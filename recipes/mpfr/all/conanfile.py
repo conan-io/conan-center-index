@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_file, apply_conandata_patches
+from conan.tools.files import save, load, chdir, copy, get, rm, rmdir, replace_in_file, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 from conan.errors import ConanException
 import os
 import re
@@ -50,6 +50,17 @@ class MpfrConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def validate(self):
+        # Requires Visual Studio 2022 as the 2019 version of MSBuild suffers from the issue
+        # reported in https://github.com/dotnet/runtime/issues/19142 and purported to be fixed
+        # by https://github.com/dotnet/corefx/pull/18467. The actual error message seen with VS2019 is:
+        #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
+        #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
+        # The issues arises because we need bash to run autotools.configure. which requires bash, and
+        # bash sets "TMP" while Windows set "tmp" thus giving rise to the error cited above.
+        if is_msvc(self):
+            check_min_vs(self, "193")
+
     def requirements(self):
         if self.options.exact_int == "gmp":
             self.requires("gmp/6.2.1", transitive_headers=True)
@@ -78,37 +89,39 @@ class MpfrConan(ConanFile):
             tc.generate()
             tc = CMakeDeps(self)
             tc.generate()
-        else:
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--enable-thread-safe")
-            tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies[str(self.options.exact_int)].package_folder)}')
-            tc.configure_args.append(f'--enable-shared={"yes" if self.options.shared else "no"}')
-            tc.configure_args.append(f'--enable-static={"yes" if not self.options.shared else "no"}')
-            if self.settings.compiler == "clang":
-                # warning: optimization flag '-ffloat-store' is not supported
-                tc.configure_args.append("mpfr_cv_gcc_floatconv_bug=no")
-                if self.settings.arch == "x86":
-                    # fatal error: error in backend: Unsupported library call operation!
-                    tc.configure_args.append("--disable-float128")
-
-            if self.options.exact_int == "mpir":
-                tc.extra_cflags.append(f"-I{self.build_folder}")
-            if is_msvc(self):
-                tc.extra_cflags.append("-FS")
-
-            env = tc.environment()
-            if is_msvc(self):
-                env.define("AR", "lib")
-                env.define("CC", "cl -nologo")
-                env.define("CXX", "cl -nologo")
-                env.define("LD", "link")
-                env.define("NM", "dumpbin -symbols")
-                env.define("OBJDUMP", ":")
-                env.define("RANLIB", ":")
-                env.define("STRIP", ":")
-            tc.generate(env) # Create conanbuild.conf
+        else: # Even with multiple toolchains (see below), can only have one "deps" generator as multiple ones will collide
             tc = AutotoolsDeps(self)
             tc.generate()
+
+        # Setup autotools on all platforms because we need to run autotools.configure when using CMake
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--enable-thread-safe")
+        tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies[str(self.options.exact_int)].package_folder)}')
+        tc.configure_args.append(f'--enable-shared={"yes" if self.options.shared else "no"}')
+        tc.configure_args.append(f'--enable-static={"yes" if not self.options.shared else "no"}')
+        if self.settings.compiler == "clang":
+            # warning: optimization flag '-ffloat-store' is not supported
+            tc.configure_args.append("mpfr_cv_gcc_floatconv_bug=no")
+            if self.settings.arch == "x86":
+                # fatal error: error in backend: Unsupported library call operation!
+                tc.configure_args.append("--disable-float128")
+
+        if self.options.exact_int == "mpir":
+            tc.extra_cflags.append(f"-I{self.build_folder}")
+        if is_msvc(self):
+            tc.extra_cflags.append("-FS")
+
+        env = tc.environment()
+        if is_msvc(self):
+            env.define("AR", "lib")
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("LD", "link")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+        tc.generate(env) # Create conanbuild.conf
 
     def _extract_makefile_variable(self, makefile, variable):
         makefile_contents = load(self, makefile)
@@ -139,19 +152,23 @@ class MpfrConan(ConanFile):
                                        "<gmp.h>", "<mpir.h>")
             save(self, "gmp.h", "#pragma once\n#include <mpir.h>\n")
 
+        autotools = Autotools(self)
+        autotools.configure() # Need to generate Makefile to extract variables for CMake below
+
         if self.settings.os == "Windows":
             cmakelists_in = load(self, os.path.join(self.export_sources_folder, "CMakeLists.txt.in"))
             sources, headers, definitions = self._extract_mpfr_autotools_variables()
+            sources = ["src/" + src for src in sources]
+            headers = ["src/" + hdr for hdr in headers]
             save(self, os.path.join(self.source_folder, "CMakeLists.txt"), cmakelists_in.format(
                 mpfr_sources=" ".join(sources),
                 mpfr_headers=" ".join(headers),
                 definitions=" ".join(definitions),
             ))
             cmake = CMake(self)
+            cmake.configure()
             cmake.build()
         else:
-            autotools = Autotools(self)
-            autotools.configure()
             autotools.make(args=["V=0"])
 
     def package(self):

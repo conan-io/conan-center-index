@@ -1,15 +1,14 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.19)
 project(cmake_wrapper)
-
-include("${{CMAKE_BINARY_DIR}}/conanbuildinfo.cmake")
-conan_basic_setup()
 
 # autotools project does not allow building a shared mpfr library (because of libtool limitation)
 
+find_package(gmp REQUIRED CONFIG)
+
 add_library(mpfr {mpfr_sources})
 target_compile_definitions(mpfr PRIVATE {definitions})
-target_include_directories(mpfr PRIVATE "${{CMAKE_BINARY_DIR}}" "${{CMAKE_BINARY_DIR}}/src" "${{CMAKE_CURRENT_SOURCE_DIR}}")
-target_link_libraries(mpfr PRIVATE ${{CONAN_LIBS}})
+target_include_directories(mpfr PRIVATE "${{CMAKE_BINARY_DIR}}" "${{CMAKE_BINARY_DIR}}/src" "${{CMAKE_CURRENT_SOURCE_DIR}}/src")
+target_link_libraries(mpfr PRIVATE gmp::gmp)
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(mpfr PRIVATE MPFR_DLL)
 endif()
