@@ -1,11 +1,9 @@
 sources:
   "8.0.31":
-    url:
-      - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.31.tar.gz"
+    url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.31.tar.gz"
     sha256: "67bb8cba75b28e95c7f7948563f01fb84528fcbb1a35dba839d4ce44fe019baa"
   "8.0.30":
-    url:
-      - "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
+    url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
     sha256: "c988d5c6ba9a56692a6cd6e9813465b5fc9368ed4b461df97059a2fc160c8b84"
   "8.0.29":
     url:
