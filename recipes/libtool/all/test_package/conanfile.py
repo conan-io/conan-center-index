@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, can_run
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
@@ -35,7 +36,7 @@ class TestPackageConan(ConanFile):
         basic_layout(self)
 
     @property
-    def _autotools_test_dir(self):
+    def package_folder(self):
         return os.path.join(self.build_folder, "autotools")
 
     def _generate_autotools(self):
@@ -50,7 +51,7 @@ class TestPackageConan(ConanFile):
             run_env.generate()
 
         test_env = Environment()
-        runtime_lib_path = unix_path(self, os.path.join(self._autotools_test_dir, "lib"))
+        runtime_lib_path = unix_path(self, os.path.join(self.package_folder, "lib"))
         test_env.append_path("LD_LIBRARY_PATH", runtime_lib_path)
         test_env.append_path("DYLD_LIBRARY_PATH", runtime_lib_path)
         test_env.vars(self, scope="run").save_script("autotools_test")
@@ -110,15 +111,16 @@ class TestPackageConan(ConanFile):
         autotools.autoreconf(["--install", "autotools"])
         autotools.configure(build_script_folder="autotools")
         autotools.make()
-        autotools.install(args=[f"DESTDIR={unix_path(self, self._autotools_test_dir)}"])
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        fix_apple_shared_install_name(self)
 
     def _test_autotools(self):
-        assert os.path.isdir(os.path.join(self._autotools_test_dir, "bin"))
-        assert os.path.isfile(os.path.join(self._autotools_test_dir, "include", "lib.h"))
-        assert os.path.isdir(os.path.join(self._autotools_test_dir, "lib"))
+        assert os.path.isdir(os.path.join(self.package_folder, "bin"))
+        assert os.path.isfile(os.path.join(self.package_folder, "include", "lib.h"))
+        assert os.path.isdir(os.path.join(self.package_folder, "lib"))
 
         if can_run(self):
-            self.run(os.path.join(self._autotools_test_dir, "bin", "test_package"), env="conanrun")
+            self.run(os.path.join(self.package_folder, "bin", "test_package"), env="conanrun")
 
     def build(self):
         self._build_ltdl()
