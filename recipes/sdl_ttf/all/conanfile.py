@@ -70,7 +70,7 @@ class SdlttfConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) >= "2.20.0":
-            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = False
+            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
             tc.variables["SDL2TTF_SAMPLES"] = False
             tc.variables["SDL2TTF_VENDORED"] = False
             tc.variables["SDL2TTF_HARFBUZZ"] = self.options.with_harfbuzz
