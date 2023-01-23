@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=1.55.0"
 
 
 class LibMysqlClientCConan(ConanFile):
