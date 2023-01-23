@@ -50,17 +50,6 @@ class MpfrConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-    def validate(self):
-        # Requires Visual Studio 2022 as the 2019 version of MSBuild suffers from the issue
-        # reported in https://github.com/dotnet/runtime/issues/19142 and purported to be fixed
-        # by https://github.com/dotnet/corefx/pull/18467. The actual error message seen with VS2019 is:
-        #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
-        #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
-        # The issues arises because we need bash to run autotools.configure. which requires bash, and
-        # bash sets "TMP" while Windows set "tmp" thus giving rise to the error cited above.
-        if is_msvc(self):
-            check_min_vs(self, "193")
-
     def requirements(self):
         if self.options.exact_int == "gmp":
             self.requires("gmp/6.2.1", transitive_headers=True)
@@ -85,6 +74,10 @@ class MpfrConan(ConanFile):
 
     def generate(self):
         if self.settings.os == "Windows":
+            # Use NMake to workaround bug in MSBuild versions prior to 2022 that shows up as:
+            #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
+            #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
+            self.conf.define("tools.cmake.cmaketoolchain:generator", "NMake Makefiles")
             tc = CMakeToolchain(self)
             tc.generate()
             tc = CMakeDeps(self)
