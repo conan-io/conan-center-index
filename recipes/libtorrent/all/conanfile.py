@@ -64,7 +64,7 @@ class LibtorrentConan(ConanFile):
         min_compiler_version = {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
+            "gcc": "5" if Version(self.version) < "2.0.8" else "6",
             "clang": "5",
             "apple-clang": "5",
         }.get(str(self.settings.compiler))
@@ -98,6 +98,21 @@ class LibtorrentConan(ConanFile):
         if Version(self.dependencies["boost"].ref.version) < "1.69.0" and \
            (self.options["boost"].header_only or self.options["boost"].without_system):
             raise ConanInvalidConfiguration(f"{self.ref} requires boost with system, which is non-header only in boost < 1.69.0")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.4" and not self._cmake_new_enough("3.16.0"):
+            self.tool_requires("cmake/3.25.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
