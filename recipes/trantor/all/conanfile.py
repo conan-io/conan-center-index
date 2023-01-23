@@ -38,6 +38,7 @@ class TrantorConan(ConanFile):
         return {
             "gcc": "5",
             "Visual Studio": "15.0",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -48,10 +49,7 @@ class TrantorConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
