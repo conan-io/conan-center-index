@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
@@ -77,7 +78,7 @@ class LibMysqlClientCConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
 
-        # mysql>=8.0.17 doesn't support shared library on MacOS.
+        # Sice 8.0.17 this doesn't support shared library on MacOS.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
         if self.settings.compiler == "apple-clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.name}/{self.version} doesn't support shared library")
@@ -183,9 +184,10 @@ class LibMysqlClientCConan(ConanFile):
                         "  # INSTALL_DEBUG_SYMBOLS(")
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
         cmake = CMakeToolchain(self)
         # Not used anywhere in the CMakeLists
-
         cmake.cache_variables["DISABLE_SHARED"] = not self.options.shared
         cmake.cache_variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
         cmake.cache_variables["WITHOUT_SERVER"] = True
