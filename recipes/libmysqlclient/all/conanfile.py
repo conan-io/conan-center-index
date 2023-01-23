@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -23,18 +24,14 @@ class LibMysqlClientCConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
     package_type = "library"
     short_paths = True
-    generators = "CMakeDeps", "PkgConfigDeps"
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     @property
     def _compilers_minimum_version(self):
@@ -55,6 +52,9 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("openssl/1.1.1s")
@@ -103,13 +103,13 @@ class LibMysqlClientCConan(ConanFile):
         if is_apple_os(self) and not self._cmake_new_enough("3.18"):
             # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
             self.tool_requires("cmake/3.24.2")
-        if self.settings.os == "FreeBSD":
+        if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_files(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
 
         libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
@@ -186,31 +186,38 @@ class LibMysqlClientCConan(ConanFile):
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
-        cmake = CMakeToolchain(self)
+
+        tc = CMakeToolchain(self)
         # Not used anywhere in the CMakeLists
-        cmake.cache_variables["DISABLE_SHARED"] = not self.options.shared
-        cmake.cache_variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-        cmake.cache_variables["WITHOUT_SERVER"] = True
-        cmake.cache_variables["WITH_UNIT_TESTS"] = False
-        cmake.cache_variables["ENABLED_PROFILING"] = False
-        cmake.cache_variables["MYSQL_MAINTAINER_MODE"] = False
-        cmake.cache_variables["WIX_DIR"] = False
+        tc.cache_variables["DISABLE_SHARED"] = not self.options.shared
+        tc.cache_variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        tc.cache_variables["WITHOUT_SERVER"] = True
+        tc.cache_variables["WITH_UNIT_TESTS"] = False
+        tc.cache_variables["ENABLED_PROFILING"] = False
+        tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
+        tc.cache_variables["WIX_DIR"] = False
 
-        cmake.cache_variables["WITH_LZ4"] = "system"
+        tc.cache_variables["WITH_LZ4"] = "system"
 
-        cmake.cache_variables["WITH_ZSTD"] = "system"
-        cmake.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0]
+        tc.cache_variables["WITH_ZSTD"] = "system"
+        tc.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
 
         if is_msvc(self):
-            cmake.cache_variables["WINDOWS_RUNTIME_MD"] = "MD" in msvc_runtime_flag(self)
+            tc.cache_variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
 
-        cmake.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder
+        tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
 
-        cmake.cache_variables["WITH_ZLIB"] = "system"
-        cmake.generate()
+        tc.cache_variables["WITH_ZLIB"] = "system"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+        if self.settings.os == "FreeBSD":
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def build(self):
-        self._patch_files()
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -236,19 +243,15 @@ class LibMysqlClientCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mysqlclient")
-        self.cpp_info.names["pkg_config"] = "mysqlclient"
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
         if not self.options.shared:
             stdcpplib = stdcpp_library(self)
             if stdcpplib:
                 self.cpp_info.system_libs.append(stdcpplib)
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.append("m")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("resolv")
+                self.cpp_info.system_libs.extend(["m", "resolv"])
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("dnsapi")
-            self.cpp_info.system_libs.append("secur32")
+            self.cpp_info.system_libs.extend(["dnsapi", "secur32"])
 
         # TODO: There is no official FindMySQL.cmake, but it's a common Find files in many projects
         #       do we want to support it in CMakeDeps?
