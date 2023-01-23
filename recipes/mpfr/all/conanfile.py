@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import save, load, chdir, copy, get, rm, rmdir, replace_in_file, apply_conandata_patches
+from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_file, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
@@ -134,11 +134,11 @@ class MpfrConan(ConanFile):
         return sources, headers, defs
 
     def build(self):
+        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             command = "./autogen.sh"
             if os.path.exists(command):
                 self.run(command)
-        apply_conandata_patches(self)
         if self.options.exact_int == "mpir":
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                        "-lgmp", "-lmpir")
