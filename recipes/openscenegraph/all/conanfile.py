@@ -146,7 +146,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_jasper:
             self.requires("jasper/2.0.33")
         if self.options.get_safe("with_jpeg"):
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.get_safe("with_openexr"):
             self.requires("openexr/3.1.5")
         if self.options.get_safe("with_png"):
