@@ -963,7 +963,7 @@ class QtConan(ConanFile):
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
+            if is_msvc(self):
                 libsuffix = "d"
             if is_apple_os(self):
                 libsuffix = "_debug"
