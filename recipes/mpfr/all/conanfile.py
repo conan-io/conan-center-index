@@ -3,7 +3,7 @@ from conan.tools.files import save, load, chdir, copy, get, rm, rmdir, replace_i
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.errors import ConanException
 import os
 import re
@@ -74,10 +74,11 @@ class MpfrConan(ConanFile):
 
     def generate(self):
         if self.settings.os == "Windows":
-            # Use NMake to workaround bug in MSBuild versions prior to 2022 that shows up as:
-            #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
-            #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
-            self.conf.define("tools.cmake.cmaketoolchain:generator", "NMake Makefiles")
+            if is_msvc(self):
+                # Use NMake to workaround bug in MSBuild versions prior to 2022 that shows up as:
+                #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
+                #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
+                self.conf.define("tools.cmake.cmaketoolchain:generator", "NMake Makefiles")
             tc = CMakeToolchain(self)
             tc.generate()
             tc = CMakeDeps(self)
