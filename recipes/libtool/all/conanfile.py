@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.gnu import Autotools, AutotoolsToolchain
