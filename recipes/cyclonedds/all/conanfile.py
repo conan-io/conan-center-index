@@ -40,7 +40,7 @@ class CycloneDDSConan(ConanFile):
 
     @property
     def _tmp_folder(self):
-        return os.path.join(self.package_folder,"tmp")        
+        return os.path.join(self.package_folder,"tmp")
 
     @property
     def _license_folder(self):
@@ -138,9 +138,9 @@ class CycloneDDSConan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "share"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib","cmake"))
-        
+
         # cyclonedds copies multiple windows dlls to bin folder
-        # these must be removed and just keep ddsc.dll  
+        # these must be removed and just keep ddsc.dll
         if self.settings.os == "Windows":
             if self.options.shared:
                 files.mkdir(self, self._tmp_folder)
@@ -172,8 +172,8 @@ class CycloneDDSConan(ConanFile):
             self.cpp_info.components["CycloneDDS"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["CycloneDDS"].system_libs = [
-                    "Ws2_32",
-                    "Dbghelp",
-                    "Bcrypt",
-                    "Iphlpapi"
+                "ws2_32",
+                "dbghelp",
+                "bcrypt",
+                "iphlpapi"
             ]
