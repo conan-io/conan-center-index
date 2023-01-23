@@ -488,7 +488,7 @@ and managed by the package option `shared`.
 
 #### **<a name="KB-H077">#KB-H077</a>: "APPLE RELOCATABLE SHARED LIBS"**
 
-It checks whether installed shared libs are relocatable on Linux & macOS. All shared libs on macOS properly have `@rpath/<shared>` in install tree (@rpath token is supported since macOS 10.5 Leopard.
+It checks whether installed shared libs are relocatable on Linux & macOS. All shared libs on macOS properly have `@rpath/<shared>` in install tree (@rpath token is supported since macOS 10.5 Leopard).
 
 ## Deprecated errors
 
