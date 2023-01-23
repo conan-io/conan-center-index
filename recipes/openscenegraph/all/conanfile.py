@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, rmdir, rm, patch
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
-from conan.tools.apple.apple import is_apple_os
+from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conans import CMake
 import os
