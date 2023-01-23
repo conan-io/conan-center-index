@@ -5,10 +5,10 @@ from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans import AutoToolsBuildEnvironment
-from conans.tools import apple_deployment_target_flag, environment_append, vcvars
+from conans import AutoToolsBuildEnvironment, tools
+from conans.tools import apple_deployment_target_flag, environment_append, unix_path, vcvars
 import os
 import contextlib
 import glob
@@ -368,7 +368,7 @@ class FFMpegConan(ConanFile):
 
     @contextlib.contextmanager
     def _build_context(self):
-        with environment_append({"PKG_CONFIG_PATH": unix_path(self, self.build_folder)}):
+        with environment_append({"PKG_CONFIG_PATH": unix_path(self.build_folder)}):
             if is_msvc(self):
                 with vcvars(self):
                     yield
