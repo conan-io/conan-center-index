@@ -1,10 +1,12 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.54.0"
 
 
 class OpenCVConan(ConanFile):
@@ -19,7 +21,7 @@ class OpenCVConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": [True, False],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_jasper": [True, False],
@@ -32,7 +34,7 @@ class OpenCVConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_jpeg": True,
+        "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
         "with_jasper": True,
@@ -43,25 +45,8 @@ class OpenCVConan(ConanFile):
         "nonfree": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "src"
-
-    @property
-    def _build_subfolder(self):
-        return "build"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,154 +56,124 @@ class OpenCVConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
-        if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+        self.requires("zlib/1.2.13")
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.33")
+            self.requires("jasper/4.0.0")
         if self.options.with_openexr:
+            # opencv 2.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_tbb:
+            # opencv 2.x doesn't support onetbb >= 2021
             self.requires("onetbb/2020.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
     def validate(self):
-        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_opencv(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "3rdparty"))
 
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-
-        # allow to find conan-supplied OpenEXR
-        if self.options.with_openexr:
-            find_openexr = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
-            tools.replace_in_file(find_openexr,
-                                  r'SET(OPENEXR_ROOT "C:/Deploy" CACHE STRING "Path to the OpenEXR \"Deploy\" folder")',
-                                  "")
-            tools.replace_in_file(find_openexr, r'set(OPENEXR_ROOT "")', "")
-            tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES x64/Release x64 x64/Debug)", "")
-            tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
-
-            def openexr_library_names(name):
-                # OpenEXR library may have different names, depends on namespace versioning, static, debug, etc.
-                reference = str(self.requires["openexr"])
-                version_name = reference.split("@")[0]
-                version = version_name.split("/")[1]
-                version_tokens = version.split(".")
-                major, minor = version_tokens[0], version_tokens[1]
-                suffix = "%s_%s" % (major, minor)
-                names = ["%s-%s" % (name, suffix),
-                         "%s-%s_s" % (name, suffix),
-                         "%s-%s_d" % (name, suffix),
-                         "%s-%s_s_d" % (name, suffix),
-                         "%s" % name,
-                         "%s_s" % name,
-                         "%s_d" % name,
-                         "%s_s_d" % name]
-                return " ".join(names)
-
-            for lib in ["Half", "Iex", "Imath", "IlmImf", "IlmThread"]:
-                tools.replace_in_file(find_openexr, "NAMES %s" % lib, "NAMES %s" % openexr_library_names(lib))
-
-            tools.replace_in_file(cmakelists,
-                                "project(OpenCV CXX C)", "project(OpenCV CXX C)\nset(CMAKE_CXX_STANDARD 11)")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
 
         for cascade in ["lbpcascades", "haarcascades"]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
-                                  "share/OpenCV/%s" % cascade, "res/%s" % cascade)
+            replace_in_file(self, os.path.join(self.source_folder, "data", "CMakeLists.txt"),
+                                  f"share/OpenCV/{cascade}", f"res/{cascade}")
 
-        tools.replace_in_file(cmakelists, "staticlib", "lib")
-        tools.replace_in_file(cmakelists, "ANDROID OR NOT UNIX", "FALSE")
-        tools.replace_in_file(cmakelists, "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
+        replace_in_file(self, cmakelists, "staticlib", "lib")
+        replace_in_file(self, cmakelists, "ANDROID OR NOT UNIX", "FALSE")
+        replace_in_file(self, cmakelists, "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
+        replace_in_file(self, os.path.join(self.source_folder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # relocatable shared lib on macOS
-        tools.replace_in_file(cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
+        replace_in_file(self, cmakelists, "cmake_policy(SET CMP0042 OLD)", "cmake_policy(SET CMP0042 NEW)")
         # Cleanup RPATH
-        tools.replace_in_file(cmakelists,
+        replace_in_file(self, cmakelists,
                               "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
-        tools.replace_in_file(cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
+        replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
         # Do not try to detect Python
-        tools.replace_in_file(cmakelists, "include(cmake/OpenCVDetectPython.cmake)", "")
+        replace_in_file(self, cmakelists, "include(cmake/OpenCVDetectPython.cmake)", "")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_DOCS"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_PACKAGE"] = False
-        self._cmake.definitions["BUILD_PERF_TESTS"] = False
-        self._cmake.definitions["BUILD_opencv_apps"] = False
-        self._cmake.definitions["BUILD_opencv_java"] = False
-        self._cmake.definitions["BUILD_ZLIB"] = False
-        self._cmake.definitions["BUILD_JPEG"] = False
-        self._cmake.definitions["BUILD_PNG"] = False
-        self._cmake.definitions["BUILD_TIFF"] = False
-        self._cmake.definitions["BUILD_JASPER"] = False
-        self._cmake.definitions["BUILD_OPENEXR"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_DOCS"] = False
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_PACKAGE"] = False
+        tc.variables["BUILD_PERF_TESTS"] = False
+        tc.variables["BUILD_opencv_apps"] = False
+        tc.variables["BUILD_opencv_java"] = False
+        tc.variables["BUILD_ZLIB"] = False
+        tc.variables["BUILD_JPEG"] = False
+        tc.variables["BUILD_PNG"] = False
+        tc.variables["BUILD_TIFF"] = False
+        tc.variables["BUILD_JASPER"] = False
+        tc.variables["BUILD_OPENEXR"] = False
+        tc.variables["WITH_CUFFT"] = False
+        tc.variables["WITH_CUBLAS"] = False
+        tc.variables["WITH_NVCUVID"] = False
+        tc.variables["WITH_FFMPEG"] = False
+        tc.variables["WITH_GSTREAMER"] = False
+        tc.variables["WITH_OPENCL"] = False
+        tc.variables["WITH_CUDA"] = False
+        tc.variables["WITH_GTK"] = self.options.get_safe("with_gtk", False)
+        tc.variables["WITH_JPEG"] = bool(self.options.with_jpeg)
+        tc.variables["WITH_PNG"] = self.options.with_png
+        tc.variables["WITH_TIFF"] = self.options.with_tiff
+        tc.variables["WITH_JASPER"] = self.options.with_jasper
+        tc.variables["WITH_OPENEXR"] = self.options.with_openexr
+        if self.options.with_openexr:
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        tc.variables["WITH_EIGEN"] = self.options.with_eigen
+        tc.variables["WITH_TBB"] = self.options.with_tbb
+        tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
+        tc.variables["BUILD_opencv_nonfree"] = self.options.nonfree
+        tc.variables["ENABLE_CCACHE"] = False
+        if is_msvc(self):
+            tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.generate()
 
-        self._cmake.definitions["WITH_CUFFT"] = False
-        self._cmake.definitions["WITH_CUBLAS"] = False
-        self._cmake.definitions["WITH_NVCUVID"] = False
-        self._cmake.definitions["WITH_FFMPEG"] = False
-        self._cmake.definitions["WITH_GSTREAMER"] = False
-        self._cmake.definitions["WITH_OPENCL"] = False
-        self._cmake.definitions["WITH_CUDA"] = False
-
-        self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg
-        self._cmake.definitions["WITH_PNG"] = self.options.with_png
-        self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
-        self._cmake.definitions["WITH_JASPER"] = self.options.with_jasper
-        self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
-        self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
-        self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
-        self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
-        self._cmake.definitions["BUILD_opencv_nonfree"] = self.options.nonfree
-
-        self._cmake.definitions["ENABLE_CCACHE"] = False
-
-        if self._is_msvc:
-            self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-
-        return self._cmake
+        CMakeDeps(self).generate()
 
     def build(self):
-        self._patch_opencv()
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "staticlib"))
-        tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "staticlib"))
+        rm(self, "*.cmake", self.package_folder, recursive=True)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -226,21 +181,20 @@ class OpenCVConan(ConanFile):
             {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _opencv_components(self):
@@ -250,8 +204,12 @@ class OpenCVConan(ConanFile):
                 components.append("jasper::jasper")
             if self.options.with_png:
                 components.append("libpng::libpng")
-            if self.options.with_jpeg:
+            if self.options.with_jpeg == "libjpeg":
                 components.append("libjpeg::libjpeg")
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                components.append("libjpeg-turbo::jpeg")
+            elif self.options.with_jpeg == "mozjpeg":
+                components.append("mozjpeg::libjpeg")
             if self.options.with_tiff:
                 components.append("libtiff::libtiff")
             if self.options.with_openexr:
@@ -297,10 +255,10 @@ class OpenCVConan(ConanFile):
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
         version = "".join(version) if self.settings.os == "Windows" else ""
-        debug = "d" if self.settings.build_type == "Debug" and self._is_msvc else ""
+        debug = "d" if self.settings.build_type == "Debug" and is_msvc(self) else ""
 
         def get_lib_name(module):
-            return "opencv_%s%s%s" % (module, version, debug)
+            return f"opencv_{module}{version}{debug}"
 
         def add_components(components):
             for component in components:
@@ -314,7 +272,7 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[conan_component].set_property("cmake_target_name", cmake_target)
                 self.cpp_info.components[conan_component].libs = [lib_name]
                 self.cpp_info.components[conan_component].requires = requires
-                if self.settings.os == "Linux":
+                if self.settings.os in ["Linux", "FreeBSD"]:
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
@@ -327,11 +285,9 @@ class OpenCVConan(ConanFile):
                     self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
                     self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
                     self.cpp_info.components[conan_component_alias].requires = [conan_component]
+                    self.cpp_info.components[conan_component_alias].bindirs = []
                     self.cpp_info.components[conan_component_alias].includedirs = []
                     self.cpp_info.components[conan_component_alias].libdirs = []
-                    self.cpp_info.components[conan_component_alias].resdirs = []
-                    self.cpp_info.components[conan_component_alias].bindirs = []
-                    self.cpp_info.components[conan_component_alias].frameworkdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "OpenCV")
 
