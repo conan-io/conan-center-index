@@ -157,7 +157,7 @@ class OpenALConan(ConanFile):
         elif is_apple_os(self):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "User32"])
+            self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "user32"])
         if self._openal_cxx_backend and not self.options.shared:
             libcxx = tools_legacy.stdcpp_library(self)
             if libcxx:
