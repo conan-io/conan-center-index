@@ -60,9 +60,6 @@ class GlibmmConan(ConanFile):
             else:
                 check_min_cppstd(self, 11)
 
-        if is_msvc(self) and not self.options.shared:
-            raise ConanInvalidConfiguration("Static library build is not supported by MSVC")
-
         if self.options.shared and not self.options["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
@@ -70,6 +67,9 @@ class GlibmmConan(ConanFile):
 
         if self.options["glib"].shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Linking shared glib with the MSVC static runtime is not supported")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,6 +89,9 @@ class GlibmmConan(ConanFile):
         else:
             self.requires("libsigcpp/2.10.8")
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+
     def generate(self):
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -104,12 +107,6 @@ class GlibmmConan(ConanFile):
 
         env = VirtualBuildEnv(self)
         env.generate()
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
