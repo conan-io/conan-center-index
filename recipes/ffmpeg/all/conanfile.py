@@ -318,7 +318,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("yasm/1.3.0")
         self.tool_requires("pkgconf/1.9.3")
-        if self._settings_build.os == "Windows" and not self.win_bash:
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -379,7 +379,7 @@ class FFMpegConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=(self.settings.os == "Windows"))
+            self, win_bash=(self._settings_build.os == "Windows"))
         self._autotools.libs = []
 
         def opt_enable_disable( what, v):
