@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -30,6 +29,7 @@ class LibMysqlClientCConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    generators = "VirtualRunEnv", "VirtualBuildEnv", "CMakeDeps"
     package_type = "library"
     short_paths = True
 
@@ -184,9 +184,6 @@ class LibMysqlClientCConan(ConanFile):
                         "  # INSTALL_DEBUG_SYMBOLS(")
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
         tc = CMakeToolchain(self)
         # Not used anywhere in the CMakeLists
         tc.cache_variables["DISABLE_SHARED"] = not self.options.shared
@@ -210,8 +207,6 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["WITH_ZLIB"] = "system"
         tc.generate()
 
-        deps = CMakeDeps(self)
-        deps.generate()
         if self.settings.os == "FreeBSD":
             deps = PkgConfigDeps(self)
             deps.generate()
