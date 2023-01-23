@@ -637,7 +637,8 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.cpp_info.components["libarrow"].requires.append("mimalloc::mimalloc")
         if self._with_re2():
-            self.cpp_info.components["libgandiva"].requires.append("re2::re2")
+            for comp in ["libgandiva", "libparquet", "libarrow"]:
+                self.cpp_info.components[comp].requires.append("re2::re2")
         if self._with_llvm():
             self.cpp_info.components["libgandiva"].requires.append("llvm-core::llvm-core")
         if self._with_protobuf():
