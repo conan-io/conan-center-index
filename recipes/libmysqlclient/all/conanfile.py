@@ -30,7 +30,7 @@ class LibMysqlClientCConan(ConanFile):
     }
     package_type = "library"
     short_paths = True
-    generators = "PkgConfigDeps"
+    generators = "CMakeDeps", "PkgConfigDeps"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
