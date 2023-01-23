@@ -219,6 +219,7 @@ class LibtoolConan(ConanFile):
         replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
                               method_pass_all)
+        fix_apple_shared_install_name(self)
 
     @property
     def _libtool_relocatable_env(self):
