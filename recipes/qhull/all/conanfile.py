@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -55,6 +56,9 @@ class QhullConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "0.8.2":
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+            tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
