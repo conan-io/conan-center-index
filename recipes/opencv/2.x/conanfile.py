@@ -274,7 +274,7 @@ class OpenCVConan(ConanFile):
 
         return opencv_modules
 
-    def _solve_internal_dependency_graph(self, opencv_modules):
+    def _get_mandatory_disabled_options(self, opencv_modules):
         direct_options_to_enable = {}
         transitive_options_to_enable = {}
 
@@ -298,6 +298,16 @@ class OpenCVConan(ConanFile):
 
         for base_option in base_options:
             collect_transitive_options(base_option, base_option)
+
+        return {
+            "direct": direct_options_to_enable,
+            "transitive": transitive_options_to_enable,
+        }
+
+    def _solve_internal_dependency_graph(self, opencv_modules):
+        disabled_options = self._get_mandatory_disabled_options(opencv_modules)
+        direct_options_to_enable = disabled_options["direct"]
+        transitive_options_to_enable = disabled_options["transitive"]
 
         # Enable mandatory options
         all_options_to_enable = set(direct_options_to_enable.keys())
@@ -364,7 +374,32 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
+    def _check_mandatory_options(self, opencv_modules):
+        disabled_options = self._get_mandatory_disabled_options(opencv_modules)
+        direct_disabled_mandatory_options = disabled_options["direct"]
+        transitive_disabled_mandatory_options = disabled_options["transitive"]
+
+        # check mandatory options
+        all_disabled_mandatory_options = set(direct_disabled_mandatory_options.keys())
+        all_disabled_mandatory_options.update(transitive_disabled_mandatory_options.keys())
+        if all_disabled_mandatory_options:
+            message = ("Several opencv options are disabled but are required by modules "
+                       "you have explicitly requested:\n")
+
+            for disabled_option in all_disabled_mandatory_options:
+                direct_and_transitive = []
+                direct = ", ".join(direct_disabled_mandatory_options.get(disabled_option, []))
+                if direct:
+                    direct_and_transitive.append(f"direct dependency of {direct}")
+                transitive = ", ".join(transitive_disabled_mandatory_options.get(disabled_option, []))
+                if transitive:
+                    direct_and_transitive.append(f"transitive dependency of {transitive}")
+                message += f"  - {disabled_option}: {' / '.join(direct_and_transitive)}\n"
+
+            raise ConanInvalidConfiguration(message)
+
     def validate(self):
+        self._check_mandatory_options(self._opencv_modules)
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
         if self.options.viz:
