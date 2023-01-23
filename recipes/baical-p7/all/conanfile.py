@@ -67,6 +67,6 @@ class BaicalP7Conan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["p7-shared" if self.options.shared else "p7"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["rt", "pthread"])
+            self.cpp_info.system_libs.extend(["m", "rt", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
