@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -44,6 +45,21 @@ class H3Conan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.0" and not self._cmake_new_enough("3.20"):
+            self.tool_requires("cmake/3.25.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
