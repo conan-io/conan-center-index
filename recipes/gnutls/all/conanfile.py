@@ -73,6 +73,7 @@ class GnuTLSConan(ConanFile):
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
         yes_no = lambda v: "yes" if v else "no"
         autotoolstc = AutotoolsToolchain(self)
         autotoolstc.configure_args.extend([
@@ -103,7 +104,12 @@ class GnuTLSConan(ConanFile):
                           "--enable-tools={}".format(yes_no(self.options.enable_tools)),
                           "--enable-openssl-compatibility={}".format(yes_no(self.options.enable_openssl_compatibility)),
                           ])
-        autotoolstc.generate()
+        env = autotoolstc.environment()
+        if cross_building(self):
+            # INFO: Undefined symbols for architecture Mac arm64 rpl_malloc and rpl_realloc
+            env.define("ac_cv_func_malloc_0_nonnull", "yes")
+            env.define("ac_cv_func_realloc_0_nonnull", "yes")
+        autotoolstc.generate(env)
         autodeps = AutotoolsDeps(self)
         autodeps.generate()
         pkgdeps = PkgConfigDeps(self)
