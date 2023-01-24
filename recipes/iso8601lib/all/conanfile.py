@@ -4,7 +4,7 @@ from conan.tools.files import get, copy, collect_libs
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class Iso8601LibConan(ConanFile):
@@ -30,18 +30,9 @@ class Iso8601LibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except ConanException:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except ConanException:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except ConanException:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
