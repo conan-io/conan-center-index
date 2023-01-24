@@ -4,6 +4,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanException
 import os
 import re
@@ -173,6 +174,7 @@ class MpfrConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
+            fix_apple_shared_install_name(self)
             os.unlink(os.path.join(self.package_folder, "lib", "libmpfr.la"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
