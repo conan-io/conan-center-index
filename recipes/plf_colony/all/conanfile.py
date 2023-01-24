@@ -16,7 +16,6 @@ class PlfcolonyConan(ConanFile):
     homepage = "https://github.com/mattreecebentley/plf_colony"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def package_id(self):
         self.info.clear()
