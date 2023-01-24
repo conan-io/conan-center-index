@@ -135,8 +135,8 @@ class CycloneDDSConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.os == "Windows" and self.options.shared:
-            for dll in ("concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
-                rm(self, dll, os.path.join(self.package_folder, "bin"))
+            for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
+                rm(self, p, os.path.join(self.package_folder, "bin"))
         else:
             rmdir(self, os.path.join(self.package_folder, "bin"))
 
