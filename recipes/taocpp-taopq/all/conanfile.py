@@ -92,8 +92,10 @@ class TaoCPPTaopqConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "taocpp::taopq")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_taocpp-taopq"].libs = ["taopq"]
-        if self.settings.os == "Windows":
-            self.cpp_info.components["_taocpp-taopq"].system_libs = ["ws2_32"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_taocpp-taopq"].system_libs.append("m")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["_taocpp-taopq"].system_libs.append("ws2_32")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "taopq"
