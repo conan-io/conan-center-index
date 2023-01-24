@@ -118,7 +118,7 @@ class PahoMqttcConan(ConanFile):
         copy(self, pattern="MQTT*.h", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
 
         for suffix in ["lib", "a", "dylib"]:
-            copy(self, pattern=f"*{self._lib_target}.{suffix}", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern=f"*.{suffix}", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern=f"*{self._lib_target}.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern=f"*{self._lib_target}.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
