@@ -1,4 +1,7 @@
 sources:
+  "2.57":
+    url: "https://github.com/mattreecebentley/plf_list/archive/d7a06d7497dc01261dd2c2fe675a8b605acb7a56.tar.gz"
+    sha256: "4297c7578fe5ea2c6346541b28a57d87ec311522fa55bc8a5ab069921fc073e9"
   "2.52":
     url: "https://github.com/mattreecebentley/plf_list/archive/76115adac11a5f362b7a8eea8362314d547284df.tar.gz"
     sha256: "897ff5309c399ec0f7c875b398c7eb07ebe3cd80a75ce337a0bd70456668116b"
