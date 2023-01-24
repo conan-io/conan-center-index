@@ -15,7 +15,6 @@ class PlflistConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mattreecebentley/plf_list"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def package_id(self):
         self.info.clear()
