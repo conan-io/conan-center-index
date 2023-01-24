@@ -153,7 +153,7 @@ class CycloneDDSConan(ConanFile):
             requires.append("openssl::openssl")
         self.cpp_info.components["CycloneDDS"].requires = requires
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["CycloneDDS"].system_libs = ["pthread"]
+            self.cpp_info.components["CycloneDDS"].system_libs = ["dl", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["CycloneDDS"].system_libs = [
                 "ws2_32",
