@@ -32,11 +32,13 @@ class TestPackageConan(ConanFile):
         assert(assert_flex_version in output_str)
 
     def build(self):
-        # Let's check flex version installed and create the basic_nr.cpp file
+        # Let's check flex version installed
         self._assert_expected_version()
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        # FIXME: CMake legacy is not working as expected when cross-compiling
+        if not tools.cross_building(self, skip_x64_x86=True):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self, skip_x64_x86=True):

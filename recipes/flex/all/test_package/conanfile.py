@@ -37,7 +37,7 @@ class TestPackageConan(ConanFile):
         assert(assert_flex_version in output_str)
 
     def build(self):
-        # Let's check flex version installed and create the basic_nr.cpp file
+        # Let's check flex version installed
         self._assert_expected_version()
         cmake = CMake(self)
         cmake.configure()
