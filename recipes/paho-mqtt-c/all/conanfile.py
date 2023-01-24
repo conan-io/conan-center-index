@@ -57,7 +57,6 @@ class PahoMqttcConan(ConanFile):
             self.output.warn("samples option is deprecated and they are no longer provided in the package.")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
@@ -90,6 +89,7 @@ class PahoMqttcConan(ConanFile):
             tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
         if self._has_high_performance_option:
             tc.variables["PAHO_HIGH_PERFORMANCE"] = self.options.high_performance
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
