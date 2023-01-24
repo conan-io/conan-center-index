@@ -101,7 +101,7 @@ class OpenCVConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        # core module options
+        # global module options
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_eigen": [True, False],
@@ -114,6 +114,7 @@ class OpenCVConan(ConanFile):
         "cuda_arch_bin": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
         "cpu_dispatch": [None, "ANY"],
+        "world": [True, False],
         "nonfree": [True, False],
         # dnn module options
         "with_vulkan": [True, False],
@@ -153,7 +154,7 @@ class OpenCVConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        # core module options
+        # global module options
         "parallel": False,
         "with_ipp": False,
         "with_eigen": True,
@@ -166,6 +167,7 @@ class OpenCVConan(ConanFile):
         "cuda_arch_bin": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
+        "world": False,
         "nonfree": False,
         # dnn module options
         "with_vulkan": False,
@@ -662,6 +664,7 @@ class OpenCVConan(ConanFile):
             },
             "img_hash": {
                 "is_built": self.options.img_hash,
+                "is_part_of_world": False,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_core", "opencv_imgproc"] + eigen() + ipp(),
             },
@@ -727,6 +730,7 @@ class OpenCVConan(ConanFile):
             },
             "sfm": {
                 "is_built": self.options.sfm,
+                "is_part_of_world": False,
                 "mandatory_options": ["with_eigen", "calib3d", "features2d", "imgcodecs", "xfeatures2d"],
                 "requires": ["opencv_core", "opencv_calib3d", "opencv_features2d", "opencv_imgcodecs", "opencv_xfeatures2d",
                              "correspondence", "multiview", "numeric", "glog::glog", "gflags::gflags"] + eigen() + ipp(),
@@ -809,20 +813,24 @@ class OpenCVConan(ConanFile):
             # Extra targets (without prefix in their target & lib name)
             "ippiw": {
                 "is_built": self.options.with_ipp == "opencv-icv" and not self.options.shared,
+                "is_part_of_world": False,
                 "no_option": True,
             },
             "numeric": {
                 "is_built": self.options.sfm,
+                "is_part_of_world": False,
                 "no_option": True,
                 "requires": eigen() + ipp(),
             },
             "correspondence": {
                 "is_built": self.options.sfm,
+                "is_part_of_world": False,
                 "no_option": True,
                 "requires": ["opencv_imgcodecs", "multiview", "glog::glog"] + eigen() + ipp(),
             },
             "multiview": {
                 "is_built": self.options.sfm,
+                "is_part_of_world": False,
                 "no_option": True,
                 "requires": ["numeric", "glog::glog"] + eigen() + ipp(),
             },
@@ -1336,6 +1344,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_stitching"] = self.options.stitching
         tc.variables["BUILD_opencv_video"] = self.options.video
         tc.variables["BUILD_opencv_videoio"] = self.options.videoio
+        tc.variables["BUILD_opencv_world"] = self.options.world
 
         # Extra modules
         tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
@@ -1453,9 +1462,12 @@ class OpenCVConan(ConanFile):
                          os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        targets_mapping = {self._cmake_target(k): f"opencv::{self._cmake_target(k)}" for k in self._opencv_modules.keys()}
+        if self.options.world:
+            targets_mapping.update({"opencv_world": "opencv::opencv_world"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {self._cmake_target(k): f"opencv::{self._cmake_target(k)}" for k in self._opencv_modules.keys()},
+            targets_mapping,
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -1507,50 +1519,72 @@ class OpenCVConan(ConanFile):
                 return [module]
             else:
                 libs = [f"opencv_{module}{version}{debug}"]
-                if module == "core" and not self.options.shared:
+                if module in ["core", "world"] and not self.options.shared:
                     lib_exclude_filter = "(opencv_|ippi|correspondence|multiview|numeric).*"
                     libs += list(filter(lambda x: not re.match(lib_exclude_filter, x), collect_libs(self)))
                 return libs
 
-        def add_components(components):
-            for module, values in components.items():
-                if values.get("is_built"):
-                    cmake_target = self._cmake_target(module)
-                    cmake_component = module
-                    conan_component = cmake_target
-                    libs = get_libs(module)
-                    requires = values.get("requires", [])
-                    system_libs = []
+        def add_components(modules):
+            if self.options.world:
+                self.cpp_info.components["opencv_world"].set_property("cmake_target_name", "opencv_world")
+                self.cpp_info.components["opencv_world"].libs = get_libs("world")
+                if self.settings.os != "Windows":
+                    self.cpp_info.components["opencv_world"].includedirs.append(os.path.join("include", "opencv4"))
+                requires_world = set()
+                requires_world_exclude = set()
+                system_libs_world = set()
+                frameworks_world = set()
+
+            for module, values in modules.items():
+                if not values.get("is_built"):
+                    continue
+                cmake_target = self._cmake_target(module)
+                # TODO: we should also define COMPONENTS names of each target for find_package() but
+                # not possible yet in CMakeDeps. See https://github.com/conan-io/conan/issues/10258
+                self.cpp_info.components[cmake_target].set_property("cmake_target_name", cmake_target)
+                if self.settings.os != "Windows":
+                    self.cpp_info.components[cmake_target].includedirs.append(os.path.join("include", "opencv4"))
+
+                if self.options.world and values.get("is_part_of_world", True):
+                    self.cpp_info.components[cmake_target].requires = ["opencv_world"]
+                    requires_world.update(values.get("requires", []))
+                    requires_world_exclude.add(cmake_target)
                     for _condition, _system_libs in values.get("system_libs", []):
                         if _condition:
-                            system_libs.extend(_system_libs)
-                    frameworks = []
+                            system_libs_world.update(_system_libs)
                     for _condition, _frameworks in values.get("frameworks", []):
                         if _condition:
-                            frameworks.extend(_frameworks)
-                    # TODO: we should also define COMPONENTS names of each target for find_package() but not possible yet in CMakeDeps
-                    #       see https://github.com/conan-io/conan/issues/10258
-                    self.cpp_info.components[conan_component].set_property("cmake_target_name", cmake_target)
-                    self.cpp_info.components[conan_component].libs = libs
-                    if self.settings.os != "Windows":
-                        self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
-                    self.cpp_info.components[conan_component].requires = requires
-                    self.cpp_info.components[conan_component].system_libs = system_libs
-                    self.cpp_info.components[conan_component].frameworks = frameworks
+                            frameworks_world.update(_frameworks)
+                else:
+                    self.cpp_info.components[cmake_target].libs = get_libs(module)
+                    self.cpp_info.components[cmake_target].requires = values.get("requires", [])
+                    for _condition, _system_libs in values.get("system_libs", []):
+                        if _condition:
+                            self.cpp_info.components[cmake_target].system_libs.extend(_system_libs)
+                    for _condition, _frameworks in values.get("frameworks", []):
+                        if _condition:
+                            self.cpp_info.components[cmake_target].frameworks.extend(_frameworks)
 
-                    # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                    self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
-                    self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
-                    self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                    self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-                    if cmake_component != cmake_target:
-                        conan_component_alias = conan_component + "_alias"
-                        self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
-                        self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
-                        self.cpp_info.components[conan_component_alias].requires = [conan_component]
-                        self.cpp_info.components[conan_component_alias].bindirs = []
-                        self.cpp_info.components[conan_component_alias].includedirs = []
-                        self.cpp_info.components[conan_component_alias].libdirs = []
+                # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                self.cpp_info.components[cmake_target].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components[cmake_target].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                if module != cmake_target:
+                    conan_component_alias = cmake_target + "_alias"
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = module
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = module
+                    self.cpp_info.components[conan_component_alias].requires = [cmake_target]
+                    self.cpp_info.components[conan_component_alias].bindirs = []
+                    self.cpp_info.components[conan_component_alias].includedirs = []
+                    self.cpp_info.components[conan_component_alias].libdirs = []
+
+            if self.options.world:
+                self.cpp_info.components["opencv_world"].requires.extend(list(requires_world - requires_world_exclude))
+                self.cpp_info.components["opencv_world"].system_libs.extend(list(system_libs_world))
+                self.cpp_info.components["opencv_world"].frameworks.extend(list(frameworks_world))
+
+                # TODO: to remove in conan v2 once cmake_find_package* generators removed
+                self.cpp_info.components["opencv_world"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components["opencv_world"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
         self.cpp_info.set_property("cmake_file_name", "OpenCV")
 
