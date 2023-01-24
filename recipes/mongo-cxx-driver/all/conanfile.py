@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 import shutil
@@ -33,8 +33,7 @@ class MongoCxxConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,10 +41,10 @@ class MongoCxxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.22.0")
+        self.requires("mongo-c-driver/1.23.2")
         if self.options.polyfill == "boost":
             self.requires("boost/1.81.0")
 
