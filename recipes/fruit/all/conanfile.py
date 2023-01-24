@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 import os
 
 required_conan_version = ">=1.53.0"
@@ -44,13 +43,13 @@ class FruitConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.use_boost:
+            self.requires("boost/1.81.0")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-
-    def build_requirements(self):
-        if self.options.use_boost:
-            self.tool_requires("boost/1.81.0")
 
     @property
     def _extracted_dir(self):
@@ -67,8 +66,8 @@ class FruitConan(ConanFile):
         tc.variables["FRUIT_ENABLE_CLANG_TIDY"] = False
         tc.generate()
 
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -83,5 +82,8 @@ class FruitConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fruit"]
+        if self.options.use_boost:
+            self.cpp_info.requires.append("boost::headers")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
