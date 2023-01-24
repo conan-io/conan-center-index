@@ -194,13 +194,13 @@ class LibcurlConan(ConanFile):
             self.requires("libpsl/0.21.1")
 
     def validate(self):
-        if self.info.options.with_ssl == "schannel" and self.info.settings.os != "Windows":
+        if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
-        if self.info.options.with_ssl == "darwinssl" and not is_apple_os(self):
+        if self.options.with_ssl == "darwinssl" and not is_apple_os(self):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
-        if self.info.options.with_ssl == "openssl":
+        if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
-            if self.info.options.with_ntlm and openssl.options.no_des:
+            if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
 
     def build_requirements(self):
@@ -275,7 +275,7 @@ class LibcurlConan(ConanFile):
         # zlib naming is not always very consistent
         if self.options.with_zlib:
             configure_ac = os.path.join(self.source_folder, "configure.ac")
-            zlib_name = self.dependencies["zlib"].cpp_info.libs[0]
+            zlib_name = self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]
             replace_in_file(self, configure_ac,
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
