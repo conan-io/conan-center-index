@@ -141,8 +141,6 @@ class LibcurlConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) < "7.10.4":
-            self.license = "MIT"
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_metalink_option:
@@ -164,8 +162,6 @@ class LibcurlConan(ConanFile):
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
-            if Version(self.version) < "7.75.0":
-                del self.options.with_libidn
             del self.options.with_libpsl
 
     def requirements(self):
@@ -191,8 +187,6 @@ class LibcurlConan(ConanFile):
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
         if self.info.options.with_ssl == "darwinssl" and not is_apple_os(self):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
-        if self.info.options.with_ssl == "wolfssl" and self._is_using_cmake_build and Version(self.version) < "7.70.0":
-            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
         if self.info.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.info.options.with_ntlm and openssl.options.no_des:
@@ -539,17 +533,15 @@ class LibcurlConan(ConanFile):
         tc.variables["CMAKE_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "7.81.0":
             tc.variables["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
-        elif Version(self.version) >= "7.72.0":
-            tc.variables["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         else:
-            tc.variables["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
+            tc.variables["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         if Version(self.version) >= "7.81.0":
             tc.variables["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         else:
             tc.variables["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         if Version(self.version) >= "7.81.0":
             tc.variables["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
-        elif Version(self.version) >= "7.70.0":
+        else:
             tc.variables["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
         tc.variables["CURL_ZLIB"] = self.options.with_zlib
@@ -564,8 +556,7 @@ class LibcurlConan(ConanFile):
             tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
         tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
         tc.variables["USE_LIBRTMP"] = self.options.with_librtmp
-        if Version(self.version) >= "7.75.0":
-            tc.variables["USE_LIBIDN2"] = self.options.with_libidn
+        tc.variables["USE_LIBIDN2"] = self.options.with_libidn
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
