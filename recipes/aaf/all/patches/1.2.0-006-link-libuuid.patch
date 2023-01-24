@@ -1,0 +1,25 @@
+--- a/ref-impl/aaflib/CMakeLists.txt
++++ b/ref-impl/aaflib/CMakeLists.txt
+@@ -75,7 +75,7 @@ target_compile_definitions(AAFLIB PRIVATE
+ )
+ 
+ if(UNIX AND NOT APPLE)
+-    target_link_libraries(AAFLIB dl uuid)
++    target_link_libraries(AAFLIB dl)
+ endif()
+ 
+ # TODO: find a way to get the actual 'comapi' target output binary name
+--- a/ref-impl/src/OM/CMakeLists.txt
++++ b/ref-impl/src/OM/CMakeLists.txt
+@@ -165,6 +165,11 @@ find_package(EXPAT REQUIRED MODULE)
+ 
+ target_link_libraries(OM PUBLIC EXPAT::EXPAT)
+ 
++find_package(libuuid CONFIG)
++if(libuuid_FOUND)
++    target_link_libraries(OM PRIVATE libuuid::libuuid)
++endif()
++
+ target_compile_definitions(OM PUBLIC
+     XML_STATIC
+     $<$<CONFIG:Debug>:OM_DEBUG>
