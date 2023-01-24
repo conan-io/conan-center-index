@@ -11,3 +11,16 @@ sources:
   "2.03":
     url: "https://github.com/mattreecebentley/plf_list/archive/cc579a5cc828d8a0da6715ef075d560e4de89901.tar.gz"
     sha256: "4ab3f7ca41e3567710a64ede3a9f708b388f3ae52e09b3ee1a45d6b4fd89dd09"
+patches:
+  "2.57":
+    - patch_file: "patches/2.57-0001-disable-cxx20-from-apple-clang14.patch"
+      patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
+      patch_type: "portability"
+  "2.52":
+    - patch_file: "patches/2.50-0001-disable-cxx20-from-apple-clang14.patch"
+      patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
+      patch_type: "portability"
+  "2.50":
+    - patch_file: "patches/2.50-0001-disable-cxx20-from-apple-clang14.patch"
+      patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
+      patch_type: "portability"
