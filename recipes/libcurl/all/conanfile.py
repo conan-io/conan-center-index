@@ -162,7 +162,8 @@ class LibcurlConan(ConanFile):
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
-            del self.options.with_libpsl
+            if Version(self.version) < "7.84.0":
+                del self.options.with_libpsl
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
@@ -547,6 +548,8 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_ZLIB"] = self.options.with_zlib
         tc.variables["CURL_BROTLI"] = self.options.with_brotli
         tc.variables["CURL_ZSTD"] = self.options.with_zstd
+        if Version(self.version) >= "7.84.0":
+            tc.variables["CURL_USE_LIBPSL"] = self.options.with_libpsl
         if Version(self.version) >= "7.81.0":
             tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         else:
