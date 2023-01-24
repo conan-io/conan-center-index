@@ -132,10 +132,6 @@ class LibcurlConan(ConanFile):
         return is_msvc(self) or self._is_win_x_android
 
     @property
-    def _has_zstd_option(self):
-        return Version(self.version) >= "7.72.0"
-
-    @property
     def _has_metalink_option(self):
         # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
         return Version(self.version) < "7.78.0" and not self._is_using_cmake_build
@@ -149,8 +145,6 @@ class LibcurlConan(ConanFile):
             self.license = "MIT"
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_zstd_option:
-            del self.options.with_zstd
         if not self._has_metalink_option:
             del self.options.with_libmetalink
 
@@ -187,7 +181,7 @@ class LibcurlConan(ConanFile):
             self.requires("zlib/1.2.13")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
-        if self.options.get_safe("with_zstd"):
+        if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.with_c_ares:
             self.requires("c-ares/1.18.1")
@@ -404,6 +398,7 @@ class LibcurlConan(ConanFile):
             f"--enable-verbose={self._yes_no(self.options.with_verbose_debug)}",
             f"--enable-symbol-hiding={self._yes_no(self.options.with_symbol_hiding)}",
             f"--enable-unix-sockets={self._yes_no(self.options.get_safe('with_unix_sockets'))}",
+            f"--with-zstd={self._yes_no(self.options.with_zstd)}",
         ])
 
         # Since 7.77.0, disabling TLS must be explicitly requested otherwise it fails
@@ -440,9 +435,6 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-zlib={path}")
         else:
             tc.configure_args.append("--without-zlib")
-
-        if self._has_zstd_option:
-            tc.configure_args.append(f"--with-zstd={self._yes_no(self.options.with_zstd)}")
 
         if self._has_metalink_option:
             tc.configure_args.append(f"--with-libmetalink={self._yes_no(self.options.with_libmetalink)}")
@@ -562,8 +554,7 @@ class LibcurlConan(ConanFile):
         tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
         tc.variables["CURL_ZLIB"] = self.options.with_zlib
         tc.variables["CURL_BROTLI"] = self.options.with_brotli
-        if self._has_zstd_option:
-            tc.variables["CURL_ZSTD"] = self.options.with_zstd
+        tc.variables["CURL_ZSTD"] = self.options.with_zstd
         if Version(self.version) >= "7.81.0":
             tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         else:
@@ -679,7 +670,7 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("zlib::zlib")
         if self.options.with_brotli:
             self.cpp_info.components["curl"].requires.append("brotli::brotli")
-        if self.options.get_safe("with_zstd"):
+        if self.options.with_zstd:
             self.cpp_info.components["curl"].requires.append("zstd::zstd")
         if self.options.with_c_ares:
             self.cpp_info.components["curl"].requires.append("c-ares::c-ares")
