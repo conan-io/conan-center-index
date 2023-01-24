@@ -73,11 +73,11 @@ class AafConan(ConanFile):
         out_include_folder = os.path.join(self.source_folder, "out", "shared", "include")
         out_target_folder = os.path.join(self.source_folder, "out", "target")
         copy(self, "*.h", src=out_include_folder, dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*/*/RefImpl/*.dll", src=out_target_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-        copy(self, "*/*/RefImpl/*.lib", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*/*/RefImpl/*.so*", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*/*/RefImpl/*.dylib", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*/*/RefImpl/*.a", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*/RefImpl/*.dll", src=out_target_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "*/RefImpl/*.lib", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*/RefImpl/*.so*", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*/RefImpl/*.dylib", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*/RefImpl/*.a", src=out_target_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
