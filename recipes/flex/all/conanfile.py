@@ -77,7 +77,6 @@ class FlexConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-
         fix_apple_shared_install_name(self)
 
     def package_info(self):
