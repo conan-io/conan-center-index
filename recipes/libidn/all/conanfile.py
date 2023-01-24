@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -96,17 +96,20 @@ class LibIdnConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env_vars = env.vars(self)
-            env.define("CC", f"{compile_wrapper} {env_vars.get('CC', 'cl')} -nologo")
-            env.define("CXX", f"{compile_wrapper} {env_vars.get('CXX', 'cl')} -nologo")
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
+            ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.append("CPPFLAGS", "-D_WIN32_WINNT=_WIN32_WINNT_WIN8")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            #Prevent msys2 from performing erroneous path conversions for C++ files
+            # when invoking cl.exe as this is already handled by the compile wrapper.
+            env.define("MSYS2_ARG_CONV_EXCL", "-Tp") 
             env.vars(self).save_script("conanbuild_libidn_msvc")
 
         deps = AutotoolsDeps(self)
@@ -123,13 +126,16 @@ class LibIdnConan(ConanFile):
                 os.path.join(self.source_folder, "lib", "stringprep.h"),
                 "ssize_t", ssize)
         autotools = Autotools(self)
-        autotools.configure()
-        autotools.make()
+        with chdir(self, self.source_folder):
+            autotools.configure()
+            autotools.make()
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install()
+        with chdir(self, self.source_folder):
+            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
