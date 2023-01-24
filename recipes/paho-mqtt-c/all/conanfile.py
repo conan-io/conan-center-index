@@ -85,8 +85,8 @@ class PahoMqttcConan(ConanFile):
         tc.variables["PAHO_BUILD_SAMPLES"] = False
         tc.variables["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
-            tc.variables["OPENSSL_SEARCH_PATH"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-            tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+            tc.cache_variables["OPENSSL_SEARCH_PATH"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+            tc.cache_variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
         if self._has_high_performance_option:
             tc.variables["PAHO_HIGH_PERFORMANCE"] = self.options.high_performance
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
