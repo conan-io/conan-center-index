@@ -1,0 +1,19 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 0e328cf..00d5d68 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -11,12 +11,10 @@ normalized_component_storage_holder.cpp
+ semistatic_map.cpp
+ semistatic_graph.cpp)
+ 
+-if("${BUILD_SHARED_LIBS}")
++if(BUILD_SHARED_LIBS)
+     add_library(fruit SHARED ${FRUIT_SOURCES})
+ 
+-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+-        set_target_properties(fruit PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+-    endif()
++    set_target_properties(fruit PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+ else()
+     add_library(fruit STATIC ${FRUIT_SOURCES})
+ endif()

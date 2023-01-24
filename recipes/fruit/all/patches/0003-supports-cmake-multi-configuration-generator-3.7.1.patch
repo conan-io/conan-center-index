@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 11342ce..c85be1b 100644
+index 1002f74..a6ab22c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -14,15 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
