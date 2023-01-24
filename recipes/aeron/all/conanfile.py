@@ -136,9 +136,9 @@ class AeronConan(ConanFile):
         if is_msvc(self):
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m", "pthread"]
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32", "iphlpapi"]
+            self.cpp_info.system_libs = ["winmm", "wsock32", "ws2_32", "iphlpapi"]
             self.cpp_info.defines.append("HAVE_WSAPOLL")
 
         # TODO: to remove in conan v2
