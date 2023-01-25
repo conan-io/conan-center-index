@@ -283,8 +283,12 @@ class QtConan(ConanFile):
 
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
-            if not self.options.with_dbus and self.settings.os == "Linux":
-                raise ConanInvalidConfiguration("option qt:webengine requires also qt:with_dbus on Linux")
+            if self.settings.os == "Linux":
+                if not self.options.with_dbus:
+                    raise ConanInvalidConfiguration("option qt:webengine requires also qt:with_dbus on Linux")
+                if not self.options.with_glib:
+                    # it's not really needed, it's only for the pdf reader inside of chromium
+                    raise ConanInvalidConfiguration("option qt:webengine requires also qt:with_glib on Linux")
 
             if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
@@ -483,6 +487,22 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
+        # work around #14884
+        if self.settings.os == "Linux" and self.options.get_safe("qtwebengine") and Version(self.version) >= "6.4.0":        
+            lib_paths = []
+
+            # for the webengine core
+            for lib in {"dbus", "sqlite3", "opus", "fontconfig", "freetype",
+                        "libpng", "bzip2", "brotli", "expat", "xkbcommon"}:
+                lib_paths.extend(self.deps_cpp_info[lib].lib_paths)
+            tc.variables["CONAN_PRIVATE_WEBENGINE_LIBRARY_DEPENDENCY_PATH"] = ";".join(lib_paths).replace("\\", "/")
+
+            # for the pdf reader
+            lib_paths = []
+            for lib in {"libffi", "glib", "bzip2", "pcre2"}:
+                lib_paths.extend(self.deps_cpp_info[lib].lib_paths)
+            tc.variables["CONAN_PRIVATE_WEBENGINE_PDF_LIBRARY_DEPENDENCY_PATH"] = ";".join(lib_paths).replace("\\", "/")
+
         package_folder = self.package_folder.replace('\\', '/')
         tc.variables["INSTALL_MKSPECSDIR"] = f"{package_folder}/res/archdatadir/mkspecs"
         tc.variables["INSTALL_ARCHDATADIR"] = f"{package_folder}/res/archdatadir"
@@ -660,6 +680,14 @@ class QtConan(ConanFile):
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
 
+        # work around #14884
+        if Version(self.version) >= "6.4.0":
+            content = "target_link_directories(WebEngineCore PRIVATE ${CONAN_PRIVATE_WEBENGINE_LIBRARY_DEPENDENCY_PATH})\n"
+            save(self, os.path.join(self.source_folder, "qtwebengine", "src", "core", "CMakeLists.txt"), content, append=True)
+
+            content = "target_link_directories(Pdf PRIVATE ${CONAN_PRIVATE_WEBENGINE_PDF_LIBRARY_DEPENDENCY_PATH})\n"
+            save(self, os.path.join(self.source_folder, "qtwebengine", "src", "pdf", "CMakeLists.txt"), content, append=True)
+
     def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
@@ -764,7 +792,7 @@ class QtConan(ConanFile):
             # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
             build_env = tools.RunEnvironment(self).vars if is_msvc(self) else {}
             build_env["MAKEFLAGS"] = "j%d" % build_jobs(self)
-            build_env["PKG_CONFIG_PATH"] = [self.build_folder]
+            build_env["PKG_CONFIG_PATH"] = [self.generators_folder, self.build_folder]
             if self.settings.os == "Windows":
                 if "PATH" not in build_env:
                     build_env["PATH"] = []
