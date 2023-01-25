@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
@@ -102,17 +102,15 @@ class FlacConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libflac"].system_libs += ["m"]
 
-        # TODO remove once conan v2 is the only support and recipes have been migrated
-        if Version(conan_version) < "2.0.0-beta":
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
 
-            self.cpp_info.filenames["cmake_find_package"] = "flac"
-            self.cpp_info.filenames["cmake_find_package_multi"] = "flac"
-            self.cpp_info.names["cmake_find_package"] = "FLAC"
-            self.cpp_info.names["cmake_find_package_multi"] = "FLAC"
-            self.cpp_info.components["libflac"].names["cmake_find_package"] = "FLAC"
-            self.cpp_info.components["libflac"].names["cmake_find_package_multi"] = "FLAC"
-            self.cpp_info.components["libflac++"].names["cmake_find_package"] = "FLAC++"
-            self.cpp_info.components["libflac++"].names["cmake_find_package_multi"] = "FLAC++"
+        self.cpp_info.filenames["cmake_find_package"] = "flac"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "flac"
+        self.cpp_info.names["cmake_find_package"] = "FLAC"
+        self.cpp_info.names["cmake_find_package_multi"] = "FLAC"
+        self.cpp_info.components["libflac"].names["cmake_find_package"] = "FLAC"
+        self.cpp_info.components["libflac"].names["cmake_find_package_multi"] = "FLAC"
+        self.cpp_info.components["libflac++"].names["cmake_find_package"] = "FLAC++"
+        self.cpp_info.components["libflac++"].names["cmake_find_package_multi"] = "FLAC++"
