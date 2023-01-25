@@ -9,7 +9,8 @@ import subprocess
 import errno
 import ctypes
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.47.0"
+
 
 class lock:
     def __init__(self):
@@ -57,18 +58,17 @@ class MSYS2Conan(ConanFile):
 
     short_paths = True
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.options.no_kill
+
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
-
-    def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -177,16 +177,12 @@ class MSYS2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        self.cpp_info.resdirs = []
 
         msys_root = os.path.join(self.package_folder, "bin", "msys64")
         msys_bin = os.path.join(msys_root, "usr", "bin")
         self.cpp_info.bindirs.append(msys_bin)
 
-        self.output.info(f"Creating MSYS_ROOT env var : {msys_root}")
         self.buildenv_info.define_path("MSYS_ROOT", msys_root)
-
-        self.output.info(f"Creating MSYS_BIN env var : {msys_bin}")
         self.buildenv_info.define_path("MSYS_BIN", msys_bin)
 
         self.conf_info.define("tools.microsoft.bash:subsystem", "msys2")
@@ -195,5 +191,4 @@ class MSYS2Conan(ConanFile):
         # conan v1 specific stuff
         self.env_info.MSYS_ROOT = msys_root
         self.env_info.MSYS_BIN = msys_bin
-        self.output.info(f"Appending PATH env var with : {msys_bin}")
         self.env_info.path.append(msys_bin)
