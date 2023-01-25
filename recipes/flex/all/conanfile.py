@@ -77,21 +77,11 @@ class FlexConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
         self.cpp_info.system_libs = ["m"]
-
-        # generate both modules and config files
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "FLEX")
-        self.cpp_info.set_property("cmake_target_name", "FLEX::FLEX")
-        self.cpp_info.set_property("pkg_config_name", "flex")
-
-        self.cpp_info.names["cmake_find_package"] = "FLEX"
-        self.cpp_info.names["cmake_find_package_multi"] = "FLEX"
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
