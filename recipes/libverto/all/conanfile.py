@@ -111,8 +111,8 @@ class LibVertoConan(ConanFile):
             raise ConanInvalidConfiguration("tevent is not (yet) available on conan-center")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.9.3")
-        self.build_requires("libtool/2.4.7")
+        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
