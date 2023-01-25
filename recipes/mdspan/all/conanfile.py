@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -50,6 +51,16 @@ class MDSpanConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
                     "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+
+        if self.settings.compiler == "Visual Studio" and "16.6" <= Version(self.settings.compiler.version) < "17.0":
+            raise ConanInvalidConfiguration(
+                "Unsupported Visual Studio version due to upstream bug. The supported Visual Studio versions are (> 15.0 and < 16.6) or >= 17.0."
+                "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.")
+        # TODO: check msvcc version more precisely 
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) == "192":
+            raise ConanInvalidConfiguration(
+                "Unsupported MSVC version due to upstream bug. The supported MSVC versions are < 192 or > 193."
+                "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
