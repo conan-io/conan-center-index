@@ -19,3 +19,24 @@ sources:
   "cci.20210730":  # Used by grpc 1.46.3
     url: "https://github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.zip"
     sha256: "c53ef0768e07bd4e2334cdacba8c6672d2252bef307a889f94893652e8e7f3a4"
+patches:
+  "cci.20220711":
+    - patch_file: "patches/cci.20220711/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/googleapis/googleapis/commit/5fd35b6a1316570df7f117426ed35af9086e9bda"
+  "cci.20220531":
+    - patch_file: "patches/cci.20220531/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/googleapis/googleapis/commit/5fd35b6a1316570df7f117426ed35af9086e9bda"
+  "cci.20211122":
+    - patch_file: "patches/cci.20211122/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/googleapis/googleapis/commit/5fd35b6a1316570df7f117426ed35af9086e9bda"
+  "cci.20210730":
+    - patch_file: "patches/cci.20210730/001-fix-google-api-deps.patch"
+      patch_description: "Fix incorrect dependency name in BUILD.bazel file"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/googleapis/googleapis/commit/5fd35b6a1316570df7f117426ed35af9086e9bda"
