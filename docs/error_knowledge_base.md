@@ -482,6 +482,16 @@ The legacy content in test_package should not be removed. Instead, rename that f
 
 The [self.requires()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#requirements) allows to override a dependency version, forcing to use that version imposed by the recipe only. As a side-effect, dependencies can use different versions of the same project at the same package, which may cause unpredicted errors, like ABI incompatibility. For that reason, the `override` parameter is forbidden and should not be used. Instead, all dependencies should align their package versions, even when it's necessary to open more pull requests to update dependency versions.
 
+#### **<a name="KB-H076">#KB-H076</a>: "EITHER STATIC OR SHARED OF EACH LIB"**
+
+It checks whether static & shared artifacts of the same lib are packaged together. Also, if there are tuples of (.a/.dylib) or (.a/.so) files with the same name.
+So it works on Unix systems only, not Windows. Putting both same library name as shared and static in the very same package is considered an error, as it should be separated
+and managed by the package option `shared`.
+
+#### **<a name="KB-H077">#KB-H077</a>: "APPLE RELOCATABLE SHARED LIBS"**
+
+It checks whether installed shared libs are relocatable on Linux & macOS. All shared libs on macOS properly have `@rpath/<shared>` in install tree (@rpath token is supported since macOS 10.5 Leopard).
+
 ## Deprecated errors
 
 The following errors from the hooks are deprecated and no longer reported:
