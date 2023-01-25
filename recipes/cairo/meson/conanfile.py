@@ -61,7 +61,7 @@ class CairoConan(ConanFile):
         "with_png": True,
         "with_opengl": "desktop",
         "with_symbol_lookup": False,
-        "tee": True,
+        "tee": False,
     }
     short_paths = True
 
@@ -158,7 +158,6 @@ class CairoConan(ConanFile):
         if self.settings.os == "Linux":
             options["xcb"] = is_enabled(self.options.with_xcb)
             options["xlib"] = is_enabled(self.options.with_xlib)
-            options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
         else:
             options["xcb"] = "disabled"
             options["xlib"] = "disabled"
@@ -177,11 +176,17 @@ class CairoConan(ConanFile):
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
-        options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
-        options["directfb"] = "disabled"
-        options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
-        options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
-        options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+
+        version = Version(self.version)
+        if version < "1.17.6":
+            options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
+            options["directfb"] = "disabled"
+            options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
+            options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
+            options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+            if self.settings.os == "Linux":
+                options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
+
         options["gtk2-utils"] = "disabled"
         options["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
