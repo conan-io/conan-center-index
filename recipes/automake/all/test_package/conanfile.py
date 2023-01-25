@@ -6,7 +6,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import unix_path
 
 
 required_conan_version = ">=1.53.0"
