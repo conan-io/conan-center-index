@@ -327,14 +327,10 @@ class OpenCVConan(ConanFile):
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
                 return [
-                        "ffmpeg::avcodec",
-                        "ffmpeg::avfilter",
-                        "ffmpeg::avformat",
-                        "ffmpeg::avutil",
-                        "ffmpeg::swresample",
-                        "ffmpeg::swscale" ]
-            else:
-                return [ ]
+                    "ffmpeg::avcodec", "ffmpeg::avfilter", "ffmpeg::avformat",
+                    "ffmpeg::avutil", "ffmpeg::swresample", "ffmpeg::swscale",
+                ]
+            return []
 
         def freetype():
             return ["freetype::freetype"] if self.options.freetype else []
@@ -343,15 +339,11 @@ class OpenCVConan(ConanFile):
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
         def ipp():
-            if self.options.with_ipp:
-                if self.options.with_ipp == "intel-ipp":
-                    return ["intel-ipp::intel-ipp"]
-                elif self.options.with_ipp == "opencv-icv" and not self.options.shared:
-                    return ["ippiw"]
-                else:
-                    return []
-            else:
-                return []
+            if self.options.with_ipp == "intel-ipp":
+                return ["intel-ipp::intel-ipp"]
+            elif self.options.with_ipp == "opencv-icv" and not self.options.shared:
+                return ["ippiw"]
+            return []
 
         def parallel():
             return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
@@ -1117,8 +1109,7 @@ class OpenCVConan(ConanFile):
             (not self.options.with_cuda or not self.options.with_cublas or not self.options.with_cudnn):
             raise ConanInvalidConfiguration("with_cublas and with_cudnn must be enabled for dnn_cuda")
         if self.options.with_ipp == "opencv-icv" and \
-            (not str(self.settings.arch) in ["x86", "x86_64"] or \
-             not str(self.settings.os) in ["Linux", "Macos", "Windows"]):
+           not (self.settings.arch in ["x86", "x86_64"] and self.settings.os in ["Linux", "Macos", "Windows"]):
             raise ConanInvalidConfiguration(f"opencv-icv is not available for {self.settings.os}/{self.settings.arch}")
         if self.options.viz:
             raise ConanInvalidConfiguration(
