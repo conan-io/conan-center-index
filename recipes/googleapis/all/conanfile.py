@@ -4,13 +4,13 @@ import glob
 from io import StringIO
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake
-from conan.tools.files import copy, get, export_conandata_patches, copy
+from conan.tools.files import apply_conandata_patches, copy, get, export_conandata_patches, copy
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-from conan.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
 
@@ -43,7 +43,7 @@ class GoogleAPIS(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
-        self._patch_sources()
+        apply_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -168,11 +168,6 @@ class GoogleAPIS(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            # Using **patch here results in an error with the required `patch_description` field.
-            tools.patch(patch_file=patch['patch_file'])
 
     _DEPS_FILE = "res/generated_targets.deps"
 
