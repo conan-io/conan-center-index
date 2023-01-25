@@ -44,7 +44,7 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
-        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "res").replace('\\', '/')
+        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin").replace('\\', '/')
         tc.generate()
 
         deps = CMakeDeps(self)
