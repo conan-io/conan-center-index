@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.tools.build import can_run, cross_building
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.env import VirtualRunEnv
 from conan.tools.microsoft import is_msvc
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeDeps"
     test_type = "explicit"
 
     def layout(self):
@@ -17,8 +18,8 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if cross_building(self) and hasattr(self, "settings_build"):
-            self.tool_requires(self.tested_reference_str)
+        # For the grpc-cpp-plugin executable
+        self.tool_requires(self.tested_reference_str)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -26,6 +27,10 @@ class TestPackageConan(ConanFile):
                                                         and str(self.settings.compiler.version) in ("15", "191")
                                                         and self.settings.build_type == "Release")
         tc.generate()
+        
+        # Set up environment so that we can run grpc-cpp-plugin at build time
+        if not cross_building(self):
+            VirtualRunEnv(self).generate(scope="build")
         
     def build(self):
         cmake = CMake(self)
