@@ -101,7 +101,7 @@ class OpenCVConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        # global module options
+        # global options
         "parallel": [False, "tbb", "openmp"],
         "with_ipp": [False, "intel-ipp", "opencv-icv"],
         "with_eigen": [True, False],
@@ -154,7 +154,7 @@ class OpenCVConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        # global module options
+        # global options
         "parallel": False,
         "with_ipp": False,
         "with_eigen": True,
