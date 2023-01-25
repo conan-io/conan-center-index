@@ -41,7 +41,6 @@ class LibVertoConan(ConanFile):
     }
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "patches/*"
    
 
     @property
@@ -152,9 +151,8 @@ class LibVertoConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        with chdir(self, self.source_folder):    
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
