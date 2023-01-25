@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class FlacConan(ConanFile):
@@ -36,7 +36,7 @@ class FlacConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("ogg/1.3.5")
