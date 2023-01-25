@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.files import get, copy, collect_libs
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
@@ -60,10 +59,5 @@ class Iso8601LibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-
-        self.cpp_info.filenames["cmake_find_package"] = self.name
-        self.cpp_info.filenames["cmake_find_package_multi"] = self.name
-        self.cpp_info.names["cmake_find_package"] = self.name
-        self.cpp_info.names["cmake_find_package_multi"] = self.name
 
         self.cpp_info.defines.append("ISO8601LIB_EXPORT")
