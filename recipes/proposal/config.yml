@@ -23,3 +23,5 @@ versions:
     folder: all
   "7.4.2":
     folder: all
+  "7.5.0":
+    folder: all
