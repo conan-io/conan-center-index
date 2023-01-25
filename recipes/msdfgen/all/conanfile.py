@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -49,7 +50,10 @@ class MsdfgenConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.12.1")
-        self.requires("lodepng/cci.20200615")
+        if  Version(self.version) < "1.10":
+            self.requires("lodepng/cci.20200615")
+        else:
+            self.requires("libpng/1.6.39")
         self.requires("tinyxml2/9.0.0")
 
     def validate(self):
@@ -118,8 +122,13 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.components["_msdfgen"].names["cmake_find_package"] = "msdfgen"
         self.cpp_info.components["_msdfgen"].names["cmake_find_package_multi"] = "msdfgen"
         self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
-        self.cpp_info.components["_msdfgen"].libs = ["msdfgen"]
+        self.cpp_info.components["_msdfgen"].libs = ["msdfgen" if Version(self.version) < "1.10" else "msdfgen-core"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
+        if Version(self.version) >= "1.10":
+            if self.options.shared and is_msvc(self):
+                self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=__declspec(dllimport)")
+            else:
+                self.cpp_info.components["_msdfgen"].defines.append("MSDFGEN_PUBLIC=")
 
         self.cpp_info.components["msdfgen-ext"].set_property("cmake_target_name", "msdfgen::msdfgen-ext")
         self.cpp_info.components["msdfgen-ext"].names["cmake_find_package"] = "msdfgen-ext"
@@ -128,8 +137,10 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.components["msdfgen-ext"].libs = ["msdfgen-ext"]
         self.cpp_info.components["msdfgen-ext"].requires = [
             "_msdfgen", "freetype::freetype",
-            "lodepng::lodepng", "tinyxml2::tinyxml2",
+            "lodepng::lodepng" if Version(self.version) < "1.10" else "libpng::libpng",
+            "tinyxml2::tinyxml2",
         ]
+
         if self.options.with_skia:
             self.cpp_info.components["msdfgen-ext"].defines.append("MSDFGEN_USE_SKIA")
 
