@@ -358,6 +358,8 @@ class QtConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+        if self.settings.os == "Windows" and self.options.get_safe("qtwebengine", False):
+            self.folders.build = "build"
 
     def requirements(self):
         self.requires("zlib/1.2.13")
