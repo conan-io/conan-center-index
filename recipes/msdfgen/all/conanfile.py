@@ -88,7 +88,7 @@ class MsdfgenConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "lib"))
         rmdir(self, os.path.join(self.source_folder, "include"))
         # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
-        if is_msvc(self):
+        if is_msvc(self) and Version(self.version) < "1.10":
             replace_in_file(
                 self,
                 cmakelists,
