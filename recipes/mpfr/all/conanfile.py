@@ -12,7 +12,6 @@ import shlex
 
 required_conan_version = ">=1.56.0"
 
-
 class MpfrConan(ConanFile):
     name = "mpfr"
     package_type = "library"
