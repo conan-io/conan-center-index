@@ -30,7 +30,12 @@ class TestPackageConan(ConanFile):
         
         # Set up environment so that we can run grpc-cpp-plugin at build time
         if not cross_building(self):
-            VirtualRunEnv(self).generate(scope="build")
+            buildenv = VirtualRunEnv(self)
+            buildenv.generate(scope="build")
+
+        # Environment so that the compiled test executable can load shared libraries
+        runenv = VirtualRunEnv(self)
+        runenv.generate(scope="run")
         
     def build(self):
         cmake = CMake(self)
