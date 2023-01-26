@@ -6,7 +6,6 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
-from conan.tools.microsoft.visual import msvc_version_to_vs_ide_version
 from conan.tools.scm import Version
 from conan.tools.build import stdcpp_library
 import os
@@ -159,7 +158,9 @@ class LibVPXConan(ConanFile):
             vc_version = self.settings.compiler.version
             compiler = f"vs{vc_version}"
         elif is_msvc(self):
-            vc_version = msvc_version_to_vs_ide_version(self.settings.compiler.version)
+            vc_version = str(self.settings.compiler.version)
+            if Version(self.settings.compiler.version) > "100": # New msvc compiler to triplet used in configure script for vpx
+                vc_version = {"190": "14", "191": "15", "192": "16"}[vc_version]
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
