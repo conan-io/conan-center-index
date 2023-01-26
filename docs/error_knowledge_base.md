@@ -327,7 +327,9 @@ The attribue [default_options](https://docs.conan.io/en/latest/reference/conanfi
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
-It's important to have new library version defined in both [config.yml](adding_packages/README.md#the-version-folders) and [conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html), otherwise newly added version will not be checked and built by CI and will not be available for download.
+It's important to have new library version defined in both [config.yml](adding_packages/folders_and_files.md#configyml) and
+[conandata.yml](adding_packages/folders_and_files.md#conandatayml), otherwise newly added version will not be checked and built
+by CI and will not be available for download.
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
@@ -479,6 +481,16 @@ The legacy content in test_package should not be removed. Instead, rename that f
 #### **<a name="KB-H075">#KB-H075</a>: "REQUIREMENT OVERRIDE PARAMETER"**
 
 The [self.requires()](https://docs.conan.io/en/latest/reference/conanfile/methods.html#requirements) allows to override a dependency version, forcing to use that version imposed by the recipe only. As a side-effect, dependencies can use different versions of the same project at the same package, which may cause unpredicted errors, like ABI incompatibility. For that reason, the `override` parameter is forbidden and should not be used. Instead, all dependencies should align their package versions, even when it's necessary to open more pull requests to update dependency versions.
+
+#### **<a name="KB-H076">#KB-H076</a>: "EITHER STATIC OR SHARED OF EACH LIB"**
+
+It checks whether static & shared artifacts of the same lib are packaged together. Also, if there are tuples of (.a/.dylib) or (.a/.so) files with the same name.
+So it works on Unix systems only, not Windows. Putting both same library name as shared and static in the very same package is considered an error, as it should be separated
+and managed by the package option `shared`.
+
+#### **<a name="KB-H077">#KB-H077</a>: "APPLE RELOCATABLE SHARED LIBS"**
+
+It checks whether installed shared libs are relocatable on Linux & macOS. All shared libs on macOS properly have `@rpath/<shared>` in install tree (@rpath token is supported since macOS 10.5 Leopard).
 
 ## Deprecated errors
 
