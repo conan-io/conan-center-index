@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package CXX)
 
-find_package(logr REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
-add_executable(${PROJECT_NAME} example.cpp)
+find_package(logr REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} ../test_package/example.cpp)
 target_link_libraries(${PROJECT_NAME} logr::logr)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
