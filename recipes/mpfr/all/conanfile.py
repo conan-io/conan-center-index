@@ -36,7 +36,6 @@ class MpfrConan(ConanFile):
 
     exports_sources = "CMakeLists.txt.in", "patches/**"
 
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
