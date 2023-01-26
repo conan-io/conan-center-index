@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index-staging-v2'
 
 conan:
-  version: 2.0.0-beta7
+  version: 2.0.0-beta8
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
