@@ -105,9 +105,6 @@ class Nghttp2Conan(ConanFile):
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
         tc.variables["WITH_SPDYLAY"] = False
         tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
-        if Version(self.version) >= "1.42.0":
-            # backward-incompatible change in 1.42.0
-            tc.variables["STATIC_LIB_SUFFIX"] = "_static"
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
@@ -164,8 +161,7 @@ class Nghttp2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["nghttp2"].set_property("pkg_config_name", "libnghttp2")
-        suffix = "_static" if Version(self.version) > "1.39.2" and not self.options.shared else ""
-        self.cpp_info.components["nghttp2"].libs = [f"nghttp2{suffix}"]
+        self.cpp_info.components["nghttp2"].libs = ["nghttp2"]
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.components["nghttp2"].defines.append("NGHTTP2_STATICLIB")
 

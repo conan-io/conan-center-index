@@ -1,0 +1,13 @@
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index 5ceb045..e19b5a9 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -190,7 +190,7 @@ include (CPack)
+ install (TARGETS avrocpp avrocpp_s
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib
+-    RUNTIME DESTINATION lib)
++    RUNTIME DESTINATION bin)
+ 
+ install (TARGETS avrogencpp RUNTIME DESTINATION bin)
+ 

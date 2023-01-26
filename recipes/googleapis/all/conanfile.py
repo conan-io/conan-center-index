@@ -16,6 +16,7 @@ from helpers import parse_proto_libraries
 
 required_conan_version = ">=1.45.0"
 
+
 class GoogleAPIS(ConanFile):
     name = "googleapis"
     description = "Public interface definitions of Google APIs"
@@ -38,9 +39,12 @@ class GoogleAPIS(ConanFile):
 
     def export_sources(self):
         self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
+        self._patch_sources()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,9 +66,6 @@ class GoogleAPIS(ConanFile):
         if self.options.shared and not self.options["protobuf"].shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
-    def requirements(self):
-        self.requires('protobuf/3.21.4')
-
     @property
     def _cmake_new_enough(self):
         try:
@@ -78,6 +79,9 @@ class GoogleAPIS(ConanFile):
             return False
         else:
             return True
+
+    def requirements(self):
+        self.requires('protobuf/3.21.4')
 
     def build_requirements(self):
         self.build_requires('protobuf/3.21.4')
@@ -130,6 +134,7 @@ class GoogleAPIS(ConanFile):
         if Version(self.deps_cpp_info["protobuf"].version) <= "3.21.5" and self.settings.os == "Macos" or \
             self.settings.os == "Android":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
+            deactivate_library("//google/storagetransfer/v1:storagetransfer_cc_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++") or \
             self.settings.compiler in ["Visual Studio", "msvc"]:
@@ -156,11 +161,23 @@ class GoogleAPIS(ConanFile):
 
     def build(self):
         proto_libraries = self._parse_proto_libraries()
-        with open(os.path.join(self.source_folder, "CMakeLists.txt"), "a", encoding="utf-8") as f:
+        # Use a separate file to host the generated code, which is generated in full each time.
+        # This is safe to call multiple times, for example, if you need to invoke `conan build` more than
+        # once.
+        with open(os.path.join(self.source_folder, "generated_targets.cmake"), "w", encoding="utf-8") as f:
+            f.write("# Generated C++ library targets for googleapis\n")
+            f.write("# DO NOT EDIT - change the generation code in conanfile.py instead\n")
             for it in filter(lambda u: u.is_used, proto_libraries):
                 f.write(it.cmake_content)
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            # Using **patch here results in an error with the required `patch_description` field.
+            tools.patch(patch_file=patch['patch_file'])
+
+    _DEPS_FILE = "res/generated_targets.deps"
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -173,11 +190,21 @@ class GoogleAPIS(ConanFile):
         copy(self, pattern="*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, pattern="*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
+        with open(os.path.join(self.package_folder, self._DEPS_FILE), "w", encoding="utf-8") as f:
+            for lib in filter(lambda u: u.is_used, self._parse_proto_libraries()):
+                interface = 'LIB' if lib.srcs else 'INTERFACE'
+                f.write(f"{lib.cmake_target} {interface} {','.join(lib.cmake_deps)}\n")
+
     def package_id(self):
         self.info.requires["protobuf"].full_package_mode()
 
     def package_info(self):
-        # We are not creating components, we can just collect the libraries
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["m"])
+        with open(os.path.join(self.package_folder, self._DEPS_FILE), "r", encoding="utf-8") as f:
+            for line in f.read().splitlines():
+                (name, libtype, deps) = line.rstrip('\n').split(' ')
+                self.cpp_info.components[name].requires = deps.split(',')
+                if libtype == 'LIB':
+                    self.cpp_info.components[name].libs = [name]
+                self.cpp_info.components[name].names["pkg_config"] = name
+                if self.settings.os == "Linux":
+                    self.cpp_info.components[name].system_libs.extend(["m"])
