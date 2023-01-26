@@ -11,6 +11,7 @@ required_conan_version = ">=1.54.0"
 
 class AutoconfConan(ConanFile):
     name = "autoconf"
+    package_type = "application"
     description = (
         "Autoconf is an extensible package of M4 macros that produce shell "
         "scripts to automatically configure software source code packages"
