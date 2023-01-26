@@ -562,7 +562,7 @@ class FFMpegConan(ConanFile):
             if self._target_os == "emscripten":
                 args.append("--target-os=none")
             else:
-                target_os = "Macos" if is_apple_os(self) else str(self.settings.os)
+                target_os = "darwin" if is_apple_os(self) else str(self.settings.os)
                 args.append(f"--target-os={target_os}")
 
             if is_apple_os(self):
