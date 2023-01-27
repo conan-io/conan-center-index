@@ -62,12 +62,12 @@ jobs:
         run: |
           echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
           i=1
-          for file in recipes/*/*/conanfile.py; do
+          for file in recipes/*/*/test_package/conanfile.py; do
             if [[ $i -gt 250 ]] ; then
               break
             fi
             echo "$i - $file"
-            pylint --rcfile=linter/pylintrc_testpackage $file --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py --output-format=json --output=recipes.json --exit-zero
+            pylint --rcfile=linter/pylintrc_testpackage $file --output-format=json --output=recipes.json --exit-zero
             jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}' recipes.json > recipes2.json
             jq -r '" * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
             (( i += 1 ))
