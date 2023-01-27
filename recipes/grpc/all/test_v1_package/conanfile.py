@@ -20,6 +20,13 @@ class TestPackageConan(ConanFile):
             with tools.run_environment(self):
                 yield
 
+    @property
+    def macos_grpc_shared(self):
+        # Due to SIP limitations on newer macOS, `DYLD_LIBRARY_PATH`, which is set
+        # by `tools.run_environment`, will not be propagated properly, see
+        # https://stackoverflow.com/questions/35568122/why-isnt-dyld-library-path-being-propagated-here 
+        return self.settings.os == "Macos" and self.options["grpc"].shared
+
     def build(self):
         # TODO: always build in conan v2
         # this is a limitation of conan v1:
@@ -27,7 +34,12 @@ class TestPackageConan(ConanFile):
         # of build requirements so that gprc_cpp_plugin can find its
         # shared dependencies (in build context as well)
         # should be fixed by using: CMakeToolchain + VirtualBuildEnv
-        if tools.cross_building(self) and self.options["grpc"].shared:
+        if (tools.cross_building(self) and self.options["grpc"].shared) or self.macos_grpc_shared:
+            self.output.warning("Skipping build of test_package due to limitation propagating "
+                                "runtime environment when invoking protoc and grpc_cpp_plugin. "
+                                "This is fixed in Conan 2.0 - please use new integrations. "
+                                "For a working example, please see the newer Conan 2.0 compatible "
+                                "test package.")
             return
         with self._buildenv():
             cmake = CMake(self)
@@ -39,6 +51,6 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.cross_building(self) and not self.macos_grpc_shared:
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
