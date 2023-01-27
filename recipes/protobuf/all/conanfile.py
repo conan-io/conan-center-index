@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
+from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm, save, chdir
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
+from conan.tools.env import Environment
 
 import os
 import textwrap
@@ -179,6 +180,13 @@ class ProtobufConan(ConanFile):
         cmake_root = "cmake" if Version(self.version) < "3.21" else None
         cmake.configure(build_script_folder=cmake_root)
         cmake.build()
+        current_dir = os.getcwd()
+        env = Environment()
+        env.define("PROTOC", os.path.join(os.getcwd(), "protoc"))
+        envvars = env.vars(self)
+        with envvars.apply():
+            with chdir(self, os.path.join(self.source_folder, "python")):
+                self.run("python setup.py build", env="conanbuild")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -190,6 +198,10 @@ class ProtobufConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
         rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
                      os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
+
+        copy(self, "*",
+            os.path.join(self.source_folder, "python"),
+            os.path.join(self.package_folder, "lib", "python3", "dist-packages"))
 
         if not self.options.lite:
             rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "lib"))
@@ -263,3 +275,8 @@ class ProtobufConan(ConanFile):
         if self.options.lite:
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
+
+        protobuf_dist_packages = os.path.join(self.package_folder, "lib", "python3", "dist-packages")
+        self.output.info("Appending PYTHONPATH environment variable: {}".format(protobuf_dist_packages))
+        self.runenv_info.prepend_path("PYTHONPATH", protobuf_dist_packages)
+        self.env_info.PYTHONPATH.append(protobuf_dist_packages) # remove in conan v2?
