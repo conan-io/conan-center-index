@@ -1,0 +1,14 @@
+diff --git a/include/libxls/xlstypes.h b/include/libxls/xlstypes.h
+index 52da772..3efba21 100644
+--- a/include/libxls/xlstypes.h
++++ b/include/libxls/xlstypes.h
+@@ -53,4 +53,9 @@ typedef unsigned __int64	unsigned64_t;
+ typedef uint64_t			unsigned64_t;
+ #endif
+ 
++#ifdef _MSC_VER
++#include <BaseTsd.h>
++typedef SSIZE_T ssize_t;
++#endif
++
+ #endif
