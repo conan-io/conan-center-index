@@ -288,7 +288,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_opencv:
             self.cpp_info.components["main"].requires.append("opencv::opencv")
         if self.options.with_tbb:
-            self.cpp_info.components["main"].requires.append("onetbb::onetbb")
+            self.cpp_info.components["openimageio_util"].requires.append("onetbb::onetbb")
         if self.options.with_dicom:
             self.cpp_info.components["main"].requires.append("dcmtk::dcmtk")
         if self.options.with_ffmpeg:
