@@ -33,3 +33,6 @@ patches:
     - patch_file: "patches/upstream-pr-4709-remove-js_embed.patch"
       patch_description: "Remove use of js_embed"
       patch_type: "backport"
+    - patch_file: "patches/upstream-pr-4620-rpath-management.patch"
+      patch_description: "CMake OSX rpath management"
+      patch_type: "backport"
