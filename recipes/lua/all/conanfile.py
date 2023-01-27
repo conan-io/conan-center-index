@@ -1,30 +1,38 @@
-from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, load, save, export_conandata_patches, apply_conandata_patches, collect_libs
+from conan.tools.apple import fix_apple_shared_install_name
+
+
+required_conan_version = ">=1.53.0"
+
 
 class LuaConan(ConanFile):
     name = "lua"
+    package_type = "library"
     description = "Lua is a powerful, efficient, lightweight, embeddable scripting language."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.lua.org/"
     topics = ("lua", "scripting")
     license = "MIT"
-    generators = "cmake"
+
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [False, True], "fPIC": [True, False], "compile_as_cpp": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "compile_as_cpp": False}
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    options = {
+        "shared": [False, True],
+        "fPIC": [True, False],
+        "compile_as_cpp": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "compile_as_cpp": False
+    }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,41 +40,41 @@ class LuaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.compile_as_cpp:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.options.rm_safe("compiler.libcxx")
+            self.options.rm_safe("compiler.cppstd")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
-        self._cmake.definitions["SKIP_INSTALL_TOOLS"] = True
-        self._cmake.definitions["COMPILE_AS_CPP"] = self.options.compile_as_cpp
-        self._cmake.configure()
-        return self._cmake
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LUA_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["SKIP_INSTALL_TOOLS"] = True
+        tc.variables["COMPILE_AS_CPP"] = self.options.compile_as_cpp
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
         # Extract the License/s from the header to a file
-        tmp = tools.load( os.path.join(self._source_subfolder, "src", "lua.h") )
+        tmp = load(self, os.path.join(self.source_folder, "src", "lua.h"))
         license_contents = tmp[tmp.find("/***", 1):tmp.find("****/", 1)]
-        tools.save(os.path.join(self.package_folder, "licenses", "COPYING.txt"), license_contents)
-        cmake = self._configure_cmake()
+        save(self, os.path.join(self.package_folder, "licenses", "COPYING.txt"), license_contents)
+        cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m"]
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
