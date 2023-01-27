@@ -20,16 +20,21 @@ sources:
 patches:
   "1.9.2":
     - patch_file: "patches/1.9.2-0001-imported-target.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix includes"
+      patch_type: "portability"
   "1.9.1":
     - patch_file: "patches/1.9.1-0001-imported-target.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix includes"
+      patch_type: "portability"
   "1.8.20":
-    - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.8-0001-xapian.patch"
+      patch_description: "Fix xapian find_package command"
+      patch_type: "portability"
   "1.8.18":
-    - patch_file: "patches/1.8.18-0001-relocatable-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.8-0001-xapian.patch"
+      patch_description: "Fix xapian find_package command"
+      patch_type: "portability"
   "1.8.17":
-    - patch_file: "patches/1.8.17-0001-relocatable-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.8-0001-xapian.patch"
+      patch_description: "Fix xapian find_package command"
+      patch_type: "portability"
