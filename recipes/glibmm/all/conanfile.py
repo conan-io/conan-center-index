@@ -65,7 +65,7 @@ class GlibmmConan(ConanFile):
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
 
-        if self.options["glib"].shared and is_msvc_static_runtime(self):
+        if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Linking shared glib with the MSVC static runtime is not supported")
 
     def export_sources(self):
