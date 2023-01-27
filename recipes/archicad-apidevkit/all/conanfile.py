@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
