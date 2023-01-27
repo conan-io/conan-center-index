@@ -50,7 +50,7 @@ class ConfuJson(ConanFile):
             min_version = self._minimum_compilers_version.get(
                 str(self.settings.compiler))
             if not min_version:
-                self.output.warn("{} recipe lacks information about the {} "
+                self.output.warning("{} recipe lacks information about the {} "
                                 "compiler support.".format(
                                     self.name, self.settings.compiler))
             else:
