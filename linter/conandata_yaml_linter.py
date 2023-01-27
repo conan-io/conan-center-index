@@ -72,7 +72,6 @@ def main():
                     f" You should either remove `{version}` from the `patches` section, or add it to the"
                     f" `sources` section"
                 )
-                exit_code = 1
             for i, patch in enumerate(patches):
                 # Individual report errors for each patch object
                 try:
