@@ -28,9 +28,6 @@ class ArchicadApidevkitConan(ConanFile):
         if not self.info.settings.os in ("Macos", "Windows"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} is not supported by the OS {self.info.settings.os}")
-        if not str(self.settings.arch) in ("x86_64"):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} is not supported yet.")
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration(
                 "This recipe does not support this compiler version")
