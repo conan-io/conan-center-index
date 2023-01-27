@@ -191,11 +191,11 @@ class GoogleAPIS(ConanFile):
         self.info.requires["protobuf"].full_package_mode()
 
     def package_info(self):
-        self.cpp_info.resdirs = ["res"]
         with open(os.path.join(self.package_folder, self._DEPS_FILE), "r", encoding="utf-8") as f:
             for line in f.read().splitlines():
                 (name, libtype, deps) = line.rstrip('\n').split(' ')
                 self.cpp_info.components[name].requires = deps.split(',')
+                self.cpp_info.components[name].resdirs = ["res"]
                 if libtype == 'LIB':
                     self.cpp_info.components[name].libs = [name]
                 self.cpp_info.components[name].names["pkg_config"] = name
