@@ -33,6 +33,9 @@ slack:
 
 # Things related to Jenkins jobs
 tasks:
+  access_request:
+    request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
+    max_inactivity_days: 0
   conan_v2_run_export: false
   write_comments: true
   detailed_status_checks: true
@@ -40,11 +43,18 @@ tasks:
   automatic_merge:
     reviews_required_total: 2  # Reviews that a PR needs so it can be merged
     reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
-# Temporarily disable feedback from Conan v2
-  # cci_wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
-  #   job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
-  #   timeout_seconds: 600  # Maximum time to wait for the multibranch job
-  #   merge_messages: true  # Merge messages from the multibranch job waited for
+  cci:
+    conan_v2_run_export: false
+    write_comments: true
+    detailed_status_checks: true
+    update_labels: true
+    wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
+      job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
+      timeout_seconds: 600  # Maximum time to wait for the multibranch job
+      merge_messages: true  # Merge messages from the multibranch job waited for
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
+    report_issue_append: false
 
 # Profile configurations to build packages
 configurations:
