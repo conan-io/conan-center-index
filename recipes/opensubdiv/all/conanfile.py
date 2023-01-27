@@ -114,6 +114,7 @@ class OpenSubdivConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         cmake.definitions["NO_TBB"] = not self.options.with_tbb
         cmake.definitions["NO_OPENGL"] = not self.options.with_opengl
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.get_safe("shared")
