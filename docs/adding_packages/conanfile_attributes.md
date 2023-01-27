@@ -180,8 +180,8 @@ Usage of each option should follow the rules:
  
  ### Removing from `package_id`
  
- By default, option are include in the calculation for the `package_id` ([docs](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-id)).
- For options which do not impact the generated packages, for instance adding a `#define` for a package should be deleted.
+ By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-id)).
+ Options which do not impact the generated packages should be deleted, for instance adding a `#define` for a package.
  
  ```python
 def package_id(self):
