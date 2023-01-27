@@ -8,7 +8,7 @@ sources:
           sha256: "ad798e4760d784a84d2708be77b3c8d7562a88ac8cddbc3177f21a6d6e91772a"
       "armv8":
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.MACARM64.DevKitAPI.tar.gz"
-          sha256: "653670b18fb7c7effff075fa53ea5533cb140f3987f5d8be3f1aa3c0dd1b35ec"
+          sha256: "ddf3308356714af962b76ea9045e36066a247106c396a1a6be2cd0386a652d28"
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/licenses.zip"
           sha256: "ad798e4760d784a84d2708be77b3c8d7562a88ac8cddbc3177f21a6d6e91772a"
     Windows:
