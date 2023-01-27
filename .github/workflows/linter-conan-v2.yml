@@ -45,8 +45,8 @@ jobs:
         run: |
           echo '## Linter summary (recipes)' >> $GITHUB_STEP_SUMMARY
           pylint --rcfile=linter/pylintrc_recipe `ls recipes/*/*/conanfile.py | shuf -n 250` --output-format=json --output=recipes.json --score=y --exit-zero
-          jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length} | sort_by(.length) | reverse' recipes.json > recipes2.json
-          jq -r '" * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
+          jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
+          jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
       - name: Execute linter over all test_package/recipes in the repository
         id: linter_test_package
@@ -54,8 +54,8 @@ jobs:
         run: |
           echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
           pylint --rcfile=linter/pylintrc_testpackage `ls recipes/*/*/test_package/conanfile.py | shuf -n 250` --output-format=json --output=recipes.json --exit-zero
-          jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length} | sort_by(.length) | reverse' recipes.json > recipes2.json
-          jq -r '" * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
+          jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
+          jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
   conanfile_recipe:
     name: Lint changed conanfile.py (v2 migration)
