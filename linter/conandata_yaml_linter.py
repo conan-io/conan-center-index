@@ -79,7 +79,6 @@ def main():
                         f"title=conandata.yml patch path error"
                         f"::'patches' should be located in `patches` subfolder"
                     )
-                    exit_code = 1
                 else:
                     patch_file_name = patch_file_name[8:]
                     if patch_file_name in unused_patches:
@@ -90,7 +89,6 @@ def main():
                             f"title=conandata.yml patch existence"
                             f"::The file `{patch_file_name}` does not exist in the `patches` folder"
                         )
-                        exit_code = 1
 
                 # Individual report errors for each patch object
                 try:
@@ -129,7 +127,6 @@ def main():
             f"title=patch file unused"
             f"::Patch file {p} is not referenced in {args.path}"
         )
-        exit_code = 1
 
 
 def pretty_print_yaml_validate_error(args, error):
