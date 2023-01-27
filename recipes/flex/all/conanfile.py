@@ -34,6 +34,11 @@ class FlexConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def requirements(self):
+        # Flex requires M4 to be compiled. If consumer does not have M4
+        # installed, Conan will need to know that Flex requires it.
+        self.requires("m4/1.4.19")
+
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
         if hasattr(self, "settings_build") and cross_building(self):
