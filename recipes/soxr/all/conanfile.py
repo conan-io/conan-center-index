@@ -59,8 +59,8 @@ class SoxrConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
         if is_msvc(self):
             tc.variables["BUILD_SHARED_RUNTIME"] = msvc_runtime_flag(self) == "MD"
-        # Disable SIMD based resample engines for Apple Silicon architecture
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        # Disable SIMD based resample engines for Apple Silicon and iOS ARMv8 architecture
+        if (self.settings.os == "Macos" or self.settings.os == "iOS") and self.settings.arch == "armv8":
             tc.variables["WITH_CR32S"] = False
             tc.variables["WITH_CR64S"] = False
         tc.variables["BUILD_TESTS"] = False
