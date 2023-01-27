@@ -6,6 +6,11 @@ sources:
           sha256: "326643eb79619166b6cb8f2858be3b24c1c3e3dd6749d20d2960baa0690f8e9c"
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/licenses.zip"
           sha256: "ad798e4760d784a84d2708be77b3c8d7562a88ac8cddbc3177f21a6d6e91772a"
+      "armv8":
+        - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.MACARM64.DevKitAPI.tar.gz"
+          sha256: "653670b18fb7c7effff075fa53ea5533cb140f3987f5d8be3f1aa3c0dd1b35ec"
+        - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/licenses.zip"
+          sha256: "ad798e4760d784a84d2708be77b3c8d7562a88ac8cddbc3177f21a6d6e91772a"
     Windows:
       "x86_64":
         - url: "https://stgsswsconan001.blob.core.windows.net/apidevkit/220529.v2022Release.3000.FULL.FIN.WIN64.DevKitAPI.zip"

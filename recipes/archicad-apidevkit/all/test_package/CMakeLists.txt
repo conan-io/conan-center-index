@@ -8,32 +8,6 @@ function(SetCompilerOptions target ac_version)
     else()
         target_compile_features("${target}" PUBLIC cxx_std_14)
     endif()
-
-    target_compile_definitions("${target}" PUBLIC "\$<\$<CONFIG:Debug>:DEBUG>")
-
-    if(WIN32)
-        target_compile_options(
-            "${target}" PRIVATE
-            /W4 /WX
-            /Zc:wchar_t-
-            /wd4499
-            /EHsc
-        )
-    else()
-        target_compile_options(
-            "${target}" PRIVATE
-            -Wall -Wextra -Werror
-            -fvisibility=hidden
-            -Wno-multichar
-            -Wno-ctor-dtor-privacy
-            -Wno-invalid-offsetof
-            -Wno-ignored-qualifiers
-            -Wno-reorder
-            -Wno-overloaded-virtual
-            -Wno-unused-parameter
-            -Wno-deprecated
-        )
-    endif()
 endfunction()
 
 set(AC_API_DEVKIT_DIR "$ENV{AC_API_DEVKIT_DIR}" CACHE PATH "API DevKit directory.")

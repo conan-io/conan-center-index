@@ -23,10 +23,12 @@ class ArchicadApidevkitConan(ConanFile):
             raise ConanInvalidConfiguration(f"Debug runtime is not supported by {self.ref}")
         # Approximate requirement for toolset >= v142
         check_min_vs(self, "192")
-        if not str(self.info.settings.os) in ("Macos", "Windows"):
-            raise ConanInvalidConfiguration(f"{self.info.settings.os} is not supported by {self.ref}")
-        if not str(self.info.settings.arch) in ("x86_64"):
-            raise ConanInvalidConfiguration(f"{self.info.settings.arch} is not supported by {self.ref}")
+        if not self.info.settings.os in ("Macos", "Windows"):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} is not supported by the OS {self.info.settings.os}")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration(
+                "This recipe does not support this compiler version")
 
     def build(self):
         devkit, licenses = self.conan_data["sources"][self.version][str(self.info.settings.os)][str(self.info.settings.arch)]

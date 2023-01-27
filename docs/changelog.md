@@ -1,5 +1,27 @@
 # Changelog
 
+### 20-January-2023 - 16:09 CET
+
+- [feature] Make feedback messages of PRs configurable.
+- [feature] Add status icon to the title of PRs comments.
+- [fix] Fix Conan v2 error when getting revisions.
+
+### 16-January-2023 - 16:43 CET
+
+- [fix] ValidateInfrastructure: Fix Conan version check.
+- [feature] TapaholesRepo: Build references when there are 0 packages for a recipe revision.
+
+### 12-January-2023 - 19:33 CET
+
+- [fix] Fix Conan v2 download/upload recipe commands.
+
+### 12-January-2023 - 11:21 CET
+
+- [feature] Add support for Conan v2 beta 7.
+- [feature] Check complete Conan version on ValidateInfrastructure.
+- [fix] Increase `conan test` timeout value.
+- [fix] Fix stage name when calculating build configurations.
+
 ### 10-January-2023 - 15:20 CET
 
 - [feature] Add entry in config to disable merging labels from the multibranch job.

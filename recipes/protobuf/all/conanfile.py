@@ -1,12 +1,10 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.build import cross_building
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-
-from conan.errors import ConanInvalidConfiguration
-from conan import ConanFile
-from conan.tools.apple import is_apple_os
 
 import os
 import textwrap
@@ -42,11 +40,9 @@ class ProtobufConan(ConanFile):
 
     short_paths = True
 
-
-
     @property
     def _is_clang_cl(self):
-        return self.settings.compiler == 'clang' and self.settings.os == 'Windows'
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     @property
     def _is_clang_x86(self):
@@ -55,9 +51,6 @@ class ProtobufConan(ConanFile):
     @property
     def _can_disable_rtti(self):
         return Version(self.version) >= "3.15.4"
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -71,6 +64,9 @@ class ProtobufConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -86,11 +82,6 @@ class ProtobufConan(ConanFile):
             if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
 
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.settings.os == "Macos" and self.options.shared:
-            # FIXME: should be allowed, actually build succeeds but it fails at build time of test package due to SIP
-            raise ConanInvalidConfiguration("protobuf shared not supported yet in CCI while cross-building on Macos")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -103,11 +94,11 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
-        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = True
+        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "3.14.0":
-            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = True
+            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
         if self._can_disable_rtti:
             tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
@@ -115,7 +106,9 @@ class ProtobufConan(ConanFile):
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
             tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
-        
+        if is_apple_os(self) and self.options.shared:
+            # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
+            tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -158,24 +151,6 @@ class ProtobufConan(ConanFile):
             "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",
             protoc_target
         )
-
-        # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
-        # (even with virtualrunenv, this fix might be required due to SIP)
-        # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
-        if is_apple_os(self):
-            replace_in_file(self,
-                protobuf_config_cmake,
-                "add_custom_command(",
-                ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${Protobuf_LIB_DIRS} ${Protobuf_LIB_DIRS_RELEASE} ${Protobuf_LIB_DIRS_DEBUG} ${Protobuf_LIB_DIRS_RELWITHDEBINFO} ${Protobuf_LIB_DIRS_MINSIZEREL})\n"
-                 "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
-                 "add_custom_command(")
-            )
-            cmd_str = "COMMAND  protobuf::protoc" if Version(self.version) < "3.20.0" else "COMMAND protobuf::protoc"
-            replace_in_file(self,
-                protobuf_config_cmake,
-                cmd_str,
-                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
-            )
 
         # Disable a potential warning in protobuf-module.cmake.in
         # TODO: remove this patch? Is it really useful?
@@ -254,9 +229,10 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
         # libprotoc
-        self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
-        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
-        self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
+        if self.settings.os != "tvOS":
+            self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
+            self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
+            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         # libprotobuf-lite
         if self.options.lite:

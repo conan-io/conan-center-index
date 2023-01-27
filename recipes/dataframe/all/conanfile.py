@@ -52,9 +52,10 @@ class DataFrameConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7",
             "clang": "6",
-            "apple-clang": "10.0" if Version(self.version) >= "1.12.0" else "9.0",
+            "apple-clang": "10.0",
         }
 
     def export_sources(self):
@@ -144,7 +145,7 @@ class DataFrameConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "DataFrame")
         self.cpp_info.libs = ["DataFrame"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "rt", "m"])
         if is_msvc(self):
             self.cpp_info.defines.append("_USE_MATH_DEFINES")
             if Version(self.version) < "1.20.0" and not self.options.shared:

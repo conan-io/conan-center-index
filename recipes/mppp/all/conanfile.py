@@ -4,10 +4,11 @@ from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class MpppConan(ConanFile):
     name = "mppp"
@@ -25,6 +26,7 @@ class MpppConan(ConanFile):
         "with_mpc": [True, False],
         "with_quadmath": [True, False],
         "with_boost": [True, False],
+        "with_fmt": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,6 +36,7 @@ class MpppConan(ConanFile):
         "with_mpc": False,
         "with_quadmath": False,
         "with_boost": False,
+        "with_fmt": False,
     }
 
     @property
@@ -49,10 +52,9 @@ class MpppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.27":
+            del self.options.with_fmt
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,7 +66,9 @@ class MpppConan(ConanFile):
         if self.options.with_mpc == True:
             self.requires("mpc/1.2.0")
         if self.options.with_boost == True:
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
+        if self.options.get_safe("with_fmt"):
+            self.requires("fmt/9.1.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -88,10 +92,11 @@ class MpppConan(ConanFile):
         tc.variables["MPPP_WITH_MPC"] = self.options.with_mpc
         tc.variables["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
         tc.variables["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
+        if Version(self.version) >= "0.27":
+            tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
         if not self.options.shared:
             tc.variables["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = not is_msvc_static_runtime(self)
         tc.generate()
-
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -114,6 +119,9 @@ class MpppConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        if self.options.get_safe("with_fmt"):    
+            self.cpp_info.defines.append("MPPP_WITH_FMT")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "mp++"
