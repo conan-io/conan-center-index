@@ -23,6 +23,8 @@ class MoldConan(ConanFile):
     }
 
     def validate(self):
+        #TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
+        # think we're raising on the build() method
         if self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
@@ -42,11 +44,8 @@ class MoldConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
-    def build_requirements(self):
-        self.tool_requires("cmake/3.24.1")
-
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("openssl/1.1.1q")
         self.requires("xxhash/0.8.1")
         self.requires("onetbb/2021.3.0")
@@ -62,12 +61,14 @@ class MoldConan(ConanFile):
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
         tc.variables["MOLD_USE_SYSTEM_TBB"] = True
+        tc.variables["CMAKE_INSTALL_LIBEXECDIR"] = "libexec"
         tc.generate()
 
         cd = CMakeDeps(self)
         cd.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate()
+
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -81,10 +82,10 @@ class MoldConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
-        mold_location = os.path.join(bindir, "bindir")
+        mold_location = os.path.join(bindir, "mold")
 
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)

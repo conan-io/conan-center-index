@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class CharlsConan(ConanFile):
@@ -39,7 +39,7 @@ class CharlsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -108,6 +108,8 @@ class CharlsConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines.append("CHARLS_STATIC")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

@@ -5,7 +5,7 @@
 #endif
 
 int main(int argc, char **argv) {
-  ZoneScopedN("main")
+  ZoneScopedN("main");
 
   return 0;
 }

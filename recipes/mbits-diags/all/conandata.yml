@@ -1,0 +1,4 @@
+sources:
+  "0.9.4":
+    url: "https://github.com/mbits-libs/diags/archive/v0.9.4.tar.gz"
+    sha256: "4fa47e416fa9521c1d268765faf8b313f8e38de249049bc09950a303e11571bf"

@@ -57,8 +57,12 @@ class DawHeaderLibrariesConan(ConanFile):
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "daw-header-libraries")
         self.cpp_info.set_property("cmake_target_name", "daw::daw-header-libraries")
+        self.cpp_info.components["daw"].set_property("cmake_target_name", "daw::daw-header-libraries")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "daw-header-libraries"
@@ -67,4 +71,3 @@ class DawHeaderLibrariesConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
         self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-header-libraries"
         self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-header-libraries"
-        self.cpp_info.components["daw"].set_property("cmake_target_name", "daw::daw-header-libraries")
