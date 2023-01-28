@@ -191,7 +191,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = str(self.version.major)
+        vtag = str(self.version.major())
         return f"icudt{vtag}l.dat"
 
     @property
