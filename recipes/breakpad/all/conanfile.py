@@ -42,6 +42,8 @@ class BreakpadConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        # see https://github.com/conan-io/conan/issues/12020
+        tc.configure_args.append("--libexecdir=${prefix}/bin")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
