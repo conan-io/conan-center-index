@@ -1,6 +1,6 @@
 from conan.tools.files import apply_conandata_patches
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 import glob
 
@@ -36,10 +36,6 @@ class AafConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("libuuid/1.0.3")
 
-    def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("ARM v8 not supported")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -48,14 +44,18 @@ class AafConan(ConanFile):
 
         cmake = CMake(self)
 
+        arch = "x86_64"
         if tools.is_apple_os(self.settings.os):
             cmake.definitions["PLATFORM"] = "apple-clang"
+            if self.setting.arch == "armv8":
+                arch = "arm64"
         elif self.settings.compiler == "Visual Studio":
             cmake.definitions["PLATFORM"] = "vc"
+            arch = "x64"
         else:
             cmake.definitions["PLATFORM"] = self.settings.os
 
-        cmake.definitions["ARCH"] = "x86_64"  # ARCH is used only for setting the output directory. So itsvalue does not matter here.
+        cmake.definitions["ARCH"] = arch
         cmake.definitions["AAF_NO_STRUCTURED_STORAGE"] = not self.options.structured_storage
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
