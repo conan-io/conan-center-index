@@ -141,7 +141,7 @@ class IXWebSocketConan(ConanFile):
             if bool(self.options.tls):
                 self.cpp_info.system_libs.append("crypt32")
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.options.get_safe("with_zlib", False):
             self.cpp_info.defines.append("IXWEBSOCKET_USE_ZLIB")
         if self.options.tls == "mbedtls":
