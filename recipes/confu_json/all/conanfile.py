@@ -3,7 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc ,check_min_vs
 
 required_conan_version = ">=1.50.0"
 
