@@ -15,7 +15,7 @@ required_conan_version = ">=1.57.0"
 
 def sha256sum(file_path):
     hash_sha256 = hashlib.sha256()
-    with open(file_name, "rb") as f:
+    with open(file_path, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
             hash_sha256.update(chunk)
     return hash_sha256.hexdigest()
