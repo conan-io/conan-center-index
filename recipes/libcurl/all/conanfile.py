@@ -151,16 +151,15 @@ class LibcurlConan(ConanFile):
             del self.options.fPIC
         if not self._has_metalink_option:
             del self.options.with_libmetalink
+        if not self._has_with_libpsl_option:
+            del self.options.with_libpsl
+        if self._is_using_cmake_build:
+            del self.options.with_libgsasl
 
         # Before 7.86.0, enabling unix sockets configure option would fail on windows
         # It was fixed with this PR: https://github.com/curl/curl/pull/9688
         if self._is_mingw and Version(self.version) < "7.86.0":
             del self.options.with_unix_sockets
-
-        if not self._has_with_libpsl_option:
-            del self.options.with_libpsl
-        if self._is_using_cmake_build:
-            del self.options.with_libgsasl
 
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
