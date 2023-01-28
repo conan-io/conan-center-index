@@ -14,14 +14,11 @@ import hashlib
 required_conan_version = ">=1.57.0"
 
 def sha256sum(file_path):
-    with open(file_path, "rb") as fh:
-        digest = hashlib.new("sha256")
-        while True:
-            data = fh.read(8192)
-            if not data:
-                break
-            digest.update(data)
-        return digest.hexdigest()
+    hash_sha256 = hashlib.sha256()
+    with open(file_name, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            hash_sha256.update(chunk)
+    return hash_sha256.hexdigest()
 
 class ICUConan(ConanFile):
     name = "icu"
