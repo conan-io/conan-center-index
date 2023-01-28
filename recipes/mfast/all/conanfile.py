@@ -255,6 +255,8 @@ class mFASTConan(ConanFile):
             if comp != target:
                 # Also provide alias component for find_package(mFAST COMPONENTS ...) if static
                 self.cpp_info.components[conan_comp].set_property("cmake_target_aliases", [comp])
+            if self.settings.os in ("FreeBSD", "Linux"):
+                self.cpp_info.components[conan_comp].system_libs.append("m")
             self.cpp_info.components[conan_comp].libs = [lib]
             self.cpp_info.components[conan_comp].requires = requires
             if self.options.shared:
