@@ -12,6 +12,8 @@ jobs:
   test_linter:
     name: Test linter changes (v2 migration)
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
       - name: Get changed files
