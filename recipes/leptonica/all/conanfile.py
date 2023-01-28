@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LeptonicaConan(ConanFile):
@@ -55,18 +55,9 @@ class LeptonicaConan(ConanFile):
         if self.options.with_tiff:
             self.options["libtiff"].jpeg = self.options.with_jpeg
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -81,7 +72,7 @@ class LeptonicaConan(ConanFile):
         if self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_tiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_openjpeg:
@@ -108,6 +99,9 @@ class LeptonicaConan(ConanFile):
             tc.variables["STATIC"] = not self.options.shared
         tc.variables["BUILD_PROG"] = False
         tc.variables["SW_BUILD"] = False
+        if Version(self.version) >= "1.83.0":
+            tc.variables["LIBWEBP_SUPPORT"] = self.options.with_webp
+            tc.variables["OPENJPEG_SUPPORT"] = self.options.with_openjpeg
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -139,47 +133,69 @@ class LeptonicaConan(ConanFile):
         replace_in_file(self, cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
         if not self.options.with_gif:
             replace_in_file(self, cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (GIF_FOUND)", "if(0)")
+            if Version(self.version) >= "1.83.0":
+                replace_in_file(self, cmake_configure, "if(GIF_FOUND)", "if(0)")
+            else:
+                replace_in_file(self, cmake_configure, "if (GIF_FOUND)", "if(0)")
         ## libjpeg
         replace_in_file(self, cmakelists_src, "${JPEG_LIBRARIES}", "JPEG::JPEG")
         if not self.options.with_jpeg:
             replace_in_file(self, cmakelists_src, "if (JPEG_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (JPEG_FOUND)", "if(0)")
+            if Version(self.version) >= "1.83.0":
+                replace_in_file(self, cmake_configure, "if(JPEG_FOUND)", "if(0)")
+            else:
+                replace_in_file(self, cmake_configure, "if (JPEG_FOUND)", "if(0)")
         ## libpng
         replace_in_file(self, cmakelists_src, "${PNG_LIBRARIES}", "PNG::PNG")
         if not self.options.with_png:
             replace_in_file(self, cmakelists_src, "if (PNG_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (PNG_FOUND)", "if(0)")
+            if Version(self.version) >= "1.83.0":
+                replace_in_file(self, cmake_configure, "if(PNG_FOUND)", "if(0)")
+            else:
+                replace_in_file(self, cmake_configure, "if (PNG_FOUND)", "if(0)")
         ## libtiff
         replace_in_file(self, cmakelists_src, "${TIFF_LIBRARIES}", "TIFF::TIFF")
         if not self.options.with_tiff:
             replace_in_file(self, cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (TIFF_FOUND)", "if(0)")
+            if Version(self.version) >= "1.83.0":
+                replace_in_file(self, cmake_configure, "if(TIFF_FOUND)", "if(0)")
+            else:
+                replace_in_file(self, cmake_configure, "if (TIFF_FOUND)", "if(0)")
         ## We have to be more aggressive with dependencies found with pkgconfig
         ## Injection of libdirs is ensured by conan_basic_setup()
         ## openjpeg
-        replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
-        replace_in_file(self, cmakelists_src,
-                              "if (JP2K_FOUND)",
-                              "if (JP2K_FOUND)\n"
-                              "target_link_directories(leptonica PRIVATE ${JP2K_LIBRARY_DIRS})\n"
-                              "target_compile_definitions(leptonica PRIVATE ${JP2K_CFLAGS_OTHER})")
-        if not self.options.with_openjpeg:
-            replace_in_file(self, cmakelists_src, "if (JP2K_FOUND)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
+        replace_in_file(self, cmakelists_src, "${JP2K_LIBRARIES}", "openjp2")
+        if Version(self.version) < "1.83.0":
+            # pkgconfig is prefered to CMake. Disable pkgconfig so only CMake is used
+            if Version(self.version) <= "1.78.0":
+                replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2)", "")
+            else:
+                replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
+            # versions below 1.83.0 do not have an option toggle
+            replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
+            if not self.options.with_openjpeg:
+                replace_in_file(self, cmakelists_src, "if (JP2K_FOUND)", "if(0)")
+                replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
+        else:
+            replace_in_file(self, cmakelists, "set(JP2K_INCLUDE_DIRS ${OPENJPEG_INCLUDE_DIRS})", "set(JP2K_INCLUDE_DIRS ${OpenJPEG_INCLUDE_DIRS})")
+            if not self.options.with_openjpeg:
+                replace_in_file(self, cmake_configure, "if(JP2K_FOUND)", "if(0)")
+
         ## libwebp
-        replace_in_file(self, cmakelists, "if(NOT WEBP)", "if(0)")
+        if Version(self.version) < "1.83.0":
+            # versions below 1.83.0 do not have an option toggle
+            replace_in_file(self, cmakelists, "if(NOT WEBP)", "if(0)")
+            if Version(self.version) >= "1.79.0":
+                replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
+            if not self.options.with_webp:
+                replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
+                replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
         replace_in_file(self, cmakelists_src,
                               "if (WEBP_FOUND)",
                               "if (WEBP_FOUND)\n"
                               "target_link_directories(leptonica PRIVATE ${WEBP_LIBRARY_DIRS} ${WEBPMUX_LIBRARY_DIRS})\n"
                               "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
         replace_in_file(self, cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
-        if Version(self.version) >= "1.79.0":
-            replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
-        if not self.options.with_webp:
-            replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
-            replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
 
         # Remove detection of fmemopen() on macOS < 10.13
         # CheckFunctionExists will find it in the link library.

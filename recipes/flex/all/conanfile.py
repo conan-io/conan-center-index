@@ -34,6 +34,11 @@ class FlexConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def requirements(self):
+        # Flex requires M4 to be compiled. If consumer does not have M4
+        # installed, Conan will need to know that Flex requires it.
+        self.requires("m4/1.4.19")
+
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
         if hasattr(self, "settings_build") and cross_building(self):
@@ -77,21 +82,13 @@ class FlexConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
         self.cpp_info.system_libs = ["m"]
-
-        # generate both modules and config files
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "FLEX")
-        self.cpp_info.set_property("cmake_target_name", "FLEX::FLEX")
-        self.cpp_info.set_property("pkg_config_name", "flex")
-
-        self.cpp_info.names["cmake_find_package"] = "FLEX"
-        self.cpp_info.names["cmake_find_package_multi"] = "FLEX"
+        # Avoid CMakeDeps messing with Conan targets
+        self.cpp_info.set_property("cmake_find_mode", "none")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

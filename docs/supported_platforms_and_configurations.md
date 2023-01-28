@@ -78,7 +78,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - CMake: 3.20.1
 - Compilers: Apple-clang versions 11.0.3, 12.0.5, 13.0.0
 - Macos SDK versions (for each apple-clang version respectively): 10.15, 11.3
-- Macos deployment target (`minos`): 11.3
+- Macos deployment target (`minos`): 11.0
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64, armv8
 - Build types: Release, Debug

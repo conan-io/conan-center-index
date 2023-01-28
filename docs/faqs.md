@@ -123,7 +123,8 @@ Unless they are a general and extended utility in recipes (in which case, we sho
 
 ## What version should packages use for libraries without official releases?
 
-The notation shown below is used for publishing packages where the original library does not make official releases. Thus, we use a format which includes the datestamp corresponding to the date of a commit: `cci.<YYYYMMDD>`. In order to create reproducible builds, we also "commit-lock" to the latest commit on that day (use UTC+00). Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [conandata.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conandata.yml#L5). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+This happens for a number of reasons, some projects have a "live on main" others are less maintained but still merge pull requests.
+Read about the [ConanCenter specific version format](adding_packages/conanfile_attributes.md#conancenter-specific-releases-format) for more information.
 
 ## Is the Jenkins orchestration library publicly available?
 

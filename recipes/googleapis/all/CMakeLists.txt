@@ -9,3 +9,5 @@ conan_basic_setup(TARGETS)
 find_package(Protobuf REQUIRED CONFIG)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/generated_targets.cmake")
