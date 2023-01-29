@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
@@ -97,16 +96,6 @@ class LibpngConan(ConanFile):
             "check": "check",
         }
 
-    @property
-    def _libpng_cmake_system_processor(self):
-        # FIXME: too specific and error prone, should be delegated to a conan helper function
-        # It should satisfy libpng CMakeLists specifically, do not use it naively in an other recipe
-        if "mips" in self.settings.arch:
-            return "mipsel"
-        if "ppc" in self.settings.arch:
-            return "powerpc"
-        return str(self.settings.arch)
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["PNG_TESTS"] = False
@@ -114,10 +103,6 @@ class LibpngConan(ConanFile):
         tc.variables["PNG_STATIC"] = not self.options.shared
         tc.variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
         tc.variables["PNG_PREFIX"] = self.options.api_prefix
-        if cross_building(self):
-            system_processor = self.conf.get("tools.cmake.cmaketoolchain:system_processor",
-                                                  self._libpng_cmake_system_processor, check_type=str)
-            tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = system_processor
         if self._has_neon_support:
             tc.variables["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
         if self._has_msa_support:
