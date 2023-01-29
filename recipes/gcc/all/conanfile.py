@@ -317,7 +317,7 @@ class GccConan(ConanFile):
         self.cpp_info.components["cc1plugin"].requires = ["gcc_s", "stdc++"]
 
         self.cpp_info.components["lto_plugin"].set_property("cmake_target_name", "gcc::lto_plugin")
-        self.cpp_info.components["lto_plugin"].libdirs = [os.path.join("bin","libexec", "gcc", triplet, self.version)]
+        self.cpp_info.components["lto_plugin"].libdirs = [os.path.join("libexec", "gcc", triplet, self.version)]
         self.cpp_info.components["lto_plugin"].libs = ["lto_plugin"]
 
         self.cpp_info.components["gcov"].set_property("cmake_target_name", "gcc::gcov")
