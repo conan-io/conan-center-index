@@ -100,8 +100,8 @@ class ICUConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         # TODO: cleanup after 2.0 is left -- workaround "visual studio" being used as a compiler
-        if is_msvc(self) and ((self.settings.compiler == "msvc" and self.settings.compiler.version >= "180") or \
-           (self.settings.compiler == "Visual Studio" and self.settings.compiler.version >= "12")):
+        if is_msvc(self) and ((self.settings.compiler == "msvc" and str(self.settings.compiler.version) >= "180") or \
+           (self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) >= "12")):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         if not self.options.shared:
