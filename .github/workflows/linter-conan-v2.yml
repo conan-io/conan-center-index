@@ -12,10 +12,6 @@ jobs:
   test_linter:
     name: Test linter changes (v2 migration)
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
-      issues: write
     steps:
       - uses: actions/checkout@v3
       - name: Get changed files
@@ -60,18 +56,6 @@ jobs:
           pylint --rcfile=linter/pylintrc_testpackage `ls recipes/*/*/test_package/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --exit-zero
           jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
           jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
-
-      - name: Post result
-        if: steps.changed_files.outputs.any_changed == 'true'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: core.summary.stringify()
-            })
 
   conanfile_recipe:
     name: Lint changed conanfile.py (v2 migration)
