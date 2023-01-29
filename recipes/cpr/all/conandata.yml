@@ -39,6 +39,9 @@ patches:
     - patch_file: "patches/007-fix-dll-install.patch"
       patch_description: "fix install path for dll"
       patch_type: "conan"
+    - patch_file: "patches/008-1.8.1-remove-warning-flags.patch"
+      patch_description: "disable warning flags"
+      patch_type: "conan"
   "1.7.2":
     - patch_file: "patches/005-1.7.2-fix-curl-components.patch"
       patch_description: "use cci package"
