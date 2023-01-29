@@ -47,7 +47,7 @@ class AafConan(ConanFile):
         arch = "x86_64"
         if tools.is_apple_os(self.settings.os):
             cmake.definitions["PLATFORM"] = "apple-clang"
-            if self.setting.arch == "armv8":
+            if self.settings.arch == "armv8":
                 arch = "arm64"
         elif self.settings.compiler == "Visual Studio":
             cmake.definitions["PLATFORM"] = "vc"
