@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
@@ -39,10 +38,6 @@ class AafConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("libuuid/1.0.3")
 
-    def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("ARM v8 not supported")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -54,7 +49,12 @@ class AafConan(ConanFile):
             tc.cache_variables["PLATFORM"] = "vc"
         else:
             tc.cache_variables["PLATFORM"] = str(self.settings.os)
-        tc.cache_variables["ARCH"] = "x86_64"  # ARCH is used only for setting the output directory. So itsvalue does not matter here.
+        # ARCH is used only for setting the output directory, except if host is macOS
+        # where ARCH is used to select proper pre-compiled proprietary Structured Storage library.
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            tc.cache_variables["ARCH"] = "arm64"
+        else:
+            tc.cache_variables["ARCH"] = "x86_64"
         tc.cache_variables["AAF_NO_STRUCTURED_STORAGE"] = not self.options.structured_storage
         jpeg_res_dirs = ";".join([p.replace("\\", "/") for p in self.dependencies["libjpeg"].cpp_info.aggregated_components().resdirs])
         tc.variables["JPEG_RES_DIRS"] = jpeg_res_dirs
