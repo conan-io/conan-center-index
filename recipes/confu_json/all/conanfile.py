@@ -35,6 +35,9 @@ class ConfuJson(ConanFile):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(
                 "apple-clang is not supported. Pull request welcome")
+        if self.settings.compiler == "gcc" and Version(self.version) < "1.0.0":
+            raise ConanInvalidConfiguration(
+                "gcc is only supported in versions greater than or equal 1.0.0.")        
         if Version(self.version) >= "1.0.0":
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 17)
