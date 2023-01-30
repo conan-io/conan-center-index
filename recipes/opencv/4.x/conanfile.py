@@ -437,7 +437,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         tc.variables["WITH_DSHOW"] = is_msvc(self)
-        tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False")
+        tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
         tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
