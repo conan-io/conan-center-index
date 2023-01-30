@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
-from conan.tools.files import replace_in_file
-from conan.tools.scm import Version
 import os
 
 
