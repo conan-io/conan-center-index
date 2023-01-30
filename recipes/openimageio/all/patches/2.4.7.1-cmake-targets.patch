@@ -144,7 +144,7 @@ index 48e871418..390bf3598 100644
 +    checked_find_package (DCMTK VERSION_MIN 3.6.1)  # For DICOM images
 +endif()
 +if (USE_FFMPEG)
-+    checked_find_package (FFmpeg VERSION_MIN 3.0)
++    checked_find_package (ffmpeg VERSION_MIN 3.0)
 +endif()
 +if (USE_GIF)
 +    checked_find_package (GIF
@@ -215,7 +215,7 @@ index 48e871418..390bf3598 100644
 -    checked_find_package (Ptex)
 -endif ()
 +if (USE_PTEX)
-+    checked_find_package (Ptex PREFER_CONFIG)
++    checked_find_package (ptex PREFER_CONFIG)
 +endif()
 
 -checked_find_package (WebP)
