@@ -1,26 +1,24 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5a21eed..399a8ed 100644
+index 89c0f91..3c842d1 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -18,50 +18,51 @@ if(DOXYGEN_FOUND)
+@@ -17,54 +17,25 @@ if(DOXYGEN_FOUND)
+   endif()
  endif()
  
- # CMake module path
+-# CMake module path
 -set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-+# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
- 
- # Compiler features
+-
+-# Compiler features
 -include(SetCompilerFeatures)
 -include(SetCompilerWarnings)
 -include(SetPlatformFeatures)
 -include(SystemInformation)
-+# include(SetCompilerFeatures)
-+# include(SetCompilerWarnings)
-+# include(SetPlatformFeatures)
-+# include(SystemInformation)
- 
+-
  # External packages
--if(CYGWIN)
+-if(APPLE)
+-  set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl@1.1")
+-elseif(CYGWIN)
 -  set(OPENSSL_ROOT_DIR "/usr/lib")
 -  set(OPENSSL_INCLUDE_DIR "/usr/include")
 -  set(OPENSSL_CRYPTO_LIBRARY "/usr/lib/libcrypto.dll.a")
@@ -33,19 +31,6 @@ index 5a21eed..399a8ed 100644
 -  set(OPENSSL_USE_STATIC_LIBS TRUE)
 -  set(OPENSSL_MSVC_STATIC_RT TRUE)
 -endif()
-+# if(CYGWIN)
-+#   set(OPENSSL_ROOT_DIR "/usr/lib")
-+#   set(OPENSSL_INCLUDE_DIR "/usr/include")
-+#   set(OPENSSL_CRYPTO_LIBRARY "/usr/lib/libcrypto.dll.a")
-+#   set(OPENSSL_SSL_LIBRARY "/usr/lib/libssl.dll.a")
-+# elseif(MINGW)
-+#   set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/OpenSSL/MinGW")
-+#   set(OPENSSL_USE_STATIC_LIBS TRUE)
-+# elseif(MSVC)
-+#   set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/OpenSSL/VS")
-+#   set(OPENSSL_USE_STATIC_LIBS TRUE)
-+#   set(OPENSSL_MSVC_STATIC_RT TRUE)
-+# endif()
  find_package(OpenSSL REQUIRED)
 -if(WIN32)
 +if(FALSE)
@@ -53,10 +38,9 @@ index 5a21eed..399a8ed 100644
    find_package(WinSock)
  endif()
  
- # Modules
+-# Modules
 -add_subdirectory("modules")
-+# add_subdirectory("modules")
- 
+-
  # Link libraries
 -list(APPEND LINKLIBS ${OPENSSL_LIBRARIES})
 +list(APPEND LINKLIBS OpenSSL::SSL)
@@ -64,7 +48,7 @@ index 5a21eed..399a8ed 100644
 -  list(APPEND LINKLIBS ${CRYPT_LIBRARIES})
 -  list(APPEND LINKLIBS ${WINSOCK_LIBRARIES})
 +  list(APPEND LINKLIBS crypt32)
-+  list(APPEND LINKLIBS mswsock ws2_32)
++  list(APPEND LINKLIBS ws2_32)
  endif()
 -list(APPEND LINKLIBS cppcommon)
 +find_package(cppcommon REQUIRED)
@@ -73,13 +57,13 @@ index 5a21eed..399a8ed 100644
  # OpenSSL libraries
  message(STATUS "OpenSSL version: ${OPENSSL_VERSION} ${OPENSSL_INCLUDE_DIR} ${OPENSSL_LIBRARIES}")
  
- # System directories
+-# System directories
 -include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-+# include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
- 
+-
  # Library
- file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h")
-@@ -70,14 +71,16 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
+ file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
+ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
+@@ -72,7 +43,9 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
  add_library(cppserver ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
  set_target_properties(cppserver PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
  target_include_directories(cppserver PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -90,50 +74,56 @@ index 5a21eed..399a8ed 100644
  list(APPEND INSTALL_TARGETS cppserver)
  list(APPEND LINKLIBS cppserver)
  
- # Additional module components: benchmarks, examples, plugins, tests, tools and install
- if(NOT CPPSERVER_MODULE)
+@@ -91,6 +64,7 @@ if(NOT CPPSERVER_MODULE)
+   list(APPEND LINKLIBS proto)
  
--  # Examples
-+if(FALSE)
+   # Examples
++  if(FALSE)
    file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
    file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
    file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
-@@ -90,8 +93,8 @@ if(NOT CPPSERVER_MODULE)
+@@ -103,8 +77,10 @@ if(NOT CPPSERVER_MODULE)
      list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
    endforeach()
--
--  # Benchmarks
-+endif()
-+if(FALSE)
++  endif()
+ 
+   # Benchmarks
++  if(FALSE)
    file(GLOB BENCHMARK_HEADER_FILES "performance/*.h")
    file(GLOB BENCHMARK_INLINE_FILES "performance/*.inl")
    file(GLOB BENCHMARK_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/performance" "performance/*.cpp")
-@@ -104,8 +107,8 @@ if(NOT CPPSERVER_MODULE)
+@@ -117,8 +93,10 @@ if(NOT CPPSERVER_MODULE)
      list(APPEND INSTALL_TARGETS ${BENCHMARK_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${BENCHMARK_TARGET})
    endforeach()
--
--  # Tests
-+endif()
-+if(FALSE)
++  endif()
+ 
+   # Tests
++  if(FALSE)
    file(GLOB TESTS_HEADER_FILES "tests/*.h")
    file(GLOB TESTS_INLINE_FILES "tests/*.inl")
    file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
-@@ -119,15 +122,15 @@ if(NOT CPPSERVER_MODULE)
+@@ -128,19 +106,22 @@ if(NOT CPPSERVER_MODULE)
+   target_link_libraries(cppserver-tests ${LINKLIBS})
+   list(APPEND INSTALL_TARGETS cppserver-tests)
+   list(APPEND INSTALL_TARGETS_PDB cppserver-tests)
++  endif()
+ 
    # CTest
++  if(FALSE)
    enable_testing()
    add_test(cppserver-tests cppserver-tests --durations yes --order lex)
--
-+endif()
++  endif()
+ 
    # Install
    install(TARGETS ${INSTALL_TARGETS}
 -    RUNTIME DESTINATION "${PROJECT_SOURCE_DIR}/bin"
 -    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/bin"
 -    ARCHIVE DESTINATION "${PROJECT_SOURCE_DIR}/bin")
-+    RUNTIME DESTINATION bin
-+    LIBRARY DESTINATION lib
-+    ARCHIVE DESTINATION lib)
++      RUNTIME DESTINATION bin
++      LIBRARY DESTINATION lib
++      ARCHIVE DESTINATION lib)
  
    # Install *.pdb files
 -  if(MSVC)
