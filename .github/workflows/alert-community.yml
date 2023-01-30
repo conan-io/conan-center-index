@@ -1,7 +1,7 @@
 name: "[service] Alert Community"
 
 on:
-  pull_request:
+  pull_request_target:
    types: [opened]
 
 jobs:
@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: master
       - uses: ./.github/actions/alert-community
         with:
           files: "docs/*/*"
