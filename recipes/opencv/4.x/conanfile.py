@@ -130,6 +130,7 @@ class OpenCVConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_gtk
             del self.options.with_v4l
+        if self.settings.os != "Windows":
             del self.options.with_msmf
             del self.options.with_msmf_dxva
 
