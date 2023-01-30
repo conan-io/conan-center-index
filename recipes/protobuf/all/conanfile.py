@@ -192,8 +192,8 @@ class ProtobufConan(ConanFile):
                      os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
         if not self.options.lite:
-            rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "lib"))
-            rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "bin"))
+            rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "lib"))
+            rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
