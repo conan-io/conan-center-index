@@ -92,7 +92,7 @@ class HiredisConan(ConanFile):
         if Version(self.version) >= "1.1.0":
             if is_msvc(self) and not self.options.shared:
                 suffix += "_static"
-            if self.info.settings.build_type == "Debug":
+            if self.settings.build_type == "Debug":
                 suffix += "d"
 
         # hiredis

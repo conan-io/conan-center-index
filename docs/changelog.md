@@ -1,5 +1,11 @@
 # Changelog
 
+### 20-January-2023 - 16:09 CET
+
+- [feature] Make feedback messages of PRs configurable.
+- [feature] Add status icon to the title of PRs comments.
+- [fix] Fix Conan v2 error when getting revisions.
+
 ### 16-January-2023 - 16:43 CET
 
 - [fix] ValidateInfrastructure: Fix Conan version check.
