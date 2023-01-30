@@ -774,12 +774,12 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        return "b2.exe" if self._settings_build == "Windows" else "b2"
+        return "b2.exe" if self._settings_build.os == "Windows" else "b2"
 
     @property
     def _bcp_exe(self):
         folder = os.path.join(self.source_folder, "dist", "bin")
-        return os.path.join(folder, "bcp.exe" if self._settings_build == "Windows" else "bcp")
+        return os.path.join(folder, "bcp.exe" if self._settings_build.os == "Windows" else "bcp")
 
     @property
     def _use_bcp(self):
@@ -869,7 +869,7 @@ class BoostConan(ConanFile):
         with chdir(self, sources):
             # To show the libraries *1
             # self.run("%s --show-libraries" % b2_exe)
-            self.run(full_command)
+            self.run(full_command, run_environment=True)
 
     @property
     def _b2_os(self):
