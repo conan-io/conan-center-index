@@ -33,6 +33,7 @@ class CeleroConan(ConanFile):
         return {
             "gcc": "6",
             "Visual Studio": "14",
+            "msvc": "190",
             "clang": "3.4",
             "apple-clang": "5.1",
         }
@@ -54,7 +55,7 @@ class CeleroConan(ConanFile):
             check_min_cppstd(self, 14)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("celero requires C++14, which your compiler does not support.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++14, which your compiler does not support.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

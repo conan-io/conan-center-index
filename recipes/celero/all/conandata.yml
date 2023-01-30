@@ -1,4 +1,7 @@
 sources:
+  "2.8.5":
+    url: "https://github.com/DigitalInBlue/Celero/archive/v2.8.5.tar.gz"
+    sha256: "1f319661c4bee1f6855e45c1764be6cd38bfe27e8afa8da1ad7060c1a793aa20"
   "2.8.2":
     url: "https://github.com/DigitalInBlue/Celero/archive/v2.8.2.tar.gz"
     sha256: "7d2131ba27ca5343b31f1e04777ed3e666e2ad7f785e79c960c872fc48cd5f88"
@@ -8,9 +11,21 @@ sources:
 patches:
   "2.8.2":
     - patch_file: "patches/0004-2.8.2-missing-include.patch"
+      patch_description: "include <memory> header"
+      patch_type: "portability"
     - patch_file: "patches/0005-drop-runtime.patch"
+      patch_description: "drop runtime flag for MSVC"
+      patch_type: "conan"
   "2.6.0":
     - patch_file: "patches/0001-cmake-install-pic-cxx-standard-sytem-libs.patch"
+      patch_description: "disable fix fPIC flag, disable C++14 flag, fix library install path"
+      patch_type: "conan"
     - patch_file: "patches/0002-lowercase-include-system-libs-windows.patch"
+      patch_description: "transform system include files for windowsto lowercase"
+      patch_type: "portability"
     - patch_file: "patches/0003-typo-declspec.patch"
+      patch_description: "fix typo for dllexport/import"
+      patch_type: "portability"
     - patch_file: "patches/0004-2.6.0-missing-include.patch"
+      patch_description: "include <memory> header"
+      patch_type: "portability"
