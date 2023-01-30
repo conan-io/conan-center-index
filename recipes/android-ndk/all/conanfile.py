@@ -60,7 +60,8 @@ class AndroidNDKConan(ConanFile):
         pass
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
+        major, _ = self._ndk_major_minor
+        if major >= 23:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             self._unzip_fix_symlinks(url=data["url"], target_folder=self.source_folder, sha256=data["sha256"])
         else:
