@@ -1,4 +1,4 @@
-name: "Alter Community"
+name: "Alert Community"
 description: "Comment on pull request if certain files changes"
 author: "prince-chrismc"
 inputs:
@@ -15,6 +15,8 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      with:
+        ref: master
     - uses: ./.github/actions/pr_changed_files
       id: changed_files
       with:
