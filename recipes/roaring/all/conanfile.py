@@ -50,10 +50,9 @@ class RoaringConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
-        if Version(self.version) >= "0.3.0":
-            if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "11":
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires at least apple-clang 11 to support runtime dispatching.",
+        if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "11":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least apple-clang 11 to support runtime dispatching.",
                 )
 
     def source(self):
