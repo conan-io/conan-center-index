@@ -42,7 +42,7 @@ class SentryBreakpadConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11 if tools.Version(self.version) < "0.5.4" else 17)
+            check_min_cppstd(self, 11 if Version(self.version) < "0.5.4" else 17)
 
         if Version(self.version) <= "0.4.1":
             if self.settings.os == "Android" or is_apple_os(self):
