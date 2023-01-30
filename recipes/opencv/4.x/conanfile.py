@@ -1028,11 +1028,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.39")
         if self.options.get_safe("with_openexr"):
-            if Version(self.version) < "4.5.3":
-                # opencv < 4.5.3 doesn't support openexr >= 3
-                self.requires("openexr/2.5.7")
-            else:
-                self.requires("openexr/3.1.5")
+            self.requires("openexr/3.1.5")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_webp"):
