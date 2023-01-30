@@ -98,7 +98,7 @@ class SpixConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self.version == "0.4" and Version(self.deps_cpp_info["qt"].version).major == 6:
+        if self.version == "0.4" and Version(self.dependencies["qt"].ref.version).major == 6:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
 
     def build(self):
