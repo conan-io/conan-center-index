@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
-from conan.tools.microsoft import check_min_vs, msvc_runtime_flag
+from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -20,8 +20,8 @@ class ArchicadApidevkitConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if msvc_runtime_flag(self).endswith("d"):
-            raise ConanInvalidConfiguration(f"Debug runtime is not supported by {self.ref}")
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("Debug configuration is not supported")
         # Approximate requirement for toolset >= v142
         check_min_vs(self, "192")
         if not self.info.settings.os in ("Macos", "Windows"):
