@@ -80,7 +80,7 @@ class ProtobufConan(ConanFile):
 
         if self.settings.compiler == "clang":
             if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
-                raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -250,10 +250,6 @@ class ProtobufConan(ConanFile):
             if self.settings.os == "Android":
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
         self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
@@ -263,3 +259,4 @@ class ProtobufConan(ConanFile):
         if self.options.lite:
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
