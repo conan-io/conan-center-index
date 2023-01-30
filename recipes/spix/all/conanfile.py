@@ -94,6 +94,8 @@ class SpixConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("anyrpc", "cmake_file_name", "AnyRPC")
+        deps.set_property("anyrpc", "cmake_target_name", "AnyRPC::anyrpc")
         deps.generate()
 
     def _patch_sources(self):
