@@ -219,7 +219,7 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
+            self.cpp_info.components["libprotobuf"].system_libs.extend(["m", "pthread"])
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
         if self.settings.os == "Android":
@@ -241,7 +241,7 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
+                self.cpp_info.components["libprotobuf-lite"].system_libs.extend(["m", "pthread"])
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
                     self.cpp_info.components["libprotobuf-lite"].system_libs.append("atomic")
             if self.settings.os == "Windows":
