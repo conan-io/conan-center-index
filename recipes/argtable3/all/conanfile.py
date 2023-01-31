@@ -1,11 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save
-from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 import textwrap
 
@@ -55,7 +51,7 @@ class Argtable3Conan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         # The initial space is important (the cmake script does OFFSET 0)
-        save(self, os.path.join(self.build_folder, f"version.tag"), " {self.version}.0\n")
+        save(self, os.path.join(self.build_folder, "version.tag"), f" {self.version}.0\n")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
