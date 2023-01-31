@@ -75,6 +75,7 @@ class SdlttfConan(ConanFile):
             tc.variables["SDL2TTF_SAMPLES"] = False
             tc.variables["SDL2TTF_VENDORED"] = False
             tc.variables["SDL2TTF_HARFBUZZ"] = self.options.with_harfbuzz
+            tc.variables["SDL2TTF_DEBUG_POSTFIX"] = ""
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
