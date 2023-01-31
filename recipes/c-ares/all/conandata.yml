@@ -6,20 +6,20 @@ sources:
     url: "https://github.com/c-ares/c-ares/releases/download/cares-1_18_1/c-ares-1.18.1.tar.gz"
     sha256: "1a7d52a8a84a9fbffb1be9133c0f6e17217d91ea5a6fa61f6b4729cda78ebbcf"
   "1.17.2":
-    url: "https://github.com/c-ares/c-ares/archive/refs/tags/cares-1_17_2.tar.gz"
-    sha256: "444b7dbf33cb6e8a764d069e3485cbaaa28386d60eace6988275c3cb9534d300"
+    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_17_2/c-ares-1.17.2.tar.gz"
+    sha256: "4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d"
   "1.17.1":
-    url: "https://github.com/c-ares/c-ares/archive/cares-1_17_1.tar.gz"
-    sha256: "61f7cf09605f5e38d4828f82d0e2ddb9de8e355ecfd6819b740691c644583b8f"
+    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_17_1/c-ares-1.17.1.tar.gz"
+    sha256: "d73dd0f6de824afd407ce10750ea081af47eba52b8a6cb307d220131ad93fc40"
   "1.16.1":
-    url: "https://github.com/c-ares/c-ares/archive/cares-1_16_1.tar.gz"
-    sha256: "870962cc8f6b352303c404ce848e2ea1f1072f3c0a940042209a72179511c08c"
+    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_16_0/c-ares-1.16.0.tar.gz"
+    sha256: "de058ad7c128156e2db6dc98b8a359924d6f210a1b99dd36ba15c8f839a83a89"
   "1.15.0":
-    url: "https://github.com/c-ares/c-ares/archive/cares-1_15_0.tar.gz"
-    sha256: "7deb7872cbd876c29036d5f37e30c4cbc3cc068d59d8b749ef85bb0736649f04"
+    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_15_0/c-ares-1.15.0.tar.gz"
+    sha256: "6cdb97871f2930530c97deb7cf5c8fa4be5a0b02c7cea6e7c7667672a39d6852"
   "1.14.0":
-    url: "https://github.com/c-ares/c-ares/archive/cares-1_14_0.tar.gz"
-    sha256: "62dd12f0557918f89ad6f5b759f0bf4727174ae9979499f5452c02be38d9d3e8"
+    url: "https://github.com/c-ares/c-ares/files/1731591/c-ares-1.14.0.tar.gz"
+    sha256: "45d3c1fd29263ceec2afc8ff9cd06d5f8f889636eb4e80ce3cc7f0eaf7aadc6e"
 patches:
   "1.17.1":
     - patch_file: "patches/upstream-pr-395-bundle-destination-v16-17.patch"
