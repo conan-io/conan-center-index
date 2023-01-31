@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -60,6 +59,9 @@ class LibtorrentConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def _check_compiler_supports_cxx14(self):
         min_compiler_version = {
             "Visual Studio": "15",
@@ -83,6 +85,10 @@ class LibtorrentConan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 14)
 
+        if Version(self.dependencies["boost"].ref.version) < "1.69.0" and \
+           (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_system):
+            raise ConanInvalidConfiguration(f"{self.ref} requires boost with system, which is non-header only in boost < 1.69.0")
+
     def requirements(self):
         # libtorrent 2.0.x [x<=6] have issue for recent boost https://github.com/arvidn/libtorrent/discussions/6757
         if Version(self.version) < "2.0.0" or "2.0.6" < Version(self.version):
@@ -93,11 +99,6 @@ class LibtorrentConan(ConanFile):
             self.requires("openssl/1.1.1s")
         if self.options.enable_iconv:
             self.requires("libiconv/1.17")
-
-    def _validate_dependency_graph(self):
-        if Version(self.dependencies["boost"].ref.version) < "1.69.0" and \
-           (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_system):
-            raise ConanInvalidConfiguration(f"{self.ref} requires boost with system, which is non-header only in boost < 1.69.0")
 
     def _cmake_new_enough(self, required_version):
         try:
@@ -119,7 +120,7 @@ class LibtorrentConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+        tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.variables["deprecated-functions"] = self.options.enable_deprecated_functions
         tc.variables["dht"] = self.options.enable_dht
         tc.variables["encryption"] = self.options.enable_encryption
@@ -133,7 +134,7 @@ class LibtorrentConan(ConanFile):
         tc.variables["python-bindings"] = False
         tc.variables["python-bindings"] = False
         if is_msvc(self):
-            tc.variables["static_runtime"] = "MT" in msvc_runtime_flag(self)
+            tc.variables["static_runtime"] = is_msvc_static_runtime(self)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -158,7 +159,6 @@ class LibtorrentConan(ConanFile):
                                       "file_entry& operator=(file_entry&&) & = default;")
 
     def build(self):
-        self._validate_dependency_graph()
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
