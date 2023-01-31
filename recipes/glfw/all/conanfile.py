@@ -142,7 +142,10 @@ class GlfwConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("gdi32")
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+            self.cpp_info.frameworks.extend([
+                "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
+                "CoreServices", "Foundation", "IOKit",
+            ])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
