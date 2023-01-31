@@ -9,6 +9,10 @@ sources:
     url: "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.0.15/SDL2_ttf-2.0.15.tar.gz"
     sha256: "a9eceb1ad88c1f1545cd7bd28e7cbc0b2c14191d40238f531a15b01b1b22cd33"
 patches:
+  "2.20.1":
+    - patch_file: "patches/2.20.1-0001-fix-cmake-min-version.patch"
+      patch_description: "Disable useless .pc file install to avoid relying on CMake 3.21 features"
+      patch_type: "conan"
   "2.0.18":
     - patch_file: "patches/2.0.18-0001-cmake-fix-link-target.patch"
       patch_description: "correct target name, disable PIC fixed"
