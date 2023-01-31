@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibgeotiffConan(ConanFile):
@@ -35,29 +35,19 @@ class LibgeotiffConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("libtiff/4.4.0")
-        self.requires("proj/9.0.1")
+        self.requires("proj/9.1.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
