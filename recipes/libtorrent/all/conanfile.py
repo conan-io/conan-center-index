@@ -96,7 +96,7 @@ class LibtorrentConan(ConanFile):
 
     def _validate_dependency_graph(self):
         if Version(self.dependencies["boost"].ref.version) < "1.69.0" and \
-           (self.options["boost"].header_only or self.options["boost"].without_system):
+           (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_system):
             raise ConanInvalidConfiguration(f"{self.ref} requires boost with system, which is non-header only in boost < 1.69.0")
 
     def _cmake_new_enough(self, required_version):
