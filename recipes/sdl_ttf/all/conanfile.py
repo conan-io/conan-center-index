@@ -56,17 +56,18 @@ class SdlttfConan(ConanFile):
             self.requires("harfbuzz/6.0.0")
 
     def validate(self):
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("sdl_ttf shared is not supported with Visual Studio")
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
             raise ConanInvalidConfiguration("sdl & sdl_ttf must have the same major version")
 
-        if Version(self.version) >= "2.20.0" and self.options.shared != self.dependencies["sdl"].options.shared:
-            raise ConanInvalidConfiguration("sdl & sdl_ttf must be build with the same options(shared or static)")
+        if Version(self.version) >= "2.20.0":
+            if self.options.shared != self.dependencies["sdl"].options.shared:
+                raise ConanInvalidConfiguration("sdl & sdl_ttf must be built with the same 'shared' option value")
+        else:
+            if is_msvc(self) and self.options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} shared is not supported with Visual Studio")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
