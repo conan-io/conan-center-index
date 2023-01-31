@@ -177,3 +177,17 @@ Usage of each option should follow the rules:
    ```
 
    The `skip_test` configuration is supported by [CMake](https://docs.conan.io/en/latest/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/en/latest/reference/build_helpers/meson.html#test).
+ 
+ ### Removing from `package_id`
+ 
+ By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-id)).
+ Options which do not impact the generated packages should be deleted, for instance adding a `#define` for a package.
+ 
+ ```python
+def package_id(self):
+   del self.info.options.enable_feature
+ 
+def package_info(self):
+   if self.options.enable_feature:
+      self.cpp_info.defines.append("FOBAR_FEATURE=1")
+```

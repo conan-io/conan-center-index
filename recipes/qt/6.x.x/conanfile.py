@@ -963,7 +963,7 @@ class QtConan(ConanFile):
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
+            if is_msvc(self):
                 libsuffix = "d"
             if is_apple_os(self):
                 libsuffix = "_debug"
@@ -1310,7 +1310,7 @@ class QtConan(ConanFile):
             _create_module("SerialPort")
 
         if self.options.get_safe("qtserialbus"):
-            _create_module("SerialBus", ["SerialPort"])
+            _create_module("SerialBus", ["SerialPort"] if self.options.get_safe("qtserialport") else [])
             _create_plugin("PassThruCanBusPlugin", "qtpassthrucanbus", "canbus", [])
             _create_plugin("PeakCanBusPlugin", "qtpeakcanbus", "canbus", [])
             _create_plugin("SocketCanBusPlugin", "qtsocketcanbus", "canbus", [])
