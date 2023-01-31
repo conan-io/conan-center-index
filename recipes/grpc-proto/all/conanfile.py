@@ -7,6 +7,8 @@ from conans import CMake, tools
 
 from helpers import parse_proto_libraries
 
+required_conan_version = ">=1.47.0"
+
 
 class GRPCProto(ConanFile):
     name = "grpc-proto"
