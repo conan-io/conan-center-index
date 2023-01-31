@@ -81,12 +81,11 @@ class LibpngConan(ConanFile):
         self.requires("zlib/1.2.13")
 
     def validate(self):
-        if Version(self.version) < "1.6" and self.info.settings.arch == "armv8" and is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.ref} currently does not building for {self.info.settings.os} {self.info.settings.arch}. Contributions are welcomed")
+        if Version(self.version) < "1.6" and self.settings.arch == "armv8" and is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} currently does not building for {self.settings.os} {self.settings.arch}. Contributions are welcomed")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _neon_msa_sse_vsx_mapping(self):
