@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.layout import cmake_layout
 from conan.tools.scm import Version, Git
 import os
 
@@ -11,8 +10,8 @@ required_conan_version = ">=1.53.0"
 class LinuxDeployConan(ConanFile):
     name = "linuxdeploy"
     homepage = "https://github.com/linuxdeploy/linuxdeploy"
-    description = "A safe and fast alternative to printf and IOStreams."
-    topics = ("format", "iostream", "printf")
+    description = "A tool to generate AppDirs"
+    topics = ("AppDir", "AppImage", "deploy")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
@@ -26,9 +25,6 @@ class LinuxDeployConan(ConanFile):
         "shared": False
     }
 
-    def init(self):
-        self.build_hash = Git(self).get_commit()
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -37,7 +33,7 @@ class LinuxDeployConan(ConanFile):
         tc.generate()
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["GIT_COMMIT"] = self.build_hash[:7] # Expects short hash
+        tc.variables["GIT_COMMIT"] = "0000000" # Expects short hash
         tc.generate()
 
     def layout(self):
