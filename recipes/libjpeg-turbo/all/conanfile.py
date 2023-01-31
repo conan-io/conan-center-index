@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibjpegTurboConan(ConanFile):
@@ -57,18 +57,9 @@ class LibjpegTurboConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
         if self.options.enable12bit:
             del self.options.java
@@ -85,11 +76,11 @@ class LibjpegTurboConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.options.enable12bit and (self.info.options.libjpeg7_compatibility or self.info.options.libjpeg8_compatibility):
+        if self.options.enable12bit and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
-        if self.info.options.get_safe("java") and not self.info.options.shared:
+        if self.options.get_safe("java") and not self.options.shared:
             raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
-        if self.info.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared can't be built with static vc runtime")
 
     def build_requirements(self):
@@ -97,8 +88,7 @@ class LibjpegTurboConan(ConanFile):
             self.tool_requires("nasm/2.15.05")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _is_arithmetic_encoding_enabled(self):
