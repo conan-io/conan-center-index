@@ -25,7 +25,7 @@ class TupletConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if self._min_cppstd == 20:
+        if self._min_cppstd == "20":
             return {
                 "gcc": "11",
                 "Visual Studio": "17",
