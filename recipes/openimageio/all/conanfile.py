@@ -53,7 +53,7 @@ class OpenImageIOConan(ConanFile):
         "with_hdf5": True,
         "with_opencolorio": True,
         "with_opencv": False,
-        "with_tbb": True,
+        "with_tbb": False, # disable temporarily due to missing deps in conan center
         "with_dicom": False,  # Heavy dependency, disabled by default
         "with_ffmpeg": True,
         "with_giflib": True,
