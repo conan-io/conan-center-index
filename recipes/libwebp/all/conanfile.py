@@ -77,8 +77,8 @@ class LibwebpConan(ConanFile):
             tc.variables["WEBP_BUILD_LIBWEBPMUX"] = True
         tc.variables["WEBP_BUILD_WEBPMUX"] = False
         if self.options.shared and is_msvc(self):
-          # Building a dll (see fix-dll-export patch)
-          tc.preprocessor_definitions["WEBP_DLL"] = 1
+            # Building a dll (see fix-dll-export patch)
+            tc.preprocessor_definitions["WEBP_DLL"] = 1
         tc.generate()
 
     def build(self):
