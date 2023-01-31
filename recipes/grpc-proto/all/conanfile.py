@@ -1,9 +1,9 @@
 import os
 import functools
 from conan import ConanFile
-from conans import CMake, tools
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
-from conans.errors import ConanInvalidConfiguration
+from conans import CMake, tools
 
 from helpers import parse_proto_libraries
 
@@ -18,11 +18,11 @@ class GRPCProto(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False]
         }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
         }
     exports = "helpers.py"
@@ -60,7 +60,8 @@ class GRPCProto(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["GOOGLEAPIS_PROTO_DIRS"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
+        googleapis_resdirs = self.dependencies["googleapis"].cpp_info.aggregated_components().resdirs
+        cmake.definitions["GOOGLEAPIS_PROTO_DIRS"] = ";".join([p.replace("\\", "/") for p in googleapis_resdirs])
         cmake.configure()
         return cmake
 
@@ -68,7 +69,7 @@ class GRPCProto(ConanFile):
     def _parse_proto_libraries(self):
         # Generate the libraries to build dynamically
         proto_libraries = parse_proto_libraries(os.path.join(self.source_folder, 'BUILD.bazel'), self.source_folder, self.output.error)
-        
+
         # Validate that all files exist and all dependencies are found
         all_deps = [it.cmake_target for it in proto_libraries]
         all_deps += ["googleapis::googleapis", "protobuf::libprotobuf"]
