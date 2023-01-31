@@ -1515,6 +1515,7 @@ class OpenCVConan(ConanFile):
             if self.options.world:
                 self.cpp_info.components["opencv_world"].set_property("cmake_target_name", "opencv_world")
                 self.cpp_info.components["opencv_world"].libs = get_libs("world")
+                self.cpp_info.components["opencv_world"].resdirs = ["res"]
                 if self.settings.os != "Windows":
                     self.cpp_info.components["opencv_world"].includedirs.append(os.path.join("include", "opencv4"))
                 world_requires = set()
@@ -1530,6 +1531,7 @@ class OpenCVConan(ConanFile):
                 # TODO: we should also define COMPONENTS names of each target for find_package() but
                 # not possible yet in CMakeDeps. See https://github.com/conan-io/conan/issues/10258
                 self.cpp_info.components[conan_component].set_property("cmake_target_name", cmake_target)
+                self.cpp_info.components[conan_component].resdirs = ["res"]
                 if self.settings.os != "Windows":
                     self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
 
