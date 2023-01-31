@@ -56,6 +56,9 @@ class XkbcommonConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("xkeyboard-config/system")
         if self.options.with_x11:
@@ -79,9 +82,6 @@ class XkbcommonConan(ConanFile):
         if self._has_build_profile and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.21.0")
             self.tool_requires("wayland-protocols/1.31")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
