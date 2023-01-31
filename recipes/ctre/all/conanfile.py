@@ -12,14 +12,13 @@ required_conan_version = ">=1.50.0"
 
 class CtreConan(ConanFile):
     name = "ctre"
-    package_type = "header-library"
-    homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Compile Time Regular Expression for C++17/20"
-    topics = ("cpp17", "regex", "compile-time-regular-expressions")
     license = ("Apache-2.0", "LLVM-exception")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
+    topics = ("cpp17", "regex", "compile-time-regular-expressions", "header-only")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings = "compiler"
 
     def layout(self):
         basic_layout(self, src_folder="src")
