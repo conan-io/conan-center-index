@@ -1,0 +1,86 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e3008a4..2e72a74 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,21 +39,21 @@ if (NOT DEFINED SQLPP11_DYNAMIC_LOADING)
+    set(SQLPP11_DYNAMIC_LOADING Off)
+ endif()
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ if(SQLCIPHER )
+-	find_package(SQLCipher REQUIRED)
+-	set (SQLITE3_LIBRARIES "${SQLCIPHER_LIBRARIES}" )
+-	set (SQLITE3_INCLUDE_DIRS "${SQLCIPHER_INCLUDE_DIRS}" )
+-    set (SQLITE3_LIBRARY "${SQLCIPHER_LIBRARY}")
++	find_package(sqlcipher REQUIRED)
++	set (SQLite3_LIBRARIES "${sqlcipher_LIBRARIES}")
++	set (SQLite3_INCLUDE_DIRS "${sqlcipher_INCLUDE_DIRS}")
++  set (SQLite3_LIBRARY "${sqlcipher_LIBRARY}")
+ else()
+-	find_package(Sqlite3 REQUIRED)
++	find_package(SQLite3 REQUIRED)
+ endif()
+ 
+-find_package(HinnantDate REQUIRED)
++find_package(date REQUIRED)
+ 
+ message(STATUS "Using ${CMAKE_CXX_COMPILER} (compiler id: ${CMAKE_CXX_COMPILER_ID})")
+ 
+-set(SQLPP11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../sqlpp11/include" CACHE FILEPATH "Path to sqlpp11 includes")
++find_package(Sqlpp11 REQUIRED)
++set(SQLPP11_INCLUDE_DIR "${Sqlpp11_INCLUDE_DIR}" CACHE FILEPATH "Path to sqlpp11 includes")
+ 
+ if(NOT EXISTS ${SQLPP11_INCLUDE_DIR}/sqlpp11/sqlpp11.h)
+ 	message(SEND_ERROR "Can't find file sqlpp11/sqlpp11.h")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 3141a6d..d005579 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -16,7 +16,7 @@ if (SQLPP_DYNAMIC_LOADING)
+                     detail/dynamic_libsqlite3.cpp
+         )
+ 
+-    get_filename_component(SQLITE3_LIB_FILE ${SQLITE3_LIBRARY} NAME)
++    get_filename_component(SQLITE3_LIB_FILE ${SQLite3_LIBRARY} NAME)
+ 
+     if (WIN32)
+         # the import library (.lib) needs to be replaced by .dll
+@@ -34,8 +34,8 @@ if (SQLPP_DYNAMIC_LOADING)
+     target_include_directories(sqlpp11-connector-sqlite3-dynamic
+                                PUBLIC
+                                ${SQLPP11_INCLUDE_DIR}
+-                               ${HinnantDate_INCLUDE_DIR}
+-															 ${SQLITE3_INCLUDE_DIRS}
++                               ${date_INCLUDE_DIR}
++                               ${SQLite3_INCLUDE_DIRS}
+                                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                                $<INSTALL_INTERFACE:include>)
+ endif()
+@@ -44,8 +44,8 @@ endif()
+ target_include_directories(sqlpp11-connector-sqlite3
+                            PUBLIC
+                            ${SQLPP11_INCLUDE_DIR}
+-                           ${HinnantDate_INCLUDE_DIR}
+-													 ${SQLITE3_INCLUDE_DIRS}
++                           ${date_INCLUDE_DIR}
++                           ${SQLite3_INCLUDE_DIRS}
+                            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+ 
+@@ -58,14 +58,13 @@ endif()
+ 
+ if (SQLCIPHER)
+     target_compile_definitions(sqlpp11-connector-sqlite3 PUBLIC SQLPP_USE_SQLCIPHER)
+-    target_link_libraries(sqlpp11-connector-sqlite3 SQLCipher::SQLCipher)
+     if (SQLPP_DYNAMIC_LOADING)
+         target_compile_definitions(sqlpp11-connector-sqlite3-dynamic PUBLIC SQLPP_USE_SQLCIPHER)
+-        target_include_directories(sqlpp11-connector-sqlite3-dynamic PUBLIC ${SQLCIPHER_INCLUDE_DIRS})
++        target_include_directories(sqlpp11-connector-sqlite3-dynamic PUBLIC ${sqlcipher_INCLUDE_DIRS})
+     endif()
+ else()
+-    target_link_libraries(sqlpp11-connector-sqlite3 ${SQLITE3_LIBRARIES})
+ endif()
++target_link_libraries(sqlpp11-connector-sqlite3 ${SQLite3_LIBRARIES} date::date sqlpp11::sqlpp11)
+ 
+ install(TARGETS sqlpp11-connector-sqlite3
+         ARCHIVE DESTINATION lib

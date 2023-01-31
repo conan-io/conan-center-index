@@ -1,0 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 521927b..18a2615 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,15 +40,14 @@ if (NOT DEFINED SQLPP11_DYNAMIC_LOADING)
+    set(SQLPP11_DYNAMIC_LOADING Off)
+ endif()
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ if(SQLCIPHER )
+-	find_package(SQLCipher REQUIRED)
+-    set (SQLite3_LIBRARY "${SQLCIPHER_LIBRARY}") # TO DO: Needed because of l. 19 in src/CmakeLists.txt?
++	find_package(sqlcipher REQUIRED)
++  set (SQLite3_LIBRARY "${sqlcipher_LIBRARY}") # TO DO: Needed because of l. 19 in src/CmakeLists.txt?
+ else()
+ 	find_package(SQLite3 REQUIRED)
+ endif()
+ 
+-add_subdirectory(dependencies)
++find_package(Sqlpp11 REQUIRED)
+ 
+ message(STATUS "Using ${CMAKE_CXX_COMPILER} (compiler id: ${CMAKE_CXX_COMPILER_ID})")
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 22cc106..40f3381 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -74,10 +74,10 @@ target_include_directories(sqlpp11-connector-sqlite3 PUBLIC
+ 
+ if (SQLCIPHER)
+     target_compile_definitions(sqlpp11-connector-sqlite3 PUBLIC SQLPP_USE_SQLCIPHER)
+-    target_link_libraries(sqlpp11-connector-sqlite3 PUBLIC SQLCipher::SQLCipher)
++    target_link_libraries(sqlpp11-connector-sqlite3 PUBLIC sqlcipher::sqlcipher)
+     if (SQLPP_DYNAMIC_LOADING)
+         target_compile_definitions(sqlpp11-connector-sqlite3-dynamic PUBLIC SQLPP_USE_SQLCIPHER)
+-        target_include_directories(sqlpp11-connector-sqlite3-dynamic PUBLIC ${SQLCIPHER_INCLUDE_DIRS})
++        target_include_directories(sqlpp11-connector-sqlite3-dynamic PUBLIC ${sqlcipher_INCLUDE_DIRS})
+     endif()
+ else()
+     target_link_libraries(sqlpp11-connector-sqlite3 PUBLIC SQLite::SQLite3)

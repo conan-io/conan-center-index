@@ -1,14 +1,23 @@
 sources:
-  "0.29":
-    url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.29.tar.gz"
-    sha256: "2904ddd578adb0e122a70f73a80bae4843434d685b7a23ae3ab43471c35efc4f"
+  "0.31":
+    url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.31.tar.gz"
+    sha256: "ceb1ceffdeb242b70ed19ca7ddb1e6e12213b2d23ba8dc4281c5ed047a7ed763"
   "0.30":
     url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.30.tar.gz"
-    sha256: "e39f420312d311f3eaa162e201883b4594c34e04739b39a4563f84be920e654f"
-patches:
+    sha256: "a3c697084259ee9dd3055f5a3734100f68015f6437f9d0237c3b365bdab11092"
   "0.29":
-    - patch_file: "patches/cmake-dependencies.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.29.tar.gz"
+    sha256: "4bafb3f37ff671b019a7bc021f5a9eba9fbb543ab806ef6c49518d9bdcf2b6d8"
+patches:
+  "0.31":
+    - patch_file: "patches/0.31-0001-cmake-dependencies.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
   "0.30":
-    - patch_file: "patches/cmake-dependencies.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0.30-0001-cmake-dependencies.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+  "0.29":
+    - patch_file: "patches/0.29-0001-cmake-dependencies.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
