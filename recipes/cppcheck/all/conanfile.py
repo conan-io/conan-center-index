@@ -25,7 +25,7 @@ class CppcheckConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) >= Version("2.8.0"):
+        if Version(self.version) >= "2.8.0":
             del self.options.with_z3
 
     def requirements(self):
