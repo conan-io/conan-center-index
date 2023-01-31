@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -46,10 +45,6 @@ class LibjpegTurboConan(ConanFile):
         "java": False,
         "enable12bit": False,
     }
-
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -120,18 +115,9 @@ class LibjpegTurboConan(ConanFile):
             tc.variables["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
         if Version(self.version) <= "2.1.0":
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
-        if cross_building(self):
-            # TODO: too specific and error prone, should be delegated to a conan helper function
-            cmake_system_processor = {
-                "armv8": "aarch64",
-                "armv8.3": "aarch64",
-            }.get(str(self.settings.arch), str(self.settings.arch))
-            tc.variables["CONAN_LIBJPEG_TURBO_SYSTEM_PROCESSOR"] = cmake_system_processor
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # use standard GNUInstallDirs.cmake - custom one is broken
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "include(cmakescripts/GNUInstallDirs.cmake)",
@@ -144,7 +130,7 @@ class LibjpegTurboConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
