@@ -22,4 +22,11 @@ sources:
     sha256: "08a33a512f29d7dbf78eab39bd7858576adcc95228c9efe8e4bc5f0f3261efc7"
 patches:
   "3.3.2":
-    - patch_file: "patches/fix-objc-cmake3.19+.patch"
+    - patch_file: "patches/3.3.2-0001-fix-objc-cmake3.19+.patch"
+      patch_description: "Fix ObjC handling while using recent CMake versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/glfw/glfw/commit/3327050ca66ad34426a82c217c2d60ced61526b7"
+    - patch_file: "patches/3.3.2-0002-macos-relocatable.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/glfw/glfw/commit/5a15d8a7842fbc4b5260eac2335a6691bca9be4b"
