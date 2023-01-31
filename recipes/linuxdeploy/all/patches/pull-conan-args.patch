@@ -1,0 +1,9 @@
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -1,4 +1 @@
+-add_library(args INTERFACE)
+-target_sources(args INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/args/args.hxx)
+-target_include_directories(args INTERFACE args)
+-
++find_package(args REQUIRED CONFIG)
+ add_subdirectory(linuxdeploy-desktopfile EXCLUDE_FROM_ALL)

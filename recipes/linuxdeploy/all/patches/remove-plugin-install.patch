@@ -1,0 +1,9 @@
+--- a/src/plugin/CMakeLists.txt
++++ b/src/plugin/CMakeLists.txt
+@@ -17,6 +17,4 @@
+ target_link_libraries(linuxdeploy_plugin PUBLIC linuxdeploy_core linuxdeploy_subprocess)
+ 
+ unset(headers)
+ unset(headers_dir)
+-
+-install(TARGETS linuxdeploy_plugin)
