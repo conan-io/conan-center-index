@@ -9,6 +9,10 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
 
+    # Can be used as a requirement and a tool.
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+    
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 

@@ -40,7 +40,7 @@
 
  # get current date
  execute_process(
-@@ -36,26 +21,15 @@ add_subdirectory(subprocess)
+@@ -36,26 +21,19 @@ add_subdirectory(subprocess)
  add_subdirectory(core)
 
  add_executable(linuxdeploy main.cpp core.cpp)
@@ -68,8 +68,12 @@
 -target_link_libraries(appdir_test linuxdeploy_core args)
 -target_include_directories(appdir_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/core)
 -set_target_properties(appdir_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
++file(GLOB_RECURSE HEADERS ${PROJECT_SOURCE_DIR}/include/linuxdeploy/*.h)
++set_target_properties(linuxdeploy_core PROPERTIES PUBLIC_HEADER "${HEADERS}" C_VISIBILITY_PRESET hidden)
 +include(GNUInstallDirs)
++install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++install(DIRECTORY "${CMAKE_SOURCE_DIR}/lib/linuxdeploy-desktopfile/include/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 +install(TARGETS linuxdeploy_core linuxdeploy linuxdeploy_desktopfile
-+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})

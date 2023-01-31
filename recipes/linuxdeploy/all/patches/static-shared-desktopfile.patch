@@ -1,10 +1,10 @@
 --- a/lib/linuxdeploy-desktopfile/src/CMakeLists.txt
 +++ b/lib/linuxdeploy-desktopfile/src/CMakeLists.txt
-@@ -1,26 +1,19 @@
+@@ -1,26 +1,18 @@
  cmake_minimum_required(VERSION 3.0)
 
- # required to be able to link libraries into shared libraries or PIEs
- set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-# required to be able to link libraries into shared libraries or PIEs
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
  
  file(GLOB HEADERS ${PROJECT_SOURCE_DIR}/include/linuxdeploy/desktopfile/*.h)
  
@@ -29,3 +29,4 @@
 -foreach(target linuxdeploy_desktopfile linuxdeploy_desktopfile_static _linuxdeploy_desktopfile_objs)
 -    target_include_directories(${target} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 -endforeach()
++set_target_properties(linuxdeploy_desktopfile PROPERTIES PUBLIC_HEADER "${HEADERS}" C_VISIBILITY_PRESET hidden)

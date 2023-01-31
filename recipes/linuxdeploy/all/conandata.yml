@@ -1,11 +1,11 @@
 sources:
   "cci.20221114":
-    url: "https://github.com/linuxdeploy/linuxdeploy/archive/2d8eaf1ee44e39b5088943b0dc03874783ddb5cc.zip"
-    sha256: "f20c421da923f7d81eb3a9cf84d8efb6390a8424589faa13d317487b403b66f3"
-linuxdeploy-desktopfile:
-  "cci.20221114":
-    url: "https://github.com/linuxdeploy/linuxdeploy-desktopfile/archive/aa7423539d6ecdb6eb3bc6c6607247d3f7ff8bb3.zip"
-    sha256: "e57b8a65edc19cf795406aa0c2b330d5bdaffbfda9f4883b2937effbd6e76d02"
+    "source":
+      url: "https://github.com/linuxdeploy/linuxdeploy/archive/2d8eaf1ee44e39b5088943b0dc03874783ddb5cc.zip"
+      sha256: "f20c421da923f7d81eb3a9cf84d8efb6390a8424589faa13d317487b403b66f3"
+    "linuxdeploy-desktopfile-source":
+      url: "https://github.com/linuxdeploy/linuxdeploy-desktopfile/archive/aa7423539d6ecdb6eb3bc6c6607247d3f7ff8bb3.zip"
+      sha256: "e57b8a65edc19cf795406aa0c2b330d5bdaffbfda9f4883b2937effbd6e76d02"
 patches:
   "cci.20221114":
     - patch_file: "patches/pull-conan-args.patch"

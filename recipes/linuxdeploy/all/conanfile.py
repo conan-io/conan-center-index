@@ -57,9 +57,9 @@ class LinuxDeployConan(ConanFile):
         self.requires("cimg/3.2.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version]["source"],
             destination=self.source_folder, strip_root=True)
-        get(self, **self.conan_data["linuxdeploy-desktopfile"][self.version],
+        get(self, **self.conan_data["sources"][self.version]["linuxdeploy-desktopfile-source"],
             destination=os.path.join(self.source_folder, "lib", "linuxdeploy-desktopfile"), strip_root=True)
 
     def build(self):
