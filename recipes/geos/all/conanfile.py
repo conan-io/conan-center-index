@@ -56,7 +56,12 @@ class GeosConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_BENCHMARKS"] = False
+        if Version(self.version) < "3.11.0":
+            # these 2 options are declared before project() in geos < 3.11.0
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            tc.cache_variables["BUILD_BENCHMARKS"] = False
+        else:
+            tc.variables["BUILD_BENCHMARKS"] = False
         if self._has_inline_option:
             tc.variables["DISABLE_GEOS_INLINE"] = not self.options.inline
         tc.variables["BUILD_TESTING"] = False
