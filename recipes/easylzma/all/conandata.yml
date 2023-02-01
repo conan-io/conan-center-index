@@ -8,4 +8,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/cmake-no-cflags.patch"
       base_path: "source_subfolder"
-
