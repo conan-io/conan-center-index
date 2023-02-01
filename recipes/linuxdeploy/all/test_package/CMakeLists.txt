@@ -5,7 +5,7 @@ find_package(linuxdeploy CONFIG REQUIRED)
 
 add_executable(test_package test_package.cpp)
 target_link_libraries(test_package linuxdeploy::linuxdeploy) # Test packaging of includes and libs
-target_compile_features(test_package PRIVATE cxx_std_14)
+target_compile_features(test_package PRIVATE cxx_std_17)
 
 add_custom_command(TARGET test_package POST_BUILD 
     COMMAND linuxdeploy # Uses the linuxdeploy on PATH from buildenv

@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version, Git
 import os
 
@@ -24,6 +26,14 @@ class LinuxDeployConan(ConanFile):
         "fPIC": True,
         "shared": False
     }
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -51,6 +61,18 @@ class LinuxDeployConan(ConanFile):
         self.requires("patchelf/0.13")
         self.requires("taywee-args/6.4.4")
         self.requires("cimg/3.2.0")
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 17)
+        check_min_vs(self, 191)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(
+                str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"],
