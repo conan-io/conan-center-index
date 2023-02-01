@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -51,3 +52,5 @@ class ObjectboxCConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+            if Version(self.version) >= "0.18.0":
+                self.cpp_info.system_libs.append("dl")
