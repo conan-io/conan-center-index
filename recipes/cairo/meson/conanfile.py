@@ -20,7 +20,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class CairoConan(ConanFile):
@@ -61,7 +61,7 @@ class CairoConan(ConanFile):
         "with_png": True,
         "with_opengl": "desktop",
         "with_symbol_lookup": False,
-        "tee": True,
+        "tee": False,
     }
     short_paths = True
 
@@ -76,8 +76,8 @@ class CairoConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os != "Linux":
@@ -90,16 +90,16 @@ class CairoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if self.options.with_glib and self.options.shared:
             self.options["glib"].shared = True
 
     def requirements(self):
         self.requires("pixman/0.40.0")
         if self.options.with_zlib and self.options.with_png:
-            self.requires("expat/2.4.9")
+            self.requires("expat/2.5.0")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_zlib:
@@ -109,9 +109,9 @@ class CairoConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_glib:
-            self.requires("glib/2.74.0")
+            self.requires("glib/2.75.2")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
@@ -125,14 +125,14 @@ class CairoConan(ConanFile):
             self.requires("egl/system")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/1.0.0")
         self.tool_requires("pkgconf/1.9.3")
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
             raise ConanInvalidConfiguration("'with_xlib_xrender' option requires 'with_xlib' option to be enabled as well!")
         if self.options.with_glib:
-            if self.options["glib"].shared:
+            if self.dependencies["glib"].options.shared:
                 if is_msvc_static_runtime(self):
                     raise ConanInvalidConfiguration(
                         "Linking shared glib with the MSVC static runtime is not supported"
@@ -158,7 +158,6 @@ class CairoConan(ConanFile):
         if self.settings.os == "Linux":
             options["xcb"] = is_enabled(self.options.with_xcb)
             options["xlib"] = is_enabled(self.options.with_xlib)
-            options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
         else:
             options["xcb"] = "disabled"
             options["xlib"] = "disabled"
@@ -177,11 +176,17 @@ class CairoConan(ConanFile):
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
-        options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
-        options["directfb"] = "disabled"
-        options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
-        options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
-        options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+
+        version = Version(self.version)
+        if version < "1.17.6":
+            options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
+            options["directfb"] = "disabled"
+            options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
+            options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
+            options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+            if self.settings.os == "Linux":
+                options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
+
         options["gtk2-utils"] = "disabled"
         options["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
