@@ -1,10 +1,10 @@
 sources:
   "3.0.20":
-    url: "https://github.com/malaterre/GDCM/archive/refs/tags/v3.0.20.tar.gz"
-    sha256: "18161bd76008f4e8a0a33dab72fa34684147e8164f25a4735f373ad4bd909636"
+    url: "https://sourceforge.net/projects/gdcm/files/gdcm%203.x/GDCM%203.0.20/gdcm-3.0.20.tar.bz2"
+    sha256: "d299731e229fe7595001f17e6b81e6f9a27daac3df7295543753525242cea0b2"
   "3.0.9":
-    url: "https://github.com/malaterre/GDCM/archive/refs/tags/v3.0.9.tar.gz"
-    sha256: "fcfc50ea8809bd4a173550c7d7bb4f8722ae0781fbf17240ce84a04e90af0e9b"
+    url: "https://sourceforge.net/projects/gdcm/files/gdcm%203.x/GDCM%203.0.9/gdcm-3.0.9.tar.bz2"
+    sha256: "1d518b0e4709cecfb7330c9bd9b3a73cfd01ffe70d1c178f36a4c847283c4672"
 patches:
   "3.0.20":
     - patch_file: "patches/0001-charls-linking.patch"
