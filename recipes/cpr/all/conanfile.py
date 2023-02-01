@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -37,6 +37,22 @@ class CprConan(ConanFile):
         "signal": True,
         "verbose_logging": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11 if Version(self.version) < "1.10.0" else 17
+
+    @property
+    def _compilers_minimum_version(self):
+        if self._min_cppstd == 11:
+            return {}
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
 
     @property
     def _supports_openssl(self):
@@ -126,6 +142,14 @@ class CprConan(ConanFile):
         return validators[library]
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         SSL_FAILURE_MESSAGES = {
             "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
             "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
