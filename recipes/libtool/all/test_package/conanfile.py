@@ -80,7 +80,7 @@ class TestPackageConan(ConanFile):
         autotools_build_folder = os.path.join(self.build_folder, "autotools")
         shutil.copytree(os.path.join(self.source_folder, "autotools"), autotools_build_folder)
         with chdir(self, "autotools"):
-            self.run(f'autoreconf --install --verbose --force -Wall')
+            self.run("autoreconf --install --verbose --force -Wall")
 
         mkdir(self, self.autotools_package_folder)
         mkdir(self, "bin_autotools")
@@ -141,7 +141,7 @@ class TestPackageConan(ConanFile):
 
         # Copy autotools directory to build folder
         with chdir(self, autotools_sis_folder):
-            self.run(f'autoreconf --install --verbose --force -Wall')
+            self.run("autoreconf --install --verbose --force -Wall")
 
         with chdir(self, autotools_sis_folder):
             autotools = Autotools(self, namespace="sis")

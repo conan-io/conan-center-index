@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rename, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rmdir, rename, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.apple import is_apple_os
@@ -149,13 +149,13 @@ class LibtoolConan(ConanFile):
             "SED": "/usr/bin/env sed",
         }
         for file in files:
-            contents = open(file).read()
+            contents = open(file, encoding='UTF-8').read()
             for key, repl in replaces.items():
                 contents, nb1 = re.subn(f'^{key}=\"[^\"]*\"', f'{key}=\"{repl}\"', contents, flags=re.MULTILINE)
                 contents, nb2 = re.subn(f'^: \\$\\{{{key}=\"[^$\"]*\"\\}}', f': ${{{key}=\"{repl}\"}}', contents, flags=re.MULTILINE)
                 if nb1 + nb2 == 0:
                     raise ConanException(f'Failed to find {key} in {repl}')
-            open(file, "w").write(contents)
+            open(file, "w", encoding='UTF-8').write(contents)
 
         binpath = os.path.join(self.package_folder, "bin")
         if self.settings.os == "Windows":
@@ -178,9 +178,17 @@ class LibtoolConan(ConanFile):
                               "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
                               method_pass_all)
 
+        mkdir(self, os.path.join(self.package_folder, "res"))
+        rename(self, os.path.join(self.package_folder, "share", "aclocal"),
+                     os.path.join(self.package_folder, "res", "aclocal"))
+        rename(self, os.path.join(self.package_folder, "share", "libtool"),
+                     os.path.join(self.package_folder, "res", "libtool"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libtool")
         self.cpp_info.libs = ["ltdl"]
+        self.cpp_info.resdirs = ["res/aclocal", "res/libtool"]
 
         if self.options.shared:
             if self.settings.os == "Windows":
@@ -189,9 +197,9 @@ class LibtoolConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl"]
 
-        # Use ACLOCAL_PATH to access to the .m4 files provided with libtool
-        libtool_aclocal = os.path.join(self.package_folder, "share", "aclocal")
-        self.buildenv_info.define_path("ACLOCAL_PATH", libtool_aclocal)
+        # Use ACLOCAL_PATH to access the .m4 files provided with libtool
+        libtool_aclocal = os.path.join(self.package_folder, "res", "aclocal")
+        self.buildenv_info.append_path("ACLOCAL_PATH", libtool_aclocal)
 
         # Everything below can be eliminated when Conan 1.x support is dropped
         bin_path = os.path.join(self.package_folder, "bin")

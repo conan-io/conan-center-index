@@ -8,6 +8,12 @@ sources:
 patches:
   "2.4.7":
     - patch_file: "patches/2.4.7-0001-libtool-relocatable.patch"
+      patch_description: "Make libtool relocatable"
+      patch_type: "portability"
   "2.4.6":
     - patch_file: "patches/2.4.6-0001-libtool-relocatable.patch"
+      patch_description: "Make libtool relocatable"
+      patch_type: "portability"
     - patch_file: "patches/2.4.6-0002-libtool-fix-type-libtool.patch"
+      patch_description: "Fix type libtool"
+      patch_type: "portability"
