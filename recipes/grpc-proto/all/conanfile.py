@@ -54,7 +54,8 @@ class GRPCProto(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["GOOGLEAPIS_PROTO_DIRS"] = self.dependencies["googleapis"].cpp_info.resdirs[0].replace("\\", "/")
+        googleapis_resdirs = self.dependencies["googleapis"].cpp_info.aggregated_components().resdirs
+        tc.cache_variables["GOOGLEAPIS_PROTO_DIRS"] = ";".join([p.replace("\\", "/") for p in googleapis_resdirs])
         tc.generate()
 
     def requirements(self):
