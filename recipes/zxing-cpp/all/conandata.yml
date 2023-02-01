@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/nu-book/zxing-cpp/archive/v1.4.0.tar.gz"
+    sha256: "126767bb56f8a1f25ae84d233db2e9b9be50d71f5776092d0e170ca0f0ed1862"
   "1.4.0":
     url: "https://github.com/nu-book/zxing-cpp/archive/v1.4.0.tar.gz"
     sha256: "126767bb56f8a1f25ae84d233db2e9b9be50d71f5776092d0e170ca0f0ed1862"
@@ -13,13 +16,18 @@ patches:
     # core/ByteArray checks `__cpp_lib_string_view` for using string_view.
     # But some compilers(ex. gcc 7.2) don't support `__cpp_lib_string_view` but support string_view.
     - patch_file: "patches/1.4.0-0001-fix-string-view.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix compilation error for string_view on several compilers"
+      patch_type: "portability"
   "1.0.8":
     - patch_file: "patches/1.0.8-0001-Fix-C2327-for-MSVC-2015.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix compilation error C2327 on MSVC 2015"
+      patch_type: "portability"
     - patch_file: "patches/1.0.8-0002-include-limits.patch"
-      base_path: "source_subfolder"
+      patch_description: "include limits"
+      patch_type: "portability"
     - patch_file: "patches/1.0.8-0003-include-stdexcept.patch"
-      base_path: "source_subfolder"
+      patch_description: "include stdexcept"
+      patch_type: "portability"
     - patch_file: "patches/1.0.8-0004-include-cstddef.patch"
-      base_path: "source_subfolder"
+      patch_description: "include cstddef"
+      patch_type: "portability"

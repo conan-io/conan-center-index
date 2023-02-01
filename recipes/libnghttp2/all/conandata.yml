@@ -57,6 +57,12 @@ patches:
   "1.40.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
     - patch_file: "patches/fix-findLibevent.cmake"
+    - patch_file: "patches/1.40.0-remove-static-suffix.patch"
+      patch_type: "backport"
+      patch_source: https://github.com/curl/curl/pull/7515#issuecomment-890320856
+      patch_description: >-
+        Fix the breaking change that was introduced in 1.40.0 and made optional
+        in 1.40.1
   "1.39.2":
     - patch_file: "patches/fix-addNghttp2IncludesPathCMake.patch"
     - patch_file: "patches/fix-findJemalloc.cmake"

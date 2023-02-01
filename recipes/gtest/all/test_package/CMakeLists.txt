@@ -5,7 +5,11 @@ find_package(GTest REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+if(GTest_VERSION VERSION_LESS "1.13.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+endif()
 
 if(WITH_MAIN)
     target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest_main)

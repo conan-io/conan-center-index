@@ -1,4 +1,7 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
+    sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
   "3.0.6":
     url: "https://github.com/jasper-software/jasper/archive/refs/tags/version-3.0.6.tar.gz"
     sha256: "c79961bc00158f5b5dc5f5fcfa792fde9bebb024432689d0f9e3f95a097d0ec3"
@@ -6,6 +9,17 @@ sources:
     url: "https://github.com/jasper-software/jasper/archive/refs/tags/version-2.0.33.tar.gz"
     sha256: "38b8f74565ee9e7fec44657e69adb5c9b2a966ca5947ced5717cde18a7d2eca6"
 patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
   "3.0.6":
     - patch_file: "patches/3.0.6-0001-skip-rpath.patch"
       patch_description: "Do not enforce rpath configuration"

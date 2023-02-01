@@ -63,8 +63,9 @@ class Libxml2Conan(ConanFile):
     options = {name: [True, False] for name in default_options.keys()}
 
     @property
-    def _option_names(self):
-        return [name for name in self.info.options.keys() if name not in ["shared", "fPIC", "include_utils"]]
+    def _configure_option_names(self):
+        return [name for name in self.default_options.keys() if (name in self.options)
+                and (name not in ["shared", "fPIC", "include_utils"])]
 
     @property
     def _settings_build(self):
@@ -139,7 +140,7 @@ class Libxml2Conan(ConanFile):
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
             ])
-            for option_name in self._option_names:
+            for option_name in self._configure_option_names:
                 option_value = getattr(self.options, option_name)
                 tc.configure_args.append(f"--with-{option_name}={yes_no(option_value)}")
 
@@ -171,7 +172,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{';'.join(incdirs)}\"")
             args.append(f"lib=\"{';'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {"mem-debug": "mem_debug",
                          "run-debug": "run_debug",
                          "docbook": "docb"}.get(name, name)
@@ -187,7 +188,8 @@ class Libxml2Conan(ConanFile):
             def fix_library(option, package, old_libname):
                 if option:
                     libs = []
-                    for lib in itertools.chain(self.dependencies[package].cpp_info.libs, self.dependencies[package].cpp_info.system_libs):
+                    aggregated_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
+                    for lib in itertools.chain(aggregated_cpp_info.libs, aggregated_cpp_info.system_libs):
                         libname = lib
                         if not libname.endswith('.lib'):
                             libname += '.lib'
@@ -232,7 +234,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{' -I'.join(incdirs)}\"")
             args.append(f"lib=\"{' -L'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {
                     "mem-debug": "mem_debug",
                     "run-debug": "run_debug",
@@ -246,10 +248,11 @@ class Libxml2Conan(ConanFile):
             # build
             def fix_library(option, package, old_libname):
                 if option:
+                    aggregated_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
                     replace_in_file(self,
                         "Makefile.mingw",
                         f"LIBS += -l{old_libname}",
-                        f"LIBS += -l{' -l'.join(self.dependencies[package].cpp_info.libs)}",
+                        f"LIBS += -l{' -l'.join(aggregated_cpp_info.libs)}",
                     )
 
             fix_library(self.options.iconv, "libiconv", "iconv")

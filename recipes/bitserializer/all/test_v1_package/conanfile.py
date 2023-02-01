@@ -11,6 +11,8 @@ class TestPackageConan(ConanFile):
         cmake.definitions["WITH_CPPRESTSDK"] = self.options["bitserializer"].with_cpprestsdk
         cmake.definitions["WITH_RAPIDJSON"] = self.options["bitserializer"].with_rapidjson
         cmake.definitions["WITH_PUGIXML"] = self.options["bitserializer"].with_pugixml
+        cmake.definitions["WITH_RAPIDYAML"] = self.options["bitserializer"].with_rapidyaml
+        cmake.definitions["WITH_CSV"] = self.options["bitserializer"].with_csv
         cmake.configure()
         cmake.build()
 

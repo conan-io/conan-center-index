@@ -1,6 +1,6 @@
---- a/src/src/lib_proj.cmake	2022-08-29 01:53:05.000000000 +0800
-+++ b/src/lib_proj.cmake	2022-11-09 00:03:25.165493175 +0800
-@@ -447,8 +447,7 @@
+--- a/src/lib_proj.cmake
++++ b/src/lib_proj.cmake
+@@ -447,8 +447,7 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
  endif()
  
@@ -10,7 +10,7 @@
  
  if(NLOHMANN_JSON STREQUAL "external")
    target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
-@@ -458,16 +458,14 @@
+@@ -458,16 +457,14 @@ endif()
  
  if(TIFF_ENABLED)
    target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
