@@ -46,6 +46,8 @@ class DateConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.header_only:
+            del self.options.shared
 
     def requirements(self):
         if not self.options.header_only and not self.options.use_system_tz_db:
