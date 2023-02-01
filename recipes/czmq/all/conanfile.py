@@ -1,13 +1,14 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc
-from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
+from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
 required_conan_version = ">=1.53.0"
+
 
 class CzmqConan(ConanFile):
     name = "czmq"
@@ -60,7 +61,7 @@ class CzmqConan(ConanFile):
         if self.options.enable_drafts:
             self.requires("libmicrohttpd/0.9.75")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.86.0")
+            self.requires("libcurl/7.87.0")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.get_safe("with_libuuid"):
@@ -82,8 +83,8 @@ class CzmqConan(ConanFile):
         tc.variables["CZMQ_BUILD_STATIC"] = not self.options.shared
         tc.variables["CZMQ_WITH_UUID"] = self.options.get_safe("with_libuuid", False)
         tc.variables["CZMQ_WITH_SYSTEMD"] = self.options.get_safe("with_systemd", False)
-        tc.variables["CZMQ_WITH_LZ4"] = self.options.get_safe("with_lz4", False)
-        tc.variables["CZMQ_WITH_LIBCURL"] = self.options.get_safe("with_libcurl", False)
+        tc.variables["CZMQ_WITH_LZ4"] = self.options.with_lz4
+        tc.variables["CZMQ_WITH_LIBCURL"] = self.options.with_libcurl
         tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.enable_drafts
         if is_msvc(self):
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
@@ -119,17 +120,17 @@ class CzmqConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _czmq_target(self):
@@ -151,4 +152,3 @@ class CzmqConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "libczmq"
