@@ -55,6 +55,8 @@ class LinuxDeployConan(ConanFile):
             self.options.rm_safe("fPIC")
     
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         self.options["cimg"].enable_png = True # Enable at least PNGs by default, maybe enable_magick?
 
     def requirements(self):
