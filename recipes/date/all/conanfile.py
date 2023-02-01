@@ -59,7 +59,7 @@ class DateConan(ConanFile):
 
     def package_id(self):
         if self.info.options.header_only:
-            self.info.header_only()
+            self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -69,11 +69,10 @@ class DateConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["ENABLE_DATE_TESTING"] = False
-        tc.cache_variables["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-        tc.cache_variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
-        tc.cache_variables["BUILD_TZ_LIB"] = not self.options.header_only
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
+        tc.variables["ENABLE_DATE_TESTING"] = False
+        tc.variables["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
+        tc.variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
+        tc.variables["BUILD_TZ_LIB"] = not self.options.header_only
         # workaround for clang 5 not having string_view
         if Version(self.version) >= "3.0.0" and self.settings.compiler == "clang" \
                 and Version(self.settings.compiler.version) <= "5.0":
@@ -138,5 +137,6 @@ class DateConan(ConanFile):
                 defines.append("DATE_USE_DLL=1")
 
             self.cpp_info.components["date-tz"].defines.extend(defines)
+            self.cpp_info.system_libs.append("m")
         else:
             self.cpp_info.defines.append("DATE_HEADER_ONLY")

@@ -26,5 +26,5 @@ class FooTestConan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            cmd = os.path.join(self.cpp.build.bindirs[0], "example")
+            cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(cmd, env="conanrun")

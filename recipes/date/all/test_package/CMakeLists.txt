@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
-project(PackageTest CXX)
+project(test_package CXX)
 
-find_package(date CONFIG REQUIRED)
+find_package(date REQUIRED)
 
-add_executable(example src/example.cpp)
-target_link_libraries(example date::date)
-set_property(TARGET example PROPERTY CXX_STANDARD 11)
+add_executable(${PROJECT_NAME} src/test_package.cpp)
+target_link_libraries(${PROJECT_NAME} date::date)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 if(DATE_HEADER_ONLY)
-  target_compile_definitions(example PRIVATE DATE_HEADER_ONLY)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE DATE_HEADER_ONLY)
 endif()
