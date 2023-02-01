@@ -1,5 +1,10 @@
-from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
-from contextlib import contextmanager
+from conan import ConanFile
+from conan.tools.build import cross_building, can_run
+from conan.tools.files import chdir, mkdir
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.apple import is_apple_os
 import glob
 import os
 import shutil
@@ -7,7 +12,6 @@ import shutil
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
     test_type = "explicit"
     short_paths = True
 
@@ -15,67 +19,97 @@ class TestPackageConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def layout(self):
+        cmake_layout(self)
+
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str) # Needed as a requirement for CMake to see libraries
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    @contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                with tools.environment_append({
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "LD": "link",
-                }):
-                    yield
-        else:
-            yield
+        self.tool_requires(self.tested_reference_str)
+        self.tool_requires("autoconf/2.71") # Needed for autoreconf
+        self.tool_requires("automake/1.16.5") # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     @property
-    def _package_folder(self):
-        return os.path.join(self.build_folder, "package")
+    def autotools_package_folder(self):
+        return os.path.join(self.build_folder, "pkg_autotools")
+
+    @property
+    def sis_package_folder(self):
+        return os.path.join(self.build_folder, "pkg_sis")
+
+    def generate(self):
+        # Coulld reuse single autotools instance because they are identical, but good example of
+        # how to use "namespace" should they differ.
+        tc = AutotoolsToolchain(self, namespace="autotools")
+        env = tc.environment()
+        if is_msvc(self):
+            env.append("CC", "cl -nologo") # Don't use compile-wrapper as it doesn't work with CMake
+            env.append("CXX", "cl -nologo")
+            env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
+            env.append("LD", "link")
+        tc.generate(env)
+        tc = AutotoolsToolchain(self, namespace="sis")
+        env = tc.environment()
+        if is_msvc(self):
+            env.append("CC", "cl -nologo")
+            env.append("CXX", "cl -nologo")
+            env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
+            env.append("LD", "link")
+        tc.generate(env)
+        # Note: Using AutotoolsDeps causes errors on Windows when configure tries to determine compiler
+        #       because injected values for environment variables CPPFLAGS and LDFLAGS that are not
+        #       interpreted correctly
+        if is_msvc(self):
+            # Use NMake to workaround bug in MSBuild versions prior to 2022 that shows up as:
+            #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
+            #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
+            self.conf.define("tools.cmake.cmaketoolchain:generator", "NMake Makefiles")
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def _build_autotools(self):
         """ Test autotools integration """
         # Copy autotools directory to build folder
-        shutil.copytree(os.path.join(self.source_folder, "autotools"), os.path.join(self.build_folder, "autotools"))
-        with tools.chdir("autotools"):
-            self.run("{} --install --verbose -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+        autotools_build_folder = os.path.join(self.build_folder, "autotools")
+        shutil.copytree(os.path.join(self.source_folder, "autotools"), autotools_build_folder)
+        with chdir(self, "autotools"):
+            self.run(f'autoreconf --install --verbose --force -Wall')
 
-        tools.mkdir(self._package_folder)
-        conf_args = [
-            "--prefix={}".format(tools.unix_path(self._package_folder)),
-            "--enable-shared", "--enable-static",
-        ]
-
-        os.mkdir("bin_autotools")
-        with tools.chdir("bin_autotools"):
-            with self._build_context():
-                autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-                autotools.libs = []
-                autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, "autotools"))
-                autotools.make(args=["V=1"])
-                autotools.install()
+        mkdir(self, self.autotools_package_folder)
+        mkdir(self, "bin_autotools")
+        with chdir(self, "bin_autotools"):
+            autotools = Autotools(self, namespace="autotools")
+            autotools.configure(build_script_folder=autotools_build_folder)
+            autotools.make(args=["V=1"])
+            autotools.install(args=[f'DESTDIR={unix_path(self, self.autotools_package_folder)}'])
 
     def _test_autotools(self):
-        assert os.path.isdir(os.path.join(self._package_folder, "bin"))
-        assert os.path.isfile(os.path.join(self._package_folder, "include", "lib.h"))
-        assert os.path.isdir(os.path.join(self._package_folder, "lib"))
+        assert os.path.isdir(os.path.join(self.autotools_package_folder, "bin"))
+        assert os.path.isfile(os.path.join(self.autotools_package_folder, "include", "lib.h"))
+        assert os.path.isdir(os.path.join(self.autotools_package_folder, "lib"))
 
-        if not tools.cross_building(self):
-            self.run(os.path.join(self._package_folder, "bin", "test_package"), run_environment=True)
+        if can_run(self):
+            if self.settings.os == "Windows":
+                libpath = ""
+            elif is_apple_os(self):
+                libpath = f'DYLD_LIBRARY_PATH={os.path.join(self.autotools_package_folder, "lib")}'
+            else:
+                libpath = f'LD_LIBRARY_PATH={os.path.join(self.autotools_package_folder, "lib")}'
+            self.run(f'{libpath} {unix_path(self, os.path.join(self.autotools_package_folder, "bin", "test_package"))}')
 
     def _build_ltdl(self):
         """ Build library using ltdl library """
         cmake = CMake(self)
-        cmake.configure(source_folder="ltdl")
+        cmake.configure(build_script_folder="ltdl")
         cmake.build()
+        cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
 
     def _test_ltdl(self):
         """ Test library using ltdl library"""
@@ -86,66 +120,53 @@ class TestPackageConan(ConanFile):
             "Windows": "dll",
         }[str(self.settings.os)]
 
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+        if can_run(self):
+            bin_path = unix_path(self, os.path.join(self.package_folder, "bin", "test_package"))
             libdir = "bin" if self.settings.os == "Windows" else "lib"
-            lib_path = os.path.join(libdir, "liba.{}".format(lib_suffix))
-            self.run("{} {}".format(bin_path, lib_path), run_environment=True)
+            lib_path = unix_path(self, os.path.join(self.package_folder, libdir, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
+            self.run(f'{bin_path} {lib_path}', scope="run")
 
     def _build_static_lib_in_shared(self):
         """ Build shared library using libtool (while linking to a static library) """
 
         # Copy static-in-shared directory to build folder
-        autotools_folder = os.path.join(self.build_folder, "sis")
-        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_folder)
-
-        install_prefix = os.path.join(autotools_folder, "prefix")
+        autotools_sis_folder = os.path.join(self.build_folder, "sis")
+        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder)
 
         # Build static library using CMake
         cmake = CMake(self)
-        cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
-        cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
+        cmake.configure(build_script_folder=autotools_sis_folder, cli_args=["--fresh"]) # Requires CMake 3.24
         cmake.build()
-        cmake.install()
+        cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
 
         # Copy autotools directory to build folder
-        with tools.chdir(autotools_folder):
-            self.run("{} -ifv -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+        with chdir(self, autotools_sis_folder):
+            self.run(f'autoreconf --install --verbose --force -Wall')
 
-        with tools.chdir(autotools_folder):
-            conf_args = [
-                "--enable-shared",
-                "--disable-static",
-                "--prefix={}".format(tools.unix_path(os.path.join(install_prefix))),
-            ]
-            with self._build_context():
-                autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-                autotools.libs = []
-                autotools.link_flags.append("-L{}".format(tools.unix_path(os.path.join(install_prefix, "lib"))))
-                autotools.configure(args=conf_args, configure_dir=autotools_folder)
-                autotools.make(args=["V=1"])
-                autotools.install()
+        with chdir(self, autotools_sis_folder):
+            autotools = Autotools(self, namespace="sis")
+            autotools.configure(build_script_folder=autotools_sis_folder)
+            autotools.make(args=["V=1", f'LDFLAGS+=-L{unix_path(self, os.path.join(self.package_folder, "lib"))}']) # CMake installs in <self.package_folder>/lib
+            autotools.install(args=[f'DESTDIR={unix_path(self, self.sis_package_folder)}'])
 
     def _test_static_lib_in_shared(self):
         """ Test existence of shared library """
-        install_prefix = os.path.join(self.build_folder, "sis", "prefix")
-
-        with tools.chdir(install_prefix):
+        with chdir(self, self.sis_package_folder):
             if self.settings.os == "Windows":
                 assert len(list(glob.glob(os.path.join("bin", "*.dll")))) > 0
-            elif tools.is_apple_os(self.settings.os):
+            elif is_apple_os(self):
                 assert len(list(glob.glob(os.path.join("lib", "*.dylib")))) > 0
             else:
                 assert len(list(glob.glob(os.path.join("lib", "*.so")))) > 0
 
     def build(self):
         self._build_ltdl()
-        if not tools.cross_building(self):
+        if not cross_building(self):
             self._build_autotools()
             self._build_static_lib_in_shared()
 
     def test(self):
         self._test_ltdl()
-        if not tools.cross_building(self):
+        if can_run(self):
             self._test_autotools()
             self._test_static_lib_in_shared()

@@ -1,6 +1,10 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanException
-from contextlib import contextmanager
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rename, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.apple import is_apple_os
+from conan.errors import ConanException
 import os
 import re
 import shutil
@@ -10,6 +14,7 @@ required_conan_version = ">=1.33.0"
 
 class LibtoolConan(ConanFile):
     name = "libtool"
+    # package_type = "application", "library" # Hybrid package_type not yet supported
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libtool/"
     description = "GNU libtool is a generic library support script. "
@@ -26,16 +31,8 @@ class LibtoolConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/**"
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,12 +40,12 @@ class LibtoolConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    def requirements(self):
-        self.requires("automake/1.16.5")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
@@ -56,69 +53,52 @@ class LibtoolConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires("automake/1.16.5")
-        self.build_requires("gnu-config/cci.20210814")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("automake/1.16.5")
+        self.tool_requires("gnu-config/cci.20210814")
+        self.tool_requires("m4/1.4.19")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    @contextmanager
-    def _build_context(self):
-        with tools.run_environment(self):
-            with tools.environment_append(self._libtool_relocatable_env):
-                if self.settings.compiler == "Visual Studio":
-                    with tools.vcvars(self.settings):
-                        with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
-                            yield
-                else:
-                    yield
-
-    @property
-    def _datarootdir(self):
-        return os.path.join(self.package_folder, "res")
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-FS")
-        conf_args = [
-            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-            "--enable-shared",
-            "--enable-static",
-            "--enable-ltdl-install",
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        if (self.settings.get_safe("compiler") == "Visual Studio" and self.settings.get_safe("compiler.version") >= "12") or \
+           (self.settings.get_safe("compiler") == "msvc" and self.settings.get_safe("compiler.version") >= "180"):
+            tc.extra_cflags.append("-FS")
+        tc.configure_args.append("--enable-shared")
+        tc.configure_args.append("--enable-static")
+        tc.configure_args.append("--enable-ltdl-install")
+        env = tc.environment()
+        if is_msvc(self):
+            env.append("CC", f'{unix_path(self, self.conf.get("user.automake:compile-wrapper"))} cl -nologo')
+            env.append("CXX", f'{unix_path(self, self.conf.get("user.automake:compile-wrapper"))} cl -nologo')
+            env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
+            env.append("LD", "link")
+        tc.generate(env)
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
+        apply_conandata_patches(self)
+        shutil.copy(self.conf.get("user.gnu-config:config_sub"),
+                    os.path.join(self.source_folder, "build-aux", "config.sub"))
+        shutil.copy(self.conf.get("user.gnu-config:config_guess"),
+                    os.path.join(self.source_folder, "build-aux", "config.guess"))
 
     def build(self):
         self._patch_sources()
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     @property
     def _shared_ext(self):
         if self.settings.os == "Windows":
             return "dll"
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             return "dylib"
         else:
             return "so"
@@ -145,13 +125,12 @@ class LibtoolConan(ConanFile):
                     os.unlink(os.path.join(dir, file))
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
 
-        tools.rmdir(os.path.join(self._datarootdir, "info"))
-        tools.rmdir(os.path.join(self._datarootdir, "man"))
+        rmdir(self, os.path.join(self.package_folder, "share", "info"))
+        rmdir(self, os.path.join(self.package_folder, "share", "man"))
 
         os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
         if self.options.shared:
@@ -159,7 +138,6 @@ class LibtoolConan(ConanFile):
         else:
             self._rm_binlib_files_containing(self._shared_ext)
 
-        import re
         files = (
             os.path.join(self.package_folder, "bin", "libtool"),
             os.path.join(self.package_folder, "bin", "libtoolize"),
@@ -173,44 +151,35 @@ class LibtoolConan(ConanFile):
         for file in files:
             contents = open(file).read()
             for key, repl in replaces.items():
-                contents, nb1 = re.subn("^{}=\"[^\"]*\"".format(key), "{}=\"{}\"".format(key, repl), contents, flags=re.MULTILINE)
-                contents, nb2 = re.subn("^: \\$\\{{{}=\"[^$\"]*\"\\}}".format(key), ": ${{{}=\"{}\"}}".format(key, repl), contents, flags=re.MULTILINE)
+                contents, nb1 = re.subn(f'^{key}=\"[^\"]*\"', f'{key}=\"{repl}\"', contents, flags=re.MULTILINE)
+                contents, nb2 = re.subn(f'^: \\$\\{{{key}=\"[^$\"]*\"\\}}', f': ${{{key}=\"{repl}\"}}', contents, flags=re.MULTILINE)
                 if nb1 + nb2 == 0:
-                    raise ConanException("Failed to find {} in {}".format(key, repl))
+                    raise ConanException(f'Failed to find {key} in {repl}')
             open(file, "w").write(contents)
 
         binpath = os.path.join(self.package_folder, "bin")
         if self.settings.os == "Windows":
-            tools.rename(os.path.join(binpath, "libtoolize"),
+            rename(self, os.path.join(binpath, "libtoolize"),
                          os.path.join(binpath, "libtoolize.exe"))
-            tools.rename(os.path.join(binpath, "libtool"),
+            rename(self, os.path.join(binpath, "libtool"),
                          os.path.join(binpath, "libtool.exe"))
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
+        if (self.settings.get_safe("compiler") == "Visual Studio" or self.settings.get_safe("compiler") == "msvc") and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
         # allow libtool to link static libs into shared for more platforms
-        libtool_m4 = os.path.join(self._datarootdir, "aclocal", "libtool.m4")
+        libtool_m4 = os.path.join(self.package_folder, "share", "aclocal", "libtool.m4")
         method_pass_all = "lt_cv_deplibs_check_method=pass_all"
-        tools.replace_in_file(libtool_m4,
+        replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
                               method_pass_all)
-        tools.replace_in_file(libtool_m4,
+        replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
                               method_pass_all)
 
-    @property
-    def _libtool_relocatable_env(self):
-        return {
-            "LIBTOOL_PREFIX": tools.unix_path(self.package_folder),
-            "LIBTOOL_DATADIR": tools.unix_path(self._datarootdir),
-            "LIBTOOL_PKGAUXDIR": tools.unix_path(os.path.join(self._datarootdir, "libtool", "build-aux")),
-            "LIBTOOL_PKGLTDLDIR": tools.unix_path(os.path.join(self._datarootdir, "libtool")),
-            "LIBTOOL_ACLOCALDIR": tools.unix_path(os.path.join(self._datarootdir, "aclocal")),
-        }
-
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libtool")
         self.cpp_info.libs = ["ltdl"]
 
         if self.options.shared:
@@ -220,22 +189,34 @@ class LibtoolConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl"]
 
+        # Use ACLOCAL_PATH to access to the .m4 files provided with libtool
+        libtool_aclocal = os.path.join(self.package_folder, "share", "aclocal")
+        self.buildenv_info.define_path("ACLOCAL_PATH", libtool_aclocal)
+
+        # Everything below can be eliminated when Conan 1.x support is dropped
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env: {}".format(bin_path))
+        self.output.info(f'Appending PATH env: {bin_path}')
         self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
-        libtoolize = tools.unix_path(os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
-        self.output.info("Setting LIBTOOLIZE env to {}".format(libtoolize))
+        libtoolize = os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext)
+        self.output.info(f'Setting LIBTOOLIZE env to {libtoolize}')
         self.env_info.LIBTOOLIZE = libtoolize
 
-        for key, value in self._libtool_relocatable_env.items():
-            self.output.info("Setting {} environment variable to {}".format(key, value))
+        libtool_relocatable_env = {
+            "LIBTOOL_PREFIX": self.package_folder,
+            "LIBTOOL_DATADIR": os.path.join(self.package_folder, "share"),
+            "LIBTOOL_PKGAUXDIR": os.path.join(self.package_folder, "share", "libtool", "build-aux"),
+            "LIBTOOL_PKGLTDLDIR": os.path.join(self.package_folder, "share", "libtool"),
+            "LIBTOOL_ACLOCALDIR": os.path.join(self.package_folder, "share", "aclocal"),
+        }
+
+        for key, value in libtool_relocatable_env.items():
+            self.output.info(f'Setting {key} environment variable to {value}')
             setattr(self.env_info, key, value)
 
-        libtool_aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
-        self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
+        self.output.info(f'Appending ACLOCAL_PATH env: {libtool_aclocal}')
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(libtool_aclocal))
+        self.output.info(f'Appending AUTOMAKE_CONAN_INCLUDES environment variable: {libtool_aclocal}')
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(libtool_aclocal)
