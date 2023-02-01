@@ -123,6 +123,7 @@ class DateConan(ConanFile):
             self.cpp_info.components["date-tz"].libs = [lib_name]
             if self.settings.os == "Linux":
                 self.cpp_info.components["date-tz"].system_libs.append("pthread")
+                self.cpp_info.components["date-tz"].system_libs.append("m")
 
             if not self.options.use_system_tz_db:
                 self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
@@ -137,6 +138,5 @@ class DateConan(ConanFile):
                 defines.append("DATE_USE_DLL=1")
 
             self.cpp_info.components["date-tz"].defines.extend(defines)
-            self.cpp_info.system_libs.append("m")
         else:
             self.cpp_info.defines.append("DATE_HEADER_ONLY")
