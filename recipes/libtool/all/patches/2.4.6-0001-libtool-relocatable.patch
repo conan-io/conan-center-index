@@ -15,10 +15,10 @@
 -  pkgltdldir="@pkgdatadir@"
 -  aclocaldir="@aclocaldir@"
 +  prefix="$SCRIPTDIR/.."
-+  datadir="SCRIPTDIR/../share"
-+  pkgauxdir="$SCRIPTDIR/../share/libtool/build-aux"
-+  pkgltdldir="$SCRIPTDIR/../share/libtool"
-+  aclocaldir="$SCRIPTDIR/../share/aclocal"
++  datadir="SCRIPTDIR/../res"
++  pkgauxdir="$SCRIPTDIR/../res/libtool/build-aux"
++  pkgltdldir="$SCRIPTDIR/../res/libtool"
++  aclocaldir="$SCRIPTDIR/../res/aclocal"
 
    # Allow the user to override the master libtoolize repository:
    if test -n "$_lt_pkgdatadir"; then
