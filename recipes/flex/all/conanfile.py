@@ -34,6 +34,11 @@ class FlexConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def requirements(self):
+        # Flex requires M4 to be compiled. If consumer does not have M4
+        # installed, Conan will need to know that Flex requires it.
+        self.requires("m4/1.4.19")
+
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
         if hasattr(self, "settings_build") and cross_building(self):
@@ -82,6 +87,8 @@ class FlexConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["fl"]
         self.cpp_info.system_libs = ["m"]
+        # Avoid CMakeDeps messing with Conan targets
+        self.cpp_info.set_property("cmake_find_mode", "none")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

@@ -89,7 +89,7 @@ class FontconfigConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "freetype_req = '>= 21.0.15'",
-                        f"freetype_req = '{Version(self.deps_cpp_info['freetype'].version)}'")
+                        f"freetype_req = '{Version(self.dependencies['freetype'].ref.version)}'")
 
     def build(self):
         self._patch_files()
