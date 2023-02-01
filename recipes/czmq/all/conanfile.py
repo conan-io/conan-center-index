@@ -90,6 +90,8 @@ class CzmqConan(ConanFile):
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
         if self.options.shared:
             tc.preprocessor_definitions["CZMQ_STATIC"] = 1
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         dpes = CMakeDeps(self)
