@@ -1,7 +1,14 @@
-from conans import ConanFile, Meson, tools
-from conan.tools.files import rename
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.files import rename, apply_conandata_patches, replace_in_file, get, copy, rm, rmdir, export_conandata_patches
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+
 import glob
 import os
 import shutil
@@ -25,46 +32,35 @@ class CairommConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "pkg_config"
-    exports_sources = "patches/**"
     short_paths = True
 
     def _abi_version(self):
-        return "1.16" if tools.Version(self.version) >= "1.16.0" else "1.0"
+        return "1.16" if Version(self.version) >= "1.16.0" else "1.0"
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if self.settings.compiler.get_safe("cppstd"):
             if self._abi_version() == "1.16":
-                tools.check_min_cppstd(self, 17)
+                check_min_cppstd(self, 17)
             else:
-                tools.check_min_cppstd(self, 11)
+                check_min_cppstd(self, 11)
         if self.options.shared and not self.options["cairo"].shared:
             raise ConanInvalidConfiguration(
                 "Linking against static cairo would cause shared cairomm to link "
                 "against static glib which can cause problems."
             )
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if is_msvc(self):
             # when using cpp_std=c++11 the /permissive- flag is added which
             # attempts enforcing standard conformant c++ code
             # the problem is that older versions of Windows SDK is not standard
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
+            replace_in_file(self,
+                os.path.join(self.source_folder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 
     def config_options(self):
@@ -78,54 +74,54 @@ class CairommConan(ConanFile):
             self.options["cairo"].shared = True
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/1.0.0")
+        self.build_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("cairo/1.17.4")
+        self.requires("cairo/1.17.6")
 
         if self._abi_version() == "1.16":
             self.requires("libsigcpp/3.0.7")
         else:
             self.requires("libsigcpp/2.10.8")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
-        tools.get(
+        get(self,
             **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self._source_subfolder,
+            strip_root=True
         )
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build(self):
         self._patch_sources()
-        with tools.environment_append(tools.RunEnvironment(self).vars):
-            meson = self._configure_meson()
-            meson.build()
-
-    def _configure_meson(self):
         meson = Meson(self)
-        defs = {
+        meson.configure()
+        meson.build()
+
+    def generate(self):
+        PkgConfigDeps(self).generate()
+
+        tc = MesonToolchain(self)
+        tc.project_options.update({
             "build-examples": "false",
             "build-documentation": "false",
             "build-tests": "false",
             "msvc14x-parallel-installable": "false",
             "default_library": "shared" if self.options.shared else "static",
-        }
-        meson.configure(
-            defs=defs,
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder,
-            pkg_config_paths=[self.install_folder],
-        )
-        return meson
+        })
+        tc.generate()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
         if is_msvc(self):
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "bin"), "*.pdb")
+            rm(self, "*.pdb",os.path.join(self.package_folder, "bin"), recursive=True)
             if not self.options.shared:
                 rename(
                     self,
@@ -157,7 +153,7 @@ class CairommConan(ConanFile):
             )
 
         for dir_to_remove in ["pkgconfig", f"cairomm-{self._abi_version()}"]:
-            tools.rmdir(os.path.join(self.package_folder, "lib",
+            rmdir(self, os.path.join(self.package_folder, "lib",
                                      dir_to_remove))
 
     def package_info(self):
@@ -171,7 +167,7 @@ class CairommConan(ConanFile):
             self.cpp_info.components["cairomm-1.16"].requires = [
                 "libsigcpp::sigc++", "cairo::cairo_"
             ]
-            if tools.is_apple_os(self.settings.os):
+            if is_apple_os(self):
                 self.cpp_info.components["cairomm-1.16"].frameworks = [
                     "CoreFoundation"
                 ]
@@ -185,7 +181,7 @@ class CairommConan(ConanFile):
             self.cpp_info.components["cairomm-1.0"].requires = [
                 "libsigcpp::sigc++-2.0", "cairo::cairo_"
             ]
-            if tools.is_apple_os(self.settings.os):
+            if is_apple_os(self):
                 self.cpp_info.components["cairomm-1.0"].frameworks = [
                     "CoreFoundation"
                 ]
