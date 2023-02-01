@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conan.tools.build import can_run, cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -29,9 +29,11 @@ class TestPackageConan(ConanFile):
         tc.generate()
         
         # Set up environment so that we can run grpc-cpp-plugin at build time
-        if not cross_building(self):
-            buildenv = VirtualRunEnv(self)
-            buildenv.generate(scope="build")
+        if hasattr(self, "settings_build"):
+            VirtualBuildEnv(self).generate()
+        else:
+            # Cover case in Conan 1.x when only one profile is provided
+            VirtualRunEnv(self).generate(scope="build")
 
         # Environment so that the compiled test executable can load shared libraries
         runenv = VirtualRunEnv(self)
