@@ -1,10 +1,10 @@
 #include <cstdlib>
 
+#include <limits>
+
 #ifdef SOL2_V3
 #include <sol/sol.hpp>
 #else
-#include <limits>
-
 #include <sol.hpp>
 #endif
 
