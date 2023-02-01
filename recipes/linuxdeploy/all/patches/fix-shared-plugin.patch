@@ -1,0 +1,15 @@
+--- a/src/plugin/CMakeLists.txt
++++ b/src/plugin/CMakeLists.txt
+@@ -13,10 +13,6 @@
+     plugin_type0.cpp
+     plugin_process_handler.cpp
+     ${headers}
+ )
+-target_link_libraries(linuxdeploy_plugin PUBLIC linuxdeploy_core linuxdeploy_subprocess)
+-
+-unset(headers)
+-unset(headers_dir)
+-
+-install(TARGETS linuxdeploy_plugin)
++target_link_libraries(linuxdeploy_plugin PUBLIC linuxdeploy_subprocess)
++target_include_directories(linuxdeploy_plugin PRIVATE ${PROJECT_SOURCE_DIR}/include)

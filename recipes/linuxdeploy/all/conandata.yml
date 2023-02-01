@@ -20,6 +20,6 @@ patches:
     - patch_file: "patches/pull-conan-core.patch"
       patch_type: "conan"
       patch_description: "Pull conan dependencies for linuxdeploy-core"
-    - patch_file: "patches/remove-plugin-install.patch"
+    - patch_file: "patches/fix-shared-plugin.patch"
       patch_type: "conan"
-      patch_description: "Remove linuxdeploy-plugin from being installed during packaging"
+      patch_description: "Remove cyclic dependency"

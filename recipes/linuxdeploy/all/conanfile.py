@@ -19,12 +19,10 @@ class LinuxDeployConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
         "shared": [True, False]
     }
 
     default_options = {
-        "fPIC": True,
         "shared": False
     }
 
@@ -49,14 +47,8 @@ class LinuxDeployConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
     
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.options["cimg"].enable_png = True # Enable at least PNGs by default, maybe enable_magick?
 
     def requirements(self):
