@@ -5,3 +5,5 @@ versions:
     folder: all
   "1.17.4":
     folder: meson
+  "1.17.6":
+    folder: meson

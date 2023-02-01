@@ -4,11 +4,11 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import replace_in_file, apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.microsoft import check_min_vs
 from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
     name = "qpdf"
@@ -52,10 +52,7 @@ class PackageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,7 +61,7 @@ class PackageConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.13")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
         if self.options.with_jpeg == "libjpeg":
@@ -76,22 +73,19 @@ class PackageConan(ConanFile):
 
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        if is_msvc(self):
-            check_min_vs(self, "150")
-        else:
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        check_min_vs(self, "150")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def build_requirements(self):
         self.tool_requires("cmake/3.24.1")
         self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

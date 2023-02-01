@@ -1,12 +1,18 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.layout import basic_layout
+from conan.tools.files import get, copy
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
+
 
 class CtreConan(ConanFile):
     name = "ctre"
+    package_type = "header-library"
     homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Compile Time Regular Expression for C++17/20"
@@ -15,18 +21,17 @@ class CtreConan(ConanFile):
     no_copy_source = True
     settings = "compiler"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
-        ctre_version = tools.Version(self.version)
+        compiler_version = Version(self.settings.compiler.version)
+        ctre_version = Version(self.version)
 
         min_gcc = "7.4" if ctre_version < "3" else "8"
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
         if is_msvc(self):
             if compiler_version < "15":
                 raise ConanInvalidConfiguration("{}/{} doesn't support MSVC < 15".format(self.name, self.version))
@@ -46,12 +51,15 @@ class CtreConan(ConanFile):
                 raise ConanInvalidConfiguration("{}/{} doesn't support Apple clang".format(self.name, self.version))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

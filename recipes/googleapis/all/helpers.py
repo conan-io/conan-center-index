@@ -41,6 +41,16 @@ class _ProtoLibrary:
             qname = qname[2:]
         return f'{qname.replace("/", "_")}_{self.name}'
 
+    def shorten_cmake_target(self, cmake_target):
+        short_name = cmake_target
+        prefix = "google_"
+        suffix = "_proto"
+        if cmake_target.startswith(prefix):
+            short_name = short_name[len(prefix):]
+        if short_name.endswith(suffix):
+            short_name = short_name[:-len(suffix)]
+        return short_name
+        
     @property
     def cmake_deps(self):
         def to_cmake_target(item):
@@ -48,32 +58,39 @@ class _ProtoLibrary:
                 return item[2:].replace("/", "_").replace(":", "_")
             return item
         return [to_cmake_target(it) for it in self.deps]
+    
+    @property
+    def cmake_deps_short(self):
+        return [self.shorten_cmake_target(dep) for dep in self.cmake_deps]
 
     @property
     def cmake_content(self):
-        content = f"\n\n# {self.cmake_target}\n"
+        cmake_target_short = self.shorten_cmake_target(self.cmake_target)
+        content = f"\n\n# {self.cmake_target} ({cmake_target_short})\n"
         content += "\n".join([f"#{it}" for it in self.dumps().split('\n')])
         content += "\n"        
         if not self.srcs:
             content += textwrap.dedent(f"""\
-                add_library({self.cmake_target} INTERFACE)
+                add_library({cmake_target_short} INTERFACE)
             """)
         else:
             content += textwrap.dedent(f"""\
-                set({self.cmake_target}_PROTOS {" ".join(["${CMAKE_SOURCE_DIR}/"+it for it in self.srcs])})
-                add_library({self.cmake_target} ${{{self.cmake_target}_PROTOS}})
-                target_include_directories({self.cmake_target} PUBLIC ${{CMAKE_BINARY_DIR}})
-                target_compile_features({self.cmake_target} PUBLIC cxx_std_11)
+                set({cmake_target_short}_PROTOS {" ".join(["${CMAKE_SOURCE_DIR}/"+it for it in self.srcs])})
+                add_library({cmake_target_short} ${{{cmake_target_short}_PROTOS}})
+                target_include_directories({cmake_target_short} PUBLIC ${{CMAKE_BINARY_DIR}})
+                target_compile_features({cmake_target_short} PUBLIC cxx_std_11)
+                # set project_label to shorten the name of the vcxproj file and cause shorter paths
+                set_property(TARGET {cmake_target_short} PROPERTY OUTPUT_NAME "{self.cmake_target}")
                 protobuf_generate(LANGUAGE cpp 
-                                TARGET {self.cmake_target} 
-                                PROTOS ${{{self.cmake_target}_PROTOS}}
+                                TARGET {cmake_target_short} 
+                                PROTOS ${{{cmake_target_short}_PROTOS}}
                                 IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}
                                 )
             """)
 
         if self.deps:
             content += textwrap.dedent(f"""\
-                target_link_libraries({self.cmake_target} {"PUBLIC" if self.srcs else "INTERFACE"} {" ".join(self.cmake_deps)})
+                target_link_libraries({cmake_target_short} {"PUBLIC" if self.srcs else "INTERFACE"} {" ".join(self.cmake_deps_short)})
             """)
 
         return content
