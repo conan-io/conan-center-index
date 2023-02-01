@@ -30,8 +30,8 @@ class Sol2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_lua == "lua":
-            if self.version < "3.0.0":
-                # v2.x.x supports up to Lua 5.3
+            if self.version < "3.1.0":
+                # v2.x.x & v3.0.x supports up to Lua 5.3
                 self.requires("lua/5.3.6")
             else:
                 self.requires("lua/5.4.4")
