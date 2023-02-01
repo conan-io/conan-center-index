@@ -10,4 +10,4 @@ libtestlib_la_SOURCES = lib.c
 libtestlib_la_LDFLAGS = -no-undefined -export-symbols "$(srcdir)/libtestlib.sym"
 include_HEADERS = lib.h
 
-ACLOCAL_AMFLAGS = -I m4
+# ACLOCAL_AMFLAGS = -I m4

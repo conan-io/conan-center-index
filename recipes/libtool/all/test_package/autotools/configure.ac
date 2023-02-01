@@ -11,7 +11,7 @@ AC_CONFIG_SRCDIR([test_package.c])
 # Store the auxiliary build tools (e.g., install-sh, config.sub, config.guess)
 # in this dir (build-aux)
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIRS([m4])
+# AC_CONFIG_MACRO_DIRS([m4])
 
 # Init automake, and specify this program use relaxed structures.
 # i.e. this program doesn't follow the gnu coding standards, and doesn't have
@@ -25,7 +25,7 @@ AC_PROG_CXX
 # Check for archiver
 AM_PROG_AR
 
-LT_PREREQ([2.4])
+LT_PREREQ([2.4.6])
 LT_INIT([win32-dll])
 
 AC_SEARCH_LIBS([sqrt], [m])
