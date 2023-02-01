@@ -1,7 +1,7 @@
 sources:
   "0.31":
     url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.31.tar.gz"
-    sha256: "ceb1ceffdeb242b70ed19ca7ddb1e6e12213b2d23ba8dc4281c5ed047a7ed763"
+    sha256: "b6be3b9b6c4a64ed9cf75d5434683d018c5fd517b2a428596e9dce97a9e030bd"
   "0.30":
     url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.30.tar.gz"
     sha256: "e39f420312d311f3eaa162e201883b4594c34e04739b39a4563f84be920e654f"
