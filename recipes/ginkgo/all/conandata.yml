@@ -14,4 +14,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/windows-iterator.patch"
       base_path: "source_subfolder"
-
