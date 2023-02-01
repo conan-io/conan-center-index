@@ -1,9 +1,13 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.files import get, copy, mkdir, rename, rmdir, export_conandata_patches
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.layout import basic_layout
 import os
 import shutil
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.56.0"
 
 
 class TestPackageConan(ConanFile):
@@ -16,34 +20,30 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
-        self.build_requires("automake/1.16.3")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires(self.tested_reference_str)
+        self.tool_requires("autoconf/2.71")    # Needed for autoreconf
+        self.tool_requires("automake/1.16.5")  # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl -nologo",
-                    "CXX": "cl -nologo",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        env = tc.environment()
+        if is_msvc(self):
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+        tc.generate(env)
 
     def build(self):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=self._settings_build.os == "Windows")
-        with self._build_context():
-            autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
-            autotools.libs = []
-            autotools.configure()
-            autotools.make()
+        self.run(f'autoreconf -fiv')
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self.build_folder)
+        autotools.make()
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run(os.path.join(".", "test_package"))
+        if can_run(self):
+            self.run(unix_path(self, os.path.join(".", "test_package")))
