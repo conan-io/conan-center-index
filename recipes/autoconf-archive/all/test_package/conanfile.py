@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.files import get, copy, mkdir, rename, rmdir, export_conandata_patches
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.layout import basic_layout
@@ -18,6 +17,9 @@ class TestPackageConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
@@ -39,7 +41,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run(f'autoreconf -fiv')
+        self.run("autoreconf -fiv")
         autotools = Autotools(self)
         autotools.configure(build_script_folder=self.build_folder)
         autotools.make()
