@@ -47,7 +47,7 @@ class CprConan(ConanFile):
         if self._min_cppstd == 11:
             return {}
         return {
-            "gcc": "7",
+            "gcc": "9",
             "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "15",
