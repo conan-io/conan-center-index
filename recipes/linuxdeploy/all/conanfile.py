@@ -14,7 +14,7 @@ class LinuxDeployConan(ConanFile):
     name = "linuxdeploy"
     homepage = "https://github.com/linuxdeploy/linuxdeploy"
     description = "A tool to generate AppDirs"
-    topics = ("AppDir", "AppImage", "deploy")
+    topics = ("appdir", "appimage", "deploy")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
