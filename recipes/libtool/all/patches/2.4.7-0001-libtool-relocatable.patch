@@ -3,20 +3,22 @@
 
 --- libtoolize.in
 +++ libtoolize.in
-@@ -1903,11 +1903,11 @@
+@@ -1903,11 +1903,13 @@
    pkgmacro_files="@pkgmacro_files@"
 
++  SCRIPT=$(realpath $0)
++  SCRIPTDIR=$(dirname "$SCRIPT")
    # Locations for important files:
 -  prefix="@prefix@"
 -  datadir="@datadir@"
 -  pkgauxdir="@pkgauxdir@"
 -  pkgltdldir="@pkgdatadir@"
 -  aclocaldir="@aclocaldir@"
-+  prefix="$LIBTOOL_PREFIX"
-+  datadir="$LIBTOOL_DATADIR"
-+  pkgauxdir="$LIBTOOL_PKGAUXDIR"
-+  pkgltdldir="$LIBTOOL_PKGLTDLDIR"
-+  aclocaldir="$LIBTOOL_ACLOCALDIR"
++  prefix="$SCRIPTDIR/.."
++  datadir="SCRIPTDIR/../share"
++  pkgauxdir="$SCRIPTDIR/../share/libtool/build-aux"
++  pkgltdldir="$SCRIPTDIR/../share/libtool"
++  aclocaldir="$SCRIPTDIR/../share/aclocal"
 
    # Allow the user to override the master libtoolize repository:
    if test -n "$_lt_pkgdatadir"; then
