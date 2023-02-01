@@ -57,7 +57,7 @@ class TrantorConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1s")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.18.1")
+            self.requires("c-ares/1.19.0")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
