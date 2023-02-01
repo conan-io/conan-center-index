@@ -97,6 +97,8 @@ class PugiXmlConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "pugixml")
         self.cpp_info.set_property("cmake_target_name", "pugixml::pugixml")
         self.cpp_info.set_property("pkg_config_name", "pugixml")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         if self.options.header_only:
             # For the "header_only" mode, options applied via global definitions
             self.cpp_info.defines.append("PUGIXML_HEADER_ONLY")
