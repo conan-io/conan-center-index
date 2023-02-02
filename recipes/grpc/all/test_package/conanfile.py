@@ -33,6 +33,7 @@ class TestPackageConan(ConanFile):
             VirtualBuildEnv(self).generate()
         else:
             # Cover case in Conan 1.x when only one profile is provided
+            self.output.info("Generating VirtualRunEnv in build environment - using two profiles is advised.")
             VirtualRunEnv(self).generate(scope="build")
 
         # Environment so that the compiled test executable can load shared libraries
