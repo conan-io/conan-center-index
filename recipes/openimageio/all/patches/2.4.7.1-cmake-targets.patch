@@ -408,3 +408,18 @@ index 213b1c0bf..24670fe8f 100644
      } catch (const std::exception&) {
          return std::string();
      }
+diff --git a/src/ptex.imageio/CMakeLists.txt b/src/ptex.imageio/CMakeLists.txt
+index d7f0a9582..7cfce4a35 100644
+--- a/src/ptex.imageio/CMakeLists.txt
++++ b/src/ptex.imageio/CMakeLists.txt
+@@ -2,8 +2,8 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ # https://github.com/OpenImageIO/oiio
+
+-if (Ptex_FOUND)
++if (ptex_FOUND)
+     add_oiio_plugin (ptexinput.cpp
+-                     LINK_LIBRARIES Ptex::Ptex_dynamic ZLIB::ZLIB
++                     LINK_LIBRARIES Ptex::Ptex ZLIB::ZLIB
+                      DEFINITIONS "-DUSE_PTEX")
+ endif ()
