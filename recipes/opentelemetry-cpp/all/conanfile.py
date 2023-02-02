@@ -53,7 +53,7 @@ class OpenTelemetryCppConan(ConanFile):
     def requirements(self):
         self.requires("abseil/20220623.0")
         self.requires("grpc/1.50.1")
-        self.requires("libcurl/7.86.0")
+        self.requires("libcurl/7.87.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("openssl/1.1.1s")
         if Version(self.version) <= "1.4.1":
@@ -63,7 +63,7 @@ class OpenTelemetryCppConan(ConanFile):
         self.requires("protobuf/3.21.4")
         self.requires("thrift/0.17.0")
         if Version(self.version) >= "1.3.0":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -103,6 +103,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_JAEGER"] = True
         tc.variables["WITH_OTLP"] = True
+        if Version(self.version) >= "1.8.2":
+            tc.variables["WITH_OTLP_HTTP"] = True
         tc.variables["WITH_ZIPKIN"] = True
         tc.generate()
 
