@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conans import CMake
-from conan.errors import ConanInvalidConfiguration
 import os
 
 
