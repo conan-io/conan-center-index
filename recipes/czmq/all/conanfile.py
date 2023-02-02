@@ -26,7 +26,7 @@ class CzmqConan(ConanFile):
         "with_libcurl": [True, False],
         "with_lz4": [True, False],
         "with_libuuid": [True, False],
-        "with_microhttpd": [True, False],
+        "with_libmicrohttpd": [True, False],
         "with_systemd": [True, False],
     }
     default_options = {
@@ -36,7 +36,7 @@ class CzmqConan(ConanFile):
         "with_libcurl": True,
         "with_lz4": True,
         "with_libuuid": True,
-        "with_microhttpd": True,
+        "with_libmicrohttpd": True,
         "with_systemd": False,
     }
 
@@ -56,14 +56,14 @@ class CzmqConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.enable_drafts:
             del self.options.with_libcurl
-            del self.options.with_microhttpd
+            del self.options.with_libmicrohttpd
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zeromq/4.3.4")
-        if self.options.get_safe("with_microhttpd"):
+        if self.options.get_safe("with_libmicrohttpd"):
             self.requires("libmicrohttpd/0.9.75")
         if self.options.get_safe("with_libcurl"):
             self.requires("libcurl/7.87.0")
@@ -90,7 +90,7 @@ class CzmqConan(ConanFile):
         tc.variables["CZMQ_WITH_SYSTEMD"] = self.options.get_safe("with_systemd", False)
         tc.variables["CZMQ_WITH_LZ4"] = self.options.with_lz4
         tc.variables["CZMQ_WITH_LIBCURL"] = self.options.get_safe("with_libcurl", False)
-        tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.get_safe("with_microhttpd", False)
+        tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.get_safe("with_libmicrohttpd", False)
         if Version(self.version) >= "4.2.1":
             tc.variables["CZMQ_WITH_NSS"] = False
         if is_msvc(self):
