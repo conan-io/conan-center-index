@@ -3,9 +3,14 @@
 
 --- libtoolize.in
 +++ libtoolize.in
-@@ -1903,11 +1903,13 @@
+@@ -1903,11 +1903,18 @@
    pkgmacro_files="@pkgmacro_files@"
 
++  if [ "$(uname -s)" = "Darwin" ]; then
++    realpath() {
++      echo $(cd "$(dirname "$1")" ; pwd -P)
++    }
++  fi
 +  SCRIPT=$(realpath $0)
 +  SCRIPTDIR=$(dirname "$SCRIPT")
    # Locations for important files:
