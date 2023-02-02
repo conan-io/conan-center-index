@@ -25,17 +25,18 @@ class IndicatorsConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        check_min_vs(self, 193)
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-        if Version(self.version) < "2.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration(
-                "indicators < 2.0 can't be used by {0} {1}".format(
-                    self.settings.compiler,
-                    self.settings.compiler.version
+        if Version(self.version) < "2.0":
+            check_min_vs(self, 193)
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                raise ConanInvalidConfiguration(
+                    "indicators < 2.0 can't be used by {0} {1}".format(
+                        self.settings.compiler,
+                        self.settings.compiler.version
+                    )
                 )
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
