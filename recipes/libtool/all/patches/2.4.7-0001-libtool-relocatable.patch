@@ -8,7 +8,7 @@
 
 +  if [ "$(uname -s)" = "Darwin" ]; then
 +    realpath() {
-+      echo $(cd "$(dirname "$1")" ; pwd -P)
++      echo $(cd "$(dirname "$1")" ; pwd -P)/$(basename "$1")
 +    }
 +  fi
 +  SCRIPT=$(realpath $0)
