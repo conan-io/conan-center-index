@@ -20,6 +20,8 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
+        self.build_requires("autoconf/2.71")   # Needed for autoreconf
+        self.build_requires("automake/1.16.5") # Needed for aclocal called by autoreconf 
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
