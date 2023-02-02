@@ -241,6 +241,12 @@ class WtConan(ConanFile):
             "if(0)",
         )
 
+        replace_in_file(self,
+            os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+            "TARGET_LINK_LIBRARIES(wt PRIVATE Crypt32.lib)",
+            "TARGET_LINK_LIBRARIES(wt PUBLIC crypt32)"
+        )
+
         dbo_cmakelsts = os.path.join(self.source_folder, "src", "Wt", "Dbo", "backend", "CMakeLists.txt")
         replace_in_file(self, dbo_cmakelsts, "FIND_PACKAGE( Sqlite3 REQUIRED)", "FIND_PACKAGE( SQLite3 REQUIRED)")
         replace_in_file(self, dbo_cmakelsts, '${SQLITE3_LIBRARIES}', '${SQLite3_LIBRARIES}')
