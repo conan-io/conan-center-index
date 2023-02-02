@@ -116,13 +116,13 @@ class LibtoolConan(ConanFile):
             regex_out = re.compile(r".*\.({})($|\..*)".format(ext_exclusive))
         else:
             regex_out = re.compile("^$")
-        for dir in (
+        for directory in (
                 os.path.join(self.package_folder, "bin"),
                 os.path.join(self.package_folder, "lib"),
         ):
-            for file in os.listdir(dir):
+            for file in os.listdir(directory):
                 if regex_in.match(file) and not regex_out.match(file):
-                    os.unlink(os.path.join(dir, file))
+                    os.unlink(os.path.join(directory, file))
 
     def package(self):
         copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
