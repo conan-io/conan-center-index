@@ -1,9 +1,4 @@
-
-from io import StringIO
-
 from conan import ConanFile
-from conan.tools.layout import basic_layout
-from conans.model.recipe_ref import RecipeReference
 
 
 class TestPackageConan(ConanFile):
