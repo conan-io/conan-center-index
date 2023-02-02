@@ -271,6 +271,7 @@ class Hdf5Conan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "HDF5")
         self.cpp_info.set_property("cmake_target_name", "HDF5::HDF5")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "hdf5-all-do-not-use") # to avoid conflict with hdf5_c component
 
         components = self._components()
