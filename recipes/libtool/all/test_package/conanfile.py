@@ -1,10 +1,11 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import cross_building, can_run
-from conan.tools.files import chdir, mkdir
+from conan.tools.files import chdir, mkdir, rm
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
 import glob
 import os
 import shutil
@@ -109,7 +110,10 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(build_script_folder="ltdl")
         cmake.build()
-        cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
+        # Conan 1.x does not define self.package_folder when running the "test" command,
+        # which prevents the use of cmake.install in the build method of a test package
+        if Version(conan_version).major >= 2:
+             cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
 
     def _test_ltdl(self):
         """ Test library using ltdl library"""
@@ -121,9 +125,15 @@ class TestPackageConan(ConanFile):
         }[str(self.settings.os)]
 
         if can_run(self):
-            bin_path = unix_path(self, os.path.join(self.package_folder, "bin", "test_package"))
-            libdir = "bin" if self.settings.os == "Windows" else "lib"
-            lib_path = unix_path(self, os.path.join(self.package_folder, libdir, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
+            if Version(conan_version).major >= 2:
+                # In Conan 2.0, we can call cmake.install, which places artifacts in subdirectories of <self.package_folder>
+                bin_path = unix_path(self, os.path.join(self.package_folder, "bin", "test_package"))
+                libdir = "bin" if self.settings.os == "Windows" else "lib"
+                lib_path = unix_path(self, os.path.join(self.package_folder, libdir, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
+            else:
+                # We can't call cmake.install with Conan 1.x, so we find artifacts in <self.build_folder>
+                bin_path = unix_path(self, os.path.join(self.build_folder, "test_package"))
+                lib_path = unix_path(self, os.path.join(self.build_folder, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
             self.run(f'{bin_path} {lib_path}', scope="run")
 
     def _build_static_lib_in_shared(self):
@@ -134,10 +144,14 @@ class TestPackageConan(ConanFile):
         shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder)
 
         # Build static library using CMake
+        rm(self, "CMakeCache.txt", self.build_folder) # or pass --fresh to cmake.configure()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=autotools_sis_folder, cli_args=["--fresh"]) # Requires CMake 3.24
+        cmake.configure(build_script_folder=autotools_sis_folder) # cli_args=["--fresh"]) # Requires CMake 3.24
         cmake.build()
-        cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
+        # Conan 1.x does not define self.package_folder when running the "test" command,
+        # which prevents the use of cmake.install in the build method of a test package
+        if Version(conan_version).major >= 2:
+            cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
 
         # Copy autotools directory to build folder
         with chdir(self, autotools_sis_folder):
@@ -146,7 +160,10 @@ class TestPackageConan(ConanFile):
         with chdir(self, autotools_sis_folder):
             autotools = Autotools(self, namespace="sis")
             autotools.configure(build_script_folder=autotools_sis_folder)
-            autotools.make(args=["V=1", f'LDFLAGS+=-L{unix_path(self, os.path.join(self.package_folder, "lib"))}']) # CMake installs in <self.package_folder>/lib
+            if Version(conan_version).major >= 2:
+                autotools.make(args=["V=1", f'LDFLAGS+=-L{unix_path(self, os.path.join(self.package_folder, "lib"))}']) # CMake installs in <self.package_folder>/lib
+            else:
+                autotools.make(args=["V=1", f'LDFLAGS+=-L{unix_path(self, self.build_folder)}']) # CMake creates artifacts in <self.build_folder> sans install
             autotools.install(args=[f'DESTDIR={unix_path(self, self.sis_package_folder)}'])
 
     def _test_static_lib_in_shared(self):
