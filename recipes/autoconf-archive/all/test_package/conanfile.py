@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import can_run
+from conan.tools.build import cross_building, can_run
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import is_msvc, unix_path
 import os
@@ -35,12 +35,13 @@ class TestPackageConan(ConanFile):
         tc.generate(env)
 
     def build(self):
-        for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run("autoreconf -fiv")
-        autotools = Autotools(self)
-        autotools.configure(build_script_folder=self.build_folder)
-        autotools.make()
+        if not cross_building(self):
+            for src in self.exports_sources:
+                shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
+            self.run("autoreconf -fiv")
+            autotools = Autotools(self)
+            autotools.configure(build_script_folder=self.build_folder)
+            autotools.make()
 
     def test(self):
         if can_run(self):
