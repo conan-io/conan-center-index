@@ -21,7 +21,7 @@ index 4465c824c..7b23fb444 100644
  endif ()
 
 diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
-index 48e871418..390bf3598 100644
+index 48e871418..21f709b1d 100644
 --- a/src/cmake/externalpackages.cmake
 +++ b/src/cmake/externalpackages.cmake
 @@ -48,11 +48,11 @@ endif ()
@@ -278,6 +278,27 @@ index 48e871418..390bf3598 100644
  endmacro()
 
 
+diff --git a/src/ffmpeg.imageio/CMakeLists.txt b/src/ffmpeg.imageio/CMakeLists.txt
+index 58402060e..5dea82369 100644
+--- a/src/ffmpeg.imageio/CMakeLists.txt
++++ b/src/ffmpeg.imageio/CMakeLists.txt
+@@ -2,13 +2,11 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ # https://github.com/OpenImageIO/oiio
+
+-if (FFmpeg_FOUND)
++if (ffmpeg_FOUND)
+     add_oiio_plugin (ffmpeginput.cpp
+-                     INCLUDE_DIRS ${FFMPEG_INCLUDES}
+-                     LINK_LIBRARIES ${FFMPEG_LIBRARIES}
+-                                    ${BZIP2_LIBRARIES}
++                     LINK_LIBRARIES ffmpeg::avcodec ffmpeg::avformat ffmpeg::swscale
+                      DEFINITIONS "-DUSE_FFMPEG"
+-                                 "-DOIIO_FFMPEG_VERSION=\"${FFMPEG_VERSION}\"")
++                                 "-DOIIO_FFMPEG_VERSION=\"${ffmpeg_VERSION}\"")
+ else()
+     message (STATUS "FFmpeg not found: ffmpeg plugin will not be built")
+ endif()
 diff --git a/src/include/CMakeLists.txt b/src/include/CMakeLists.txt
 index 52b0936a6..611eadb4e 100644
 --- a/src/include/CMakeLists.txt
