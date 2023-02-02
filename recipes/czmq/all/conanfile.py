@@ -83,7 +83,6 @@ class CzmqConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["ENABLE_DRAFTS"] = self.options.enable_drafts
         tc.variables["CZMQ_BUILD_SHARED"] = self.options.shared
         tc.variables["CZMQ_BUILD_STATIC"] = not self.options.shared
@@ -96,8 +95,6 @@ class CzmqConan(ConanFile):
             tc.variables["CZMQ_WITH_NSS"] = False
         if is_msvc(self):
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
-        if self.options.shared:
-            tc.preprocessor_definitions["CZMQ_STATIC"] = 1
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
