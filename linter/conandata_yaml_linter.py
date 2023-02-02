@@ -64,7 +64,7 @@ def main():
             patches = parsed["patches"][version]
             if version not in parsed["sources"]:
                 print(
-                    f"::error file={args.path},line={patches.start_line},endline={patches.end_line},"
+                    f"::warning file={args.path},line={patches.start_line},endline={patches.end_line},"
                     f"title=conandata.yml inconsistency"
                     f"::Patch(es) are listed for version `{version}`, but there is source for this version."
                     f" You should either remove `{version}` from the `patches` section, or add it to the"
