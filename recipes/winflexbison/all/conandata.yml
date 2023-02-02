@@ -1,10 +1,10 @@
 sources:
   "2.5.24":
-    url: "https://github.com/lexxmark/winflexbison/archive/v2.5.24.tar.gz"
-    sha256: "a49d6e310636e3487e1e066e411d908cfeae2d5b5fde1f3cf74fe1d6d4301062"
+    url: "https://github.com/lexxmark/winflexbison/releases/download/v2.5.24/win_flex_bison-2.5.24.zip"
+    sha256: "39c6086ce211d5415500acc5ed2d8939861ca1696aee48909c7f6daf5122b505"
   "2.5.22":
-    url: "https://github.com/lexxmark/winflexbison/archive/v2.5.22.tar.gz"
-    sha256: "697c2c4af3308625605b75498bd63a9a294660f8e43a4c35452cf4334fa4a530"
+    url: "https://github.com/lexxmark/winflexbison/releases/download/v2.5.22/win_flex_bison-2.5.22.zip"
+    sha256: "2a9c4086ae425166133d56f529308f5bffe5c5df4fedca2c7962fb8663945c6b"
 patches:
   "2.5.24":
     - patch_file: "patches/0001-2.5.24-mingw-support.patch"
