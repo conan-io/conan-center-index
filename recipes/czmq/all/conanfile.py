@@ -62,7 +62,6 @@ class CzmqConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1s")  # zdigest depends on openssl
         self.requires("zeromq/4.3.4")
         if self.options.get_safe("with_microhttpd"):
             self.requires("libmicrohttpd/0.9.75")
