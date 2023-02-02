@@ -24,9 +24,6 @@ class IndicatorsConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    def package_id(self):
-        self.info.clear()
-
     def validate(self):
         check_min_vs(self, 193)
         if self.settings.compiler.get_safe("cppstd"):
