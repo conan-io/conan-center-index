@@ -8,8 +8,10 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save, rename, collect_libs, load
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save, rename, collect_libs, load, replace_in_file
 from conan.tools.scm import Version
+
+from shutil import which
 
 import os
 import textwrap
@@ -64,7 +66,6 @@ class VtkConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     short_paths = True
-    no_copy_source = False
 
     # Alternative method: can use git directly - helpful when hacking VTK
     # TODO allow user to set the git_url from the command line, during conan install
@@ -159,6 +160,7 @@ class VtkConan(ConanFile):
             "enable_wrapping": [True, False],
             "wrap_java":       [True, False],
             "wrap_python":     [True, False],
+            "build_pyi_files": [True, False],   # requires wrap_python
             "use_tk":          [True, False],   # requires wrap_python
 
             ### Advanced tech ###
@@ -185,9 +187,18 @@ class VtkConan(ConanFile):
             "group_enable_Imaging":    ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_MPI":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Rendering":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "group_enable_StandAlone": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Views":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Web":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+
+            # With StandAlone enabled, it will use the conan libraries rather than the copies
+            # bundled with VTK (eg: HDF5, cgns, theora, ogg, netcdf, libxml2)
+            "group_enable_StandAlone": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+
+            # Modules (many not listed)
+            "module_enable_IOExport":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOLegacy":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_RenderingCore":     ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_RenderingExternal": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
             # Qt-specific modules
             "qt_version": ["Auto", "5", "6"],
@@ -198,17 +209,17 @@ class VtkConan(ConanFile):
             "module_enable_ViewsQt":           ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
             # TODO modules that require extra stuff to be installed
-            "module_IOPDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_IOPostgreSQL":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_IOOpenVDB":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_IOLAS":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_IOADIOS2":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_fides":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_GeovisGDAL":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_IOGDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_FiltersOpenTURNS":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_DomainsMicroscopy": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_CommonArchive":     ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOPDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOPostgreSQL":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOOpenVDB":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOLAS":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOADIOS2":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_fides":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_GeovisGDAL":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_IOGDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_FiltersOpenTURNS":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_DomainsMicroscopy": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "module_enable_CommonArchive":     ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             }
 
     default_options = {
@@ -237,6 +248,9 @@ class VtkConan(ConanFile):
             "wrap_java":       False,
             "wrap_python":     False,
             "use_tk":          False,
+
+            ### Python specifics ###
+            "build_pyi_files": False,
 
             ### Advanced tech ###
             "use_cuda":    False,
@@ -272,24 +286,24 @@ class VtkConan(ConanFile):
             "module_enable_RenderingQt":       "DEFAULT",
             "module_enable_ViewsQt":           "DEFAULT",
 
-            # Note: parallel MPI support should be also applied to hdf5 and cgns
-
-            # HDF5 is expected to have "parallel" enabled
-            # "hdf5:parallel":   True,
-            # "hdf5:enable_cxx": False,  # can't be enabled with parallel
+            # More specific modules
+            "module_enable_IOExport":          "DEFAULT",
+            "module_enable_IOLegacy":          "DEFAULT",
+            "module_enable_RenderingCore":     "DEFAULT",
+            "module_enable_RenderingExternal": "DEFAULT",
 
             # these aren't supported yet, need to system-install packages
-            "module_IOPDAL":            "NO",
-            "module_IOPostgreSQL":      "NO",
-            "module_IOOpenVDB":         "NO",
-            "module_IOLAS":             "NO",
-            "module_IOADIOS2":          "NO",
-            "module_fides":             "NO",
-            "module_GeovisGDAL":        "NO",
-            "module_IOGDAL":            "NO",
-            "module_FiltersOpenTURNS":  "NO",
-            "module_DomainsMicroscopy": "NO",
-            "module_CommonArchive":     "NO",
+            "module_enable_IOPDAL":            "NO",
+            "module_enable_IOPostgreSQL":      "NO",
+            "module_enable_IOOpenVDB":         "NO",
+            "module_enable_IOLAS":             "NO",
+            "module_enable_IOADIOS2":          "NO",
+            "module_enable_fides":             "NO",
+            "module_enable_GeovisGDAL":        "NO",
+            "module_enable_IOGDAL":            "NO",
+            "module_enable_FiltersOpenTURNS":  "NO",
+            "module_enable_DomainsMicroscopy": "NO",
+            "module_enable_CommonArchive":     "NO",
 
             # kissfft - we want the double format (also known as kiss_fft_scalar)
             # FIXME should this be in configure/validate? I recall it was required for some reason...
@@ -333,6 +347,12 @@ class VtkConan(ConanFile):
             ])
 
 
+    # Required as VTK adds 'd' to the end of library files on windows
+    @property
+    def _lib_suffix(self):
+        return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+
+
     def source(self):
         if self.options.use_source_from_git:
             self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
@@ -347,11 +367,6 @@ class VtkConan(ConanFile):
             get(self, **self.conan_data["sources"][self.version],
                     strip_root=True,
                     destination=self.source_folder)
-
-        # And apply our patches.  I do it here rather than in build, so I can repeatedly call build without applying patches.
-        if self.no_copy_source:
-            apply_conandata_patches(self)
-
 
     def _third_party(self):
         parties = {
@@ -440,6 +455,9 @@ class VtkConan(ConanFile):
         if self.options.use_tk and not self.options.wrap_python:
             raise ConanInvalidConfiguration("use_tk can only be enabled with wrap_python")
 
+        if self.options.build_pyi_files and not self.options.wrap_python:
+            raise ConanInvalidConfiguration("build_pyi_files can only be enabled with wrap_python")
+
         if self.dependencies["libtiff"].options.jpeg != self.info.options.with_jpeg:
             raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg.")
 
@@ -523,6 +541,7 @@ class VtkConan(ConanFile):
         tc.variables["VTK_ENABLE_WRAPPING"] = self.options.enable_wrapping
         tc.variables["VTK_WRAP_JAVA"] = self.options.wrap_java
         tc.variables["VTK_WRAP_PYTHON"] = self.options.wrap_python
+        tc.variables["VTK_BUILD_PYI_FILES"] = self.options.build_pyi_files # Warning: this fails on 9.2.2 if rendering is not enabled.
         tc.variables["VTK_USE_TK"] = self.options.use_tk    # requires wrap_python
 
 
@@ -581,17 +600,26 @@ class VtkConan(ConanFile):
         tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]           = _yesno(self.options.module_enable_ViewsQt)
 
         ### Other stuff ###
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOPDAL"]            = _yesno(self.options.module_IOPDAL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOPostgreSQL"]      = _yesno(self.options.module_IOPostgreSQL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOOpenVDB"]         = _yesno(self.options.module_IOOpenVDB)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOLAS"]             = _yesno(self.options.module_IOLAS)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOADIOS2"]          = _yesno(self.options.module_IOADIOS2)
-        tc.variables["VTK_MODULE_ENABLE_VTK_fides"]             = _yesno(self.options.module_fides)
-        tc.variables["VTK_MODULE_ENABLE_VTK_GeovisGDAL"]        = _yesno(self.options.module_GeovisGDAL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOGDAL"]            = _yesno(self.options.module_IOGDAL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_FiltersOpenTURNS"]  = _yesno(self.options.module_FiltersOpenTURNS)
-        tc.variables["VTK_MODULE_ENABLE_VTK_DomainsMicroscopy"] = _yesno(self.options.module_DomainsMicroscopy)
-        tc.variables["VTK_MODULE_ENABLE_VTK_CommonArchive"]     = _yesno(self.options.module_CommonArchive)
+
+        # Modules
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOExport"]          = _yesno(self.options.module_enable_IOExport)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOLegacy"]          = _yesno(self.options.module_enable_IOLegacy)
+        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingCore"]     = _yesno(self.options.module_enable_RenderingCore)
+        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingExternal"] = _yesno(self.options.module_enable_RenderingExternal)
+
+        # Modules that aren't supported yet
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOPDAL"]            = _yesno(self.options.module_enable_IOPDAL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOPostgreSQL"]      = _yesno(self.options.module_enable_IOPostgreSQL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOOpenVDB"]         = _yesno(self.options.module_enable_IOOpenVDB)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOLAS"]             = _yesno(self.options.module_enable_IOLAS)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOADIOS2"]          = _yesno(self.options.module_enable_IOADIOS2)
+        tc.variables["VTK_MODULE_ENABLE_VTK_fides"]             = _yesno(self.options.module_enable_fides)
+        tc.variables["VTK_MODULE_ENABLE_VTK_GeovisGDAL"]        = _yesno(self.options.module_enable_GeovisGDAL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_IOGDAL"]            = _yesno(self.options.module_enable_IOGDAL)
+        tc.variables["VTK_MODULE_ENABLE_VTK_FiltersOpenTURNS"]  = _yesno(self.options.module_enable_FiltersOpenTURNS)
+        tc.variables["VTK_MODULE_ENABLE_VTK_DomainsMicroscopy"] = _yesno(self.options.module_enable_DomainsMicroscopy)
+        tc.variables["VTK_MODULE_ENABLE_VTK_CommonArchive"]     = _yesno(self.options.module_enable_CommonArchive)
+
         # TODO if true (or all) then system has to install postgres dev package
 
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
@@ -644,8 +672,18 @@ class VtkConan(ConanFile):
 
 
     def build(self):
-        if not self.no_copy_source:     # might be done in def source()
-            apply_conandata_patches(self)
+        apply_conandata_patches(self)
+
+        if self.options.wrap_python and self.settings.build_type == "Debug" and self.settings.os == "Windows":
+            # TODO: check with @EricAtORS if this is needed
+            # if you apply the python patch here: https://stackoverflow.com/a/40594968
+            # then you need this hack to compile the python portion of the code in debug
+            python_lib_folder = os.path.realpath(os.path.join(which("python"), "..", "libs")).replace("\\", "/")
+            replace_in_file(os.path.join(self.build_folder,"..", "..", "src", "CMakeLists.txt"),
+                                  "project(VTK)",
+                                  'project(VTK)\nlink_directories("{}")\n'.format(python_lib_folder)
+                                  )
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -688,16 +726,19 @@ class VtkConan(ConanFile):
                 set (VTK_ENABLE_KITS {self.options.enable_kits})
                 """
                 )
+        if self.settings.os == "Windows" and self.options.wrap_python:
+            rename(self,
+                   os.path.join(self.package_folder, "bin", "Lib", "site-packages"),
+                   os.path.join(self.package_folder, "Lib", "site-packages")
+            )
         save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
 
 
     def package_info(self):
         # auto-include these .cmake files (generated by conan)
         vtk_cmake_build_modules = [self._module_file_rel_path]
-
-        # Just generate 'config' version, FindVTK.cmake hasn't existed since CMake 3.1, according to:
-        # https://cmake.org/cmake/help/latest/module/FindVTK.html
-
+        self.cpp_info.names["cmake_find_package"] = "VTK"
+        self.cpp_info.names["cmake_find_package_multi"] = "VTK"
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
 
@@ -769,12 +810,15 @@ class VtkConan(ConanFile):
         self.output.info("Processing modules")
         for module_name in vtkmods["modules"]:
             comp = module_name.split(':')[2]
-            comp_libname = vtkmods["modules"][module_name]["library_name"]
+            comp_libname = vtkmods["modules"][module_name]["library_name"] + self._lib_suffix
 
             if comp_libname in existing_libs:
                 self.output.info(f"Processing module {module_name}")
                 self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                self.cpp_info.components[comp].libs          = [comp_libname]
+                self.cpp_info.components[comp].libs         = [comp_libname]
+                self.cpp_info.components[comp].include_dirs = ["include/vtk"]
+                self.cpp_info.components[comp].names["cmake_find_package"] = comp
+                self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
                 # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
             elif module_name in thirds:
                 self.output.info("Processing external module {} --> {}".format(module_name, thirds[module_name]))
@@ -796,7 +840,7 @@ class VtkConan(ConanFile):
                 # FIXME should private be added as a different kind of private-requires?
                 for section in ["depends", "private_depends"]:
                     for dep in vtkmods["modules"][module_name][section]:
-                        dep_libname = vtkmods["modules"][dep]["library_name"]
+                        dep_libname = vtkmods["modules"][dep]["library_name"] + self._lib_suffix
                         if dep_libname in existing_libs:
                             depname = dep.split(':')[2]
                             self.output.info(f"{comp}   depends on {depname}")
@@ -809,94 +853,6 @@ class VtkConan(ConanFile):
                             self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
 
                 # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
-
-                self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
-                if self.settings.os in ("FreeBSD", "Linux"):
-                    self.cpp_info.components[comp].system_libs.extend(["dl","pthread","m"])
-            else:
-                self.output.warning("Skipping module, did not become a component: {}".format(module_name))
-
-
-        # add some more system libs
-        if self.settings.os == "Windows" and "vtksys" in self.cpp_info.components:
-            self.cpp_info.components["vtksys"].system_libs = ["ws2_32", "dbghelp", "psapi"]
-
-        # All modules use the same include dir.
-        #
-        # Cannot just be vtk_include_dirs = "include",
-        # as vtk files include themselves with #include <vtkCommand.h>
-        # and the files can't find each other in the same dir when included with <>
-        #
-        # Plus, it is standard to include vtk files with #include <vtkWhatever.h>
-        #
-        # Note also we aren't using "-9" in include/vtk-9: VTK_VERSIONED_INSTALL=False
-        # With versioned_install, we would do: "include/vtk-%s" % self.short_version,
-        #
-
-        if self._is_any_Qt_enabled:
-            # VTK::QtOpenGL doesn't currently exist in VTK, I have added this.
-            # Check it doesn't appear in the future, if so then we should check it out.
-            if "VTK::QtOpenGL" in vtkmods["modules"]:
-                raise ConanException("Did not expect to find VTK::QtOpenGL in modules.json - please investigate and adjust recipe")
-            vtkmods["modules"]["VTK::QtOpenGL"] = {
-                    "library_name": "EXTERNAL_LIB",
-                    "depends": [],
-                    "private_depends": [],
-                    }
-
-            # GUISupportQt requires Qt6::QtOpenGL as a dependency
-            vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
-
-        self.output.info(f"All module keys: {vtkmods['modules'].keys()}")
-
-        self.output.info(f"Found libs: {existing_libs}")
-        self.output.info("Processing modules")
-        for module_name in vtkmods["modules"]:
-            comp = module_name.split(':')[2]
-            comp_libname = vtkmods["modules"][module_name]["library_name"]
-
-            if comp_libname in existing_libs:
-                self.output.info(f"Processing module {module_name}")
-                self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                self.cpp_info.components[comp].libs          = [comp_libname]
-                # NEEDED with 1.53? # self.cpp_info.components[comp].libdirs       = ["lib"]
-                # NEEDED with 1.53? # # WTF resdirs # self.cpp_info.components[comp].resdirs       = ["res"]
-
-                # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
-            elif module_name in thirds:
-                self.output.info(f"Processing external module {module_name} --> {thirds[module_name]}")
-                self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                self.cpp_info.components[comp].requires.append(thirds[module_name])
-
-            else:
-                self.output.warning(f"Skipping module (lib file does not exist) {module_name}")
-
-        # second loop for internal dependencies
-        for module_name in vtkmods["modules"]:
-            comp = module_name.split(':')[2]
-            if comp in self.cpp_info.components:
-
-                # always depend on the headers mini-module
-                # which also includes the cmake extra file definitions (declared afterwards)
-                self.cpp_info.components[comp].requires.append("headers")
-
-                # these are the public depends + private depends
-                # FIXME should private be added as a different kind of private-requires?
-                for section in ["depends", "private_depends"]:
-                    for dep in vtkmods["modules"][module_name][section]:
-                        dep_libname = vtkmods["modules"][dep]["library_name"]
-                        if dep_libname in existing_libs:
-                            depname = dep.split(':')[2]
-                            self.output.info(f"{comp}   depends on {depname}")
-                            self.cpp_info.components[comp].requires.append(depname)
-                        elif dep in thirds:
-                            extern = thirds[dep]
-                            self.output.info(f"{comp}   depends on external {dep} --> {extern}")
-                            self.cpp_info.components[comp].requires.append(extern)
-                        else:
-                            self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
-
-                # DEBUG # self.output.info(f"  Final deps: {self.cpp_info.components[comp].requires}")
 
                 self.cpp_info.components[comp].set_property("cmake_build_modules", vtk_cmake_build_modules)
                 if self.settings.os in ("FreeBSD", "Linux"):
