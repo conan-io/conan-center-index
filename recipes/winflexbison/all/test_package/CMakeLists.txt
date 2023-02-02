@@ -29,7 +29,7 @@ target_compile_features(flex_test_package PRIVATE cxx_std_11)
 
 # Bison
 
-find_package(BISON)
+find_package(BISON REQUIRED)
 
 set(BISON_VARS
     BISON_FOUND
