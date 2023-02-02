@@ -113,7 +113,7 @@ class TestPackageConan(ConanFile):
         # Conan 1.x does not define self.package_folder when running the "test" command,
         # which prevents the use of cmake.install in the build method of a test package
         if Version(conan_version).major >= 2:
-             cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
+            cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
 
     def _test_ltdl(self):
         """ Test library using ltdl library"""
