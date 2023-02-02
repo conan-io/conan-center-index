@@ -29,11 +29,11 @@ class SentryBreakpadConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if Version(self.version < "0.5.4") else 17
+        return 11 if Version(self.version) < "0.5.4" else 17
 
     @property
     def _compilers_minimum_version(self):
-        return {} if Version(self.version < "0.5.4") else {
+        return {} if Version(self.version) < "0.5.4" else {
             "gcc": "7",
             "clang": "7",
             "apple-clang": "10",
