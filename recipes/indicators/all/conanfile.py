@@ -29,7 +29,7 @@ class IndicatorsConan(ConanFile):
             check_min_cppstd(self, 11)
 
         if Version(self.version) < "2.0":
-            check_min_vs(self, 193)
+            check_min_vs(self, 192)
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration(
                     "indicators < 2.0 can't be used by {0} {1}".format(
