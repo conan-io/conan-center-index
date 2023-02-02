@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, symlinks
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -21,11 +22,16 @@ class OpenJDK(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
+        if Version(self.version) < "19.0.2" and self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)],
+        key = self.settings.os
+        if self.settings.os == "Macos":
+            key = f"{self.settings.os}_{self.settings.arch}"
+        get(self, **self.conan_data["sources"][self.version][str(key)],
                   destination=self.source_folder, strip_root=True)
 
     def package(self):
