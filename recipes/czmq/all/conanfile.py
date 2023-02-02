@@ -4,6 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -25,6 +26,7 @@ class CzmqConan(ConanFile):
         "with_libcurl": [True, False],
         "with_lz4": [True, False],
         "with_libuuid": [True, False],
+        "with_microhttpd": [True, False],
         "with_systemd": [True, False],
     }
     default_options = {
@@ -34,6 +36,7 @@ class CzmqConan(ConanFile):
         "with_libcurl": True,
         "with_lz4": True,
         "with_libuuid": True,
+        "with_microhttpd": True,
         "with_systemd": False,
     }
 
@@ -51,6 +54,9 @@ class CzmqConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.enable_drafts:
+            del self.options.with_libcurl
+            del self.options.with_microhttpd
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,9 +64,9 @@ class CzmqConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1s")  # zdigest depends on openssl
         self.requires("zeromq/4.3.4")
-        if self.options.enable_drafts:
+        if self.options.get_safe("with_microhttpd"):
             self.requires("libmicrohttpd/0.9.75")
-        if self.options.with_libcurl:
+        if self.options.get_safe("with_libcurl"):
             self.requires("libcurl/7.87.0")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
@@ -79,13 +85,16 @@ class CzmqConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["ENABLE_DRAFTS"] = self.options.enable_drafts
         tc.variables["CZMQ_BUILD_SHARED"] = self.options.shared
         tc.variables["CZMQ_BUILD_STATIC"] = not self.options.shared
         tc.variables["CZMQ_WITH_UUID"] = self.options.get_safe("with_libuuid", False)
         tc.variables["CZMQ_WITH_SYSTEMD"] = self.options.get_safe("with_systemd", False)
         tc.variables["CZMQ_WITH_LZ4"] = self.options.with_lz4
-        tc.variables["CZMQ_WITH_LIBCURL"] = self.options.with_libcurl
-        tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.enable_drafts
+        tc.variables["CZMQ_WITH_LIBCURL"] = self.options.get_safe("with_libcurl", False)
+        tc.variables["CZMQ_WITH_LIBMICROHTTPD"] = self.options.get_safe("with_microhttpd", False)
+        if Version(self.version) >= "4.2.1":
+            tc.variables["CZMQ_WITH_NSS"] = False
         if is_msvc(self):
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
         if self.options.shared:
