@@ -1,9 +1,10 @@
 import os
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import copy, get, rmdir, rename, chdir, replace_in_file
+from conan.tools.files import copy, get, rmdir, rename, chdir
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -48,13 +49,13 @@ class LibniceConan(ConanFile):
     def validate(self):
         if self.settings.os != "Windows" and self.options.crypto_library == "win32":
             raise ConanInvalidConfiguration(
-                "crypto_library=win32 is not supported on non-Windows")
+                "-o libnice:crypto_library=win32 is not supported on non-Windows")
         if self.settings.os == "Windows" and self.options.with_gtk_doc:
             raise ConanInvalidConfiguration(
-                "gtk-doc is disabled by libnice while building on Windows")
-        if self.settings.get_safe("runtime") in ("MT", "MTd", "static") and self.options["glib"].shared:
+                "-o libnice:with_gtk_doc=True is not support on Windows")
+        if is_msvc_static_runtime(self) and self.options["glib"].shared:
             raise ConanInvalidConfiguration(
-                "glib:shared=True with static runtime is not supported")
+                "-o glib:shared=True with static runtime is not supported")
 
     def requirements(self):
         self.requires("glib/2.75.2")
