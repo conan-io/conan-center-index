@@ -272,8 +272,6 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
-            if self.settings.get_safe("compiler.threads") == "posix":
-                self.cpp_info.components["pq"].system_libs.append("pthread")
 
         self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
         self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
