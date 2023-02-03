@@ -6,6 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -19,12 +20,6 @@ class TestPackageConan(ConanFile):
         tc.variables["PAHO_MQTT_C_ASYNC"] = self.options["paho-mqtt-c"].asynchronous
         tc.variables["PAHO_MQTT_C_WITH_SSL"] = self.options["paho-mqtt-c"].ssl
         tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
