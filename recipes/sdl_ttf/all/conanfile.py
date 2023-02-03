@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class SdlttfConan(ConanFile):
@@ -35,15 +35,16 @@ class SdlttfConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "2.20.0":
+            del self.options.with_harfbuzz
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-
-        if Version(self.version) < "2.20.0":
-            del self.options.with_harfbuzz
+        if Version(self.version) >= "2.20.0":
+            self.options["sdl"].shared = self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -55,25 +56,26 @@ class SdlttfConan(ConanFile):
             self.requires("harfbuzz/6.0.0")
 
     def validate(self):
-        if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration("sdl_ttf shared is not supported with Visual Studio")
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
             raise ConanInvalidConfiguration("sdl & sdl_ttf must have the same major version")
 
-        if Version(self.version) >= "2.20.0" and self.options.shared != self.dependencies["sdl"].options.shared:
-            raise ConanInvalidConfiguration("sdl & sdl_ttf must be build with the same options(shared or static)")
+        if Version(self.version) >= "2.20.0":
+            if self.options.shared != self.dependencies["sdl"].options.shared:
+                raise ConanInvalidConfiguration("sdl & sdl_ttf must be built with the same 'shared' option value")
+        else:
+            if is_msvc(self) and self.options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} shared is not supported with Visual Studio")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) >= "2.20.0":
-            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
             tc.variables["SDL2TTF_SAMPLES"] = False
             tc.variables["SDL2TTF_VENDORED"] = False
             tc.variables["SDL2TTF_HARFBUZZ"] = self.options.with_harfbuzz
+            tc.variables["SDL2TTF_DEBUG_POSTFIX"] = ""
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
