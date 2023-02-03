@@ -10,7 +10,7 @@ from conan.tools.microsoft import is_msvc, NMakeDeps, NMakeToolchain, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.58.0"
 
 
 class GdalConan(ConanFile):
@@ -22,6 +22,7 @@ class GdalConan(ConanFile):
     homepage = "https://github.com/OSGeo/gdal"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -410,7 +411,8 @@ class GdalConan(ConanFile):
     def build_requirements(self):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
-            self.tool_requires("pkgconf/1.9.3")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
