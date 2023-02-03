@@ -6,7 +6,7 @@ patches:
   "2.1.0":
     - patch_file: "patches/0001-fix-cmake-config-in-path.patch"
       patch_description: "Fix path to easyhttpcppeasyhttpConfig.cmake.in"
-      patch_type : "conan"
+      patch_type: "conan"
     - patch_file: "patches/0002-use-poco-targets.patch"
       patch_description: "Use Poco targets, remove OpenSSL from direct dependencies"
-      patch_type : "conan"
+      patch_type: "conan"
