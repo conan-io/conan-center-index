@@ -105,7 +105,7 @@ class LibtoolConan(ConanFile):
 
     @property
     def _static_ext(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             return "lib"
         else:
             return "a"
@@ -134,7 +134,7 @@ class LibtoolConan(ConanFile):
 
         os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
         if self.options.shared:
-            self._rm_binlib_files_containing(self._static_ext, self._shared_ext)
+            self._rm_binlib_files_containing(self._static_ext)
         else:
             self._rm_binlib_files_containing(self._shared_ext)
 
@@ -164,7 +164,7 @@ class LibtoolConan(ConanFile):
             rename(self, os.path.join(binpath, "libtool"),
                          os.path.join(binpath, "libtool.exe"))
 
-        if (self.settings.get_safe("compiler") == "Visual Studio" or self.settings.get_safe("compiler") == "msvc") and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
