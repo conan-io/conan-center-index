@@ -51,16 +51,13 @@ class GlibmmConan(ConanFile):
         return f"giomm-{self._abi_version}"
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-
         if self.settings.compiler.get_safe("cppstd"):
             if self._abi_version == "2.68":
                 check_min_cppstd(self, 17)
             else:
                 check_min_cppstd(self, 11)
 
-        if self.options.shared and not self.options["glib"].shared:
+        if self.options.shared and not self.dependencies["glib"].shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
