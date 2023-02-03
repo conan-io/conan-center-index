@@ -3,29 +3,29 @@ import functools
 import glob
 from io import StringIO
 
-from conans import CMake, tools
-
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.files import apply_conandata_patches, copy, get, export_conandata_patches, copy
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-from conan.errors import ConanInvalidConfiguration
 
 from helpers import parse_proto_libraries
 
-required_conan_version = ">=1.45.0"
-
+required_conan_version = ">=1.50.0"
 
 class GoogleAPIS(ConanFile):
     name = "googleapis"
+    package_type = "library"
     description = "Public interface definitions of Google APIs"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/googleapis/googleapis"
     topics = "google", "protos", "api"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeDeps", "CMakeToolchain"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -38,17 +38,18 @@ class GoogleAPIS(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
-        self._patch_sources()
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
@@ -57,7 +58,7 @@ class GoogleAPIS(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration("Build with GCC 5 fails")
 
@@ -81,19 +82,13 @@ class GoogleAPIS(ConanFile):
             return True
 
     def requirements(self):
-        self.requires('protobuf/3.21.4')
+        self.requires('protobuf/3.21.4', transitive_headers=True)
 
     def build_requirements(self):
         self.build_requires('protobuf/3.21.4')
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
         if not self._cmake_new_enough:
-            self.build_requires('cmake/3.23.2')
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+            self.build_requires('cmake/3.23.5')
 
     @functools.lru_cache(1)
     def _parse_proto_libraries(self):
@@ -131,13 +126,13 @@ class GoogleAPIS(ConanFile):
         #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs: GID_MAX
         #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
         #    as of 3.21.4 issue still exist
-        if Version(self.deps_cpp_info["protobuf"].version) <= "3.21.5" and self.settings.os == "Macos" or \
+        if Version(self.dependencies["protobuf"].ref.version) <= "3.21.5" and self.settings.os == "Macos" or \
             self.settings.os == "Android":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
             deactivate_library("//google/storagetransfer/v1:storagetransfer_cc_proto")
         #  - Inconvenient macro names from /usr/include/math.h : DOMAIN
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++") or \
-            self.settings.compiler in ["Visual Studio", "msvc"]:
+            is_msvc(self):
             deactivate_library("//google/cloud/channel/v1:channel_proto")
             deactivate_library("//google/cloud/channel/v1:channel_cc_proto")
         #  - Inconvenient names for android
@@ -160,6 +155,7 @@ class GoogleAPIS(ConanFile):
         return proto_libraries
 
     def build(self):
+        apply_conandata_patches(self)
         proto_libraries = self._parse_proto_libraries()
         # Use a separate file to host the generated code, which is generated in full each time.
         # This is safe to call multiple times, for example, if you need to invoke `conan build` more than
@@ -169,13 +165,9 @@ class GoogleAPIS(ConanFile):
             f.write("# DO NOT EDIT - change the generation code in conanfile.py instead\n")
             for it in filter(lambda u: u.is_used, proto_libraries):
                 f.write(it.cmake_content)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            # Using **patch here results in an error with the required `patch_description` field.
-            tools.patch(patch_file=patch['patch_file'])
 
     _DEPS_FILE = "res/generated_targets.deps"
 
@@ -203,6 +195,7 @@ class GoogleAPIS(ConanFile):
             for line in f.read().splitlines():
                 (name, libtype, deps) = line.rstrip('\n').split(' ')
                 self.cpp_info.components[name].requires = deps.split(',')
+                self.cpp_info.components[name].resdirs = ["res"]
                 if libtype == 'LIB':
                     self.cpp_info.components[name].libs = [name]
                 self.cpp_info.components[name].names["pkg_config"] = name

@@ -41,7 +41,8 @@ This section gathers the most common questions from the community related to pac
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
   * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
-    * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)<!-- endToc -->
+    * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
+  * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -420,12 +421,20 @@ Please, read [Inactivity and user removal section](adding_packages/README.md#ina
 
 ## Can we add package which are parts of bigger projects like Boost?
 
-Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version. See #14660 for recent discussions.
+Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version.
+See #14660 for recent discussions. There is one main "boost" recipe with many versions maintained. Adding boost libraries with no dependencies
+just opens the door to graph resolution problems and once available allows for dependent libraries to be added.
 
-There is one main "boost" recipe with many versions maintained.
-
-There are good arguments for permitting some boost libraries but we feel doing so is not fair to the rest.
+In order to avoid this the sole permutation which is permissible is when the project does not package any headers under the `boost/` folder, does not use the boost namespace
+and does not install libraries with the boost prefix.
 
 ### Can I add my project which I will submit to Boost?
 
-Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts.
+Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts. In addition to follow the rules outlined above.
+
+## Can I add options that do not affect `package_id` or the package contents
+
+Generally no, these sorts of options can most likely be set from a profile or downstream recipes. However if the project supports this option from its build script
+and would otherwise dynamically embed this into the CMake config files or generated pkg-config files then it should be allowed.
+
+Doing so requires [deleting the option from the `package_id`](adding_packages/conanfile_attributes.md#removing-from-package_id).

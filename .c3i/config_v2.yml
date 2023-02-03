@@ -51,13 +51,13 @@ tasks:
       text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
       collapse_on_success: false
       collapse_on_failure: true
-    scheduled_export_check:
-      report_issue_url: https://github.com/conan-io/conan-center-index/issues/11464
-      report_issue_append: false
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
+    report_issue_append: false
 
 configurations:
   - id: linux-gcc
-    epochs: [20220628]
+    epochs: [0, 20220628]
     hrname: "Linux, GCC"
     build_profile:
       os: "Linux"
@@ -70,7 +70,7 @@ configurations:
               compiler.version: ["11"]
               build_type: ["Release"]
   - id: configs/macos-clang
-    epochs: [20220628]
+    epochs: [0, 20220628]
     hrname: "macOS, Clang"
     build_profile:
       os: "Macos"
@@ -83,7 +83,7 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: configs/windows-msvc
-    epochs: [20220628]
+    epochs: [0, 20220628]
     hrname: "Windows, MSVC"
     build_profile:
       os: "Windows"

@@ -49,7 +49,7 @@ class GlfwConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.3.231.1")
+            self.requires("vulkan-loader/1.3.236.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
 
@@ -142,7 +142,10 @@ class GlfwConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("gdi32")
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+            self.cpp_info.frameworks.extend([
+                "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
+                "CoreServices", "Foundation", "IOKit",
+            ])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
