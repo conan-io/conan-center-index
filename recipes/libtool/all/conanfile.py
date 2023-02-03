@@ -52,12 +52,11 @@ class LibtoolConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.tool_requires("automake/1.16.5")
-        self.tool_requires("gnu-config/cci.20210814")
-        self.tool_requires("m4/1.4.19")
+        self.tool_requires("m4/1.4.19")               # Needed by configure
+        self.tool_requires("gnu-config/cci.20210814") # Needed for config.sub and config.guess
         if self._settings_build.os == "Windows":
             self.win_bash = True
+            self.tool_requires("automake/1.16.5")     # Needed for complie and lib wrappers
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
