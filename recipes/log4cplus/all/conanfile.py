@@ -97,6 +97,8 @@ class Log4cplusConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "log4cplus")
+        self.cpp_info.set_property("cmake_target_name", "log4cplus::log4cplus")
         self.cpp_info.libs = collect_libs(self)
         if self.options.unicode:
             self.cpp_info.defines = ["UNICODE", "_UNICODE"]
