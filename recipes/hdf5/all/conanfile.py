@@ -277,6 +277,7 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.components[component_name].libs = [_config_libname(alias_target)]
             self.cpp_info.components[component_name].requires = requirements
             self.cpp_info.components[component_name].includedirs.append(os.path.join("include", "hdf5"))
+            self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake"))
 
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[component_name].names["cmake_find_package"] = component
@@ -288,6 +289,7 @@ class Hdf5Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "HDF5")
         self.cpp_info.set_property("cmake_target_name", "HDF5::HDF5")
         self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("pkg_config_name", "hdf5-all-do-not-use") # to avoid conflict with hdf5_c component
 
         components = self._components()
