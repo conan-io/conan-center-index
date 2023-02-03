@@ -244,6 +244,11 @@ class Hdf5Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "libhdf5.settings", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+        # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+
         # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
         components = self._components()
