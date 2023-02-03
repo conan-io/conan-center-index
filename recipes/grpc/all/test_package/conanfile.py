@@ -26,6 +26,11 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["TEST_ACTUAL_SERVER"] = not (is_msvc(self)
                                                         and str(self.settings.compiler.version) in ("15", "191")
                                                         and self.settings.build_type == "Release")
+
+        # Additional logic to override the make program on MacOS if /usr/bin/make is found by CMake
+        # which otherwise prevents the propagation of DYLD_LIBRARY_PATH as set by the VirtualBuildEnv
+        project_include = os.path.join(self.source_folder, "macos_make_override.cmake")
+        tc.cache_variables["CMAKE_PROJECT_test_package_INCLUDE"] = project_include
         tc.generate()
         
         # Set up environment so that we can run grpc-cpp-plugin at build time

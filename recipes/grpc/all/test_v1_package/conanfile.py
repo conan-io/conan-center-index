@@ -37,7 +37,6 @@ class TestPackageConan(ConanFile):
         if (tools.cross_building(self) and self.options["grpc"].shared) or self.macos_grpc_shared:
             self.output.warning("Skipping build of test_package due to limitation propagating "
                                 "runtime environment when invoking protoc and grpc_cpp_plugin. "
-                                "This is fixed in Conan 2.0 - please use new integrations. "
                                 "For a working example, please see the newer Conan 2.0 compatible "
                                 "test package.")
             return
