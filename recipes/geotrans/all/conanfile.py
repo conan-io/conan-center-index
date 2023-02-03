@@ -57,7 +57,7 @@ class GeotransConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=True, filename=f"geotrans-{self.version}.tgz")
 
     def generate(self):
         tc = CMakeToolchain(self)

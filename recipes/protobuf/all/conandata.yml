@@ -17,10 +17,12 @@ sources:
   "3.18.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.18.1.tar.gz"
     sha256: "9111bf0b542b631165fadbd80aa60e7fb25b25311c532139ed2089d76ddf6dd7"
-  "3.17.1":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.17.1.tar.gz"
-    sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"
 patches:
+  "3.19.6":
+    - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
+      patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
+      patch_type: "backport"
   "3.19.4":
-    - patch_file: "patches/upstream-pr-9153-msvc-runtime.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
+      patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
+      patch_type: "backport"

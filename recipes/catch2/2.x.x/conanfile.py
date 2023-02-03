@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 class Catch2Conan(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
-    topics = ("catch2", "header-only", "unit-test", "tdd", "bdd")
+    topics = ("header-only", "unit-test", "tdd", "bdd")
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
@@ -46,7 +46,7 @@ class Catch2Conan(ConanFile):
             self.options.rm_safe("with_benchmark")
 
     def package_id(self):
-        if not self.options.with_main:
+        if not self.info.options.with_main:
             self.info.clear()
 
     def layout(self):

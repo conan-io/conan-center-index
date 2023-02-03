@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
+
 import os
 import textwrap
 
@@ -36,9 +36,20 @@ class CryptoPPConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
-        if Version(self.version) >= "8.7.0":
-            self.tool_requires("cmake/3.24.0")
+        if Version(self.version) >= "8.7.0" and not self._cmake_new_enough("3.20"):
+            self.tool_requires("cmake/3.20.6")
 
     def validate(self):
         if self.options.shared and Version(self.version) >= "8.7.0":
@@ -100,8 +111,10 @@ class CryptoPPConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # Use cpu-features.h from Android NDK
-        if self.settings.os == "Android":
-            android_ndk_home = tools_legacy.get_env("ANDROID_NDK_HOME")
+        if self.settings.os == "Android" and Version(self.version) < "8.4.0":
+            # Replicate logic from: https://github.com/weidai11/cryptopp/blob/CRYPTOPP_8_2_0/cpu.cpp#L46-L52
+            # In more recent versions this is already taken care of by cryptopp-cmake
+            android_ndk_home = self.conf.get("tools.android:ndk_path")
             if android_ndk_home:
                 copy(
                     self,

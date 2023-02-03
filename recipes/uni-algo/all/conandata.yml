@@ -1,0 +1,4 @@
+sources:
+  "0.6.0":
+    url: "https://github.com/uni-algo/uni-algo/archive/refs/tags/v0.6.0.tar.gz"
+    sha256: "b2b0cf62c8476895ce2dae51459f8df82cd27b6f199b014cb5b2dbb45a605187"

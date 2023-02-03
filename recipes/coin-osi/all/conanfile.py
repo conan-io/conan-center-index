@@ -57,7 +57,10 @@ class CoinOsiConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("coin-utils/2.11.4")
+        if self.version == "0.108.6":
+            self.requires("coin-utils/2.11.4")
+        else:
+            self.requires("coin-utils/2.11.6")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")

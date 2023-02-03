@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("wayland/1.21.0")
-        self.build_requires("meson/0.64.1")
+        self.build_requires("meson/1.0.0")
 
     def requirements(self):
         self.requires("wayland/1.21.0")

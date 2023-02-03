@@ -13,7 +13,7 @@ class LibAVIFConan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AOMediaCodec/libavif"
-    topics = "avif"
+    topics = ("avif")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,7 +48,7 @@ class LibAVIFConan(ConanFile):
 
     def requirements(self):
         self.requires("libaom-av1/3.5.0")
-        self.requires("libyuv/1845")
+        self.requires("libyuv/1854")
         if self._has_dav1d:
             self.requires("dav1d/1.0.0")
 

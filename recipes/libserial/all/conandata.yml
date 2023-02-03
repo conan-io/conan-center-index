@@ -1,0 +1,4 @@
+sources:
+  "cci.20200930":
+    url: "https://github.com/crayzeewulf/libserial/archive/1d1e47a2faae0470f93eb291263b0ce7ea119a81.tar.gz"
+    sha256: "a433b04bd42e8b4504e5e1fbe7ec22b648f2872d3d125e58c17b9c6c1b171bba"

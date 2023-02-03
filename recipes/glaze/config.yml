@@ -1,4 +1,10 @@
 versions:
+  "0.3.6":
+    folder: all
+  "0.3.5":
+    folder: all
+  "0.3.2":
+    folder: all
   "0.2.2":
     folder: all
   "0.2.1":

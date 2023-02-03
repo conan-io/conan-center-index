@@ -40,8 +40,9 @@ class PcapplusplusConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows":
-            self.requires("pthreads4w/3.0.0")
             self.requires("npcap/1.70")
+            if self.version < "22.11":
+                self.requires("pthreads4w/3.0.0")
         else:
             self.requires("libpcap/1.9.1")
 
@@ -86,9 +87,10 @@ class PcapplusplusConan(ConanFile):
             config_args = [
                 "configure-windows-visual-studio.bat",
                 "--pcap-sdk", self.deps_cpp_info["npcap"].rootpath,
-                "--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath,
                 "--vs-version", "vs2015",
             ]
+            if self.version < "22.11":
+                config_args += ["--pthreads-home", self.deps_cpp_info["pthreads4w"].rootpath]
             self.run(" ".join(config_args), run_environment=True)
             msbuild = MSBuild(self)
             targets = ['Common++', 'Packet++', 'Pcap++']
@@ -120,7 +122,7 @@ class PcapplusplusConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Pcap++", "Packet++", "Common++"]
-        if self.settings.os in ("FreeBSD", "Linux"):
+        if self.version < "22.11" and self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "Security", "SystemConfiguration"])
