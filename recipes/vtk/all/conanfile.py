@@ -387,7 +387,7 @@ class VtkConan(ConanFile):
                 "libpng":            "libpng/1.6.39",
                 "proj":              "proj/9.0.1", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
                 "pugixml":           "pugixml/1.13",
-                "sqlite3":           "sqlite3/3.40.0",
+                "sqlite3":           "sqlite3/3.40.1",
                 "utfcpp":            "utfcpp/3.2.2",
                 "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
                 "zlib":              "zlib/1.2.13",
