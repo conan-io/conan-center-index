@@ -5,7 +5,7 @@ from conan.tools.microsoft import unix_path
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=1.57.0"
 
 
 class AutoconfArchiveConan(ConanFile):
