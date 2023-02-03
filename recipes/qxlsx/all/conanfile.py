@@ -43,7 +43,7 @@ class QXlsxConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) <= "1.4.4":
-            self.requires("qt/5.15.2")
+            self.requires("qt/5.15.8")
         else:
             self.requires("qt/6.4.2")
 
