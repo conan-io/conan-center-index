@@ -304,10 +304,6 @@ class VtkConan(ConanFile):
             "module_enable_FiltersOpenTURNS":  "NO",
             "module_enable_DomainsMicroscopy": "NO",
             "module_enable_CommonArchive":     "NO",
-
-            # kissfft - we want the double format (also known as kiss_fft_scalar)
-            # FIXME should this be in configure/validate? I recall it was required for some reason...
-            "kissfft:datatype": "double",
             }
 
 
@@ -466,6 +462,10 @@ class VtkConan(ConanFile):
 
         if self.dependencies["pugixml"].options.wchar_mode:
             raise ConanInvalidConfiguration(f"{self.ref} requires pugixml:wchar_mode=False")
+
+        if self.dependencies["kissfft"].options.datatype != "double":
+            # kissfft - we want the double format (also known as kiss_fft_scalar)
+            raise ConanInvalidConfiguration(f"{self.ref} requires kissfft:datatype=double")
 
 
     def export_sources(self):
