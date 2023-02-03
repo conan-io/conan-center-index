@@ -85,7 +85,6 @@ class LibX264Conan(ConanFile):
         args = [
             f"--bit-depth={self.options.bit_depth}",
             "--disable-cli",
-            f"--prefix={unix_path(self, self.package_folder)}",
         ]
         if self.options.shared:
             args.append("--enable-shared")
