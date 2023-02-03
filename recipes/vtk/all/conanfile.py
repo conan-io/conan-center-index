@@ -757,7 +757,7 @@ class VtkConan(ConanFile):
             # And then put a copy of pythonVER_d.lib in a spot where it can be found by the linker...
             # but it doesn't get found for some reason (experienced by EricAtORS)
             python_lib_folder = os.path.realpath(os.path.join(which("python"), "..", "libs")).replace("\\", "/")
-            replace_in_file(os.path.join(self.build_folder,"..", "..", "src", "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self.build_folder,"..", "..", "src", "CMakeLists.txt"),
                                   "project(VTK)",
                                   'project(VTK)\nlink_directories("{}")\n'.format(python_lib_folder)
                                   )
