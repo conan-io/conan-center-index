@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
+from conan.tools.microsoft import check_min_vs, is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -30,7 +31,7 @@ class Sol2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_lua == "lua":
-            if self.version < "3.1.0":
+            if Version(self.version) < "3.1.0":
                 # v2.x.x & v3.0.x supports up to Lua 5.3
                 self.requires("lua/5.3.6")
             else:
@@ -43,17 +44,16 @@ class Sol2Conan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        # TODO: MSVC?
-        if self.version < "3.0.0":
+        if Version(self.version) < "3.0.0":
             return {
-                "Visual Studio": "14",
+                "msvc": "190",
                 "gcc": "5",
                 "clang": "3.2",
                 "apple-clang": "4.3"
             }
         else:
             return {
-                "Visual Studio": "15.7" if Version(self.version) < "3.3.0" else "16",
+                "msvc": "191" if Version(self.version) < "3.3.0" else "192",
                 "gcc": "7",
                 "clang": "6",
                 "apple-clang": "10",
@@ -61,7 +61,7 @@ class Sol2Conan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if self.version < "3.0.0":
+        if Version(self.version) < "3.0.0":
             # v2.x.x only requires C++14
             return 14
         else:
@@ -78,15 +78,17 @@ class Sol2Conan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd} or higher support standard. {self.settings.compiler} {self.settings.compiler.version} is not supported.")
+        check_min_vs(self, self._compilers_minimum_version["msvc"])
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if not minimum_version:
+                self.output.warning(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+            elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd} or higher support standard. {self.settings.compiler} {self.settings.compiler.version} is not supported.")
 
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if self.version < "3.0.0":
+        if Version(self.version) < "3.0.0":
             copy(self, "*", src=os.path.join(self.source_folder, "sol"), dst=os.path.join(self.package_folder, "include", "sol"))
             copy(self, "sol.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
         else:
