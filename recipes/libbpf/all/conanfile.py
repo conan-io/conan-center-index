@@ -10,7 +10,7 @@ required_conan_version = ">=1.54.0"
 class LibbpfConan(ConanFile):
     name = "libbpf"
     description = "eBPF helper library"
-    license = "LGPL-2.1", "BSD-2-Clause"
+    license = "LGPL-2.1-only", "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libbpf/libbpf"
     topics = ("bpf", "ebpf", "berkeley-packet-filter")
