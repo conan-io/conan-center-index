@@ -219,14 +219,13 @@ class XmlSecConan(ConanFile):
         major = str(Version(self.version).major)
         prefix = "lib" if is_msvc(self) else ""
         infix = "" if is_msvc(self) else major
+        base_libname = f"{prefix}xmlsec{infix}"
         suffix = "_a" if is_msvc(self) and not self.options.shared else ""
 
-        get_libname = lambda libname: prefix + "xmlsec" + infix + (("-" + libname) if libname else "") + suffix
-
-        self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
+        self.cpp_info.components["libxmlsec"].set_property("pkg_config_name", f"xmlsec{major}")
+        self.cpp_info.components["libxmlsec"].libs = [f"{base_libname}{suffix}"]
         self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", f"xmlsec{major}"))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
-        self.cpp_info.components["libxmlsec"].set_property("pkg_config_name", f"xmlsec{major}")
         if not self.options.shared:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_STATIC")
         if self.options.with_xslt:
@@ -240,7 +239,7 @@ class XmlSecConan(ConanFile):
             self.cpp_info.components["libxmlsec"].system_libs = ["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"]
 
         if self.options.with_openssl:
-            self.cpp_info.components["openssl"].libs = [get_libname("openssl")]
+            self.cpp_info.components["openssl"].set_property("pkg_config_name", f"xmlsec{major}-openssl")
+            self.cpp_info.components["openssl"].libs = [f"{base_libname}-openssl{suffix}"]
             self.cpp_info.components["openssl"].requires = ["libxmlsec", "openssl::openssl"]
             self.cpp_info.components["openssl"].defines = ["XMLSEC_CRYPTO_OPENSSL=1"]
-            self.cpp_info.components["openssl"].set_property("pkg_config_name", f"xmlsec{major}-openssl")
