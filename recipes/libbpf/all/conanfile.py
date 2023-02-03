@@ -13,7 +13,7 @@ class LibbpfConan(ConanFile):
     license = "LGPL-2.1-only", "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libbpf/libbpf"
-    topics = ("bpf", "ebpf", "berkeley-packet-filter")
+    topics = ("berkeley-packet-filter", "bpf", "ebpf", "network", "tracing")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
