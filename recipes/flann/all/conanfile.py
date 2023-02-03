@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.scm import Version
+from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class FlannConan(ConanFile):
@@ -16,29 +21,15 @@ class FlannConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_hdf5": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_hdf5": "deprecated",
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,100 +38,84 @@ class FlannConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_hdf5 != "deprecated":
-            self.output.warn("with_hdf5 is a deprecated option. Do not use.")
-
-    @property
-    def _min_cppstd(self):
-        return 11 if tools.Version(self.version) > "1.9.1" else None
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
 
     def requirements(self):
         self.requires("lz4/1.9.3")
 
-    def package_id(self):
-        del self.info.options.with_hdf5
+    def validate(self):
+        if Version(self.version) >= "1.9.2" and self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_C_BINDINGS"] = True
+        # Only build the C++ libraries
+        tc.variables["BUILD_DOC"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_MATLAB_BINDINGS"] = False
+        tc.variables["BUILD_PYTHON_BINDINGS"] = False
+        # OpenMP support can be added later if needed
+        tc.variables["USE_OPENMP"] = False
+        # Generate a relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         # remove embedded lz4
-        tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
+        rmdir(self, os.path.join(self.source_folder, "src", "cpp", "flann", "ext"))
 
-        if tools.Version(self.version) > "1.9.1":
-            return
+        if Version(self.version) < "1.9.2":
+            # Workaround issue with empty sources for a CMake target
+            flann_cpp_dir = os.path.join(self.source_folder, "src", "cpp")
+            save(self, os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
 
-        # Workaround issue with empty sources for a CMake target
-        flann_cpp_dir = os.path.join(self._source_subfolder, "src", "cpp")
-        tools.save(os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
-
-        tools.replace_in_file(
-            os.path.join(flann_cpp_dir, "CMakeLists.txt"),
-            'add_library(flann_cpp SHARED "")',
-            'add_library(flann_cpp SHARED empty.cpp)'
-        )
-        tools.replace_in_file(
-            os.path.join(flann_cpp_dir, "CMakeLists.txt"),
-            'add_library(flann SHARED "")',
-            'add_library(flann SHARED empty.cpp)'
-        )
-
-    def _configure_cmake(self):
-        if self._cmake is not None:
-            return self._cmake
-        self._cmake = CMake(self)
-
-        self._cmake.definitions["BUILD_C_BINDINGS"] = True
-
-        # Only build the C++ libraries
-        self._cmake.definitions["BUILD_DOC"] = False
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = False
-        self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
-
-        # OpenMP support can be added later if needed
-        self._cmake.definitions["USE_OPENMP"] = False
-
-        # Generate a relocatable shared lib on Macos
-        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            replace_in_file(self,
+                os.path.join(flann_cpp_dir, "CMakeLists.txt"),
+                'add_library(flann_cpp SHARED "")',
+                'add_library(flann_cpp SHARED empty.cpp)'
+            )
+            replace_in_file(self,
+                os.path.join(flann_cpp_dir, "CMakeLists.txt"),
+                'add_library(flann SHARED "")',
+                'add_library(flann SHARED empty.cpp)'
+            )
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # Remove vc runtimes
         if self.settings.os == "Windows":
             if self.options.shared:
                 for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                    tools.remove_files_by_mask(
-                        os.path.join(self.package_folder, "bin"),
-                        dll_pattern_to_remove,
-                    )
+                    rm(self, dll_pattern_to_remove, os.path.join(self.package_folder, "bin"))
             else:
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+                rmdir(self, os.path.join(self.package_folder, "bin"))
         # Remove static/dynamic libraries depending on the build mode
         libs_pattern_to_remove = ["*flann_cpp_s.*", "*flann_s.*"] if self.options.shared else ["*flann_cpp.*", "*flann.*"]
         for lib_pattern_to_remove in libs_pattern_to_remove:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), lib_pattern_to_remove)
+            rm(self, lib_pattern_to_remove, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -152,8 +127,8 @@ class FlannConan(ConanFile):
         flann_cpp_lib = "flann_cpp" if self.options.shared else "flann_cpp_s"
         self.cpp_info.components["flann_cpp"].set_property("cmake_target_name", "flann::{}".format(flann_cpp_lib))
         self.cpp_info.components["flann_cpp"].libs = [flann_cpp_lib]
-        if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.components["flann_cpp"].system_libs.append(tools.stdcpp_library(self))
+        if not self.options.shared and tools_legacy.stdcpp_library(self):
+            self.cpp_info.components["flann_cpp"].system_libs.append(tools_legacy.stdcpp_library(self))
         self.cpp_info.components["flann_cpp"].requires = ["lz4::lz4"]
 
         # flann

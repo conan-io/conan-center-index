@@ -1,0 +1,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,9 +12,6 @@ cmake_policy(SET CMP0048 NEW) # set VERSION in project()
+ cmake_policy(SET CMP0042 NEW) # enable MACOSX_RPATH by default
+ 
+ include(GNUInstallDirs)
+-add_subdirectory(test)
+-add_subdirectory(demo)
+-enable_testing ()
+ 
+ if (MSVC)
+   add_compile_options(/W4)

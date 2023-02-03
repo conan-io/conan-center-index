@@ -5,7 +5,7 @@
  
  # ZSTD {
 -find_package(ZSTD QUIET)
-+find_package(zstd QUIET)
++find_package(zstd QUIET CONFIG)
  if(ZSTD_FOUND)
    set(with_zstd_default ON)
  else()
@@ -19,11 +19,12 @@
    if(WITH_SSL)
      set(WITH_SASL_SCRAM ON)
      set(WITH_SASL_OAUTHBEARER ON)
-@@ -149,7 +152,7 @@ endif()
+@@ -149,7 +152,8 @@ endif()
  option(ENABLE_LZ4_EXT "Enable external LZ4 library support" ON)
  set(WITH_LZ4_EXT OFF)
  if(ENABLE_LZ4_EXT)
 -  find_package(LZ4)
++  find_package(lz4 REQUIRED CONFIG)
 +  set(LZ4_FOUND ON)
    if(LZ4_FOUND)
      set(WITH_LZ4_EXT ON)

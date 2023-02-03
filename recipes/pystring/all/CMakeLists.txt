@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.4)
-project(pystring)
+project(pystring LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+include(GNUInstallDirs)
 
-add_library(${PROJECT_NAME} source_subfolder/pystring.cpp)
-set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+add_library(pystring ${PYSTRING_SRC_DIR}/pystring.cpp)
+set_property(TARGET pystring PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS pystring
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES source_subfolder/pystring.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${PYSTRING_SRC_DIR}/pystring.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

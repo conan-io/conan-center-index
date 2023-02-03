@@ -1,8 +1,13 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import contextlib
+from conan import ConanFile
+from conan.tools.layout import basic_layout
+from conan.tools.files import get, copy, rename, rmdir, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class LibexifConan(ConanFile):
@@ -12,7 +17,6 @@ class LibexifConan(ConanFile):
     license = "LGPL-2.1"
     description = "libexif is a library for parsing, editing, and saving EXIF data."
     topics = ("exif", "metadata", "parse", "edit")
-    exports_sources = "patches/*"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,29 +26,20 @@ class LibexifConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl -nologo",
-                    "AR": "lib",
-                    "LD": "link -nologo",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,56 +52,64 @@ class LibexifConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("gettext/0.21")
-        self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self.tool_requires("gettext/0.21")
+        self.tool_requires("libtool/2.4.6")
+        if self._settings_build.os == "Windows":
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+                self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
-        self._autotools.libs = []
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-FS")
+    def generate(self):
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        args = [
+        tc.configure_args.extend([
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-docs",
             "--disable-nls",
             "--disable-rpath",
-        ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        ])
+        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            tc.extra_cflags.append("-FS")
+
+        # env vars
+        env = tc.environment()
+        if is_msvc(self):
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile).replace("\\", "/")
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib).replace("\\", "/")
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+            env.define("LD", f"{compile_wrapper} link -nologo")
+
+        tc.generate(env)
+
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def build(self):
-        self._patch_sources()
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "exif.dll.lib"),
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "exif.dll.lib"),
                          os.path.join(self.package_folder, "lib", "exif.lib"))
-        tools.remove_files_by_mask(self.package_folder, "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["exif"]
         self.cpp_info.names["pkg_config"] = "libexif"
+        self.cpp_info.set_property("pkg_config_name", "libexif")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]

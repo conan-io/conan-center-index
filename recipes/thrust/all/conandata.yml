@@ -5,3 +5,6 @@ sources:
   "1.16.0":
     url: "https://github.com/thrust/thrust/archive/1.16.0.tar.gz"
     sha256: "93b9553e3ee544e05395022bea67e6d600f8f3eb680950ec7cf73c0f55162487"
+  "1.17.0":
+    url: "https://github.com/thrust/thrust/archive/1.17.0.tar.gz"
+    sha256: "b02aca5d2325e9128ed9d46785b8e72366f758b873b95001f905f22afcf31bbf"

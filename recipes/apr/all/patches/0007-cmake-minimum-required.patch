@@ -1,0 +1,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,9 +15,9 @@
+ #
+ # Read README.cmake before using this.
+ 
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT(APR C)
+ 
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+ 
+ OPTION(APR_INSTALL_PRIVATE_H  "Install selected private .h files (for httpd)"  OFF)
+ OPTION(APR_HAVE_IPV6        "IPv6 support"                 ON)

@@ -1,0 +1,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -207,7 +207,9 @@ else()
+ endif()
+ 
+ # Find libm, if available
+-find_library(M_LIBRARY m)
++if (NOT MINGW)
++  find_library(M_LIBRARY m)
++endif()
+ 
+ check_include_file(assert.h    HAVE_ASSERT_H)
+ check_include_file(dlfcn.h     HAVE_DLFCN_H)

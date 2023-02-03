@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.4)
-project(farmhash CXX)
+project(farmhash LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+include(GNUInstallDirs)
 
-set(FARMHASH_SOURCE_DIR source_subfolder)
-
-if (NOT FARMHASH_NO_BUILTIN_EXPECT)
+if(NOT FARMHASH_NO_BUILTIN_EXPECT)
     # Transcribed from farmhash/src/Makefile.am
     include(CheckCXXSourceCompiles)
     check_cxx_source_compiles(
@@ -15,22 +12,22 @@ if (NOT FARMHASH_NO_BUILTIN_EXPECT)
     )
 endif()
 
-add_library(farmhash "${FARMHASH_SOURCE_DIR}/src/farmhash.cc" )
-target_include_directories(farmhash PRIVATE "${FARMHASH_SOURCE_DIR}/src")
+add_library(farmhash "${FARMHASH_SRC_DIR}/src/farmhash.cc" )
+target_include_directories(farmhash PRIVATE "${FARMHASH_SRC_DIR}/src")
 
 if(NOT FARMHASH_HAS_BUILTIN_EXPECT)
-  target_compile_definitions(farmhash PUBLIC -DFARMHASH_NO_BUILTIN_EXPECT)
+    target_compile_definitions(farmhash PUBLIC FARMHASH_NO_BUILTIN_EXPECT)
 endif()
 
 set_target_properties(farmhash
     PROPERTIES
-    PUBLIC_HEADER "${FARMHASH_SOURCE_DIR}/src/farmhash.h"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
+        PUBLIC_HEADER "${FARMHASH_SRC_DIR}/src/farmhash.h"
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
-install (TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include
+install(TARGETS farmhash
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )

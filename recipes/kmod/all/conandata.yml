@@ -1,4 +1,7 @@
 sources:
+  "30":
+    url: "https://github.com/kmod-project/kmod/archive/v30.tar.gz"
+    sha256: "1fa3974abd80b992d61324bcc04fa65ea96cfe2e9e1150f48394833030c4b583"
   "29":
     sha256: "a49aaf9c4914cd1abd9eea43d86b5a2fd07d898935e088965e6d18793610f2e7"
     url: "https://github.com/kmod-project/kmod/archive/refs/tags/v29.tar.gz"

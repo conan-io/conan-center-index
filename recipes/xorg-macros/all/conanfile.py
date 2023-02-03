@@ -1,8 +1,11 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan import ConanFile
+from conan.tools import files
+from conan.tools import build
+from conans import AutoToolsBuildEnvironment, tools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.2"
 
 
 class XorgMacrosConan(ConanFile):
@@ -13,7 +16,6 @@ class XorgMacrosConan(ConanFile):
     homepage = "https://gitlab.freedesktop.org/xorg/util/macros"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os"
-    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -25,8 +27,12 @@ class XorgMacrosConan(ConanFile):
     def _settings_build(self):
         return self.settings_build if hasattr(self, "settings_build") else self.settings
 
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
@@ -46,15 +52,14 @@ class XorgMacrosConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         conf_args = [
-            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
+            f"--datarootdir={tools.unix_path(self._datarootdir)}",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
+        files.apply_conandata_patches(self)
+        with files.chdir(self, self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=self._settings_build.os == "Windows")
         autotools = self._configure_autotools()
         autotools.make()
@@ -64,12 +69,13 @@ class XorgMacrosConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
-        tools.rmdir(os.path.join(self._datarootdir, "pkgconfig"))
-        tools.rmdir(os.path.join(self._datarootdir, "util-macros"))
+        files.rmdir(self, os.path.join(self._datarootdir, "pkgconfig"))
+        files.rmdir(self, os.path.join(self._datarootdir, "util-macros"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "xorg-macros"
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
         self.cpp_info.set_property("pkg_config_custom_content", textwrap.dedent("""\
             datarootdir={datarootdir}
             datadir=${{datarootdir}}

@@ -1,5 +1,6 @@
-from conan.tools.files import rename
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools import files
+from conans import CMake
 import functools
 import os
 
@@ -46,13 +47,13 @@ class QxmppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/6.2.3")
+        self.requires("qt/6.2.4")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.2")
             self.requires("glib/2.70.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -67,7 +68,7 @@ class QxmppConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            files.patch(self, **patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -75,12 +76,12 @@ class QxmppConan(ConanFile):
         self.copy("LICENSE.LGPL", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if self.options.shared and self.settings.os == "Windows":
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
-            rename(self, os.path.join(self.package_folder, "lib", "qxmpp.dll"),
+            files.mkdir(self, os.path.join(self.package_folder, "bin"))
+            files.rename(self, os.path.join(self.package_folder, "lib", "qxmpp.dll"),
                          os.path.join(self.package_folder, "bin", "qxmpp.dll"))
 
     def package_info(self):

@@ -1,6 +1,6 @@
 --- a/include/qarchive_enums.hpp
 +++ b/include/qarchive_enums.hpp
-@@ -1,11 +1,12 @@
+@@ -1,10 +1,11 @@
  #ifndef QARCHIVE_ENUMS_HPP_INCLUDED
  #define QARCHIVE_ENUMS_HPP_INCLUDED
 +#include "qarchive_global.hpp"
@@ -13,4 +13,3 @@
 +QARCHIVE_EXPORT QString errorCodeToString(short);
  
  /*
-  * Common error codes , these are most likely will be

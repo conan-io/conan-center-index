@@ -1,15 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=1.33.0"
+import os
+
+required_conan_version = ">=1.52.0"
 
 class LunaSVGConan(ConanFile):
     name = "lunasvg"
     description = "lunasvg is a standalone SVG rendering library in C++."
-    topics = ("svg", "renderer", )
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sammycage/lunasvg"
+    topics = ("svg", "renderer", )
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -19,27 +26,31 @@ class LunaSVGConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package_multi"
-
-    _cmake = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _minimum_cpp_standard(self):
+        if Version(self.version) <= "2.3.2":
+            return 14
+        else:
+            return 17
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "3.5",
-            "apple-clang": "10"
-        }
+        if Version(self.version) <= "2.3.2":
+            return {
+                "gcc": "5",
+                "clang": "3.5",
+                "apple-clang": "10"
+            }
+        else:
+            return {
+                "gcc": "7.1",
+                "clang": "7",
+                "apple-clang": "12.0"
+            }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,48 +58,55 @@ class LunaSVGConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("plutovg/cci.20220103")
+        if Version(self.version) < "2.3.5":
+            self.requires("plutovg/cci.20220103")
+        else:
+            self.requires("plutovg/cci.20221030")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
-
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not fully support.".format(self.name))
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        if Version(self.version) <= "2.3.2":
+            check_min_vs(self, 191)
+        else:
+            check_min_vs(self, 192)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

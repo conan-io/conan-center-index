@@ -1,0 +1,24 @@
+sources:
+  "16.02":
+    url: https://downloads.sourceforge.net/project/p7zip/p7zip/16.02/p7zip_16.02_src_all.tar.bz2
+    sha256: "5eb20ac0e2944f6cb9c2d51dd6c4518941c185347d4089ea89087ffdd6e2341f"
+patches:
+  "16.02":
+    - patch_file: "patches/12-CVE-2016-9296.patch"
+      patch_source: "https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+      patch_description: "Addresses CVE-2016-9296: null pointer check for the variable folders.PackPositions in function CInArchive::ReadAndDecodePackedStreams"
+    - patch_file: "patches/13-CVE-2017-17969.patch"
+      patch_source: "https://sourceforge.net/p/p7zip/bugs/_discuss/thread/0920f369/27d7"
+      patch_description: "Addresses CVE-2017-17969: Heap-based buffer overflow in the NCompress::NShrink::CDecoder::CodeReal method"
+    - patch_file: "patches/14-Fix-g++-warning.patch"
+      patch_source: "https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+      patch_description: "Addresses gcc warning: use of an operand of type 'bool' in 'operator++' is deprecated"
+    - patch_file: "patches/clang.diff"
+      patch_source: "https://github.com/conda-forge/p7zip-feedstock/tree/main/recipe"
+      patch_description: "Addresses clang 6.x error: case value evaluates to -2147024809"
+    - patch_file: "patches/06-CVE-2018-5996.patch"
+      patch_source: "https://salsa.debian.org/debian/p7zip-rar/-/tree/debian/16.02-3/debian/patches"
+      patch_description: "Addresses CVE-2018-5996: RAR memory corruptions fix"
+    - patch_file: "patches/CVE-2018-10115.patch"
+      patch_source: "https://salsa.debian.org/debian/p7zip-rar/-/tree/debian/16.02-3/debian/patches"
+      patch_description: "Addresses CVE-2018-10115: Incorrect initialization logic of RAR decoder objects"

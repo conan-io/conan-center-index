@@ -8,7 +8,5 @@ sources:
 patches:
   "1.1":
     - patch_file: "patches/remove-c99-features.patch"
-      base_path: "source_subfolder"
   "1.0":
     - patch_file: "patches/replace-vla.patch"
-      base_path: "source_subfolder"

@@ -55,7 +55,10 @@ void sample1() {
 
   lerc_status hr = lerc_computeCompressedSize(reinterpret_cast<const void*>(&zImg[0]),    // raw image data, row by row, band by band
     static_cast<uint32>(dt_float), 1, w, h, 1,
-    &maskByteImg[0],         // can give nullptr if all pixels are valid
+#ifdef LERC_VER3_LATER
+    1,
+#endif
+    maskByteImg.data(),         // can give nullptr if all pixels are valid
     maxZError,           // max coding error per pixel, or precision
     &numBytesNeeded);    // size of outgoing Lerc blob
 
@@ -67,7 +70,10 @@ void sample1() {
 
   hr = lerc_encode(reinterpret_cast<const void*>(&zImg[0]),    // raw image data, row by row, band by band
     static_cast<uint32>(dt_float), 1, w, h, 1,
-    &maskByteImg[0],         // can give nullptr if all pixels are valid
+#ifdef LERC_VER3_LATER
+    1,
+#endif
+    maskByteImg.data(),         // can give nullptr if all pixels are valid
     maxZError,           // max coding error per pixel, or precision
     &pLercBlob[0],           // buffer to write to, function will fail if buffer too small
     numBytesBlob,        // buffer size
@@ -98,7 +104,11 @@ void sample1() {
 
   std::vector<Byte> maskByteImg3(w * h);
 
+#ifdef LERC_VER3_LATER
+  hr = lerc_decode(&pLercBlob[0], numBytesBlob, 1, maskByteImg3.data(), 1, w, h, 1, static_cast<uint32>(dt_float), reinterpret_cast<void*>(&zImg3[0]));
+#else
   hr = lerc_decode(&pLercBlob[0], numBytesBlob, &maskByteImg3[0], 1, w, h, 1, static_cast<uint32>(dt_float), reinterpret_cast<void*>(&zImg3[0]));
+#endif
   if (hr)
     std::cout << "lerc_decode(...) failed" << std::endl;
 
@@ -124,88 +134,7 @@ void sample1() {
   std::cout << "max z error per pixel = " << maxDelta << std::endl;
 }
 
-void sample2() {
-  const int h = 713;
-  const int w = 257;
-
-  std::vector<Byte> byteImg(3 * w * h);
-
-  for (int k = 0, i = 0; i < h; i++)
-    for (int j = 0; j < w; j++, k++)
-      for (int m = 0; m < 3; m++)
-        byteImg[k * 3 + m] = std::rand() % 30;
-
-
-  // encode
-
-  uint32 numBytesNeeded = 0;
-  uint32 numBytesWritten = 0;
-
-  lerc_status hr = lerc_computeCompressedSize(reinterpret_cast<const void*>(&byteImg[0]),    // raw image data: nDim values per pixel, row by row, band by band
-    static_cast<uint32>(dt_uchar), 3, w, h, 1,
-    0,                   // can give nullptr if all pixels are valid
-    0,                   // max coding error per pixel
-    &numBytesNeeded);    // size of outgoing Lerc blob
-
-  if (hr)
-    std::cout << "lerc_computeCompressedSize(...) failed" << std::endl;
-
-  uint32 numBytesBlob = numBytesNeeded;
-  std::vector<Byte> pLercBlob(numBytesBlob);
-
-  hr = lerc_encode(reinterpret_cast<const void*>(&byteImg[0]),    // raw image data: nDim values per pixel, row by row, band by band
-    static_cast<uint32>(dt_uchar), 3, w, h, 1,
-    0,                   // can give nullptr if all pixels are valid
-    0,                   // max coding error per pixel
-    &pLercBlob[0],           // buffer to write to, function will fail if buffer too small
-    numBytesBlob,        // buffer size
-    &numBytesWritten);   // num bytes written to buffer
-
-  if (hr)
-    std::cout << "lerc_encode(...) failed" << std::endl;
-
-  double ratio = 3 * w * h / static_cast<double>(numBytesBlob);
-  std::cout << "sample 2 compression ratio = " << ratio << std::endl;
-
-  // decode
-
-  uint32 infoArr[10];
-  double dataRangeArr[3];
-  hr = lerc_getBlobInfo(&pLercBlob[0], numBytesBlob, infoArr, dataRangeArr, 10, 3);
-  if (hr)
-    std::cout << "lerc_getBlobInfo(...) failed" << std::endl;
-
-  BlobInfo_Print(infoArr);
-
-  if (!BlobInfo_Equal(infoArr, 3, w, h, 1, static_cast<uint32>(dt_uchar)))
-    std::cout << "got wrong lerc info" << std::endl;
-
-  // new data storage
-  std::vector<Byte> byteImg3(3 * w * h);
-
-  hr = lerc_decode(&pLercBlob[0], numBytesBlob, 0, 3, w, h, 1, static_cast<uint32>(dt_uchar), reinterpret_cast<void*>(&byteImg3[0]));
-  if (hr)
-    std::cout << "lerc_decode(...) failed" << std::endl;
-
-  // compare to orig
-
-  double maxDelta = 0;
-  for (int k = 0, i = 0; i < h; i++)
-    for (int j = 0; j < w; j++, k++)
-      for (int m = 0; m < 3; m++)
-      {
-        double delta = std::abs(byteImg3[k * 3 + m] - byteImg[k * 3 + m]);
-        if (delta > maxDelta)
-          maxDelta = delta;
-      }
-
-  std::cout << "max z error per pixel = " << maxDelta << std::endl;
-}
-
 int main() {
   sample1();
-  std::cout << std::endl;
-  sample2();
-  std::cout << std::endl;
   return 0;
 }

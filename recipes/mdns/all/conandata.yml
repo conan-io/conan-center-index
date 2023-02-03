@@ -1,13 +1,4 @@
 sources:
-  "20200130":
-    sha256: 5f327b56d932ed5c1a28b7b1b1f528ddfbf69cb45bc4a8d38301ab85116e4b0e
-    url: https://github.com/mjansson/mdns/archive/0f75def961433102dc4848564c1a865f473dfaed.zip
-  "20200331":
-    sha256: 98861150179942cd6975b207048939a491ab4bb6c7291a3a34dedc80082b3ba9
-    url: https://github.com/mjansson/mdns/archive/4f7f7942bd10eb3d67af48b5233cb84283d9639c.zip
-  "20200424":
-    sha256: 505aac658feb45bea65b2ab00a6abf1b14c2aaaa971456d6e3ba58b75a543d47
-    url: https://github.com/mjansson/mdns/archive/0b9a4de6c5132679364e47c0f9a7a37af9d2ce47.zip
   "1.0":
     sha256: e06ed954b4705f0e48f3e6bd44b75c115ee03f745c62394ee615f466e44e9373
     url: https://github.com/mjansson/mdns/archive/1.0.tar.gz

@@ -2,3 +2,27 @@ sources:
   "1.0.0":
     sha256: 943de75803f492f78c5d55fe43be298fbb66156cc22946a3c6cc6b0634efc2e2
     url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.0.tar.gz
+  "1.0.1":
+    sha256: 3748ad1095805338d0d54ca7b60a155520188970946b247d56cc9b5eeb397358
+    url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.1.tar.gz
+patches:
+  "1.0.0":
+    - patch_file: "patches/1.0.0-updated-cmake.patch"
+      patch_description: "Use find_package for CMakeDeps"
+      patch_type: "conan"
+      sha256: "2be2eadc468fe676f547793fc7ec48bc38ce6f1daa47a497cd2535aaa493fa9a"
+
+    - patch_file: "patches/1.0.0-Grid.hpp-include-vector.patch"
+      patch_description: "add missing #include <vector>"
+      patch_type: "portability"
+      sha256: "0326eb790fc55630efe138bc9b359754d2de23c4aa37179faa04821f83efa9c3"
+
+    - patch_file: "patches/1.0.0-RandomGenerator.hpp-link.patch"
+      patch_description: "Fix static function linking"
+      patch_type: "portability"
+      sha256: "218318c017500ab4c6360dafaf0523736295ddac323c04aaad5fc8a31867b4f0"
+
+    - patch_file: "patches/1.0.0-RandomGenerator.cpp-link.patch"
+      patch_description: "Fix static function linking"
+      patch_type: "portability"
+      sha256: "f5d0cc6a108bb3f5f22a88c29f5eda1ddf73c25720e894e7ac3c67396e687087"

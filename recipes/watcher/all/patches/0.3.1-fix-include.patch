@@ -1,0 +1,12 @@
+diff --git a/include/watcher/adapter/linux/watch.hpp b/include/watcher/adapter/linux/watch.hpp
+index 1b6b61a..a3e6aa9 100644
+--- a/include/watcher/adapter/linux/watch.hpp
++++ b/include/watcher/adapter/linux/watch.hpp
+@@ -11,6 +11,7 @@
+ 
+ #include <sys/epoll.h>
+ #include <sys/inotify.h>
++#include <unistd.h>
+ #include <chrono>
+ #include <filesystem>
+ #include <iostream>

@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.1.0)
-project(test_package C)
+cmake_minimum_required(VERSION 3.1)
+project(test_package LANGUAGES C)
 
-find_package(libpciaccess REQUIRED)
+find_package(libpciaccess REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} libpciaccess::libpciaccess)
+target_link_libraries(${PROJECT_NAME} PRIVATE libpciaccess::libpciaccess)

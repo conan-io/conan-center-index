@@ -7,3 +7,7 @@ versions:
     folder: all
   "2.9.2":
     folder: all
+  "2.10.0":
+    folder: all
+  "2.10.1":
+    folder: all

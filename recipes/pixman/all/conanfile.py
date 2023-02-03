@@ -1,8 +1,13 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools import files, microsoft
+from conan.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.52.0"
 
 
 class PixmanConan(ConanFile):
@@ -21,12 +26,6 @@ class PixmanConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _settings_build(self):
@@ -47,79 +46,58 @@ class PixmanConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("meson/0.63.2")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options.update({
+            "libpng": "disabled",
+            "gtk": "disabled"
+        })
+        tc.generate()
+
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("pixman can only be built as a static library on Windows")
 
+    def export_sources(self):
+        files.export_conandata_patches(self)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
-                                  "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
-                                  "-MD ", "-{} ".format(str(self.settings.compiler.runtime)))
-        if tools.is_apple_os(self.settings.os):
-            # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
-            test_makefile = os.path.join(self._source_subfolder, "test", "Makefile.in")
-            tools.replace_in_file(test_makefile,
-                                  "region_test_OBJECTS = region-test.$(OBJEXT)",
-                                  "region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)")
-            tools.replace_in_file(test_makefile,
-                                  "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT)",
-                                  "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT) utils.$(OBJEXT)")
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--disable-libpng",
-            "--disable-gtk",
-        ]
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+        files.apply_conandata_patches(self)
+        files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "")
+        files.replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('demos')", "")
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                make_vars = {
-                    "MMX": "on" if self.settings.arch == "x86" else "off",
-                    "SSE2": "on",
-                    "SSSE3": "on",
-                    "CFG": str(self.settings.build_type).lower(),
-                }
-                var_args = " ".join("{}={}".format(k, v) for k, v in make_vars.items())
-                self.run("make -C {}/pixman -f Makefile.win32 {}".format(self._source_subfolder, var_args),
-                            win_bash=True)
-        else:
-            autotools = self._configure_autotools()
-            autotools.make(target="pixman")
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.copy(os.path.join(self._source_subfolder, "COPYING"), dst="licenses")
-        if self.settings.compiler == "Visual Studio":
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            self.copy(pattern="*{}pixman.h".format(os.sep), dst=self._includedir, keep_path=False)
-            self.copy(pattern="*{}pixman-version.h".format(os.sep), dst=self._includedir, keep_path=False)
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        meson = Meson(self)
+        meson.install()
+
+        files.copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        lib_folder = os.path.join(self.package_folder, "lib")
+        files.rmdir(self, os.path.join(lib_folder, "pkgconfig"))
+        files.rm(self, "*.la", lib_folder)
+        if microsoft.is_msvc(self):
+            prefix = "libpixman-1"
+            files.rename(self, os.path.join(lib_folder, f"{prefix}.a"), os.path.join(lib_folder, f"{prefix}.lib"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = files.collect_libs(self)
         self.cpp_info.includedirs.append(self._includedir)
-        self.cpp_info.names["pkg_config"] = "pixman-1"
+        self.cpp_info.set_property("pkg_config_name", "pixman-1")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]

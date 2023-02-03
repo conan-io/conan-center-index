@@ -14,13 +14,9 @@ sources:
 patches:
   "1.7.1":
     - patch_file: "patches/fix-cmake-1.7.1.patch"
-      base_path: "source_subfolder"
   "1.7.0":
     - patch_file: "patches/fix-cmake-1.6.0.patch"
-      base_path: "source_subfolder"
   "1.6.0":
     - patch_file: "patches/fix-cmake-1.6.0.patch"
-      base_path: "source_subfolder"
   "1.5.1":
     - patch_file: "patches/fix-cmake-1.5.1.patch"
-      base_path: "source_subfolder"

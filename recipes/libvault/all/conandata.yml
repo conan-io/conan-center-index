@@ -1,8 +1,23 @@
 sources:
+  "0.52.0":
+    url: "https://github.com/abedra/libvault/archive/refs/tags/0.52.0.zip"
+    sha256: 49058ac9a1d3d1d08ac165f5f7b50e3a2a2ab0d3f9b8bb8194fa7a8de36edcf8
+  "0.51.0":
+    url: "https://github.com/abedra/libvault/archive/refs/tags/0.51.0.zip"
+    sha256: 570ccc6451cf8e93b1c585bbf6ab5212ff9290b3a9b477752cf0651414b3d026
   "0.48.0":
     url: "https://github.com/abedra/libvault/archive/0.48.0.zip"
     sha256: 0a42be282ff0aff77b68cb7238014aa762df5c6b62e4d3561878874ca3760489
 patches:
+  "0.52.0":
+    - patch_file: "patches/fix-cmake-0.51.0.patch"
+      patch_type: "conan"
+      patch_description: "use libcurl from conan center"
+  "0.51.0":
+    - patch_file: "patches/fix-cmake-0.51.0.patch"
+      patch_type: "conan"
+      patch_description: "use libcurl from conan center"
   "0.48.0":
     - patch_file: "patches/fix-cmake-0.48.0.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "use libcurl from conan center"

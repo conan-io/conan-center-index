@@ -1,0 +1,84 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -19,7 +19,7 @@
+ option( BUILD_TESTS "Build unit tests." ON )
+ option( BUILD_SSL "Build secure socket layer support." ON )
+ option( BUILD_IPC "Build unix domain socket layer support." OFF )
+-
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ #
+ # Configuration
+ #
+@@ -57,7 +57,7 @@ find_package( asio REQUIRED )
+ 
+ if ( BUILD_SSL )
+     add_definitions( "-DBUILD_SSL" )
+-    find_package( openssl REQUIRED )
++    find_package( OpenSSL REQUIRED )
+ endif ( )
+ 
+ include_directories( ${INCLUDE_DIR} SYSTEM ${asio_INCLUDE} ${ssl_INCLUDE} )
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -68,7 +68,7 @@
+ 
+ if ( WIN32 )
+ 	add_definitions( -DWIN_DLL_EXPORT )
+-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251" )
++	#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251" )
+ endif ( )
+ 
+ #
+@@ -75,13 +75,14 @@
+ # Build
+ #
+ file( GLOB_RECURSE MANIFEST "${SOURCE_DIR}/*.cpp" )
+-
++if(NOT BUILD_SHARED_LIBS)
+ set( STATIC_LIBRARY_NAME "${PROJECT_NAME}-static" )
+ add_library( ${STATIC_LIBRARY_NAME} STATIC ${MANIFEST} )
+ set_property( TARGET ${STATIC_LIBRARY_NAME} PROPERTY CXX_STANDARD 14 )
+ set_property( TARGET ${STATIC_LIBRARY_NAME} PROPERTY CXX_STANDARD_REQUIRED ON )
+ set_target_properties( ${STATIC_LIBRARY_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} )
+-	
++target_link_libraries( ${STATIC_LIBRARY_NAME} LINK_PRIVATE asio::asio )
++else()
+ set( SHARED_LIBRARY_NAME "${PROJECT_NAME}-shared" )
+ add_library( ${SHARED_LIBRARY_NAME} SHARED ${MANIFEST} )
+ set_property( TARGET ${SHARED_LIBRARY_NAME} PROPERTY CXX_STANDARD 14 )
+@@ -93,13 +94,20 @@
+ 	set_target_properties( ${SHARED_LIBRARY_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} )
+ endif ( )	
+ set_target_properties( ${SHARED_LIBRARY_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR} VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} )
+-
++target_link_libraries( ${SHARED_LIBRARY_NAME} LINK_PRIVATE asio::asio )
++endif()
+ if ( BUILD_SSL )
+-    target_link_libraries( ${SHARED_LIBRARY_NAME} LINK_PRIVATE ${ssl_LIBRARY_SHARED} ${crypto_LIBRARY_SHARED} )
+-    target_link_libraries( ${STATIC_LIBRARY_NAME} LINK_PRIVATE ${ssl_LIBRARY_STATIC} ${crypto_LIBRARY_STATIC} ${CMAKE_DL_LIBS} )
++if(BUILD_SHARED_LIBS)
++    target_link_libraries( ${SHARED_LIBRARY_NAME} LINK_PRIVATE OpenSSL::SSL $<$<BOOL:${WIN32}>:mswsock>)
++else()
++    target_link_libraries( ${STATIC_LIBRARY_NAME} LINK_PRIVATE OpenSSL::SSL ${CMAKE_DL_LIBS} $<$<BOOL:${WIN32}>:mswsock>)
++endif()
+ else ( )
++if(BUILD_SHARED_LIBS)
+-    target_link_libraries( ${SHARED_LIBRARY_NAME} )
++    target_link_libraries( ${SHARED_LIBRARY_NAME} OpenSSL::SSL $<$<BOOL:${WIN32}>:mswsock>)
++else()
+-    target_link_libraries( ${STATIC_LIBRARY_NAME} ${CMAKE_DL_LIBS} )
++    target_link_libraries( ${STATIC_LIBRARY_NAME} ${CMAKE_DL_LIBS} OpenSSL::SSL $<$<BOOL:${WIN32}>:mswsock>)
++endif()
+ endif ( )
+ 
+ if ( BUILD_TESTS )
+@@ -119,5 +127,8 @@
+ 
+ install( FILES "${INCLUDE_DIR}/${PROJECT_NAME}" DESTINATION "${CMAKE_INSTALL_PREFIX}/include" )
+ install( FILES ${ARTIFACTS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/corvusoft/${PROJECT_NAME}" )
++if(NOT BUILD_SHARED_LIBS)
+ install( TARGETS ${STATIC_LIBRARY_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library )
++else()
+-install( TARGETS ${SHARED_LIBRARY_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library )
++install( TARGETS ${SHARED_LIBRARY_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT library )
++endif()

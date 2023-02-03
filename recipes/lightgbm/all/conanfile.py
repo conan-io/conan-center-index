@@ -42,7 +42,7 @@ class LightGBMConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0")
         self.requires("fast_double_parser/0.6.0")
-        self.requires("fmt/8.1.1")
+        self.requires("fmt/9.0.0")
         if self.options.with_openmp and self.settings.compiler in ("clang", "apple-clang"):
             self.requires("llvm-openmp/11.1.0")
 

@@ -1,0 +1,9 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/thedevmanek/imutils-cpp/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "de79dce695a20550de1c383f74bf034ade22686f1197308ec612a1fb05fcf67a"
+patches:
+  "1.0.1":
+    - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
+    - patch_file: "patches/1.0.1-0002-unuse-bits_stdcpp_h.patch"
+    - patch_file: "patches/1.0.1-0003-fix-path-cast.patch"

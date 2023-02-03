@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4fd93d04..922efd15 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -415,14 +415,7 @@ IF(ZLIB_FOUND)
+   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+   LIST(APPEND ADDITIONAL_LIBS ${ZLIB_LIBRARIES})
+   IF(WIN32 AND NOT CYGWIN)
+-    #
+-    # Test if ZLIB_WINAPI macro is needed to use.
+-    #
+-    TRY_MACRO_FOR_LIBRARY(
+-      "${ZLIB_INCLUDE_DIR}" "${ZLIB_LIBRARIES}"
+-      RUNS
+-      "#include <zlib.h>\nint main() {uLong f = zlibCompileFlags(); return (f&(1U<<10))?0:-1; }"
+-      ZLIB_WINAPI)
++    set(ZLIB_WINAPI yes)
+     IF(ZLIB_WINAPI)
+       ADD_DEFINITIONS(-DZLIB_WINAPI)
+     ELSE(ZLIB_WINAPI)

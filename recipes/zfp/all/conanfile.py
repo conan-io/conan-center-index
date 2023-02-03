@@ -1,7 +1,10 @@
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.54.0"
 
 
 class ZfpConan(ConanFile):
@@ -10,7 +13,7 @@ class ZfpConan(ConanFile):
     homepage = "https://github.com/LLNL/zfp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-    topics = ("zfp", "compression", "arrays")
+    topics = ("compression", "arrays")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -38,63 +41,54 @@ class ZfpConan(ConanFile):
         "with_openmp": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
         if self.options.with_cuda:
             self.output.warn("Conan package for CUDA is not available, this package will be used from system.")
         if self.options.with_openmp:
             self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_CFP"] = True
-        self._cmake.definitions["BUILD_UTILITIES"] = False
-        self._cmake.definitions["ZFP_WITH_CUDA"] = self.options.with_cuda
-        self._cmake.definitions["ZFP_BIT_STREAM_WORD_SIZE"] = self.options.bit_stream_word_size
-        self._cmake.definitions["ZFP_WITH_BIT_STREAM_STRIDED"] = self.options.with_bit_stream_strided
-        self._cmake.definitions["ZFP_WITH_ALIGNED_ALLOC"] = self.options.with_aligned_alloc
-        self._cmake.definitions["ZFP_WITH_CACHE_TWOWAY"] = self.options.with_cache_twoway
-        self._cmake.definitions["ZFP_WITH_CACHE_FAST_HASH"] = self.options.with_cache_fast_hash
-        self._cmake.definitions["ZFP_WITH_CACHE_PROFILE"] = self.options.with_cache_profile
-        self._cmake.definitions["ZFP_WITH_CUDA"] = self.options.with_cuda
-        self._cmake.definitions["ZFP_WITH_OPENMP"] = self.options.with_openmp
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_CFP"] = True
+        tc.variables["BUILD_UTILITIES"] = False
+        tc.variables["ZFP_WITH_CUDA"] = self.options.with_cuda
+        tc.variables["ZFP_BIT_STREAM_WORD_SIZE"] = self.options.bit_stream_word_size
+        tc.variables["ZFP_WITH_BIT_STREAM_STRIDED"] = self.options.with_bit_stream_strided
+        tc.variables["ZFP_WITH_ALIGNED_ALLOC"] = self.options.with_aligned_alloc
+        tc.variables["ZFP_WITH_CACHE_TWOWAY"] = self.options.with_cache_twoway
+        tc.variables["ZFP_WITH_CACHE_FAST_HASH"] = self.options.with_cache_fast_hash
+        tc.variables["ZFP_WITH_CACHE_PROFILE"] = self.options.with_cache_profile
+        tc.variables["ZFP_WITH_CUDA"] = self.options.with_cuda
+        tc.variables["ZFP_WITH_OPENMP"] = self.options.with_openmp
         if self.settings.os != "Windows" and not self.options.shared:
-            self._cmake.definitions["ZFP_ENABLE_PIC"] = self.options.fPIC
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["ZFP_ENABLE_PIC"] = self.options.fPIC
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "zfp")
@@ -112,7 +106,7 @@ class ZfpConan(ConanFile):
 
         if not self.options.shared and self.options.with_openmp:
             openmp_flags = []
-            if self._is_msvc:
+            if is_msvc(self):
                 openmp_flags = ["-openmp"]
             elif self.settings.compiler in ("gcc", "clang"):
                 openmp_flags = ["-fopenmp"]
@@ -121,6 +115,9 @@ class ZfpConan(ConanFile):
 
             self.cpp_info.components["_zfp"].sharedlinkflags = openmp_flags
             self.cpp_info.components["_zfp"].exelinkflags = openmp_flags
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_zfp"].system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_zfp"].names["cmake_find_package"] = "zfp"

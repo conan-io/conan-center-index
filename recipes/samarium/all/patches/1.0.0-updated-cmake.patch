@@ -1,0 +1,39 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 0cc8517..aff82dd 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -42,28 +42,13 @@ if(WARNINGS)
+     target_compile_options(samarium PUBLIC ${WARNINGS})
+ endif()
+ 
+-option(SAMARIUM_USE_CONAN "Use Conan to find dependencies" TRUE)
+-if(SAMARIUM_USE_CONAN)
+-    message(STATUS "src/CMakeLists.txt: Using Conan for deps")
++find_package(SFML 2.5 CONFIG REQUIRED)
++find_package(fmt CONFIG REQUIRED)
++find_package(range-v3 CONFIG REQUIRED)
+ 
+-    include(conanbuildinfo)
+-    conan_basic_setup(TARGETS)
+-
+-    target_link_libraries(samarium PRIVATE CONAN_PKG::fmt)
+-    target_link_libraries(samarium PRIVATE CONAN_PKG::sfml)
+-    target_link_libraries(samarium PRIVATE CONAN_PKG::range-v3)
+-
+-else()
+-    find_package(
+-        SFML 2.5
+-        COMPONENTS system window graphics
+-        REQUIRED
+-    )
+-
+-    find_package(fmt REQUIRED)
+-    target_link_libraries(samarium PRIVATE fmt::fmt)
+-    target_link_libraries(samarium PRIVATE sfml-system sfml-window sfml-graphics)
+-endif()
++target_link_libraries(samarium PRIVATE fmt::fmt)
++target_link_libraries(samarium PRIVATE sfml-system sfml-window sfml-graphics)
++target_link_libraries(samarium PRIVATE range-v3::range-v3)
+ 
+ install(
+     TARGETS samarium

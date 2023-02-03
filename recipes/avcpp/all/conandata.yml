@@ -1,9 +1,17 @@
 sources:
+  "2.1.0":
+    url: "https://github.com/h4tr3d/avcpp/archive/refs/tags/v2.1.0.tar.gz"
+    sha256: "8398217dccb9f5b4cbb41e5bf4f73f47b461ed3ba8c3aefdda9f9dd714649855"
   "cci.20220301":
     url: "https://github.com/h4tr3d/avcpp/archive/fd4bc4662eb39853de8fcac4a663bebd0eea30b8.tar.gz"
     sha256: "e48eae2ec154bc69aed16159c8b18c9ffb4925ba672b022e94a3c9b96782a4bf"
 
 patches:
+  "2.1.0":
+    - patch_file: "patches/2.1.0-fix-ffmpeg.patch"
+      patch_description: "fix ffmpeg package name and remove ffmpeg from install targets"
+      patch_type: "conan"
   "cci.20220301":
-    - base_path: "source_subfolder"
-      patch_file: "patches/fix-ffmpeg-package.patch"
+    - patch_file: "patches/cci.20220301-fix-ffmpeg.patch"
+      patch_description: "fix ffmpeg package name and remove ffmpeg from install targets"
+      patch_type: "conan"

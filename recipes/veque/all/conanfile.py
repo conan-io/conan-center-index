@@ -1,8 +1,12 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
+
 
 class VequeConan(ConanFile):
     name = "veque"
@@ -16,39 +20,50 @@ class VequeConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
             "Visual Studio": "15.7",
+            "msvc": "191",
         }
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
 
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.name} {self.version} requires C++17, which your compiler does not support.",
+            )
 
-    def package_id(self):
-        self.info.header_only()
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

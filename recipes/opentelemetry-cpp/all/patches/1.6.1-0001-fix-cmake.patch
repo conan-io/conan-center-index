@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a1b6934..d4f5251 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,7 +209,6 @@ if(WITH_JAEGER)
+   find_package(Thrift QUIET)
+   if(Thrift_FOUND)
+     find_package(Boost REQUIRED)
+-    include_directories(${Boost_INCLUDE_DIR})
+   else()
+     # Install Thrift and propagate via vcpkg toolchain file
+     if(WIN32 AND (NOT DEFINED CMAKE_TOOLCHAIN_FILE))
+diff --git a/cmake/opentelemetry-proto.cmake b/cmake/opentelemetry-proto.cmake
+index 629ea81..3b09b92 100644
+--- a/cmake/opentelemetry-proto.cmake
++++ b/cmake/opentelemetry-proto.cmake
+@@ -242,6 +242,10 @@ else() # cmake 3.8 or lower
+   target_link_libraries(opentelemetry_proto INTERFACE ${Protobuf_LIBRARIES})
+ endif()
+ 
++if(TARGET gRPC::grpc++)
++  target_link_libraries(opentelemetry_proto PUBLIC gRPC::grpc++)
++endif()
++
+ if(BUILD_SHARED_LIBS)
+   set_property(TARGET opentelemetry_proto PROPERTY POSITION_INDEPENDENT_CODE ON)
+ endif()

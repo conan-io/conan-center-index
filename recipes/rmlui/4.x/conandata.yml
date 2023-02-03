@@ -11,3 +11,6 @@ sources:
   "4.3":
     sha256: "5b378647137e74b7c89dfebb0ea6f173bc83372f7268104b99c420cfc9652a01"
     url: "https://github.com/mikke89/RmlUi/archive/refs/tags/4.3.zip"
+  "4.4":
+    url: "https://github.com/mikke89/RmlUi/archive/4.4.tar.gz"
+    sha256: "9e45176e47154616253c4e5c78368f4af4b4379278b73066c3fb5a338f9c655a"

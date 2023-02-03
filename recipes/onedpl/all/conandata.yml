@@ -1,4 +1,10 @@
 sources:
+  "2021.7.0":
+    url: "https://github.com/oneapi-src/oneDPL/archive/refs/tags/oneDPL-2021.7.0-release.tar.gz"
+    sha256: "5484c6de482790206d877a4947dcef6e0a1e082dbfa5c6a5362e18072c4a3de3"
+  "2021.6.1":
+    url: "https://github.com/oneapi-src/oneDPL/archive/refs/tags/oneDPL-2021.6.1-release.tar.gz"
+    sha256: "4995fe2ed2724b89cdb52c4b6c9af22e146b48d2561abdafdaaa06262dbd67c4"
   "20200330":
     url: "https://github.com/oneapi-src/oneDPL/archive/20200330.tar.gz"
     sha256: "3e040f6afdb200229dd58be2cf2a5f1613872f254231b18de2942aaf7e39ae2d"

@@ -5,6 +5,4 @@ sources:
 patches:
   "0.5.20200222":
     - patch_file: "patches/0001-fix-dll-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-shared-apple.patch"
-      base_path: "source_subfolder"

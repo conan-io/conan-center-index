@@ -1,16 +1,13 @@
 sources:
-  "4.0.0":
-    url: "https://github.com/fukuchi/libqrencode/archive/v4.0.0.tar.gz"
-    sha256: "c2c8a8110354463a3332cb48abf8581c8d94136af4dc1418f891cc9c7719e3c1"
   "4.1.1":
     url: "https://github.com/fukuchi/libqrencode/archive/v4.1.1.tar.gz"
     sha256: "5385bc1b8c2f20f3b91d258bf8ccc8cf62023935df2d2676b5b67049f31a049c"
-patches:
   "4.0.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-remove-deprecated-attribute.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-cmake-fix-install.patch"
+    url: "https://github.com/fukuchi/libqrencode/archive/v4.0.0.tar.gz"
+    sha256: "c2c8a8110354463a3332cb48abf8581c8d94136af4dc1418f891cc9c7719e3c1"
+patches:
   "4.1.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-cmake-fix-install-4.1.1.patch"
+    - patch_file: "patches/0003-cmake-fix-install-4.1.1.patch"
+  "4.0.0":
+    - patch_file: "patches/0001-remove-deprecated-attribute.patch"
+    - patch_file: "patches/0002-cmake-fix-install.patch"

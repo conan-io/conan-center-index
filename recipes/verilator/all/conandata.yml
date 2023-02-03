@@ -1,4 +1,10 @@
 sources:
+  "4.224":
+    url: "https://github.com/verilator/verilator/archive/refs/tags/v4.224.tar.gz"
+    sha256: "010ff2b5c76d4dbc2ed4a3278a5599ba35c8ed4c05690e57296d6b281591367b"
+  "4.200":
+    url: "https://www.veripool.org/ftp/verilator-4.200.tgz"
+    sha256: "773913f4410512a7a51de3d04964766438dc11fc22b213eab5c6c29730df3e36"
   "4.038":
     url: "https://www.veripool.org/ftp/verilator-4.038.tgz"
     sha256: "fa004493216034ac3e26b21b814441bd5801592f4f269c5a4672e3351d73b515"

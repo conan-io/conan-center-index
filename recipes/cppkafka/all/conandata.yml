@@ -5,8 +5,5 @@ sources:
 patches:
   "0.4.0":
     - patch_file: "patches/0001-no-template-export.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-cppstd.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-clean-rpath.patch"
-      base_path: "source_subfolder"

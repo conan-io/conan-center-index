@@ -70,6 +70,7 @@ class Argon2Conan(ConanFile):
             tools.replace_in_file(argon2_header, "__declspec(dllexport)", "")
             tools.replace_in_file(vcxproj, "DynamicLibrary", "StaticLibrary")
         tools.replace_in_file(vcxproj, "<ClCompile>", "<ClCompile><AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>")
+        tools.replace_in_file(vcxproj, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
         if self.settings.compiler == "Visual Studio":
             msbuild = MSBuild(self)
             msbuild.build(os.path.join(self._source_subfolder, "Argon2.sln"), targets=("Argon2OptDll",))#, platforms={"x86": "Win32"})

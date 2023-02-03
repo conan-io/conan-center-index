@@ -1,13 +1,10 @@
 sources:
-  "20200306":
-    sha256: bf61bc7ffe556b30464ac0734e18d975fe6a8676d9c2fcb7c215981a46381847
-    url: https://github.com/bacnet-stack/bacnet-stack/archive/4a916468c63de478b84ef4d0c67d541cd84da27e.zip
-  "20200515":
-    sha256: dda1b8c180c3eeb85eb950de5a5907fa22543d7c6b930f11f3fe735eb6ea662b
-    url: https://github.com/bacnet-stack/bacnet-stack/archive/3553ae56c2b0240949ddf54dbea4213b0c69433c.zip
-  "20200601":
-    sha256: 0575a7b1f9d05778ed6211a6a095d344b8684aebf3b51889423b51a4f3575889
-    url: https://github.com/bacnet-stack/bacnet-stack/archive/ff9697bab4d520588dae350de9b8a700c8af18a0.zip
   "1.0.0":
-    sha256: 6a57448fa8099bcb51713a6799f9f08f4f14f70dc9c69c6927129b0a21868b92
-    url: https://github.com/bacnet-stack/bacnet-stack/archive/bacnet-stack-1.0.0.zip
+    url: "https://github.com/bacnet-stack/bacnet-stack/archive/refs/tags/bacnet-stack-1.0.0.tar.gz"
+    sha256: "8dad24decb3870bc8147a1ea5eecd5c6f8c1205ec48d5ae4d454085427122658"
+patches:
+  "1.0.0":
+    - patch_file: "patches/0001-fix-dll-install.patch"
+      patch_description: "Fix installation of dll"
+      patch_type: "portability"
+      patch_source: "https://github.com/bacnet-stack/bacnet-stack/pull/351"

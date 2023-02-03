@@ -1,0 +1,11 @@
+--- a/cur/SQLGetDiagRec.c
++++ b/cur/SQLGetDiagRec.c
+@@ -101,8 +101,4 @@ SQLRETURN CLGetDiagRec( SQLSMALLINT handle_type,
+                          text_length_ptr);
+ }
+ 
+-DMHDBC __get_connection( EHEAD * head )
+-{
+-    return 0;
+-}
+ 

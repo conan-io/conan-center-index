@@ -1,4 +1,10 @@
 sources:
+  "2.0.2":
+    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.2.tar.gz"
+    sha256: "99871BCAA8DA4361D1BAAE9CF1507683058DE8572AC3080EDC41E590FFBA06C0"
+  "2.0.1":
+    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.1.tar.gz"
+    sha256: "A6750992EA668786F267E4EDA5588DE4D7585F30E59DCF8512620AF509D6690F"
   "2.0.0":
     url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v2.0.0.tar.gz"
     sha256: "C598DD0630F535D61EA9F8BDE5FE7DA3EF4C595419ECFBCD2384CA6FB4CA804F"
@@ -9,9 +15,15 @@ sources:
     url: "https://github.com/eclipse-iceoryx/iceoryx/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "3D7BABCF92974F6D22E8A497E31198DE1D88DF8B20C942992DBBEC5DFB06C4BB"
 patches:
+  "2.0.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.0.X-0001-fix-find-toml.patch"
+  "2.0.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.0.X-0001-fix-find-toml.patch"
   "2.0.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/2.0.0-0001-fix-find-toml.patch"
+      patch_file: "patches/2.0.X-0001-fix-find-toml.patch"
   "1.0.1":
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.0-0001-fix-find-toml.patch"

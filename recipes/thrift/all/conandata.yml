@@ -1,4 +1,7 @@
 sources:
+  "0.17.0":
+    url: "https://github.com/apache/thrift/archive/v0.17.0.tar.gz"
+    sha256: "f5888bcd3b8de40c2c2ab86896867ad9b18510deb412cba3e5da76fb4c604c29"
   "0.16.0":
     url: "https://github.com/apache/thrift/archive/refs/tags/v0.16.0.tar.gz"
     sha256: "df2931de646a366c2e5962af679018bca2395d586e00ba82d09c0379f14f8e7b"
@@ -15,18 +18,15 @@ sources:
     url: "https://github.com/apache/thrift/archive/0.13.0.tar.gz"
     sha256: "8469c8d72c684c6de72ddf55fc65d1c10868a576e7dc4d1f4a21a59814b97110"
 patches:
+  "0.17.0":
+    - patch_file: "patches/cmake-0.16.0.patch"
   "0.16.0":
     - patch_file: "patches/cmake-0.16.0.patch"
-      base_path: "source_subfolder"
   "0.15.0":
     - patch_file: "patches/cmake-0.15.0.patch"
-      base_path: "source_subfolder"
   "0.14.2":
     - patch_file: "patches/cmake-0.14.1.patch"
-      base_path: "source_subfolder"
   "0.14.1":
     - patch_file: "patches/cmake-0.14.1.patch"
-      base_path: "source_subfolder"
   "0.13.0":
     - patch_file: "patches/cmake-0.13.0.patch"
-      base_path: "source_subfolder"

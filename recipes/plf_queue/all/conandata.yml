@@ -1,0 +1,10 @@
+sources:
+  "1.22":
+    url: "https://github.com/mattreecebentley/plf_queue/archive/bef2bda67cb4cadfd5dceaaf2c8f037c540a12bc.tar.gz"
+    sha256: "96da3d7f27c62b39a147bc38a8d9f3a1a5f1cb0bfcc3b37d5ee2c7c056ad368e"
+  "1.21":
+    url: "https://github.com/mattreecebentley/plf_queue/archive/67c5de0cc2c21a865dd1fae180eb765d39f2d2c5.tar.gz"
+    sha256: "baa01a5b0709e5742b87b1bcd7ddbb116e0c841beb22c4553f0d64f54e5a829d"
+  "1.19":
+    url: "https://github.com/mattreecebentley/plf_queue/archive/991661f3674ff30c3f469120f6973556804b8a00.tar.gz"
+    sha256: "7e9a36c0fde9c131c4552d61bd4cf3a71dc78536fba4dc60d8f33b92bf5f4e8d"

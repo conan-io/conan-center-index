@@ -1,6 +1,5 @@
 # Code of conduct
 
-
 Try to be polite, CCI maintainers and contributors are really willing to help and we enjoy it.
 
 Please keep in mind these points:
@@ -15,5 +14,4 @@ Please keep in mind these points:
 - You should not get bothered if you feel unattended, CCI is an Open Source project, not a commercial product. Try to explain what you
   really need and we will try to help you.
   
- 
- For possible violations of the CoC, please report to info@conan.io **and** conancenter@jfrog.com 
+ For possible violations of the CoC, please report to info@conan.io **and** conancenter@jfrog.com

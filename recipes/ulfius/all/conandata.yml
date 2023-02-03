@@ -1,0 +1,12 @@
+sources:
+  "2.7.11":
+    url: "https://github.com/babelouest/ulfius/archive/refs/tags/v2.7.11.tar.gz"
+    sha256: "6f6fadf2fed0516f6f2203b9e5afcd9c6dfeee0cb48a27f659d6c4e21d1b456f"
+patches:
+  "2.7.11":
+    - patch_file: "patches/2.7.11-0001-shared-static-conan.patch"
+      patch_description: "Build shared and static libraries"
+      patch_type: "portability"
+    - patch_file: "patches/2.7.11-0002-pthread-for-websockets-only.patch"
+      patch_description: "pthread is only required when using websockets"
+      patch_type: "portability"

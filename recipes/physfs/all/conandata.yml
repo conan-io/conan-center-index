@@ -5,6 +5,4 @@ sources:
 patches:
   "3.0.2":
     - patch_file: "patches/0001-fix-export-import-symbols.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-cmake-doc-option.patch"
-      base_path: "source_subfolder"

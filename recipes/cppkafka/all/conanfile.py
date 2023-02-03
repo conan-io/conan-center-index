@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class CppKafkaConan(ConanFile):
@@ -23,20 +25,9 @@ class CppKafkaConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,40 +38,44 @@ class CppKafkaConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.78.0")
-        self.requires("librdkafka/1.8.2")
+        self.requires("boost/1.79.0")
+        self.requires("librdkafka/1.9.2")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CPPKAFKA_BUILD_SHARED"] = self.options.shared
-        cmake.definitions["CPPKAFKA_DISABLE_TESTS"] = True
-        cmake.definitions["CPPKAFKA_DISABLE_EXAMPLES"] = True
-        cmake.definitions["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CPPKAFKA_BUILD_SHARED"] = self.options.shared
+        tc.variables["CPPKAFKA_DISABLE_TESTS"] = True
+        tc.variables["CPPKAFKA_DISABLE_EXAMPLES"] = True
+        tc.variables["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
         if self.settings.os == "Windows":
-            cmake.definitions["CMAKE_CXX_FLAGS"] = "-DNOMINMAX"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            tc.preprocessor_definitions["NOMINMAX"] = 1
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CppKafka")

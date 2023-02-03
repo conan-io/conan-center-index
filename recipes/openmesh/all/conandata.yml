@@ -1,14 +1,12 @@
 sources:
-  "8.1":
-    url: "https://www.graphics.rwth-aachen.de/media/openmesh_static/Releases/8.1/OpenMesh-8.1.tar.gz"
-    sha256: "0953777f483d47ea9fa00c329838443a7a09dde8be77bf7de188001cb9e768a7"
   "9.0":
     url: "https://www.graphics.rwth-aachen.de/media/openmesh_static/Releases/9.0/OpenMesh-9.0.tar.gz"
     sha256: "b9574c921482798ce75a8bf578345a84b928ca26ee759219d21b310e2db9d006"
-patches:
   "8.1":
-    - patch_file: "patches/cmake-install_8.1.patch"
-      base_path: "source_subfolder"
+    url: "https://www.graphics.rwth-aachen.de/media/openmesh_static/Releases/8.1/OpenMesh-8.1.tar.gz"
+    sha256: "0953777f483d47ea9fa00c329838443a7a09dde8be77bf7de188001cb9e768a7"
+patches:
   "9.0":
     - patch_file: "patches/cmake-install_9.0.patch"
-      base_path: "source_subfolder"
+  "8.1":
+    - patch_file: "patches/cmake-install_8.1.patch"

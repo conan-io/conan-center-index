@@ -1,0 +1,12 @@
+--- a/build/cmake/CMakeLists.txt
++++ b/build/cmake/CMakeLists.txt
+@@ -7,8 +7,8 @@
+ # in the COPYING file in the root directory of this source tree).
+ # ################################################################
+ 
+-PROJECT(zstd)
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
++PROJECT(zstd)
+ SET(ZSTD_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
+ INCLUDE(GNUInstallDirs)

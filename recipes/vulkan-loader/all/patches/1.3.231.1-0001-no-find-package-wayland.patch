@@ -1,0 +1,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -215,10 +215,6 @@ if(UNIX AND NOT APPLE) # i.e.: Linux
+         find_package(X11 REQUIRED)
+     endif()
+ 
+-    if(BUILD_WSI_WAYLAND_SUPPORT)
+-        find_package(Wayland REQUIRED)
+-        include_directories(SYSTEM ${WAYLAND_CLIENT_INCLUDE_DIR})
+-    endif()
+ 
+     if(BUILD_WSI_DIRECTFB_SUPPORT)
+         find_package(DirectFB REQUIRED)

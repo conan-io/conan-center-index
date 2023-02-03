@@ -1,8 +1,9 @@
 import os
+import functools
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.43.0"
 
 class LibnfnetlinkConan(ConanFile):
     name = "libnfnetlink"
@@ -14,36 +15,35 @@ class LibnfnetlinkConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libnfnetlink is only supported on Linux")
+
+    def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        autotools = AutoToolsBuildEnvironment(self)
         conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
-        return self._autotools
+        autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
+        return autotools
 
     def build(self):
         autotools = self._configure_autotools()
@@ -61,4 +61,7 @@ class LibnfnetlinkConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["nfnetlink"]
+        self.cpp_info.set_property("pkg_config_name",  "libnfnetlink")
+
+        # TODO: to remove in conan v2 once pkg_config generator is removed
         self.cpp_info.names["pkg_config"] = "libnfnetlink"

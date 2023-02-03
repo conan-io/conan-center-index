@@ -1,0 +1,23 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -246,10 +246,16 @@
+ if (Z3_USE_LIB_GMP)
+   # Because this is off by default we will make the configure fail if libgmp
+   # can't be found
+-  find_package(GMP REQUIRED)
+-  message(STATUS "Using libgmp")
+-  list(APPEND Z3_DEPENDENT_LIBS ${GMP_C_LIBRARIES})
+-  list(APPEND Z3_COMPONENT_EXTRA_INCLUDE_DIRS ${GMP_INCLUDE_DIRS})
++  if (Z3_USE_LIB_MPIR)
++    message(STATUS "Using libmpir")
++    list(APPEND Z3_DEPENDENT_LIBS CONAN_PKG::mpir)
++  else()
++    message(STATUS "Using libgmp")
++    find_package(GMP REQUIRED)
++    list(APPEND Z3_DEPENDENT_LIBS ${GMP_C_LIBRARIES})
++    list(APPEND Z3_COMPONENT_EXTRA_INCLUDE_DIRS ${GMP_INCLUDE_DIRS})
++  endif()
++  list(APPEND Z3_COMPONENT_EXTRA_INCLUDE_DIRS "${CMAKE_BINARY_DIR}" ${CONAN_INCLUDE_DIRS})
+   list(APPEND Z3_COMPONENT_CXX_DEFINES "-D_MP_GMP")
+ else()
+   list(APPEND Z3_COMPONENT_CXX_DEFINES "-D_MP_INTERNAL")

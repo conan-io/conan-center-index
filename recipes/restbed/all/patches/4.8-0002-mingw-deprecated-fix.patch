@@ -1,0 +1,12 @@
+--- source/corvusoft/restbed/http.hpp
++++ source/corvusoft/restbed/http.hpp
+@@ -40,7 +40,7 @@
+     class Response;
+     class Settings;
+-    
+-    class [[deprecated("HTTP client is deprecated; we will release a complimentary client framework at a future date.")]] HTTP_EXPORT Http
++    class HTTP_EXPORT Http;
++    class [[deprecated("HTTP client is deprecated; we will release a complimentary client framework at a future date.")]] Http
+     {
+         public:
+             //Friends

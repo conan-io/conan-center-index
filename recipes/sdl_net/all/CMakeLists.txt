@@ -1,39 +1,31 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(SDL2_net C)
+cmake_minimum_required(VERSION 3.1)
+project(SDL2_net LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(SDL2 REQUIRED CONFIG)
 
-find_package(SDL2 REQUIRED)
-
-set(SOURCES 
-  source_subfolder/SDLnet.c
-  source_subfolder/SDLnetselect.c
-  source_subfolder/SDLnetTCP.c
-  source_subfolder/SDLnetUDP.c	
+add_library(SDL2_net
+    ${SDL_NET_SRC_DIR}/SDLnet.c
+    ${SDL_NET_SRC_DIR}/SDLnetselect.c
+    ${SDL_NET_SRC_DIR}/SDLnetTCP.c
+    ${SDL_NET_SRC_DIR}/SDLnetUDP.c
 )
-
-set(HEADERS
-  source_subfolder/SDL_net.h
-  source_subfolder/SDLnetsys.h
-)
-
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
-target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder")
-
-target_link_libraries(${PROJECT_NAME} SDL2::SDL2)
+target_include_directories(SDL2_net PUBLIC ${SDL_NET_SRC_DIR})
+target_link_libraries(SDL2_net PUBLIC SDL2::SDL2)
 
 if(WIN32)
-  target_link_libraries(${PROJECT_NAME} ws2_32 iphlpapi)
+    target_link_libraries(SDL2_net PRIVATE ws2_32 iphlpapi)
+    target_compile_definitions(SDL2_net PRIVATE "DECLSPEC=__declspec(dllexport)")
+else()
+    target_compile_definitions(SDL2_net PRIVATE "DECLSPEC=__attribute__((visibility(\"default\")))")
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    DEFINE_SYMBOL DLL_EXPORT
-    PUBLIC_HEADER source_subfolder/SDL_net.h
+set_target_properties(SDL2_net PROPERTIES
+    PUBLIC_HEADER ${SDL_NET_SRC_DIR}/SDL_net.h
+    C_VISIBILITY_PRESET hidden
 )
 
-install(TARGETS ${PROJECT_NAME}
+include(GNUInstallDirs)
+install(TARGETS SDL2_net
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

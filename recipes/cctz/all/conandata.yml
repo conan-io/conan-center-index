@@ -5,6 +5,4 @@ sources:
 patches:
   "2.3":
     - patch_file: "patches/0001-fix-installation.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-fix-frameworks-apple.patch"
-      base_path: "source_subfolder"

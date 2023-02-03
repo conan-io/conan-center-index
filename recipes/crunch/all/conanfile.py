@@ -1,19 +1,21 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get
 import os
-import glob
-from conans import ConanFile, tools, CMake, MSBuild
-from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.47.0"
 
 
 class CrunchConan(ConanFile):
     name = "crunch"
     description = "Advanced DXTc texture compression and transcoding library"
     homepage = "https://github.com/BinomialLLC/crunch"
-    topics = ("conan", "crunch", "DXTc", "texture", "compression", "decompression", "transcoding")
+    topics = ("crunch", "DXTc", "texture", "compression", "decompression", "transcoding")
     url = "https://github.com/conan-io/conan-center-index"
     license = "Zlib"
+
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     options = {
         "fPIC": [True, False],
     }
@@ -21,52 +23,47 @@ class CrunchConan(ConanFile):
         "fPIC": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.settings.os not in ["Windows", "Linux"]:
-            raise ConanInvalidConfiguration("Crunch is not supported on {}.".format(self.settings.os))
+    def validate(self):
+        if self.info.settings.os not in ["Windows", "Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Crunch is not supported on {}.".format(self.info.settings.os))
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('crunch-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CRUNCH_FOLDER"] = self.source_folder.replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("license.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["crnlib"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: %s' % bin_path)
-        self.env_info.path.append(bin_path)
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)

@@ -1,7 +1,9 @@
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class EigenConan(ConanFile):
@@ -10,7 +12,8 @@ class EigenConan(ConanFile):
     homepage = "http://eigen.tuxfamily.org"
     description = "Eigen is a C++ template library for linear algebra: matrices, vectors," \
                   " numerical solvers, and related algorithms."
-    topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
+    topics = ("algebra", "linear-algebra", "matrix", "vector", "numerical")
+    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -19,45 +22,49 @@ class EigenConan(ConanFile):
     default_options = {
         "MPL2_only": False,
     }
-    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
 
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+        tc.cache_variables["EIGEN_TEST_NOQT"] = True
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["EIGEN_TEST_NOQT"] = True
-        cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
 
-        self.copy("COPYING.*", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING.*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Eigen3")
         self.cpp_info.set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.set_property("pkg_config_name", "eigen3")
         # TODO: back to global scope once cmake_find_package* generators removed
+        self.cpp_info.components["eigen3"].bindirs = []
+        self.cpp_info.components["eigen3"].libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eigen3"].system_libs = ["m"]
         if self.options.MPL2_only:

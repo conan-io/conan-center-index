@@ -8,13 +8,18 @@ sources:
 patches:
   "0.6.3":
     - patch_file: "patches/cmake-library-0.6.3.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
     - patch_file: "patches/msvc-dll-export-0.6.3.patch"
-      base_path: "source_subfolder"
+      patch_description: "export ostream<< to dll"
+      patch_type: "portability"
   "0.6.2":
     - patch_file: "patches/include-stdexcept.patch"
-      base_path: "source_subfolder"
+      patch_description: "include stdexcept"
+      patch_type: "portability"
     - patch_file: "patches/cmake-library-0.6.2.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
     - patch_file: "patches/msvc-dll-export-0.6.2.patch"
-      base_path: "source_subfolder"
+      patch_description: "export ostream<< to dll"
+      patch_type: "portability"

@@ -1,0 +1,1 @@
+option('has_build_profile', type : 'boolean', value : false)

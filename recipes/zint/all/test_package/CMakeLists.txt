@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+project(test_package LANGUAGES C)
 
 option(ZINT_WITH_QT "Zint has been built with Qt support")
 if(ZINT_WITH_QT)
     enable_language(CXX)
 endif()
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 find_package(Zint REQUIRED CONFIG)
 
