@@ -559,6 +559,16 @@ class VtkConan(ConanFile):
 
         tc.variables["VTK_ENABLE_REMOTE_MODULES"] = self.options.enable_remote_modules
 
+        # TODO when conan OpenMPI package works: check if this is a valid test.
+        # This is normally computed by VTK's bundled FindNetCDF.cmake, which checks
+        # netcdf's include/netcdf_meta.h for the value of NC_HAS_PARALLEL,
+        # which apparently is set when parallel IO is supported by HDF5 / PnetCDF.
+        # This could be exported from NetCDF's recipe in a cmake module or similar,
+        # but the recipe would have to parse netcdf's generated cmake files, and,
+        # it would be exported with the wrong case (netCDF_HAS_PARALLEL), so it is easier
+        # to just guess here.
+        tc.variables["NetCDF_HAS_PARALLEL"] = self.dependencies["hdf5"].options.parallel
+
 
         # There are LOTS of these modules now ...
         # for vtkModule in self.required_modules:
