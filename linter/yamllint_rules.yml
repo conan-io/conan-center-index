@@ -24,3 +24,5 @@ rules:
     type: unix
   key-duplicates:
     level: error
+  empty-lines: disable
+  colons: disable
