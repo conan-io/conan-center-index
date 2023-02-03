@@ -127,13 +127,9 @@ class XmlSecConan(ConanFile):
             deps = PkgConfigDeps(self)
             deps.generate()
 
-    def _build_msvc(self):
-        with chdir(self, os.path.join(self.source_folder, "win32")):
-            crypto_engines = []
-            if self.options.with_openssl:
-                ov = Version(self.dependencies["openssl"].ref.version)
-                crypto_engines.append(f"openssl={ov.major}{ov.minor}0")
-
+    def build(self):
+        if is_msvc(self):
+            # Configure step to generate Makefile.msvc
             deps_includedirs = []
             deps_libdirs = []
             for deps in self.dependencies.values():
@@ -141,10 +137,13 @@ class XmlSecConan(ConanFile):
                 deps_includedirs.extend(deps_cpp_info.includedirs)
                 deps_libdirs.extend(deps_cpp_info.libdirs)
 
+            crypto_engines = []
+            if self.options.with_openssl:
+                ov = Version(self.dependencies["openssl"].ref.version)
+                crypto_engines.append(f"openssl={ov.major}{ov.minor}0")
+
             yes_no = lambda v: "yes" if v else "no"
             args = [
-                "cscript",
-                "configure.js",
                 f"prefix={self.package_folder}",
                 f"cruntime=/{msvc_runtime_flag(self)}",
                 f"debug={yes_no(self.settings.build_type == 'Debug')}",
@@ -157,39 +156,27 @@ class XmlSecConan(ConanFile):
                 "crypto={}".format(",".join(crypto_engines)),
             ]
 
-            configure_command = " ".join(args)
-            self.output.info(configure_command)
-            self.run(configure_command)
+            with chdir(self, os.path.join(self.source_folder, "win32")):
+                self.run(f"cscript configure.js {' '.join(args)}")
 
-            # Fix library names
+            # Fix library names in generated Makefile.msvc
             def format_libs(package):
-                libs = []
-                deps_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
-                for lib in deps_cpp_info.libs:
-                    libname = lib
-                    if not libname.endswith(".lib"):
-                        libname += ".lib"
-                    libs.append(libname)
-                for lib in deps_cpp_info.system_libs:
-                    libname = lib
-                    if not libname.endswith(".lib"):
-                        libname += ".lib"
-                    libs.append(libname)
+                cpp_info = self.dependencies[package].cpp_info.aggregated_components()
+                libs = [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in cpp_info.libs + cpp_info.system_libs]
                 return " ".join(libs)
 
-            replace_in_file(self, "Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
-            replace_in_file(self, "Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
+            makefile_msvc = os.path.join(self.source_folder, "win32", "Makefile.msvc")
+            replace_in_file(self, makefile_msvc, "libxml2.lib", format_libs("libxml2"))
+            replace_in_file(self, makefile_msvc, "libxml2_a.lib", format_libs("libxml2"))
             if self.options.with_xslt:
-                replace_in_file(self, "Makefile.msvc", "libxslt.lib", format_libs("libxslt"))
-                replace_in_file(self, "Makefile.msvc", "libxslt_a.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, "libxslt.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, "libxslt_a.lib", format_libs("libxslt"))
             if self.options.with_openssl:
-                replace_in_file(self, "Makefile.msvc", "libcrypto.lib", format_libs("openssl"))
+                replace_in_file(self, makefile_msvc, "libcrypto.lib", format_libs("openssl"))
 
-            self.run("nmake -f Makefile.msvc")
-
-    def build(self):
-        if is_msvc(self):
-            self._build_msvc()
+            # Build with NMake
+            with chdir(self, os.path.join(self.source_folder, "win32")):
+                self.run("nmake -f Makefile.msvc")
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
