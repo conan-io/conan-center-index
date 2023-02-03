@@ -665,19 +665,82 @@ class VtkConan(ConanFile):
         # this one was used for RenderingRayTracing
         tc.variables["VTK_ENABLE_OSPRAY"] = False
 
-        tc.generate()
+        deps = CMakeDeps(self)
+        #
+        # VTK expected different finder filenames and targets (check ThirdParty/LIB/CMakeLists.txt)
+        # We adjust here so VTK will find our Finders.
+        #
+        # netcdf is netCDF, but VTK expected NetCDF
+        deps.set_property("netcdf", "cmake_file_name", "NetCDF")
+        deps.set_property("netcdf", "cmake_target_name", "NetCDF::NetCDF")
+        #
+        # eigen's target is Eigen3::Eigen, but VTK expected Eigen3::Eigen3
+        deps.set_property("eigen", "cmake_target_name", "Eigen3::Eigen3")
+        #
+        # lz4 is lz4, but VTK expected LZ4
+        deps.set_property("lz4", "cmake_file_name", "LZ4")
+        deps.set_property("lz4", "cmake_target_name", "LZ4::LZ4")
+        #
+        # lzma is LibLZMA, but VTK expected LZMA
+        deps.set_property("xz_utils", "cmake_file_name", "LZMA")
+        deps.set_property("xz_utils", "cmake_target_name", "LZMA::LZMA")
+        #
+        # utfcpp's target is utf8cpp, but VTK expected utf8cpp::utf8cpp
+        deps.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
+        #
+        # freetype is freetype, but VTK expected Freetype and Freetype::Freetype
+        deps.set_property("freetype", "cmake_file_name", "Freetype")
+        deps.set_property("freetype", "cmake_target_name", "Freetype::Freetype")
+        #
+        # expat is expat, but VTK expected EXPAT and EXPAT::EXPAT
+        deps.set_property("expat", "cmake_file_name", "EXPAT")
+        deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
+        #
+        # libharu is libharu, but VTK expected LibHaru and LibHaru::LibHaru
+        deps.set_property("libharu", "cmake_file_name", "LibHaru")
+        deps.set_property("libharu", "cmake_target_name", "LibHaru::LibHaru")
+        #
+        # openvr is openvr, but VTK expected OpenVR and OpenVR::OpenVR
+        deps.set_property("openvr", "cmake_file_name", "OpenVR")
+        deps.set_property("openvr", "cmake_target_name", "OpenVR::OpenVR")
+        #
+        # exprtk is exprtk, but VTK expected ExprTk and ExprTk::ExprTk
+        deps.set_property("exprtk", "cmake_file_name", "ExprTk")
+        deps.set_property("exprtk", "cmake_target_name", "ExprTk::ExprTk")
+        #
+        # theora is theora ::theora ::theoradec ::theoraenc,
+        # but VTK wants THEORA ::THEORA ::DEC ::ENC
+        deps.set_property("theora", "cmake_file_name", "THEORA")
+        deps.set_property("theora", "cmake_target_name", "THEORA::THEORA")
+        deps.set_property("theora::theoradec", "cmake_target_name", "THEORA::DEC")
+        deps.set_property("theora::theoraenc", "cmake_target_name", "THEORA::ENC")
+        #
+        # proj is proj and PROJ::proj, but VTK wants LibPROJ and LibPROJ::LibPROJ
+        deps.set_property("proj", "cmake_file_name", "LibPROJ")
+        deps.set_property("proj", "cmake_target_name", "LibPROJ::LibPROJ")
+        # VTK also wants a variable LibPROJ_MAJOR_VERSION, which conan has as proj_VERSION_MAJOR
+        tc.variables["LibPROJ_MAJOR_VERSION"] = Version(self.dependencies["proj"].ref.version).major
+        #
+        # double-version has their headers in <double-conversion/header>
+        # but VTK expects just <header>
+        self.dependencies["double-conversion"].cpp_info.includedirs[0] = os.path.join(self.dependencies["double-conversion"].cpp_info.includedirs[0], "double-conversion")
+        ###
 
-        tc = CMakeDeps(self)
         tc.generate()
+        deps.generate()
 
 
     def build(self):
         apply_conandata_patches(self)
 
         if self.options.wrap_python and self.settings.build_type == "Debug" and self.settings.os == "Windows":
-            # TODO: check with @EricAtORS if this is needed
-            # if you apply the python patch here: https://stackoverflow.com/a/40594968
-            # then you need this hack to compile the python portion of the code in debug
+            # This is specifically for Python < 3.8
+            # Building VTK in Debug, on Windows, with Python < 3.8,
+            #  ... while linking to the standard release python libraries.
+            # Then you need this hack so the API/ABI that VTK expects will match the Release ABI.
+            # ie: comment out Py_DEBUG from pyconfig.h - described here - https://stackoverflow.com/a/40594968
+            # And then put a copy of pythonVER_d.lib in a spot where it can be found by the linker...
+            # but it doesn't get found for some reason (experienced by EricAtORS)
             python_lib_folder = os.path.realpath(os.path.join(which("python"), "..", "libs")).replace("\\", "/")
             replace_in_file(os.path.join(self.build_folder,"..", "..", "src", "CMakeLists.txt"),
                                   "project(VTK)",
@@ -729,7 +792,7 @@ class VtkConan(ConanFile):
         if self.settings.os == "Windows" and self.options.wrap_python:
             rename(self,
                    os.path.join(self.package_folder, "bin", "Lib", "site-packages"),
-                   os.path.join(self.package_folder, "Lib", "site-packages")
+                   os.path.join(self.package_folder, "lib", "site-packages")
             )
         save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
 
