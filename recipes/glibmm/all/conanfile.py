@@ -74,7 +74,7 @@ class GlibmmConan(ConanFile):
             self.requires("libsigcpp/2.10.8")
 
     def package_id(self):
-        if not self.options["glib"].shared:
+        if not self.dependencies["glib"].options.shared:
             self.info.requires["glib"].full_package_mode()
 
     def validate(self):
@@ -84,7 +84,7 @@ class GlibmmConan(ConanFile):
             else:
                 check_min_cppstd(self, 11)
 
-        if self.options.shared and not self.dependencies["glib"].shared:
+        if self.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
@@ -111,8 +111,7 @@ class GlibmmConan(ConanFile):
         tc.project_options.update({
             "build-examples": "false",
             "build-documentation": "false",
-            "msvc14x-parallel-installable": "false",
-            "default_library": "shared" if self.options.shared else "static"
+            "msvc14x-parallel-installable": "false"
         })
         tc.generate()
 
@@ -180,17 +179,12 @@ class GlibmmConan(ConanFile):
 
     def package_info(self):
         glibmm_component = f"glibmm-{self._abi_version}"
-        giomm_component = f"giomm-{self._abi_version}"
-
         self.cpp_info.components[glibmm_component].set_property("pkg_config_name", glibmm_component)
         self.cpp_info.components[glibmm_component].libs = [glibmm_component]
         self.cpp_info.components[glibmm_component].includedirs = [os.path.join("include", glibmm_component)]
+        self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::libsigcpp"]
 
-        if self._abi_version == "2.68":
-            self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::sigc++"]
-        else:
-            self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::libsigcpp"]
-
+        giomm_component = f"giomm-{self._abi_version}"
         self.cpp_info.components[giomm_component].set_property("pkg_config_name", giomm_component)
         self.cpp_info.components[giomm_component].libs = [giomm_component]
         self.cpp_info.components[giomm_component].includedirs = [os.path.join("include", giomm_component)]
