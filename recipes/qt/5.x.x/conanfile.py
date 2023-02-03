@@ -768,6 +768,8 @@ class QtConan(ConanFile):
             args += ["-qt-webengine-ffmpeg",
                      "-system-webengine-opus",
                      "-webengine-jumbo-build 0"]
+        
+        args.append("-optimized-tools")
 
         if self.options.config:
             args.append(str(self.options.config))
