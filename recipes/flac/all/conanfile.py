@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class FlacConan(ConanFile):
@@ -56,8 +56,6 @@ class FlacConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_TESTING"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -105,6 +103,7 @@ class FlacConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
+        # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "flac"
         self.cpp_info.filenames["cmake_find_package_multi"] = "flac"
         self.cpp_info.names["cmake_find_package"] = "FLAC"
