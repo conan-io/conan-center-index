@@ -449,6 +449,9 @@ class VtkConan(ConanFile):
         if self.options.wrap_python and not self.options.enable_wrapping:
             raise ConanInvalidConfiguration("wrap_python can only be enabled with enable_wrapping")
 
+        if self.options.wrap_python and not self._is_module_enabled([self.options.module_enable_IOExport]):
+            raise ConanInvalidConfiguration("wrap_python can only be enabled with module_enable_IOExport enabled, otherwise it has problems compiling")
+
         if self.options.wrap_java and not self.options.enable_wrapping:
             raise ConanInvalidConfiguration("wrap_java can only be enabled with enable_wrapping")
 
