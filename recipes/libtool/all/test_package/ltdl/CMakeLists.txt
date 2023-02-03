@@ -12,7 +12,6 @@ target_include_directories(liba
 )
 
 add_executable(${PROJECT_NAME} test_package.c)
-include_directories(${LIBTOOL_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE libtool::libtool)
 
 install(TARGETS test_package liba)
