@@ -55,6 +55,12 @@ class LibconfigConan(ConanFile):
                 os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
                 "_STDLIB_H",
                 "")
+        if Version(self.version) == "1.7.3":
+            replace_in_file(self,
+                os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
+                "target_compile_definitions(${libname}++ PUBLIC LIBCONFIGXX_STATIC)",
+                "target_compile_definitions(${libname}++ PUBLIC LIBCONFIG_STATIC LIBCONFIGXX_STATIC)")
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
