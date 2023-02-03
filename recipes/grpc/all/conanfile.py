@@ -100,6 +100,9 @@ class grpcConan(ConanFile):
         self.info.requires["protobuf"].full_package_mode()
 
     def validate(self):
+        if self.settings.os != "Macos":
+            raise ConanInvalidConfiguration(f"Do not merge - CI testing")
+            
         check_min_vs(self, "190")
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
