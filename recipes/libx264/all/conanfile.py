@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, apple_deployment_target_flag
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -37,6 +37,10 @@ class LibX264Conan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -82,7 +86,7 @@ class LibX264Conan(ConanFile):
         args = [
             f"--bit-depth={self.options.bit_depth}",
             "--disable-cli",
-            f"--prefix={unix_path(self.package_folder)}",
+            f"--prefix={unix_path(self, self.package_folder)}",
         ]
         if self.options.shared:
             args.append("--enable-shared")
@@ -98,14 +102,10 @@ class LibX264Conan(ConanFile):
             extra_ldflags.append("-arch arm64")
             args.append("--host=aarch64-apple-darwin")
             if self.settings.os != "Macos":
-                deployment_target_flag = apple_deployment_target_flag(
-                    self.settings.os,
-                    self.settings.get_safe("os.version"),
-                    self.settings.get_safe("os.sdk"),
-                    self.settings.get_safe("os.subsystem"),
-                    self.settings.get_safe("arch")
-                )
-                platform_flags = ["-isysroot", XCRun(self.settings).sdk_path, deployment_target_flag]
+                platform_flags = ["-isysroot", XCRun(self.settings).sdk_path]
+                apple_min_version_flag = AutotoolsToolchain(self).self.apple_min_version_flag
+                if apple_min_version_flag:
+                    platform_flags.append(apple_min_version_flag)
                 extra_asflags.extend(platform_flags)
                 extra_cflags.extend(platform_flags)
                 extra_ldflags.extend(platform_flags)
@@ -113,14 +113,14 @@ class LibX264Conan(ConanFile):
         if self._with_nasm:
             env = Environment()
             # FIXME: get using user_build_info
-            env.define("AS", os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if os_info.is_windows else "")).replace("\\", "/"))
+            env.define("AS", unix_path(self, os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if self.settings.os == "Windows" else ""))))
             env.vars(self).save_script("conanbuild_nasm")
         if cross_building(self):
             if self.settings.os == "Android":
                 # the as of ndk does not work well for building libx264
                 env = Environment()
                 env.define("AS", os.environ["CC"])
-                ndk_root = unix_path(os.environ["NDK_ROOT"])
+                ndk_root = unix_path(self, os.environ["NDK_ROOT"])
                 arch = {
                     "armv7": "arm",
                     "armv8": "aarch64",
@@ -132,9 +132,9 @@ class LibX264Conan(ConanFile):
                 env.vars(self).save_script("conanbuild_android")
         if is_msvc(self):
             env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
-            env.define("CC", f"{compiler_wrapper} cl -nologo")
+            # compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            # env.define("CC", f"{compiler_wrapper} cl -nologo")
+            env.define("CC", f"cl -nologo")
             if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
                 extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
