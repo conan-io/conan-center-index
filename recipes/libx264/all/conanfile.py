@@ -1,13 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.apple import is_apple_os, XCRun
+from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, rename, get, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -101,9 +100,10 @@ class LibX264Conan(ConanFile):
             extra_asflags.append("-arch arm64")
             extra_ldflags.append("-arch arm64")
             args.append("--host=aarch64-apple-darwin")
-            if self.settings.os != "Macos":
-                platform_flags = ["-isysroot", XCRun(self.settings).sdk_path]
-                apple_min_version_flag = AutotoolsToolchain(self).self.apple_min_version_flag
+            if self.settings.os != "Macos": # TODO not sure why this is != "Macos" ... shouldn't it be == ??
+                xcrun = XCRun(self)
+                platform_flags = ["-isysroot", xcrun.sdk_path]
+                apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
                 if apple_min_version_flag:
                     platform_flags.append(apple_min_version_flag)
                 extra_asflags.extend(platform_flags)
@@ -134,12 +134,12 @@ class LibX264Conan(ConanFile):
             env = Environment()
             # compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             # env.define("CC", f"{compiler_wrapper} cl -nologo")
-            env.define("CC", f"cl -nologo")
+            env.define("CC", "cl -nologo")
             if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
                 extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
-        build_canonical_name = None
-        host_canonical_name = None
+        # build_canonical_name = None
+        # host_canonical_name = None
         if is_msvc(self) or self.settings.os in ["iOS", "watchOS", "tvOS"]:
             # autotools does not know about the msvc and Apple embedded OS canonical name(s)
             build_canonical_name = False
