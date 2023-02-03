@@ -1,28 +1,28 @@
 sources:
-  "7.9.2":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v7.9.2.zip"
-    sha256: "B5224C1DEC64E25933F2DC547C278265A1B335C4516F1B11FAC81F0AC99B747E"
-  "9.1.9":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v9.1.9.zip"
-    sha256: "dd83b4855882b538ca9782b42e80be4ebf96f978974e2615def673fb9d58c33b"
-  "9.6.4":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v9.6.4.zip"
-    sha256: "b249b3bd0323f5b9aa4808852266f17073afd9f1f3a89815205a39604230f0ea"
-  "10.2.5":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v10.2.5.tar.gz"
-    sha256: "5db57c7327dc0764151038dc71d9ae7d9859fe3f1c182f35b4e2dfec43a5224e"
-  "10.4.0":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v10.4.0.tar.gz"
-    sha256: "5bdeef08a66d3c143e7fd8b02820ed5ee5c7848e4fa043132cbeef4ea18cd326"
-  "11.0.4":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v11.0.4.tar.gz"
-    sha256: "deebfa04bd6bd930b2f7c0daba8674c8e8bc273a3d735b1877b1f4bb2c0e8596"
-  "11.0.9":
-    url: "https://github.com/machinezone/IXWebSocket/archive/v11.0.9.tar.gz"
-    sha256: "bb355b54add3de14fa645ac9c16c49d1cd8324fdeea959a64071ca9aec64da7e"
-  "11.2.4":
-    url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.2.4.tar.gz"
-    sha256: "e9d4bfc6192c5390f43a9e0534ef7e3a2821bc062a1ff8c94f80884df3b412a9"
   "11.4.3":
     url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.3.tar.gz"
     sha256: "aa2d02c9c71339943cc61eb4efeb2ffc3a5a0011128a67027b9251b7d8a6e0ac"
+  "11.2.4":
+    url: "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.2.4.tar.gz"
+    sha256: "e9d4bfc6192c5390f43a9e0534ef7e3a2821bc062a1ff8c94f80884df3b412a9"
+  "11.0.9":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v11.0.9.tar.gz"
+    sha256: "bb355b54add3de14fa645ac9c16c49d1cd8324fdeea959a64071ca9aec64da7e"
+  "11.0.4":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v11.0.4.tar.gz"
+    sha256: "deebfa04bd6bd930b2f7c0daba8674c8e8bc273a3d735b1877b1f4bb2c0e8596"
+  "10.4.0":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v10.4.0.tar.gz"
+    sha256: "5bdeef08a66d3c143e7fd8b02820ed5ee5c7848e4fa043132cbeef4ea18cd326"
+  "10.2.5":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v10.2.5.tar.gz"
+    sha256: "5db57c7327dc0764151038dc71d9ae7d9859fe3f1c182f35b4e2dfec43a5224e"
+  "9.6.4":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v9.6.4.zip"
+    sha256: "b249b3bd0323f5b9aa4808852266f17073afd9f1f3a89815205a39604230f0ea"
+  "9.1.9":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v9.1.9.zip"
+    sha256: "dd83b4855882b538ca9782b42e80be4ebf96f978974e2615def673fb9d58c33b"
+  "7.9.2":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v7.9.2.zip"
+    sha256: "b5224c1dec64e25933f2dc547c278265a1b335c4516f1b11fac81f0ac99b747e"

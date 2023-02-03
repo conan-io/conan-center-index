@@ -8,9 +8,6 @@ sources:
 patches:
   "1.0.6":
     - patch_file: "patches/fix-nmake-1.0.6.patch"
-      base_path: "source_subfolder"
   "1.0.5":
     - patch_file: "patches/fix-nmake-1.0.5.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/msvc-round-lround.patch"
-      base_path: "source_subfolder"

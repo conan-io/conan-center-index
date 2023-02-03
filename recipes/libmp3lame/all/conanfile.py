@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class LibMP3LameConan(ConanFile):
@@ -62,33 +62,20 @@ class LibMP3LameConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
-    def _generate_vs(self):
-        tc = VCVars(self)
-        tc.generate()
-        # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
-        #        So populate CL with AutotoolsToolchain cflags
-        c_flags = AutotoolsToolchain(self).cflags
-        if c_flags:
-            env = Environment()
-            env.define("CL", c_flags)
-            env.vars(self).save_script("conanbuildenv_nmake")
-
-    def _generate_autotools(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--disable-frontend")
-        if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
-            tc.extra_cxxflags.extend(["-mmmx", "-msse"])
-        tc.generate()
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if is_msvc(self) or self._is_clang_cl:
-            self._generate_vs()
+            tc = NMakeToolchain(self)
+            tc.generate()
         else:
-            self._generate_autotools()
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--disable-frontend")
+            if self.settings.compiler == "clang" and self.settings.arch in ["x86", "x86_64"]:
+                tc.extra_cxxflags.extend(["-mmmx", "-msse"])
+            tc.generate()
 
     def _build_vs(self):
         with chdir(self, self.source_folder):
@@ -101,8 +88,10 @@ class LibMP3LameConan(ConanFile):
             replace_in_file(self, "Makefile.MSVC", "ADDL_OBJ = bufferoverflowU.lib", "")
             command = "nmake -f Makefile.MSVC comp=msvc"
             if self._is_clang_cl:
-                cl = os.environ.get("CC", "clang-cl")
-                link = os.environ.get("LD", "lld-link")
+                compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+                buildenv_vars = VirtualBuildEnv(self).vars()
+                cl = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl"))
+                link = buildenv_vars.get("LD", "lld-link")
                 replace_in_file(self, "Makefile.MSVC", "CC = cl", f"CC = {cl}")
                 replace_in_file(self, "Makefile.MSVC", "LN = link", f"LN = {link}")
                 # what is /GAy? MSDN doesn't know it
@@ -152,8 +141,7 @@ class LibMP3LameConan(ConanFile):
                          os.path.join(self.package_folder, "lib", "mp3lame.lib"))
         else:
             autotools = Autotools(self)
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             fix_apple_shared_install_name(self)
