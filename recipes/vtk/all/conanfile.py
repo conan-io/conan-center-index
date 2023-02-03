@@ -494,6 +494,8 @@ class VtkConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.options["libtiff"].jpeg = self.options.with_jpeg
+        # kissfft - we want the double format (also known as kiss_fft_scalar)
+        self.options["kissfft"].datatype = "double"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
