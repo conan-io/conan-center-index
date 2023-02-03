@@ -41,8 +41,8 @@ class GetTextConan(ConanFile):
 
     @property
     def _is_clang_cl(self):
-        return (str(self.settings.compiler) in ["clang"] and str(self.settings.os) in ["Windows"]) or \
-               self.settings.get_safe("compiler.toolset") == "ClangCL"
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _gettext_folder(self):
@@ -165,7 +165,7 @@ class GetTextConan(ConanFile):
                     return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
                 if is_msvc(self):
                     return "cl -nologo", "lib", "link", rc
-                    
+
             env = Environment()
             compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
