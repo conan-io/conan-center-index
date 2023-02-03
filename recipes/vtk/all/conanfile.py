@@ -427,6 +427,7 @@ class VtkConan(ConanFile):
                 self.requires("xorg/system")
         for pack in self._third_party().values():
             self.requires(pack)
+        self.requires("libcurl/7.87.0", override=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
