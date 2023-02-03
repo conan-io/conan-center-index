@@ -38,7 +38,7 @@ class LibniceConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-           self.options.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -52,6 +52,9 @@ class LibniceConan(ConanFile):
         if self.settings.os == "Windows" and self.options.with_gtk_doc:
             raise ConanInvalidConfiguration(
                 "gtk-doc is disabled by libnice while building on Windows")
+        if self.settings.get_safe("runtime") in ("MT", "MTd", "static") and self.options["glib"].shared:
+            raise ConanInvalidConfiguration(
+                "glib:shared=True with static runtime is not supported")
 
     def requirements(self):
         self.requires("glib/2.75.2")
@@ -63,7 +66,7 @@ class LibniceConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
         self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("glib/2.75.2") # for glib-mkenums
+        self.tool_requires("glib/2.75.2")  # for glib-mkenums
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
