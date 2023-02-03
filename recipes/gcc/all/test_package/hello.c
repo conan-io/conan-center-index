@@ -2,7 +2,7 @@
 
 int main()
 {
-    puts("Hello, World!\n");
+    puts(" gcc: Hello, World!");
     return 0;
 }
 

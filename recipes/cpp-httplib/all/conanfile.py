@@ -12,7 +12,7 @@ class CpphttplibConan(ConanFile):
     name = "cpp-httplib"
     description = "A C++11 single-file header-only cross platform HTTP/HTTPS library."
     license = "MIT"
-    topics = ("cpp-httplib", "http", "https", "header-only")
+    topics = ("http", "https", "header-only")
     homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
 

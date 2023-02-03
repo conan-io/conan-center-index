@@ -22,10 +22,12 @@ class OpenTelemetryCppConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        "with_logs_preview": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
+        "with_logs_preview": False,
     }
     short_paths = True
 
@@ -66,15 +68,19 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("boost/1.80.0")
 
     def validate(self):
-        if self.info.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support architecture : {self.info.settings.arch}")
-
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         check_min_vs(self, "192")
 
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
+
+        if not self.dependencies["grpc"].options.cpp_plugin:
+            raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+
+    def build_requirements(self):
+        self.tool_requires("protobuf/3.21.4")
+        self.tool_requires("grpc/1.50.1")
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
@@ -100,6 +106,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["WITH_JAEGER"] = True
         tc.variables["WITH_OTLP"] = True
         tc.variables["WITH_ZIPKIN"] = True
+        if self.options.with_logs_preview:
+            tc.variables["WITH_LOGS_PREVIEW"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -189,6 +197,14 @@ class OpenTelemetryCppConan(ConanFile):
 
         if Version(self.version) >= "1.7.0":
             libraries.append("opentelemetry_exporter_otlp_grpc_client")
+
+        if self.options.with_logs_preview:
+            libraries.extend([
+                "opentelemetry_logs",
+                "opentelemetry_exporter_ostream_logs",
+                "opentelemetry_exporter_otlp_grpc_log",
+                "opentelemetry_exporter_otlp_http_log",
+            ])
 
         if self.settings.os == "Windows":
             libraries.extend([
@@ -303,6 +319,26 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_common",
             "opentelemetry_resources",
         ])
+
+        if self.options.with_logs_preview:
+            self.cpp_info.components["opentelemetry_logs"].requires.extend([
+                "opentelemetry_resources",
+                "opentelemetry_common",
+            ])
+
+            self.cpp_info.components["opentelemetry_exporter_ostream_logs"].requires.extend([
+                "opentelemetry_logs",
+            ])
+
+            self.cpp_info.components["opentelemetry_exporter_otlp_grpc_log"].requires.extend([
+                "opentelemetry_otlp_recordable",
+                "opentelemetry_exporter_otlp_grpc_client",
+            ])
+
+            self.cpp_info.components["opentelemetry_exporter_otlp_http_log"].requires.extend([
+                "opentelemetry_otlp_recordable",
+                "opentelemetry_exporter_otlp_http_client",
+            ])
 
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])

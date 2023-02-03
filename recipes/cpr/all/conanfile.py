@@ -152,7 +152,7 @@ class CprConan(ConanFile):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
-        if Version(self.version) == "1.9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+        if Version(self.version) >= "1.9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
     def source(self):
