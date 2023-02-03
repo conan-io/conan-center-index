@@ -774,12 +774,12 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        return "b2.exe" if self._settings_build == "Windows" else "b2"
+        return "b2"
 
     @property
     def _bcp_exe(self):
         folder = os.path.join(self.source_folder, "dist", "bin")
-        return os.path.join(folder, "bcp.exe" if self._settings_build == "Windows" else "bcp")
+        return os.path.join(folder, "bcp")
 
     @property
     def _use_bcp(self):
