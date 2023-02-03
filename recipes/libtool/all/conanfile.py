@@ -224,6 +224,7 @@ class LibtoolConan(ConanFile):
             self.output.info(f'Setting {key} environment variable to {value}')
             setattr(self.env_info, key, value)
 
+        libtool_aclocal = unix_path(self, libtool_aclocal) # Conan 1.x needs and allows unix_path() in package_info()
         self.output.info(f'Appending ACLOCAL_PATH env: {libtool_aclocal}')
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
         self.output.info(f'Appending AUTOMAKE_CONAN_INCLUDES environment variable: {libtool_aclocal}')
