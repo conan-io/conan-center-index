@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -12,7 +12,7 @@ from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class XapianCoreConan(ConanFile):
@@ -26,6 +26,7 @@ class XapianCoreConan(ConanFile):
     homepage = "https://xapian.org/"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -72,8 +73,7 @@ class XapianCoreConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -85,8 +85,8 @@ class XapianCoreConan(ConanFile):
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         tc.configure_args.extend([
@@ -106,8 +106,36 @@ class XapianCoreConan(ConanFile):
             env.define("STRIP", ":")
         tc.generate(env)
 
-        deps = AutotoolsDeps(self)
-        deps.generate()
+        if is_msvc(self):
+            # Custom AutotoolsDeps for cl like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
+
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("LIBS", [f"-l{lib}" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -118,8 +146,7 @@ class XapianCoreConan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         if is_msvc(self) and not self.options.shared:
             rename(self, f"{self.package_folder}/lib/libxapian.lib",
@@ -165,7 +192,6 @@ class XapianCoreConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "xapian")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "xapian-core")
-
         self.cpp_info.libs = ["xapian"]
         self.cpp_info.resdirs = ["res"]
         if not self.options.shared:
