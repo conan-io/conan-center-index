@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4f58f43..678d88b 100644
+index 4f58f43..69e0238 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -129,6 +129,7 @@ check_include_file( "libelf/libelf.h" HAVE_LIBELF_LIBELF_H)
@@ -20,18 +20,16 @@ index 4f58f43..678d88b 100644
    message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getehdr")
    check_symbol_exists( elf64_getehdr ${PLAIN_JUST_LIBELF} HAVE_ELF64_GETEHDR)
    message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getshdr")
-@@ -216,7 +218,10 @@ if (DWARF_WITH_LIBELF)
+@@ -216,6 +218,9 @@ if (DWARF_WITH_LIBELF)
    message(STATUS "checking using elf header ... ${HAVE_LOCATION_OF_LIBELFHEADER}")
    message(STATUS "checking using libelf header ... ${JUST_LIBELF}")
  
--check_c_source_compiles("
-+  set (CMAKE_REQUIRED_LIBRARIES libelf::libelf)
-+  set (CMAKE_REQUIRED_DEFINITIONS -D__LIBELF64=1)
++set (CMAKE_REQUIRED_LIBRARIES libelf::libelf)
++set (CMAKE_REQUIRED_DEFINITIONS -D__LIBELF64=1)
 +
-+  check_c_source_compiles("
+ check_c_source_compiles("
    #include ${HAVE_LOCATION_OF_LIBELFHEADER}
    int main()
-   {
 @@ -361,7 +366,6 @@ message(STATUS "Building api tests   ... ${DOTESTS}")
  ### end what was configure.cmake
  
@@ -62,22 +60,20 @@ index f6f5376..22c5977 100644
  endif()
  set(LIBDIR lib${SUFFIX})
 diff --git a/src/bin/dwarfgen/CMakeLists.txt b/src/bin/dwarfgen/CMakeLists.txt
-index 5c2c192..fdd5505 100644
+index 5c2c192..fc3428e 100644
 --- a/src/bin/dwarfgen/CMakeLists.txt
 +++ b/src/bin/dwarfgen/CMakeLists.txt
-@@ -28,9 +28,8 @@ target_include_directories(dwarfgen PRIVATE
+@@ -28,7 +28,7 @@ target_include_directories(dwarfgen PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/libdwarfp)
  
  target_link_libraries(dwarfgen PRIVATE ${dwarfp-target}
 -   ${dwarf-target} ${DW_FZLIB})
 +   ${dwarf-target} ${DW_FZLIB} libelf::libelf)
  
--set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
+ set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
  set(LIBDIR lib${SUFFIX})
- set(BINDIR bin${SUFFIX})
- 
 diff --git a/src/lib/libdwarf/CMakeLists.txt b/src/lib/libdwarf/CMakeLists.txt
-index 0b7d578..88b798e 100644
+index 0b7d578..62b67da 100644
 --- a/src/lib/libdwarf/CMakeLists.txt
 +++ b/src/lib/libdwarf/CMakeLists.txt
 @@ -67,7 +67,7 @@ set_source_group(CONFIGURATION_FILES "Configuration Files"
@@ -89,21 +85,19 @@ index 0b7d578..88b798e 100644
  if (DW_FZLIB)
      list(APPEND DWARF_LIBS z)
  endif()
-@@ -91,7 +91,6 @@ foreach(i RANGE ${targetCount})
+@@ -85,13 +85,15 @@ foreach(i RANGE ${targetCount})
+             ${LIBELF_INCLUDE_DIRS})
+     target_compile_options(${target} PRIVATE -DLIBDWARF_BUILD
+             ${DW_FWALL})
+-	msvc_posix(${target})
++    if(BUILD_SHARED)
++        target_compile_definitions(${target} PRIVATE LIBDWARF_SHARED)
++    endif()
++    msvc_posix(${target})
+ 
+ 	target_link_libraries(${target} PUBLIC ${LIBELF_LIBRARIES} ${DW_FZLIB} ${DW_FZSTD} ) 
  	
  	set_target_properties(${target} PROPERTIES OUTPUT_NAME dwarf)
- 
--	set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
- 	set(LIBDIR lib${SUFFIX})
- 	set(BINDIR bin${SUFFIX})
- 
-diff --git a/src/lib/libdwarfp/CMakeLists.txt b/src/lib/libdwarfp/CMakeLists.txt
-index 0cc8dbc..3e01187 100644
---- a/src/lib/libdwarfp/CMakeLists.txt
-+++ b/src/lib/libdwarfp/CMakeLists.txt
-@@ -50,7 +50,6 @@ foreach(i RANGE ${targetCount})
- 	
- 	set_target_properties(${target} PROPERTIES OUTPUT_NAME dwarfp)
  
 -	set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
  	set(LIBDIR lib${SUFFIX})
