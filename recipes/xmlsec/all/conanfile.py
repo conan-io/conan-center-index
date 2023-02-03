@@ -182,9 +182,8 @@ class XmlSecConan(ConanFile):
             if self.options.with_xslt:
                 replace_in_file(self, "Makefile.msvc", "libxslt.lib", format_libs("libxslt"))
                 replace_in_file(self, "Makefile.msvc", "libxslt_a.lib", format_libs("libxslt"))
-
-            if self.settings.build_type == "Debug":
-                replace_in_file(self, "Makefile.msvc", "libcrypto.lib", "libcryptod.lib")
+            if self.options.with_openssl:
+                replace_in_file(self, "Makefile.msvc", "libcrypto.lib", format_libs("openssl"))
 
             self.run("nmake -f Makefile.msvc")
 
