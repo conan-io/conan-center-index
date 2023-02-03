@@ -19,20 +19,20 @@ patches:
   "2.0.8":
     - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
       patch_description: "disable fPIC, move cmake_minimum_version to front"
-      patch_type: "backport"
+      patch_type: "conan"
   "2.0.7":
     - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
       patch_description: "disable fPIC, move cmake_minimum_version to front"
-      patch_type: "backport"
+      patch_type: "conan"
   "2.0.6":
     - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
       patch_description: "disable fPIC, move cmake_minimum_version to front"
-      patch_type: "backport"
+      patch_type: "conan"
   "2.0.5":
     - patch_file: "patches/2.0.4-0001-fix-cmake.patch"
       patch_description: "disable fPIC, move cmake_minimum_version to front"
-      patch_type: "backport"
+      patch_type: "conan"
   "2.0.4":
     - patch_file: "patches/2.0.4-0001-fix-cmake.patch"
       patch_description: "disable fPIC, move cmake_minimum_version to front"
-      patch_type: "backport"
+      patch_type: "conan"
