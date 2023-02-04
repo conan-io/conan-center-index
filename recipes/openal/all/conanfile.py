@@ -12,6 +12,8 @@ required_conan_version = ">=1.54.0"
 
 
 class OpenALConan(ConanFile):
+    deprecated = "openal-soft"
+
     name = "openal"
     description = "OpenAL Soft is a software implementation of the OpenAL 3D audio API."
     topics = ("openal", "audio", "api")
