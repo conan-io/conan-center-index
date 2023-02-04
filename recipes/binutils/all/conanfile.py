@@ -142,7 +142,7 @@ class BinutilsConan(ConanFile):
         self.requires("zlib/1.2.13")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _exec_prefix(self):
