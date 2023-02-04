@@ -65,11 +65,6 @@ class PangoConan(ConanFile):
             self.options.with_freetype = not self.settings.os in ["Windows", "Macos"]
         if self.options.with_fontconfig == "auto":
             self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
-        if self.options.shared:
-            self.dependencies["glib"].options.shared = True
-            self.dependencies["harfbuzz"].options.shared = True
-            if self.options.with_cairo:
-                self.dependencies["cairo"].options.shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -77,7 +72,6 @@ class PangoConan(ConanFile):
     def requirements(self):
         if self.options.with_freetype:
             self.requires("freetype/2.12.1")
-
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
