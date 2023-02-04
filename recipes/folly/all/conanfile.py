@@ -1,14 +1,13 @@
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conan.tools.build import can_run,check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools import files
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-from conans import tools
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.build import can_run, check_min_cppstd, default_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.53.0"
 
 
 class FollyConan(ConanFile):
@@ -23,30 +22,26 @@ class FollyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "use_sse4_2" : [True, False],
+        "use_sse4_2": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_sse4_2" : False
+        "use_sse4_2": False
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17 if Version(self.version) >= "2022.01.31.00" else 14
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
             "gcc": "5",
             "clang": "6",
             "apple-clang": "8",
-        } if self._minimum_cpp_standard == 14 else {
+        } if self._min_cppstd == 14 else {
             "gcc": "7",
             "Visual Studio": "16",
             "clang": "6",
@@ -54,25 +49,20 @@ class FollyConan(ConanFile):
         }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            del self.options.fPIC
         if str(self.settings.arch) not in ['x86', 'x86_64']:
             del self.options.use_sse4_2
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.78.0")
@@ -94,10 +84,10 @@ class FollyConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.5.0")
-        if Version(self.version) >= "2020.08.10.00" and Version(self.version) < "2022.01.31.00":
+        if "2020.08.10.00" <= Version(self.version) < "2022.01.31.00":
             self.requires("fmt/7.1.3")
         if Version(self.version) >= "2022.01.31.00":
-            self.requires("fmt/8.0.1") # Folly bumpup fmt to 8.0.1 in v2022.01.31.00
+            self.requires("fmt/8.0.1")  # Folly bump fmt to 8.0.1 in v2022.01.31.00
 
     @property
     def _required_boost_components(self):
@@ -105,14 +95,12 @@ class FollyConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
@@ -136,23 +124,22 @@ class FollyConan(ConanFile):
         if miss_boost_required_comp:
             raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def layout(self):
-        cmake_layout(self)
-
+    def _cxx_std_flag(self, cppstd):
+        cppstd_prefix_gnu, cppstd_value = (cppstd[:3], cppstd[3:]) if "gnu" in cppstd else ("", cppstd)
+        if not cppstd_prefix_gnu:
+            cppstd_prefix_gnu = "c"
+        if is_msvc(self):
+            cppstd_prefix_gnu = ""
+            if cppstd_value > "17":
+                cppstd_value = "latest"
+        cxx_std_value = f"{cppstd_prefix_gnu}++{cppstd_value}"
+        return cxx_std_value
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -176,37 +163,44 @@ class FollyConan(ConanFile):
                 tc.variables["CMAKE_C_FLAGS"] = "/arch:FMA"
                 tc.variables["CMAKE_CXX_FLAGS"] = "/arch:FMA"
 
-        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        cxx_std_flag = tools.cppstd_flag(self.settings)
-        cxx_std_value = cxx_std_flag.split('=')[1] if cxx_std_flag else "c++{}".format(self._minimum_cpp_standard)
-        tc.variables["CXX_STD"] = cxx_std_value
+        current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
+        cxx_std_value = self._cxx_std_flag(current_cpp_std)
+
+        # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
             tc.variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.variables["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+        else:
+            tc.variables["CXX_STD"] = cxx_std_value
 
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
+        replace_in_file(self, folly_deps, "MODULE", "")
+
     def build(self):
-        files.apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "folly")
@@ -302,7 +296,6 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_test_util"].set_property("pkg_config_name", "libfolly_test_util")
             self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
             self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
-
 
         if Version(self.version) >= "2020.08.10.00" and self.settings.os == "Linux":
             # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
