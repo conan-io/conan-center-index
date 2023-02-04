@@ -1,13 +1,13 @@
 sources:
   "4.3.4":
-    url: "https://github.com/zeromq/libzmq/archive/v4.3.4.tar.gz"
-    sha256: "0ff5a531c9ffaf0dfdc7dc78d13d1383088f454896d252934c429b2554d10559"
+    url: "https://github.com/zeromq/libzmq/releases/download/v4.3.4/zeromq-4.3.4.tar.gz"
+    sha256: "c593001a89f5a85dd2ddf564805deb860e02471171b3f204944857336295c3e5"
   "4.3.3":
-    url: "https://github.com/zeromq/libzmq/archive/v4.3.3.tar.gz"
-    sha256: "c4fd999d67cd12872a8604162f2b1cf5b5a02fb807a88215f0f96bd50331b166"
+    url: "https://github.com/zeromq/libzmq/releases/download/v4.3.3/zeromq-4.3.3.tar.gz"
+    sha256: "9d9285db37ae942ed0780c016da87060497877af45094ff9e1a1ca736e3875a2"
   "4.3.2":
-    url: "https://github.com/zeromq/libzmq/archive/v4.3.2.tar.gz"
-    sha256: "02ecc88466ae38cf2c8d79f09cfd2675ba299a439680b64ade733e26a349edeb"
+    url: "https://github.com/zeromq/libzmq/releases/download/v4.3.2/zeromq-4.3.2.tar.gz"
+    sha256: "ebd7b5c830d6428956b67a0454a7f8cbed1de74b3b01e5c33c5378e22740f763"
 patches:
   "4.3.4":
     - patch_file: "patches/0003-rpath-macos-4.3.3.patch"

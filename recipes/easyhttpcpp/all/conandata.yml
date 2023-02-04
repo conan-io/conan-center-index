@@ -1,10 +1,12 @@
 sources:
   "2.1.0":
-    url: "https://github.com/sony/easyhttpcpp/archive/2.1.0.tar.gz"
+    url: "https://github.com/sony/easyhttpcpp/archive/refs/tags/2.1.0.tar.gz"
     sha256: "a20216039af129900a270e020917c3e7e7b9eb45d73ff09b1c5d9b44777a6b75"
 patches:
   "2.1.0":
-    - patch_file: "patches/0001-allow-inclusion-as-subproject.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-use-poco-target.cmake"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-config-in-path.patch"
+      patch_description: "Fix path to easyhttpcppeasyhttpConfig.cmake.in"
+      patch_type: "conan"
+    - patch_file: "patches/0002-use-poco-targets.patch"
+      patch_description: "Use Poco targets, remove OpenSSL from direct dependencies"
+      patch_type: "conan"
