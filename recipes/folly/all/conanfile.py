@@ -94,13 +94,31 @@ class FollyConan(ConanFile):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        compiler_cppstd = self.settings.compiler.get_safe("cppstd")
+        if compiler_cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if not compiler_cppstd:
+            def less_than(lhs, rhs):
+                def extract_cpp_version(_cppstd):
+                    return str(_cppstd).replace("gnu", "")
+
+                def add_millennium(_cppstd):
+                    return "19%s" % _cppstd if _cppstd == "98" else "20%s" % _cppstd
+
+                lhs = add_millennium(extract_cpp_version(lhs))
+                rhs = add_millennium(extract_cpp_version(rhs))
+                return lhs < rhs
+            cppstd = default_cppstd(self)
+            if less_than(cppstd, self._min_cppstd):
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, but your compiler defaults to C++{cppstd}."
+                    f" Please provide -s compiler.cppstd={self._min_cppstd}."
+                )
 
         if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
