@@ -268,6 +268,12 @@ class FollyConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
 
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+            self.cpp_info.components["libfolly"].system_libs.append("stdc++fs")
+
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9":
+            self.cpp_info.components["libfolly"].system_libs.append("stdc++fs" if self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] else "c++fs")
+
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "folly"
         self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
