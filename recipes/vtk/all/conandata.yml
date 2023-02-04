@@ -1,13 +1,13 @@
 sources:
-  "48ca652a":
-    url: "https://gitlab.kitware.com/vtk/vtk/-/archive/48ca652a/vtk-48ca652a.zip"
-    sha256: "3daeea8f1c3b34e5815dd0c24054e421c6f575bf"
+  "9.2.5":
+    url: "https://www.vtk.org/files/release/9.2/VTK-9.2.5.tar.gz"
+    sha256: "128d601baa980e98ee034207974b33fb38d2c98ab9cf4a5756efdb09ed6c0949"
   "9.2.2":
     url: "https://www.vtk.org/files/release/9.2/VTK-9.2.2.tar.gz"
     sha256: "1c5b0a2be71fac96ff4831af69e350f7a0ea3168981f790c000709dcf9121075"
 
 patches:
-  "48ca652a":
+  "9.2.5":
     - patch_file: "patches/9.2.2-remove-qt-59-limit.patch"
       patch_type: "conan"
       patch_description: "Don't limit QT to 5.9.x"
