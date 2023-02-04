@@ -1,7 +1,10 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conan import ConanFile
+from conans import AutoToolsBuildEnvironment
+from conans import tools
 
 class ThorsSerializerConan(ConanFile):
     name        = "thors-serializer"
+    version     = "2.2.18"
     author      = "Martin York (Aka Loki Astari) Martin.York@gmail.com"
     url         = "git@github.com:Loki-Astari/ThorsSerializer.git"
     license     = "MIT"
@@ -28,7 +31,7 @@ class ThorsSerializerConan(ConanFile):
 
     def build(self):
         atools = AutoToolsBuildEnvironment(self)
-        atools.configure(args=["--disable-vera", "--with-standard=%s" % self.settings.cppstd])
+        atools.configure(args=["--disable-vera", f"--with-standard={self.settings.cppstd}"])
         atools.make()
 
     def package(self):
@@ -36,4 +39,4 @@ class ThorsSerializerConan(ConanFile):
         atools.install()
 
     def package_info(self):
-        self.cpp_info.libs = [ "ThorsLogging%s" % self.settings.cppstd, "ThorSerialize%s" % self.settings.cppstd ]
+        self.cpp_info.libs = [ f"ThorsLogging{self.settings.cppstd}", f"ThorSerialize{self.settings.cppstd}" ]
