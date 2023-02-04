@@ -211,7 +211,8 @@ class XmlSecConan(ConanFile):
 
         self.cpp_info.components["libxmlsec"].set_property("pkg_config_name", f"xmlsec{major}")
         self.cpp_info.components["libxmlsec"].libs = [f"{base_libname}{suffix}"]
-        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", f"xmlsec{major}"))
+        if not is_msvc(self):
+            self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", f"xmlsec{major}"))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
         if not self.options.shared:
             self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_STATIC")
