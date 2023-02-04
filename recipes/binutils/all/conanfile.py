@@ -205,7 +205,6 @@ class BinutilsConan(ConanFile):
         # Add recipe path to enable running the self test in the test package.
         # Don't use this property in production code. It's unsupported.
         self.user_info.recipe_path = os.path.realpath(__file__)
-        self.conf_info.define("user.binutils:recipe_path",  os.path.realpath(__file__))
 
 
 class _ArchOs:
