@@ -129,8 +129,10 @@ class BinutilsConan(ConanFile):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type="str"):
+                self.tool_requires("msys2/cci.latest")
 
         if self.version >= "2.39":
             self.tool_requires("bison/3.8.2")
