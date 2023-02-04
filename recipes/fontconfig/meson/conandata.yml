@@ -5,6 +5,6 @@ sources:
 patches:
   "2.13.93":
     - patch_file: "patches/0001-meson-win32.patch"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/commit/7bfbaecf819a8b1630dfc8f56126e31f985d5fb3"
       patch_description: "Windows: Fix symlink privilege error detection"
