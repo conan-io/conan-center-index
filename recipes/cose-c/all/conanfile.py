@@ -15,6 +15,7 @@ class CoseCConan(ConanFile):
     description = "Implementation of COSE in C using cn-cbor and openssl"
     topics = ("cbor")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
