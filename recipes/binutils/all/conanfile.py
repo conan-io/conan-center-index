@@ -11,7 +11,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 # This recipe includes a selftest to test conversion of os/arch to triplets (and vice verse)
 # Run it using `python -m unittest conanfile.py`
