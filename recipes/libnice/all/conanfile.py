@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import copy, get, rmdir, rename, chdir
+from conan.tools.files import copy, get, rmdir, rename, chdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc_static_runtime
@@ -101,6 +101,8 @@ class LibniceConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         if self.settings.os == "Windows":
             if not self.options.shared:
                 with chdir(self, os.path.join(self.package_folder, "lib")):
