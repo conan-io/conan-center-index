@@ -48,27 +48,6 @@ class PangoConan(ConanFile):
         "with_fontconfig": "auto"
     }
 
-    def validate(self):
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration(
-                "this recipe does not support GCC before version 5. contributions are welcome")
-        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
-
-        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
-            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
-
-        if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Linking shared glib against static MSVC runtime is not supported")
-
-        if self.options.shared and (not self.dependencies["glib"].options.shared
-                                    or not self.dependencies["harfbuzz"].options.shared or
-                                    (self.options.with_cairo
-                                     and not self.dependencies["cairo"].options.shared)):
-            raise ConanInvalidConfiguration(
-                "Linking a shared library against static glib can cause unexpected behaviour."
-            )
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -95,31 +74,6 @@ class PangoConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def generate(self):
-        def is_enabled(option):
-            return "enabled" if option else "disabled"
-
-        pkg_deps = PkgConfigDeps(self)
-        pkg_deps.generate()
-
-        meson = MesonToolchain(self)
-        meson.project_options.update({
-            "introspection": is_enabled(False),
-            "libthai": is_enabled(self.options.with_libthai),
-            "cairo": is_enabled(self.options.with_cairo),
-            "xft": is_enabled(self.options.with_xft),
-            "fontconfig": is_enabled(self.options.with_fontconfig),
-            "freetype": is_enabled(self.options.with_freetype)
-        })
-        meson.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
-
-    def build_requirements(self):
-        self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("meson/1.0.0")
-
     def requirements(self):
         if self.options.with_freetype:
             self.requires("freetype/2.12.1")
@@ -136,9 +90,59 @@ class PangoConan(ConanFile):
         self.requires("glib/2.75.2")
         self.requires("fribidi/1.0.12")
 
+    def package_id(self):
+        if not self.options["glib"].shared:
+            self.info.requires["glib"].full_package_mode()
+
+    def validate(self):
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration(
+                "this recipe does not support GCC before version 5. contributions are welcome")
+        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
+
+        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
+            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+
+        if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Linking shared glib against static MSVC runtime is not supported")
+
+        if self.options.shared and (not self.dependencies["glib"].options.shared
+                                    or not self.dependencies["harfbuzz"].options.shared or
+                                    (self.options.with_cairo
+                                     and not self.dependencies["cairo"].options.shared)):
+            raise ConanInvalidConfiguration(
+                "Linking a shared library against static glib can cause unexpected behaviour."
+            )
+
+    def build_requirements(self):
+        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("meson/1.0.0")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.source_folder)
+            strip_root=True, destination=self.source_folder)
+
+    def generate(self):
+        def is_enabled(option):
+            return "enabled" if option else "disabled"
+
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        pkg_deps = PkgConfigDeps(self)
+        pkg_deps.generate()
+
+        meson = MesonToolchain(self)
+        meson.project_options.update({
+            "introspection": is_enabled(False),
+            "libthai": is_enabled(self.options.with_libthai),
+            "cairo": is_enabled(self.options.with_cairo),
+            "xft": is_enabled(self.options.with_xft),
+            "fontconfig": is_enabled(self.options.with_fontconfig),
+            "freetype": is_enabled(self.options.with_freetype)
+        })
+        meson.generate()
 
     def build(self):
         meson_build = os.path.join(self.source_folder, "meson.build")
@@ -233,7 +237,3 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangocairo"].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-
-    def package_id(self):
-        if not self.options["glib"].shared:
-            self.info.requires["glib"].full_package_mode()
