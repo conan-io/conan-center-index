@@ -9,10 +9,9 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 
 required_conan_version = ">=1.52.0"
-
 
 # This recipe includes a selftest to test conversion of os/arch to triplets (and vice verse)
 # Run it using `python -m unittest conanfile.py`
@@ -157,7 +156,7 @@ class BinutilsConan(ConanFile):
         tc.configure_args.append("--disable-nls")
         tc.configure_args.append(f"--target={self.options.target_triplet}")
         tc.configure_args.append(f"--enable-multilib={yes_no(self.options.multilib)}")
-        tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
+        tc.configure_args.append(f"--with-zlib={unix_path(self.dependencies['zlib'].package_folder)}")
         tc.configure_args.append(f"--program-prefix={self.options.prefix}")
         tc.configure_args.append("--exec_prefix=/bin/exec_prefix")
         tc.generate()
