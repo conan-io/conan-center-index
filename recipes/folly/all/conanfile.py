@@ -74,7 +74,7 @@ class FollyConan(ConanFile):
         self.requires("openssl/1.1.1q")
         self.requires("lz4/1.9.3")
         self.requires("snappy/1.1.9")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("zstd/1.5.2")
         if not is_msvc(self):
             self.requires("libdwarf/20191104")
