@@ -58,13 +58,13 @@ class PangoConan(ConanFile):
         if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
             raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
 
-        if self.options["glib"].shared and is_msvc_static_runtime(self):
+        if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Linking shared glib against static MSVC runtime is not supported")
 
-        if self.options.shared and (not self.options["glib"].shared
-                                    or not self.options["harfbuzz"].shared or
+        if self.options.shared and (not self.dependencies["glib"].options.shared
+                                    or not self.dependencies["harfbuzz"].options.shared or
                                     (self.options.with_cairo
-                                     and not self.options["cairo"].shared)):
+                                     and not self.dependencies["cairo"].options.shared)):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
@@ -87,10 +87,10 @@ class PangoConan(ConanFile):
         if self.options.with_fontconfig == "auto":
             self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
         if self.options.shared:
-            self.options["glib"].shared = True
-            self.options["harfbuzz"].shared = True
+            self.dependencies["glib"].options.shared = True
+            self.dependencies["harfbuzz"].options.shared = True
             if self.options.with_cairo:
-                self.options["cairo"].shared = True
+                self.dependencies["cairo"].options.shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
