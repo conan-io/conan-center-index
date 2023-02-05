@@ -10,8 +10,11 @@ sources:
     sha256: "7349e1fcc8b2979230b46c0d62ccf2ba2bbd611d87ef80cfd37ffe74425f5efb"
 patches:
   "3.1.4":
-    - patch_file: "patches/fix-cmake-3.1.4.patch"
+    - patch_file: "patches/3.1.4-0001-fix-cmake.patch"
+    - patch_file: "patches/3.1.1-0002-windows-nominmax.patch"
   "3.1.2":
-    - patch_file: "patches/fix-cmake-3.1.2.patch"
+    - patch_file: "patches/3.1.2-0001-fix-cmake.patch"
+    - patch_file: "patches/3.1.1-0002-windows-nominmax.patch"
   "3.1.1":
-    - patch_file: "patches/fix-cmake-3.1.1.patch"
+    - patch_file: "patches/3.1.1-0001-fix-cmake.patch"
+    - patch_file: "patches/3.1.1-0002-windows-nominmax.patch"
