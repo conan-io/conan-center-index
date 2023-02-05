@@ -196,6 +196,7 @@ class SpirvtoolsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
         rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-lint"))
         rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-diff"))
+        rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-tools"))
         if self.options.shared:
             for file_name in [
                 "*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link",
