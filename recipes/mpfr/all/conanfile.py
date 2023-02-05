@@ -90,8 +90,6 @@ class MpfrConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-thread-safe")
         tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies[str(self.options.exact_int)].package_folder)}')
-        tc.configure_args.append(f'--enable-shared={"yes" if self.options.shared else "no"}')
-        tc.configure_args.append(f'--enable-static={"yes" if not self.options.shared else "no"}')
         if self.settings.compiler == "clang":
             # warning: optimization flag '-ffloat-store' is not supported
             tc.configure_args.append("mpfr_cv_gcc_floatconv_bug=no")
