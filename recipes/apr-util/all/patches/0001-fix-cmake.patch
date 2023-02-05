@@ -1,10 +1,50 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -227,24 +227,24 @@ SET(install_bin_pdb)
- SET(dbd_drivers)
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,13 +15,13 @@
+ #
+ # Read README.cmake before using this.
+ 
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT(APR-Util C)
+ 
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+ 
+ FIND_PACKAGE(OpenSSL)
+ 
+-FIND_PACKAGE(expat)
++FIND_PACKAGE(EXPAT MODULE)
+ 
+ OPTION(APU_HAVE_CRYPTO      "Crypto support"                            OFF)
+ OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"                     ON)
+@@ -29,17 +29,14 @@ OPTION(APR_HAS_LDAP         "LDAP support"                              ON)
+ OPTION(INSTALL_PDB          "Install .pdb files (if generated)"         ON)
+ OPTION(APR_BUILD_TESTAPR    "Build the test suite"                      OFF)
+ OPTION(TEST_STATIC_LIBS     "Test programs use APR static libraries instead of shared libraries?" OFF)
+-SET(APR_INCLUDE_DIR         "${CMAKE_INSTALL_PREFIX}/include"           CACHE STRING "Directory with APR include files")
+-SET(APR_LIBRARIES           "${CMAKE_INSTALL_PREFIX}/lib/libapr-1.lib"  CACHE STRING "APR library to link with")
++find_package(apr REQUIRED CONFIG)
++if(NOT DEFINED APR_INCLUDE_DIR)
++    set(APR_INCLUDE_DIR apr_INCLUDE_DIRS)
++endif()
++if(NOT DEFINED APR_LIBRARIES)
++    set(APR_LIBRARIES apr::apr)
++endif()
+ 
+-IF(NOT EXISTS "${APR_INCLUDE_DIR}/apr.h")
+-  MESSAGE(FATAL_ERROR "APR include directory ${APR_INCLUDE_DIR} is not correct.")
+-ENDIF()
+-FOREACH(onelib ${APR_LIBRARIES})
+-  IF(NOT EXISTS ${onelib})
+-    MESSAGE(FATAL_ERROR "APR library ${onelib} was not found.")
+-  ENDIF()
+-ENDFOREACH()
+ 
+ IF(APU_HAVE_CRYPTO)
+ IF(NOT OPENSSL_FOUND)
+@@ -228,23 +225,26 @@ SET(dbd_drivers)
  
  # Note: The WINNT definition on some targets is used only by libaprutil.rc.
--
+ 
 +if(BUILD_SHARED_LIBS)
  # libaprutil-1 is shared, aprutil-1 is static
  ADD_LIBRARY(libaprutil-1 SHARED ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED} libaprutil.rc)
@@ -12,14 +52,14 @@
  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libaprutil-1.pdb)
  TARGET_LINK_LIBRARIES(libaprutil-1 ${APR_LIBRARIES} ${XMLLIB_LIBRARIES})
  SET_TARGET_PROPERTIES(libaprutil-1 PROPERTIES COMPILE_DEFINITIONS "APU_DECLARE_EXPORT;APR_DECLARE_EXPORT;XML_STATIC;WINNT")
--
 +else()
+ 
  ADD_LIBRARY(aprutil-1 STATIC ${APR_SOURCES} ${APR_PUBLIC_HEADERS_GENERATED})
  SET(install_targets ${install_targets} aprutil-1)
  TARGET_LINK_LIBRARIES(aprutil-1 ${APR_LIBRARIES} ${XMLLIB_LIBRARIES})
  SET_TARGET_PROPERTIES(aprutil-1 PROPERTIES COMPILE_DEFINITIONS "APU_DECLARE_STATIC;APR_DECLARE_STATIC;APU_DSO_MODULE_BUILD;XML_STATIC")
--
 +endif()
+ 
  IF(APU_HAVE_CRYPTO)
    IF(NOT OPENSSL_FOUND)
      MESSAGE(FATAL_ERROR "Only OpenSSL-based crypto is currently implemented in the cmake build")
