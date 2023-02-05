@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
@@ -70,6 +71,9 @@ class FontconfigConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
@@ -85,6 +89,8 @@ class FontconfigConan(ConanFile):
         ])
         tc.generate()
 
+        deps = AutotoolsDeps(self)
+        deps.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
 
