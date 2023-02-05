@@ -11,10 +11,7 @@ sources:
 patches:
   "3.1.4":
     - patch_file: "patches/fix-cmake-3.1.4.patch"
-      base_path: "source_subfolder"
   "3.1.2":
     - patch_file: "patches/fix-cmake-3.1.2.patch"
-      base_path: "source_subfolder"
   "3.1.1":
     - patch_file: "patches/fix-cmake-3.1.1.patch"
-      base_path: "source_subfolder"

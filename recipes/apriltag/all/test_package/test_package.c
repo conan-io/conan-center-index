@@ -1,7 +1,8 @@
-#include <iostream>
-#include "apriltag.h"
-#include "tagStandard41h12.h"
-#include "common/image_u8.h"
+#include <apriltag.h>
+#include <tagStandard41h12.h>
+#include <common/image_u8.h>
+
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +13,7 @@ int main(int argc, char *argv[])
     tagStandard41h12_destroy(tf);
     apriltag_detector_destroy(td);
 
-    std::cout << "Apriltag test_package ran successfully" << std::endl;
+    printf("Apriltag test_package ran successfully\n");
 
     return 0;
 }
