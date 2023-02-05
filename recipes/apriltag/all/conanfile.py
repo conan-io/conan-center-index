@@ -1,7 +1,8 @@
 from conan import ConanFile
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -43,16 +44,22 @@ class ApriltagConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Apriltag officially supported only on Linux")
+    def requirements(self):
+        if is_msvc(self):
+            self.requires("pthreads4w/3.0.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "3.1.4":
+            tc.variables["BUILD_PYTHON_WRAPPER"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
+        if is_msvc(self):
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -66,7 +73,6 @@ class ApriltagConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "apriltag")
@@ -74,5 +80,7 @@ class ApriltagConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "apriltag")
         self.cpp_info.libs = ["apriltag"]
         self.cpp_info.includedirs.append(os.path.join("include", "apriltag"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["winmm"]
