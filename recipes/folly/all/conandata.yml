@@ -42,7 +42,8 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/0023-fix-cmake-generator-expr.patch"
       patch_description: "CMake: Handle generator expressions requiring a target for pkg-config #1433"
-      patch_type: "backport"
+      patch_type: "portability"
+      patch_source: "https://github.com/facebook/folly/pull/1433"
   "2020.08.10.00":
     - patch_file: "patches/0008-find-packages.patch"
       patch_description: "fix folly-deps.cmake"
@@ -67,7 +68,8 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/0024-fix-cmake-generator-expr.patch"
       patch_description: "CMake: Handle generator expressions requiring a target for pkg-config #1433"
-      patch_type: "backport"
+      patch_type: "portability"
+      patch_source: "https://github.com/facebook/folly/pull/1433"
   "2022.01.31.00":
     - patch_file: "patches/0016-find-packages.patch"
       patch_description: "fix folly-deps.cmake"
