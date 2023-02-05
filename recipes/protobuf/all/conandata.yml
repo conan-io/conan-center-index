@@ -1,4 +1,7 @@
 sources:
+  "3.21.12":
+    url: "https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protobuf-cpp-3.21.12.tar.gz"
+    sha256: "4eab9b524aa5913c6fffb20b2a8abf5ef7f95a80bc0701f3a6dbb4c607f73460"
   "3.21.9":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.9.tar.gz"
     sha256: "0aa7df8289c957a4c54cbe694fbabe99b180e64ca0f8fdb5e2f76dcf56ff2422"
