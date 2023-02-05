@@ -155,7 +155,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANTLR4CPP_STATIC")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["m", "pthread"]
         elif is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation"]
 
