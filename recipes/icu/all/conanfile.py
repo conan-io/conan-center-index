@@ -7,6 +7,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
@@ -74,6 +75,11 @@ class ICUConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def validate(self):
+        if self.info.options.dat_package_file:
+            if not os.path.exists(self.info.options.dat_package_file):
+                raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
+        
     def layout(self):
         basic_layout(self, src_folder="src")
 
