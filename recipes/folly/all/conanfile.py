@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, download, copy, rmdir, replace_in_file
 from conan.tools.build import can_run, check_min_cppstd, default_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -145,8 +145,11 @@ class FollyConan(ConanFile):
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
 
+    def _preserve_tarball_root(self):
+        return Version(self.version) >= "2022.01.31.00"
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=not self._preserve_tarball_root())
 
     def _cxx_std_flag(self, cppstd):
         cppstd_prefix_gnu, cppstd_value = (cppstd[:3], cppstd[3:]) if "gnu" in cppstd else ("", cppstd)
