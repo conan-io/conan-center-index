@@ -11,9 +11,9 @@ import os
 import shutil
 import hashlib
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=1.54.0"
 
-def sha256sum(file_path):
+def _sha256sum(file_path):
     hash_sha256 = hashlib.sha256()
     with open(file_path, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
@@ -78,7 +78,7 @@ class ICUConan(ConanFile):
 
     def package_id(self):
         if self.info.options.dat_package_file:
-            dat_package_file_sha256 = sha256sum(str(self.info.options.dat_package_file))
+            dat_package_file_sha256 = _sha256sum(str(self.info.options.dat_package_file))
             self.info.options.dat_package_file = dat_package_file_sha256
 
     def build_requirements(self):
@@ -191,7 +191,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = str(self.version.split(".")[0])
+        vtag = Version(self.version).major
         return f"icudt{vtag}l.dat"
 
     @property
