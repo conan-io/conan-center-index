@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import chdir
 import os
 
 
@@ -8,7 +9,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
-    enable_cxx = False
 
     def layout(self):
         cmake_layout(self)
@@ -21,9 +21,6 @@ class TestPackageConan(ConanFile):
         tc.variables["ENABLE_CXX"] = self.dependencies["gmp"].options.enable_cxx
         tc.variables["TEST_PIC"] = "fPIC" in self.dependencies["gmp"].options and self.dependencies["gmp"].options.fPIC
         tc.generate()
-        # Conan 1.x doesn't permit accessing dependencits in test method()
-        if self.dependencies["gmp"].options.enable_cxx:
-            self.enable_cxx = True
 
     def build(self):
         cmake = CMake(self)
@@ -31,9 +28,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
-            if self.enable_cxx:
-                bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
-                self.run(bin_path, env="conanrun")
+        if not can_run(self):
+            return
+        with chdir(self, self.folders.build_folder):
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env="conanrun")
