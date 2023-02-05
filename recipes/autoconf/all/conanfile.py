@@ -37,7 +37,7 @@ class AutoconfConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("m4/1.4.19", run=True) # m4 is called by autom4te making it a run-time requirement
+        self.requires("m4/1.4.19")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -79,7 +79,7 @@ class AutoconfConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"),
                         "M4 = /usr/bin/env m4", "#M4 = /usr/bin/env m4")
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             # Handle vagaries of Windows line endings
             replace_in_file(self, os.path.join(self.source_folder, "bin", "autom4te.in"),
                             "$result =~ s/^\\n//mg;", "$result =~ s/^\\R//mg;")
