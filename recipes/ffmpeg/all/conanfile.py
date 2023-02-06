@@ -536,7 +536,7 @@ class FFMpegConan(ConanFile):
             ])
         if not self.options.with_programs:
             args.append("--disable-programs")
-        # since ffmpeg"s build system ignores CC and CXX
+        # since ffmpeg"s build system ignores CC, CXX and STRIP
         if tools.get_env("AS"):
             args.append("--as={}".format(tools.get_env("AS")))
         if tools.get_env("CC"):
