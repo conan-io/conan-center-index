@@ -1,5 +1,5 @@
 sources:
   "1.0.0":
     # TODO: Change this to a release package
-    url: "https://github.com/wadehunk/open-dis-cpp/archive/refs/heads/master.zip"
-    sha256: "e48778abedf0044588cfd522d70e6362afc127110693e14afd349e37e544b6d8"
+    url: "https://github.com/wadehunk/open-dis-cpp/archive/refs/heads/target-install.zip"
+    sha256: "54c8a8d83822e2a0d402dd632c9caf7815ce5301b4e9a55e91db189fc857610c"
