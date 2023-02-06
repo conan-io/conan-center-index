@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
-from conan.tools.build import can_run, check_min_cppstd, default_cppstd
+from conan.tools.build import can_run, check_min_cppstd, default_cppstd, supported_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -48,6 +48,19 @@ class FollyConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def _cppstd_less_than(self, cppstd, min_cppstd):
+        def less_than(lhs, rhs):
+            def extract_cpp_version(_cppstd):
+                return str(_cppstd).replace("gnu", "")
+
+            def add_millennium(_cppstd):
+                return "19%s" % _cppstd if _cppstd == "98" else "20%s" % _cppstd
+
+            lhs = add_millennium(extract_cpp_version(lhs))
+            rhs = add_millennium(extract_cpp_version(rhs))
+            return lhs < rhs
+        return less_than(cppstd, min_cppstd)
+        
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -102,23 +115,18 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if not compiler_cppstd:
-            def less_than(lhs, rhs):
-                def extract_cpp_version(_cppstd):
-                    return str(_cppstd).replace("gnu", "")
+        supported_cppstds = supported_cppstd(self)
+        if not supported_cppstds or str(self._min_cppstd) not in supported_cppstds:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                f" Supported cppstds: {supported_cppstds}"
+            )
 
-                def add_millennium(_cppstd):
-                    return "19%s" % _cppstd if _cppstd == "98" else "20%s" % _cppstd
-
-                lhs = add_millennium(extract_cpp_version(lhs))
-                rhs = add_millennium(extract_cpp_version(rhs))
-                return lhs < rhs
-            cppstd = default_cppstd(self)
-            if less_than(cppstd, self._min_cppstd):
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, but your compiler defaults to C++{cppstd}."
-                    f" Please provide -s compiler.cppstd={self._min_cppstd}."
-                )
+        def_cppstd = default_cppstd(self)
+        if not compiler_cppstd and self._cppstd_less_than(def_cppstd, self._min_cppstd):
+            self.output.info(f"{self.requires} requires C++{self._min_cppstd}, '-s compiler.cppstd' is not provided"
+                             f" and your compiler default C++ standard ({def_cppstd}) is too low."
+                             f" Forcing {self._min_cppstd}.")
 
         if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
@@ -151,7 +159,7 @@ class FollyConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=not self._preserve_tarball_root())
 
-    def _cxx_std_flag(self, cppstd):
+    def _cppstd_flag_value(self, cppstd):
         cppstd_prefix_gnu, cppstd_value = (cppstd[:3], cppstd[3:]) if "gnu" in cppstd else ("", cppstd)
         if not cppstd_prefix_gnu:
             cppstd_prefix_gnu = "c"
@@ -190,8 +198,9 @@ class FollyConan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
-        cxx_std_value = self._cxx_std_flag(current_cpp_std)
+        def_cppstd = default_cppstd(self)
+        backup_cppstd = str(self._min_cppstd) if self._cppstd_less_than(def_cppstd, self._min_cppstd) else def_cppstd
+        cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", backup_cppstd))
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
