@@ -134,7 +134,8 @@ class LibtoolConan(ConanFile):
 
         os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
         if self.options.shared:
-            self._rm_binlib_files_containing(self._static_ext)
+            if not is_msvc(self): # Don't delete Windows import lib
+                self._rm_binlib_files_containing(self._static_ext)
         else:
             self._rm_binlib_files_containing(self._shared_ext)
 
@@ -165,6 +166,9 @@ class LibtoolConan(ConanFile):
                          os.path.join(binpath, "libtool.exe"))
 
         if is_msvc(self) and self.options.shared:
+            # Remove static (archive) library
+            os.unlink(os.path.join(self.package_folder, "lib", "ltdl.lib"))
+            # Rename import library
             rename(self, os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
@@ -198,8 +202,8 @@ class LibtoolConan(ConanFile):
                 self.cpp_info.system_libs = ["dl"]
 
         # Use ACLOCAL_PATH to access the .m4 files provided with libtool
-        libtool_aclocal = os.path.join(self.package_folder, "res", "aclocal")
-        self.buildenv_info.append_path("ACLOCAL_PATH", libtool_aclocal)
+        aclocal_path = os.path.join(self.package_folder, "res", "aclocal")
+        self.buildenv_info.append_path("ACLOCAL_PATH", aclocal_path)
 
         # Everything below can be eliminated when Conan 1.x support is dropped
         bin_path = os.path.join(self.package_folder, "bin")
@@ -224,8 +228,8 @@ class LibtoolConan(ConanFile):
             self.output.info(f'Setting {key} environment variable to {value}')
             setattr(self.env_info, key, value)
 
-        libtool_aclocal = unix_path(self, libtool_aclocal) # Conan 1.x needs and allows unix_path() in package_info()
-        self.output.info(f'Appending ACLOCAL_PATH env: {libtool_aclocal}')
-        self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
-        self.output.info(f'Appending AUTOMAKE_CONAN_INCLUDES environment variable: {libtool_aclocal}')
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(libtool_aclocal)
+        aclocal_path = aclocal_path.replace("\\", "/") # Can't use unix_path with Conan 2.0
+        self.output.info(f'Appending ACLOCAL_PATH env: {aclocal_path}')
+        self.env_info.ACLOCAL_PATH.append(aclocal_path)
+        self.output.info(f'Appending AUTOMAKE_CONAN_INCLUDES environment variable: {aclocal_path}')
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal_path)
