@@ -22,7 +22,7 @@ class PistacheConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": False,
+        "with_ssl": True,
     }
 
     generators = "cmake", "cmake_find_package"
@@ -48,7 +48,7 @@ class PistacheConan(ConanFile):
     def requirements(self):
         self.requires("rapidjson/1.1.0")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
 
     def validate(self):
         compilers = {
@@ -93,8 +93,10 @@ class PistacheConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
+        self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+        self.copy("*.a", dst="lib/", keep_path=False)
+        self.copy("*.so", dst="lib/", keep_path=False)
+        self.copy("*.lib", dst="lib/", keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:

@@ -2,6 +2,9 @@ sources:
   "cci.20201127":
     url: https://github.com/pistacheio/pistache/archive/a3c5c68e0f08e19331d53d12846079ad761fe974.tar.gz
     sha256: f1abb9e43ff847ebff8edb72623c9942162df134bccfb571af9c7817d3261fae
+  "cci.20220902":
+    url: https://github.com/pistacheio/pistache/archive/769e4f458b85035f51c997e8a58d0dfeb8e5492e.tar.gz
+    sha256: c470559c25b7c89a5e964915fc4338893b969788a2a6222923dc92ac3fa6c998
 patches:
   "cci.20201127":
     - patch_file: "patches/0001-remove-fpic.patch"
