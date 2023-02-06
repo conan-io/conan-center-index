@@ -87,11 +87,11 @@ class OpenDisConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenDIS"
         self.cpp_info.names["cmake_find_package"] = "OpenDIS"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenDIS"
-        self.cpp_info.components["OpenDIS6"].names["cmake_find_package"] = "OpenDIS::OpenDIS6"
-        self.cpp_info.components["OpenDIS6"].names["cmake_find_package_multi"] = "OpenDIS::OpenDIS6"
+        self.cpp_info.components["OpenDIS6"].names["cmake_find_package"] = "OpenDIS"
+        self.cpp_info.components["OpenDIS6"].names["cmake_find_package_multi"] = "OpenDIS"
         self.cpp_info.components["OpenDIS6"].set_property("cmake_target_name", "OpenDIS::OpenDIS6")
         self.cpp_info.components["OpenDIS6"].set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
-        self.cpp_info.components["OpenDIS7"].names["cmake_find_package"] = "OpenDIS::OpenDIS7"
-        self.cpp_info.components["OpenDIS7"].names["cmake_find_package_multi"] = "OpenDIS::OpenDIS7"
+        self.cpp_info.components["OpenDIS7"].names["cmake_find_package"] = "OpenDIS"
+        self.cpp_info.components["OpenDIS7"].names["cmake_find_package_multi"] = "OpenDIS"
         self.cpp_info.components["OpenDIS7"].set_property("cmake_target_name", "OpenDIS::OpenDIS7")
         self.cpp_info.components["OpenDIS7"].set_property("cmake_target_aliases", ["OpenDIS::DIS7","OpenDIS7"])
