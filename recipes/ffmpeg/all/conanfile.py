@@ -348,7 +348,7 @@ class FFMpegConan(ConanFile):
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             )
             target_os = triplet.split("-")[2]
-            if target_os == "gnueabihf":
+            if target_os in ["gnueabihf", "gnueabi"]:
                 target_os = "gnu" # could also be "linux"
             if target_os.startswith("android"):
                 target_os = "android"
