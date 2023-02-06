@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, rm, rmdir
@@ -71,6 +71,8 @@ class CppunitConan(ConanFile):
                (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
+        if is_apple_os(self):
+            tc.extra_ldflags.append("-headerpad_max_install_names")
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
