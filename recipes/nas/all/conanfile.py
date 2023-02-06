@@ -1,13 +1,13 @@
 from conan import ConanFile
 
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, download, replace_in_file, rm, copy
+from conan.tools.files import chdir, get, download, replace_in_file, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conans.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class NasRecipe(ConanFile):
@@ -28,7 +28,7 @@ class NasRecipe(ConanFile):
     }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
@@ -53,7 +53,7 @@ class NasRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],  strip_root=True)
-        download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property
     def _user_info_build(self):
@@ -80,29 +80,32 @@ class NasRecipe(ConanFile):
         return ["IRULESRC={}".format(self._imake_irulesrc), "IMAKE_DEFINES={}".format(self._imake_defines)]
 
     def build(self):
-        replace_in_file(os.path.join(self.source_folder, "server", "dia", "main.c"),
+        replace_in_file(self, os.path.join(self.source_folder, "server", "dia", "main.c"),
                               "\nFILE *yyin", "\nextern FILE *yyin")
-        self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
-        autotools = Autotools(self)
-        autotools.make(target="World", args=["-j1"] + self._imake_make_args)
+
+        with chdir(self, self.source_folder):
+            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
+            autotools = Autotools(self)
+            autotools.make(target="World", args=["-j1"] + self._imake_make_args)
 
     def package(self):
-        copy(self, "LICENSE", dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        autotools = Autotools(self)
         tmp_install = os.path.join(self.build_folder, "prefix")
         install_args = [
-                           "DESTDIR={}".format(tmp_install),
-                           "INCDIR=/include",
-                           "ETCDIR=/etc",
-                           "USRLIBDIR=/lib",
-                           "BINDIR=/bin",
-                       ] + self._imake_make_args
-        autotools.install(args=["-j1"] + install_args)
+                        "DESTDIR={}".format(tmp_install),
+                        "INCDIR=/include",
+                        "ETCDIR=/etc",
+                        "USRLIBDIR=/lib",
+                        "BINDIR=/bin",
+                    ] + self._imake_make_args
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.install(args=["-j1"] + install_args)
 
-        copy(self, "*", src=os.path.join(tmp_install, "bin"), dst="bin")
-        copy(self, "*", src=os.path.join(tmp_install, "include"), dst=os.path.join("include", "audio"))
-        copy(self, "*", src=os.path.join(tmp_install, "lib"), dst="lib")
+        copy(self, "*", src=os.path.join(tmp_install, "bin"), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "*", src=os.path.join(tmp_install, "include"), dst=os.path.join(self.package_folder, "include", "audio"))
+        copy(self, "*", src=os.path.join(tmp_install, "lib"), dst=os.path.join(self.package_folder, "lib"))
 
         if self.options.shared:
             rm(self, os.path.join(self.package_folder, "lib"), "*.a")
