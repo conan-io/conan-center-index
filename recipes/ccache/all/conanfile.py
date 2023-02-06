@@ -89,6 +89,7 @@ class CcacheConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
+        self.build_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and cross_building(self) and \
            self.settings.os == "Macos" and self.settings.arch == "armv8":
             self.build_requires("cmake/3.25.1")
@@ -104,12 +105,13 @@ class CcacheConan(ConanFile):
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
         tc.generate()
+        # For zstd (and hiredis on UNIX)
+        deps = PkgConfigDeps(self)
+        deps.generate()
+        # For hiredis
         if self._is_msvc:
             deps = CMakeDeps(self)
             deps.set_property("hiredislib", "cmake_target_name", "HIREDIS::HIREDIS")
-            deps.generate()
-        else:
-            deps = PkgConfigDeps(self)
             deps.generate()
 
     def build(self):
