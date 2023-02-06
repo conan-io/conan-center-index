@@ -1,18 +1,19 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
-from conans.tools import get_gnu_triplet, sha256sum, stdcpp_library
+from conans.tools import get_gnu_triplet
 import glob
+import hashlib
 import os
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class ICUConan(ConanFile):
@@ -71,10 +72,17 @@ class ICUConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @staticmethod
+    def _sha256sum(file_path):
+        m = hashlib.sha256()
+        with open(file_path, "rb") as fh:
+            for data in iter(lambda: fh.read(8192), b""):
+                m.update(data)
+        return m.hexdigest()
+
     def package_id(self):
-        if self.options.dat_package_file:
-            dat_package_file_sha256 = sha256sum(str(self.options.dat_package_file))
-            self.info.options.dat_package_file = dat_package_file_sha256
+        if self.info.options.dat_package_file:
+            self.info.options.dat_package_file = self._sha256sum(str(self.info.options.dat_package_file))
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -86,16 +94,15 @@ class ICUConan(ConanFile):
             self.tool_requires(self.ref)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         if not self.options.shared:
@@ -119,11 +126,6 @@ class ICUConan(ConanFile):
         if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
-            if (not is_msvc(self)):
-                # --with-cross-build above prevents tc.generate() from setting --build option.
-                # Workaround for https://github.com/conan-io/conan/issues/12642
-                gnu_triplet = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), str(self.settings.compiler))
-                tc.configure_args.append(f"--build={gnu_triplet}")
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
                 tc.configure_args.append(f"--host={gnu_triplet}")
@@ -215,8 +217,7 @@ class ICUConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         dll_files = glob.glob(os.path.join(self.package_folder, "lib", "*.dll"))
         if dll_files:
