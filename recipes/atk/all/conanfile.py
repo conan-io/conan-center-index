@@ -7,6 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=1.53.0"
@@ -59,6 +60,10 @@ class AtkConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
+
+        if str(self.settings.compiler) == "Visual Studio" and not self.options.shared and \
+           is_msvc_static_runtime(self) and self.dependencies["glib"].options.shared:
+            raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
 
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
