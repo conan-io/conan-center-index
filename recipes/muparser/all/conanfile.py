@@ -73,6 +73,8 @@ class MuParserConan(ConanFile):
         self.cpp_info.libs = ["muparser"]
         if not self.options.shared:
             self.cpp_info.defines = ["MUPARSER_STATIC=1"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
