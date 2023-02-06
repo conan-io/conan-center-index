@@ -120,6 +120,6 @@ class CppunitConan(ConanFile):
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.append("dl")
+                self.cpp_info.system_libs.extend(["dl", "m"])
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("CPPUNIT_DLL")
