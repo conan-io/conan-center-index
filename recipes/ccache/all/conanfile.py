@@ -104,10 +104,12 @@ class CcacheConan(ConanFile):
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
         tc.generate()
-        deps = PkgConfigDeps(self)
-        deps.generate()
         if self._is_msvc:
             deps = CMakeDeps(self)
+            deps.set_property("hiredislib", "cmake_target_name", "HIREDIS::HIREDIS")
+            deps.generate()
+        else:
+            deps = PkgConfigDeps(self)
             deps.generate()
 
     def build(self):
