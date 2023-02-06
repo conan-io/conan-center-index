@@ -4,7 +4,7 @@ from conans import tools
 
 class ThorsSerializerConan(ConanFile):
     name        = "thors-serializer"
-    version     = "2.2.18"
+    version     = "2.2.19"
     author      = "Martin York (Aka Loki Astari) Martin.York@gmail.com"
     url         = "git@github.com:Loki-Astari/ThorsSerializer.git"
     license     = "MIT"
@@ -14,9 +14,9 @@ class ThorsSerializerConan(ConanFile):
     scm         = {
         "type"      : "git",
         "url"       : "git@github.com:Loki-Astari/ThorsSerializer.git",
-        "revision"  : "4581400d58f7ad189abacae95d261a56ab0c1d3e"
+        "revision"  : "426ba1018f03b77594e6202c4352b0e1a9a150a1"
     }
-    requires = "libyaml/0.2.5", "boost/1.81.0"
+    requires = "libyaml/0.2.5", "boost/1.81.0", "magic_enum/0.8.2"
     cppminimum = 17
 
     def configure(self):
