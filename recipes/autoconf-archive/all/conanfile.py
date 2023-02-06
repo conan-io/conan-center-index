@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, mkdir, rename, rmdir, export_conandata_patches
 from conan.tools.gnu import AutotoolsToolchain, Autotools
-from conan.tools.microsoft import unix_path
 from conan.tools.layout import basic_layout
 import os
 
