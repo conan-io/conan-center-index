@@ -6,7 +6,7 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class FlatbuffersConan(ConanFile):
@@ -42,13 +42,24 @@ class FlatbuffersConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
-        if Version(self.version) >= "2.0.7":
+        if Version(self.version) >= "2.0.7" and not self._cmake_new_enough("3.16"):
             self.tool_requires("cmake/3.25.1")
 
     def configure(self):
         if self.options.shared or self.options.header_only:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if self.options.header_only:
             del self.options.shared
 
