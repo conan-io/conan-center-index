@@ -94,6 +94,8 @@ class TaglibConan(ConanFile):
         self.cpp_info.components["tag"].requires = ["zlib::zlib"]
         if not self.options.shared:
             self.cpp_info.components["tag"].defines.append("TAGLIB_STATIC")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["tag"].system_libs.append("m")
 
         if self.options.bindings:
             self.cpp_info.components["tag_c"].set_property("pkg_config_name", "taglib_c")
