@@ -61,7 +61,6 @@ class NasRecipe(ConanFile):
 
     def generate(self):
         autotools = AutotoolsToolchain(self)
-        # autotools.libs = []
         autotools.generate()
 
         deps = AutotoolsDeps(self)
