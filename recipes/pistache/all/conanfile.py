@@ -118,9 +118,10 @@ class PistacheConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                                "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep']),",
-                                "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep']),")
+        if self.version != "cci.20201127":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                                    "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep']),",
+                                    "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep']),")
 
         if self.version == "cci.20201127":
             cmake = CMake(self)
