@@ -9,7 +9,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibX264Conan(ConanFile):
@@ -82,23 +82,27 @@ class LibX264Conan(ConanFile):
         extra_asflags = []
         extra_cflags = []
         extra_ldflags = []
-        args = [
-            f"--bit-depth={self.options.bit_depth}",
-            "--disable-cli",
-        ]
+        args = {
+            "--bit-depth": self.options.bit_depth,
+            "--disable-cli": "",
+            "--sbindir": None,          # Not understood by configure
+            "--oldincludedir": None     # Not understood by configure
+        }
         if self.options.shared:
-            args.append("--enable-shared")
+            args["--enable-shared"] = ""
+            args["--disable-static"] = None # --disable-static is not understood
         else:
-            args.append("--enable-static")
+            args["--enable-static"] = ""
+            args["--disable-shared"] = None # --disable-shared is not understood
         if self.options.get_safe("fPIC", self.settings.os != "Windows"):
-            args.append("--enable-pic")
+            args["--enable-pic"] = ""
         if self.settings.build_type == "Debug":
-            args.append("--enable-debug")
+            args["--enable-debug"] = ""
         if is_apple_os(self) and self.settings.arch == "armv8":
             # bitstream-a.S:29:18: error: unknown token in expression
             extra_asflags.append("-arch arm64")
             extra_ldflags.append("-arch arm64")
-            args.append("--host=aarch64-apple-darwin")
+            args["--host"] = "aarch64-apple-darwin"
             if self.settings.os != "Macos": # TODO not sure why this is != "Macos" ... shouldn't it be == ??
                 xcrun = XCRun(self)
                 platform_flags = ["-isysroot", xcrun.sdk_path]
@@ -127,7 +131,7 @@ class LibX264Conan(ConanFile):
                     "x86_64": "x86_64",
                 }.get(str(self.settings.arch))
                 abi = "androideabi" if self.settings.arch == "armv7" else "android"
-                args.append(f"--cross-prefix={ndk_root}/bin/{arch}-linux-{abi}-")
+                args["--cross-prefix"] = f"{ndk_root}/bin/{arch}-linux-{abi}-"
                 env.vars(self).save_script("conanbuild_android")
         if is_msvc(self):
             env = Environment()
@@ -144,13 +148,13 @@ class LibX264Conan(ConanFile):
             build_canonical_name = False
             host_canonical_name = False
         if extra_asflags:
-            args.append("--extra-asflags={}".format(" ".join(extra_asflags)))
+            args["--extra-asflags"] = " ".join(extra_asflags)
         if extra_cflags:
-            args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
+            args["--extra-cflags"] = " ".join(extra_cflags)
         if extra_ldflags:
-            args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
+            args["--extra-ldflags"] = " ".join(extra_ldflags)
         # self._autotools.configure(args=args, vars=self._override_env, configure_dir=self.source_folder, build=build_canonical_name, host=host_canonical_name)
-        tc.configure_args.extend(args)
+        tc.update_configure_args(args)
         tc.generate()
 
     def build(self):
