@@ -78,6 +78,8 @@ class SnappyConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["snappylib"].libs = ["snappy"]
         if not self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["snappylib"].system_libs.append("m")
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["snappylib"].system_libs.append(libcxx)
