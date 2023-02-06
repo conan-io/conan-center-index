@@ -9,6 +9,7 @@ required_conan_version = ">=1.50.0"
 
 class OpenJDK(ConanFile):
     name = "openjdk"
+    package_type = "application"
     url = "https://github.com/conan-io/conan-center-index/"
     description = "Java Development Kit builds, from Oracle"
     homepage = "https://jdk.java.net"
@@ -65,6 +66,10 @@ class OpenJDK(ConanFile):
 
     def package_info(self):
         self.output.info(f"Creating JAVA_HOME environment variable with : {self.package_folder}")
-        self.env_info.JAVA_HOME = self.package_folder
+
+        self.runenv_info.append("JAVA_HOME", self.package_folder)
         self.buildenv_info.append("JAVA_HOME", self.package_folder)
+
+        # TODO: remove `env_info` once the recipe is only compatible with Conan >= 2.0
+        self.env_info.JAVA_HOME = self.package_folder
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
