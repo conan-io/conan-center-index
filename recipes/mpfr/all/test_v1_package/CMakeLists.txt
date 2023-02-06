@@ -4,4 +4,5 @@ project(test_package C)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+add_executable(test_package ../test_package/test_package.c)
+target_link_libraries(test_package CONAN_PKG::mpfr)
