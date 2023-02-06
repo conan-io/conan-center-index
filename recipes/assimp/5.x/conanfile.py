@@ -20,6 +20,7 @@ class AssimpConan(ConanFile):
     )
     topics = ("assimp", "3d", "game development", "3mf", "collada")
     license = "BSD-3-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
