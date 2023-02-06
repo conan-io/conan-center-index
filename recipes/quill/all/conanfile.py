@@ -94,6 +94,8 @@ class QuillConan(ConanFile):
         tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
         tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64"):
+            tc.variables["QUILL_X86ARCH"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -124,7 +126,9 @@ class QuillConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["quill"]
-        self.cpp_info.defines = ["QUILL_FMT_EXTERNAL"]
+        self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
+        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64"):
+            self.cpp_info.defines.append("QUILL_X86ARCH")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
