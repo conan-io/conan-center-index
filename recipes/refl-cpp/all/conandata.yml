@@ -1,4 +1,7 @@
 sources:
-  "0.12.1":
-    url: "https://github.com/veselink1/refl-cpp/archive/refs/tags/v0.12.1.tar.gz"
-    sha256: "dcc740271645597fe882bf43a7006d232f5be622b4cb97a143925eb1fd3946ae"
+  0.12.1:
+    sha256: dcc740271645597fe882bf43a7006d232f5be622b4cb97a143925eb1fd3946ae
+    url: https://github.com/veselink1/refl-cpp/archive/refs/tags/v0.12.1.tar.gz
+  0.12.3:
+    sha256: cdec1956d99b2f7a62d493db38268dba503995b30134a77375d49b0a2665c1b7
+    url: https://github.com/veselink1/refl-cpp/archive/refs/tags/v0.12.3.tar.gz
