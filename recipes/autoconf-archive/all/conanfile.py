@@ -5,7 +5,7 @@ from conan.tools.microsoft import unix_path
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=1.56.0"
 
 
 class AutoconfArchiveConan(ConanFile):
@@ -71,7 +71,7 @@ class AutoconfArchiveConan(ConanFile):
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal_path)
 
         # Remove for Conan 2.0
-        aclocal_path = unix_path(self, aclocal_path) # Conan 1.x needs and allows unix_path() in package_info()
+        aclocal_path = aclocal_path.replace("\\", "/") # Can't use unix_path with Conan 2.0
         self.output.info(f'Appending ACLOCAL_PATH env: {aclocal_path}')
         self.env_info.ACLOCAL_PATH.append(aclocal_path)
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment var: {}".format(aclocal_path))
