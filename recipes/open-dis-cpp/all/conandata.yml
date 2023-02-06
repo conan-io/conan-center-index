@@ -1,0 +1,5 @@
+sources:
+  "1.0.0":
+    # TODO: Change this to a release package
+    url: "https://github.com/open-dis/open-dis-cpp/archive/refs/heads/master.zip"
+    sha256: "e48778abedf0044588cfd522d70e6362afc127110693e14afd349e37e544b6d8"
