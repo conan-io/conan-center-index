@@ -1,68 +1,67 @@
 diff --git a/lib/jxl.cmake b/lib/jxl.cmake
-index 72c07f4..01d1d2b 100644
+index a8a96e1..0601850 100644
 --- a/lib/jxl.cmake
 +++ b/lib/jxl.cmake
-@@ -348,10 +348,13 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
-   jxl/progressive_split.h
- )
+@@ -364,8 +364,12 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
  
-+set(CMAKE_VERBOSE_MAKEFILE ON)
+ set_source_files_properties(jxl/enc_fast_lossless.cc PROPERTIES COMPILE_FLAGS -O3)
+ 
 +find_package(highway REQUIRED CONFIG)
 +find_package(brotli REQUIRED CONFIG)
 +
  set(JPEGXL_DEC_INTERNAL_LIBS
--  brotlidec-static
--  brotlicommon-static
 -  hwy
 +  brotli::brotli
 +  highway::highway
    Threads::Threads
    ${ATOMICS_LIBRARIES}
  )
-@@ -362,7 +365,6 @@ endif()
+@@ -380,7 +384,6 @@ endif()
  
  set(JPEGXL_INTERNAL_LIBS
    ${JPEGXL_DEC_INTERNAL_LIBS}
 -  brotlienc-static
  )
  
- # strips the -static suffix from all the elements in LIST
-@@ -383,7 +385,10 @@ if (JPEGXL_ENABLE_SKCMS)
+ if (JPEGXL_ENABLE_SKCMS)
+@@ -392,7 +395,8 @@ if (JPEGXL_ENABLE_SKCMS)
      list(APPEND JPEGXL_INTERNAL_LIBS skcms)
    endif ()
  else ()
 -  list(APPEND JPEGXL_INTERNAL_LIBS lcms2)
-+  # pkg_check_modules(LIB_LCMS2 REQUIRED lcms2)
-+  # list(APPEND JPEGXL_INTERNAL_LIBS ${LIB_LCMS2_LIBRARIES})
 +  find_package(lcms REQUIRED CONFIG)
 +  list(APPEND JPEGXL_INTERNAL_LIBS lcms::lcms)
  endif ()
  
- if (NOT JPEGXL_ENABLE_TRANSCODE_JPEG)
-@@ -408,8 +413,8 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ if (JPEGXL_ENABLE_TRANSCODE_JPEG)
+@@ -425,9 +429,9 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_dec-obj PUBLIC
    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 -  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>>"
 -  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>>"
+-)
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>"
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotli::brotli,INTERFACE_INCLUDE_DIRECTORIES>>"
- )
++  )
  target_compile_definitions(jxl_dec-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -426,8 +431,9 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ )
+@@ -443,9 +447,10 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_enc-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 -  $<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>
 -  $<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>
+-)
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>"
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:lcms::lcms,INTERFACE_INCLUDE_DIRECTORIES>>"
 +  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotli::brotli,INTERFACE_INCLUDE_DIRECTORIES>>"
- )
++  )
  target_compile_definitions(jxl_enc-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -436,17 +442,6 @@ if (JPEGXL_ENABLE_PROFILER)
+ )
+@@ -453,17 +458,6 @@ if (JPEGXL_ENABLE_PROFILER)
  target_link_libraries(jxl_enc-obj PUBLIC jxl_profiler)
  endif()
  
@@ -80,7 +79,7 @@ index 72c07f4..01d1d2b 100644
  # Generate version.h
  configure_file("jxl/version.h.in" "include/jxl/version.h")
  
-@@ -465,9 +460,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
+@@ -482,9 +476,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
    VISIBILITY_INLINES_HIDDEN 1
    DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD
  )
@@ -90,7 +89,7 @@ index 72c07f4..01d1d2b 100644
  target_include_directories(jxl_enc-obj PUBLIC
      ${CMAKE_CURRENT_BINARY_DIR}/include)
  
-@@ -546,9 +538,7 @@ if (BUILD_SHARED_LIBS)
+@@ -563,9 +554,7 @@ if (BUILD_SHARED_LIBS)
  
  # Public shared library.
  add_library(jxl SHARED ${JPEGXL_INTERNAL_OBJECTS})
@@ -101,7 +100,7 @@ index 72c07f4..01d1d2b 100644
  # Shared library include path contains only the "include/" paths.
  target_include_directories(jxl PUBLIC
    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-@@ -557,22 +547,8 @@ set_target_properties(jxl PROPERTIES
+@@ -574,22 +563,8 @@ set_target_properties(jxl PROPERTIES
    VERSION ${JPEGXL_LIBRARY_VERSION}
    SOVERSION ${JPEGXL_LIBRARY_SOVERSION}
    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -126,7 +125,7 @@ index 72c07f4..01d1d2b 100644
  
  # Check whether the linker support excluding libs
  set(LINKER_EXCLUDE_LIBS_FLAG "-Wl,--exclude-libs=ALL")
-@@ -584,7 +560,7 @@ list(REMOVE_ITEM CMAKE_EXE_LINKER_FLAGS ${LINKER_EXCLUDE_LIBS_FLAG})
+@@ -601,7 +576,7 @@ list(REMOVE_ITEM CMAKE_EXE_LINKER_FLAGS ${LINKER_EXCLUDE_LIBS_FLAG})
  # Add a jxl.version file as a version script to tag symbols with the
  # appropriate version number. This script is also used to limit what's exposed
  # in the shared library from the static dependencies bundled here.
@@ -135,7 +134,7 @@ index 72c07f4..01d1d2b 100644
    set_target_properties(${target} PROPERTIES
        LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/jxl/jxl.version)
    if(APPLE)
-@@ -615,8 +591,14 @@ install(TARGETS jxl
+@@ -632,8 +607,14 @@ install(TARGETS jxl
  else()
  add_library(jxl ALIAS jxl-static)
  add_library(jxl_dec ALIAS jxl_dec-static)

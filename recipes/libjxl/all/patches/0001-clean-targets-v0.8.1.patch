@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 533815d..debc90e 100644
+index 4c13d27..9a7d9b9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -191,8 +191,6 @@ if(JPEGXL_STATIC)
+@@ -199,8 +199,6 @@ if(JPEGXL_STATIC)
    # so just linking all other libraries is fine.
    if (NOT MSVC AND NOT APPLE)
      set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -11,7 +11,7 @@ index 533815d..debc90e 100644
    endif()
  endif()  # JPEGXL_STATIC
  
-@@ -331,7 +329,6 @@ include(GNUInstallDirs)
+@@ -339,7 +337,6 @@ include(GNUInstallDirs)
  # Separately build/configure testing frameworks and other third_party libraries
  # to allow disabling tests in those libraries.
  include(third_party/testing.cmake)
@@ -19,7 +19,7 @@ index 533815d..debc90e 100644
  # Copy the JXL license file to the output build directory.
  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
                 ${PROJECT_BINARY_DIR}/LICENSE.jpeg-xl COPYONLY)
-@@ -468,5 +465,3 @@ if (JPEGXL_ENABLE_PLUGINS)
+@@ -476,5 +473,3 @@ if (JPEGXL_ENABLE_PLUGINS)
  add_subdirectory(plugins)
  endif ()
  

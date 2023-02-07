@@ -53,7 +53,7 @@ class LibjxlConan(ConanFile):
         if Version(self.version) < "0.7.0":
             self.requires("highway/0.12.2")
         else:
-            self.requires("highway/1.0.2")
+            self.requires("highway/1.0.3")
         self.requires("lcms/2.14")
 
     def validate(self):
@@ -137,6 +137,7 @@ class LibjxlConan(ConanFile):
             self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
                                                             "highway::highway",
                                                             "lcms::lcms"]
+
         # jxl_threads
         self.cpp_info.components["jxl_threads"].names["pkg_config"] = \
             "libjxl_threads"
