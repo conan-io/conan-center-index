@@ -278,6 +278,8 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtmain"].system_libs = ["m", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["wtmain"].system_libs = ["ws2_32", "mswsock", "winmm"]
+            if Version(self.version) >= "4.9.0":
+                self.cpp_info.components["wtmain"].system_libs.extend(["dwrite", "d2d1", "shlwapi"])
         self.cpp_info.components["wtmain"].requires = ["boost::boost"]
         if self.options.with_ssl:
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
