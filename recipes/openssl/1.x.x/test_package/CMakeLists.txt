@@ -4,7 +4,7 @@ project(test_package C)
 option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
 
 set(OpenSSL_DEBUG 1)
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL REQUIRED CONFIG)
 
 # Test whether variables from https://cmake.org/cmake/help/latest/module/FindOpenSSL.html
 # are properly defined in conan generators
@@ -26,8 +26,6 @@ foreach(_custom_var ${_custom_vars})
     endif()
 endforeach()
 
-add_executable(digest digest.c)
-target_link_libraries(digest OpenSSL::SSL)
-if(OPENSSL_WITH_ZLIB)
-    target_compile_definitions(digest PRIVATE WITH_ZLIB)
-endif()
+add_executable(${PROJECT_NAME} digest.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<BOOL:${OPENSSL_WITH_ZLIB}>:WITH_ZLIB>)

@@ -6,8 +6,6 @@ from conan.tools.files import save, load
 import os
 import json
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -28,7 +26,7 @@ class TestPackageConan(ConanFile):
         # see https://github.com/conan-io/conan/pull/9839
         dict_test = {"skip_test": self.settings.os == "Macos" and \
                                   self.settings.arch == "armv8" and \
-                                  bool(self.dependencies["openssl"].options.shared)}
+                                  bool(self.dependencies[self.tested_reference_str].options.shared)}
         save(self, self._skip_test_filename, json.dumps(dict_test))
 
     @property
@@ -45,7 +43,7 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         if self.settings.os == "Android":
             tc.cache_variables["CONAN_LIBCXX"] = ""
-        openssl = self.dependencies["openssl"]
+        openssl = self.dependencies[self.tested_reference_str]
         openssl_version = Version(openssl.ref.version)
         if openssl_version.major == "1" and openssl_version.minor == "1":
             tc.cache_variables["OPENSSL_WITH_ZLIB"] = False
@@ -63,5 +61,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not self._skip_test and can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "digest")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
