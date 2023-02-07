@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, rm, patch
+from conan.tools.files import get, rmdir, rm, patch, apply_conandata_patches
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.apple import is_apple_os
@@ -161,8 +161,7 @@ class OpenSceneGraphConanFile(ConanFile):
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
-        for p in self.conan_data["patches"].get(self.version, []):
-            patch(self, **p)
+        apply_conandata_patches(self)
 
         for package in ("Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"):
             # Prefer conan's find package scripts over osg's
