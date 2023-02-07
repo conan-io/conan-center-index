@@ -19,7 +19,7 @@ index 2607e56..e18df2c 100644
  #  It's not really setting the location of libelfheader, 
  #  it is really #  either elf.h, or if that is missing 
  #  it is assuming  elf.h data is in the supplied libelf.
-+find_package(Libelf REQUIRED)
++find_package(libelf REQUIRED)
 +find_package(ZLIB REQUIRED)
  
  if(HAVE_ELF_H)
