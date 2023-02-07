@@ -96,6 +96,7 @@ class QuillConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64"):
             tc.variables["QUILL_X86ARCH"] = True
+            tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -110,13 +111,6 @@ class QuillConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/quill/cmake" CACHE STRING "Modules for CMake" FORCE)""",
                 """set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_LIST_DIR}/quill/cmake")"""
-            )
-
-        # inlining failed in call to 'always_inline' 'void _mm_clflushopt(void*)'
-        if Version(self.version) >= "2.7.0":
-            replace_in_file(self, os.path.join(self.source_folder, "quill", "CMakeLists.txt"),
-                "-Wfatal-errors ",
-                ""
             )
 
     def build(self):
@@ -138,6 +132,7 @@ class QuillConan(ConanFile):
         self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
         if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64"):
             self.cpp_info.defines.append("QUILL_X86ARCH")
+            self.cpp_info.cxxflags.append("-mclflushopt")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
