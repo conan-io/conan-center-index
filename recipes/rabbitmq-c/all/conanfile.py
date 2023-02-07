@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -52,7 +53,10 @@ class RabbitmqcConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.variables["BUILD_TESTS"] = False
+        if Version(self.version) < "0.12.0":
+            tc.variables["BUILD_TESTS"] = False
+        else:
+            tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_TOOLS"] = False
         tc.variables["BUILD_TOOLS_DOCS"] = False
         tc.variables["ENABLE_SSL_SUPPORT"] = self.options.ssl
