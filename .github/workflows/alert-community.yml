@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: master
+
       - uses: ./.github/actions/alert-community
         with:
           files: "docs/*/*"
@@ -33,6 +34,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/abseil/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/b2/*/*"
           reviewers: "@grafikrobot"
 
@@ -40,6 +46,26 @@ jobs:
         with:
           files: "recipes/bandit/*/*"
           reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/benchmark/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/boost/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/bzip2/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/cereal/*/*"
+          reviewers: "@Hopobcn"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -53,8 +79,68 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/double-conversion/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/elfio/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/ffmpeg/*/*"
           reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/fmt/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/folly/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/foxi/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/fp16/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/g3log/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/gflags/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/glew/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/glfw/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/glog/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/gtest/*/*"
+          reviewers: "@Hopobcn"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -63,8 +149,93 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/imgui/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/implot/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/jemalloc/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libbacktrace/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libcap/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libcurl/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libdwarf/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libelf/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libevent/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libffi/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libiberty/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libiconv/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/libltc/*/*"
           reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libpng/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libsodium/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libunwind/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libxml2/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/llvm-core/*/*"
+          reviewers: "@Hopobcn"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -73,13 +244,48 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/lz4/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/nlohmann_json/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/onnx/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/openapi-generator/*/*"
           reviewers: "@MartinDelille"
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/opengl/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/opengl-registry/*/*"
           reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/openssl/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/protobuf/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/psimd/*/*"
+          reviewers: "@Hopobcn"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -103,10 +309,35 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/snappy/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/uncrustify/*/*"
           reviewers: "@MartinDelille"
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/xorg/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/yaml-cpp/*/*"
           reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/xz_utils/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/zlib/*/*"
+          reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/zstd/*/*"
+          reviewers: "@Hopobcn"
