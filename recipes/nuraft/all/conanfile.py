@@ -36,7 +36,7 @@ class NuRaftConan(ConanFile):
         if self.options.asio == "boost":
             self.requires("boost/1.79.0")
         else:
-            self.requires("asio/1.22.1")
+            self.requires("asio/1.24.0")
         self.requires("openssl/1.1.1s")
 
     def validate(self):
