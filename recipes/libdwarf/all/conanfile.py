@@ -39,6 +39,9 @@ class LibdwarfConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+        if not self.options.with_dwarfgen:
+            self.license = "LGPL-2.1-only"
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
