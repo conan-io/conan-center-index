@@ -1,11 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=1.53.0"
@@ -66,14 +63,15 @@ class FastPFORConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["FastPFOR"]
 
         self.cpp_info.set_property("cmake_file_name", "FastPFOR")
         self.cpp_info.set_property("cmake_target_name", "FastPFOR::FastPFOR")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "FastPFOR"
