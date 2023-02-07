@@ -75,6 +75,7 @@ class PahoMqttcConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.variables["PAHO_ENABLE_TESTING"] = False
         tc.variables["PAHO_BUILD_DOCUMENTATION"] = False
         tc.variables["PAHO_ENABLE_CPACK"] = False
