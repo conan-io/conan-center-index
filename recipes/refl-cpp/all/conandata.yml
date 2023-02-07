@@ -5,3 +5,10 @@ sources:
   "0.12.1":
     url: "https://github.com/veselink1/refl-cpp/archive/refs/tags/v0.12.1.tar.gz"
     sha256: "dcc740271645597fe882bf43a7006d232f5be622b4cb97a143925eb1fd3946ae"
+
+patches:
+  "0.12.1":
+    - patch_file: "patches/0.12.1-0001-remove-memory-fwd.patch"
+      patch_description: "remove xxx_ptr forward declaration"
+      patch_type: "portability"
+      patch_source: "https://github.com/veselink1/refl-cpp/pull/76"
