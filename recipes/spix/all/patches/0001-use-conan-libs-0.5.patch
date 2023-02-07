@@ -8,4 +8,3 @@
  set(CMAKE_CXX_STANDARD 17)
  
  # Hide symbols unless explicitly flagged with SPIX_EXPORT
- 
