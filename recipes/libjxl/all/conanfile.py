@@ -3,10 +3,11 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class LibjxlConan(ConanFile):
     name = "libjxl"
@@ -38,12 +39,7 @@ class LibjxlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-            # prevent hidden symbols of highway which are referenced by DSO
-            self.options["highway"].shared = True
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -59,6 +55,9 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
+        highway = self.dependencies["highway"]
+        if hasattr(highway, "options.shared") and not highway.options.shared and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref}:shared=True requires -o highway:shared=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
