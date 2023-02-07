@@ -1,9 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class ArmadilloConan(ConanFile):
@@ -93,8 +95,8 @@ class ArmadilloConan(ConanFile):
             del self.options.use_extern_rng
 
     def configure(self):
-        if self.options.shared and self.settings.os != "Windows":
-            del self.options.fPIC
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.compiler.cppstd:
