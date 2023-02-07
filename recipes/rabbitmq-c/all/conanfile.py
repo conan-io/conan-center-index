@@ -100,6 +100,9 @@ class RabbitmqcConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["rabbitmq"].defines.append("AMQP_STATIC")
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("rt")
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "rabbitmq-c"
         self.cpp_info.filenames["cmake_find_package_multi"] = "rabbitmq-c"
