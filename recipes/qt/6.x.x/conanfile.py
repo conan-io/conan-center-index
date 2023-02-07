@@ -787,8 +787,28 @@ class QtConan(ConanFile):
                 rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             extension = ".exe"
+
+        # hack: copy tools binaries from native build
+        if cross_building(self):
+            qt_tools = [ "tracegen", "cmake_automoc_parser", "moc",
+                "lupdate-pro", "lrelease-pro", "qtplugininfo", "qtpaths6",
+                "qtpaths", "qlalr", "qtattributionsscanner", "qvkgen", "rcc",
+                "windeployqt", "lconvert", "lrelease",
+                "lprodump", "uic", "lupdate", "qmake6", "qmake", "qtdiag6",
+                "qtdiag", "qhelpgenerator", "pixeltool", "linguist",
+                "assistant", "designer" ]
+            src_bin_dir = self.deps_env_info["qt"].PATH[0]
+            dst_bin_dir = os.path.join(self.package_folder, "bin")
+            for tool in qt_tools:
+                tool_exe = "{}{}".format(tool, extension)
+                if os.path.isfile(os.path.join(src_bin_dir, tool_exe)):
+                    copy(self, tool_exe, src_bin_dir, dst_bin_dir)
+                else:
+                    self.output.warn("Could not copy native tool {}".format(tool_exe))
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
         filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
         ver = Version(self.version)
         filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
