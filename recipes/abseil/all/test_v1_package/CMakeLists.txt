@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(test_package LANGUAGES CXX)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
@@ -9,7 +9,12 @@ find_package(absl REQUIRED CONFIG)
 # Test components
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE absl::strings absl::flat_hash_map absl::flat_hash_set absl::int128 absl::time)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+#   Abseil now requires at least C++14 since 20230125.0
+if(absl_VERSION VERSION_LESS "20230125.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+endif()
 
 if(cxx_std_14 IN_LIST CMAKE_CXX_COMPILE_FEATURES)
     add_executable(${PROJECT_NAME}_14 ../test_package/test_package.cpp)
@@ -38,4 +43,8 @@ endif()
 # Test also global target
 add_executable(${PROJECT_NAME}_global ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME}_global PRIVATE CONAN_PKG::abseil)
-target_compile_features(${PROJECT_NAME}_global PRIVATE cxx_std_11)
+if(absl_VERSION VERSION_LESS "20230125.0")
+    target_compile_features(${PROJECT_NAME}_global PRIVATE cxx_std_11)
+else()
+    target_compile_features(${PROJECT_NAME}_global PRIVATE cxx_std_14)
+endif()
