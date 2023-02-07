@@ -106,6 +106,8 @@ class Sol2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "sol2")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         if self.options.with_lua == "lua":
             if self.dependencies["lua"].options.compile_as_cpp:
                 self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
