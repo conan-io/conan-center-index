@@ -23,5 +23,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            args = " --docroot . --http-listen http://127.0.0.1:8080"
             self.run(bin_path + args, env="conanrun")
