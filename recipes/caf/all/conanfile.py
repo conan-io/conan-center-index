@@ -17,6 +17,7 @@ class CAFConan(ConanFile):
     topics = "actor-framework", "actor-model", "pattern-matching", "actors"
     license = "BSD-3-Clause", "BSL-1.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
