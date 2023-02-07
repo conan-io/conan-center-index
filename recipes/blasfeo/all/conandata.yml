@@ -3,3 +3,6 @@ sources:
   "0.1.3":
     url: "https://github.com/giaf/blasfeo/archive/refs/tags/0.1.3.tar.gz"
     sha256: "c33eb6467a90d6075a8db34e5ab239ecdda38c5261ae096def122fe7a0f98780"
+  "0.1.2":
+    url: "https://github.com/giaf/blasfeo/archive/refs/tags/0.1.2.tar.gz"
+    sha256: "079c9c90db1249aac59fa649c42667d46f4d458049e5986762035388f22fc005"
