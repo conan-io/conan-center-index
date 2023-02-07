@@ -94,7 +94,8 @@ class QuillConan(ConanFile):
         tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
         tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64"):
+        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64") and \
+            not(self.settings.compiler== "clang" and self.settings.compiler.libcxx == "libc++"):
             tc.variables["QUILL_X86ARCH"] = True
             tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
         tc.generate()
@@ -130,7 +131,8 @@ class QuillConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["quill"]
         self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
-        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64"):
+        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64") and \
+            not(self.settings.compiler== "clang" and self.settings.compiler.libcxx == "libc++"):
             self.cpp_info.defines.append("QUILL_X86ARCH")
             self.cpp_info.cxxflags.append("-mclflushopt")
 
