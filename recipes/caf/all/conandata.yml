@@ -17,6 +17,4 @@ sources:
 patches:
   "0.17.6":
     - patch_file: "patches/win_install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/udp.patch"
-      base_path: "source_subfolder"
