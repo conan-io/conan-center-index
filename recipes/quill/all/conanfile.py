@@ -101,17 +101,26 @@ class QuillConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
+        # remove bundled fmt
+        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "include", "quill", "bundled", "fmt"))
+        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "src", "bundled", "fmt"))
+
         if Version(self.version) >= "2.0.0":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/quill/cmake" CACHE STRING "Modules for CMake" FORCE)""",
                 """set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_LIST_DIR}/quill/cmake")"""
             )
 
-        # remove bundled fmt
-        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "include", "quill", "bundled", "fmt"))
-        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "src", "bundled", "fmt"))
+        # inlining failed in call to 'always_inline' 'void _mm_clflushopt(void*)'
+        if Version(self.version) >= "2.7.0":
+            replace_in_file(self, os.path.join(self.source_folder, "quill", "CMakeLists.txt"),
+                "-Wfatal-errors ",
+                ""
+            )
 
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
