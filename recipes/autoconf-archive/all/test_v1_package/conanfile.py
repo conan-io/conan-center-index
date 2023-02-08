@@ -3,7 +3,7 @@ import contextlib
 import os
 import shutil
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.56.0"
 
 
 class TestPackageConan(ConanFile):
@@ -37,7 +37,10 @@ class TestPackageConan(ConanFile):
     def build(self):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=self._settings_build.os == "Windows")
+
+        # Work around the fact that "used_special_vars" in conans/client/tools/win.py doesn't handle ACLOCAL_PATH
+        aclocal_path = "$ACLOCAL_PATH:" + self.deps_env_info.vars["ACLOCAL_PATH"][0].lower()
+        self.run("ACLOCAL_PATH={} autoreconf -fiv".format(aclocal_path), win_bash=self._settings_build.os == "Windows")
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
             autotools.libs = []

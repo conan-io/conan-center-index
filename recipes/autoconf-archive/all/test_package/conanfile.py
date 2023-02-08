@@ -3,7 +3,6 @@ from conan.tools.build import cross_building, can_run
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.layout import basic_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 import shutil
 
@@ -14,6 +13,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = "configure.ac", "Makefile.am", "test_package.c"
     test_type = "explicit"
+    generators = "VirtualBuildEnv"  # Need VirtualBuildEnv for Conan 1.x env_info support
     win_bash = True # This assignment must be *here* to avoid "Cannot wrap command with different envs." in Conan 1.x
 
     @property
@@ -39,9 +39,6 @@ class TestPackageConan(ConanFile):
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
         tc.generate(env)
-        # Need VirtualBuildEnv for Conan 1.x env_info support
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         if not cross_building(self):
