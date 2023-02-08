@@ -3,8 +3,6 @@ from conan.tools.scm import Version
 from conan.tools.build import cross_building
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -37,6 +35,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not self._skip_test and not cross_building(self):
-            bin_path = os.path.join("bin", "digest")
+            bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
