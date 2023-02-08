@@ -6,7 +6,7 @@ on:
 
 jobs:
   comment:
-    if: github.repository == "conan-io/conan-center-index"
+    if: github.repository == 'conan-io/conan-center-index'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
