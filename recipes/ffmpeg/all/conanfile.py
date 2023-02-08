@@ -2,20 +2,23 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch, XCRun
 from conan.tools.build import cross_building
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans import AutoToolsBuildEnvironment, tools
-from conans.tools import apple_deployment_target_flag, environment_append, unix_path, vcvars
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+# from conans import AutoToolsBuildEnvironment, tools
+# from conans.tools import apple_deployment_target_flag, environment_append, unix_path, vcvars
 import os
 import contextlib
 import glob
 import shutil
 import re
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.58.0"
 
 class FFMpegConan(ConanFile):
     name = "ffmpeg"
@@ -183,12 +186,13 @@ class FFMpegConan(ConanFile):
         "enable_filters": None,
     }
 
-    generators = "pkg_config"
-    _autotools = None
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     @property
     def _dependencies(self):
@@ -318,12 +322,13 @@ class FFMpegConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("yasm/1.3.0")
         self.tool_requires("pkgconf/1.9.3")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _target_arch(self):
@@ -352,7 +357,7 @@ class FFMpegConan(ConanFile):
         return target_os
 
     def _patch_sources(self):
-        if is_msvc(self) and self.options.with_libx264 and not self.options["libx264"].shared and Version(self.version) <= "5.0":
+        if is_msvc(self) and self.options.with_libx264 and not self.dependencies["libx264"].options.shared and Version(self.version) <= "5.0":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
@@ -361,117 +366,116 @@ class FFMpegConan(ConanFile):
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
             openssl_libraries = " ".join(
-                [f"-l{lib}" for lib in self.deps_cpp_info["openssl"].libs])
+                [f"-l{lib}" for lib in self.dependencies["openssl"].libs])
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                   f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        with environment_append({"PKG_CONFIG_PATH": unix_path(self.build_folder)}):
-            if is_msvc(self):
-                with vcvars(self):
-                    yield
-            else:
-                yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=(self._settings_build.os == "Windows"))
-        self._autotools.libs = []
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
-        def opt_enable_disable( what, v):
+        pc = PkgConfigDeps(self)
+        pc.generate()
+
+        tc = AutotoolsToolchain(self)
+
+
+#        with environment_append({"PKG_CONFIG_PATH": unix_path(self.build_folder)}):
+#            if is_msvc(self):
+#                with vcvars(self):
+#                    yield
+#            else:
+#                yield
+
+        def opt_enable_disable(args, what, v):
             action = "enable" if v else "disable"
-            return f"--{action}-{what}"
+            args[f"--{action}-{what}"] = ""
 
         def opt_append_disable_if_set(args, what, v):
             if v:
-                args.append(f"--disable-{what}")
+                args[f"--disable-{what}"] = ""
 
-        args = [
-            "--pkg-config-flags=--static",
-            "--disable-doc",
-            opt_enable_disable("cross-compile", cross_building(self)),
-            opt_enable_disable("asm", self.options.with_asm),
-            # Libraries
-            opt_enable_disable("shared", self.options.shared),
-            opt_enable_disable("static", not self.options.shared),
-            opt_enable_disable("pic", self.options.get_safe("fPIC", True)),
-            # Components
-            opt_enable_disable("avdevice", self.options.avdevice),
-            opt_enable_disable("avcodec", self.options.avcodec),
-            opt_enable_disable("avformat", self.options.avformat),
-            opt_enable_disable("swresample", self.options.swresample),
-            opt_enable_disable("swscale", self.options.swscale),
-            opt_enable_disable("postproc", self.options.postproc),
-            opt_enable_disable("avfilter", self.options.avfilter),
+        args2 = {}
 
-            # Dependencies
-            opt_enable_disable("bzlib", self.options.with_bzip2),
-            opt_enable_disable("zlib", self.options.with_zlib),
-            opt_enable_disable("lzma", self.options.with_lzma),
-            opt_enable_disable("iconv", self.options.with_libiconv),
-            opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
-            opt_enable_disable("libopenh264", self.options.with_openh264),
-            opt_enable_disable("libvorbis", self.options.with_vorbis),
-            opt_enable_disable("libopus", self.options.with_opus),
-            opt_enable_disable("libzmq", self.options.with_zeromq),
-            opt_enable_disable("sdl2", self.options.with_sdl),
-            opt_enable_disable("libx264", self.options.with_libx264),
-            opt_enable_disable("libx265", self.options.with_libx265),
-            opt_enable_disable("libvpx", self.options.with_libvpx),
-            opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
-            opt_enable_disable("libfdk-aac", self.options.with_libfdk_aac),
-            opt_enable_disable("libwebp", self.options.with_libwebp),
-            opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
-            opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
-            opt_enable_disable(
-                "libpulse", self.options.get_safe("with_pulse")),
-            opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
-            opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
-            opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
-            opt_enable_disable(
-                "libxcb-shm", self.options.get_safe("with_xcb")),
-            opt_enable_disable(
-                "libxcb-shape", self.options.get_safe("with_xcb")),
-            opt_enable_disable(
-                "libxcb-xfixes", self.options.get_safe("with_xcb")),
-            opt_enable_disable("appkit", self.options.get_safe("with_appkit")),
-            opt_enable_disable(
-                "avfoundation", self.options.get_safe("with_avfoundation")),
-            opt_enable_disable(
-                "coreimage", self.options.get_safe("with_coreimage")),
-            opt_enable_disable(
-                "audiotoolbox", self.options.get_safe("with_audiotoolbox")),
-            opt_enable_disable(
-                "videotoolbox", self.options.get_safe("with_videotoolbox")),
-            opt_enable_disable("securetransport",
-                               self.options.with_ssl == "securetransport"),
-            "--disable-cuda",  # FIXME: CUDA support
-            "--disable-cuvid",  # FIXME: CUVID support
+        args2["--pkg-config-flags"] = "--static"
+        opt_enable_disable(args2, "doc", False)
+
+        opt_enable_disable(args2, "cross-compile", cross_building(self))
+        opt_enable_disable(args2, "asm", self.options.with_asm)
+        # Libraries
+        opt_enable_disable(args2, "shared", self.options.shared)
+        opt_enable_disable(args2, "static", not self.options.shared)
+        opt_enable_disable(args2, "pic", self.options.get_safe("fPIC", True))
+        # Components
+        opt_enable_disable(args2, "avdevice", self.options.avdevice)
+        opt_enable_disable(args2, "avcodec", self.options.avcodec)
+        opt_enable_disable(args2, "avformat", self.options.avformat)
+        opt_enable_disable(args2, "swresample", self.options.swresample)
+        opt_enable_disable(args2, "swscale", self.options.swscale)
+        opt_enable_disable(args2, "postproc", self.options.postproc)
+        opt_enable_disable(args2, "avfilter", self.options.avfilter)
+
+        # Dependencies
+        opt_enable_disable(args2, "bzlib", self.options.with_bzip2)
+        opt_enable_disable(args2, "zlib", self.options.with_zlib)
+        opt_enable_disable(args2, "lzma", self.options.with_lzma)
+        opt_enable_disable(args2, "iconv", self.options.with_libiconv)
+        opt_enable_disable(args2, "libopenjpeg", self.options.with_openjpeg)
+        opt_enable_disable(args2, "libopenh264", self.options.with_openh264)
+        opt_enable_disable(args2, "libvorbis", self.options.with_vorbis)
+        opt_enable_disable(args2, "libopus", self.options.with_opus)
+        opt_enable_disable(args2, "libzmq", self.options.with_zeromq)
+        opt_enable_disable(args2, "sdl2", self.options.with_sdl)
+        opt_enable_disable(args2, "libx264", self.options.with_libx264)
+        opt_enable_disable(args2, "libx265", self.options.with_libx265)
+        opt_enable_disable(args2, "libvpx", self.options.with_libvpx)
+        opt_enable_disable(args2, "libmp3lame", self.options.with_libmp3lame)
+        opt_enable_disable(args2, "libfdk-aac", self.options.with_libfdk_aac)
+        opt_enable_disable(args2, "libwebp", self.options.with_libwebp)
+        opt_enable_disable(args2, "openssl", self.options.with_ssl == "openssl")
+        opt_enable_disable(args2, "alsa", self.options.get_safe("with_libalsa"))
+        opt_enable_disable(args2, "libpulse", self.options.get_safe("with_pulse"))
+        opt_enable_disable(args2, "vaapi", self.options.get_safe("with_vaapi"))
+        opt_enable_disable(args2, "vdpau", self.options.get_safe("with_vdpau"))
+        opt_enable_disable(args2, "libxcb", self.options.get_safe("with_xcb"))
+        opt_enable_disable(args2, "libxcb-shm", self.options.get_safe("with_xcb"))
+        opt_enable_disable(args2, "libxcb-shape", self.options.get_safe("with_xcb"))
+        opt_enable_disable(args2, "libxcb-xfixes", self.options.get_safe("with_xcb"))
+        opt_enable_disable(args2, "appkit", self.options.get_safe("with_appkit"))
+        opt_enable_disable(args2, "avfoundation", self.options.get_safe("with_avfoundation"))
+        opt_enable_disable(args2, "coreimage", self.options.get_safe("with_coreimage"))
+        opt_enable_disable(args2, "audiotoolbox", self.options.get_safe("with_audiotoolbox"))
+        opt_enable_disable(args2, "videotoolbox", self.options.get_safe("with_videotoolbox"))
+        opt_enable_disable(args2, "securetransport", self.options.with_ssl == "securetransport")
+        opt_enable_disable(args2, "cuda", False)  # FIXME: CUDA support
+        opt_enable_disable(args2, "cuvid", False)  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
-                self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
-            opt_enable_disable(
+        opt_enable_disable(args2, "nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
+                self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)))
+        opt_enable_disable(args2,
                 "gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
-        ]
+
+        args = []
 
         # Individual Component Options
-        opt_append_disable_if_set(args, "everything", self.options.disable_everything)
-        opt_append_disable_if_set(args, "encoders", self.options.disable_all_encoders)
-        opt_append_disable_if_set(args, "decoders", self.options.disable_all_decoders)
-        opt_append_disable_if_set(args, "hwaccels", self.options.disable_all_hardware_accelerators)
-        opt_append_disable_if_set(args, "muxers", self.options.disable_all_muxers)
-        opt_append_disable_if_set(args, "demuxers", self.options.disable_all_demuxers)
-        opt_append_disable_if_set(args, "parsers", self.options.disable_all_parsers)
-        opt_append_disable_if_set(args, "bsfs", self.options.disable_all_bitstream_filters)
-        opt_append_disable_if_set(args, "protocols", self.options.disable_all_protocols)
-        opt_append_disable_if_set(args, "devices", self.options.disable_all_devices)
-        opt_append_disable_if_set(args, "indevs", self.options.disable_all_input_devices)
-        opt_append_disable_if_set(args, "outdevs", self.options.disable_all_output_devices)
-        opt_append_disable_if_set(args, "filters", self.options.disable_all_filters)
+        opt_append_disable_if_set(args2, "everything", self.options.disable_everything)
+        opt_append_disable_if_set(args2, "encoders", self.options.disable_all_encoders)
+        opt_append_disable_if_set(args2, "decoders", self.options.disable_all_decoders)
+        opt_append_disable_if_set(args2, "hwaccels", self.options.disable_all_hardware_accelerators)
+        opt_append_disable_if_set(args2, "muxers", self.options.disable_all_muxers)
+        opt_append_disable_if_set(args2, "demuxers", self.options.disable_all_demuxers)
+        opt_append_disable_if_set(args2, "parsers", self.options.disable_all_parsers)
+        opt_append_disable_if_set(args2, "bsfs", self.options.disable_all_bitstream_filters)
+        opt_append_disable_if_set(args2, "protocols", self.options.disable_all_protocols)
+        opt_append_disable_if_set(args2, "devices", self.options.disable_all_devices)
+        opt_append_disable_if_set(args2, "indevs", self.options.disable_all_input_devices)
+        opt_append_disable_if_set(args2, "outdevs", self.options.disable_all_output_devices)
+        opt_append_disable_if_set(args2, "filters", self.options.disable_all_filters)
 
         args.extend(self._split_and_format_options_string(
             "enable-encoder", self.options.enable_encoders))
@@ -519,40 +523,38 @@ class FFMpegConan(ConanFile):
             "disable-filter", self.options.disable_filters))
 
         if self._version_supports_vulkan():
-            args.append(opt_enable_disable(
-                "vulkan", self.options.get_safe("with_vulkan")))
+            opt_enable_disable(args2, "vulkan", self.options.get_safe("with_vulkan"))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
         args.append(f"--arch={self._target_arch}")
         if self.settings.build_type == "Debug":
-            args.extend([
-                "--disable-optimizations",
-                "--disable-mmx",
-                "--disable-stripping",
-                "--enable-debug",
-            ])
+            opt_enable_disable(args2, "optimizations", False)
+            opt_enable_disable(args2, "mmx", False)
+            opt_enable_disable(args2, "stripping", False)
+            opt_enable_disable(args2, "debug", True)
         if not self.options.with_programs:
-            args.append("--disable-programs")
+            opt_enable_disable(args2, "programs", False)    # --enable-programs not understood
         # since ffmpeg"s build system ignores CC and CXX
         as_value = os.getenv("AS")
         if as_value:
             args.append(f"--as={as_value}")
-        cc_value = os.getenv("CC")
+        cc_value = os.getenv("CC") # TODO
         if cc_value:
             args.append(f"--cc={cc_value}")
-        cxx = os.getenv("CXX")
+        cxx = os.getenv("CXX") # TODO
         if cxx:
             args.append(f"--cxx={cxx}")
         extra_cflags = []
         extra_ldflags = []
-        if is_apple_os(self) and self.settings.os.version:
-            extra_cflags.append(apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version))
-            extra_ldflags.append(apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version))
+
+        if is_apple_os(self):
+            apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
+            if apple_min_version_flag:
+                extra_cflags.append(apple_min_version_flag)
+                extra_ldflags.append(apple_min_version_flag)
         if is_msvc(self):
-            pkg_config = os.getenv("PKG_CONFIG")
+            pkg_config = os.getenv("PKG_CONFIG") # TODO
             args.append(f"--pkg-config={pkg_config}")
             args.append("--toolchain=msvc")
             if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= "12":
@@ -567,7 +569,7 @@ class FFMpegConan(ConanFile):
 
             if is_apple_os(self):
                 if self.options.with_audiotoolbox:
-                    args.append("--disable-outdev=audiotoolbox")
+                    args2["--disable-outdev"] = "audiotoolbox"
 
                 xcrun = XCRun(self)
                 apple_arch = to_apple_arch(self)
@@ -576,14 +578,20 @@ class FFMpegConan(ConanFile):
                 extra_ldflags.extend(
                     [f"-arch {apple_arch}", f"-isysroot {xcrun.sdk_path}"])
 
-        extra_cflags_str = " ".join(extra_cflags)
-        args.append(f"--extra-cflags={extra_cflags_str}")
-        extra_ldflags_str = " ".join(extra_ldflags)
-        args.append(f"--extra-ldflags={extra_ldflags_str}")
+        if len(extra_cflags) > 0:
+            args2["--extra-cflags"]  = " ".join(extra_cflags)
+        if len(extra_ldflags) > 0:
+            args2["--extra-ldflags"] = " ".join(extra_ldflags)
 
-        self._autotools.configure(
-            args=args, configure_dir=self.source_folder, build=False, host=False, target=False)
-        return self._autotools
+        # these aregs aren't understood by ffmpeg's configure script
+        args2["--sbindir"] = None
+        args2["--includedir"] = None
+        args2["--oldincludedir"] = None
+
+        tc.configure_args.extend(args)
+        tc.update_configure_args(args2)
+
+        tc.generate()
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
@@ -603,16 +611,18 @@ class FFMpegConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                               "echo libx264.lib", "echo x264.lib")
         if self.options.with_libx264:
-            shutil.copy("x264.pc", "libx264.pc")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+            shutil.copy(
+                    os.path.join(self.build_folder, "conan", "x264.pc"),
+                    os.path.join(self.build_folder, "conan", "libx264.pc")
+                    )
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, pattern="LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
