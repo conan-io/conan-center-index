@@ -213,6 +213,7 @@ class LibtoolConan(ConanFile):
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
         libtoolize = os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext)
+        libtoolize = "/" + libtoolize.replace("\\", "/").replace(":", "") # Can't use unix_path with Conan 2.0
         self.output.info(f'Setting LIBTOOLIZE env to {libtoolize}')
         self.env_info.LIBTOOLIZE = libtoolize
 
@@ -228,7 +229,7 @@ class LibtoolConan(ConanFile):
             self.output.info(f'Setting {key} environment variable to {value}')
             setattr(self.env_info, key, value)
 
-        aclocal_path = aclocal_path.replace("\\", "/") # Can't use unix_path with Conan 2.0
+        aclocal_path = "/" + aclocal_path.replace("\\", "/").replace(":", "") # Can't use unix_path with Conan 2.0
         self.output.info(f'Appending ACLOCAL_PATH env: {aclocal_path}')
         self.env_info.ACLOCAL_PATH.append(aclocal_path)
         self.output.info(f'Appending AUTOMAKE_CONAN_INCLUDES environment variable: {aclocal_path}')

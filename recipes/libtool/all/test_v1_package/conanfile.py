@@ -15,12 +15,8 @@ class TestPackageConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
-        self.build_requires("autoconf/2.71")   # Needed for autoreconf
         self.build_requires("automake/1.16.5") # Needed for aclocal called by autoreconf
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -30,10 +26,8 @@ class TestPackageConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 with tools.environment_append({
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "LD": "link",
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
                 }):
                     yield
         else:
@@ -48,7 +42,9 @@ class TestPackageConan(ConanFile):
         # Copy autotools directory to build folder
         shutil.copytree(os.path.join(self.source_folder, "autotools"), os.path.join(self.build_folder, "autotools"))
         with tools.chdir("autotools"):
-            self.run("{} --install --verbose -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+            # Work around the fact that "used_special_vars" in conans/client/tools/win.py doesn't handle ACLOCAL_PATH
+            aclocal_path = "$ACLOCAL_PATH:" + self.deps_env_info.vars["ACLOCAL_PATH"][0].lower()
+            self.run("ACLOCAL_PATH={} autoreconf --install --verbose -Wall".format(aclocal_path), win_bash=tools.os_info.is_windows)
 
         tools.mkdir(self._package_folder)
         conf_args = [
@@ -75,9 +71,10 @@ class TestPackageConan(ConanFile):
 
     def _build_ltdl(self):
         """ Build library using ltdl library """
-        cmake = CMake(self)
-        cmake.configure(source_folder="ltdl")
-        cmake.build()
+        with self._build_context():
+            cmake = CMake(self, generator="NMake Makefiles")
+            cmake.configure(source_folder="ltdl")
+            cmake.build()
 
     def _test_ltdl(self):
         """ Test library using ltdl library"""
@@ -89,10 +86,10 @@ class TestPackageConan(ConanFile):
         }[str(self.settings.os)]
 
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = tools.unix_path(os.path.join("bin", "test_package"))
             libdir = "bin" if self.settings.os == "Windows" else "lib"
-            lib_path = os.path.join(libdir, "liba.{}".format(lib_suffix))
-            self.run("{} {}".format(bin_path, lib_path), run_environment=True)
+            lib_path = tools.unix_path(os.path.join(libdir, "liba.{}".format(lib_suffix)))
+            self.run("{} {}".format(bin_path, lib_path), win_bash=tools.os_info.is_windows)
 
     def _build_static_lib_in_shared(self):
         """ Build shared library using libtool (while linking to a static library) """
@@ -104,15 +101,18 @@ class TestPackageConan(ConanFile):
         install_prefix = os.path.join(autotools_folder, "prefix")
 
         # Build static library using CMake
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
-        cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
-        cmake.build()
-        cmake.install()
+        with self._build_context():
+            cmake = CMake(self, generator="NMake Makefiles")
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
+            cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
+            cmake.build()
+            cmake.install()
 
         # Copy autotools directory to build folder
         with tools.chdir(autotools_folder):
-            self.run("{} -ifv -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+            # Work around the fact that "used_special_vars" in conans/client/tools/win.py doesn't handle ACLOCAL_PATH
+            aclocal_path = "$ACLOCAL_PATH:" + self.deps_env_info.vars["ACLOCAL_PATH"][0].lower()
+            self.run("ACLOCAL_PATH={} autoreconf -ifv -Wall".format(aclocal_path), win_bash=tools.os_info.is_windows)
 
         with tools.chdir(autotools_folder):
             conf_args = [
