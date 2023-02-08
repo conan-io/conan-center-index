@@ -44,7 +44,7 @@ class FruitConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.use_boost != "deprecated":
-            self.output.warn("use_boost option is deprecated, do not use anymore.")
+            self.output.warn("use_boost option is deprecated, use the option with_boost instead.")
             self.options.with_boost = self.options.use_boost
 
     def layout(self):
