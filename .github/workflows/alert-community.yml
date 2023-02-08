@@ -39,6 +39,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/b2/*/*"
+          reviewers: "@grafikrobot"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/bandit/*/*"
           reviewers: "@MartinDelille"
 
@@ -231,6 +236,11 @@ jobs:
         with:
           files: "recipes/llvm-core/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/lyra/*/*"
+          reviewers: "@grafikrobot"
 
       - uses: ./.github/actions/alert-community
         with:
