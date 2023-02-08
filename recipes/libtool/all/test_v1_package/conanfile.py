@@ -15,6 +15,9 @@ class TestPackageConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def requirements(self):
+        self.requires(self.tested_reference_str) # Needed as a requirement for CMake to see libraries
+
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
         self.build_requires("automake/1.16.5") # Needed for aclocal called by autoreconf
