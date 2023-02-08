@@ -83,12 +83,9 @@ class GoogleCloudCppConan(ConanFile):
         self.requires("grpc/1.50.1")
         self.requires("nlohmann_json/3.10.0")
         self.requires("crc32c/1.1.1")
-        self.requires("abseil/20220623.1")
+        self.requires("abseil/20220623.0")
         self.requires("libcurl/7.76.0")
-        self.requires("openssl/3.0.0")
-        # openssl, gRPC, and Protobuf require different versions, explicitly setting a
-        # version here seems to resolve the conflict
-        self.requires("zlib/1.2.12")
+        self.requires("openssl/1.1.1s")
         # `google-cloud-cpp` contains code generated from the proto files.
         # Working with older versions of these protos almost always will fail, as
         # at least some of the RPCs included in the GRPC-generator stubs will be
