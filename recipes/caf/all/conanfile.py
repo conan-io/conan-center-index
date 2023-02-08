@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class CAFConan(ConanFile):
@@ -34,30 +34,18 @@ class CAFConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) <= "0.17.6" else "17"
+        return "17"
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "11": {
-                "Visual Studio": "15",
-                "msvc": "191",
-                "gcc": "4.8",
-                "clang": "4",
-                "apple-clang": "9",
-            },
-            "17": {
-                "Visual Studio": "16",
-                "msvc": "192",
-                "gcc": "7",
-                "clang": "6",   # Should be 5 but clang 5 has a bug that breaks compiling CAF
-                                # see https://github.com/actor-framework/actor-framework/issues/1226
-                "apple-clang": "10",
-            },
-        }.get(self._min_cppstd, {})
-
-    def export_sources(self):
-        export_conandata_patches(self)
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "7",
+            "clang": "6",   # Should be 5 but clang 5 has a bug that breaks compiling CAF
+                            # see https://github.com/actor-framework/actor-framework/issues/1226
+            "apple-clang": "10",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -99,27 +87,16 @@ class CAFConan(ConanFile):
         tc = CMakeToolchain(self)
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-        if Version(self.version) < "0.18.0":
-            tc.variables["CAF_NO_AUTO_LIBCPP"] = True
-            tc.variables["CAF_NO_OPENSSL"] = not self.options.with_openssl
-            tc.variables["CAF_NO_EXAMPLES"] = True
-            tc.variables["CAF_NO_TOOLS"] = True
-            tc.variables["CAF_NO_UNIT_TESTS"] = True
-            tc.variables["CAF_NO_PYTHON"] = True
-            tc.variables["CAF_BUILD_STATIC"] = not self.options.shared
-            tc.variables["CAF_BUILD_STATIC_ONLY"] = not self.options.shared
-        else:
-            tc.variables["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
-            tc.variables["CAF_ENABLE_EXAMPLES"] = False
-            tc.variables["CAF_ENABLE_TOOLS"] = False
-            tc.variables["CAF_ENABLE_TESTING"] = False
+        tc.variables["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
+        tc.variables["CAF_ENABLE_EXAMPLES"] = False
+        tc.variables["CAF_ENABLE_TOOLS"] = False
+        tc.variables["CAF_ENABLE_TESTING"] = False
         tc.variables["CAF_LOG_LEVEL"] = self.options.log_level.value.upper()
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -133,24 +110,22 @@ class CAFConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CAF")
 
-        suffix = "_static" if not self.options.shared and Version(self.version) <= "0.17.6" else ""
-
         self.cpp_info.components["caf_core"].set_property("cmake_target_name", "CAF::core")
-        self.cpp_info.components["caf_core"].libs = [f"caf_core{suffix}"]
+        self.cpp_info.components["caf_core"].libs = ["caf_core"]
         if self.settings.os == "Windows":
             self.cpp_info.components["caf_core"].system_libs = ["iphlpapi"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["caf_core"].system_libs = ["pthread", "m"]
 
         self.cpp_info.components["caf_io"].set_property("cmake_target_name", "CAF::io")
-        self.cpp_info.components["caf_io"].libs = [f"caf_io{suffix}"]
+        self.cpp_info.components["caf_io"].libs = ["caf_io"]
         self.cpp_info.components["caf_io"].requires = ["caf_core"]
         if self.settings.os == "Windows":
             self.cpp_info.components["caf_io"].system_libs = ["ws2_32"]
 
         if self.options.with_openssl:
             self.cpp_info.components["caf_openssl"].set_property("cmake_target_name", "CAF::openssl")
-            self.cpp_info.components["caf_openssl"].libs = [f"caf_openssl{suffix}"]
+            self.cpp_info.components["caf_openssl"].libs = ["caf_openssl"]
             self.cpp_info.components["caf_openssl"].requires = ["caf_io", "openssl::openssl"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
