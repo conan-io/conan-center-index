@@ -15,6 +15,8 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
     short_paths = True
+    generators = "VirtualBuildEnv"  # Need VirtualBuildEnv for Conan 1.x env_info support
+    win_bash = True # This assignment must be *here* to avoid "Cannot wrap command with different envs." in Conan 1.x
 
     @property
     def _settings_build(self):
@@ -74,6 +76,7 @@ class TestPackageConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+        # Need VirtualBuildEnv for Conan 1.x env_info support
 
     def _build_autotools(self):
         """ Test autotools integration """
@@ -134,7 +137,7 @@ class TestPackageConan(ConanFile):
                 # We can't call cmake.install with Conan 1.x, so we find artifacts in <self.build_folder>
                 bin_path = unix_path(self, os.path.join(self.build_folder, "test_package"))
                 lib_path = unix_path(self, os.path.join(self.build_folder, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
-            self.run(f'{bin_path} {lib_path}', scope="run")
+            self.run(f'{bin_path} {lib_path}')
 
     def _build_static_lib_in_shared(self):
         """ Build shared library using libtool (while linking to a static library) """
