@@ -4,7 +4,7 @@ project(test_package C)
 option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
 
 set(OpenSSL_DEBUG 1)
-find_package(OpenSSL REQUIRED CONFIG)
+find_package(OpenSSL REQUIRED)
 
 # Test whether variables from https://cmake.org/cmake/help/latest/module/FindOpenSSL.html
 # are properly defined in conan generators
