@@ -366,7 +366,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
             openssl_libraries = " ".join(
-                [f"-l{lib}" for lib in self.dependencies["openssl"].libs])
+                [f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.libs])
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                   f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
