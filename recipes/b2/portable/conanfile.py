@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 
 from contextlib import contextmanager
 import os
-from six import StringIO
+from io import StringIO
 
 required_conan_version = ">=1.47.0"
 
@@ -126,7 +126,7 @@ class B2Conan(ConanFile):
                 with chdir(self, self._b2_engine_dir):
                     with self._bootstrap_env():
                         buf = StringIO()
-                        self.run('guess_toolset && set', output=buf)
+                        self.run('guess_toolset && set', buf)
                         guess_vars = map(
                             lambda x: x.strip(), buf.getvalue().split("\n"))
                         if "B2_TOOLSET=vcunk" in guess_vars:
