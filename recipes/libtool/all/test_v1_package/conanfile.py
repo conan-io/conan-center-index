@@ -72,7 +72,10 @@ class TestPackageConan(ConanFile):
     def _build_ltdl(self):
         """ Build library using ltdl library """
         with self._build_context():
-            cmake = CMake(self, generator="NMake Makefiles")
+            if self.settings.compiler == "Visual Studio":
+                cmake = CMake(self, generator="NMake Makefiles")
+            else:
+                cmake = CMake(self)
             cmake.configure(source_folder="ltdl")
             cmake.build()
 
@@ -102,7 +105,10 @@ class TestPackageConan(ConanFile):
 
         # Build static library using CMake
         with self._build_context():
-            cmake = CMake(self, generator="NMake Makefiles")
+            if self.settings.compiler == "Visual Studio":
+                cmake = CMake(self, generator="NMake Makefiles")
+            else:
+                cmake = CMake(self)
             cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
             cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
             cmake.build()
