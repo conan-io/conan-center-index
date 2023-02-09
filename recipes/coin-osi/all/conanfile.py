@@ -17,7 +17,8 @@ class CoinOsiConan(ConanFile):
     topics = ("clp", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Osi"
-    license = ("EPL-2.0",)
+    license = "EPL-2.0"
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
