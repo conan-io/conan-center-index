@@ -6,11 +6,10 @@ from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.57.0"
 
 
 class CoinUtilsConan(ConanFile):
@@ -90,8 +89,7 @@ class CoinUtilsConan(ConanFile):
         if is_msvc(self):
             tc.configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
             tc.extra_cxxflags.append("-EHsc")
-            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
         env = tc.environment()
