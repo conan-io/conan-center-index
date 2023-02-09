@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, get, replace_in_file
+from conan.tools.files import get, replace_in_file
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -108,16 +109,16 @@ class SoPlexConan(ConanFile):
         self.copy(pattern="src/soplex/*.h", dst="include/soplex", keep_path=False)
         self.copy(pattern="src/soplex/*.hpp", dst="include/soplex", keep_path=False)
         self.copy(pattern="soplex/*.h", dst="include/soplex", keep_path=False)
-        # unix
-        self.copy(pattern="lib/*.a")
-        self.copy(pattern="lib/*.so*", symlinks=True)
-        # mac
-        self.copy(pattern="lib/*.dylib*", symlinks=True)
-        # win
-        self.copy(pattern="bin/*.dll", dst="lib", keep_path=False)
-        self.copy(pattern="lib/*.lib", dst="lib", keep_path=False)
+        if self.options.shared:
+            self.copy(pattern="lib/*.so*", symlinks=True)
+            self.copy(pattern="lib/*.dylib*", symlinks=True)
+            self.copy(pattern="bin/*.dll", dst="lib", keep_path=False)
+        else:
+            self.copy(pattern="lib/*.a")
+            self.copy(pattern="lib/*.lib", dst="lib", keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = [self._determine_lib_name()]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
