@@ -816,19 +816,18 @@ class BoostConan(ConanFile):
             self.run(command)
 
     def build(self):
+        stacktrace_jamfile = os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2")
         if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
-            replace_in_file(self, os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2"),
-                                  "$(>) > $(<)",
-                                  "echo \"\" > $(<)", strict=False)
+            replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)", strict=False)
         if self._with_stacktrace_backtrace and self.settings.os in ["Linux", "Macos"] and not cross_building(self):
             # When libbacktrace is shared, give extra help to the test-executable
             linker_var = "LD_LIBRARY_PATH" if self.settings.os == "Linux" else "DYLD_LIBRARY_PATH"
             libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.libdirs[0]
             patched_run_rule = f"{linker_var}={libbacktrace_libdir} $(>) > $(<)"
-            replace_in_file(self, os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2"),
-                                  "$(>) > $(<)",
-                                  patched_run_rule, strict=False)
+            replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", patched_run_rule, strict=False)
+            if self.dependencies["libbacktrace"].options.shared:
+                replace_in_file(self, stacktrace_jamfile, "<link>static", "<link>shared", strict=False)
 
         # Older clang releases require a thread_local variable to be initialized by a constant value
         replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
@@ -1108,7 +1107,8 @@ class BoostConan(ConanFile):
 
             if self.conf.get("tools.apple:enable_bitcode", check_type=bool):
                 cxx_flags.append("-fembed-bitcode")
-
+        if self._with_stacktrace_backtrace:
+            flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.dependencies['libiconv'].package_folder}")
         if self._with_icu:
