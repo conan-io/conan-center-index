@@ -93,6 +93,11 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("abseil/20220623.0")
 
         if self.options.with_otlp:
+            if Version(self.version) <= "1.4.1":
+                self.requires("opentelemetry-proto/0.11.0")
+            else:
+                self.requires("opentelemetry-proto/0.19.0")
+
             if self.options.with_otlp_grpc:
                 self.requires("grpc/1.50.1")
                 self.requires("protobuf/3.21.4")
@@ -125,11 +130,6 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_etw:
             self.requires("nlohmann_json/3.11.2")
             self.requires("openssl/1.1.1s")
-
-        if Version(self.version) <= "1.4.1":
-            self.requires("opentelemetry-proto/0.11.0")
-        else:
-            self.requires("opentelemetry-proto/0.19.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -254,14 +254,16 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_common",
             "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_ostream_span",
-            "opentelemetry_proto",
             "opentelemetry_resources",
             "opentelemetry_trace",
             "opentelemetry_version",
         ]
 
         if self.options.with_otlp:
-            libraries.append("opentelemetry_otlp_recordable")
+            libraries.extend([
+                "opentelemetry_proto",
+                "opentelemetry_otlp_recordable",
+                ])
 
             if self.options.with_otlp_grpc:
                 libraries.append("opentelemetry_exporter_otlp_grpc")
@@ -323,11 +325,6 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._otel_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._otel_build_modules
 
-        self.cpp_info.components["opentelemetry_proto"].requires.extend([
-            "opentelemetry-proto::opentelemetry-proto",
-            "protobuf::protobuf",
-        ])
-
         self.cpp_info.components["opentelemetry_resources"].requires.extend([
             "opentelemetry_common",
         ])
@@ -368,6 +365,11 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_common"].requires.append("abseil::abseil")
 
         if self.options.with_otlp:
+            self.cpp_info.components["opentelemetry_proto"].requires.extend([
+                "opentelemetry-proto::opentelemetry-proto",
+                "protobuf::protobuf",
+            ])
+
             self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
                 "opentelemetry_proto",
                 "opentelemetry_resources",
