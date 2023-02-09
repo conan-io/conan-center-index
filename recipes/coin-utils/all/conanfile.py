@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
@@ -168,5 +168,8 @@ class CoinUtilsConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "coinutils")
         self.cpp_info.libs = ["CoinUtils"]
         self.cpp_info.includedirs.append(os.path.join("include", "coin"))
-        if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["m"]
+        if not self.options.shared:
+            if self.settings.os in ("FreeBSD", "Linux"):
+                self.cpp_info.system_libs = ["m"]
+            if is_apple_os(self):
+                self.cpp_info.frameworks.append("Accelerate")
