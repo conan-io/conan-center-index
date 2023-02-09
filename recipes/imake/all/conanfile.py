@@ -1,14 +1,18 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import contextlib
+from conan import ConanFile
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.33.0"
+# required_conan_version = ">=1.33.0"
 
 
 class ImakeConan(ConanFile):
     name = "imake"
     description = "Obsolete C preprocessor interface to the make utility"
-    topics = ("conan", "imake", "xmkmf", "preprocessor", "build", "system")
+    topics = ("xmkmf", "preprocessor", "build", "system")
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/imake"
     url = "https://github.com/conan-io/conan-center-index"
@@ -35,13 +39,9 @@ class ImakeConan(ConanFile):
     }
 
     exports_sources = "patches/*"
-    generators = "pkg_config"
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
@@ -51,53 +51,44 @@ class ImakeConan(ConanFile):
         self.requires("xorg-proto/2021.4")
 
     def build_requirements(self):
-        self.build_requires("automake/1.16.3")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("automake/1.16.3")
+        self.tool_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows":
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("msys2/cci.latest")
 
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     @property
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CPP": "{} cl -E".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
-        self._autotools.libs = []
+    def configure(self):
+        # venv = VirtualBuildEnv(self)
+        # venv.generate()
+
+        tc = AutotoolsToolchain(self)
+
         if self.settings.os == "Windows":
-            self._autotools.defines.append("WIN32")
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.defines.extend([
+            tc.extra_defines.append("WIN32")
+        if is_msvc(self):
+            tc.extra_defines.extend([
                 "_CRT_SECURE_NO_WARNINGS",
                 "CROSSCOMPILE_CPP",
             ])
-            self._autotools.flags.append("-FS")
+            # Or cxx?
+            tc.extra_cflags.append("-FS")
+
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-ccmakedep={}".format(yes_no(self.options.ccmakedep)),
@@ -109,29 +100,36 @@ class ImakeConan(ConanFile):
             "--enable-revpath={}".format(yes_no(self.options.revpath)),
             "--enable-xmkmf={}".format(yes_no(self.options.xmkmf)),
         ]
-
-        # FIXME: RAWCPP (ac_cv_path_RAWCPP) is not compatible with MSVC preprocessor. It needs to be cpp.
-        if tools.get_env("CPP"):
+        if "CPP" in os.environ:
             conf_args.extend([
-                "--with-script-preproc-cmd={}".format(tools.get_env("CPP")),
+                "--with-script-preproc-cmd={}".format(os.environ["CPP"]),
             ])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+
+        env = tc.environment()
+        if is_msvc(self):
+            compiler_path = f"{unix_path(self, self._user_info_build['automake'].compile)} cl -nologo"
+            env.define("CC", compiler_path)
+            env.define("CXX", compiler_path)
+            env.define("CPP", compiler_path)
+        tc.generate(env)
+
+        pkgconf = PkgConfigDeps(self)
+        pkgconf.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # tools.replace_in_file(os.path.join(self._source_subfolder, ""))
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make(args=["V=1"])
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make(args=["V=1"])
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst="licenses")
+        autotools = Autotools(self)
+        autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
