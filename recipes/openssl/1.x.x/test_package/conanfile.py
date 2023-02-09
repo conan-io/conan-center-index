@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OPENSSL_WITH_ZLIB"] = not self.dependencies["openssl"].get_safe("no_zlib", True)
+        tc.variables["OPENSSL_WITH_ZLIB"] = not self.dependencies["openssl"].options.get_safe("no_zlib", True)
         tc.generate()
 
     def build(self):
