@@ -348,6 +348,8 @@ class VtkConan(ConanFile):
     def _lib_suffix(self):
         return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
 
+    def build_requirements(self):
+        self.tool_requires("sqlite3/3.40.1")
 
     def source(self):
         if self.options.use_source_from_git:
