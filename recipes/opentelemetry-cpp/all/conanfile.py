@@ -22,10 +22,12 @@ class OpenTelemetryCppConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        "with_logs_preview": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
+        "with_logs_preview": False,
     }
     short_paths = True
 
@@ -104,6 +106,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["WITH_JAEGER"] = True
         tc.variables["WITH_OTLP"] = True
         tc.variables["WITH_ZIPKIN"] = True
+        if self.options.with_logs_preview:
+            tc.variables["WITH_LOGS_PREVIEW"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -193,6 +197,14 @@ class OpenTelemetryCppConan(ConanFile):
 
         if Version(self.version) >= "1.7.0":
             libraries.append("opentelemetry_exporter_otlp_grpc_client")
+
+        if self.options.with_logs_preview:
+            libraries.extend([
+                "opentelemetry_logs",
+                "opentelemetry_exporter_ostream_logs",
+                "opentelemetry_exporter_otlp_grpc_log",
+                "opentelemetry_exporter_otlp_http_log",
+            ])
 
         if self.settings.os == "Windows":
             libraries.extend([
@@ -307,6 +319,26 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_common",
             "opentelemetry_resources",
         ])
+
+        if self.options.with_logs_preview:
+            self.cpp_info.components["opentelemetry_logs"].requires.extend([
+                "opentelemetry_resources",
+                "opentelemetry_common",
+            ])
+
+            self.cpp_info.components["opentelemetry_exporter_ostream_logs"].requires.extend([
+                "opentelemetry_logs",
+            ])
+
+            self.cpp_info.components["opentelemetry_exporter_otlp_grpc_log"].requires.extend([
+                "opentelemetry_otlp_recordable",
+                "opentelemetry_exporter_otlp_grpc_client",
+            ])
+
+            self.cpp_info.components["opentelemetry_exporter_otlp_http_log"].requires.extend([
+                "opentelemetry_otlp_recordable",
+                "opentelemetry_exporter_otlp_http_client",
+            ])
 
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])

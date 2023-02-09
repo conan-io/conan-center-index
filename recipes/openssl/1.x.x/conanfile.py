@@ -539,8 +539,7 @@ class OpenSSLConan(ConanFile):
         if self._full_version >= "1.1.0":
             args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
-        if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-            args.append("--libdir=lib") # See https://github.com/openssl/openssl/blob/master/INSTALL.md#libdir
+        args.append("--libdir=lib") # See https://github.com/openssl/openssl/blob/master/INSTALL.md#libdir
 
         if self.settings.os in ["tvOS", "watchOS"]:
             args.append(" -DNO_FORK") # fork is not available on tvOS and watchOS
@@ -764,7 +763,7 @@ class OpenSSLConan(ConanFile):
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
             new_str = '-install_name @rpath/'
             makefile = "Makefile" if self._full_version >= "1.1.1" else "Makefile.shared"
-            replace_in_file(self, makefile, old_str, new_str, strict=self.in_local_cache)
+            replace_in_file(self, makefile, old_str, new_str)
         if self._use_nmake:
             # NMAKE interprets trailing backslash as line continuation
             if self._full_version >= "1.1.0":

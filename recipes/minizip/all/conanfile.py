@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class MinizipConan(ConanFile):
@@ -38,18 +38,9 @@ class MinizipConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -60,14 +51,16 @@ class MinizipConan(ConanFile):
             self.requires("bzip2/1.0.8", transitive_headers=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MINIZIP_SRC_DIR"] = os.path.join(self.source_folder, "contrib", "minizip").replace("\\", "/")
         tc.variables["MINIZIP_ENABLE_BZIP2"] = self.options.bzip2
         tc.variables["MINIZIP_BUILD_TOOLS"] = self.options.tools
+        # fopen64 and similar are unavailable before API level 24: https://github.com/madler/zlib/pull/436
+        if self.settings.os == "Android" and int(str(self.settings.os.api_level)) < 24:
+            tc.preprocessor_definitions["IOAPI_NO_64"] = "1"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

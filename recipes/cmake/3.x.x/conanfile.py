@@ -99,6 +99,8 @@ class CMakeConan(ConanFile):
             save(self, "bootstrap_args", json.dumps({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}))
         else:
             tc = CMakeToolchain(self)
+            # Disabling testing because CMake tests build can fail in Windows in some cases
+            tc.variables["BUILD_TESTING"] = False
             if not self.settings.compiler.cppstd:
                 tc.variables["CMAKE_CXX_STANDARD"] = 11
             tc.variables["CMAKE_BOOTSTRAP"] = False

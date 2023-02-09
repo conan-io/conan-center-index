@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -10,7 +11,7 @@ class SVTAV1Conan(ConanFile):
     name = "libsvtav1"
     license = "BSD-3-Clause"
     description = "An AV1-compliant software encoder/decoder library"
-    topics = "av1", "codec", "encoder", "ffmpeg", "video"
+    topics = "av1", "codec", "encoder", "decoder", "video"
     homepage = "https://gitlab.com/AOMediaCodec/SVT-AV1"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
@@ -36,6 +37,9 @@ class SVTAV1Conan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def build_requirements(self):
+        if Version(self.version) >= "1.3.0":
+            # at least CMake 3.16
+            self.tool_requires("cmake/3.25.0")
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("nasm/2.15.05")
 
@@ -50,7 +54,6 @@ class SVTAV1Conan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         tc.variables["BUILD_DEC"] = self.options.build_decoder
         tc.variables["BUILD_ENC"] = self.options.build_encoder
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
         tc.generate()
