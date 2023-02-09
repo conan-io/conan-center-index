@@ -58,3 +58,5 @@ class CppOptparseConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["OptionParser"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
