@@ -8,7 +8,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 
 from conans.tools import get_gnu_triplet
 
@@ -380,6 +380,9 @@ class FFMpegConan(ConanFile):
 
         pc = PkgConfigDeps(self)
         pc.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
         tc = AutotoolsToolchain(self)
 
