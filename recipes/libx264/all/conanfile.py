@@ -1,5 +1,5 @@
 from conan import ConanFile, __version__ as conan_version
-from conan.tools.apple import is_apple_os, XCRun
+from conan.tools.apple import is_apple_os, XCRun, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, rename, get, rmdir
@@ -166,11 +166,6 @@ class LibX264Conan(ConanFile):
 
     def build(self):
         autotools = Autotools(self)
-        # with self._build_context():
-            # relocatable shared lib on macOS
-            # TODO # replace_in_file(os.path.join(self.source_folder, "configure"),
-                                  # TODO # "-install_name \\$(DESTDIR)\\$(libdir)/",
-                                  # TODO # "-install_name @rpath/")
         autotools.configure()
         autotools.make()
 
@@ -183,6 +178,7 @@ class LibX264Conan(ConanFile):
             ext = ".dll.lib" if self.options.shared else ".lib"
             rename(self, os.path.join(self.package_folder, "lib", f"libx264{ext}"),
                          os.path.join(self.package_folder, "lib", "x264.lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "x264")
