@@ -37,9 +37,6 @@ class CppfrontConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
