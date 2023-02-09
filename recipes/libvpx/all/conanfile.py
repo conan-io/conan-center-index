@@ -5,13 +5,13 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.build import stdcpp_library
 import os
 import re
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibVPXConan(ConanFile):
@@ -83,19 +83,11 @@ class LibVPXConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
 
-        if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
-            # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
-# FIXME what to do
-            tc.extra_ldflags.append("-stdlib=libc++")
-
-        env = Environment()
-
-        if is_msvc(self):
-            # gen_msvs_vcxproj.sh doesn't like custom flags
-            env.define("CC", "")
-            # FIXME can we leave these alone?
-            # env.define("CFLAGS", "")
-            # env.define("CXXFLAGS", "")
+# Test if we can avoid setting this
+#        if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
+#            # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
+## FIXME what to do
+#            tc.extra_ldflags.append("-stdlib=libc++")
 
 
         # libvpx's configure script is not a standard autotools script,
@@ -187,11 +179,15 @@ class LibVPXConan(ConanFile):
 
         tc.update_configure_args(args)
 
-        tc.generate(env=env)
-
         if is_msvc(self):
-            vcvars = VCVars(self)
-            vcvars.generate()
+            env = Environment()
+            # gen_msvs_vcxproj.sh doesn't like custom flags,
+            # without this, it will fail with:
+            #   "Unknown option -MD, see gen_msvs_vcxproj.sh --help for available options"
+            env.define("CC", "")
+            tc.generate(env=env)
+        else:
+            tc.generate()
 
 
     def build(self):
