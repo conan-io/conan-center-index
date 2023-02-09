@@ -86,50 +86,54 @@ class OpenTelemetryCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        requires = set()
+
         if self.options.with_gsl:
-            self.requires("ms-gsl/4.0.0")
+            requires.add("ms-gsl/4.0.0")
 
         if self.options.with_abseil:
-            self.requires("abseil/20220623.0")
+            requires.add("abseil/20220623.0")
 
         if self.options.with_otlp:
+            requires.add("protobuf/3.21.4")
             if Version(self.version) <= "1.4.1":
-                self.requires("opentelemetry-proto/0.11.0")
+                requires.add("opentelemetry-proto/0.11.0")
             else:
-                self.requires("opentelemetry-proto/0.19.0")
+                requires.add("opentelemetry-proto/0.19.0")
 
             if self.options.with_otlp_grpc:
-                self.requires("grpc/1.50.1")
-                self.requires("protobuf/3.21.4")
+                requires.add("grpc/1.50.1")
 
             if self.options.with_otlp_http:
-                self.requires("protobuf/3.21.4")
-                self.requires("libcurl/7.86.0")
-                self.requires("nlohmann_json/3.11.2")
-                self.requires("openssl/1.1.1s")
+                requires.add("libcurl/7.87.0")
+                requires.add("nlohmann_json/3.11.2")
+                requires.add("openssl/1.1.1s")
 
         if self.options.with_zipkin:
-            self.requires("nlohmann_json/3.11.2")
-            self.requires("libcurl/7.86.0")
-            self.requires("openssl/1.1.1s")
+            requires.add("nlohmann_json/3.11.2")
+            requires.add("libcurl/7.87.0")
+            requires.add("openssl/1.1.1s")
 
         if self.options.with_prometheus:
-            self.requires("prometheus-cpp/1.1.0")
+            requires.add("prometheus-cpp/1.1.0")
 
         if self.options.with_elasticsearch:
-            self.requires("nlohmann_json/3.11.2")
-            self.requires("libcurl/7.86.0")
-            self.requires("openssl/1.1.1s")
+            requires.add("nlohmann_json/3.11.2")
+            requires.add("libcurl/7.87.0")
+            requires.add("openssl/1.1.1s")
 
         if self.options.with_jaeger:
-            self.requires("thrift/0.17.0")
+            requires.add("thrift/0.17.0")
 
             if Version(self.version) >= "1.3.0":
-                self.requires("boost/1.80.0")
+                requires.add("boost/1.81.0")
 
         if self.options.with_etw:
-            self.requires("nlohmann_json/3.11.2")
-            self.requires("openssl/1.1.1s")
+            requires.add("nlohmann_json/3.11.2")
+            requires.add("openssl/1.1.1s")
+
+        for r in requires:
+            self.requires(r)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
