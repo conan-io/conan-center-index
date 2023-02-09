@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch, XCRun
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 
@@ -325,6 +325,8 @@ class FFMpegConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -594,6 +596,21 @@ class FFMpegConan(ConanFile):
         tc.update_configure_args(args2)
 
         tc.generate()
+
+
+        if is_msvc(self):
+            env = Environment()
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_msvc")
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
