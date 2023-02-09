@@ -1,9 +1,9 @@
 from conan import ConanFile
 
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import chdir, get, download, replace_in_file, rm, copy
+from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -36,6 +36,9 @@ class NasRecipe(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("Recipe supports Linux only")
@@ -53,6 +56,7 @@ class NasRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],  strip_root=True)
+        # This library does not come with a License file by itself, package it from an external source
         download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property
@@ -79,18 +83,19 @@ class NasRecipe(ConanFile):
         return ["IRULESRC={}".format(self._imake_irulesrc), "IMAKE_DEFINES={}".format(self._imake_defines)]
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "server", "dia", "main.c"),
-                              "\nFILE *yyin", "\nextern FILE *yyin")
+        apply_conandata_patches(self)
 
         with chdir(self, self.source_folder):
             self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
             autotools = Autotools(self)
+            # j1 avoids some errors while trying to run this target
             autotools.make(target="World", args=["-j1"] + self._imake_make_args)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         tmp_install = os.path.join(self.build_folder, "prefix")
+        self.output.warning(tmp_install)
         install_args = [
                         "DESTDIR={}".format(tmp_install),
                         "INCDIR=/include",
@@ -100,16 +105,19 @@ class NasRecipe(ConanFile):
                     ] + self._imake_make_args
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
+            # j1 avoids some errors while trying to install
             autotools.install(args=["-j1"] + install_args)
 
         copy(self, "*", src=os.path.join(tmp_install, "bin"), dst=os.path.join(self.package_folder, "bin"))
-        copy(self, "*", src=os.path.join(tmp_install, "include"), dst=os.path.join(self.package_folder, "include", "audio"))
+        copy(self, "*.h", src=os.path.join(tmp_install, "include"), dst=os.path.join(self.package_folder, "include", "audio"))
         copy(self, "*", src=os.path.join(tmp_install, "lib"), dst=os.path.join(self.package_folder, "lib"))
 
+        # Both are present in the final build and there does not seem to be an obvious way to tell the build system
+        # to only generate one of them, so remove the unwanted one
         if self.options.shared:
-            rm(self, os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            rm(self, os.path.join(self.package_folder, "lib"), "*.so*")
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["audio"]
