@@ -33,6 +33,9 @@ class LibX264Conan(ConanFile):
         "bit_depth": "all",
     }
 
+    # otherwise build fails with: ln: failed to create symbolic link './Makefile' -> '../../../../../../../../../../../../../j/w/prod/buildsinglereference@2/.conan/data/libx264/cci.20220602/_/_/build/622692a7dbc145becf87f01b017e2a0d93cc644e/src/Makefile': File name too long
+    short_paths = True
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -61,6 +64,8 @@ class LibX264Conan(ConanFile):
     def build_requirements(self):
         if self._with_nasm:
             self.build_requires("nasm/2.15.05")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
@@ -135,8 +140,9 @@ class LibX264Conan(ConanFile):
                 env.vars(self).save_script("conanbuild_android")
         if is_msvc(self):
             env = Environment()
+            # TODO why doesn't this work?
             # compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            # env.define("CC", f"{compiler_wrapper} cl -nologo")
+            # env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CC", "cl -nologo")
             if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
                 extra_cflags.append("-FS")
