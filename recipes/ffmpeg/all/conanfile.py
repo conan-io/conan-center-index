@@ -2,18 +2,17 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch, XCRun
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu.get_gnu_triplet import _get_gnu_triplet
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
-# from conans import AutoToolsBuildEnvironment, tools
-# from conans.tools import apple_deployment_target_flag, environment_append, unix_path, vcvars
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+
+from conans.tools import get_gnu_triplet
+
 import os
-import contextlib
 import glob
 import shutil
 import re
@@ -332,7 +331,7 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_arch(self):
-        triplet = _get_gnu_triplet(
+        triplet = get_gnu_triplet(
             "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
@@ -344,7 +343,7 @@ class FFMpegConan(ConanFile):
     def _target_os(self):
         if is_msvc(self):
             return "win32"
-        triplet = _get_gnu_triplet(
+        triplet = get_gnu_triplet(
             "Macos" if is_apple_os(self) else str(self.settings.os),
             str(self.settings.arch),
             str(self.settings.compiler) if self.settings.os == "Windows" else None,
@@ -559,7 +558,7 @@ class FFMpegConan(ConanFile):
             args.append("--toolchain=msvc")
             if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= "12":
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
-                self._autotools.defines.append("inline=__inline")
+                tc.extra_defines.append("inline=__inline")
         if cross_building(self):
             if self._target_os == "emscripten":
                 args.append("--target-os=none")
