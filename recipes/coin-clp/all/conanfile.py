@@ -57,12 +57,8 @@ class CoinClpConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.version == "1.17.6":
-            self.requires("coin-utils/2.11.4")
-            self.requires("coin-osi/0.108.6")
-        else:
-            self.requires("coin-utils/2.11.6")
-            self.requires("coin-osi/0.108.7")
+        self.requires("coin-utils/2.11.6")
+        self.requires("coin-osi/0.108.7")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
