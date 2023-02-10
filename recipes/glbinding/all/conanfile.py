@@ -49,13 +49,14 @@ class GlbindingConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OPTION_SELF_CONTAINED"] = False
-        tc.variables["OPTION_BUILD_TESTS"] = False
-        tc.variables["OPTION_BUILD_DOCS"] = False
-        tc.variables["OPTION_BUILD_TOOLS"] = False
-        tc.variables["OPTION_BUILD_EXAMPLES"] = False
-        tc.variables["OPTION_BUILD_WITH_BOOST_THREAD"] = False
-        tc.variables["OPTION_BUILD_CHECK"] = False
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["OPTION_SELF_CONTAINED"] = False
+        tc.cache_variables["OPTION_BUILD_TESTS"] = False
+        tc.cache_variables["OPTION_BUILD_DOCS"] = False
+        tc.cache_variables["OPTION_BUILD_TOOLS"] = False
+        tc.cache_variables["OPTION_BUILD_EXAMPLES"] = False
+        tc.cache_variables["OPTION_BUILD_WITH_BOOST_THREAD"] = False
+        tc.cache_variables["OPTION_BUILD_CHECK"] = False
         # TODO: might be a good idea to fix upstream CMakeLists to not rely on
         # WriteCompilerDetectionHeader, and just use cxx_std_11 compile feature
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0120"] = "OLD"
