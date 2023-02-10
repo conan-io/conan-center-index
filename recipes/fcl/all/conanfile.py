@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.53.0"
 
 
 class FclConan(ConanFile):
@@ -15,10 +15,11 @@ class FclConan(ConanFile):
     description = "C++11 library for performing three types of proximity " \
                   "queries on a pair of geometric models composed of triangles."
     license = "BSD-3-Clause"
-    topics = ("fcl", "geometry", "collision")
+    topics = ("geometry", "collision")
     homepage = "https://github.com/flexible-collision-library/fcl"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,8 +33,7 @@ class FclConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,7 +41,10 @@ class FclConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("eigen/3.4.0")
@@ -50,19 +53,13 @@ class FclConan(ConanFile):
             self.requires("octomap/1.9.7")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.info.settings.os == "Windows" and self.info.options.shared:
-            raise ConanInvalidConfiguration(
-                "fcl {} doesn't properly support shared lib on Windows".format(self.version)
-            )
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't properly support shared lib on Windows")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -114,28 +111,23 @@ class FclConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fcl")
         self.cpp_info.set_property("cmake_target_name", "fcl")
         self.cpp_info.set_property("pkg_config_name", "fcl")
         self.cpp_info.libs = ["fcl"]
-
-        # TODO: to remove if required_conan_version updated to 1.51.1 (see https://github.com/conan-io/conan/pull/11790)
-        self.cpp_info.requires = ["eigen::eigen", "libccd::libccd"]
-        if self.options.with_octomap:
-            self.cpp_info.requires.append("octomap::octomap")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
