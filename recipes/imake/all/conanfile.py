@@ -2,11 +2,10 @@ from conan import ConanFile
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
 import os
 
-# required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class ImakeConan(ConanFile):
@@ -38,8 +37,6 @@ class ImakeConan(ConanFile):
         "xmkmf": True,
     }
 
-    exports_sources = "patches/*"
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -66,10 +63,6 @@ class ImakeConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -86,8 +79,9 @@ class ImakeConan(ConanFile):
                 "_CRT_SECURE_NO_WARNINGS",
                 "CROSSCOMPILE_CPP",
             ])
-            # Or cxx?
-            tc.extra_cflags.append("-FS")
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
 
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
@@ -107,10 +101,10 @@ class ImakeConan(ConanFile):
 
         env = tc.environment()
         if is_msvc(self):
-            compiler_path = f"{unix_path(self, self._user_info_build['automake'].compile)} cl -nologo"
-            env.define("CC", compiler_path)
-            env.define("CXX", compiler_path)
-            env.define("CPP", compiler_path)
+            compile_wrapper = f"{unix_path(self, self.conf.get('user.automake:compile-wrapper'))} cl -nologo"
+            env.define("CC", compile_wrapper)
+            env.define("CXX", compile_wrapper)
+            env.define("CPP", compile_wrapper)
         tc.generate(env)
 
         pkgconf = PkgConfigDeps(self)
