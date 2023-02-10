@@ -56,6 +56,9 @@ class XkbcommonConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("xkeyboard-config/system")
         if self.options.with_x11:
@@ -65,29 +68,28 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.21.0")
             if not self._has_build_profile:
-                self.requires("wayland-protocols/1.27")
+                self.requires("wayland-protocols/1.31")
 
     def validate(self):
-        if self.info.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.64.1")
+        self.tool_requires("meson/1.0.0")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self._has_build_profile and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.21.0")
-            self.tool_requires("wayland-protocols/1.27")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+            self.tool_requires("wayland-protocols/1.31")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = MesonToolchain(self)
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
@@ -104,13 +106,16 @@ class XkbcommonConan(ConanFile):
             pkg_config_deps.build_context_suffix = {"wayland": "_BUILD", "wayland-protocols": "_BUILD"}
         pkg_config_deps.generate()
 
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-
     def build(self):
         if self.options.get_safe("with_wayland"):
             meson_build_file = os.path.join(self.source_folder, "meson.build")
             # Patch the build system to use the pkg-config files generated for the build context.
+
+            if Version(self.version) >= "1.5.0":
+                get_pkg_config_var = "get_variable(pkgconfig: "
+            else:
+                get_pkg_config_var = "get_pkgconfig_variable("
+
             if self._has_build_profile:
                 replace_in_file(self, meson_build_file,
                                 "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
@@ -128,7 +133,7 @@ class XkbcommonConan(ConanFile):
                                 "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
 
                 replace_in_file(self, meson_build_file,
-                                "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
+                                f"wayland_scanner = find_program(wayland_scanner_dep.{get_pkg_config_var}'wayland_scanner'))",
                                 "wayland_scanner = find_program('wayland-scanner')")
 
         meson = Meson(self)
@@ -139,9 +144,9 @@ class XkbcommonConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["libxkbcommon"].set_property("pkg_config_name", "xkbcommon")

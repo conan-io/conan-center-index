@@ -133,9 +133,9 @@ class GLibConan(ConanFile):
             # allow to find gettext
             replace_in_file(self,
                 os.path.join(self.source_folder, "meson.build"),
-                "libintl = cc.find_library('intl', required : false)" if Version(self.version) < "2.73.1" \
-                else "libintl = dependency('intl', required: false)",
-                "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
+                "libintl = cc.find_library('intl', required : false" if Version(self.version) < "2.73.1" \
+                else "libintl = dependency('intl', required: false",
+                "libintl = dependency('libgettext', method : 'pkg-config', required : false",
             )
 
         replace_in_file(self,

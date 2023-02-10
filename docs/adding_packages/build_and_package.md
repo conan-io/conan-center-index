@@ -19,27 +19,59 @@ Both methods often use build helpers to build binaries and install them into the
 
 * `build()` method should focus on build only, not installation. During the build, nothing should be written in `package` folder. Installation step should only occur in `package()` method.
 
-* The build itself should only rely on local files. Nothing should be downloaded from the internet during this step. If external files are required, they should come from `requirements` or `build_requirements` in addition to source files downloaded in `source()` or coming from the recipe itself.
+* The build itself should only rely on local files. Nothing should be downloaded from the internet during this step. If external files are required, they should come from `requirements` or `build_requirements` in addition to source files downloaded in `source()` or coming from the recipe itself through `export()` or `export_sources()`.
 
-* Except for CMake and a working build toolchain (compiler, linker, archiver, etc.), the recipe should not assume that any other build tool is installed on the user-build machine (like Meson, autotools, or pkg-config). On Windows, the recipe should not assume that a shell is available (like MSYS2). Therefore, if the build method requires additional tools, they should be added to `build_requirements()`.
+* Except for CMake, a working build toolchain (compiler, linker, archiver, etc.), and a "native generator" (`make` on *nix platforms, `mingw32-make` for MinGW, `MSBuild`/`NMake` for Visual Studio), the recipe should not assume that any other build tool is installed on the user-build machine (like Meson, autotools, or pkg-config). On Windows, the recipe should not assume that a shell is available (like MSYS2). Therefore, if the build method requires additional tools, they should be added to `build_requirements()`.
+  Tools explicitly marked as available by users through conf like `tools.gnu:make_program`, `tools.gnu:pkg_config`, `tools.microsoft.bash:path`, `tools.microsoft.bash:subsystem` should be taken into account to conditionally inject a build requirement (these conf should have precedence over build requirement equivalent hardcoded in the recipe).
 
 * It is forbidden to run other conan client commands during build. In other words, if upstream build files call conan under the hood (through `cmake-conan` for example or any other logic), this logic must be removed.
 
 * Settings from profile should be honored (`build_type`, `compiler.libcxx`, `compiler.cppstd`, `compiler.runtime` etc).
 
-* These env vars from profile should be honored and properly propagated to underlying build system during the build: `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`, `LDFLAGS`.
+* Compiler paths from host profile should be honored and properly propagated to underlying build system during the build:
+
+  | compiler type | conf / env var |
+  |---------------|----------------|
+  | C compiler | `c` key of `tools.build:compiler_executables`, otherwise `CC` environment variable |
+  | C++ compiler | `cpp` key of `tools.build:compiler_executables`, otherwise `CXX` environment variable |
+  | ASM compiler | `asm` key of `tools.build:compiler_executables`, otherwise `CCAS` environment variable |
+  | CUDA compiler | `cuda` key of `tools.build:compiler_executables` |
+  | Fortran compiler | `fortran` key of `tools.build:compiler_executables`, otherwise `FC` environment variable |
+  | Objective-C compiler | `objc` key of `tools.build:compiler_executables` |
+  | Objective-C++ compiler | `objcpp` key of `tools.build:compiler_executables` |
+  | Resource files compiler | `rc` key of `tools.build:compiler_executables`, otherwise `RC` environment variable |
+  | Archiver | `AR` environment variable |
+  | Linker | `LD` environment variable |
+
+  They should be curated on the fly if underlying build system expects a specific format (no spaces in path, forward slash instead of back slash, etc).
+
+* These compiler and linker conf from host profile should be honored and propagated to underlying build system during the build:
+  * `tools.build:cflags`
+  * `tools.build:cxxflags`
+  * `tools.build:defines`
+  * `tools.build:sharedlinklags`
+  * `tools.build:exelinkflags`
+  * `tools.apple:enable_bitcode` (only if host OS is `iOS`/`watchOS`/`tvOS`)
+
+* Multithread build (if supported by underlying build system):
+  * if some steps are sensitive to race conditions, monothread should be enforced.
+  * otherwise multithreaded build should be enabled with a number of cores controlled by `tools.build:jobs` conf from host profile if it is set, otherwise to all cores of build machine.
 
 ## Package Method
 
-* CMake config files must be removed (they will be generated for consumers by `cmake_find_package`, `cmake_find_package_multi`, or `CMakeDeps` generators). Use `rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))` or `rm(self, "*.cmake", os.path.join(self.package_folder, "lib"))`.
+* CMake config files must be removed. They will be generated for consumers by `CMakeDeps` generator (or legacy `cmake_find_package`/`cmake_find_package_multi` generators).
 
-* pkg-config files must be removed (they will be generated for consumers by `pkg_config` or `PkgConfigDeps` generators). Use `rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))` or `rm(self, "*.pc", os.path.join(self.package_folder, "lib"))`.
+* pkg-config files must be removed. They will be generated for consumers by `PkgConfigDeps` generator (or legacy `pkg_config` generator).
 
-* On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`.
+* On *nix systems, executables and shared libraries should have empty `RPATH`/`RUNPATH`/`LC_RPATH`. Though, a relative path pointing inside package itself is allowed.
 
-* On macOS, install name in `LC_ID_DYLIB` section of shared libs must be `@rpath/<libfilename>`.
+* On Apple OS family:
+  * shared libs: name field of `LC_ID_DYLIB` load command must be `@rpath/<libfilename>`.
+  * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except those refering to system libs or frameworks).
 
 * Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
+
+* Static and shared flavors of the same library must not be packaged together.
 
 ## Build System Examples
 

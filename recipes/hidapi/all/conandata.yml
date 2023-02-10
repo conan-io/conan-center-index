@@ -1,4 +1,7 @@
 sources:
+  "0.13.1":
+    url: "https://github.com/libusb/hidapi/archive/hidapi-0.13.1.tar.gz"
+    sha256: "476a2c9a4dc7d1fc97dd223b84338dbea3809a84caea2dcd887d9778725490e3"
   "0.12.0":
     url: "https://github.com/libusb/hidapi/archive/hidapi-0.12.0.tar.gz"
     sha256: "28ec1451f0527ad40c1a4c92547966ffef96813528c8b184a665f03ecbb508bc"
@@ -9,5 +12,5 @@ sources:
     url: "https://github.com/libusb/hidapi/archive/hidapi-0.11.0.tar.gz"
     sha256: "391d8e52f2d6a5cf76e2b0c079cfefe25497ba1d4659131297081fc0cd744632"
   "0.10.1":
-    url: "https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.10.1.tar.gz"
+    url: "https://github.com/libusb/hidapi/archive/hidapi-0.10.1.tar.gz"
     sha256: "f71dd8a1f46979c17ee521bc2117573872bbf040f8a4750e492271fc141f2644"

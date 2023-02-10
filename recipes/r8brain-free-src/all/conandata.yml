@@ -1,4 +1,7 @@
 sources:
+  "6.2":
+    url: "https://github.com/avaneev/r8brain-free-src/archive/refs/tags/version-6.2.tar.gz"
+    sha256: "5e576ec8cb6ae3969c4bcacb630ddc957fc20f60a6b08593681d16e06942597d"
   "4.6":
-    sha256: 9a0d66c3a04954359ef9f69168b58fcdf11e8975821181ee7d1e3b42e8a2cf0e
-    url: https://github.com/avaneev/r8brain-free-src/archive/version-4.6.tar.gz
+    url: "https://github.com/avaneev/r8brain-free-src/archive/version-4.6.tar.gz"
+    sha256: "9a0d66c3a04954359ef9f69168b58fcdf11e8975821181ee7d1e3b42e8a2cf0e"

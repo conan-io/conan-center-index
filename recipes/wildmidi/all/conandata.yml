@@ -1,0 +1,4 @@
+sources:
+  "0.4.5":
+    url: "https://github.com/Mindwerks/wildmidi/releases/download/wildmidi-0.4.5/wildmidi-0.4.5.tar.gz"
+    sha256: "d5e7bef00a7aa47534a53d43b1265f8d3d27f6a28e7f563c1cdf02ff4fa35b99"

@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanException
-from conan.tools.system import package_manager
 from conan.tools.gnu import PkgConfig
+from conan.tools.system import package_manager
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class SysConfigGLUConan(ConanFile):
@@ -15,7 +14,15 @@ class SysConfigGLUConan(ConanFile):
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
     settings = "os", "arch", "compiler", "build_type"
-    requires = "opengl/system"
+
+    def layout(self):
+        pass
+
+    def requirements(self):
+        self.requires("opengl/system")
+
+    def package_id(self):
+        self.info.clear()
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
@@ -37,14 +44,12 @@ class SysConfigGLUConan(ConanFile):
         pkg.install(["libGLU"], update=True, check=True)
 
     def package_info(self):
+        self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Glu32"]
+            self.cpp_info.system_libs = ["glu32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             pkg_config = PkgConfig(self, 'glu')
             pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")
-
-    def package_id(self):
-        self.info.clear()

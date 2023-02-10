@@ -1,4 +1,7 @@
 sources:
+  "1.8.3":
+    url: "https://github.com/drogonframework/drogon/archive/v1.8.3.tar.gz"
+    sha256: "db6d92a0c40ec52d5704fb4128860b9eecdc284653e8d85113b4219b96dc7129"
   "1.8.2":
     url: "https://github.com/drogonframework/drogon/archive/v1.8.2.tar.gz"
     sha256: "1182cab00c33e400eac617c6dbf44fa2f358e1844990b6b8c5c87783024f9971"
@@ -9,6 +12,18 @@ sources:
     url: "https://github.com/drogonframework/drogon/archive/refs/tags/v1.7.5.tar.gz"
     sha256: "e2af7c55dcabafef16f26f5b3242692f5a2b54c19b7b626840bf9132d24766f6"
 patches:
+  "1.8.3":
+    - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
+      patch_description: "Consume Trantor package from Conan instead of using the\
+        \ subproject"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.3-0003-find-package-sqlite.patch"
+      patch_description: "Fix sqlite cmake target name"
+      patch_type: "conan"
+
   "1.8.2":
     - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
       patch_description: "Consume Trantor package from Conan instead of using the\
@@ -17,6 +32,10 @@ patches:
     - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.2-0003-find-package-sqlite.patch"
+      patch_description: "Fix sqlite cmake target name"
+      patch_type: "conan"
+
   "1.8.0":
     - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
       patch_description: "Consume Trantor package from Conan instead of using the subproject"
@@ -24,6 +43,10 @@ patches:
     - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-0003-find-package-sqlite.patch"
+      patch_description: "Fix sqlite cmake target name"
+      patch_type: "conan"
+
   "1.7.5":
     - patch_file: "patches/1.7.5-0001-disable_trantor.patch"
       patch_description: "Consume Trantor package from Conan instead of using the subproject"
