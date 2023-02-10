@@ -1565,7 +1565,8 @@ class BoostConan(ConanFile):
                 if abi:
                     libsuffix_data["abi"] = f"-{abi}"
 
-            libsuffix_data["arch"] = f"-{self._b2_architecture[0]}{self._b2_address_model}"
+            if self._b2_architecture:
+                libsuffix_data["arch"] = f"-{self._b2_architecture[0]}{self._b2_address_model}"
             version = Version(self.version)
             if not version.patch or version.patch == "0":
                 libsuffix_data["version"] = f"-{version.major}_{version.minor}"

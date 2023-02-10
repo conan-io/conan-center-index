@@ -763,7 +763,7 @@ class OpenSSLConan(ConanFile):
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
             new_str = '-install_name @rpath/'
             makefile = "Makefile" if self._full_version >= "1.1.1" else "Makefile.shared"
-            replace_in_file(self, makefile, old_str, new_str, strict=self.in_local_cache)
+            replace_in_file(self, makefile, old_str, new_str)
         if self._use_nmake:
             # NMAKE interprets trailing backslash as line continuation
             if self._full_version >= "1.1.0":

@@ -26,6 +26,20 @@ class SentryBreakpadConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11 if Version(self.version) < "0.5.4" else 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {} if Version(self.version) < "0.5.4" else {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
@@ -42,7 +56,12 @@ class SentryBreakpadConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if Version(self.version) <= "0.4.1":
             if self.settings.os == "Android" or is_apple_os(self):
