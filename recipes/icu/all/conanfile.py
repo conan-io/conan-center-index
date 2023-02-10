@@ -11,6 +11,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.57.0"
 
@@ -129,6 +130,15 @@ class ICUConan(ConanFile):
         if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
+            if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                # ICU build scripts interpret all Apple platforms as 'darwin'.
+                # Since this can coincide with the `build` triple, we need to tweak
+                # the build triple to avoid the collision and ensure the scripts
+                # know we are cross-building.
+                host_triplet = f"{str(self.settings.arch)}-apple-darwin"
+                build_triplet = f"{str(self._settings_build.arch)}-apple"
+                tc.update_configure_args({"--host": host_triplet,
+                                          "--build": build_triplet})
         else:
             arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
             bits = "64" if self.settings.arch in arch64 else "32"
