@@ -1,7 +1,12 @@
 sources:
+  "3.9":
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/geotrans/geotrans-3.9.tgz"
+    sha256: "06712b1c52e0a321bad1b5e6b38babbdbfd89f709669a238644fd878e8ccb4f2"
   "3.8":
     url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/geotrans/geotrans-3.8.tgz"
     sha256: "baa72d3b1ae12f237a8ad30f2deb3fed2b80feb759528ea0a72b4b42cb77c565"
 patches:
+  "3.9":
+    - patch_file: "patches/3.x-fix-for-cxx20.patch"
   "3.8":
-    - patch_file: "patches/3.8-fix-for-cxx20.patch"
+    - patch_file: "patches/3.x-fix-for-cxx20.patch"

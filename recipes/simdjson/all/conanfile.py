@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.53"
 
 
 class SimdjsonConan(ConanFile):
@@ -33,9 +33,9 @@ class SimdjsonConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            # In simdjson/2.0.1, several AVX-512 instructions are not support by GCC < 9.0
-            "gcc": "8" if Version(self.version) != "2.0.1" else "9",
+            "gcc": "8",
             "Visual Studio": "16",
+            "msvc": "192",
             "clang": "6",
             "apple-clang": "9.4",
         }
@@ -46,7 +46,7 @@ class SimdjsonConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -60,17 +60,17 @@ class SimdjsonConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
         elif loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not fully support.".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not fully support.")
 
         if Version(self.version) >= "2.0.0" and \
             self.info.settings.compiler == "gcc" and \
             Version(self.info.settings.compiler.version).major == "9":
             if self.settings.compiler.get_safe("libcxx") == "libstdc++11":
-                raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with libstdc++11.".format(self.name, self.version))
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC 9 with libstdc++11.")
             if self.info.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with Debug build type.".format(self.name, self.version))
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC 9 with Debug build type.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

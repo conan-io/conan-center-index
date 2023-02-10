@@ -1,3 +1,8 @@
+import glob
+import hashlib
+import os
+import shutil
+
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
@@ -5,22 +10,10 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
-import glob
-import os
-import shutil
-import hashlib
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
-def _sha256sum(file_path):
-    hash_sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        for chunk in iter(lambda: f.read(8192), b""):
-            hash_sha256.update(chunk)
-    return hash_sha256.hexdigest()
 
 class ICUConan(ConanFile):
     name = "icu"
@@ -83,10 +76,17 @@ class ICUConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @staticmethod
+    def _sha256sum(file_path):
+        m = hashlib.sha256()
+        with open(file_path, "rb") as fh:
+            for data in iter(lambda: fh.read(8192), b""):
+                m.update(data)
+        return m.hexdigest()
+
     def package_id(self):
         if self.info.options.dat_package_file:
-            dat_package_file_sha256 = _sha256sum(str(self.info.options.dat_package_file))
-            self.info.options.dat_package_file = dat_package_file_sha256
+            self.info.options.dat_package_file = self._sha256sum(str(self.info.options.dat_package_file))
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -95,20 +95,17 @@ class ICUConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
         if cross_building(self) and hasattr(self, "settings_build"):
-            self.tool_requires(self.ref)
+            self.tool_requires(str(self.ref))
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        # TODO: cleanup after 2.0 is left -- workaround "visual studio" being used as a compiler
-        if is_msvc(self) and ((self.settings.compiler == "msvc" and str(self.settings.compiler.version) >= "180") or \
-           (self.settings.compiler == "Visual Studio" and str(self.settings.compiler.version) >= "12")):
+        if check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         if not self.options.shared:
@@ -146,6 +143,8 @@ class ICUConan(ConanFile):
             env = Environment()
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
+            if cross_building(self):
+                env.define("icu_cv_host_frag", "mh-msys-msvc")
             env.vars(self).save_script("conanbuild_icu_msvc")
 
     def _patch_sources(self):

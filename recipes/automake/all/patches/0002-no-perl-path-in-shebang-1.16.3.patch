@@ -1,0 +1,46 @@
+diff --git a/Makefile.in b/Makefile.in
+index c599705..8c18ed2 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -535,7 +535,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
+ PACKAGE_URL = @PACKAGE_URL@
+ PACKAGE_VERSION = @PACKAGE_VERSION@
+ PATH_SEPARATOR = @PATH_SEPARATOR@
+-PERL = @PERL@
++PERL = /usr/bin/env perl
+ RELEASE_YEAR = @RELEASE_YEAR@
+ SET_MAKE = @SET_MAKE@
+ SHELL = @SHELL@
+diff --git a/bin/aclocal.in b/bin/aclocal.in
+index ca2f963..8782f24 100644
+--- a/bin/aclocal.in
++++ b/bin/aclocal.in
+@@ -1,4 +1,4 @@
+-#!@PERL@
++#!/usr/bin/env perl
+ # aclocal - create aclocal.m4 by scanning configure.ac      -*- perl -*-
+ # @configure_input@
+ # Copyright (C) 1996-2020 Free Software Foundation, Inc.
+diff --git a/bin/automake.in b/bin/automake.in
+index 31c7238..e41b1f5 100644
+--- a/bin/automake.in
++++ b/bin/automake.in
+@@ -1,4 +1,4 @@
+-#!@PERL@
++#!/usr/bin/env perl
+ # automake - create Makefile.in from Makefile.am            -*- perl -*-
+ # @configure_input@
+ # Copyright (C) 1994-2020 Free Software Foundation, Inc.
+diff --git a/t/ax/test-defs.in b/t/ax/test-defs.in
+index dff88b7..20b012f 100644
+--- a/t/ax/test-defs.in
++++ b/t/ax/test-defs.in
+@@ -97,7 +97,7 @@ SHELL=${AM_TESTSUITE_SHELL-'@SHELL@'}; export SHELL
+ # User can override various tools used.  Prefer overriding specific for
+ # that automake testsuite, if they are available.
+ AWK=${AM_TESTSUITE_AWK-${AWK-'@AWK@'}}
+-PERL=${AM_TESTSUITE_PERL-${PERL-'@PERL@'}}
++PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/env perl'}}
+ MAKE=${AM_TESTSUITE_MAKE-${MAKE-'make'}}
+ YACC=${AM_TESTSUITE_YACC-${YACC-'@YACC@'}}
+ LEX=${AM_TESTSUITE_LEX-${LEX-'@LEX@'}}

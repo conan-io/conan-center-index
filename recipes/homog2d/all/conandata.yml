@@ -11,3 +11,7 @@ patches:
     - patch_file: "patches/0002-pretty_function-for-msvc.patch"
       patch_description: "use __FUNCSIG__ instead of __PRETTY_FUNCTION__ on MSVC"
       patch_type: "portability"
+    - patch_file: "patches/0003-support-msvc.patch"
+      patch_description: "fix msvc compilation error"
+      patch_type: "portability"
+      patch_source: "https://github.com/skramm/homog2d/issues/2"

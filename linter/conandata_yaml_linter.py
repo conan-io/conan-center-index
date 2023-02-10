@@ -1,5 +1,4 @@
 import argparse
-import sys
 from strictyaml import (
     load,
     Map,
@@ -54,23 +53,29 @@ def main():
     try:
         parsed = load(content, schema)
     except YAMLValidationError as error:
-        pretty_print_yaml_validate_error(args, error)
-        sys.exit(1)
+        pretty_print_yaml_validate_error(args, error) # Error when "source" is missing or when "patches" has no versions
+        return
     except BaseException as error:
-        pretty_print_yaml_validate_error(args, error)
-        sys.exit(1)
+        pretty_print_yaml_validate_error(args, error) # YAML could not be parsed
+        return
 
-    exit_code = 0
     if "patches" in parsed:
         for version in parsed["patches"]:
             patches = parsed["patches"][version]
+            if version not in parsed["sources"]:
+                print(
+                    f"::warning file={args.path},line={patches.start_line},endline={patches.end_line},"
+                    f"title=conandata.yml inconsistency"
+                    f"::Patch(es) are listed for version `{version}`, but there is source for this version."
+                    f" You should either remove `{version}` from the `patches` section, or add it to the"
+                    f" `sources` section"
+                )
             for i, patch in enumerate(patches):
                 # Individual report errors for each patch object
                 try:
                     parsed["patches"][version][i].revalidate(patch_fields)
                 except YAMLValidationError as error:
-                    pretty_print_yaml_validate_error(args, error)
-                    exit_code = 1
+                    pretty_print_yaml_validate_warning(args, error) # Warning when patch fields are not followed
                     continue
 
                 # Make sure `patch_source` exists where it's encouraged
@@ -98,14 +103,20 @@ def main():
                         " the new helper (see https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
                     )
 
-    sys.exit(exit_code)
-
 
 def pretty_print_yaml_validate_error(args, error):
     snippet = error.context_mark.get_snippet().replace("\n", "%0A")
     print(
         f"::error file={args.path},line={error.context_mark.line},endline={error.problem_mark.line+1},"
         f"title=conandata.yml schema error"
+        f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A"
+    )
+    
+def pretty_print_yaml_validate_warning(args, error):
+    snippet = error.context_mark.get_snippet().replace("\n", "%0A")
+    print(
+        f"::warning file={args.path},line={error.context_mark.line},endline={error.problem_mark.line+1},"
+        f"title=conandata.yml schema warning"
         f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A"
     )
 

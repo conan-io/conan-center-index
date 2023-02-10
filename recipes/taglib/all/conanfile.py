@@ -1,11 +1,11 @@
 from conan import ConanFile
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class TaglibConan(ConanFile):
@@ -16,6 +16,7 @@ class TaglibConan(ConanFile):
     homepage = "https://taglib.org"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -46,8 +47,7 @@ class TaglibConan(ConanFile):
         self.requires("zlib/1.2.13")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -56,8 +56,6 @@ class TaglibConan(ConanFile):
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_BINDINGS"] = self.options.bindings
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -96,12 +94,14 @@ class TaglibConan(ConanFile):
         self.cpp_info.components["tag"].requires = ["zlib::zlib"]
         if not self.options.shared:
             self.cpp_info.components["tag"].defines.append("TAGLIB_STATIC")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["tag"].system_libs.append("m")
 
         if self.options.bindings:
             self.cpp_info.components["tag_c"].set_property("pkg_config_name", "taglib_c")
             self.cpp_info.components["tag_c"].libs = ["tag_c"]
             self.cpp_info.components["tag_c"].requires = ["tag"]
             if not self.options.shared:
-                libcxx = tools_legacy.stdcpp_library(self)
+                libcxx = stdcpp_library(self)
                 if libcxx:
                     self.cpp_info.components["tag"].system_libs.append(libcxx)

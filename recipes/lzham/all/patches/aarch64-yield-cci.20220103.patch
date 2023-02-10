@@ -1,0 +1,16 @@
+diff --git a/lzhamdecomp/lzham_platform.h b/lzhamdecomp/lzham_platform.h
+index 01704be..920a8f4 100644
+--- a/lzhamdecomp/lzham_platform.h
++++ b/lzhamdecomp/lzham_platform.h
+@@ -24,7 +24,11 @@ void lzham_fail(const char* pExp, const char* pFile, unsigned line);
+ #if defined(__GNUC__) && LZHAM_PLATFORM_PC
+ extern __inline__ __attribute__((__always_inline__,__gnu_inline__)) void lzham_yield_processor()
+ {
++   #if defined(__aarch64__)
++   __asm__ __volatile__("yield");
++   #else
+    __asm__ __volatile__("pause");
++   #endif
+ }
+ #elif LZHAM_PLATFORM_X360
+ #define lzham_yield_processor() \

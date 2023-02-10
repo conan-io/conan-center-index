@@ -1,4 +1,7 @@
 sources:
+  "1.14.0":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_0.tar.gz"
+    sha256: "0f2ec13c1bf6e9f506fd03681c83a476d722e7479cad9ce6f8585a26c317d0ad"
   "1.13.1":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_13_1.tar.gz"
     sha256: "92552458f35c7e58128ce1bfc2831abf901cc142ea0fdd2b056311e4452db7bf"
@@ -19,6 +22,10 @@ sources:
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_21.tar.gz"
     sha256: "753520e34a576a64809b8e02d9c015d6126f7974f678c7417a60492d835a88f4"
 patches:
+  "1.14.0":
+    - patch_file: "patches/conanize-link-szip-1.14.0+.patch"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.13.1":
     - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
       patch_type: "conan"
