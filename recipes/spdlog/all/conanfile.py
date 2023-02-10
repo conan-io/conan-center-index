@@ -12,6 +12,7 @@ required_conan_version = ">=1.53.0"
 
 class SpdlogConan(ConanFile):
     name = "spdlog"
+    package_type = "library"
     description = "Fast C++ logging library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gabime/spdlog"
@@ -49,18 +50,19 @@ class SpdlogConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.11.0":
-            self.requires("fmt/9.1.0", transitive_headers=True)
-        elif Version(self.version) >= "1.10.0":
-            self.requires("fmt/8.1.1", transitive_headers=True)
-        elif Version(self.version) >= "1.9.0":
-            self.requires("fmt/8.0.1", transitive_headers=True)
-        elif Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.1.3", transitive_headers=True)
-        elif Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.1", transitive_headers=True)
-        else:
-            self.requires("fmt/6.0.0", transitive_headers=True)
+        self_version = Version(self.version)
+        fmt_version = "7.1.3"
+
+        if self_version >= "1.11.0":
+            fmt_version = "9.1.0"
+        elif self_version >= "1.10.0":
+            fmt_version = "8.1.1"
+        elif self_version >= "1.9.0":
+            fmt_version = "8.0.1"
+        elif self_version >= "1.7.0":
+            fmt_version = "7.1.3"
+
+        self.requires(f"fmt/{fmt_version}", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self.info.options.header_only:

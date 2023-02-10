@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2607e56..b88f0f8 100644
+index 2607e56..3ca4ac5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -73,9 +73,9 @@ check_include_file( "unistd.h"        HAVE_UNISTD_H   )
@@ -10,17 +10,25 @@ index 2607e56..b88f0f8 100644
 -check_include_file( "libelf.h"        HAVE_LIBELF_H   ) 
 -check_include_file( "libelf/libelf.h" HAVE_LIBELF_LIBELF_H) 
 +set(HAVE_ELF_H FALSE)
-+set(HAVE_LIBELF_H TRUE)
-+set(HAVE_LIBELF_LIBELF_H FALSE)
++set(HAVE_LIBELF_H FALSE)
++set(HAVE_LIBELF_LIBELF_H TRUE)
  check_include_file( "alloca.h"        HAVE_ALLOCA_H   )
  check_include_file( "elfaccess.h"     HAVE_ELFACCESS_H)
  check_include_file( "sys/elf_386.h"   HAVE_SYS_ELF_386_H  )
-@@ -146,12 +146,14 @@ elseif(HAVE_LIBELF_LIBELF_H)
+@@ -128,6 +128,8 @@ endif()
+ #  It's not really setting the location of libelfheader, 
+ #  it is really #  either elf.h, or if that is missing 
+ #  it is assuming  elf.h data is in the supplied libelf.
++find_package(libelf REQUIRED CONFIG)
++find_package(ZLIB REQUIRED CONFIG)
+ 
+ if(HAVE_ELF_H)
+     set(HAVE_LOCATION_OF_LIBELFHEADER "<elf.h>")
+@@ -146,12 +148,13 @@ elseif(HAVE_LIBELF_LIBELF_H)
  endif()
  
  if (HAVE_LIBELF_H OR HAVE_LIBELF_LIBELF_H)
 -  set (CMAKE_REQUIRED_LIBRARIES elf)
-+  set (CMAKE_REQUIRED_LIBRARIES CONAN_PKG::libelf)
 +  set (CMAKE_REQUIRED_DEFINITIONS -D__LIBELF64=1)
    message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getehdr")
    check_symbol_exists( elf64_getehdr ${PLAIN_JUST_LIBELF} HAVE_ELF64_GETEHDR)
@@ -31,12 +39,11 @@ index 2607e56..b88f0f8 100644
  endif()
  
  option(DWARF_WITH_LIBELF "Use libelf (default is YES)" TRUE)
-@@ -166,6 +168,10 @@ if (DWARF_WITH_LIBELF)
+@@ -166,6 +169,9 @@ if (DWARF_WITH_LIBELF)
    message(STATUS "checking using HAVE_ELF_H ... ${HAVE_ELF_H}")
    message(STATUS "checking using elf header ... ${HAVE_LOCATION_OF_LIBELFHEADER}")
    message(STATUS "checking using libelf header ... ${JUST_LIBELF}")
 +
-+  set (CMAKE_REQUIRED_LIBRARIES CONAN_PKG::libelf)
 +  set (CMAKE_REQUIRED_DEFINITIONS -D__LIBELF64=1)
 +
    check_c_source_compiles("
@@ -71,16 +78,19 @@ index 2607e56..b88f0f8 100644
  endif()
  message(STATUS "Assuming struct Elf for the default libdwarf.h")
  # Because cmake treats ; in an interesting way attempting
-@@ -381,7 +391,7 @@ message(STATUS "Checking producer generates only 32bit... ${HAVE_STRICT_DWARF2_3
- find_package(LibElf REQUIRED)
+@@ -378,10 +388,9 @@ message(STATUS "Checking producer generates only 32bit... ${HAVE_STRICT_DWARF2_3
+ 
+ 
+ # This references cmake/FindLibElf.cmake. See cmake documentation.
+-find_package(LibElf REQUIRED)
  list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBELF_INCLUDE_DIRS})
  
 -configure_file(config.h.in.cmake config.h)
-+configure_file(${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake ${CMAKE_BINARY_DIR}/config.h)
++configure_file(${CMAKE_SOURCE_DIR}/config.h.in.cmake ${CMAKE_BINARY_DIR}/config.h)
  
  if(BUILD_NON_SHARED)
  	set(DWARF_TARGETS dwarf-static)
-@@ -395,7 +405,6 @@ if(BUILD_SHARED)
+@@ -395,7 +404,6 @@ if(BUILD_SHARED)
  endif()
  
  add_subdirectory(libdwarf)
@@ -89,60 +99,31 @@ index 2607e56..b88f0f8 100644
  	if ( DWARF_WITH_LIBELF )
  	    add_subdirectory(dwarfgen)
 diff --git a/dwarfdump/CMakeLists.txt b/dwarfdump/CMakeLists.txt
-index b94f6c8..e688ea0 100644
+index b94f6c8..6bdb57f 100644
 --- a/dwarfdump/CMakeLists.txt
 +++ b/dwarfdump/CMakeLists.txt
-@@ -28,7 +28,7 @@ set_source_group(HEADERS "Header Files"
-   print_reloc.h print_reloc_decls.h section_bitmaps.h uri.h)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files"
--  ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-+  ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake
+@@ -31,7 +31,7 @@ set_source_group(CONFIGURATION_FILES "Configuration Files"
+   ${CMAKE_SOURCE_DIR}/config.h.in.cmake
    ${CMAKE_BINARY_DIR}/config.h)
  	
- add_executable(dwarfdump ${SOURCES} ${HEADERS} ${CONFIGURATION_FILES})
-@@ -180,10 +180,10 @@ set(LIBDIR lib${SUFFIX})
- set(BINDIR bin${SUFFIX})
+-add_executable(dwarfdump ${SOURCES} ${HEADERS} ${CONFIGURATION_FILES})
++add_executable(dwarfdump ${SOURCES} ${HEADERS} ${CONFIGURATION_FILES} ${libelf_LIBRARIES})
  
- install(TARGETS dwarfdump DESTINATION
--	RUNTIME DESTINATION ${BINDIR}		
--	LIBRARY DESTINATION ${LIBDIR}
--	ARCHIVE DESTINATION ${LIBDIR})
-+	RUNTIME DESTINATION bin
-+  LIBRARY DESTINATION lib
-+	ARCHIVE DESTINATION lib)
+ set_folder(dwarfdump dwarfdump)
  
--install(FILES dwarfdump.conf DESTINATION ${LIBDIR})
-+install(FILES dwarfdump.conf DESTINATION res)
- 
- install(FILES dwarfdump.1 DESTINATION share/man/man1)
-diff --git a/dwarfexample/CMakeLists.txt b/dwarfexample/CMakeLists.txt
-index 8104691..7c6cd7e 100644
---- a/dwarfexample/CMakeLists.txt
-+++ b/dwarfexample/CMakeLists.txt
-@@ -1,7 +1,7 @@
- set_source_group(SIMPLE_READER_SOURCES "Source Files" simplereader.c)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files"
--  ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-+  ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake
-   ${CMAKE_BINARY_DIR}/config.h)
- 
- add_executable(simplereader 
 diff --git a/dwarfgen/CMakeLists.txt b/dwarfgen/CMakeLists.txt
-index 488b820..bcc92b4 100644
+index 488b820..5bde9eb 100644
 --- a/dwarfgen/CMakeLists.txt
 +++ b/dwarfgen/CMakeLists.txt
-@@ -11,7 +11,7 @@ set_source_group(HEADERS "Header Files" createirepfrombinary.h
-     strtabdata.h ../libdwarf/dwgetopt.h)
+@@ -20,16 +20,16 @@ set_folder(dwarfgen dwarfgen)
  
- set_source_group(CONFIGURATION_FILES "Configuration Files" 
--    ${CMAKE_SOURCE_DIR}/config.h.in.cmake
-+    ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake
-     ${CMAKE_BINARY_DIR}/config.h)
-     
- add_executable(dwarfgen ${SOURCES} ${HEADERS} ${CONFIGURATION_FILES})
-@@ -27,9 +27,9 @@ set(LIBDIR lib${SUFFIX})
+ target_compile_options(dwarfgen PRIVATE ${DW_FWALLXX})
+ 
+-target_link_libraries(dwarfgen PRIVATE ${dwarf-target} ${DW_FZLIB})
++target_link_libraries(dwarfgen PRIVATE ${dwarf-target} ${DW_FZLIB} ${libelf_LIBRARIES})
+ 
+ set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
+ set(LIBDIR lib${SUFFIX})
  set(BINDIR bin${SUFFIX})
  
  install(TARGETS dwarfgen DESTINATION
@@ -156,18 +137,9 @@ index 488b820..bcc92b4 100644
  #install(FILES dwarfgen.conf DESTINATION lib)
  
 diff --git a/libdwarf/CMakeLists.txt b/libdwarf/CMakeLists.txt
-index c610522..c0872c0 100644
+index c610522..3a69533 100644
 --- a/libdwarf/CMakeLists.txt
 +++ b/libdwarf/CMakeLists.txt
-@@ -67,7 +67,7 @@ pro_reloc.h pro_reloc_stream.h pro_reloc_symbolic.h
- pro_section.h pro_types.h pro_util.h)
- 
- set_source_group(CONFIGURATION_FILES "Configuration Files" 
--    ${CMAKE_SOURCE_DIR}/config.h.in.cmake 
-+    ${CMAKE_SOURCE_DIR}/source_subfolder/config.h.in.cmake 
-     ${CMAKE_BINARY_DIR}/config.h)
- 
- 
 @@ -81,12 +81,9 @@ foreach(i RANGE ${targetCount})
              ${GENNAMES_OUTPUT} ${CONFIGURATION_FILES})
  
@@ -178,7 +150,7 @@ index c610522..c0872c0 100644
  	msvc_posix(${target})
  
 -	target_link_libraries(${target} PUBLIC ${LIBELF_LIBRARIES})
-+  conan_target_link_libraries(${target})
++    target_link_libraries(${target} PUBLIC ${libelf_LIBRARIES} ${ZLIB_LIBRARIES})
  	
  	set_target_properties(${target} PROPERTIES OUTPUT_NAME dwarf)
  
@@ -198,7 +170,7 @@ index c610522..c0872c0 100644
 -	target_link_libraries(dwarf-shared PUBLIC z)
 -endif()
 -		
-+install(FILES ${CMAKE_BINARY_DIR}/source_subfolder/libdwarf/libdwarf.h DESTINATION include)
++install(FILES ${CMAKE_BINARY_DIR}/libdwarf/libdwarf.h DESTINATION include)
 +install(FILES dwarf.h DESTINATION include)
 +
  if (DO_TESTING)
