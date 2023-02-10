@@ -95,7 +95,7 @@ class TestPackageConan(ConanFile):
             bin_path = tools.unix_path(os.path.join("bin", "test_package"))
             libdir = "bin" if self.settings.os == "Windows" else "lib"
             lib_path = tools.unix_path(os.path.join(libdir, "liba.{}".format(lib_suffix)))
-            self.run("{} {}".format(bin_path, lib_path), win_bash=tools.os_info.is_windows)
+            self.run("{} {}".format(bin_path, lib_path), run_environment=True, win_bash=tools.os_info.is_windows)
 
     def _build_static_lib_in_shared(self):
         """ Build shared library using libtool (while linking to a static library) """
