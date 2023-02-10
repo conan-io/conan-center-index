@@ -69,8 +69,8 @@ class ICUConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.info.options.dat_package_file:
-            if not os.path.exists(self.info.options.dat_package_file):
+        if self.options.dat_package_file:
+            if not os.path.exists(self.options.dat_package_file):
                 raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
         
     def layout(self):
