@@ -176,9 +176,6 @@ class MpfrConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "MPFR")
-        self.cpp_info.set_property("cmake_target_name", "MPFR::MPFR")
         self.cpp_info.libs = ["mpfr"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["MPFR_DLL"]
