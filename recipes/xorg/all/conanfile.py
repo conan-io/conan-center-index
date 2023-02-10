@@ -54,7 +54,7 @@ class XorgConan(ConanFile):
         zypper = package_manager.Zypper(self)
         zypper.install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                               "libXcursor-devel", "libXdmcp-devel", "libXtst-devel", "libXinerama-devel",
-                              "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
+                              "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXss-devel", "libXvMC-devel",
                               "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                               "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                               "xcb-util-devel", "libuuid-devel"], update=True, check=True)
