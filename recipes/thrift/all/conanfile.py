@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class ThriftConan(ConanFile):
@@ -61,18 +61,18 @@ class ThriftConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
+        self.requires("boost/1.81.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:
-            self.requires("qt/5.15.7")
+            self.requires("qt/5.15.8")
 
     def build_requirements(self):
         # TODO: use is_msvc with build_context in conan >=1.52.0 (see https://github.com/conan-io/conan/pull/11949)
@@ -80,7 +80,7 @@ class ThriftConan(ConanFile):
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
-            self.tool_requires("bison/3.7.6")
+            self.tool_requires("bison/3.8.2")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

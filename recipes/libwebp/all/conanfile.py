@@ -12,7 +12,7 @@ class LibwebpConan(ConanFile):
     name = "libwebp"
     description = "Library to encode and decode images in WebP format"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/webmproject/libwebp"
+    homepage = "https://chromium.googlesource.com/webm/libwebp"
     topics = ("image", "libwebp", "webp", "decoding", "encoding")
     license = "BSD-3-Clause"
 
@@ -49,8 +49,7 @@ class LibwebpConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -78,8 +77,8 @@ class LibwebpConan(ConanFile):
             tc.variables["WEBP_BUILD_LIBWEBPMUX"] = True
         tc.variables["WEBP_BUILD_WEBPMUX"] = False
         if self.options.shared and is_msvc(self):
-          # Building a dll (see fix-dll-export patch)
-          tc.preprocessor_definitions["WEBP_DLL"] = 1
+            # Building a dll (see fix-dll-export patch)
+            tc.preprocessor_definitions["WEBP_DLL"] = 1
         tc.generate()
 
     def build(self):
