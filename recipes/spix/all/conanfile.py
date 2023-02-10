@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.53.0"
 
 
 class SpixConan(ConanFile):
@@ -44,7 +44,7 @@ class SpixConan(ConanFile):
         else:
             return {
                 "Visual Studio": "15.7",
-                "msvc": "192" # FIXME: 15.7 is actually 1914 but needs to be tested
+                "msvc": "192", # FIXME: 15.7 is actually 1914 but needs to be tested
                 "gcc": "7",
                 "clang": "5",
                 "apple-clang": "10",
