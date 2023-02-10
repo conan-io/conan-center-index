@@ -32,8 +32,7 @@ class TestPackageConan(ConanFile):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
         if can_run(self):
-            with self._build_context():
-                self.run("imake", env="conanrun")
+            self.run("imake", env="conanrun")
 
     def test(self):
         if can_run(self):
