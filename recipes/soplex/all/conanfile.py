@@ -119,6 +119,7 @@ class SoPlexConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = [self._determine_lib_name()]
+        prefix = "lib" if is_msvc(self) else ""
+        self.cpp_info.libs = [prefix + self._determine_lib_name()]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
