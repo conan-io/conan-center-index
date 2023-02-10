@@ -1,11 +1,11 @@
-from conan import ConanFile, __version__ as conan_version
+from conan import ConanFile
 from conan.tools.apple import is_apple_os, XCRun, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, rename, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
@@ -144,9 +144,8 @@ class LibX264Conan(ConanFile):
             # compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
             # env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CC", "cl -nologo")
-            if conan_version < Version("2.0"):
-                if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
-                    extra_cflags.append("-FS")
+            if check_min_vs(self, 180, False):
+                extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
         # build_canonical_name = None
         # host_canonical_name = None
