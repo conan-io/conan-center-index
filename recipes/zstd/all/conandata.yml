@@ -46,7 +46,7 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/1.5.0-remove-explicit-standard-setting.patch"
       patch_description: "fix strange performance and scalability issues"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/facebook/zstd/pull/3167"
   "1.5.1":
     - patch_file: "patches/1.5.1-cmake-remove-asm-except-x86_64.patch"
@@ -54,12 +54,12 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/1.5.0-remove-explicit-standard-setting.patch"
       patch_description: "fix strange performance and scalability issues"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/facebook/zstd/pull/3167"
   "1.5.0":
     - patch_file: "patches/1.5.0-remove-explicit-standard-setting.patch"
       patch_description: "fix strange performance and scalability issues"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/facebook/zstd/pull/3167"
   "1.4.5":
     - patch_file: "patches/1.4.5-cmake-install-dll.patch"
