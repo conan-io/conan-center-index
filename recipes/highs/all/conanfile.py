@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 
@@ -22,6 +23,10 @@ class HiGHSConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -64,14 +69,12 @@ class HiGHSConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses")
         self.copy(pattern="*.h", dst="include", src="src")
         self.copy(pattern="HConfig.h", dst="include")
-        # unix
-        self.copy(pattern="lib/*.a")
-        self.copy(pattern="lib/*.so*", symlinks=True)
-        # mac
-        self.copy(pattern="lib/*.dylib*", symlinks=True)
-        # win
-        self.copy(pattern="bin/*.dll", dst="lib", keep_path=False)
-        self.copy(pattern="lib/*.lib", dst="lib", keep_path=False)
+        if self.options.shared:
+            self.copy(pattern="lib/*.so*", symlinks=True)
+            self.copy(pattern="lib/*.dylib*", symlinks=True)
+        else:
+            self.copy(pattern="lib/*.a")
+            self.copy(pattern="lib/*.lib", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
