@@ -36,6 +36,7 @@ class SpixConan(ConanFile):
         if self.version == "0.4":
             return {
                 "Visual Studio": "14",
+                "msvc": "190",
                 "gcc": "5",
                 "clang": "3.4",
                 "apple-clang": "10"
@@ -43,6 +44,7 @@ class SpixConan(ConanFile):
         else:
             return {
                 "Visual Studio": "15.7",
+                "msvc": "192" # FIXME: 15.7 is actually 1914 but needs to be tested
                 "gcc": "7",
                 "clang": "5",
                 "apple-clang": "10",
