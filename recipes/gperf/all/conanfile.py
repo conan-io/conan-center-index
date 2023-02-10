@@ -4,7 +4,6 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.57.0"
