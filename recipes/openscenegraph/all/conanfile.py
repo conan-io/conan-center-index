@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, rm, patch, apply_conandata_patches
+from conan.tools.files import get, rmdir, rm, apply_conandata_patches
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.apple import is_apple_os
@@ -154,11 +154,10 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
