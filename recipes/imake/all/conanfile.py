@@ -66,7 +66,7 @@ class ImakeConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def configure(self):
+    def generate(self):
         # venv = VirtualBuildEnv(self)
         # venv.generate()
 
