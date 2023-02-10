@@ -126,7 +126,10 @@ class OpenTelemetryCppConan(ConanFile):
             requires.add("thrift/0.17.0")
 
             if Version(self.version) >= "1.3.0":
-                requires.add("boost/1.81.0")
+                if self.settings.compiler == "apple-clang":
+                    requires.add("boost/1.80.0")
+                else:
+                    requires.add("boost/1.81.0")
 
         if self.options.with_etw:
             requires.add("nlohmann_json/3.11.2")
