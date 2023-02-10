@@ -820,10 +820,10 @@ class BoostConan(ConanFile):
         if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)", strict=False)
-        if self._with_stacktrace_backtrace and self.settings.os in ["Linux", "Macos"] and not cross_building(self):
+        if self._with_stacktrace_backtrace and self.settings.os != "Windows" and not cross_building(self):
             # When libbacktrace is shared, give extra help to the test-executable
-            linker_var = "LD_LIBRARY_PATH" if self.settings.os == "Linux" else "DYLD_LIBRARY_PATH"
-            libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.libdirs[0]
+            linker_var = "DYLD_LIBRARY_PATH" if self.settings.os == "Macos" else "LD_LIBRARY_PATH"
+            libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.aggregated_components().libdirs[0]
             patched_run_rule = f"{linker_var}={libbacktrace_libdir} $(>) > $(<)"
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", patched_run_rule, strict=False)
             if self.dependencies["libbacktrace"].options.shared:
