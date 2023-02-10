@@ -5,8 +5,5 @@ project(test_package LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(bimg REQUIRED CONFIG)
-
-add_executable(${PROJECT_NAME} test_package.cpp)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-target_link_libraries(${PROJECT_NAME} bimg::bimg)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
