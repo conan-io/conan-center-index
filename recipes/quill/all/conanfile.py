@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -87,6 +88,17 @@ class QuillConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def is_quilll_x86_arch(self):
+        if Version(self.version) < "2.7.0":
+            return False
+        if self.settings.arch not in ("x86", "x86_64"):
+            return False
+        if self.settings.compiler== "clang" and self.settings.compiler.libcxx == "libc++":
+            return False
+        if is_msvc(self):
+            return False
+        return True
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["QUILL_FMT_EXTERNAL"] = True
@@ -94,8 +106,7 @@ class QuillConan(ConanFile):
         tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
         tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64") and \
-            not(self.settings.compiler== "clang" and self.settings.compiler.libcxx == "libc++"):
+        if self.is_quilll_x86_arch():
             tc.variables["QUILL_X86ARCH"] = True
             tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
         tc.generate()
@@ -131,8 +142,7 @@ class QuillConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["quill"]
         self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
-        if Version(self.version) >= "2.7.0" and self.settings.arch in ("x86", "x86_64") and \
-            not(self.settings.compiler== "clang" and self.settings.compiler.libcxx == "libc++"):
+        if self.is_quilll_x86_arch():
             self.cpp_info.defines.append("QUILL_X86ARCH")
             self.cpp_info.cxxflags.append("-mclflushopt")
 
