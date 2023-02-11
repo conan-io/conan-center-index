@@ -16,7 +16,7 @@ required_conan_version = ">=1.53.0"
 class AtkConan(ConanFile):
     name = "atk"
     description = "set of accessibility interfaces that are implemented by other toolkits and applications"
-    topics = ("accessibility")
+    topics = "accessibility"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.atk.org"
     license = "LGPL-2.1-or-later"
