@@ -13,6 +13,6 @@ sources:
     sha256: "d0c6714e4427d3eb964388afe526a8e0f69687da7e944f1ad66ffa639923be46"
 patches:
   "0.24":
-    - patch_file: "patches/0.24-0001-fix-ac_test_CFLAGS.patch"
-      patch_description: "Fix ac_test_cflags logic error"
+    - patch_file: "patches/0.24-0001-fix-ac_test_cflags.patch"
+      patch_description: "Fix ac_test_CFLAGS logic error"
       patch_type: "portability"
