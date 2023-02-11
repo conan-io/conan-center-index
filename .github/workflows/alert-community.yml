@@ -21,12 +21,12 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: ".github/*/*"
-          reviewers: "@ericLemanissier @prince-chrismc"
+          reviewers: "@ericLemanissier @prince-chrismc @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
           files: "linter/*/*"
-          reviewers: "@ericLemanissier @prince-chrismc"
+          reviewers: "@ericLemanissier @prince-chrismc @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -77,6 +77,11 @@ jobs:
         with:
           files: "recipes/cereal/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/cmake/*/*"
+          reviewers: "@Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -321,7 +326,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/openssl/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
