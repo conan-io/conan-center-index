@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ZeroMQConan(ConanFile):
@@ -49,10 +49,7 @@ class ZeroMQConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,14 +61,13 @@ class ZeroMQConan(ConanFile):
             self.requires("norm/1.5.9")
 
     def validate(self):
-        if self.info.settings.os == "Windows" and self.info.options.with_norm:
+        if self.settings.os == "Windows" and self.options.with_norm:
             raise ConanInvalidConfiguration(
                 "Norm and ZeroMQ are not compatible on Windows yet"
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

@@ -3,8 +3,8 @@ sources:
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.7.0/mongo-cxx-driver-r3.7.0.tar.gz"
     sha256: "fb2da11178db728f63147fe4b0c7509eb49b1b02c5cb55f9bee5f927e451a0c7"
   "3.6.7":
-    url: "https://github.com/mongodb/mongo-cxx-driver/archive/debian/3.6.7-1.tar.gz"
-    sha256: "62a0a16e4a35289e1692f60cf07a7f6957485446b7bc1d82306b731ad6763fb9"
+    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.7/mongo-cxx-driver-r3.6.7.tar.gz"
+    sha256: "2c58005d4fe46f1973352fba821f7bb37e818cefc922377ce979a9fd1bff38ac"
   "3.6.6":
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.6/mongo-cxx-driver-r3.6.6.tar.gz"
     sha256: "d5906b9e308a8a353a2ef92b699c9b27ae28ec6b34fdda94e15d2981b27e64ca"
