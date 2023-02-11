@@ -78,7 +78,7 @@ class QuillConan(ConanFile):
             if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{cxx_std}, which your compiler does not support.")
         else:
-            self.output.warn(f"{self.ref} requires C++{cxx_std}. Your compiler is unknown. Assuming it supports C++{cxx_std}.")
+            self.output.warning(f"{self.ref} requires C++{cxx_std}. Your compiler is unknown. Assuming it supports C++{cxx_std}.")
 
         if Version(self.version) >= "2.0.0" and \
             self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
@@ -93,7 +93,7 @@ class QuillConan(ConanFile):
             return False
         if self.settings.arch not in ("x86", "x86_64"):
             return False
-        if self.settings.compiler== "clang" and self.settings.compiler.libcxx == "libc++":
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             return False
         if is_msvc(self):
             return False
