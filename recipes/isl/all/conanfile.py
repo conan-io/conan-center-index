@@ -116,7 +116,7 @@ class IslConan(ConanFile):
                 self.run(command)
         autotools = Autotools(self)
         # Need to pass MSVC runtime flag for configure to avoid trying to mix runtime library types
-        autotools.configure(args=[f'CFLAGS_FOR_BUILD=-{msvc_runtime_flag(self)}' if is_msvc(self) else None])
+        autotools.configure(args=[f'CFLAGS_FOR_BUILD=-{msvc_runtime_flag(self)}'] if is_msvc(self) else None)
         autotools.make()
 
     def package(self):
