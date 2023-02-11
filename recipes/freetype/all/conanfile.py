@@ -1,6 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import collect_libs, copy, load, get, rename, replace_in_file, rmdir, save
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, load,
+    get, rename, replace_in_file, rmdir, save
+)
 from conan.tools.scm import Version
 import os
 import re
@@ -40,6 +43,9 @@ class FreetypeConan(ConanFile):
     @property
     def _has_with_brotli_option(self):
         return Version(self.version) >= "2.10.2"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,6 +106,7 @@ class FreetypeConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Do not accidentally enable dependencies we have disabled
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
