@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class Bzip2Conan(ConanFile):
@@ -38,18 +38,9 @@ class Bzip2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
