@@ -151,6 +151,9 @@ class VtkConan(ConanFile):
             "use_future_const": [True, False],
             "debug_leaks":      [True, False],
 
+            # debug what modules are available and why a module isn't available
+            "debug_module":     [True, False],
+
             ### Compile options ###
             "use_64bit_ids": ["Auto", True, False], # default: 32 bit on 32 bit platforms.  64 on 64 bit platforms.
             "enable_kits":   [True, False],         # VTK_ENABLE_KITS - smaller set of libraries - ONLY for shared mode
@@ -190,8 +193,9 @@ class VtkConan(ConanFile):
             "group_enable_Views":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Web":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
-            # With StandAlone enabled, it will use the conan libraries rather than the copies
+            # With StandAlone enabled, it will build a bunch of extra libraries, such as
             # bundled with VTK (eg: HDF5, cgns, theora, ogg, netcdf, libxml2)
+            # We will use the conan version, as we always set VTK_USE_EXTERNAL=True (for now)
             "group_enable_StandAlone": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
             # Modules (many not listed)
@@ -237,6 +241,8 @@ class VtkConan(ConanFile):
             "legacy_silent":    False,
             "use_future_const": False,
             "debug_leaks":      False,
+
+            "debug_module":     False,
 
             ### Compile options ###
             "use_64bit_ids":   "Auto",
@@ -514,6 +520,16 @@ class VtkConan(ConanFile):
         # Be sure to set this, otherwise vtkCompilerChecks.cmake will downgrade our CXX standard to 11
         tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
 
+        # print out info about why modules are not available
+        if self.options.debug_module:
+            tc.variables["VTK_DEBUG_MODULE"] = True
+            tc.variables["VTK_DEBUG_MODULE_ALL"] = True
+            tc.variables["VTK_DEBUG_MODULE_building"] = True
+            tc.variables["VTK_DEBUG_MODULE_enable"] = True
+            tc.variables["VTK_DEBUG_MODULE_kit"] = True
+            tc.variables["VTK_DEBUG_MODULE_module"] = True
+            tc.variables["VTK_DEBUG_MODULE_provide"] = True
+            tc.variables["VTK_DEBUG_MODULE_testing"] = True
 
         # No need for versions on installed names
         tc.variables["VTK_VERSIONED_INSTALL"] = False
@@ -571,7 +587,8 @@ class VtkConan(ConanFile):
         # but the recipe would have to parse netcdf's generated cmake files, and,
         # it would be exported with the wrong case (netCDF_HAS_PARALLEL), so it is easier
         # to just guess here.
-        tc.variables["NetCDF_HAS_PARALLEL"] = self.dependencies["hdf5"].options.parallel
+        if self._is_module_enabled([self.options.group_enable_StandAlone]):
+            tc.variables["NetCDF_HAS_PARALLEL"] = self.dependencies["hdf5"].options.parallel
 
 
         # There are LOTS of these modules now ...
@@ -880,23 +897,59 @@ class VtkConan(ConanFile):
                     "library_name": "EXTERNAL_LIB",
                     "depends": [],
                     "private_depends": [],
+                    "kit": None,
                     }
             # GUISupportQt requires Qt6::QtOpenGL as a dependency
             vtkmods["modules"]["VTK::GUISupportQt"]["depends"].append("VTK::QtOpenGL")
 
         self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
-
+        self.output.info("All kits keys: {}".format(vtkmods["kits"].keys()))
         self.output.info(f"Found libs: {existing_libs}")
+
+        enabled_kits = []
+
+        # Kits are always exported.
+        #  If enabled, they will have a libname, and components will depend on them.
+        #  If disabled, they will NOT have a libname, and will depend on their components.
+
+        for kit_name in vtkmods["kits"]:
+            kit = kit_name.split(':')[2]
+            kit_enabled = vtkmods["kits"][kit_name]["enabled"]
+            kit_libname = "vtk" + kit  # guess this, as json has empty library_name for kits
+            self.output.info(f"Processing kit {kit_name} ({'enabled' if kit_enabled else 'disabled'})")
+            self.cpp_info.components[kit].set_property("cmake_target_name", kit_name)
+            self.cpp_info.components[kit].names["cmake_find_package"] = kit
+            self.cpp_info.components[kit].names["cmake_find_package_multi"] = kit
+            if kit_enabled:
+                enabled_kits.append(kit)
+                self.cpp_info.components[kit].libs = [kit_libname]
+                # requires are added in the next loop, if disabled
+
         self.output.info("Processing modules")
         for module_name in vtkmods["modules"]:
             comp = module_name.split(':')[2]
             comp_libname = vtkmods["modules"][module_name]["library_name"] + self._lib_suffix
+            comp_kit = vtkmods["modules"][module_name]["kit"]
+            if comp_kit is not None:
+                comp_kit = comp_kit.split(':')[2]
 
-            if comp_libname in existing_libs:
-                self.output.info(f"Processing module {module_name}")
+            has_lib = comp_libname in existing_libs
+            use_kit = comp_kit and comp_kit in enabled_kits
+
+            # sanity check should be one or the other... not true for both
+            if has_lib == use_kit and has_lib:
+                raise ConanException(f"Logic Error: Component '{module_name}' has both a library and an enabled kit")
+
+            if has_lib or use_kit:
+                self.output.info("Processing module {}{}".format(module_name, f" (in kit {comp_kit})" if use_kit else ""))
                 self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
-                self.cpp_info.components[comp].libs         = [comp_libname]
-                self.cpp_info.components[comp].include_dirs = ["include/vtk"]
+                if has_lib:
+                    self.cpp_info.components[comp].libs = [comp_libname]
+                if comp_kit is not None:
+                    if has_lib:
+                        self.cpp_info.components[comp_kit].requires.append(comp)
+                    else:
+                        self.cpp_info.components[comp].requires.append(comp_kit)
                 self.cpp_info.components[comp].names["cmake_find_package"] = comp
                 self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
                 # not sure how to be more specific here, the modules.json doesn't specify which other modules are required
@@ -905,7 +958,12 @@ class VtkConan(ConanFile):
                 self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                 self.cpp_info.components[comp].requires.append(thirds[module_name])
             else:
-                self.output.warning(f"Skipping module (lib file does not exist) {module_name}")
+                self.output.warning(f"Skipping module (lib file does not exist, or no kit) {module_name}")
+
+        self.output.info("Components:")
+        for dep in self.cpp_info.components:
+            self.output.info(f"   {dep}")
+        self.output.info("-----------")
 
         # second loop for internal dependencies
         for module_name in vtkmods["modules"]:
@@ -920,9 +978,8 @@ class VtkConan(ConanFile):
                 # FIXME should private be added as a different kind of private-requires?
                 for section in ["depends", "private_depends"]:
                     for dep in vtkmods["modules"][module_name][section]:
-                        dep_libname = vtkmods["modules"][dep]["library_name"] + self._lib_suffix
-                        if dep_libname in existing_libs:
-                            depname = dep.split(':')[2]
+                        depname = dep.split(':')[2]
+                        if depname in self.cpp_info.components:
                             self.output.info(f"{comp}   depends on {depname}")
                             self.cpp_info.components[comp].requires.append(depname)
                         elif dep in thirds:
@@ -930,7 +987,7 @@ class VtkConan(ConanFile):
                             self.output.info(f"{comp}   depends on external {dep} --> {extern}")
                             self.cpp_info.components[comp].requires.append(extern)
                         else:
-                            self.output.info(f"{comp}   skipping depends (lib file does not exist): {dep}")
+                            self.output.info(f"{comp}   skipping depends (component does not exist): {dep}")
 
                 # DEBUG # self.output.info("  Final deps: {}".format(self.cpp_info.components[comp].requires))
 
