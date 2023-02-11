@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import chdir, copy, get, rm, rmdir, apply_conandata_patches
+from conan.tools.files import chdir, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs, unix_path
@@ -27,6 +27,8 @@ class IslConan(ConanFile):
         "with_int": "gmp",
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":

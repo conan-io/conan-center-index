@@ -15,4 +15,4 @@ patches:
   "0.24":
     - patch_file: "patches/0.24-0001-fix-ac_test_CFLAGS.patch"
       patch_description: "Fix ac_test_CFLAGS logic error"
-      patch_type: "bug fix"
+      patch_type: "portability"
