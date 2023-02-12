@@ -174,9 +174,10 @@ class CryptoPPConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
-        cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
         self.cpp_info.set_property("cmake_file_name", "cryptopp")
-        self.cpp_info.set_property("cmake_target_name", cmake_target)
+        self.cpp_info.set_property("cmake_target_name", "cryptopp::cryptopp")
+        legacy_cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
+        self.cpp_info.set_property("cmake_target_name_aliases", [legacy_cmake_target])
         self.cpp_info.set_property("pkg_config_name", "libcryptopp")
 
         # TODO: back to global scope once cmake_find_package* generators removed
@@ -190,9 +191,9 @@ class CryptoPPConan(ConanFile):
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libcryptopp"
-        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = legacy_cmake_target
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = legacy_cmake_target
         self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["libcryptopp"].set_property("cmake_target_name", cmake_target)
+        self.cpp_info.components["libcryptopp"].set_property("cmake_target_name", "cryptopp::cryptopp")
         self.cpp_info.components["libcryptopp"].set_property("pkg_config_name", "libcryptopp")
