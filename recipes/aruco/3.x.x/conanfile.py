@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class ArucoConan(ConanFile):
     name = "aruco"
     description = "Augmented reality library based on OpenCV "
-    topics = ("augmented reality")
+    topics = ("augmented-reality", "robotics", "markers")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.uco.es/investiga/grupos/ava/node/26"
     license = "GPL-3.0-only"
