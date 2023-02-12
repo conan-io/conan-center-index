@@ -7,7 +7,7 @@ from conans import CMake
 import functools
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenImageIOConan(ConanFile):
@@ -162,8 +162,7 @@ class OpenImageIOConan(ConanFile):
         )
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            files.patch(self, **patch)
+        files.apply_conandata_patches(self)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
