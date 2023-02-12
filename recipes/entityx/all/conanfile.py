@@ -20,6 +20,7 @@ class EntityXConan(ConanFile):
     topics = ("entity", "c++11", "type-safe", "component")
     license = "MIT"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
