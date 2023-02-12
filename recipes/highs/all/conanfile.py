@@ -82,5 +82,4 @@ class HiGHSConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
         if is_msvc(self):
-            self.cpp_info.defines.append("_CRT_SECURE_NO_WARNINGS")
             self.cpp_info.defines.append("_ITERATOR_DEBUG_LEVEL=0")
