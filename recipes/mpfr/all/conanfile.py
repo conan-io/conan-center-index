@@ -3,7 +3,7 @@ from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_fi
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanException
 import os
@@ -11,6 +11,7 @@ import re
 import shlex
 
 required_conan_version = ">=1.56.0"
+
 
 class MpfrConan(ConanFile):
     name = "mpfr"
@@ -35,6 +36,7 @@ class MpfrConan(ConanFile):
 
     exports_sources = "CMakeLists.txt.in", "patches/**"
 
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -56,6 +58,10 @@ class MpfrConan(ConanFile):
             self.requires("mpir/3.0.0")
 
     def build_requirements(self):
+        self.tool_requires("autoconf/2.71")                # Needed for autoreconf when building from Git source
+        self.tool_requires("automake/1.16.5")              # Needed for aclocal when building from Git source
+        self.tool_requires("autoconf-archive/2021.02.19")  # Needed for additonal aclocal includes
+        self.tool_requires("libtool/2.4.7")                # Needed for libtool
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -73,7 +79,8 @@ class MpfrConan(ConanFile):
 
     def generate(self):
         if self.settings.os == "Windows":
-            if is_msvc(self):
+            if is_msvc(self) and not check_min_vs(self, 193, raise_invalid=False) and \
+                not self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str):
                 # Use NMake to workaround bug in MSBuild versions prior to 2022 that shows up as:
                 #    error MSB6001: Invalid command line switch for "cmd.exe". System.ArgumentException: Item
                 #                   has already been added. Key in dictionary: 'tmp'  Key being added: 'TMP'
@@ -104,14 +111,8 @@ class MpfrConan(ConanFile):
 
         env = tc.environment()
         if is_msvc(self):
-            env.define("AR", "lib")
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
-            env.define("LD", "link")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
         tc.generate(env) # Create conanbuild.conf
 
     def _extract_makefile_variable(self, makefile, variable):
@@ -136,6 +137,15 @@ class MpfrConan(ConanFile):
             command = "./autogen.sh"
             if os.path.exists(command):
                 self.run(command)
+
+        if self.settings.os == "Windows": # Allow mixed shared and static libs
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                'as_fn_error $? "libgmp isn\'t provided as a DLL: use --enable-static --disable-shared" "$LINENO" 5',
+                '# as_fn_error $? "libgmp isn\'t provided as a DLL: use --enable-static --disable-shared" "$LINENO" 5')
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                'as_fn_error $? "libgmp is provided as a DLL: use --disable-static --enable-shared" "$LINENO" 5',
+                '# as_fn_error $? "libgmp is provided as a DLL: use --disable-static --enable-shared" "$LINENO" 5')
+
         if self.options.exact_int == "mpir":
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                        "-lgmp", "-lmpir")
