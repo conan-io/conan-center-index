@@ -103,7 +103,7 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webpdecoder"].set_property("pkg_config_name", "libwebpdecoder")
         self.cpp_info.components["webpdecoder"].libs = ["webpdecoder"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["webpdecoder"].system_libs = ["pthread"]
+            self.cpp_info.components["webpdecoder"].system_libs = ["m", "pthread"]
 
         # webp
         self.cpp_info.components["webp"].set_property("cmake_target_name", "WebP::webp")
@@ -111,6 +111,16 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webp"].libs = ["webp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webp"].system_libs = ["m", "pthread"]
+
+        if Version(self.version) >= "1.3.0":
+            # sharpyuv
+            self.cpp_info.components["sharpyuv"].set_property("cmake_target_name", "WebP::sharpyuv")
+            self.cpp_info.components["sharpyuv"].set_property("pkg_config_name", "libsharpyuv")
+            self.cpp_info.components["sharpyuv"].libs = ["sharpyuv"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["sharpyuv"].system_libs = ["m", "pthread"]
+            # note: webp now depends on sharpyuv
+            self.cpp_info.components["webp"].requires = ["sharpyuv"]
 
         # webpdemux
         self.cpp_info.components["webpdemux"].set_property("cmake_target_name", "WebP::webpdemux")
