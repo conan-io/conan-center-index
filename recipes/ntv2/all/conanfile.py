@@ -12,7 +12,7 @@ class Ntv2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aja-video/ntv2"
     description = "AJA NTV2 SDK"
-    topics = "video, hardware"
+    topics = "video", "hardware"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
