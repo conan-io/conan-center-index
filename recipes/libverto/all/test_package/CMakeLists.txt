@@ -4,4 +4,4 @@ project(test_package C)
 find_package(libverto REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE libverto::liberto)
+target_link_libraries(${PROJECT_NAME} PRIVATE libverto::libverto)
