@@ -13,7 +13,7 @@ class HiGHSConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.highs.dev/"
-    topics = ("highs", "simplex", "interior point", "solver", "linear", "programming")
+    topics = ("simplex", "interior point", "solver", "linear", "programming")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
