@@ -186,7 +186,7 @@ class CryptoPPConan(ConanFile):
         elif self.settings.os == "SunOS":
             self.cpp_info.components["libcryptopp"].system_libs = ["nsl", "socket"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["libcryptopp"].system_libs = ["ws2_32"]
+            self.cpp_info.components["libcryptopp"].system_libs = ["bcrypt", "ws2_32"]
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libcryptopp"
