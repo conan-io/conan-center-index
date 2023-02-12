@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class AclConan(ConanFile):
     name = "acl"
     description = "Commands for Manipulating POSIX Access Control Lists"
-    topics = "posix"
+    topics = ("posix",)
     license = "GPL-2.0-or-later"
     homepage = "https://savannah.nongnu.org/projects/acl/"
     url = "https://github.com/conan-io/conan-center-index"
