@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get
@@ -75,6 +76,7 @@ class HiGHSConan(ConanFile):
         else:
             self.copy(pattern="lib/*.a")
             self.copy(pattern="lib/*.lib", dst="lib", keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
