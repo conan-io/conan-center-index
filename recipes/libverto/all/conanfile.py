@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
@@ -94,12 +95,11 @@ class LibVertoConan(ConanFile):
         export_conandata_patches(self)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.74.21")
+            self.requires("glib/2.75.2")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libev:
@@ -109,7 +109,8 @@ class LibVertoConan(ConanFile):
             raise ConanInvalidConfiguration("tevent is not (yet) available on conan-center")
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         self.tool_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -162,6 +163,7 @@ class LibVertoConan(ConanFile):
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_id(self):
         del self.info.options.default
