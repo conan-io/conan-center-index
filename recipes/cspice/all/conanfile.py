@@ -67,7 +67,7 @@ class CspiceConan(ConanFile):
             )
 
     def _get_os_or_subsystem(self):
-        if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
+        if self.settings.os == "Windows" and self.settings.get_safe("os.subsystem"):
             os_or_subsystem = str(self.settings.os.subsystem)
         else:
             os_or_subsystem = str(self.settings.os)
