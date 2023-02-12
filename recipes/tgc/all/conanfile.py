@@ -10,7 +10,7 @@ class TgcConan(ConanFile):
     name = "tgc"
     description = "A Tiny Garbage Collector for C."
     license = "BSD-2-Clause"
-    topics = ("garbage-collector")
+    topics = "garbage-collector"
     homepage = "https://github.com/orangeduck/tgc"
     url = "https://github.com/conan-io/conan-center-index"
 
