@@ -5,7 +5,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibsndfileConan(ConanFile):
@@ -27,6 +27,7 @@ class LibsndfileConan(ConanFile):
         "experimental": [True, False],
         "with_alsa": [True, False],
         "with_external_libs": [True, False],
+        "with_mpeg": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +36,7 @@ class LibsndfileConan(ConanFile):
         "experimental": False,
         "with_alsa": False,
         "with_external_libs": True,
+        "with_mpeg": True,
     }
 
     def export_sources(self):
@@ -45,10 +47,12 @@ class LibsndfileConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_alsa
+        if Version(self.version) < "1.1.0":
+            del self.options.with_mpeg
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.get_safe("with_alsa"):
@@ -56,15 +60,17 @@ class LibsndfileConan(ConanFile):
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
-            self.requires("flac/1.3.3")
+            self.requires("flac/1.4.2")
             self.requires("opus/1.3.1")
+        if self.options.get_safe("with_mpeg", False):
+            self.requires("mpg123/1.29.3")
+            self.requires("libmp3lame/3.100")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -87,6 +93,8 @@ class LibsndfileConan(ConanFile):
         if is_msvc(self) and Version(self.version) < "1.0.30":
             tc.variables["ENABLE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_REGTEST"] = False
+        if Version(self.version) > "1.11.0":
+            tc.variables["ENABLE_MPEG"] = self.options.with_mpeg
         # Fix iOS/tvOS/watchOS
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
@@ -121,6 +129,9 @@ class LibsndfileConan(ConanFile):
                 "ogg::ogg", "vorbis::vorbismain", "vorbis::vorbisenc",
                 "flac::flac", "opus::opus",
             ])
+        if self.options.get_safe("with_mpeg", False):
+            self.cpp_info.components["sndfile"].requires.append("mpg123::mpg123")
+            self.cpp_info.components["sndfile"].requires.append("libmp3lame::libmp3lame")
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
         if not self.options.shared:
