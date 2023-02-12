@@ -44,7 +44,7 @@ class HazelcastCppClient(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
+        self.requires("boost/1.79.0")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1t")
 
