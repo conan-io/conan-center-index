@@ -69,7 +69,7 @@ class AbseilConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.info.options.shared and is_msvc(self):
+        if self.options.shared and is_msvc(self):
             # upstream tries its best to export symbols, but it's broken for the moment
             raise ConanInvalidConfiguration(f"{self.ref} shared not availabe for Visual Studio (yet)")
 
