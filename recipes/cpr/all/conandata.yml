@@ -26,22 +26,22 @@ sources:
 patches:
   "1.10.0":
     - patch_file: "patches/008-1.10.0-remove-warning-flags.patch"
-      patch_description: "disable warning flags"
-      patch_type: "conan"
+      patch_description: "disable warning flags and warning as error"
+      patch_type: "portability"
   "1.9.3":
     - patch_file: "patches/005-1.9.3-fix-curl-components.patch"
       patch_description: "use cci package"
       patch_type: "conan"
     - patch_file: "patches/008-1.9.3-remove-warning-flags.patch"
-      patch_description: "disable warning flags"
-      patch_type: "conan"
+      patch_description: "disable warning flags and warning as error"
+      patch_type: "portability"
   "1.9.0":
     - patch_file: "patches/005-1.9.0-fix-curl-components.patch"
       patch_description: "use cci package"
       patch_type: "conan"
     - patch_file: "patches/008-1.8.1-remove-warning-flags.patch"
-      patch_description: "disable warning flags"
-      patch_type: "conan"
+      patch_description: "disable warning flags and warning as error"
+      patch_type: "portability"
   "1.8.1":
     - patch_file: "patches/005-1.8.1-fix-curl-components.patch"
       patch_description: "use cci package"
@@ -50,8 +50,8 @@ patches:
       patch_description: "fix install path for dll"
       patch_type: "conan"
     - patch_file: "patches/008-1.8.1-remove-warning-flags.patch"
-      patch_description: "disable warning flags"
-      patch_type: "conan"
+      patch_description: "disable warning flags and warning as error"
+      patch_type: "portability"
   "1.7.2":
     - patch_file: "patches/005-1.7.2-fix-curl-components.patch"
       patch_description: "use cci package"
@@ -60,8 +60,8 @@ patches:
       patch_description: "fix install path for dll"
       patch_type: "conan"
     - patch_file: "patches/008-1.7.2-remove-warning-flags.patch"
-      patch_description: "disable warning flags"
-      patch_type: "conan"
+      patch_description: "disable warning flags and warning as error"
+      patch_type: "portability"
   "1.6.2":
     - patch_file: "patches/005-1.6.2-fix-curl-components.patch"
       patch_description: "use cci package"
