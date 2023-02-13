@@ -1,0 +1,105 @@
+submodules:
+  "2.2.4":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/38e1e862386cb38d577664fd681ef829b0e03fba.zip
+      sha256:
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/57f8c679a939728c171c8780e484e94711b3a7e3.zip"
+      sha256: "ef13512b39570a14baf0f514bd8f49e61a23bc7804292c7b6eab794ab528a80a"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/2b43315458a99fc5de1da6e7bc0ddd364b26d643.zip"
+      sha256: "9e9a1a80c019012c0d1359d144447bd4bc40e636f8c24c9161e588ed76b3579f"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.2.3":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/60ec9e46916e5170051293e7925729ba88951934.zip
+      sha256: 2a43bbe94151613f8b20c1b4b12c7afc253bc29b0386f70cb3c086a301557c2f
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/67bd275efa53cf63bec0e2f3cc6849a94c926d14.zip"
+      sha256: "c2cf5a18f52575c87f7f284c79a0131dda3ca0afa87a0296b43c3510638a574e"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/2b43315458a99fc5de1da6e7bc0ddd364b26d643.zip"
+      sha256: "9e9a1a80c019012c0d1359d144447bd4bc40e636f8c24c9161e588ed76b3579f"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.2.2":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/0cca391ad9168581641b569e031f25c7ee1673b3.zip
+      sha256: 5f65f054cd3540686926ddd0ddddb75aac007eaf46fd0b38d1ebcdfdccf4d014
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/276978abfc7dce8a7c72ce5d8b74933beb11f22e.zip"
+      sha256: "71fb5f52092f72bac8b1f9cafec1e707d2997daa81e80bcd5811d32b9d3b0c0b"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/2b43315458a99fc5de1da6e7bc0ddd364b26d643.zip"
+      sha256: "9e9a1a80c019012c0d1359d144447bd4bc40e636f8c24c9161e588ed76b3579f"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.2.1":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/ff61b183bf4bea3234b16d0ee33917d3155627f7.zip
+      sha256: 9229d032b6e9881c2bfe8755653a40c9797fc3b24a42b6e086b0ca513b0d7057
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/6add3dcfdca75076c67d3e6e8a065bbc4c5f7a5b.zip"
+      sha256: "b453ce2dceb2c3c799651746e71d0f8898b07c17d04a0e70c744dec3b5ce6f97"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/2b43315458a99fc5de1da6e7bc0ddd364b26d643.zip"
+      sha256: "9e9a1a80c019012c0d1359d144447bd4bc40e636f8c24c9161e588ed76b3579f"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.2.0":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/ab3cd8217b6a89b91708a497f77f119c096fcce3.zip
+      sha256: f20b319a16f1fe5fe807cbd1de9f6ee053fa41e9c44bc90cf7878d27bbd9a353
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/6add3dcfdca75076c67d3e6e8a065bbc4c5f7a5b.zip"
+      sha256: "b453ce2dceb2c3c799651746e71d0f8898b07c17d04a0e70c744dec3b5ce6f97"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/2b43315458a99fc5de1da6e7bc0ddd364b26d643.zip"
+      sha256: "9e9a1a80c019012c0d1359d144447bd4bc40e636f8c24c9161e588ed76b3579f"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.1.5":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/a9ef1d0aaafd83937cdc2cba48aed62d2147f86f.zip
+      sha256: c3f11e920664b117788604a4fb721c38780bc3b3a42ac1320d215963d6aa3c2a
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/e065f41726296b3a24f7f3eebae3e510a3232366.zip"
+      sha256: "ab491ecbdfa0e752e008c8f900646c26d706fce4c6859efda352999374beddba"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/2b43315458a99fc5de1da6e7bc0ddd364b26d643.zip"
+      sha256: "9e9a1a80c019012c0d1359d144447bd4bc40e636f8c24c9161e588ed76b3579f"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.1.4":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/b70d070c02fe74f85d1a05f91b1d8c1dbf7168b0.zip
+      sha256: 380c12b0f8d807e63ed28f1529e6981bfa65101a553fc30292059d5626fe633a
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/56c0eed98e4c2ceeeb3bdac1a75ce8f5c58bb9b5.zip"
+      sha256: "78db6949288de0a7d56a7fe08dd2599eaffe72943f719734ec50145b6f5ff053"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/ad88b17869a1f80bbf2783cea1c4dfc2157c0e22.zip"
+      sha256: "08f30af6600c96fa289b2027408ea123af65201b543c17053336f9b386154382"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
+  "2.1.3":
+    status-code:
+      url: https://github.com/ned14/status-code/archive/9f414ea58264fe0a62172a06f4653adc7556c164.zip
+      sha256: 23c478bcc2509903ba38d466cbf54a834ea72699fd641c56eb975ce9e3d4a3be
+      destination: ["include", "outcome", "experimental", "status-code"]
+    quickcpplib:
+      url: "https://github.com/ned14/quickcpplib/archive/e6515d51df28804ee8638cbd778d089b53ee1030.zip"
+      sha256: "353b231b4e3504d079a2d10e88721ca37a2f90921668bde7e3da342958fdd0f9"
+      destination: ["quickcpplib"]
+    Outcome:
+      url: "https://github.com/akrzemi1/Optional/archive/f6249e7fdcb80131c390a083f1621d96023e72e9.zip"
+      sha256: "3303f3dc27cba0f1e3f45efbc9b3fc7c9d7bea33b6cd7aa57e52e20a21d1af87"
+      destination: ["quickcpplib", "include", "quickcpplib", "optional"]
