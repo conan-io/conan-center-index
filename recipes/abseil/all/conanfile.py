@@ -34,19 +34,19 @@ class AbseilConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if Version(self.version) < "20230125.0" else 14
+        return "11" if Version(self.version) < "20230125.0" else "14"
 
     @property
     def _compilers_minimum_version(self):
-        if self._min_cppstd == 11:
-            return {}
         return {
-            "gcc": "6",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         copy(self, "abi_trick/*", self.recipe_folder, self.export_sources_folder)
