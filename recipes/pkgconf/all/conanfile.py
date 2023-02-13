@@ -33,7 +33,7 @@ class PkgConfConan(ConanFile):
     }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
