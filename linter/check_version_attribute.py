@@ -27,7 +27,7 @@ class VersionAttribute(BaseChecker):
                    isinstance(children[0], AssignName) and \
                    children[0].name == "version" and \
                    isinstance(children[1], Const):
-                    value = children[1].as_string()
-                    if not value and value != "system":
+                    value = children[1].as_string().replace('"', "").replace("'", "")
+                    if value and value != "system":
                         self.add_message("conan-forced-version", node=attr, line=attr.lineno)
                     return
