@@ -68,7 +68,7 @@ class OutcomeConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        basic_layout(self, src_folder=".")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self._use_custom_byte_impl:
@@ -93,15 +93,15 @@ class OutcomeConan(ConanFile):
                 )
         if self.options.single_header and self._is_experimental:
             raise ConanInvalidConfiguration(
-                f"The experimental single header option is not supported.")
+                "The experimental single header option is not supported.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         submodule_data_file = os.path.join(
             self.recipe_folder, "submoduledata.yml")
-        with open(submodule_data_file, 'r') as submodule_stream:
+        with open(submodule_data_file, 'r', encoding="utf-8") as submodule_stream:
             submodules_data = yaml.safe_load(submodule_stream)
-            for name, submodule in submodules_data["submodules"][self.version].items():
+            for _, submodule in submodules_data["submodules"][self.version].items():
                 submodule_data = {
                     "url": submodule["url"],
                     "sha256": submodule["sha256"]
@@ -154,7 +154,7 @@ class OutcomeConan(ConanFile):
 
     def _package_multi_header(self):
         # Copy quickcpplibs
-        with open(os.path.join(self.source_folder, "quickcpplib", "cmake", "headers.cmake"), 'r') as file:
+        with open(os.path.join(self.source_folder, "quickcpplib", "cmake", "headers.cmake"), 'r', encoding="utf-8") as file:
             for line in file:
                 line = line.strip()
                 if not line.startswith('"include'):
@@ -169,16 +169,15 @@ class OutcomeConan(ConanFile):
         root = os.path.join(self.source_folder, "include")
         sep = os.path.sep
         for ext in valid_extensions:
-            files += [x for x in glob.glob(f"**/*{ext}", root_dir=root, recursive=True)
+            files += [x for x in glob.glob(os.path.join(root, "**", f"*{ext}"), recursive=True)
                         if f"{sep}experimental{sep}" not in x]
             if self._is_experimental:
-                files += glob.glob(f"**/experimental/*{ext}", root_dir=root)
-                files += glob.glob(
-                    f"**/experimental/status-code/include/**/*{ext}", root_dir=root, recursive=True)
+                files += glob.glob(os.path.join(root, "**", "experimental", f"*{ext}"))
+                files += glob.glob(os.path.join(root, "**", "experimental", "status-code", "include", "**", f"*{ext}"), recursive=True)
 
         dst = os.path.join(self.package_folder, "include")
         for f in files:
-            copy(self, f, src=root, dst=dst)
+            copy(self, os.path.relpath(f, root), src=root, dst=dst)
 
         if self._is_experimental:
             base = os.path.join(dst, "outcome", "experimental", "status-code", )
@@ -198,7 +197,7 @@ class OutcomeConan(ConanFile):
             self.package_folder, "licenses", "Optional"), src=os.path.join(self.source_folder, "quickcpplib", "include", "quickcpplib", "optional"))
 
         if self.options.single_header:
-            copy(self, pattern=f"outcome.hpp", dst=os.path.join(self.package_folder,
+            copy(self, pattern="outcome.hpp", dst=os.path.join(self.package_folder,
                  "include"), src=os.path.join(self.source_folder, "single-header"))
         else:
             self._package_multi_header()
