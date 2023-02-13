@@ -50,9 +50,6 @@ class PahoMqttcConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-        if self.options.samples != "deprecated":
-            self.output.warn("samples option is deprecated and they are no longer provided in the package.")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
