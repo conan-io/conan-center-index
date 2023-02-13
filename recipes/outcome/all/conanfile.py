@@ -48,11 +48,13 @@ class OutcomeConan(ConanFile):
 
     @property
     def _use_custom_byte_impl(self):
-        return self.settings.compiler.get_safe("cppstd") < "17"
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        return cppstd is not None and cppstd < "17"
 
     @property
     def _use_custom_span_impl(self):
-        return self.settings.compiler.get_safe("cppstd") < "20"
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        return cppstd is not None and cppstd < "20"
 
     @property
     def _use_new_span(self):
