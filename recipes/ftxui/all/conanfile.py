@@ -98,9 +98,13 @@ class FTXUIConan(ConanFile):
         self.cpp_info.components["ftxui-dom"].set_property("cmake_target_name", "ftxui::dom")
         self.cpp_info.components["ftxui-dom"].libs = ["ftxui-dom"]
         self.cpp_info.components["ftxui-dom"].requires = ["ftxui-screen"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ftxui-dom"].system_libs.append("m")
 
         self.cpp_info.components["ftxui-screen"].set_property("cmake_target_name", "ftxui::screen")
         self.cpp_info.components["ftxui-screen"].libs = ["ftxui-screen"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ftxui-screen"].system_libs.append("m")
 
         self.cpp_info.components["ftxui-component"].set_property("cmake_target_name", "ftxui::component")
         self.cpp_info.components["ftxui-component"].libs = ["ftxui-component"]
