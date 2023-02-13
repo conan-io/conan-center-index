@@ -10,11 +10,11 @@ class VersionAttribute(BaseChecker):
 
     __implements__ = IAstroidChecker
 
-    name = "conan-package-name"
+    name = "conan-attr-version"
     msgs = {
-        "E9012": (
+        "E9014": (
             "Recipe should not contain version attribute",
-            "conan-attr-version",
+            "conan-forced-version",
             "Do not enforce a specific version in your recipe. Keep it generic for any version."
         ),
     }
@@ -29,5 +29,5 @@ class VersionAttribute(BaseChecker):
                    isinstance(children[1], Const):
                     value = children[1].as_string()
                     if not value and value != "system":
-                        self.add_message("conan-attr-version", node=attr, line=attr.lineno)
+                        self.add_message("conan-forced-version", node=attr, line=attr.lineno)
                     return
