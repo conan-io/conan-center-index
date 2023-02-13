@@ -15,6 +15,7 @@ class Blend2dConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://blend2d.com/"
     topics = ("2d-graphics", "rasterization", "asmjit", "jit")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
