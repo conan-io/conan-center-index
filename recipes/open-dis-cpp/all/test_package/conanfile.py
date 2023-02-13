@@ -12,10 +12,6 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-
     def layout(self):
         cmake_layout(self)
 
