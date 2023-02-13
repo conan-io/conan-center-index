@@ -137,7 +137,6 @@ class PkgConfConan(ConanFile):
         pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
         self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
-        self.env_info.PKG_CONFIG = pkg_config # remove in conan v2?
 
         pkgconf_aclocal = os.path.join(self.package_folder, "bin", "aclocal")
         self.buildenv_info.prepend_path("ACLOCAL_PATH", pkgconf_aclocal)
@@ -147,7 +146,8 @@ class PkgConfConan(ConanFile):
         # TODO: remove in conanv2
         automake_extra_includes = unix_path_package_info_legacy(self, pkgconf_aclocal.replace("\\", "/"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes) # remove in conan v2?
+        self.env_info.PKG_CONFIG = pkg_config
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
 
         # TODO: to remove in conan v2 once pkg_config generator removed
         if self.options.enable_lib:
