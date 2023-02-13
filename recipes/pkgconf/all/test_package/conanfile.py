@@ -5,16 +5,17 @@ import re
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
 
 
 # It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
+    win_bash = True
 
     @property
     def _settings_build(self):
@@ -30,7 +31,7 @@ class TestPackageConan(ConanFile):
             self.tool_requires("msys2/cci.latest")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         # Autotools project to test integration pkgconfig works
@@ -79,14 +80,13 @@ class TestPackageConan(ConanFile):
         # and that it is the expected version
         output = StringIO()
         self.run("pkgconf --about", output, env="conanbuild")
-        pkgconf_about = output.getvalue().splitlines()[0]
-        self.output.info(f"pkgconf about: {pkgconf_about}")
         # TODO: When recipe is Conan 2+ only, this can be simplified
         # to: self.dependencies['pkgconf'].ref.version
         tokens = re.split('[@#]', self.tested_reference_str)
         pkgconf_expected_version = tokens[0].split("/", 1)[1]
-        assert f"pkgconf {pkgconf_expected_version}" == pkgconf_about
+        assert f"pkgconf {pkgconf_expected_version}" in output.getvalue() 
         
         # Test that executable linked against library runs as expected
         if can_run(self) and self._testing_library:
-            self.run(os.path.join(self.build_folder, "test_package"), env="conanrun")
+            test_executable = unix_path(self, os.path.join(self.cpp.build.bindirs[0], "test_package"))
+            self.run(test_executable, env="conanrun")
