@@ -119,19 +119,14 @@ class OutcomeConan(ConanFile):
         include_internal = os.path.join(
             self.source_folder, "quickcpplib",  "include", "quickcpplib")
 
-        replace_in_file(
-            self, os.path.join(include_internal, "byte.hpp"),
-            "#if QUICKCPPLIB_USE_STD_BYTE", f"#if {0 if self._use_custom_byte_impl else 1}",
-        )
-        span_header = "span.hpp"
+        if self._use_custom_span_impl:
+            replace_in_file(
+                self, os.path.join(include_internal, "span.hpp"),
+                '#include "span-lite/include/nonstd/span.hpp"' if self._use_new_span else '#include "gsl-lite/include/gsl/gsl-lite.hpp"',
+                "#include <nonstd/span.hpp>" if self._use_new_span else "#include <gsl/gsl-lite.hpp>",
+            )
 
-        replace_in_file(
-            self, os.path.join(include_internal, span_header),
-            '#include "span-lite/include/nonstd/span.hpp"' if self._use_new_span else '#include "gsl-lite/include/gsl/gsl-lite.hpp"',
-            "#include <nonstd/span.hpp>" if self._use_new_span else "#include <gsl/gsl-lite.hpp>",
-        )
-
-        if not self._use_custom_byte_impl:
+        if self._use_custom_byte_impl:
             replace_in_file(
                 self, os.path.join(include_internal, "byte.hpp"),
                 "#include \"byte/include/nonstd/byte.hpp\"",
