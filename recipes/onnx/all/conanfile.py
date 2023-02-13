@@ -142,7 +142,8 @@ class OnnxConan(ConanFile):
                 "requires": ["protobuf::libprotobuf"]
             },
             "onnxifi": {
-                "target": "onnxifi"
+                "target": "onnxifi",
+                "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["dl"])],
             },
             "onnxifi_dummy": {
                 "target": "onnxifi_dummy",
@@ -171,10 +172,12 @@ class OnnxConan(ConanFile):
                 libs = comp_values.get("libs", [])
                 defines = comp_values.get("defines", [])
                 requires = comp_values.get("requires", [])
+                system_libs = [l for cond, sys_libs in comp_values.get("system_libs", []) if cond for l in sys_libs]
                 self.cpp_info.components[comp_name].set_property("cmake_target_name", target)
                 self.cpp_info.components[comp_name].libs = libs
                 self.cpp_info.components[comp_name].defines = defines
                 self.cpp_info.components[comp_name].requires = requires
+                self.cpp_info.components[comp_name].system_libs = system_libs
 
                 # TODO: to remove in conan v2 once cmake_find_package_* generators removed
                 self.cpp_info.components[comp_name].names["cmake_find_package"] = target
