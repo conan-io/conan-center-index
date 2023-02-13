@@ -17,6 +17,7 @@ required_conan_version = ">=1.57.0"
 class PkgConfConan(ConanFile):
     name = "pkgconf"
     url = "https://github.com/conan-io/conan-center-index"
+    topics = ("build", "configuration")
     homepage = "https://git.sr.ht/~kaniini/pkgconf"
     license = "ISC"
     description = "package compiler and linker metadata toolkit"
