@@ -27,7 +27,6 @@ class PahoMqttcConan(ConanFile):
         "fPIC": True,
         "ssl": True,
         "asynchronous": True,
-        "samples": "deprecated",
         "high_performance": False,
     }
 
