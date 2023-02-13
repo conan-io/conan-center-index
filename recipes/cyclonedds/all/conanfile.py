@@ -18,6 +18,7 @@ class CycloneDDSConan(ConanFile):
                   " of the OMG Data Distribution Service (DDS) specification"
     topics = ("dds", "ipc", "ros", "middleware")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
