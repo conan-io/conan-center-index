@@ -82,64 +82,63 @@ class OpenTelemetryCppConan(ConanFile):
             except Exception:
                 pass
 
+        if not self.options.with_otlp:
+            try:
+                del self.options.with_otlp_grpc
+            except Exception:
+                pass
+
+            try:
+                del self.options.with_otlp_http
+            except Exception:
+                pass
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        requires = set()
-
         if self.options.with_gsl:
-            requires.add("ms-gsl/4.0.0")
+            self.requires("ms-gsl/4.0.0")
 
         if self.options.with_abseil:
-            requires.add("abseil/20220623.0")
+            self.requires("abseil/20220623.0")
 
         if self.options.with_otlp:
-            requires.add("protobuf/3.21.4")
+            self.requires("protobuf/3.21.4")
             if Version(self.version) <= "1.4.1":
-                requires.add("opentelemetry-proto/0.11.0")
+                self.requires("opentelemetry-proto/0.11.0")
             else:
-                requires.add("opentelemetry-proto/0.19.0")
+                self.requires("opentelemetry-proto/0.19.0")
 
             if self.options.with_otlp_grpc:
-                requires.add("grpc/1.50.1")
+                self.requires("grpc/1.50.1")
 
-            if self.options.with_otlp_http:
-                requires.add("libcurl/7.87.0")
-                requires.add("nlohmann_json/3.11.2")
-                requires.add("openssl/1.1.1s")
+        if (self.options.with_zipkin or
+           self.options.with_elasticsearch or
+           self.options.with_otlp_http or
+           self.options.with_etw):
+                self.requires("nlohmann_json/3.11.2")
+                self.requires("openssl/1.1.1s")
 
-        if self.options.with_zipkin:
-            requires.add("nlohmann_json/3.11.2")
-            requires.add("libcurl/7.87.0")
-            requires.add("openssl/1.1.1s")
+        if (self.options.with_zipkin or
+           self.options.with_elasticsearch or
+           self.options.with_otlp_http):
+                self.requires("libcurl/7.87.0")
 
         if self.options.with_prometheus:
-            requires.add("prometheus-cpp/1.1.0")
-
-        if self.options.with_elasticsearch:
-            requires.add("nlohmann_json/3.11.2")
-            requires.add("libcurl/7.87.0")
-            requires.add("openssl/1.1.1s")
+            self.requires("prometheus-cpp/1.1.0")
 
         if self.options.with_jaeger:
-            requires.add("thrift/0.17.0")
+            self.requires("thrift/0.17.0")
 
             if Version(self.version) >= "1.3.0":
                 if self.settings.compiler == "apple-clang":
-                    requires.add("boost/1.80.0")
+                    self.requires("boost/1.80.0")
                 else:
-                    requires.add("boost/1.81.0")
-
-        if self.options.with_etw:
-            requires.add("nlohmann_json/3.11.2")
-            requires.add("openssl/1.1.1s")
-
-        for r in requires:
-            self.requires(r)
+                    self.requires("boost/1.81.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         check_min_vs(self, "192")
 
@@ -150,7 +149,7 @@ class OpenTelemetryCppConan(ConanFile):
             raise ConanInvalidConfiguration("Option 'with_otlp_grpc' requires 'with_otlp'")
 
         if self.options.with_otlp_http and not self.options.with_otlp:
-            raise ConanInvalidConfiguration("Option 'with_otlp_http' requires 'with otlp'")
+            raise ConanInvalidConfiguration("Option 'with_otlp_http' requires 'with_otlp'")
 
         if not self.dependencies["grpc"].options.cpp_plugin:
             raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
