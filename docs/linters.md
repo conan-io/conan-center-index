@@ -170,7 +170,7 @@ from conan import ConanFile
 
 class FooConanFile(ConanFile):
     version = "1.0.0"  # Wrong!
-````
+```
 
 The package version should be passed as command argument, e.g:
 
@@ -181,3 +181,10 @@ Or, if you are running Conan 2.0:
     conan create all/ --version=1.0.0 -pr:h=default -pr:b=default
 
 The only exception is when providing ``system`` packages, which are allowed.
+
+```python
+from conan import ConanFile
+
+class FooConanFile(ConanFile):
+    version = "system"  # Okay!
+```
