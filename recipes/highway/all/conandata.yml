@@ -1,4 +1,7 @@
 sources:
+  "1.0.3":
+    url: "https://github.com/google/highway/archive/1.0.3.tar.gz"
+    sha256: "566fc77315878473d9a6bd815f7de78c73734acdcb745c3dde8579560ac5440e"
   "1.0.2":
     url: "https://github.com/google/highway/archive/1.0.2.tar.gz"
     sha256: "e8ef71236ac0d97f12d553ec1ffc5b6375d57b5f0b860c7447dd69b6ed1072db"
@@ -23,5 +26,9 @@ sources:
 patches:
   "0.16.0":
     - patch_file: "patches/0.16.0-0001-fix-sys-random-h.patch"
+      patch_description: "fix including sys/random.h on several environments"
+      patch_type: "portability"
   "0.11.1":
     - patch_file: "patches/0.11.1-0001-remove-contrib.patch"
+      patch_description: "remove contrib sources"
+      patch_type: "portability"

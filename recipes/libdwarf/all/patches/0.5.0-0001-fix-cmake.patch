@@ -1,0 +1,105 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4f58f43..69e0238 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -129,6 +129,7 @@ check_include_file( "libelf/libelf.h" HAVE_LIBELF_LIBELF_H)
+ 
+ ### cmake provides no way to guarantee uint32_t present.
+ ### configure does guarantee that.
++find_package(libelf REQUIRED)
+ if(HAVE_STDINT_H)
+   check_c_source_compiles("
+   #include <stdint.h>
+@@ -192,7 +193,8 @@ elseif(HAVE_LIBELF_LIBELF_H)
+ endif()
+ 
+ if (HAVE_LIBELF_H OR HAVE_LIBELF_LIBELF_H)
+-  set (CMAKE_REQUIRED_LIBRARIES elf)
++  set (CMAKE_REQUIRED_LIBRARIES libelf::libelf)
++  set (CMAKE_REQUIRED_DEFINITIONS -D__LIBELF64=1)
+   message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getehdr")
+   check_symbol_exists( elf64_getehdr ${PLAIN_JUST_LIBELF} HAVE_ELF64_GETEHDR)
+   message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getshdr")
+@@ -216,6 +218,9 @@ if (DWARF_WITH_LIBELF)
+   message(STATUS "checking using elf header ... ${HAVE_LOCATION_OF_LIBELFHEADER}")
+   message(STATUS "checking using libelf header ... ${JUST_LIBELF}")
+ 
++set (CMAKE_REQUIRED_LIBRARIES libelf::libelf)
++set (CMAKE_REQUIRED_DEFINITIONS -D__LIBELF64=1)
++
+ check_c_source_compiles("
+   #include ${HAVE_LOCATION_OF_LIBELFHEADER}
+   int main()
+@@ -361,7 +366,6 @@ message(STATUS "Building api tests   ... ${DOTESTS}")
+ ### end what was configure.cmake
+ 
+ # This references cmake/FindLibElf.cmake. See cmake documentation.
+-find_package(LibElf REQUIRED)
+ list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBELF_INCLUDE_DIRS})
+ 
+ configure_file(cmake/config.h.cmake config.h)
+@@ -384,7 +388,6 @@ if(BUILD_SHARED)
+ endif()
+ 
+ add_subdirectory(src/lib/libdwarf)
+-add_subdirectory(src/bin/dwarfdump)
+ 
+ if ( BUILD_DWARFEXAMPLE )
+ 	add_subdirectory(src/bin/dwarfexample)
+diff --git a/src/bin/dwarfdump/CMakeLists.txt b/src/bin/dwarfdump/CMakeLists.txt
+index f6f5376..22c5977 100644
+--- a/src/bin/dwarfdump/CMakeLists.txt
++++ b/src/bin/dwarfdump/CMakeLists.txt
+@@ -65,7 +65,7 @@ target_compile_options(dwarfdump PRIVATE ${DW_FWALL})
+ 
+ target_link_libraries(dwarfdump PRIVATE ${dwarf-target} ${DW_FZLIB} ${DW_FZSTD} ) 
+ 
+-if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++if(0)
+ 	set(SUFFIX 64)
+ endif()
+ set(LIBDIR lib${SUFFIX})
+diff --git a/src/bin/dwarfgen/CMakeLists.txt b/src/bin/dwarfgen/CMakeLists.txt
+index 5c2c192..fc3428e 100644
+--- a/src/bin/dwarfgen/CMakeLists.txt
++++ b/src/bin/dwarfgen/CMakeLists.txt
+@@ -28,7 +28,7 @@ target_include_directories(dwarfgen PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/libdwarfp)
+ 
+ target_link_libraries(dwarfgen PRIVATE ${dwarfp-target}
+-   ${dwarf-target} ${DW_FZLIB})
++   ${dwarf-target} ${DW_FZLIB} libelf::libelf)
+ 
+ set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
+ set(LIBDIR lib${SUFFIX})
+diff --git a/src/lib/libdwarf/CMakeLists.txt b/src/lib/libdwarf/CMakeLists.txt
+index 0b7d578..62b67da 100644
+--- a/src/lib/libdwarf/CMakeLists.txt
++++ b/src/lib/libdwarf/CMakeLists.txt
+@@ -67,7 +67,7 @@ set_source_group(CONFIGURATION_FILES "Configuration Files"
+ 	
+ list(LENGTH DWARF_TARGETS targetCount)
+ math(EXPR targetCount "${targetCount} - 1")
+-list(APPEND DWARF_LIBS ${LIBELF_LIBRARIES})
++list(APPEND DWARF_LIBS ${libelf_LIBRARIES})
+ if (DW_FZLIB)
+     list(APPEND DWARF_LIBS z)
+ endif()
+@@ -85,13 +85,15 @@ foreach(i RANGE ${targetCount})
+             ${LIBELF_INCLUDE_DIRS})
+     target_compile_options(${target} PRIVATE -DLIBDWARF_BUILD
+             ${DW_FWALL})
+-	msvc_posix(${target})
++    if(BUILD_SHARED)
++        target_compile_definitions(${target} PRIVATE LIBDWARF_SHARED)
++    endif()
++    msvc_posix(${target})
+ 
+ 	target_link_libraries(${target} PUBLIC ${LIBELF_LIBRARIES} ${DW_FZLIB} ${DW_FZSTD} ) 
+ 	
+ 	set_target_properties(${target} PROPERTIES OUTPUT_NAME dwarf)
+ 
+-	set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
+ 	set(LIBDIR lib${SUFFIX})
+ 	set(BINDIR bin${SUFFIX})
+ 
