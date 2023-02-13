@@ -293,8 +293,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
-        if cross_building(self)
-            if self._settings_build.os != "Windows":
+        if cross_building(self):
+            if self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("cross compiling qt 6 in this configuration is not yet supported. Contributions are welcome")
             if Version(conan_version) <"1.58.0":
                 raise ConanInvalidConfiguration("for cross compiling qt 6 conan version 1.58 or later is required")
