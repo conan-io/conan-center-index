@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenDisConan(ConanFile):
