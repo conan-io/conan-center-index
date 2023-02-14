@@ -13,11 +13,14 @@ patches:
     - patch_file: "patches/cmake-patching-3-6-7.patch"
       base_path: "source_subfolder"
       patch_type: conan
+      patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
   "3.6.6":
     - patch_file: "patches/0002-cmake-use-conan-packages.patch"
       base_path: "source_subfolder"
       patch_type: conan
+      patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
   "3.6.5":
     - patch_file: "patches/0001-cmake-use-conan-packages.patch"
       base_path: "source_subfolder"
       patch_type: conan
+      patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
