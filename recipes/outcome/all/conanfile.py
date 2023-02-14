@@ -239,5 +239,3 @@ class OutcomeConan(ConanFile):
 
     def package_id(self):
         self.info.settings.clear()
-        if self.options.single_header:
-            del self.info.options.experimental
