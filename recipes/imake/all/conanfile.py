@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -15,6 +16,8 @@ class ImakeConan(ConanFile):
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/imake"
     url = "https://github.com/conan-io/conan-center-index"
+
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "ccmakedep": [True, False],
@@ -52,7 +55,9 @@ class ImakeConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows":
-            self.tool_requires("msys2/cci.latest")
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
@@ -68,8 +73,8 @@ class ImakeConan(ConanFile):
         export_conandata_patches(self)
 
     def generate(self):
-        # venv = VirtualBuildEnv(self)
-        # venv.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate()
 
         tc = AutotoolsToolchain(self)
 
