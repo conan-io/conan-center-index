@@ -53,10 +53,6 @@ class GrapheneConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.75.2")
 
-    def package_id(self):
-        if self.info.options.with_glib and not self.dependencies["glib"].options.shared:
-            self.info.requires["glib"].full_package_mode()
-
     def validate(self):
         if self.settings.compiler == "gcc":
             if Version(self.settings.compiler.version) < "5.0":
