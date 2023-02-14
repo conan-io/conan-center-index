@@ -73,6 +73,7 @@ class XorgProtoConan(ConanFile):
         apply_conandata_patches(self)
 
         autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     @property
