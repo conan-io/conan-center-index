@@ -5,6 +5,5 @@ sources:
 patches:
   "3.6.7":
     - patch_file: "patches/cmake-patching-3-6-7.patch"
-      base_path: "source_subfolder"
       patch_type: conan
       patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
