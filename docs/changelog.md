@@ -5,7 +5,7 @@
 - [fix] Fix ScheduledExportCheck job not updating hook validation issues.
 - [fix] Fix missing GitHub labels for PRs with "bump version" and "bump dependencies"
 - [feature] PromotePackages: Add a parameter to promote multiple references.
-- [feature] Increate `conan test` time limit to 1 hour.
+- [feature] Increase `conan test` time limit to 1 hour.
 - [feature] Add request header for GitHub API version.
 
 ### 03-February-2023 - 10:24 CET
