@@ -18,6 +18,7 @@ class LiunwindConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libunwind/libunwind"
     topics = ("unwind", "debuggers", "exception-handling", "introspection", "setjmp")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
