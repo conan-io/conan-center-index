@@ -5,9 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class CcacheConan(ConanFile):
@@ -31,15 +32,11 @@ class CcacheConan(ConanFile):
     }
 
     @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _min_cppstd(self):
         if Version(self.version) > "4.7":
             return "17"
         else:
-            return "17" if self._is_msvc else "14"
+            return "17" if is_msvc(self) else "14"
 
     @property
     def _compilers_minimum_version(self):
@@ -92,7 +89,7 @@ class CcacheConan(ConanFile):
         self.build_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and cross_building(self) and \
            self.settings.os == "Macos" and self.settings.arch == "armv8":
-            self.build_requires("cmake/3.25.1")
+            self.tool_requires("cmake/3.25.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -107,7 +104,7 @@ class CcacheConan(ConanFile):
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
-        if self._is_msvc:
+        if is_msvc(self):
             deps = CMakeDeps(self)
             deps.set_property("hiredislib", "cmake_target_name", "HIREDIS::HIREDIS")
             deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
