@@ -32,15 +32,11 @@ class XorgProtoConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def build_requirements(self):
         self.build_requires("automake/1.16.3")
         self.build_requires("xorg-macros/1.19.3")
         self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not os.environ["CONAN_BASH_PATH"]:
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
