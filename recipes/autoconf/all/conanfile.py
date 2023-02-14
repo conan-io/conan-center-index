@@ -37,9 +37,10 @@ class AutoconfConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("m4/1.4.19")
+        self.requires("m4/1.4.19") # Needed at runtime by downstream clients as well
 
     def build_requirements(self):
+        self.tool_requires("m4/1.4.19")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
