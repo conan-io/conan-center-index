@@ -78,6 +78,8 @@ class LibtoolConan(ConanFile):
             env.append("CXX", f'{unix_path(self, self.conf.get("user.automake:compile-wrapper"))} cl -nologo')
             env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
             env.append("LD", "link")
+            env.define("F77", "no")
+            env.define("FC", "no")
         tc.generate(env)
 
     def _patch_sources(self):
