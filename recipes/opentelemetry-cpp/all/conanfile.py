@@ -132,10 +132,11 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("thrift/0.17.0")
 
             if Version(self.version) >= "1.3.0":
-                if self.settings.compiler == "apple-clang":
-                    self.requires("boost/1.80.0")
-                else:
-                    self.requires("boost/1.81.0")
+                self.requires("boost/1.81.0")
+
+    @property
+    def _required_boost_components(self):
+        return ["locale"] if self.options.with_jaeger and Version(self.version) >= "1.3.0" else []
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -153,6 +154,14 @@ class OpenTelemetryCppConan(ConanFile):
 
         if not self.dependencies["grpc"].options.cpp_plugin:
             raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+
+        miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
+                                       for boost_comp in self._required_boost_components)
+        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires non header-only boost with these components: "
+                f"{', '.join(self._required_boost_components)}"
+            )
 
     def build_requirements(self):
         self.tool_requires("protobuf/3.21.4")
