@@ -17,6 +17,7 @@ class PulseAudioConan(ConanFile):
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
