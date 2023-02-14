@@ -14,6 +14,10 @@ patches:
       base_path: "source_subfolder"
       patch_type: conan
       patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
+    - patch_file: "patches/cmake-force-openssl-check-values.patch"
+      base_path: "source_subfolder"
+      patch_type: conan
+      patch_description: "Remove several checks for the OpenSSL library; force same values as seen in a Linux build"
   "3.6.6":
     - patch_file: "patches/0002-cmake-use-conan-packages.patch"
       base_path: "source_subfolder"

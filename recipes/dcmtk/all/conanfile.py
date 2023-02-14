@@ -91,11 +91,7 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_openssl:
-            if self.settings.os == "Windows":
-                # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
-                self.requires("openssl/1.0.2u")
-            else:
-                self.requires("openssl/1.1.1t")
+            self.requires("openssl/1.1.1t")
         if self.options.with_libpng:
             self.requires("libpng/1.6.39")
         if self.options.with_libtiff:
@@ -173,6 +169,7 @@ class DCMTKConan(ConanFile):
         if is_msvc(self):
             cmake.definitions["DCMTK_ICONV_FLAGS_ANALYZED"] = True
             cmake.definitions["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = "MD" in msvc_runtime_flag(self)
+            # cmake.definitions["HAVE_SSL_CTX_GET0_PARAM"] = 1
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
