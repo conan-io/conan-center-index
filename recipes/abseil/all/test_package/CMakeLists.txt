@@ -40,9 +40,9 @@ endif()
 # Test also (unofficial) global target
 add_executable(${PROJECT_NAME}_global test_package.cpp)
 if(TARGET abseil::abseil)
-target_link_libraries(${PROJECT_NAME}_global PRIVATE abseil::abseil)
+    target_link_libraries(${PROJECT_NAME}_global PRIVATE abseil::abseil)
 else()
-target_link_libraries(${PROJECT_NAME}_global PRIVATE CONAN_PKG::abseil)
+    target_link_libraries(${PROJECT_NAME}_global PRIVATE absl::absl)
 endif()
 #   Abseil now requires at least C++14 since 20230125.0
 if(absl_VERSION VERSION_LESS "20230125.0")
