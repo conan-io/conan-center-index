@@ -155,11 +155,12 @@ class OpenTelemetryCppConan(ConanFile):
         if not self.dependencies["grpc"].options.cpp_plugin:
             raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
 
-        miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
+        boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
                                        for boost_comp in self._required_boost_components)
-        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
+
+        if boost_required_comp:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires non header-only boost with these components: "
+                f"{self.ref} requires boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
 
