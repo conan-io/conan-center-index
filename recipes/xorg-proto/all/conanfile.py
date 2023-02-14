@@ -22,6 +22,7 @@ class XorgProtoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
 
+    package_type = "application"
     generators = "PkgConfigDeps"
 
     def layout(self):
