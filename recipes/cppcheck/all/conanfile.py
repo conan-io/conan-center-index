@@ -30,7 +30,7 @@ class CppcheckConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_z3", default=False):
-            self.requires("z3/4.8.8")
+            self.requires("z3/4.10.2")
         if self.options.have_rules:
             self.requires("pcre/8.45")
 
@@ -44,7 +44,7 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
-        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "res").replace('\\', '/')
+        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin").replace('\\', '/')
         tc.generate()
 
         deps = CMakeDeps(self)

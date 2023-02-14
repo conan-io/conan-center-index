@@ -26,25 +26,17 @@ sources:
 patches:
   "4.3.18":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.3.16":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.3.11":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.3.10":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.2.1":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.1.7":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.1.6":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"
   "4.1.5":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
-      base_path: "source_subfolder"

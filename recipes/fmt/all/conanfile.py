@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class FmtConan(ConanFile):
@@ -40,23 +40,6 @@ class FmtConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def generate(self):
-        if not self.options.header_only:
-            tc = CMakeToolchain(self)
-            tc.cache_variables["FMT_DOC"] = False
-            tc.cache_variables["FMT_TEST"] = False
-            tc.cache_variables["FMT_INSTALL"] = True
-            tc.cache_variables["FMT_LIB_DIR"] = "lib"
-            if self._has_with_os_api_option:
-                tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
-            tc.generate()
-
-    def layout(self):
-        if self.options.header_only:
-            basic_layout(self, src_folder="src")
-        else:
-            cmake_layout(self, src_folder="src")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,20 +50,17 @@ class FmtConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-            del self.options.shared
-            try:
-                del self.options.with_os_api
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
+            self.options.rm_safe("with_os_api")
         elif self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        if self.options.header_only:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def package_id(self):
         if self.info.options.header_only:
@@ -89,12 +69,22 @@ class FmtConan(ConanFile):
             del self.info.options.with_fmt_alias
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if not self.options.header_only:
+            tc = CMakeToolchain(self)
+            tc.cache_variables["FMT_DOC"] = False
+            tc.cache_variables["FMT_TEST"] = False
+            tc.cache_variables["FMT_INSTALL"] = True
+            tc.cache_variables["FMT_LIB_DIR"] = "lib"
+            if self._has_with_os_api_option:
+                tc.cache_variables["FMT_OS"] = bool(self.options.with_os_api)
+            tc.generate()
 
     def build(self):
         apply_conandata_patches(self)

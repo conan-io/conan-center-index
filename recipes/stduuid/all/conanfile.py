@@ -12,7 +12,7 @@ required_conan_version = ">=1.50.0"
 class StduuidConan(ConanFile):
     name = "stduuid"
     description = "A C++17 cross-platform implementation for UUIDs"
-    topics = ("uuid", "guid")
+    topics = ("uuid", "guid", "header-only")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mariusbancila/stduuid"
