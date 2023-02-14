@@ -1,11 +1,12 @@
 from conan import ConanFile
-from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_file, apply_conandata_patches
+from conan.tools.files import save, load, chdir, copy, get, rmdir, replace_in_file, apply_conandata_patches, patch
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanException
+from conan.errors import ConanInvalidConfiguration
 import os
 import re
 import shlex
@@ -26,16 +27,20 @@ class MpfrConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "exact_int": ["mpir", "gmp",]
+        "exact_int": ["mpir", "gmp",],
+        "autogen": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "exact_int": "gmp",
+        "autogen": False,
     }
 
     exports_sources = "CMakeLists.txt.in", "patches/**"
 
+    def package_id(self):
+        self.info.options.rm_safe("autogen")
 
     @property
     def _settings_build(self):
@@ -58,14 +63,15 @@ class MpfrConan(ConanFile):
             self.requires("mpir/3.0.0")
 
     def build_requirements(self):
-        self.tool_requires("autoconf/2.71")                # Needed for autoreconf when building from Git source
-        self.tool_requires("automake/1.16.5")              # Needed for aclocal when building from Git source
-        self.tool_requires("autoconf-archive/2021.02.19")  # Needed for additonal aclocal includes
-        self.tool_requires("libtool/2.4.7")                # Needed for libtool
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        if self.options.autogen:
+            self.tool_requires("autoconf/2.71")                # Needed for autoreconf when building from Git source
+            self.tool_requires("automake/1.16.5")              # Needed for aclocal when building from Git source
+            self.tool_requires("autoconf-archive/2021.02.19")  # Needed for additonal aclocal includes
+            self.tool_requires("libtool/2.4.7")                # Needed for libtool
 
     def layout(self):
         if self.settings.os == "Windows":
@@ -133,10 +139,15 @@ class MpfrConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        with chdir(self, self.source_folder):
-            command = "./autogen.sh"
-            if os.path.exists(command):
-                self.run(command)
+
+        if self.options.autogen:
+            # Only apply this patch when building from Git source to prevent Makefile from
+            # invoking autoconf due to to changed .ac or .m4 file
+            patch(self, patch_file=os.path.join(self.export_sources_folder, "patches", f'{self.version}-0001-configure.ac-fixes.patch'))
+            with chdir(self, self.source_folder):
+                command = "./autogen.sh"
+                if os.path.exists(command):
+                    self.run(command)
 
         if self.settings.os == "Windows": # Allow mixed shared and static libs
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
