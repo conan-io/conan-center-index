@@ -438,3 +438,23 @@ Generally no, these sorts of options can most likely be set from a profile or do
 and would otherwise dynamically embed this into the CMake config files or generated pkg-config files then it should be allowed.
 
 Doing so requires [deleting the option from the `package_id`](adding_packages/conanfile_attributes.md#removing-from-package_id).
+
+## Can I use full_package_mode for a requirement in my recipe?
+
+For some unusual projects, they need to be aligned and beign used as requirement, using the very same version, options and settings.
+Those projects usually break between patch versions and are very sentsitive, so we can't use different versions throught Conan graph dependencies,
+otherwise it may result on unexpected behavior, or even runtime errors.
+
+A very kwnon project is [glib](https://conan.io/center/glib), which requires the very same configuration to prevent multiple instances and using static link. As solution, we could consume glib on full package id mode, like:
+
+```python
+def package_id(self):
+    self.info.requires["glib"].full_package_mode()
+```
+
+However, there is a painful side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests. As workaround, it would be necessary updating
+all recipes involved, by opening new PRs, then it should generate new packages, but it takes many days and still is a fragile process.
+
+To have more context about it, please, visit the issues #11684 and #11022
+
+In summary, we do not recommend `full_package_mode` usage on CCI. Instead, prefer using `shared=True` by default, when is really needed.
