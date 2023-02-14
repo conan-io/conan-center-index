@@ -23,6 +23,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": ["openssl", "libressl", "commoncrypto"],
         "with_largefile": [True, False],
         "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"],
+        "memory_manage": [True, False],
     }
     default_options = {
         "shared": False,
@@ -30,6 +31,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": "openssl",
         "with_largefile": True,
         "temporary_store": "default_memory",
+        "memory_manage": True,
     }
 
     @property
@@ -103,8 +105,11 @@ class SqlcipherConan(ConanFile):
         crypto_dep = self.deps_cpp_info[str(self.options.crypto_library)]
         crypto_incdir = crypto_dep.include_paths[0]
         crypto_libdir = crypto_dep.lib_paths[0]
+        opt_feature = ""
         libs = map(lambda lib : lib + ".lib", crypto_dep.libs)
         system_libs = map(lambda lib : lib + ".lib", crypto_dep.system_libs)
+        if self.options.memory_manage:
+            opt_feature += " -DSQLITE_ENABLE_MEMORY_MANAGEMENT"
 
         nmake_flags = [
                 "TLIBS=\"%s %s\"" % (" ".join(libs), " ".join(system_libs)),
@@ -112,7 +117,7 @@ class SqlcipherConan(ConanFile):
                 "OPTS=\"-I%s -DSQLITE_HAS_CODEC\"" % (crypto_incdir),
                 "NO_TCL=1",
                 "USE_AMALGAMATION=1",
-                "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL",
+                "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL%s" % opt_feature,
                 "SQLITE_TEMP_STORE=%s" % self._temp_store_nmake_value,
                 "TCLSH_CMD=%s" % self.deps_env_info.TCLSH,
                 ]
@@ -172,6 +177,8 @@ class SqlcipherConan(ConanFile):
             if not self.options.with_largefile:
                 autotools.defines.append("SQLITE_DISABLE_LFS=1")
         autotools.defines.append("SQLITE_HAS_CODEC")
+        if self.options.memory_manage:
+            autotools.defines.append("SQLITE_ENABLE_MEMORY_MANAGEMENT")
 
         env_vars = autotools.vars
         tclsh_cmd = self.deps_env_info.TCLSH
