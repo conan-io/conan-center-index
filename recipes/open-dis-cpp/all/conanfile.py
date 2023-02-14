@@ -45,10 +45,7 @@ class OpenDisConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.info.settings.get_safe("compiler.cppstd"):
