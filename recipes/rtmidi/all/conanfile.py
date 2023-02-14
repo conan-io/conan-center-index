@@ -54,8 +54,8 @@ class RtMidiConan(ConanFile):
             self.requires("libalsa/1.2.4")
 
     def build_requirements(self):
-        if self._with_alsa:
-            self.build_requires("pkgconf/1.7.4")
+        if self._with_alsa and not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
