@@ -20,12 +20,3 @@ sources:
   "0.4.13":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.13/sentry-native.zip"
     sha256: "85e0e15d7fb51388d967ab09e7ee1b95f82330a469a93c65d964ea1afd5e6127"
-  "0.2.6":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.2.6/sentry-native-0.2.6.zip"
-    sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
-patches:
-  "0.2.6":
-    - patch_file: "patches/0.2.6-0001-remove-sentry-handler-dependency.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0.2.6-0002-set-cmake-cxx-standard-14.patch"
-      base_path: "source_subfolder"
