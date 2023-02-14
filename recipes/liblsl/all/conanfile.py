@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, save
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class LiblslConan(ConanFile):
@@ -25,18 +27,6 @@ class LiblslConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def requirements(self):
         self.requires("boost/1.78.0")
         self.requires("pugixml/1.11")
@@ -47,54 +37,57 @@ class LiblslConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LSL_BUILD_STATIC"] = not self.options.shared
+        tc.variables["LSL_BUNDLED_BOOST"] = False
+        tc.variables["LSL_BUNDLED_PUGIXML"] = False
+        tc.variables["lslgitrevision"] = "v" + self.version
+        tc.variables["lslgitbranch"] = "master"
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def _patch_sources(self):
         if not self.options.shared:
             # Do not force PIC
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
                 "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
                 ""
             )
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LSL_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["LSL_BUNDLED_BOOST"] = False
-        self._cmake.definitions["LSL_BUNDLED_PUGIXML"] = False
-        self._cmake.definitions["lslgitrevision"] = "v" + self.version
-        self._cmake.definitions["lslgitbranch"] = "master"
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "lslver*")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "lslver*", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", src=self.source_folder, dst="licenses")
 
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"lsl": "LSL::lsl"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -103,7 +96,7 @@ class LiblslConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_subfolder(self):
