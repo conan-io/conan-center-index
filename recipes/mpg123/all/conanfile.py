@@ -158,7 +158,7 @@ class Mpg123Conan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self):
             cmake = CMake(self)
-            cmake.configure(build_script_folder=os.path.join(self.source_folder, "port", "cmake"))
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "ports", "cmake"))
             cmake.build()
         else:
             autotools = Autotools(self)
