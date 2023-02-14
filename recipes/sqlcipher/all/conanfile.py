@@ -31,7 +31,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": "openssl",
         "with_largefile": True,
         "temporary_store": "default_memory",
-        "memory_manage": True,
+        "memory_manage": False,
     }
 
     @property
