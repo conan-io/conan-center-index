@@ -1,10 +1,13 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan.tools.scm import Version
+
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.47.0"
 
 
 class DlibConan(ConanFile):
@@ -44,19 +47,10 @@ class DlibConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _has_with_webp_option(self):
-        return tools.Version(self.version) >= "19.24"
+        return Version(self.version) >= "19.24"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -88,88 +82,106 @@ class DlibConan(ConanFile):
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
+            raise ConanInvalidConfiguration(
+                "dlib can not be built as a shared library with Visual Studio")
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("dlib doesn't support macOS M1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        dlib_cmakelists = os.path.join(self._source_subfolder, "dlib", "CMakeLists.txt")
-        # robust giflib injection
-        tools.replace_in_file(dlib_cmakelists, "${GIF_LIBRARY}", "GIF::GIF")
-        # robust libjpeg injection
-        for cmake_file in [
-            dlib_cmakelists,
-            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "find_libjpeg.cmake"),
-            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "test_for_libjpeg", "CMakeLists.txt"),
-        ]:
-            tools.replace_in_file(cmake_file, "${JPEG_LIBRARY}", "JPEG::JPEG")
-        # robust libpng injection
-        for cmake_file in [
-            dlib_cmakelists,
-            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "find_libpng.cmake"),
-            os.path.join(self._source_subfolder, "dlib", "cmake_utils", "test_for_libpng", "CMakeLists.txt"),
-        ]:
-            tools.replace_in_file(cmake_file, "${PNG_LIBRARIES}", "PNG::PNG")
-        # robust sqlite3 injection
-        tools.replace_in_file(dlib_cmakelists, "find_library(sqlite sqlite3)", "find_package(SQLite3 REQUIRED)")
-        tools.replace_in_file(dlib_cmakelists, "find_path(sqlite_path sqlite3.h)", "")
-        tools.replace_in_file(dlib_cmakelists, "if (sqlite AND sqlite_path)", "if(1)")
-        tools.replace_in_file(dlib_cmakelists, "${sqlite}", "SQLite::SQLite3")
-        # robust libwebp injection
-        if self._has_with_webp_option:
-            tools.replace_in_file(dlib_cmakelists, "include(cmake_utils/find_libwebp.cmake)", "find_package(WebP REQUIRED)")
-            tools.replace_in_file(dlib_cmakelists, "if (WEBP_FOUND)", "if(1)")
-            tools.replace_in_file(dlib_cmakelists, "${WEBP_LIBRARY}", "WebP::webp")
+    def layout(self):
+        cmake_layout(self)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
 
         # With in-project builds dlib is always built as a static library,
         # we want to be able to build it as a shared library too
-        cmake.definitions["DLIB_IN_PROJECT_BUILD"] = False
+        tc.variables["DLIB_IN_PROJECT_BUILD"] = False
 
-        cmake.definitions["DLIB_ISO_CPP_ONLY"] = False
-        cmake.definitions["DLIB_NO_GUI_SUPPORT"] = True
+        tc.variables["DLIB_ISO_CPP_ONLY"] = False
+        tc.variables["DLIB_NO_GUI_SUPPORT"] = True
 
         # Configure external dependencies
-        cmake.definitions["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
+        tc.variables["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
         if self._has_with_webp_option:
-            cmake.definitions["DLIB_WEBP_SUPPORT"] = self.options.with_webp
-        cmake.definitions["DLIB_LINK_WITH_SQLITE3"] = self.options.with_sqlite3
-        cmake.definitions["DLIB_USE_BLAS"] = True    # FIXME: all the logic behind is not sufficiently under control
-        cmake.definitions["DLIB_USE_LAPACK"] = True  # FIXME: all the logic behind is not sufficiently under control
-        cmake.definitions["DLIB_USE_CUDA"] = False   # TODO: add with_cuda option?
-        cmake.definitions["DLIB_PNG_SUPPORT"] = self.options.with_png
-        cmake.definitions["DLIB_GIF_SUPPORT"] = self.options.with_gif
-        cmake.definitions["DLIB_USE_MKL_FFT"] = False
+            tc.variables["DLIB_WEBP_SUPPORT"] = self.options.with_webp
+        tc.variables["DLIB_LINK_WITH_SQLITE3"] = self.options.with_sqlite3
+        # FIXME: all the logic behind is not sufficiently under control
+        tc.variables["DLIB_USE_BLAS"] = True
+        # FIXME: all the logic behind is not sufficiently under control
+        tc.variables["DLIB_USE_LAPACK"] = True
+        tc.variables["DLIB_USE_CUDA"] = False   # TODO: add with_cuda option?
+        tc.variables["DLIB_PNG_SUPPORT"] = self.options.with_png
+        tc.variables["DLIB_GIF_SUPPORT"] = self.options.with_gif
+        tc.variables["DLIB_USE_MKL_FFT"] = False
 
         # Configure SIMD options if possible
         if self.settings.arch in ["x86", "x86_64"]:
             if self.options.with_sse2 != "auto":
-                cmake.definitions["USE_SSE2_INSTRUCTIONS"] = self.options.with_sse2
+                tc.variables["USE_SSE2_INSTRUCTIONS"] = self.options.with_sse2
             if self.options.with_sse4 != "auto":
-                cmake.definitions["USE_SSE4_INSTRUCTIONS"] = self.options.with_sse4
+                tc.variables["USE_SSE4_INSTRUCTIONS"] = self.options.with_sse4
             if self.options.with_avx != "auto":
-                cmake.definitions["USE_AVX_INSTRUCTIONS"] = self.options.with_avx
+                tc.variables["USE_AVX_INSTRUCTIONS"] = self.options.with_avx
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        dlib_cmakelists = os.path.join(
+            self.source_folder, "dlib", "CMakeLists.txt")
+        # robust giflib injection
+        replace_in_file(self, dlib_cmakelists, "${GIF_LIBRARY}", "GIF::GIF")
+        # robust libjpeg injection
+        for cmake_file in [
+            dlib_cmakelists,
+            os.path.join(self.source_folder, "dlib",
+                         "cmake_utils", "find_libjpeg.cmake"),
+            os.path.join(self.source_folder, "dlib", "cmake_utils",
+                         "test_for_libjpeg", "CMakeLists.txt"),
+        ]:
+            replace_in_file(self, cmake_file, "${JPEG_LIBRARY}", "JPEG::JPEG")
+        # robust libpng injection
+        for cmake_file in [
+            dlib_cmakelists,
+            os.path.join(self.source_folder, "dlib",
+                         "cmake_utils", "find_libpng.cmake"),
+            os.path.join(self.source_folder, "dlib", "cmake_utils",
+                         "test_for_libpng", "CMakeLists.txt"),
+        ]:
+            replace_in_file(self, cmake_file, "${PNG_LIBRARIES}", "PNG::PNG")
+        # robust sqlite3 injection
+        replace_in_file(self, dlib_cmakelists, "find_library(sqlite sqlite3)",
+                        "find_package(SQLite3 REQUIRED)")
+        replace_in_file(self, dlib_cmakelists,
+                        "find_path(sqlite_path sqlite3.h)", "")
+        replace_in_file(self, dlib_cmakelists,
+                        "if (sqlite AND sqlite_path)", "if(1)")
+        replace_in_file(self, dlib_cmakelists, "${sqlite}", "SQLite::SQLite3")
+        # robust libwebp injection
+        if self._has_with_webp_option:
+            replace_in_file(
+                self, dlib_cmakelists, "include(cmake_utils/find_libwebp.cmake)", "find_package(WebP REQUIRED)")
+            replace_in_file(self, dlib_cmakelists, "if (WEBP_FOUND)", "if(1)")
+            replace_in_file(self, dlib_cmakelists,
+                            "${WEBP_LIBRARY}", "WebP::webp")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
-        self.copy("LICENSE.txt", "licenses", os.path.join(self._source_subfolder, "dlib"), keep_path=False)
+        copy(self, pattern="LICENSE.txt", src=os.path.join(self.source_folder, "dlib"),
+             dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
 
         # Remove configuration files
         for dir_to_remove in [
@@ -178,16 +190,17 @@ class DlibConan(ConanFile):
             os.path.join("include", "dlib", "cmake_utils"),
             os.path.join("include", "dlib", "external", "pybind11", "tools")
         ]:
-            tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
+            rmdir(self, os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "dlib")
         self.cpp_info.set_property("cmake_target_name", "dlib::dlib")
         self.cpp_info.set_property("pkg_config_name", "dlib-1")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32", "winmm", "comctl32", "gdi32", "imm32"]
+            self.cpp_info.system_libs = [
+                "ws2_32", "winmm", "comctl32", "gdi32", "imm32"]
 
         self.cpp_info.names["pkg_config"] = "dlib-1"
