@@ -536,13 +536,21 @@ class FFMpegConan(ConanFile):
             ])
         if not self.options.with_programs:
             args.append("--disable-programs")
-        # since ffmpeg"s build system ignores CC and CXX
+        # since ffmpeg"s build system ignores toolchain variables 
+        if tools.get_env("AR"):
+            args.append("--ar={}".format(tools.get_env("AR")))
         if tools.get_env("AS"):
             args.append("--as={}".format(tools.get_env("AS")))
         if tools.get_env("CC"):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
             args.append("--cxx={}".format(tools.get_env("CXX")))
+        if tools.get_env("NM"):
+            args.append("--nm={}".format(tools.get_env("NM")))
+        if tools.get_env("RANLIB"):
+            args.append("--ranlib={}".format(tools.get_env("RANLIB")))
+        if tools.get_env("STRIP"):
+            args.append("--strip={}".format(tools.get_env("STRIP")))
         extra_cflags = []
         extra_ldflags = []
         if is_apple_os(self) and self.settings.os.version:
