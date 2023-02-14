@@ -72,12 +72,6 @@ class AravisConan(ConanFile):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
 
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
-        if self.options.gst_plugin:
-            self.info.requires["gstreamer"].full_package_mode()
-            self.info.requires["gst-plugins-base"].full_package_mode()
-
     def validate(self):
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Static runtime is not supported on Windows due to GLib issues")
