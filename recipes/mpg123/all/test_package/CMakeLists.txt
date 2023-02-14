@@ -4,4 +4,4 @@ project(test_package LANGUAGES C)
 find_package(mpg123 REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE MPG123::MPG123)
+target_link_libraries(${PROJECT_NAME} PRIVATE MPG123::libmpg123)
