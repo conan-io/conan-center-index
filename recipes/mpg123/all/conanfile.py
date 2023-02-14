@@ -90,7 +90,7 @@ class Mpg123Conan(ConanFile):
         if not str(self.options.seektable).isdigit():
             raise ConanInvalidConfiguration(f"The option -o {self.ref.name}:seektable must be an integer number.")
         if self.settings.os != "Windows" and self.options.module == "win32":
-            raise ConanInvalidConfiguration("The option -o {self.ref.name}:module should not use 'win32' for non-Windows OS")
+            raise ConanInvalidConfiguration(f"The option -o {self.ref.name}:module should not use 'win32' for non-Windows OS")
 
 
     def build_requirements(self):
