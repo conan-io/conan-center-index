@@ -69,6 +69,7 @@ class QtConan(ConanFile):
         "gui": [True, False],
         "widgets": [True, False],
 
+        "android_sdk": [None, "ANY"],
         "device": [None, "ANY"],
         "cross_compile": [None, "ANY"],
         "sysroot": [None, "ANY"],
@@ -111,6 +112,7 @@ class QtConan(ConanFile):
         "gui": True,
         "widgets": True,
 
+        "android_sdk": None,
         "device": None,
         "cross_compile": None,
         "sysroot": None,
@@ -187,6 +189,9 @@ class QtConan(ConanFile):
 
         if self.settings.os != "Macos":
             del self.options.qtmacextras
+
+        if self.settings.os != "Android":
+            del self.options.android_sdk
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -276,8 +281,11 @@ class QtConan(ConanFile):
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
-        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+        if self.settings.os == "Android":
+            if self.options.get_safe("opengl", "no") == "desktop":
+                raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+            if not self.options.get_safe("android_sdk", ""):
+                raise ConanInvalidConfiguration("Path to Android SDK is required to build Qt")
 
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
@@ -736,6 +744,8 @@ class QtConan(ConanFile):
         elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
             args += ["-D_GLIBCXX_USE_CXX11_ABI=1"]
 
+        if self.options.get_safe("android_sdk", ""):
+            args += [f"-android-sdk {self.options.android_sdk}"]
         if self.options.sysroot:
             args += [f"-sysroot {self.options.sysroot}"]
 
@@ -940,6 +950,8 @@ Examples = bin/datadir/examples""")
                     self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime_type = "Release/Debug"
+        if self.settings.os == "Android":
+            del self.info.options.android_sdk
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
