@@ -175,7 +175,6 @@ class Mpg123Conan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
-            fix_apple_shared_install_name(self)
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
