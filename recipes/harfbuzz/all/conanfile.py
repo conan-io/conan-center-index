@@ -86,10 +86,6 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.75.2")
 
-    def package_id(self):
-        if self.options.with_glib and not self.options["glib"].shared:
-            self.info.requires["glib"].full_package_mode()
-
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
