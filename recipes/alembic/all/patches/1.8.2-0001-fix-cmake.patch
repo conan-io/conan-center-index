@@ -1,0 +1,57 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -99,9 +99,6 @@ SET(DARWIN FALSE)
+ IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+     SET(DARWIN TRUE)
+     # suppress rpath warning
+-    IF (POLICY CMP0042)
+-        CMAKE_POLICY(SET CMP0042 OLD)
+-    ENDIF()
+ ENDIF()
+ 
+ IF (APPLE)
+@@ -127,7 +124,6 @@ ENDIF()
+ 
+ # Set some debug vs opt flags
+ if ("${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT MSVC)
+-    add_definitions(-Wall -Werror -Wextra -Wno-unused-parameter -Wno-deprecated)
+     if((CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
+         CMAKE_CXX_COMPILER_ID MATCHES "CLANG")
+         add_definitions( -Wno-error=implicit-fallthrough)
+@@ -215,7 +211,6 @@ INCLUDE("./cmake/AlembicIlmBase.cmake")
+ 
+ # HDF5
+ IF (USE_HDF5)
+-    FIND_PACKAGE(ZLIB REQUIRED)
+     SET(ALEMBIC_WITH_HDF5 "1")
+     INCLUDE("./cmake/AlembicHDF5.cmake")
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5_USE_18_API")
+--- a/lib/Alembic/CMakeLists.txt
++++ b/lib/Alembic/CMakeLists.txt
+@@ -69,21 +69,20 @@ ENDIF()
+ 
+ 
+ TARGET_LINK_LIBRARIES(Alembic
+-    LINK_PUBLIC
++    PUBLIC
+     ${ALEMBIC_ILMBASE_LIBS}
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${EXTERNAL_MATH_LIBS}
+-    LINK_PRIVATE
++    PRIVATE
+     ${HDF5_LIBRARIES}
+-    ${ZLIB_LIBRARY}
+   )
+ 
+ SET( ALEMBIC_LIB_INSTALL_DIR lib CACHE PATH "Where to install the Alembic libs")
+ INSTALL(TARGETS Alembic
+         EXPORT AlembicTargets
+-        LIBRARY DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        ARCHIVE DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        RUNTIME DESTINATION ${ALEMBIC_LIB_INSTALL_DIR})
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ #-******************************************************************************
+ # PACKAGE EXPORTS
