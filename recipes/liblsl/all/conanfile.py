@@ -85,6 +85,7 @@ class LiblslConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LSL")
         self.cpp_info.set_property("cmake_target_name", "LSL::lsl")
         # TODO: back to global scope in conan v2
+        self.cpp_info.components["_liblsl"].requires = ["boost::boost", "pugixml::pugixml"]
         self.cpp_info.components["_liblsl"].libs = ["lsl"]
         self.cpp_info.components["_liblsl"].defines = ["LSLNOAUTOLINK"]
         if not self.options.shared:
