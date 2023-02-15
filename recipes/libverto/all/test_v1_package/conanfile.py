@@ -17,4 +17,3 @@ class TestPackageConan(ConanFile):
 
             for impl in self.deps_user_info["libverto"].backends.split(","):
                 self.run("{} {}".format(bin_path, impl), run_environment=True)
-
