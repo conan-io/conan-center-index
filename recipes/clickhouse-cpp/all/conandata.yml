@@ -1,0 +1,4 @@
+sources:
+  "2.3.0":
+    url: "https://github.com/ClickHouse/clickhouse-cpp/archive/9cf39cacac93ad407e607e144220bc8f742e1afc.tar.gz"
+    sha256: "23aafb117b48d446ba0fce9f5f48e8fb69cfe6b29e0374e7b8909db95354706e"
