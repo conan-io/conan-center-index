@@ -34,7 +34,6 @@ class SentryNativeConan(ConanFile):
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "with_breakpad": ["google", "sentry"],
-        "performance": [True, False],
     }
     default_options = {
         "shared": False,
@@ -44,7 +43,6 @@ class SentryNativeConan(ConanFile):
         "qt": False,
         "with_crashpad": "sentry",
         "with_breakpad": "sentry",
-        "performance": False,
     }
 
     @property
@@ -125,12 +123,6 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
-        if self.options.backend == "crashpad" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
-
-        if self.options.performance:
-            if Version(self.version) < "0.4.14" or Version(self.version) > "0.4.15":
-                raise ConanInvalidConfiguration("Performance monitoring is only valid in 0.4.14 and 0.4.15")
 
     def _cmake_new_enough(self, required_version):
         try:
@@ -163,7 +155,6 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_TRANSPORT"] = self.options.transport
         tc.variables["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
-        tc.variables["SENTRY_PERFORMANCE_MONITORING"] = self.options.performance
         tc.generate()
         CMakeDeps(self).generate()
         if self.options.backend == "breakpad":
