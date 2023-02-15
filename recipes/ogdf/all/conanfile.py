@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from os.path import join
 
 required_conan_version = ">=1.53.0"
@@ -26,9 +26,9 @@ class OGDFConan(ConanFile):
         "fPIC": True,
     }
 
-    # def validate(self):
-    #     if is_msvc(self) and self.options.shared:
-    #         raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,5 +91,6 @@ class OGDFConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-        #if self.settings.os in ["Linux", "FreeBSD"]:
-        #    self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("pthread")
