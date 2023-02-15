@@ -4,7 +4,7 @@ project(test_package LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(lsl CONFIG REQUIRED)
+find_package(LSL CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE LSL::lsl)
