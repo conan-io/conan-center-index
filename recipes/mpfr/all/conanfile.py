@@ -6,7 +6,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanException
-from conan.errors import ConanInvalidConfiguration
 import os
 import re
 import shlex
