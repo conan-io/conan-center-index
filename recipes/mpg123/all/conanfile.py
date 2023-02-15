@@ -7,6 +7,7 @@ from conan.tools.files import get, copy, export_conandata_patches, apply_conanda
 from conan.tools.microsoft import is_msvc
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 required_conan_version = ">=1.53.0"
@@ -174,6 +175,7 @@ class Mpg123Conan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
+            fix_apple_shared_install_name(self)
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -205,6 +207,7 @@ class Mpg123Conan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["libmpg123"].system_libs = ["m"]
+            self.cpp_info.components["libsyn123"].system_libs = ["mvec"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libmpg123"].system_libs = ["shlwapi"]
 
