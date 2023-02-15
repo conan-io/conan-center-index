@@ -11,7 +11,6 @@ import shutil
 
 required_conan_version = ">=1.57.0"
 
-
 class LibtoolConan(ConanFile):
     name = "libtool"
     # package_type = "application", "library" # Hybrid package_type not yet supported
