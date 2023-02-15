@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -75,6 +75,9 @@ class MsdfgenConan(ConanFile):
         tc.variables["MSDFGEN_USE_CPP11"] = True
         tc.variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
         tc.variables["MSDFGEN_INSTALL"] = True
+        if Version(self.version) >= "1.10":
+            tc.variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
+            tc.variables["MSDFGEN_USE_VCPKG"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -88,13 +91,33 @@ class MsdfgenConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "lib"))
         rmdir(self, os.path.join(self.source_folder, "include"))
         # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
-        if is_msvc(self) and Version(self.version) < "1.10":
-            replace_in_file(
-                self,
-                cmakelists,
-                "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
-                "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)",
-            )
+        if is_msvc(self):
+            if Version(self.version) < "1.10":
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
+                    "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)",
+                )
+            else:
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    'set_property(TARGET msdfgen-core PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
+                    ''
+                )
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    'set_property(TARGET msdfgen-ext PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
+                    ''
+                )
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    'set_property(TARGET msdfgen PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
+                    ''
+                )
 
     def build(self):
         self._patch_sources()
