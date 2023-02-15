@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibVertoConan(ConanFile):
@@ -144,8 +144,6 @@ class LibVertoConan(ConanFile):
         #     env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
 
         tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
         pkg = PkgConfigDeps(self)
         pkg.generate()
 
