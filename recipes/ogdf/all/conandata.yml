@@ -1,0 +1,4 @@
+sources:
+  "2022.02":
+    url: "https://github.com/ogdf/ogdf/archive/refs/tags/dogwood-202202.tar.gz"
+    sha256: "308cc2749c6a63520f7979bac86a04066dfea2fb9d3a5e89831318db404bfbf5"
