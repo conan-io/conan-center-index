@@ -7,8 +7,8 @@ required_conan_version = ">=1.43.0"
 
 class RapidFuzzConan(ConanFile):
     name = "rapidfuzz"
-    description = "Rapid fuzzy string matching in C++ using the Levenshtein Distance "
-    topics = ("conan", "cpp", "levenshtein", "string-matching", "string-similarity", "string-comparison")
+    description = "Rapid fuzzy string matching in C++ using the Levenshtein Distance"
+    topics = ("cpp", "levenshtein", "string-matching", "string-similarity", "string-comparison")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/maxbachmann/rapidfuzz-cpp"
     license = "MIT"
@@ -23,4 +23,4 @@ class RapidFuzzConan(ConanFile):
         copy(self, "rapidfuzz/*.impl", self.source_folder, join(self.package_folder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
