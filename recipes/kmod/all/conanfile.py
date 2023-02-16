@@ -46,24 +46,25 @@ class KModConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_openssl:
             self.requires("openssl/3.0.7")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("kmod is Linux-only!")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
