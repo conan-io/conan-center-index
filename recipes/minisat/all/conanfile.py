@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import collect_libs, copy, get
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from os.path import join
 
@@ -33,6 +33,9 @@ class MiniSatConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,6 +62,7 @@ class MiniSatConan(ConanFile):
         return f"minisat-lib-{'shared' if self.options.shared else 'static'}"
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target=self._determine_lib_name())
@@ -69,7 +73,6 @@ class MiniSatConan(ConanFile):
         if self.options.shared:
             copy(self, pattern="*.so*", src=self.build_folder, dst=join(self.package_folder, "lib"))
             copy(self, pattern="*.dylib*", src=self.build_folder, dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.dll*", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
         else:
             copy(self, pattern="*.a", src=self.build_folder, dst=join(self.package_folder, "lib"))
             copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
