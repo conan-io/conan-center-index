@@ -71,6 +71,7 @@ class CppunitConan(ConanFile):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
         if is_apple_os(self):
+            # https://github.com/conan-io/conan-center-index/pull/15759#issuecomment-1419046535
             tc.extra_ldflags.append("-headerpad_max_install_names")
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
