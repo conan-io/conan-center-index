@@ -441,20 +441,24 @@ Doing so requires [deleting the option from the `package_id`](adding_packages/co
 
 ## Can I use full_package_mode for a requirement in my recipe?
 
-For some unusual projects, they need to be aligned and being used as requirement, using the very same version, options and settings.
-Those projects usually break between patch versions and are very sentsitive, so we can not use different versions throught Conan graph dependencies,
-otherwise, it may result on unexpected behavior, or even runtime errors.
+For some not regular projects, they may need to be aligned when being used as a requirement, using the very same version, options, and settings and maybe not mixing shared with static linkage.
+Those projects usually break between patch versions and are very sensitive, so we can not use different versions through Conan graph dependencies,
+otherwise, it may result in unexpected behavior or even runtime errors.
 
-A very kwnon project is [glib](https://conan.io/center/glib), which requires the very same configuration to prevent multiple instances when using static link. As solution, we could consume glib on full package id mode, like:
+A very known project is GLib, which requires the very same configuration to prevent multiple instances when using static linkage.
+As a solution, we could consume glib on full package id mode, like:
 
 ```python
 def package_id(self):
     self.info.requires["glib"].full_package_mode()
 ```
 
-Perfect solution on consumer side, but there is a painful side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests.
-As workaround, it would be necessary updating all recipes involved, by opening new PRs, then it should generate new packages, but it takes many days and still is a fragile process.
+Perfect solution on the consumer side, but there is a painful side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph with which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests.
+As a trade-off, it would be necessary to update all recipes involved, by opening new PRs,
+then it should generate new packages, but it takes many days and still is a process that is not supported by CCI internally.
 
-To have more context about it, please, visit the issues #11684 and #11022
+To have more context about it, please, visit issues #11684 and #11022
 
-In summary, we do recommend `full_package_mode` usage on CCI. Instead, prefer using `shared=True` by default, when is really needed.
+In summary, we do not recommend `full_package_mode` or any other custom package id mode for requirements on CCI, it will break other PRs soon or later.
+Instead, prefer using `shared=True` by default, when needed.
+Also, when having a similar situation, do not hesitate in opening an issue explaining your case, and ask for support from the community.
