@@ -25,4 +25,3 @@ index 3a24eee..a53c65a 100644
    orig_installdir="$bindir" # see Makefile.am's *_SCRIPTS variables
    func_find_curr_installdir # determine curr_installdir
    func_find_prefixes
-   
