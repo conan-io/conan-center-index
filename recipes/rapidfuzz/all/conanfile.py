@@ -1,6 +1,8 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, copy
+from os.path import join
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class RapidFuzzConan(ConanFile):
@@ -12,17 +14,13 @@ class RapidFuzzConan(ConanFile):
     license = "MIT"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="rapidfuzz/*.hpp", dst="include", src=self._source_subfolder)
+        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
+        copy(self, "rapidfuzz/*.hpp", self.source_folder, join(self.package_folder, "include"))
+        copy(self, "rapidfuzz/*.impl", self.source_folder, join(self.package_folder, "include"))
 
     def package_id(self):
         self.info.header_only()
