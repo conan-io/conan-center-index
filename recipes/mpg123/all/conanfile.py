@@ -7,7 +7,6 @@ from conan.tools.files import get, copy, export_conandata_patches, apply_conanda
 from conan.tools.microsoft import is_msvc
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
-from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 required_conan_version = ">=1.53.0"
