@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
-from conan.tools.build import can_run, check_min_cppstd, default_cppstd, supported_cppstd
+from conan.tools.build import can_run, check_min_cppstd, supported_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -18,6 +18,7 @@ class FollyConan(ConanFile):
     homepage = "https://github.com/facebook/folly"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,7 +33,7 @@ class FollyConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17 if Version(self.version) >= "2022.01.31.00" else 14
+        return "17" if Version(self.version) >= "2022.01.31.00" else "14"
 
     @property
     def _compilers_minimum_version(self):
@@ -41,26 +42,13 @@ class FollyConan(ConanFile):
             "gcc": "5",
             "clang": "6",
             "apple-clang": "8",
-        } if self._min_cppstd == 14 else {
+        } if self._min_cppstd == "14" else {
             "gcc": "7",
             "Visual Studio": "16",
             "clang": "6",
             "apple-clang": "10",
         }
 
-    def _cppstd_less_than(self, cppstd, min_cppstd):
-        def less_than(lhs, rhs):
-            def extract_cpp_version(_cppstd):
-                return str(_cppstd).replace("gnu", "")
-
-            def add_millennium(_cppstd):
-                return "19%s" % _cppstd if _cppstd == "98" else "20%s" % _cppstd
-
-            lhs = add_millennium(extract_cpp_version(lhs))
-            rhs = add_millennium(extract_cpp_version(rhs))
-            return lhs < rhs
-        return less_than(cppstd, min_cppstd)
-        
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -116,17 +104,11 @@ class FollyConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         supported_cppstds = supported_cppstd(self)
-        if not supported_cppstds or str(self._min_cppstd) not in supported_cppstds:
+        if supported_cppstds and self._min_cppstd not in supported_cppstds:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 f" Supported cppstds: {supported_cppstds}"
             )
-
-        def_cppstd = default_cppstd(self)
-        if not compiler_cppstd and self._cppstd_less_than(def_cppstd, self._min_cppstd):
-            self.output.info(f"{self.requires} requires C++{self._min_cppstd}, '-s compiler.cppstd' is not provided"
-                             f" and your compiler default C++ standard ({def_cppstd}) is too low."
-                             f" Forcing {self._min_cppstd}.")
 
         if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
@@ -198,10 +180,7 @@ class FollyConan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        def_cppstd = default_cppstd(self)
-        backup_cppstd = str(self._min_cppstd) if self._cppstd_less_than(def_cppstd, self._min_cppstd) else def_cppstd
-        cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", backup_cppstd))
-
+        cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", self._min_cppstd))
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
             tc.variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
