@@ -457,4 +457,4 @@ As workaround, it would be necessary updating all recipes involved, by opening n
 
 To have more context about it, please, visit the issues #11684 and #11022
 
-In summary, we do not recommend `full_package_mode` usage on CCI. Instead, prefer using `shared=True` by default, when is really needed.
+In summary, we do recommend `full_package_mode` usage on CCI. Instead, prefer using `shared=True` by default, when is really needed.
