@@ -1,5 +1,7 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 from os.path import join
 
 required_conan_version = ">=1.43.0"
@@ -14,6 +16,9 @@ class RapidFuzzConan(ConanFile):
     license = "MIT"
     no_copy_source = True
 
+    def layout(self):
+        basic_layout(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -24,3 +29,7 @@ class RapidFuzzConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 17)
