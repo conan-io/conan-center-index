@@ -1,15 +1,14 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain, Autotools
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
 from conan.tools.scm import Version
 
-import os
-
 required_conan_version = ">=1.57.0"
-
 
 class GetTextConan(ConanFile):
     name = "gettext"
@@ -24,10 +23,6 @@ class GetTextConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -46,9 +41,9 @@ class GetTextConan(ConanFile):
         if is_msvc(self):
             self.build_requires("automake/1.16.5")
 
-    def validate(self):
-        if Version(self.version) < "0.21" and is_msvc(self):
-            raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
+    # def validate(self):
+    #     if Version(self.version) < "0.21" and is_msvc(self):
+    #         raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
 
     def package_id(self):
         del self.info.settings.compiler
@@ -60,9 +55,6 @@ class GetTextConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
-        # tc = AutotoolsDeps(self)
-        # tc.generate()
 
         tc = AutotoolsToolchain(self)
         libiconv = self.dependencies["libiconv"]
@@ -83,7 +75,6 @@ class GetTextConan(ConanFile):
             "--disable-libasprintf",
             "--disable-curses",
         ])
-       
 
         if is_msvc(self):
             if check_min_vs(self, "180", raise_invalid=False):
@@ -113,8 +104,6 @@ class GetTextConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "gettext-tools", "misc", "autopoint.in"), "@prefix@", "$GETTEXT_ROOT_UNIX")
-        replace_in_file(self, os.path.join(self.source_folder, "gettext-tools", "misc", "autopoint.in"), "@datarootdir@", "$prefix/res")
 
         autotools = Autotools(self)
         autotools.configure()
@@ -140,7 +129,6 @@ class GetTextConan(ConanFile):
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
-        self.buildenv_info.define_path("GETTEXT_ROOT_UNIX", self.package_folder)
         
         # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
         bindir = os.path.join(self.package_folder, "bin")
@@ -152,4 +140,3 @@ class GetTextConan(ConanFile):
 
         self.output.info("Setting AUTOPOINT environment variable: {}".format(autopoint))
         self.env_info.AUTOPOINT = unix_path_package_info_legacy(self, autopoint)
-        self.env_info.GETTEXT_ROOT_UNIX = unix_path_package_info_legacy(self, self.package_folder)
