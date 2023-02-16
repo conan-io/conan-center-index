@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -41,6 +41,9 @@ class TestPackageConan(ConanFile):
 
         runenv = VirtualRunEnv(self)
         runenv.generate()
+
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
     def build(self):
 

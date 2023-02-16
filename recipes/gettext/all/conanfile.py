@@ -61,16 +61,17 @@ class GetTextConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        # tc = AutotoolsDeps(self)
+        # tc.generate()
 
         tc = AutotoolsToolchain(self)
-        libiconv_prefix = unix_path(self, self.dependencies["libiconv"].package_folder)
+        libiconv = self.dependencies["libiconv"]
+        libiconv_root = unix_path(self, libiconv.package_folder)
         tc.configure_args.extend([
             "HELP2MAN=/bin/true",
             "EMACS=no",
             "--datarootdir=${prefix}/res",
-            "--with-libiconv-prefix={}".format(libiconv_prefix),
+            "--with-libiconv-prefix={}".format(libiconv_root),
             "--disable-shared",
             "--disable-static",
             "--disable-nls",
@@ -88,6 +89,11 @@ class GetTextConan(ConanFile):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS") #TODO: reference github issue
 
+            iconv_includedir = unix_path(self, libiconv.cpp_info.aggregated_components().includedirs[0])
+            iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
+            tc.extra_cflags.append(f"-I{iconv_includedir}")
+            tc.extra_ldflags.append(f"-L{iconv_libdir}")
+
             env = Environment()
             compile_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper")
             lib_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper")
@@ -95,15 +101,15 @@ class GetTextConan(ConanFile):
             env.define("LD", "link -nologo")
             env.define("NM", "dumpbin -symbols")
             env.define("STRIP", ":")
-            env.define("AR", "{} lib".format(unix_path(lib_wrapper)))
+            env.define("AR", "{} lib".format(unix_path(self, lib_wrapper)))
             env.define("RANLIB", ":")
+            env.prepend("CPPFLAGS", f"-I{iconv_includedir}")
+
             windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
             env.define("RC", f"windres --target=pe-{windres_arch}")
             env.vars(self).save_script("conanbuild_msvc")
 
-
         tc.generate()
-
 
     def build(self):
         apply_conandata_patches(self)
@@ -113,7 +119,6 @@ class GetTextConan(ConanFile):
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
-
 
     def package(self):
         autotools = Autotools(self)
@@ -134,8 +139,8 @@ class GetTextConan(ConanFile):
         aclocal = os.path.join(self.package_folder, "res", "aclocal")
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
-        self.buildenv_info.define("AUTOPOINT", autopoint)
-        self.buildenv_info.define("GETTEXT_ROOT_UNIX", self.package_folder)
+        self.buildenv_info.define_path("AUTOPOINT", autopoint)
+        self.buildenv_info.define_path("GETTEXT_ROOT_UNIX", self.package_folder)
         
         # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
         bindir = os.path.join(self.package_folder, "bin")
