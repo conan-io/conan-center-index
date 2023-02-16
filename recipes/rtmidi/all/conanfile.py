@@ -90,7 +90,7 @@ class RtMidiConan(ConanFile):
         self.cpp_info.components["librtmidi"].libs = ["rtmidi"]
         if is_apple_os(self):
             self.cpp_info.components["librtmidi"].frameworks.extend(
-                ["CoreFoundation", "CoreAudio", "CoreMidi", "CoreServices"]
+                ["CoreFoundation", "CoreAudio", "CoreMIDI", "CoreServices"]
             )
         elif self.settings.os == "Windows":
             self.cpp_info.components["librtmidi"].system_libs.append("winmm")
