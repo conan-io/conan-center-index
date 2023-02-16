@@ -30,6 +30,9 @@ class TestPackageConan(ConanFile):
         basic_layout(self, src_folder="src")
         
     def generate(self):
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
         at = AutotoolsToolchain(self)
         at.generate()
 
@@ -41,9 +44,6 @@ class TestPackageConan(ConanFile):
 
         runenv = VirtualRunEnv(self)
         runenv.generate()
-
-        buildenv = VirtualBuildEnv(self)
-        buildenv.generate()
 
     def build(self):
 
