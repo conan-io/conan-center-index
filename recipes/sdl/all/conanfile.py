@@ -488,6 +488,12 @@ class SDLConan(ConanFile):
             self.cpp_info.components["libsdl2"].system_libs = ["user32", "gdi32", "winmm", "imm32", "ole32", "oleaut32", "version", "uuid", "advapi32", "setupapi", "shell32"]
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["libsdl2"].system_libs.append("mingw32")
+        elif self.settings.os == "Android" and not self.options.shared:
+            self.cpp_info.components["libsdl2"].system_libs.extend(["android", "dl", "log"])
+            if self.options.opengles:
+                self.cpp_info.components["libsdl2"].system_libs.extend(["GLESv1_CM", "GLESv2"])
+            if Version(self.version) >= "2.0.16":
+                self.cpp_info.components["libsdl2"].system_libs.append("OpenSLES")
 
         # SDL2main
         if self.options.sdl2main:
