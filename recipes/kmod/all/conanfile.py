@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, save
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
@@ -59,7 +59,6 @@ class KModConan(ConanFile):
             raise ConanInvalidConfiguration("kmod is Linux-only!")
 
     def build_requirements(self):
-        self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
@@ -94,9 +93,7 @@ class KModConan(ConanFile):
         tc.generate()
 
     def build(self):
-        save(self, os.path.join(self.source_folder, "libkmod", "docs", "gtk-doc.make"), "")
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
