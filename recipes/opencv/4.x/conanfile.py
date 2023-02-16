@@ -97,6 +97,7 @@ class OpenCVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -1242,7 +1243,8 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
             for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                # TODO: use self.dependencies once https://github.com/conan-io/conan/issues/12728 fixed
+                # FIXME: use self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
+                # once fixed in ffmpeg recipe.
                 ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
                 tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
 
@@ -1490,7 +1492,7 @@ class OpenCVConan(ConanFile):
             return False
         gtk_version = self.dependencies["gtk"].ref.version
         if gtk_version == "system":
-            return self.options["gtk"].version == 2
+            return self.dependencies["gtk"].options.version == 2
         else:
             return Version(gtk_version) < "3.0.0"
 
