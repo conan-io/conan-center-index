@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.meson import Meson, MesonToolchain, MesonDeps
+from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 
@@ -107,9 +107,6 @@ class PistacheConan(ConanFile):
             tc.generate()
 
             tc = PkgConfigDeps(self)
-            tc.generate()
-
-            tc = MesonDeps(self)
             tc.generate()
 
             env = VirtualBuildEnv(self)
