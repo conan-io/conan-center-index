@@ -1012,9 +1012,9 @@ class OpenCVConan(ConanFile):
             self.requires("intel-ipp/2020")
         # dnn module dependencies
         if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}")
+            self.requires(f"protobuf/{self._protobuf_version}", run=not cross_building(self))
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-headers/1.3.236.0")
+            self.requires("vulkan-headers/1.3.239.0")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2a")
@@ -1022,12 +1022,12 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.7")
+            self.requires("qt/5.15.8")
         # imgcodecs module dependencies
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_jpeg2000") == "jasper":
@@ -1041,7 +1041,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
         if self.options.get_safe("with_gdal"):
             self.requires("gdal/3.5.2")
         if self.options.get_safe("with_gdcm"):
@@ -1059,7 +1059,7 @@ class OpenCVConan(ConanFile):
             self.requires("harfbuzz/6.0.0")
         # hdf module dependencies
         if self.options.hdf:
-            self.requires("hdf5/1.13.1")
+            self.requires("hdf5/1.14.0")
         # ovis module dependencies
         if self.options.ovis:
             self.requires("ogre/1.10.2")
@@ -1069,7 +1069,7 @@ class OpenCVConan(ConanFile):
             self.requires("glog/0.6.0")
         # text module dependencies
         if self.options.get_safe("with_tesseract"):
-            self.requires("tesseract/5.2.0")
+            self.requires("tesseract/5.3.0")
 
     def package_id(self):
         # deprecated options
