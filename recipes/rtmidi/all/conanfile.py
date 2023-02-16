@@ -1,7 +1,11 @@
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class RtMidiConan(ConanFile):
@@ -12,8 +16,6 @@ class RtMidiConan(ConanFile):
     topics = ("midi")
     license = "MIT+send-patches-upstream"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "pkg_config"
-    exports_sources = "CMakeLists.txt", "patches/*"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -33,6 +35,9 @@ class RtMidiConan(ConanFile):
     def _with_alsa(self):
         return self.settings.os == "Linux"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -41,43 +46,55 @@ class RtMidiConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self._with_alsa:
             self.requires("libalsa/1.2.4")
 
     def build_requirements(self):
-        if self._with_alsa:
-            self.build_requires("pkgconf/1.7.4")
+        if self._with_alsa and not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["RTMIDI_BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["RTMIDI_BUILD_TESTING"] = False
+        tc.generate()
+        if self._with_alsa:
+            tc = CMakeDeps(self)
+            tc.generate()
+            tc = VirtualBuildEnv(self)
+            tc.generate(scope="build")
+
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        if Version(self.version) < "5.0.0":
+            os.makedirs(os.path.join(self.package_folder, "include", "rtmidi"))
+            os.rename(
+                os.path.join(self.package_folder, "include", "RtMidi.h"),
+                os.path.join(self.package_folder, "include", "rtmidi", "RtMidi.h"),
+            )
 
     def package_info(self):
-        if tools.Version(self.version) >= "5.0.0":
-            self.cpp_info.components["librtmidi"].includedirs = [os.path.join("include", "rtmidi")]
+        self.cpp_info.components["librtmidi"].includedirs = [os.path.join("include", "rtmidi")]
 
+        self.cpp_info.set_property("cmake_module_file_name", "RtMidi")
+        self.cpp_info.set_property("cmake_module_target_name", "RtMidi::rtmidi")
         self.cpp_info.set_property("cmake_file_name", "RtMidi")
         self.cpp_info.set_property("cmake_target_name", "RtMidi::rtmidi")
         self.cpp_info.components["librtmidi"].set_property("cmake_target_name", "RtMidi::rtmidi")
