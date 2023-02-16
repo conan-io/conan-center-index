@@ -14,6 +14,7 @@ required_conan_version = ">=1.54.0"
 
 class XorgProtoConan(ConanFile):
     name = "xorg-proto"
+    package_type = "header-library"
     description = "This package provides the headers and specification documents defining " \
         "the core protocol and (many) extensions for the X Window System."
     topics = ("specification", "x-window")
@@ -21,8 +22,6 @@ class XorgProtoConan(ConanFile):
     homepage = "https://gitlab.freedesktop.org/xorg/proto/xorgproto"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-
-    package_type = "application"
     generators = "PkgConfigDeps"
 
     def layout(self):
@@ -33,18 +32,18 @@ class XorgProtoConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires("automake/1.16.3")
-        self.build_requires("xorg-macros/1.19.3")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("xorg-macros/1.19.3")
+        self.tool_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            self.build_requires("msys2/cci.latest")
+            self.tool_requires("msys2/cci.latest")
 
     def requirements(self):
         if hasattr(self, "settings_build"):
             self.requires("xorg-macros/1.19.3")
 
     def package_id(self):
-        # self.info.header_only() would be fine too, but keep the os to add c3i test coverage for Windows.
+        # self.info.clear() would be fine too, but keep the os to add c3i test coverage for Windows.
         del self.info.settings.arch
         del self.info.settings.build_type
         del self.info.settings.compiler
@@ -64,7 +63,7 @@ class XorgProtoConan(ConanFile):
         tc.generate(env)
 
         autotools = Autotools(self)
-        autotools.configure(build_script_folder=self.source_folder)
+        autotools.configure()
 
     def build(self):
         apply_conandata_patches(self)
