@@ -2,10 +2,10 @@ from conan import ConanFile
 from conans import tools
 from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rm, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import glob
 import os
@@ -45,7 +45,7 @@ class Krb5Conan(ConanFile):
     exports_sources = "patches/*"
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
