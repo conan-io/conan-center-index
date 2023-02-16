@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.tools.files import chdir, copy, rmdir, get, save, load
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+
 import os
 import json
 
@@ -113,6 +114,11 @@ class CMakeConan(ConanFile):
                 tc.variables["HAVE_POLL_FINE_EXITCODE"] = ''
                 tc.variables["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             tc.generate()
+            tc = CMakeDeps(self)
+            # CMake tries to consume openssl::openssl target by default but it fails when checking
+            tc.set_property("openssl", "cmake_find_mode", "module")
+            tc.generate()
+
 
     def build(self):
         if self.options.bootstrap:
