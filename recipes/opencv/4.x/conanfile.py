@@ -50,6 +50,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
         "with_imgcodec_sunraster": [True, False],
+        "with_msmf": [True, False],
+        "with_msmf_dxva": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
@@ -86,6 +88,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
         "with_imgcodec_sunraster": False,
+        "with_msmf": True,
+        "with_msmf_dxva": True,
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
@@ -126,6 +130,9 @@ class OpenCVConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_gtk
             del self.options.with_v4l
+        if self.settings.os != "Windows":
+            del self.options.with_msmf
+            del self.options.with_msmf_dxva
 
         if self._has_with_ffmpeg_option:
             # Following the packager choice, ffmpeg is enabled by default when
@@ -430,8 +437,8 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         tc.variables["WITH_DSHOW"] = is_msvc(self)
-        tc.variables["WITH_MSMF"] = is_msvc(self)
-        tc.variables["WITH_MSMF_DXVA"] = is_msvc(self)
+        tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
+        tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 
