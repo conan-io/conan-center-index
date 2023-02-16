@@ -72,7 +72,21 @@ class OGDFConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        # use cci packages where available 
+        replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)\nfind_package(pugixml REQUIRED CONFIG)")
+        replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp pugixml::pugixml)")
+        # replace pugixml copy in repo by conan dependency
+        for dir_name, file_name in [("include", "GexfParser.h"),
+                                    ("include", "GraphMLParser.h"),
+                                    ("include", "SvgPrinter.h"),
+                                    ("include", "TsplibXmlParser.h"),
+                                    ("src", "GraphIO_graphml.cpp"),
+                                    ("src", "GraphIO_gexf.cpp")]:
+            replace_in_file(self, join(self.source_folder, dir_name, "ogdf", "fileformats", file_name), "ogdf/lib/pugixml/pugixml.h", "pugixml.hpp")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="OGDF")
