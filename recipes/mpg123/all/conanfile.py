@@ -15,7 +15,7 @@ required_conan_version = ">=1.53.0"
 class Mpg123Conan(ConanFile):
     name = "mpg123"
     description = "Fast console MPEG Audio Player and decoder library"
-    topics = ("mpg123", "mpeg", "audio", "player", "decoder")
+    topics = ("mpeg", "audio", "player", "decoder")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpg123.org/"
     license = "LGPL-2.1-or-later", "GPL-2.0-or-later"
