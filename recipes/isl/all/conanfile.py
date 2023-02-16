@@ -116,9 +116,9 @@ class IslConan(ConanFile):
                 if os.path.exists(command):
                     self.run(command)
         autotools = Autotools(self)
-        if self.version == "0.24" and is_msvc(self) and msvc_runtime_flag(self).startswith("MD"):
-            # Need to pass MSVC runtime flag to configure to avoid trying to mix runtime library types
-            autotools.configure(args=[f'CFLAGS_FOR_BUILD=-{msvc_runtime_flag(self)}'])
+        if is_msvc(self) and self.version == "0.24" and msvc_runtime_flag(self).startswith("MD"):
+            # Pass BUILD flags to avoid confusion with GCC and mixing of runtime variants
+            autotools.configure(args=['CC_FOR_BUILD=cl -nologo', f'CFLAGS_FOR_BUILD=-{msvc_runtime_flag(self)}'])
         else:
             autotools.configure()
         autotools.make()
