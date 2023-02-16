@@ -58,7 +58,13 @@ class OGDFConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        # use cci packages where available 
+        # delete code from other cci packages
+        rmdir(self, join(self.source_folder, "src", "coin"))
+        rmdir(self, join(self.source_folder, "include", "coin"))
+        rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "backward"))
+        rmdir(self, join(self.source_folder, "src", "ogdf", "lib", "pugixml"))
+        rmdir(self, join(self.source_folder, "include", "ogdf", "lib", "pugixml"))
+        # use cci packages where available
         replace_in_file(self, join(self.source_folder, "CMakeLists.txt"), "include(coin)", "find_package(coin-clp REQUIRED CONFIG)\nfind_package(pugixml REQUIRED CONFIG)")
         replace_in_file(self, join(self.source_folder, "cmake", "ogdf.cmake"), "target_link_libraries(OGDF PUBLIC COIN)", "target_link_libraries(OGDF PUBLIC coin-clp::coin-clp pugixml::pugixml)")
         # replace pugixml copy in repo by conan dependency
