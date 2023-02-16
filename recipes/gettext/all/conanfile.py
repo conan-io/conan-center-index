@@ -80,6 +80,9 @@ class GetTextConan(ConanFile):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS") #TODO: reference github issue
 
+            # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
+            # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
+            # following outstanding issue: https://github.com/conan-io/conan/issues/12784
             iconv_includedir = unix_path(self, libiconv.cpp_info.aggregated_components().includedirs[0])
             iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
             tc.extra_cflags.append(f"-I{iconv_includedir}")
@@ -94,6 +97,9 @@ class GetTextConan(ConanFile):
             env.define("STRIP", ":")
             env.define("AR", "{} lib".format(unix_path(self, lib_wrapper)))
             env.define("RANLIB", ":")
+
+            # One of the checks performed by the configure script requires this as a preprocessor flag
+            # rather than a C compiler flag
             env.prepend("CPPFLAGS", f"-I{iconv_includedir}")
 
             windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
