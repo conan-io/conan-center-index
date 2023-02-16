@@ -1,6 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -87,11 +88,11 @@ class RtMidiConan(ConanFile):
         # TODO: back to global scope in conan v2
         self.cpp_info.components["librtmidi"].includedirs = [os.path.join("include", "rtmidi")]
         self.cpp_info.components["librtmidi"].libs = ["rtmidi"]
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.components["librtmidi"].frameworks.extend(
-                ["CoreFoundation", "CoreAudio", "CoreMidi"]
+                ["CoreFoundation", "CoreAudio", "CoreMidi", "CoreServices"]
             )
-        if self.settings.os == "Windows":
+        elif self.settings.os == "Windows":
             self.cpp_info.components["librtmidi"].system_libs.append("winmm")
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["librtmidi"].system_libs.append("pthread")
