@@ -6,7 +6,7 @@ from conan.tools.microsoft import unix_path, unix_path_package_info_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.53.2"
+required_conan_version = ">=1.57"
 
 
 class XorgMacrosConan(ConanFile):
@@ -33,8 +33,8 @@ class XorgMacrosConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            self.build_requires("msys2/cci.latest")
-        self.build_requires("automake/1.16.3")
+            self.tool_requires("msys2/cci.latest")
+        self.tool_requires("automake/1.16.5")
 
     def package_id(self):
         self.info.clear()
@@ -45,16 +45,16 @@ class XorgMacrosConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        conf_args = [
-            f"--datarootdir={unix_path(self._datarootdir)}",
-        ]
-        tc.configure_args(args=conf_args)
+        tc.configure_args.extend(
+            ["--datarootdir=${prefix}/bin/share"]
+        )
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        with files.chdir(self, self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=self._settings_build.os == "Windows")
+
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
@@ -81,6 +81,9 @@ class XorgMacrosConan(ConanFile):
             name="util-macros",
         ))
 
-        aclocal = unix_path_package_info_legacy(os.path.join(self._datarootdir, "aclocal"))
+        aclocal = os.path.join(self._datarootdir, "aclocal")
+        self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
+
+        # TODO: remove once recipe only supports Conan >= 2.0 only
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, aclocal ))
