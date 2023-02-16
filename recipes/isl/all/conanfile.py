@@ -20,12 +20,17 @@ class IslConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_int": ["gmp", "imath", "imath-32"],
+        "autogen": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_int": "gmp",
+        "autogen": False,
     }
+
+    def package_id(self):
+        self.info.options.rm_safe("autogen")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -65,10 +70,10 @@ class IslConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        # The following are needed when building from Git source
-        self.tool_requires("autoconf/2.71")    # Needed for autoreconf
-        self.tool_requires("automake/1.16.5")  # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
-        self.tool_requires("libtool/2.4.7")    # Needed for libtool
+        if self.options.autogen:
+            self.tool_requires("autoconf/2.71")    # Needed for autoreconf
+            self.tool_requires("automake/1.16.5")  # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
+            self.tool_requires("libtool/2.4.7")    # Needed for libtool
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -99,23 +104,17 @@ class IslConan(ConanFile):
                 tc.extra_cflags = ["-FS"]
         env = tc.environment()
         if is_msvc(self):
-            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
-            env.define("AR", f'{ar_wrapper} "lib -nologo"')
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
         tc.generate(env)
 
     def build(self):
-        apply_conandata_patches(self)
-        # Support building with source from Git repo
-        with chdir(self, self.source_folder):
-            command = "./autogen.sh"
-            if os.path.exists(command) and not os.path.exists("configure"):
-                self.run(command)
+        if self.options.autogen:
+            apply_conandata_patches(self) # Currently, the only patch is for the autogen use case
+            with chdir(self, self.source_folder):
+                command = "./autogen.sh"
+                if os.path.exists(command):
+                    self.run(command)
         autotools = Autotools(self)
         # Need to pass MSVC runtime flag for configure to avoid trying to mix runtime library types
         autotools.configure(args=[f'CFLAGS_FOR_BUILD=-{msvc_runtime_flag(self)}'] if is_msvc(self) else None)
