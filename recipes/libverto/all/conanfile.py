@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.layout import basic_layout
 import os
