@@ -41,9 +41,9 @@ class GetTextConan(ConanFile):
         if is_msvc(self):
             self.build_requires("automake/1.16.5")
 
-    # def validate(self):
-    #     if Version(self.version) < "0.21" and is_msvc(self):
-    #         raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
+    def validate(self):
+        if Version(self.version) < "0.21" and is_msvc(self):
+            raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
 
     def package_id(self):
         del self.info.settings.compiler
