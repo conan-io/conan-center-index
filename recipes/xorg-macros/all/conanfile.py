@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path, unix_path_package_info_legacy
+from conan.tools.microsoft import unix_path_package_info_legacy
 import os
 import textwrap
 
@@ -19,7 +19,7 @@ class XorgMacrosConan(ConanFile):
     settings = "os"
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
