@@ -58,7 +58,10 @@ class VkBootstrapConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.236.0", transitive_headers=True)
+        if Version(self.version) < "0.7":
+            self.requires("vulkan-headers/1.3.236.0", transitive_headers=True)
+        else:
+            self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
