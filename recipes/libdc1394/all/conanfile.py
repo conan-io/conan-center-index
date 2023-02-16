@@ -1,28 +1,33 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class Libdc1394Conan(ConanFile):
     name = "libdc1394"
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = 'https://damien.douxchamps.net/ieee1394/libdc1394/'
+    homepage = "https://damien.douxchamps.net/ieee1394/libdc1394/"
     description = "libdc1394 provides a complete high level API to control IEEE 1394 based cameras"
-    topics = ("conan", "ieee1394", "camera", "iidc", "dcam")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    topics = ("ieee1394", "camera", "iidc", "dcam")
 
-    generators = "pkg_config"
-    _env_build = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,65 +35,69 @@ class Libdc1394Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libusb/1.0.24")
+        self.requires("libusb/1.0.26")
 
     def validate(self):
-        if self.settings.os == "Windows":
+        if self.info.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported yet in this recipe")
-        if self.settings.compiler == "clang":
+        if self.info.settings.compiler == "clang":
             raise ConanInvalidConfiguration("Clang doesn't support VLA")
 
     def build_requirements(self):
-        self.build_requires("gnu-config/cci.20201022")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("gnu-config/cci.20210814")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-examples")
+        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
-    def _configure_autotools(self):
-        if not self._env_build:
-            self._env_build = AutoToolsBuildEnvironment(self)
-            if self.options.shared:
-                args = ["--disable-static", "--enable-shared"]
-            else:
-                args = ["--disable-shared", "--enable-static"]
-            args.extend(["--disable-examples"])
-            self._env_build.configure(args=args)
-        return self._env_build
+    def _patch_sources(self):
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
     def build(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-        with tools.chdir(self._source_subfolder):
-            env_build = self._configure_autotools()
-            env_build.make()
+        self._patch_sources()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
-            env_build = self._configure_autotools()
-            env_build.install()
-
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libdc1394-{}".format(tools.Version(self.version).major)
+        self.cpp_info.set_property("pkg_config_name", f"libdc1394-{Version(self.version).major}")
         self.cpp_info.libs = ["dc1394"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-        elif tools.is_apple_os(self.settings.os):
+        elif is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "IOKit"])

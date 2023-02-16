@@ -1,0 +1,13 @@
+sources:
+  "3.3.0":
+    sha256: "b76c0103c7ed07c137bd5b1988b9c09da280bbbad37588a096d2954c8d996e0f"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.3.0.tar.gz"
+  "3.2.0":
+    sha256: "0604e5978fb65d5b27868892c931902cdd320ca6d623b555141060a715394453"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.2.0.tar.gz"
+  "3.1.0":
+    sha256: "c8b70ee63822ee21f25c201806e464100686b1faca5aeabeee96378d2a2c3be8"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.1.0.tar.gz"
+  "3.0.0":
+    sha256: "c36052b28b4f28698a6d6f3ad988d7979f6bf6823ebf2af2074714fde15dc19c"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.0.0.tar.gz"

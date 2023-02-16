@@ -1,0 +1,33 @@
+name: 'Package: New Version'
+description: If an existing package recipe needs an update for a new upstream version
+title: '[request] <LIBRARY-NAME>/<LIBRARY-VERSION>'
+labels: 'upstream update'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to submit your request.
+        **Please don't forget to update the issue title.**
+  - type: input
+    id: package
+    attributes:
+      label: Package Name/Version
+      placeholder: cmake/3.25.1
+    validations:
+      required: true
+  - type: input
+    id: changelog
+    attributes:
+      label: Changelog
+      placeholder: https://cmake.org/cmake/help/latest/release/3.25.html
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Context about the new update
+      value: |
+        The above-mentioned version is newly released by the upstream project and not yet available as a recipe.
+        Please add this version.
+    validations:
+      required: true

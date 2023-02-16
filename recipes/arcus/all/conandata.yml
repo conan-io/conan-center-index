@@ -2,3 +2,9 @@ sources:
   "4.9.1":
     url: "https://github.com/Ultimaker/libArcus/archive/refs/tags/4.9.1.tar.gz"
     sha256: "18d939fd2428c72fdce35a286c196438327cfc3c8476e463e5ca46570168c9ce"
+patches:
+  "4.9.1":
+    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/0002-protobuf-compat-ge-3.18.patch"
+      patch_description: "Compatibility with protobuf >= 3.18"
+      patch_type: "portability"

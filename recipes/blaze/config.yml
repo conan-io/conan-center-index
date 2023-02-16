@@ -1,5 +1,5 @@
 versions:
-  "3.7":
-    folder: all
   "3.8":
+    folder: all
+  "3.7":
     folder: all

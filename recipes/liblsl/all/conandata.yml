@@ -1,0 +1,4 @@
+sources:
+  "1.16.0":
+    url: "https://github.com/sccn/liblsl/archive/refs/tags/v1.16.0.tar.gz"
+    sha256: "57d9ab0451d6d1a2068f45e4609c67d52c9c0c76d06c07e625034bea4bc01720"

@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(gcem REQUIRED CONFIG)
 
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
-set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE gcem)
+target_compile_features(${CMAKE_PROJECT_NAME} PRIVATE cxx_std_11)

@@ -41,16 +41,27 @@
  
  
  ###############################################################################
-@@ -74,6 +74,8 @@ endif()
+@@ -74,6 +74,19 @@ endif()
  add_library(backward ${libtype} backward.cpp)
  target_compile_definitions(backward PUBLIC ${BACKWARD_DEFINITIONS})
  target_include_directories(backward PUBLIC ${BACKWARD_INCLUDE_DIRS})
 +target_compile_features(backward PUBLIC cxx_std_11)
-+conan_target_link_libraries(backward)
++if(STACK_DETAILS_DW)
++    find_package(elfutils REQUIRED CONFIG)
++    target_link_libraries(backward PUBLIC elfutils::libdw)
++endif()
++if(STACK_DETAILS_BFD)
++    find_package(binutils REQUIRED CONFIG)
++    target_link_libraries(backward PUBLIC binutils::binutils)
++endif()
++if(STACK_DETAILS_DWARF)
++    find_package(libdwarf REQUIRED CONFIG)
++    target_link_libraries(backward PUBLIC libdwarf::libdwarf)
++endif()
  
  ###############################################################################
  # TESTS
-@@ -117,11 +119,18 @@ if(BACKWARD_TESTS)
+@@ -117,11 +130,18 @@ if(BACKWARD_TESTS)
  	endforeach()
  endif()
  

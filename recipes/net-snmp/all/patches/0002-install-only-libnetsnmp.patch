@@ -1,0 +1,35 @@
+--- agent/Makefile.in
++++ agent/Makefile.in
+@@ -19,8 +19,8 @@
+ FTSUBDIRS=mibgroup helpers
+ 
+ INSTALLSBINPROGS= @SNMPD@
+-INSTALLLIBS	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
+-INSTALLPOSTLIBS	= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
++INSTALLLIBS	=
++INSTALLPOSTLIBS	=
+ 
+ INCLUDESUBDIR=agent
+ HEADERS=\
+--- agent/helpers/Makefile.in
++++ agent/helpers/Makefile.in
+@@ -14,7 +14,7 @@
+ # What to install
+ #
+ 
+-INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
++INSTALLLIBS=
+ INCLUDESUBDIR=agent
+ 
+ #
+--- Makefile.in
++++ Makefile.in
+@@ -39,7 +39,7 @@
+ #
+ # other install rules.
+ #
+-OTHERINSTALL=copypersistentfiles @PERLINSTALLTARGS@ @PYTHONINSTALLTARGS@
++OTHERINSTALL=
+ OTHERUNINSTALL=@PERLUNINSTALLTARGS@ @PYTHONUNINSTALLTARGS@
+ COPY_PERSISTENT_FILES=@COPY_PERSISTENT_FILES@
+ PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@

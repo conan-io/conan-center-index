@@ -1,0 +1,66 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e32c84b..c2c535f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,10 +9,17 @@ if (${CMAKE_VERSION} VERSION_LESS "3.11.0")
+     endif ()
+     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
+ else ()
++    include(GNUInstallDirs)
++
+     function(defineObjectBoxLibForURL VARIANT DL_URL)
+         include(FetchContent)
+         project(objectbox${VARIANT}-download)
+-        FetchContent_Declare(${PROJECT_NAME} URL ${DL_URL})
++        FetchContent_Declare(${PROJECT_NAME}
++            URL ${DL_URL}
++            # workaround for max path length in Windows (260byte)
++            SUBBUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sub
++            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tmp
++        )
+ 
+         FetchContent_Populate(${PROJECT_NAME})
+         set(DL_DIR "${${PROJECT_NAME}_SOURCE_DIR}")
+@@ -27,6 +34,25 @@ else ()
+                 IMPORTED_IMPLIB ${DL_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}objectbox${CMAKE_IMPORT_LIBRARY_SUFFIX}
+                 INTERFACE_INCLUDE_DIRECTORIES "${objectbox_include_dirs}"
+         )
++
++        if(EXISTS "${DL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}objectbox${CMAKE_SHARED_LIBRARY_SUFFIX}")
++            install(
++                FILES ${DL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}objectbox${CMAKE_SHARED_LIBRARY_SUFFIX}
++                DESTINATION $<IF:$<PLATFORM_ID:Windows>,${CMAKE_INSTALL_BINDIR},${CMAKE_INSTALL_LIBDIR}>
++            )
++        endif()
++        if(EXISTS "${DL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}objectbox${CMAKE_IMPORT_LIBRARY_SUFFIX}")
++            install(
++                FILES ${DL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}objectbox${CMAKE_IMPORT_LIBRARY_SUFFIX}
++                DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            )
++        endif()
++
++        install(
++            DIRECTORY ${DL_DIR}/include/
++            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++        )
++
+     endfunction()
+ 
+     function(defineObjectBoxLib VARIANT)
+@@ -72,10 +98,15 @@ else ()
+         defineObjectBoxLibForURL("" "${DL_URL}")
+     else ()
+         defineObjectBoxLib("")
+-        defineObjectBoxLib("-sync")
++        if(OBJECTBOX_WITH_SYNC)
++            defineObjectBoxLib("-sync")
++        endif()
+     endif ()
+ endif ()
+ 
++if(0)
+ add_subdirectory(src-test)
+ add_subdirectory(src-test-gen)
+ add_subdirectory(examples)
++endif()
++

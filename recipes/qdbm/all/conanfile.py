@@ -1,10 +1,7 @@
-import functools
-import os
-
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.33.0"
 
 
 class QDBMConan(ConanFile):
@@ -29,12 +26,13 @@ class QDBMConan(ConanFile):
         "with_iconv": True,
         "with_zlib": True,
     }
-    generators = ("cmake", "cmake_find_package_multi")
-    exports_sources = ("CMakeLists.txt",)
-    no_copy_source = True
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+    generators = "cmake", "cmake_find_package"
+    exports_sources = "CMakeLists.txt"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,7 +49,11 @@ class QDBMConan(ConanFile):
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -69,7 +71,7 @@ class QDBMConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", "licenses")
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 

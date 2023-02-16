@@ -1,0 +1,13 @@
+diff --git a/NvCloth/compiler/cmake/common/NvCloth.cmake b/NvCloth/compiler/cmake/common/NvCloth.cmake
+index 8d59261..5f5e979 100644
+--- a/NvCloth/compiler/cmake/common/NvCloth.cmake
++++ b/NvCloth/compiler/cmake/common/NvCloth.cmake
+@@ -24,7 +24,7 @@ SET( NV_CLOTH_SOURCE_LIST
+ 	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsAtomic.h
+ 	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsAlignedMalloc.h
+ 	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsAllocator.h
+-	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsAllocator.cpp
++	# ${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsAllocator.cpp
+ 	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsArray.h
+ 	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsBasicTemplates.h
+ 	${PROJECT_ROOT_DIR}/include/NvCloth/ps/PsBitUtils.h

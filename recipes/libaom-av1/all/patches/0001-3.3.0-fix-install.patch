@@ -1,0 +1,21 @@
+--- a/build/cmake/aom_install.cmake
++++ b/build/cmake/aom_install.cmake
+@@ -27,7 +27,7 @@ endif()
+ # Note: aom.pc generation uses GNUInstallDirs:
+ # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+ macro(setup_aom_install_targets)
+-  if(NOT XCODE)
++  if(1)
+     include("GNUInstallDirs")
+     set(AOM_PKG_CONFIG_FILE "${AOM_CONFIG_DIR}/aom.pc")
+ 
+@@ -77,7 +77,8 @@ macro(setup_aom_install_targets)
+     endif()
+ 
+     if(BUILD_SHARED_LIBS)
+-      set(AOM_INSTALL_LIBS aom aom_static)
++      set_target_properties(aom_static PROPERTIES OUTPUT_NAME aom_static)
++      set(AOM_INSTALL_LIBS aom)
+     else()
+       set(AOM_INSTALL_LIBS aom)
+     endif()

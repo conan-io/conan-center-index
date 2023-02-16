@@ -1,8 +1,15 @@
 sources:
   "3.4.10":
-    url:
-      source: "https://github.com/swift-nav/libsbp/archive/refs/tags/v3.4.10.tar.gz"
-      cmake: "https://github.com/swift-nav/cmake/archive/373d4fcafbbc0c208dc9ecb278d36ed8c9448eda.zip"
-    sha256:
-      source: f2fb738f49112b25e7849ca0c75415159127e9b5373b13e7027362b8fa0b1224
-      cmake: 6077d2a754d013e3cb9826f589e47b19ab01f4d91ede4f5bfc14db74bc5dc894
+    cmake:
+      url: "https://github.com/swift-nav/cmake/archive/373d4fcafbbc0c208dc9ecb278d36ed8c9448eda.zip"
+      sha256: 6077d2a754d013e3cb9826f589e47b19ab01f4d91ede4f5bfc14db74bc5dc894
+    source:
+      url: "https://github.com/swift-nav/libsbp/archive/refs/tags/v3.4.10.tar.gz"
+      sha256: f2fb738f49112b25e7849ca0c75415159127e9b5373b13e7027362b8fa0b1224
+  "4.2.0":
+    cmake:
+      url: "https://github.com/swift-nav/cmake/archive/31604e72e72c09fa32effdbc37acc79dda7c99d7.zip"
+      sha256: 22e0ef6915ad5accfa6c0b30cb75a7d409ee1e08746f5ee92311015aa3826246
+    source:
+      url: "https://github.com/swift-nav/libsbp/archive/refs/tags/v4.2.0.tar.gz"
+      sha256: 9ee9808394867405938505fb0aa52ffeb8d98b7ce222e47629ffabdc9e23d3e4

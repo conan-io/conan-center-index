@@ -1,8 +1,14 @@
 sources:
+  "4.6":
+    url: "https://github.com/ccache/ccache/releases/download/v4.6/ccache-4.6.tar.xz"
+    sha256: "3d2bb860f4359169e640f60cf7cc11da5fab5fb9aed55230d78141e49c3945e9"
   "4.5.1":
     url: "https://github.com/ccache/ccache/releases/download/v4.5.1/ccache-4.5.1.tar.xz"
     sha256: "51186ebe0326365f4e6131e1caa8911de7da4aa6718efc00680322d63a759517"
 patches:
+  "4.6":
+    - patch_file: "patches/0001-fix-cmake-4.6.patch"
+      base_path: "source_subfolder"
   "4.5.1":
-    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/0001-fix-cmake-4.5.1.patch"
       base_path: "source_subfolder"

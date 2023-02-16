@@ -1,24 +1,31 @@
 sources:
-  "5.0.0":
-    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.0.tar.gz"
-    sha256: "b0110a91650d6bb4000e3d5c2185bf77b0ff0a2e7a284bc2c4af81b33988b63c"
-  "5.0.1":
-    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.1.tar.gz"
-    sha256: "11310ec1f2ad2cd46b95ba88faca8f7aaa1efe9aa12605c55e3de2b977b3dbfc"
+  "5.2.2":
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.2.2.tar.gz"
+    sha256: "ad76c5d86c380af65a9d9f64e8fc57af692ffd80a90f613dfc6bd945d0b80bb4"
+  "5.1.6":
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.1.6.tar.gz"
+    sha256: "52ad3a3776ce320c8add531dbcb2d3b93f2e1f10fcff5ac30178b09ba934d084"
   "5.1.0":
     url: "https://github.com/assimp/assimp/archive/refs/tags/v5.1.0.tar.gz"
     sha256: "b96f609bca45cc4747bf8ea4b696816ada484aed2812e60ea4d16aae18360b0b"
-patches:
-  "5.0.0":
-    - patch_file: "patches/0001-unvendor-deps-5.0.x.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"
-      base_path: "source_subfolder"
   "5.0.1":
-    - patch_file: "patches/0001-unvendor-deps-5.0.x.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.1.tar.gz"
+    sha256: "11310ec1f2ad2cd46b95ba88faca8f7aaa1efe9aa12605c55e3de2b977b3dbfc"
+  "5.0.0":
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.0.tar.gz"
+    sha256: "b0110a91650d6bb4000e3d5c2185bf77b0ff0a2e7a284bc2c4af81b33988b63c"
+patches:
+  "5.2.2":
+    - patch_file: "patches/0005-fix-unzip.patch"
+    - patch_file: "patches/0006-unvendor-deps-5.2.x.patch"
+  "5.1.6":
+    - patch_file: "patches/0004-unvendor-deps-5.1.6.patch"
+    - patch_file: "patches/0005-fix-unzip.patch"
   "5.1.0":
     - patch_file: "patches/0003-unvendor-deps-5.1.x.patch"
-      base_path: "source_subfolder"
+  "5.0.1":
+    - patch_file: "patches/0001-unvendor-deps-5.0.x.patch"
+    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"
+  "5.0.0":
+    - patch_file: "patches/0001-unvendor-deps-5.0.x.patch"
+    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"

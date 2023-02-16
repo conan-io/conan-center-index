@@ -1,18 +1,23 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import glob
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.30.0"
+required_conan_version = ">=1.53.0"
 
 class mailioConan(ConanFile):
     name = "mailio"
+    description = "mailio is a cross platform C++ library for MIME format and SMTP, POP3 and IMAP protocols."
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/karastojko/mailio"
-    description = "mailio is a cross platform C++ library for MIME format and SMTP, POP3 and IMAP protocols."
-    topics = ("conan", "smtp", "imap", "email", "mail", "libraries", "cpp")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("smtp", "imap", "email", "mail", "libraries", "cpp")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "shared": [True, False]
@@ -21,40 +26,24 @@ class mailioConan(ConanFile):
         "fPIC": True,
         "shared": False
     }
-    requires = ["boost/1.75.0", "openssl/1.1.1j"]
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
-    _cmake = None
-
-    _compiler_required_cpp17 = {
-        "gcc": "7",
-        "clang": "6",
-        "Visual Studio": "15",
-        "apple-clang": "10",
-    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compiler_required_cpp(self): 
+        return {
+            "gcc": "8.3",
+            "clang": "6",
+            "Visual Studio": "15",
+            "msvc": "191",
+            "apple-clang": "10",
+        }
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
-            self._cmake.definitions["MAILIO_BUILD_DOCUMENTATION"] = False
-            self._cmake.definitions["MAILIO_BUILD_EXAMPLES"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("mailio-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,29 +51,57 @@ class mailioConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("boost/1.81.0")
+        self.requires("openssl/1.1.1s")
+
+    def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
+            check_min_cppstd(self, self._min_cppstd)
         try:
-            minimum_required_compiler_version = self._compiler_required_cpp17[str(self.settings.compiler)]
-            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
-                raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
+            minimum_required_compiler_version = self._compiler_required_cpp[str(self.settings.compiler)]
+            if Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires c++{self._min_cppstd} support. The current compiler does not support it.")
         except KeyError:
-            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
+            self.output.warn(f"{self.ref} has no support for the current compiler. Please consider adding it.")
+
+    def build_requirements(self):
+        # mailio requires cmake >= 3.16.3
+        self.tool_requires("cmake/3.25.0")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
+        tc.variables["MAILIO_BUILD_DOCUMENTATION"] = False
+        tc.variables["MAILIO_BUILD_EXAMPLES"] = False
+        tc.generate()
+
+        dpes = CMakeDeps(self)
+        dpes.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["mailio"]
         self.cpp_info.requires = ["boost::system", "boost::date_time", "boost::regex", "openssl::openssl"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

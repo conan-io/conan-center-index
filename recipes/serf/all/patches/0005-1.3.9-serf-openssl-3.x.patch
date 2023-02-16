@@ -1,0 +1,30 @@
+Subject: Fix build with OpenSSL 3
+Author: James McCoy <jamessan@debian.org>
+Origin: https://salsa.debian.org/jamessan/serf/-/blob/500faae58ca4a8f84c2c4a485c81ed4867be57a6/debian/patches/openssl-3.x
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1006572
+
+Remove use of ERR_GET_FUNC when it's not defined, as is the case with OpenSSL >= 3.
+
+See https://www.openssl.org/news/cl30.txt
+
+ * The ERR_GET_FUNC() function was removed.  With the loss of meaningful
+   function codes, this function can only cause problems for calling
+   applications.
+
+--- buckets/ssl_buckets.c
++++ buckets/ssl_buckets.c
+@@ -1325,9 +1325,14 @@ static int ssl_need_client_cert(SSL *ssl, X509 **cert, EVP_PKEY **pkey)
+                 return 0;
+             }
+             else {
++#ifdef ERR_GET_FUNC
+                 printf("OpenSSL cert error: %d %d %d\n", ERR_GET_LIB(err),
+                        ERR_GET_FUNC(err),
+                        ERR_GET_REASON(err));
++#else
++                printf("OpenSSL cert error: %d %d\n", ERR_GET_LIB(err),
++                       ERR_GET_REASON(err));
++#endif
+                 PKCS12_free(p12);
+                 bio_meth_free(biom);
+             }

@@ -1,0 +1,4 @@
+sources:
+  "1.0-beta4":
+    url: "https://www.accellera.org/images/downloads/standards/systemc/uvm-systemc-1.0-beta4.tar.gz"
+    sha256: "7b7d9167ab590204ec3a4aae0626d7103b3af47865311e05a7187396d7628276"

@@ -1,4 +1,7 @@
 sources:
+  "22.03":
+    url: "https://mediaarea.net/download/source/libmediainfo/22.03/libmediainfo_22.03.tar.xz"
+    sha256: "fc50babb628e9cfba655288dae06d5c342b0d7e6941a32d64fbbb113248c80b9"
   "21.09":
     url: "https://mediaarea.net/download/source/libmediainfo/21.09/libmediainfo_21.09.tar.xz"
     sha256: "69be9444f6a03a1bdf56713ee31d56e987c502a7ec18eb54ee70fcc171b7f126"
@@ -9,6 +12,9 @@ sources:
     url: "https://mediaarea.net/download/source/libmediainfo/20.03/libmediainfo_20.03.tar.xz"
     sha256: "6848310eb7050efe7f90f18191dacfcc220c924390b8088fdf0d553274917f72"
 patches:
+  "22.03":
+    - patch_file: "patches/0002-cmake-get-property-location.patch"
+      base_path: "source_subfolder"
   "20.03":
     - patch_file: "patches/0001-cmakelists-CMAKE_MODULE_PATH-find_package.patch"
       base_path: "source_subfolder"

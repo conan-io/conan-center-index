@@ -1,0 +1,38 @@
+From 7ff159da128c4f249b468f3ff972f864d243c742 Mon Sep 17 00:00:00 2001
+From: Allan Sandfeld Jensen <allan.jensen@qt.io>
+Date: Tue, 7 Dec 2021 10:44:51 +0100
+Subject: [PATCH] Try to fix build on Apple Monterey
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+std::basic_string<T>::shrink_to_fit appears to not be inline
+
+Change-Id: I5bca251bdde433e917879947f97659973c430f54
+Fixes: QTBUG-98813
+Reviewed-by: Peter Varga <pvarga@inf.u-szeged.hu>
+Reviewed-by: Allan Sandfeld Jensen <allan.jensen@qt.io>
+Reviewed-by: Michael Brüning <michael.bruning@qt.io>
+---
+ chromium/base/strings/utf_string_conversions.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/chromium/base/strings/utf_string_conversions.cc b/chromium/base/strings/utf_string_conversions.cc
+index 0b55cd9e59d..12ed1f3e010 100644
+--- a/chromium/base/strings/utf_string_conversions.cc
++++ b/chromium/base/strings/utf_string_conversions.cc
+@@ -15,6 +15,14 @@
+ #include "base/third_party/icu/icu_utf.h"
+ #include "build/build_config.h"
+ 
++#if defined(OS_MAC)
++namespace std {
++inline namespace __1 {
++template class basic_string<base::char16, base::string16_internals::string16_char_traits>;
++} // namespace __1
++} // namespace std
++#endif // defined(OS_MAC)
++
+ namespace base {
+ 
+ namespace {

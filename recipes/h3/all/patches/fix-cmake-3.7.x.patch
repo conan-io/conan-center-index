@@ -1,0 +1,57 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,6 +13,10 @@
+ # limitations under the License.
+ 
+ cmake_minimum_required(VERSION 3.1)
++file(READ VERSION H3_VERSION LIMIT_COUNT 1)
++# Clean any newlines
++string(REPLACE "\n" "" H3_VERSION "${H3_VERSION}")
++project(h3 LANGUAGES C VERSION ${H3_VERSION})
+ 
+ set(H3_PREFIX "" CACHE STRING "Prefix for exported symbols")
+ set(H3_ALLOC_PREFIX "" CACHE STRING "Prefix for allocation functions")
+@@ -25,9 +29,6 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ 
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain.cmake"
+-    CACHE FILEPATH
+-    "Toolchain to use for building this project")
+ 
+ option(ENABLE_COVERAGE "Enable compiling tests with coverage." ON)
+ option(BUILD_BENCHMARKS "Build benchmarking applications." ON)
+@@ -47,16 +48,12 @@ else()
+     set(LIBRARY_OUTPUT_PATH lib)
+ endif()
+ 
+-file(READ VERSION H3_VERSION LIMIT_COUNT 1)
+-# Clean any newlines
+-string(REPLACE "\n" "" H3_VERSION "${H3_VERSION}")
+ string(REPLACE "." ";" H3_VERSION_LIST "${H3_VERSION}")
+ list(GET H3_VERSION_LIST 0 H3_VERSION_MAJOR)
+ list(GET H3_VERSION_LIST 1 H3_VERSION_MINOR)
+ list(GET H3_VERSION_LIST 2 H3_VERSION_PATCH)
+ set(H3_SOVERSION 1)
+ 
+-project(h3 LANGUAGES C VERSION ${H3_VERSION})
+ 
+ set(H3_COMPILE_FLAGS "")
+ set(H3_LINK_FLAGS "")
+@@ -213,6 +210,7 @@ set(INSTALL_TARGETS)
+ function(add_h3_library name h3_alloc_prefix_override)
+     add_library(${name} ${LIB_SOURCE_FILES} ${CONFIGURED_API_HEADER})
+ 
++    target_compile_features(${name} PUBLIC c_std_99)
+     target_compile_options(${name} PRIVATE ${H3_COMPILE_FLAGS})
+     target_link_libraries(${name} PRIVATE ${H3_LINK_FLAGS})
+ 
+@@ -666,7 +664,7 @@ configure_package_config_file(
+ install(
+     TARGETS ${INSTALL_TARGETS}
+     EXPORT "${TARGETS_EXPORT_NAME}"
+-    RUNTIME DESTINATION "bin"
++    DESTINATION "bin"
+     COMPONENT h3
+ )
+ 

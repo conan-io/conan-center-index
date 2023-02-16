@@ -1,0 +1,19 @@
+diff --git a/openmp/runtime/src/z_Linux_asm.S b/openmp/runtime/src/z_Linux_asm.S
+index 8090ff759fe1..d50019c299fc 100644
+--- a/runtime/src/z_Linux_asm.S
++++ b/runtime/src/z_Linux_asm.S
+@@ -1746,10 +1746,12 @@ __kmp_unnamed_critical_addr:
+     .comm .gomp_critical_user_,32,8
+     .data
+     .align 8
+-    .global __kmp_unnamed_critical_addr
+-__kmp_unnamed_critical_addr:
++    .global KMP_PREFIX_UNDERSCORE(__kmp_unnamed_critical_addr)
++KMP_PREFIX_UNDERSCORE(__kmp_unnamed_critical_addr):
+     .8byte .gomp_critical_user_
++#ifdef __ELF__
+     .size __kmp_unnamed_critical_addr,8
++#endif
+ #endif /* KMP_ARCH_PPC64 || KMP_ARCH_AARCH64 || KMP_ARCH_MIPS64 ||
+           KMP_ARCH_RISCV64 */
+ 

@@ -3,7 +3,9 @@ from conan.tools.files import rename
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
+import functools
 
+required_conan_version = ">=1.33.0"
 
 class OsgearthConan(ConanFile):
     name = "osgearth"
@@ -101,10 +103,13 @@ class OsgearthConan(ConanFile):
     def requirements(self):
 
         self.requires("opengl/system")
-        self.requires("gdal/3.3.1")
+        self.requires("gdal/3.4.3")
         self.requires("openscenegraph/3.6.5")
-        self.requires("libcurl/7.79.1")
+        self.requires("libcurl/7.83.1")
+        self.requires("lerc/2.2")
+        self.requires("rapidjson/1.1.0")
 
+        self.requires("zlib/1.2.12", override=True)
         self.requires("libtiff/4.3.0", override=True)
         self.requires("openssl/1.1.1l", override=True)
 
@@ -117,12 +122,11 @@ class OsgearthConan(ConanFile):
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.20.3")
         if self.options.build_zip_plugin:
-            self.requires("libzip/1.7.3")
             self.requires("zstd/1.4.9")  # override
         if self.options.with_geos:
-            self.requires("geos/3.9.1")
+            self.requires("geos/3.10.2")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.38.5")
         if self.options.with_draco:
             self.requires("draco/1.4.3")
         # if self.options.with_basisu:
@@ -148,11 +152,9 @@ class OsgearthConan(ConanFile):
 
         self._patch_sources()
 
+    @functools.lru_cache(1)
     def _configured_cmake(self):
-        if hasattr(self, "_cmake"):
-            return self._cmake
-
-        self._cmake = cmake = CMake(self)
+        cmake = CMake(self)
         cmake.definitions["OSGEARTH_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["OSGEARTH_BUILD_TOOLS"] = False
         cmake.definitions["OSGEARTH_BUILD_EXAMPLES"] = False
@@ -196,6 +198,8 @@ class OsgearthConan(ConanFile):
         if os_info.is_linux:
             rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+
     def package_info(self):
         if self.settings.build_type == "Debug":
             postfix = "d"
@@ -228,7 +232,6 @@ class OsgearthConan(ConanFile):
         if not self.options.shared and self.settings.compiler == "Visual Studio":
             osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
         if self.options.build_zip_plugin:
-            osgearth.requires += ["libzip::libzip"]
             osgearth.requires += ["zstd::zstd"]
         if self.options.with_geos:
             osgearth.requires += ["geos::geos"]
@@ -271,7 +274,7 @@ class OsgearthConan(ConanFile):
         setup_plugin("osgearth_engine_rex")
         setup_plugin("osgearth_featurefilter_intersect")
         setup_plugin("osgearth_featurefilter_join")
-        setup_plugin("gltf")
+        setup_plugin("gltf").requires.append("rapidjson::rapidjson")
         setup_plugin("kml")
         setup_plugin("osgearth_mapinspector")
         setup_plugin("osgearth_monitor")
@@ -284,7 +287,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_webp:
             setup_plugin("webp").requires.append("libwebp::libwebp")
 
-        setup_plugin("lerc")
+        setup_plugin("lerc").requires.append("lerc::lerc")
         setup_plugin("osgearth_vdatum_egm2008")
         setup_plugin("osgearth_vdatum_egm84")
         setup_plugin("osgearth_vdatum_egm96")

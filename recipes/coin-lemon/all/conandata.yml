@@ -5,4 +5,4 @@ sources:
 patches:
   "1.3.1":
     - patch_file: "patches/cmake-add-runtime-destination_1.3.1.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-remove-register-keyword.patch"

@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(libcbor REQUIRED CONFIG)
 
-find_package(libcbor CONFIG REQUIRED)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE libcbor::libcbor)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} libcbor::libcbor)
+if(libcbor_VERSION VERSION_GREATER_EQUAL "0.10.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DLIBCBOR_DEPRECATE_CUSTOM_ALLOC)
+endif()

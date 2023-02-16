@@ -14,4 +14,3 @@ sources:
 patches:
   "1.7.12":
     - patch_file: "patches/fix-cmake-install.patch"
-      base_path: "source_subfolder"

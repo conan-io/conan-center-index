@@ -1,11 +1,13 @@
 versions:
-  "3.1.4":
+  "3.2.1":
     folder: all
-  "3.1.5":
-    folder: all
-  "3.1.6":
+  "3.2.0":
     folder: all
   "3.1.7":
     folder: all
-  "3.2.0":
+  "3.1.6":
+    folder: all
+  "3.1.5":
+    folder: all
+  "3.1.4":
     folder: all

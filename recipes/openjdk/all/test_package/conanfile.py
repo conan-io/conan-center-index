@@ -1,18 +1,22 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.errors import ConanException
 from io import StringIO
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.47.0"
 
 
 class TestPackage(ConanFile):
-    test_type = "build_requires"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
 
     def build(self):
         pass  # nothing to build, but tests should not warn
 
     def test(self):
-        if not tools.cross_building(self):
+        if can_run(self):
             output = StringIO()
             self.run("java --version", output=output, run_environment=True)
             print(output.getvalue)

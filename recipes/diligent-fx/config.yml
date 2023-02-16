@@ -1,0 +1,11 @@
+versions:
+  "api.252009":
+    folder: "all"
+  "api.252005":
+    folder: "all"
+  "cci.20211112":
+    folder: "all"
+  "cci.20220219":
+    folder: "all"
+  "2.5.2":
+    folder: "all"

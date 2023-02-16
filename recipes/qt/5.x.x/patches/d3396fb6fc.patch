@@ -1,0 +1,30 @@
+From d3396fb6fcf9e1846de3091ada99284e10e9ee54 Mon Sep 17 00:00:00 2001
+From: Peter Varga <pvarga@inf.u-szeged.hu>
+Date: Fri, 10 Dec 2021 14:40:20 +0100
+Subject: [PATCH] [Backport] abseil-cpp: Fixes build with latest glibc
+
+Fixes https://github.com/abseil/abseil-cpp/issues/952
+
+This fix is extracted from:
+https://github.com/abseil/abseil-cpp/commit/a9831f1cbf93fb18dd951453635f488037454ce9
+
+Change-Id: I337c8c900ef569853046bb9adc3807a3ed12b13b
+Reviewed-by: Allan Sandfeld Jensen <allan.jensen@qt.io>
+---
+ .../abseil-cpp/absl/debugging/failure_signal_handler.cc        | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/chromium/third_party/abseil-cpp/absl/debugging/failure_signal_handler.cc b/chromium/third_party/abseil-cpp/absl/debugging/failure_signal_handler.cc
+index 5d13bdbbbd1..2ed137b58f1 100644
+--- a/chromium/third_party/abseil-cpp/absl/debugging/failure_signal_handler.cc
++++ b/chromium/third_party/abseil-cpp/absl/debugging/failure_signal_handler.cc
+@@ -135,7 +135,8 @@ static bool SetupAlternateStackOnce() {
+ #else
+   const size_t page_mask = sysconf(_SC_PAGESIZE) - 1;
+ #endif
+-  size_t stack_size = (std::max(SIGSTKSZ, 65536) + page_mask) & ~page_mask;
++  size_t stack_size =
++      (std::max<size_t>(SIGSTKSZ, 65536) + page_mask) & ~page_mask;
+ #if defined(ABSL_HAVE_ADDRESS_SANITIZER) || \
+     defined(ABSL_HAVE_MEMORY_SANITIZER) || defined(ABSL_HAVE_THREAD_SANITIZER)
+   // Account for sanitizer instrumentation requiring additional stack space.

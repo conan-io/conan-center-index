@@ -1,4 +1,7 @@
 sources:
+  "2.2.4":
+    url: "https://github.com/mapbox/earcut.hpp/archive/v2.2.4.tar.gz"
+    sha256: "fcfa6a47a52d4c94dc960bdb747f17e077609235517b0bb5ce8097d6b747695a"
   "2.2.3":
     url: "https://github.com/mapbox/earcut.hpp/archive/v2.2.3.tar.gz"
     sha256: "f382616de763289c698f37ec3a5b9fcd3d6d821cbef0b3c72e43bdd909c81b5a"

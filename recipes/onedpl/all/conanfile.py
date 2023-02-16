@@ -1,10 +1,12 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-from conan.tools import files
+required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
 
-required_conan_version = ">=1.43.0"
 
 class OneDplConan(ConanFile):
     name = "onedpl"
@@ -18,64 +20,57 @@ class OneDplConan(ConanFile):
     topics = ("stl", "parallelism")
     settings = "os", "arch", "build_type", "compiler"
     options = {
-        "backend": ["tbb", "serial"]
+        "backend": ["tbb", "serial"],
     }
     default_options = {
-        "backend": "tbb"
+        "backend": "tbb",
     }
-    generators = ["cmake", "cmake_find_package"]
-    exports = ["CMakeLists.txt"]
     no_copy_source = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def validate(self):
-        if self.options.backend == "tbb" and not self.options["tbb"].tbbmalloc:
-            raise ConanInvalidConfiguration(f"recipe {self.name}/{self.version} with backend=tbb requires tbb:malloc")
-
-    def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        if self.options.backend == "tbb":
-            # Listed as an OPTIONAL_COMPONENT but optional components not supported by conan
-            self.options["tbb"].tbbmalloc = True
 
     def requirements(self):
         if self.options.backend == "tbb":
-            self.requires("tbb/2020.2")
+            self.requires("onetbb/2020.3")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            if Version(self.version) >= "2021.7.0":
+                check_min_cppstd(self, 17)
+            else:
+                check_min_cppstd(self, 11)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PARALLELSTL_BACKEND"] = self.options.backend
-        cmake.configure()
-        return cmake
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
-        self.copy("*", src=os.path.join(self._source_subfolder, "stdlib"), dst=os.path.join("lib", "stdlib"))
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        version_major = int(str(Version(self.version).major)[0:4])
+        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        if version_major < 2021:
+            copy(self, "*", src=os.path.join(self.source_folder, "stdlib"), dst=os.path.join(self.package_folder, "include"))
+            copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "LICENSE.txt", src=os.path.join(self.source_folder, "licensing"), dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        target_name = "ParallelSTL"
-        namespace = "pstl"
-        self.cpp_info.filenames["cmake_find_package"] = target_name
-        self.cpp_info.filenames["cmake_find_package_multi"] = target_name
-        self.cpp_info.names["cmake_find_package"] = namespace
-        self.cpp_info.names["cmake_find_package_multi"] = namespace
-        self.cpp_info.set_property("cmake_file_name", target_name)
-        self.cpp_info.set_property("cmake_target_name", f"{namespace}::{target_name}")
-        self.cpp_info.components["_onedpl"].names["cmake_find_package"] = target_name
-        self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = target_name
-        self.cpp_info.components["_onedpl"].includedirs = ["include", os.path.join("lib", "stdlib")]
+        self.cpp_info.set_property("cmake_file_name", "ParallelSTL")
+        self.cpp_info.set_property("cmake_target_name", "pstl::ParallelSTL")
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "ParallelSTL"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "ParallelSTL"
+        self.cpp_info.names["cmake_find_package"] = "pstl"
+        self.cpp_info.names["cmake_find_package_multi"] = "pstl"
+        self.cpp_info.components["_onedpl"].names["cmake_find_package"] = "ParallelSTL"
+        self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = "ParallelSTL"
+        self.cpp_info.components["_onedpl"].set_property("cmake_target_name", "pstl::ParallelSTL")
         if self.options.backend == "tbb":
-            self.cpp_info.components["_onedpl"].requires = ["tbb::libtbb", "tbb::tbbmalloc"]
+            self.cpp_info.components["_onedpl"].requires = ["onetbb::onetbb"]

@@ -41,7 +41,7 @@ class CppItertoolsConan(ConanFile):
         compiler_version = tools.Version(self.settings.compiler.version)
 
         if compiler not in minimal_version:
-            self.output.info("{} requires a compiler that supports at least C++17".format(self.name, min))
+            self.output.info("{} requires a compiler that supports at least C++17".format(self.name))
             return
 
         # Exclude compilers not supported by cppitertools

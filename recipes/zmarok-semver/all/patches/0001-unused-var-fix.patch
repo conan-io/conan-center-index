@@ -1,0 +1,19 @@
+diff -Naur a/src/Semver200_modifier.cpp b/src/Semver200_modifier.cpp
+--- a/src/Semver200_modifier.cpp	2021-04-06 19:10:15.986509743 +0000
++++ b/src/Semver200_modifier.cpp	2021-04-06 19:10:49.807335550 +0000
+@@ -50,7 +50,7 @@
+ 		return Version_data{ s.major, s.minor, s.patch, s.prerelease_ids, b };
+ 	}
+ 
+-	Version_data Semver200_modifier::reset_major(const Version_data& s, const int m) const {
++	Version_data Semver200_modifier::reset_major(const Version_data&, const int m) const {
+ 		if (m < 0) throw Modification_error("major version cannot be less than 0");
+ 		return Version_data{ m, 0, 0, Prerelease_identifiers{}, Build_identifiers{} };
+ 	}
+@@ -72,4 +72,4 @@
+ 	Version_data Semver200_modifier::reset_build(const Version_data& s, const Build_identifiers& b) const {
+ 		return Version_data{ s.major, s.minor, s.patch, s.prerelease_ids, b };
+ 	}
+-}
+\ No newline at end of file
++}

@@ -1,4 +1,7 @@
 sources:
+  "1.6.2":
+    url: "https://github.com/stlab/libraries/archive/v1.6.2.tar.gz"
+    sha256: "d0369d889c7bf78068d0c4f4b5125d7e9fe9abb0ad7a3be35bf13b6e2c271676"
   "1.5.6":
     url: "https://github.com/stlab/libraries/archive/refs/tags/v1.5.6.tar.gz"
     sha256: "a6b788848be637b6d6c471de76c38486789e708997648e9b9731fdb5a631030c"

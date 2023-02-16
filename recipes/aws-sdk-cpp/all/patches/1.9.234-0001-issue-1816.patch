@@ -1,0 +1,21 @@
+# https://github.com/aws/aws-sdk-cpp/issues/1816
+diff --git aws-cpp-sdk-text-to-speech/source/text-to-speech/TextToSpeechManager.cpp aws-cpp-sdk-text-to-speech/source/text-to-speech/TextToSpeechManager.cpp
+index 82a298f5a4..f995fcfd4a 100644
+--- aws-cpp-sdk-text-to-speech/source/text-to-speech/TextToSpeechManager.cpp
++++ aws-cpp-sdk-text-to-speech/source/text-to-speech/TextToSpeechManager.cpp
+@@ -152,7 +152,6 @@ namespace Aws
+                 AWS_LOGSTREAM_TRACE(CLASS_TAG, "Audio retrieved from Polly. " << result.GetContentType() << " with " 
+                     << result.GetRequestCharacters() << " characters syntesized");
+ 
+-                std::streamsize amountRead(0);
+                 unsigned char buffer[BUFF_SIZE];
+ 
+                 std::lock_guard<std::mutex> m(m_driverLock);
+@@ -165,7 +164,6 @@ namespace Aws
+                     AWS_LOGSTREAM_TRACE(CLASS_TAG, "Writing " << read << " bytes to device.");
+ 
+                     successfullyPlayed = m_activeDriver->WriteBufferToDevice(buffer, (std::size_t)read);
+-                    amountRead += read;
+                     played = successfullyPlayed;
+                 }
+ 

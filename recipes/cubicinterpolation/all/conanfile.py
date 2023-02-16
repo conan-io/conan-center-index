@@ -12,7 +12,7 @@ class CubicInterpolationConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Leightweight interpolation library based on boost and eigen."
     topics = ("interpolation", "splines", "cubic", "bicubic", "boost", "eigen3")
-
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,7 +23,7 @@ class CubicInterpolationConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -43,6 +43,7 @@ class CubicInterpolationConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        # TODO: update boost dependency as soon as issue #11207 is fixed
         self.requires("boost/1.75.0")
         self.requires("eigen/3.3.9")
 
@@ -92,10 +93,13 @@ class CubicInterpolationConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_EXAMPLE"] = False
         self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -7,6 +7,9 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>
+#ifdef BUILT_CONTRIB
+#include <opencv2/sfm.hpp>
+#endif
 
 #define w 400
 
@@ -17,6 +20,7 @@ void MyEllipse( Mat img, double angle );
 void MyFilledCircle( Mat img, Point center );
 void MyPolygon( Mat img );
 void MyLine( Mat img, Point start, Point end );
+void TestSFM();
 
 /**
  * @function main
@@ -63,6 +67,7 @@ int main( void ){
   MyLine( rook_image, Point( w/4, 7*w/8 ), Point( w/4, w ) );
   MyLine( rook_image, Point( w/2, 7*w/8 ), Point( w/2, w ) );
   MyLine( rook_image, Point( 3*w/4, 7*w/8 ), Point( 3*w/4, w ) );
+  TestSFM();
 
   return(0);
 }
@@ -162,4 +167,13 @@ void MyLine( Mat img, Point start, Point end )
     Scalar( 0, 0, 0 ),
     thickness,
     lineType );
+}
+
+void TestSFM()
+{
+#ifdef BUILT_CONTRIB
+  Vec3f a;
+  a << 1,2,3;
+  Matx33f ax = sfm::skew(a);
+#endif
 }

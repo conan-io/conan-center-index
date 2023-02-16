@@ -1,0 +1,25 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -185,7 +185,7 @@ else (build_errors)
+     "${CMAKE_INSTALL_PREFIX}"
+   )
+   configure_file(
+-    ${CMAKE_SOURCE_DIR}/cmake/pkgconfig/ignition.in
++    ${PROJECT_SOURCE_DIR}/cmake/pkgconfig/ignition.in
+     ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc @ONLY)
+   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc
+     DESTINATION ${PC_CONFIG_INSTALL_DIR}
+
+--- doc/CMakeLists.txt
++++ doc/CMakeLists.txt
+@@ -1,8 +1,8 @@
+ find_package(Doxygen)
+ 
+ if (DOXYGEN_FOUND)
+-  configure_file(${CMAKE_SOURCE_DIR}/doc/ignition.in
+-                 ${CMAKE_BINARY_DIR}/ignition.dox @ONLY)
++  configure_file(${PROJECT_SOURCE_DIR}/doc/ignition.in
++                 ${PROJECT_BINARY_DIR}/ignition.dox @ONLY)
+ 
+   add_custom_target(doc
+ 

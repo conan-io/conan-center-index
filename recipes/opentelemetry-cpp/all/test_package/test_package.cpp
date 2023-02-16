@@ -4,12 +4,12 @@
 #include <opentelemetry/trace/provider.h>
 
 int main(int argc, char** argv) {
-  auto exporter = std::unique_ptr<sdktrace::SpanExporter>(
+  auto exporter = std::unique_ptr<opentelemetry::sdk::trace::SpanExporter>(
     new opentelemetry::exporter::trace::OStreamSpanExporter);
-  auto processor = std::unique_ptr<sdktrace::SpanProcessor>(
-    new sdktrace::SimpleSpanProcessor(std::move(exporter)));
-  auto provider = nostd::shared_ptr<opentelemetry::trace::TracerProvider>(
-    new sdktrace::TracerProvider(std::move(processor)));
+  auto processor = std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor>(
+    new opentelemetry::sdk::trace::SimpleSpanProcessor(std::move(exporter)));
+  auto provider = opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>(
+    new opentelemetry::sdk::trace::TracerProvider(std::move(processor)));
 
   auto tracer = provider->GetTracer("simple");
 

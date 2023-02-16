@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import cross_building
 
 
 class MinGWTestConan(ConanFile):
@@ -11,5 +12,5 @@ class MinGWTestConan(ConanFile):
         self.run("x86_64-w64-mingw32-g++ {} @conanbuildinfo.gcc -lstdc++ -o main".format(source_file), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             self.run("x86_64-w64-mingw32-g++ --version", run_environment=True)

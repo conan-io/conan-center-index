@@ -1,0 +1,9 @@
+sources:
+  "0.9.0-rc2":
+    url: "https://github.com/smoked-herring/sail/archive/v0.9.0-rc2.tar.gz"
+    sha256: "988d318fd4cfbc77ccbda49f4ac751d1998b990db157aef32b0dbd32d11f8fd6"
+patches:
+  "0.9.0-rc2":
+    - patch_file: "patches/0.9.0-rc2-avif-find-package.patch"
+      patch_type: "conan"
+      patch_description: "Make the AVIF codec use find_package()"

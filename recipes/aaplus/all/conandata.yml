@@ -1,0 +1,7 @@
+sources:
+  "2.41":
+    url: "http://www.naughter.com/download/aaplus_v2.41.zip"
+    sha256: "7aede2802f3542c91eeefa0cdd4419911c7547073c84a6faa4bf31f6b6f172da"
+patches:
+  "2.41":
+    - patch_file: "patches/0001-fix-cmake.patch"

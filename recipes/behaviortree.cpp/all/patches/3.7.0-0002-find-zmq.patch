@@ -1,0 +1,68 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 843045e..471c00e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,14 +54,14 @@ endif()
+ 
+ #---- Find other packages ----
+ find_package(Threads)
+-find_package(ZMQ)
++find_package(ZeroMQ)
+ 
+ list(APPEND BEHAVIOR_TREE_PUBLIC_LIBRARIES
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${CMAKE_DL_LIBS}
+ )
+ 
+-if( ZMQ_FOUND )
++if( ZeroMQ_FOUND )
+     message(STATUS "ZeroMQ found.")
+     add_definitions( -DZMQ_FOUND )
+     list(APPEND BT_SOURCE src/loggers/bt_zmq_publisher.cpp)
+@@ -193,8 +193,8 @@ else()
+     add_library(${BEHAVIOR_TREE_LIBRARY} STATIC ${BT_SOURCE})
+ endif()
+ 
+-if( ZMQ_FOUND )
+-    list(APPEND BUILD_TOOL_INCLUDE_DIRS ${ZMQ_INCLUDE_DIRS})
++if( ZeroMQ_FOUND )
++    list(APPEND BUILD_TOOL_INCLUDE_DIRS ${ZeroMQ_INCLUDE_DIRS})
+ endif()
+ 
+ target_link_libraries(${BEHAVIOR_TREE_LIBRARY} PUBLIC
+@@ -202,7 +202,7 @@ target_link_libraries(${BEHAVIOR_TREE_LIBRARY} PUBLIC
+ 
+ target_link_libraries(${BEHAVIOR_TREE_LIBRARY} PRIVATE
+     ${Boost_LIBRARIES}
+-    ${ZMQ_LIBRARIES})
++    ${ZeroMQ_LIBRARIES})
+ 
+ #get_target_property(my_libs ${BEHAVIOR_TREE_LIBRARY} INTERFACE_LINK_LIBRARIES)
+ #list(REMOVE_ITEM _libs X)
+@@ -218,8 +218,8 @@ target_include_directories(${BEHAVIOR_TREE_LIBRARY} PUBLIC
+     $<INSTALL_INTERFACE:include>
+     ${BUILD_TOOL_INCLUDE_DIRS})
+ 
+-if( ZMQ_FOUND )
+-    target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PUBLIC ZMQ_FOUND)
++if( ZeroMQ_FOUND )
++    target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PUBLIC ZeroMQ_FOUND)
+ endif()
+ 
+ if(MSVC)
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index 2ad33b3..2dc969d 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -6,9 +6,9 @@ target_link_libraries(bt3_log_cat  ${BEHAVIOR_TREE_LIBRARY} )
+ install(TARGETS bt3_log_cat
+         DESTINATION ${BEHAVIOR_TREE_BIN_DESTINATION} )
+ 
+-if( ZMQ_FOUND )
++if( ZeroMQ_FOUND )
+     add_executable(bt3_recorder         bt_recorder.cpp )
+-    target_link_libraries(bt3_recorder  ${BEHAVIOR_TREE_LIBRARY} ${ZMQ_LIBRARIES})
++    target_link_libraries(bt3_recorder  ${BEHAVIOR_TREE_LIBRARY} ${ZeroMQ_LIBRARIES})
+     install(TARGETS bt3_recorder
+             DESTINATION ${BEHAVIOR_TREE_BIN_DESTINATION} )
+ endif()

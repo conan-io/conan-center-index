@@ -36,7 +36,7 @@ class GStreamerConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("glib/2.70.1")
+        self.requires("glib/2.72.0")
 
     @property
     def _is_msvc(self):
@@ -58,10 +58,10 @@ class GStreamerConan(ConanFile):
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.61.2")
         self.build_requires("pkgconf/1.7.4")
         if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.69.0")
+            self.build_requires("gobject-introspection/1.70.0")
         if self.settings.os == 'Windows':
             self.build_requires("winflexbison/2.5.24")
         else:

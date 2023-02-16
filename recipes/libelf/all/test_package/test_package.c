@@ -34,6 +34,52 @@ int main(int argc , char **argv) {
         return EXIT_FAILURE;
     }
 
+    if(ELF_C_NULL != 0)
+    {
+        printf("ELF_C_NULL has wrong value: %d\n", ELF_C_NULL);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_READ != 1)
+    {
+        printf("ELF_C_READ has wrong value: %d\n", ELF_C_READ);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_WRITE != 2)
+    {
+        printf("ELF_C_WRITE has wrong value: %d\n", ELF_C_WRITE);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_CLR != 3)
+    {
+        printf("ELF_C_CLR has wrong value: %d\n", ELF_C_CLR);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_SET != 4)
+    {
+        printf("ELF_C_SET has wrong value: %d\n", ELF_C_SET);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_FDDONE != 5)
+    {
+        printf("ELF_C_FDDONE has wrong value: %d\n", ELF_C_FDDONE);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_FDREAD != 6)
+    {
+        printf("ELF_C_FDREAD has wrong value: %d\n", ELF_C_FDREAD);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_RDWR != 7)
+    {
+        printf("ELF_C_RDWR has wrong value: %d\n", ELF_C_RDWR);
+        return EXIT_FAILURE;
+    }
+    if(ELF_C_NUM != 8)
+    {
+        printf("ELF_C_NUM has wrong value: %d\n", ELF_C_NUM);
+        return EXIT_FAILURE;
+    }
+
     if ((e = elf_begin(fd, ELF_C_READ, NULL)) == NULL) {
         printf("elf_begin () failed: %s.\n", elf_errmsg ( -1));
         return EXIT_FAILURE;

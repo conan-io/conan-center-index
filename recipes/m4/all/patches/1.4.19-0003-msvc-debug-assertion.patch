@@ -1,0 +1,31 @@
+diff --git a/src/m4.c b/src/m4.c
+index 2bd57750..ca3ded62 100644
+--- a/src/m4.c
++++ b/src/m4.c
+@@ -36,6 +36,10 @@
+ # include "assert.h"
+ #endif
+ 
++#ifdef _WIN32
++#  include <crtdbg.h>
++#endif
++
+ /* TRANSLATORS: This is a non-ASCII name: The first name is (with
+    Unicode escapes) "Ren\u00e9" or (with HTML entities) "Ren&eacute;".  */
+ #define AUTHORS proper_name_utf8 ("Rene' Seindal", "Ren\xC3\xA9 Seindal")
+@@ -423,6 +427,15 @@ main (int argc, char *const *argv)
+   textdomain (PACKAGE);
+   atexit (close_stdin);
+ 
++#ifdef _WIN32
++  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
++  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
++  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
++#endif
++
+   include_init ();
+   debug_init ();
+ 

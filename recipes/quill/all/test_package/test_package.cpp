@@ -3,7 +3,7 @@
 int main()
 {
     quill::start();
-    quill::Handler *file_handler = quill::file_handler("logs/logfile.log", "w");
+    quill::Handler *file_handler = quill::file_handler("logfile.log", "w");
     quill::Logger *my_logger = quill::create_logger("my_logger", file_handler);
 
     LOG_INFO(my_logger, "Hello from {}", "Quill");

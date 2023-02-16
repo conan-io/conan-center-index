@@ -1,0 +1,43 @@
+diff --git a/RenderStateNotation/CMakeLists.txt b/RenderStateNotation/CMakeLists.txt
+index fca3d7b..30ded42 100644
+--- a/RenderStateNotation/CMakeLists.txt
++++ b/RenderStateNotation/CMakeLists.txt
+@@ -3,18 +3,18 @@ cmake_minimum_required (VERSION 3.6)
+ project(Diligent-RenderStateNotation CXX)
+ 
+ set(REFLECTED
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/BlendState.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/DepthStencilState.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/GraphicsTypes.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/InputLayout.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/PipelineResourceSignature.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/PipelineState.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/RasterizerState.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/RenderPass.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/Shader.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/ShaderResourceVariable.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/GraphicsEngine/interface/Sampler.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/Graphics/Archiver/interface/ArchiverFactory.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/BlendState.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/DepthStencilState.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/GraphicsTypes.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/InputLayout.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/PipelineResourceSignature.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/PipelineState.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/RasterizerState.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/RenderPass.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/Shader.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/ShaderResourceVariable.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/GraphicsEngine/interface/Sampler.h
++    ${CONAN_DILIGENT-CORE_ROOT}/include/DiligentCore/Graphics/Archiver/interface/ArchiverFactory.h
+ )
+ 
+ set(RSN_PARSER_HEADERS_DIR ${CMAKE_CURRENT_BINARY_DIR}/parser_headers CACHE INTERNAL "Render State Notation Parser generated headers directory")
+@@ -64,7 +64,6 @@ endif()
+ 
+ add_custom_command(OUTPUT ${GENERATED}
+                    COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cxx_generator.py" --dir "." --files ${REFLECTED}
+-                   COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../../DiligentCore/BuildTools/FormatValidation/${CLANG_FORMAT_VERSION}" -i *.hpp --verbose
+                    WORKING_DIRECTORY "${RSN_PARSER_GENERATED_HEADERS_DIR}"
+                    DEPENDS ${REFLECTED}
+                    COMMENT "RSN Parser Header Generation")

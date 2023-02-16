@@ -4,18 +4,18 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _executables(self):
         available = []
         #            (executable, option name)
-        all_execs = (("gl-info", "gl_info"), 
-                     ("al-info", "al_info"), 
-                     ("distancefieldconverter", "distance_field_converter"), 
-                     ("fontconverter", "font_converter"), 
-                     ("imageconverter", "image_converter"), 
+        all_execs = (("gl-info", "gl_info"),
+                     ("al-info", "al_info"),
+                     ("distancefieldconverter", "distance_field_converter"),
+                     ("fontconverter", "font_converter"),
+                     ("imageconverter", "image_converter"),
                      ("sceneconverter", "scene_converter"))
         for executable, opt_name in all_execs:
             try:

@@ -1,12 +1,22 @@
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 import os
+import shutil
 import subprocess
 from six import StringIO
-from conans import ConanFile, CMake, tools
+
 
 class NmosCppTestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    # use cmake_find_package_multi because the project installs a config-file package
-    generators = "cmake", "cmake_find_package_multi"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -14,14 +24,15 @@ class NmosCppTestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            with open("registry-config.json", "w") as config:
+        if can_run(self):
+            with open("registry-config.json", "w", encoding="utf-8") as config:
                 config.write('{"http_port": 10000, "domain": "local.", "pri": 51967}')
-            with open("node-config.json", "w") as config:
+            with open("node-config.json", "w", encoding="utf-8") as config:
                 config.write('{"http_port": 20000, "domain": "local.", "highest_pri": 51967, "lowest_pri": 51967}')
 
-            # start up the installed nmos-cpp-registry to check it works
-            registry = subprocess.Popen(["nmos-cpp-registry", "registry-config.json"],
+            # find and start up the installed nmos-cpp-registry to check it works
+            registry_path = shutil.which("nmos-cpp-registry", path=os.pathsep.join(self.env["PATH"]))
+            registry = subprocess.Popen([registry_path, "registry-config.json"],
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,
                                         universal_newlines=True)
@@ -29,8 +40,8 @@ class NmosCppTestPackageConan(ConanFile):
             # run the test_package node which should have time to register and then exit
             node_out = StringIO()
             try:
-                bin_path = os.path.join("bin", "test_package")
-                self.run(bin_path + " node-config.json", run_environment=True, output=node_out)
+                bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+                self.run(bin_path + " node-config.json", env="conanrun", output=node_out)
             finally:
                 registry.terminate()
             if "Adopting registered operation" not in node_out.getvalue():

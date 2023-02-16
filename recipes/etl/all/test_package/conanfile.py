@@ -1,11 +1,18 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.build import can_run
 import os
 
-from conans import ConanFile, CMake, tools
 
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
-class EmbeddedTemplateLibraryTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake","cmake_find_package_multi"
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -13,6 +20,5 @@ class EmbeddedTemplateLibraryTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.abspath(os.path.join("bin", "example"))
-            self.run(bin_path, run_environment=True)
+        if can_run(self):
+            self.run(os.path.join(self.cpp.build.bindirs[0], "test_package"), env="conanrun")

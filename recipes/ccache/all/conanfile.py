@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -26,15 +27,18 @@ class CcacheConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _min_cppstd(self):
-        return "17" if self.settings.compiler == "Visual Studio" else "14"
+        return "17" if self._is_msvc else "14"
 
     @property
     def _compilers_minimum_version(self):
@@ -42,7 +46,7 @@ class CcacheConan(ConanFile):
             "gcc": "6",
             "clang": "6",
             "apple-clang": "10",
-            "Visual Studio": "15.7",
+            "Visual Studio": "15.7" if tools.Version(self.version) < "4.6" else "16.2",
         }
 
     def export_sources(self):
@@ -51,7 +55,7 @@ class CcacheConan(ConanFile):
             self.copy(patch["patch_file"])
 
     def requirements(self):
-        self.requires("zstd/1.5.1")
+        self.requires("zstd/1.5.2")
         if self.options.redis_storage_backend:
             self.requires("hiredis/1.0.2")
 
@@ -74,19 +78,23 @@ class CcacheConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self) and \
+           self.settings.os == "Macos" and self.settings.arch == "armv8":
+            self.build_requires("cmake/3.22.0")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
-        self._cmake.definitions["ENABLE_DOCUMENTATION"] = False
-        self._cmake.definitions["ENABLE_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
+        cmake.definitions["ENABLE_DOCUMENTATION"] = False
+        cmake.definitions["ENABLE_TESTING"] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

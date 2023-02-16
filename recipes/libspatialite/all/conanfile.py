@@ -1,7 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+import functools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibspatialiteConan(ConanFile):
@@ -51,13 +52,23 @@ class LibspatialiteConan(ConanFile):
         "with_minizip": True,
     }
 
-    exports_sources = "patches/**"
     generators = "pkg_config"
-    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,29 +84,25 @@ class LibspatialiteConan(ConanFile):
             del self.options.gcp
 
     def requirements(self):
-        self.requires("sqlite3/3.36.0")
-        self.requires("zlib/1.2.11")
+        self.requires("sqlite3/3.38.1")
+        self.requires("zlib/1.2.12")
         if self.options.with_proj:
-            self.requires("proj/8.1.0")
+            self.requires("proj/9.0.0")
         if self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
         if self.options.with_geos:
-            self.requires("geos/3.9.1")
+            self.requires("geos/3.10.2")
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.12")
+            self.requires("libxml2/2.9.13")
         if self.options.with_minizip:
-            self.requires("minizip/1.2.11")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+            self.requires("minizip/1.2.12")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not self._is_msvc:
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -159,14 +166,22 @@ class LibspatialiteConan(ConanFile):
 
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # relocatable shared libs on macOS
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
+            # avoid SIP issues on macOS when dependencies are shared
+            if tools.is_apple_os(self.settings.os):
+                libpaths = ":".join(self.deps_cpp_info.lib_paths)
+                tools.replace_in_file(
+                    "configure",
+                    "#! /bin/sh\n",
+                    "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
+                )
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.make()
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -196,21 +211,21 @@ class LibspatialiteConan(ConanFile):
                 "--enable-rttopo={}".format(yes_no(self.options.with_rttopo)),
             ])
 
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=args)
-        return self._autotools
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.configure(args=args)
+        return autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self._build_msvc()
         else:
             self._build_autotools()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.copy("spatialite.h", dst="include", src=os.path.join(self._source_subfolder, "src", "headers"))
             self.copy("*.h", dst=os.path.join("include", "spatialite"), src=os.path.join(self._source_subfolder, "src", "headers", "spatialite"))
             self.copy("*.lib", dst="lib", src=self._source_subfolder)
@@ -224,8 +239,11 @@ class LibspatialiteConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "spatialite"
-        suffix = "_i" if self.settings.compiler == "Visual Studio" and self.options.shared else ""
+        self.cpp_info.set_property("pkg_config_name", "spatialite")
+        suffix = "_i" if self._is_msvc and self.options.shared else ""
         self.cpp_info.libs = ["spatialite{}".format(suffix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+
+        # TODO: to remove in conan v2 once pkg_config generator removed
+        self.cpp_info.names["pkg_config"] = "spatialite"

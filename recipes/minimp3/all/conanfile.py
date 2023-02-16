@@ -1,29 +1,40 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
-from conans import ConanFile, tools
+required_conan_version = ">=1.50.0"
+
 
 class Minimp3Conan(ConanFile):
     name = "minimp3"
     description = "Minimalistic MP3 decoder single header library."
     license = "CC0-1.0"
-    topics = ("conan", "minimp3", "decoder", "mp3", "header-only")
+    topics = ("minimp3", "decoder", "mp3", "header-only")
     homepage = "https://github.com/lieff/minimp3"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def package_id(self):
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = "minimp3-" + os.path.splitext(os.path.basename(url))[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="minimp3*.h", dst="include", src=self._source_subfolder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "minimp3*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []

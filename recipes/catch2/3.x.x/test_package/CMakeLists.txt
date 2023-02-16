@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
+
+find_package(Catch2 REQUIRED CONFIG)
+
+if(WITH_PREFIX)
+    add_executable(standalone 300-standalone-with-prefix.cpp)
+    add_executable(benchmark 400-benchmark-with-prefix.cpp)
+else()
+    add_executable(standalone 100-standalone.cpp)
+    add_executable(benchmark 200-benchmark.cpp)
+endif()
+target_link_libraries(standalone PRIVATE Catch2::Catch2WithMain)
+target_compile_features(standalone PRIVATE cxx_std_14)
+target_link_libraries(benchmark PRIVATE Catch2::Catch2WithMain)
+target_compile_features(benchmark PRIVATE cxx_std_14)

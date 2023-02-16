@@ -1,0 +1,21 @@
+sources:
+  "3.4.0":
+    url: "https://github.com/OpenSimulationInterface/open-simulation-interface/archive/refs/tags/v3.4.0.tar.gz"
+    sha256: "a5bc25d8b7d8b383a3c869987f92314ac600e954ca53c6bb6de9da3b0eb605d0"
+  "3.3.1":
+    url: "https://github.com/OpenSimulationInterface/open-simulation-interface/archive/refs/tags/v3.3.1.tar.gz"
+    sha256: "65b96499d80a84d64da28f75148a62b22d7e27f774574aec4cc9251146e85062"
+  "3.1.2":
+    url: "https://github.com/OpenSimulationInterface/open-simulation-interface/archive/refs/tags/v3.1.2.tar.gz"
+    sha256: "d492c1686fd82dba7a65a3653335bc71b111f8a760e2fbfaec06b80490027f2c"
+
+patches:
+  3.1.2:
+    - patch_file: "patches/3.1.2_single_lib.patch"
+      base_path: "source_subfolder"
+  3.3.1:
+    - patch_file: "patches/3.3.x_single_lib.patch"
+      base_path: "source_subfolder"
+  3.4.0:
+    - patch_file: "patches/3.4.0_single_lib.patch"
+      base_path: "source_subfolder"

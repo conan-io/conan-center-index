@@ -1,0 +1,4 @@
+sources:
+  "cci.20200628":
+    url: "https://github.com/BrutPitt/fastPRNG/archive/5ce17711a65965b3726b3f0c62c7dcbd967a7b0f.zip"
+    sha256: "ab185d52bbc4d3d02cf258a3be01059e7c28a0d9e6320a0c1dba7aa74a27b201"

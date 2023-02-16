@@ -308,7 +308,7 @@ cdebug = -Gh -Ox -DNDEBUG
 !ELSE IFDEF TUNE
 cdebug = -Gh -Ox -DNDEBUG
 !ELSE
-cdebug = -Zi -Od -DDEBUG
+cdebug = -Zi -Od -DDEBUG -Fdlibjpeg.pdb
 !ENDIF
 
 !ELSE
@@ -316,7 +316,7 @@ cdebug = -Zi -Od -DDEBUG
 !IFDEF NODEBUG
 cdebug = -Ox -DNDEBUG
 !ELSE
-cdebug = -Zi -Od -DDEBUG
+cdebug = -Zi -Od -DDEBUG -Fdlibjpeg.pdb
 !ENDIF
 
 !ENDIF

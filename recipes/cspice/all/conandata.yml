@@ -1,122 +1,122 @@
 sources:
   "0067":
-    url:
-      "Macos":
-        "apple-clang":
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/MacIntel_OSX_AppleC_64bit/packages/cspice.tar.Z"
-          "armv8": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/MacM1_OSX_clang_64bit/packages/cspice.tar.Z"
-      "Linux":
-        "gcc":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Linux_GCC_32bit/packages/cspice.tar.Z"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Linux_GCC_64bit/packages/cspice.tar.Z"
-      "Windows":
-        "Visual Studio":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
-        "msvc":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
-      "cygwin":
-        "gcc":
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Cygwin_GCC_64bit/packages/cspice.tar.gz"
-      "SunOs":
-        "sun-cc":
-          "sparc": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_SunC_32bit/packages/cspice.tar.Z"
-          "sparcv9": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_SunC_64bit/packages/cspice.tar.Z"
-        "gcc":
-          "sparc": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_GCC_32bit/packages/cspice.tar.Z"
-          "sparcv9": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_GCC_64bit/packages/cspice.tar.Z"
-    sha256:
-      "Macos":
-        "apple-clang":
-          "x86_64": "6f4980445fee4d363dbce6f571819f4a248358d2c1bebca47e0743eedfe9935e"
-          "armv8": "0deae048443e11ca4d093cac651d9785d4f2594631a183d85a3d58949f4d0aa9"
-      "Linux":
-        "gcc":
-          "x86": "33d75cd94acf6546e53d7ebc4e7d3d6d42ac27c83cb0d8f04c91a8b50c1149e3"
-          "x86_64": "60a95b51a6472f1afe7e40d77ebdee43c12bb5b8823676ccc74692ddfede06ce"
-      "Windows":
-        "Visual Studio":
-          "x86": "bc566e6a975c888fc5fd89d76554329501446bda88c8bab937c0725faead170f"
-          "x86_64": "98d60b814b412fa55294aeaaeb7dab46d849cc87a8b709ffe835d08de17625dc"
-        "msvc":
-          "x86": "bc566e6a975c888fc5fd89d76554329501446bda88c8bab937c0725faead170f"
-          "x86_64": "98d60b814b412fa55294aeaaeb7dab46d849cc87a8b709ffe835d08de17625dc"
-      "cygwin":
-        "gcc":
-          "x86_64": "78ca611638653e1b86347d2b58d8bc761c256e5d0037314fcb7c3eedb3e981bd"
-      "SunOs":
-        "sun-cc":
-          "sparc": "382d6bc51312c0af8b52d6995c255a5af468551bb04c79fb2e6171dc10de95f3"
-          "sparcv9": "f2510faccdcfeb4ed75ed3fc377059629ae090c29e7d22189e0933e9a905143b"
-        "gcc":
-          "sparc": "b26c645d11b12f906c4283202d630c114710288531f2dfc118721b81de25722f"
-          "sparcv9": "b0936d1ef0973fcdbd2b204faacd128059d8a656d73e4f276dfc6709d8080eee"
+    "Macos":
+      "apple-clang":
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/MacIntel_OSX_AppleC_64bit/packages/cspice.tar.Z"
+          sha256: "6f4980445fee4d363dbce6f571819f4a248358d2c1bebca47e0743eedfe9935e"
+        "armv8":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/MacM1_OSX_clang_64bit/packages/cspice.tar.Z"
+          sha256: "0deae048443e11ca4d093cac651d9785d4f2594631a183d85a3d58949f4d0aa9"
+    "Linux":
+      "gcc":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Linux_GCC_32bit/packages/cspice.tar.Z"
+          sha256: "33d75cd94acf6546e53d7ebc4e7d3d6d42ac27c83cb0d8f04c91a8b50c1149e3"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Linux_GCC_64bit/packages/cspice.tar.Z"
+          sha256: "60a95b51a6472f1afe7e40d77ebdee43c12bb5b8823676ccc74692ddfede06ce"
+    "Windows":
+      "Visual Studio":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
+          sha256: "bc566e6a975c888fc5fd89d76554329501446bda88c8bab937c0725faead170f"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
+          sha256: "98d60b814b412fa55294aeaaeb7dab46d849cc87a8b709ffe835d08de17625dc"
+      "msvc":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
+          sha256: "bc566e6a975c888fc5fd89d76554329501446bda88c8bab937c0725faead170f"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
+          sha256: "98d60b814b412fa55294aeaaeb7dab46d849cc87a8b709ffe835d08de17625dc"
+    "cygwin":
+      "gcc":
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/PC_Cygwin_GCC_64bit/packages/cspice.tar.gz"
+          sha256: "78ca611638653e1b86347d2b58d8bc761c256e5d0037314fcb7c3eedb3e981bd"
+    "SunOs":
+      "sun-cc":
+        "sparc":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_SunC_32bit/packages/cspice.tar.Z"
+          sha256: "382d6bc51312c0af8b52d6995c255a5af468551bb04c79fb2e6171dc10de95f3"
+        "sparcv9":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_SunC_64bit/packages/cspice.tar.Z"
+          sha256: "f2510faccdcfeb4ed75ed3fc377059629ae090c29e7d22189e0933e9a905143b"
+      "gcc":
+        "sparc":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_GCC_32bit/packages/cspice.tar.Z"
+          sha256: "b26c645d11b12f906c4283202d630c114710288531f2dfc118721b81de25722f"
+        "sparcv9":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0067/C/SunSPARC_Solaris_GCC_64bit/packages/cspice.tar.Z"
+          sha256: "b0936d1ef0973fcdbd2b204faacd128059d8a656d73e4f276dfc6709d8080eee"
   "0066":
-    url:
-      "Macos":
-        "apple-clang":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_32bit/packages/cspice.tar.Z"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_64bit/packages/cspice.tar.Z"
-      "Linux":
-        "gcc":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_32bit/packages/cspice.tar.Z"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_64bit/packages/cspice.tar.Z"
-      "Windows":
-        "Visual Studio":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
-        "msvc":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
-      "cygwin":
-        "gcc":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Cygwin_GCC_32bit/packages/cspice.tar.gz"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Cygwin_GCC_64bit/packages/cspice.tar.gz"
-      "SunOs":
-        "sun-cc":
-          "x86": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunIntel_Solaris_SunC_32bit/packages/cspice.tar.Z"
-          "x86_64": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunIntel_Solaris_SunC_64bit/packages/cspice.tar.Z"
-          "sparc": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_SunC_32bit/packages/cspice.tar.Z"
-          "sparcv9": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_SunC_64bit/packages/cspice.tar.Z"
-        "gcc":
-          "sparc": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_GCC_32bit/packages/cspice.tar.Z"
-          "sparcv9": "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_GCC_64bit/packages/cspice.tar.Z"
-    sha256:
-      "Macos":
-        "apple-clang":
-          "x86": "9a4b5f674ea76821c43aa9140829da4091de646ef3ce40fd5be1d09d7c37b6b3"
-          "x86_64": "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
-      "Linux":
-        "gcc":
-          "x86": "59f5a2e865ff8dee3e415477fe55cf366bad5498948bf7b034ee00b46ec80720"
-          "x86_64": "93cd4fbce5818f8b7fecf3914c5756b8d41fd5bdaaeac1f4037b5a5410bc4768"
-      "Windows":
-        "Visual Studio":
-          "x86": "db48e5beddc0e50f7a0224bb2c6f2b39fc38f84628ad5cd455e847fc70aa5e75"
-          "x86_64": "b29dfb0b41ae8322c60ee9d162beb97433d21e12843ecbe03d819e5edef45920"
-        "msvc":
-          "x86": "db48e5beddc0e50f7a0224bb2c6f2b39fc38f84628ad5cd455e847fc70aa5e75"
-          "x86_64": "b29dfb0b41ae8322c60ee9d162beb97433d21e12843ecbe03d819e5edef45920"
-      "cygwin":
-        "gcc":
-          "x86": "fae1e81f2b120801078415ddc78069543792b2ecf6f01e2ddd4f9d1fdff6d705"
-          "x86_64": "bc41bd496c98b5b26c03e2eb1235a2ab3ee3d6b54452155722c0163ebec52c09"
-      "SunOs":
-        "sun-cc":
-          "x86": "2779be0a8cce3a342fd77d118c53689344979de01a4185f8ff727f85502f116e"
-          "x86_64": "b221eb598e4397acf957b0464694a62c92871671be9fe9c32ac64d621b1eb29d"
-          "sparc": "1432f49f628930b48197bcf4e9234ed7a340732302c82fd6d0650d15fe8503f8"
-          "sparcv9": "be27fa91fefa9f54e90578a7c84e9e16d19b0ce6420eb346340ecf8d26db1b5f"
-        "gcc":
-          "sparc": "463c93a54f432fa41e1733bc4ec0e584f1017f48f84e0e9fafe4adc4163064c9"
-          "sparcv9": "4e86fad7e8fa947abddd3d78174efc65476a3f54627747ffc2027ee572af48b3"
+    "Macos":
+      "apple-clang":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_32bit/packages/cspice.tar.Z"
+          sha256: "9a4b5f674ea76821c43aa9140829da4091de646ef3ce40fd5be1d09d7c37b6b3"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/MacIntel_OSX_AppleC_64bit/packages/cspice.tar.Z"
+          sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
+    "Linux":
+      "gcc":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_32bit/packages/cspice.tar.Z"
+          sha256: "59f5a2e865ff8dee3e415477fe55cf366bad5498948bf7b034ee00b46ec80720"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Linux_GCC_64bit/packages/cspice.tar.Z"
+          sha256: "93cd4fbce5818f8b7fecf3914c5756b8d41fd5bdaaeac1f4037b5a5410bc4768"
+    "Windows":
+      "Visual Studio":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
+          sha256: "db48e5beddc0e50f7a0224bb2c6f2b39fc38f84628ad5cd455e847fc70aa5e75"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
+          sha256: "b29dfb0b41ae8322c60ee9d162beb97433d21e12843ecbe03d819e5edef45920"
+      "msvc":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_32bit/packages/cspice.zip"
+          sha256: "db48e5beddc0e50f7a0224bb2c6f2b39fc38f84628ad5cd455e847fc70aa5e75"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Windows_VisualC_64bit/packages/cspice.zip"
+          sha256: "b29dfb0b41ae8322c60ee9d162beb97433d21e12843ecbe03d819e5edef45920"
+    "cygwin":
+      "gcc":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Cygwin_GCC_32bit/packages/cspice.tar.gz"
+          sha256: "fae1e81f2b120801078415ddc78069543792b2ecf6f01e2ddd4f9d1fdff6d705"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/PC_Cygwin_GCC_64bit/packages/cspice.tar.gz"
+          sha256: "bc41bd496c98b5b26c03e2eb1235a2ab3ee3d6b54452155722c0163ebec52c09"
+    "SunOs":
+      "sun-cc":
+        "x86":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunIntel_Solaris_SunC_32bit/packages/cspice.tar.Z"
+          sha256: "2779be0a8cce3a342fd77d118c53689344979de01a4185f8ff727f85502f116e"
+        "x86_64":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunIntel_Solaris_SunC_64bit/packages/cspice.tar.Z"
+          sha256: "b221eb598e4397acf957b0464694a62c92871671be9fe9c32ac64d621b1eb29d"
+        "sparc":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_SunC_32bit/packages/cspice.tar.Z"
+          sha256: "1432f49f628930b48197bcf4e9234ed7a340732302c82fd6d0650d15fe8503f8"
+        "sparcv9":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_SunC_64bit/packages/cspice.tar.Z"
+          sha256: "be27fa91fefa9f54e90578a7c84e9e16d19b0ce6420eb346340ecf8d26db1b5f"
+      "gcc":
+        "sparc":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_GCC_32bit/packages/cspice.tar.Z"
+          sha256: "463c93a54f432fa41e1733bc4ec0e584f1017f48f84e0e9fafe4adc4163064c9"
+        "sparcv9":
+          url: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066/C/SunSPARC_Solaris_GCC_64bit/packages/cspice.tar.Z"
+          sha256: "4e86fad7e8fa947abddd3d78174efc65476a3f54627747ffc2027ee572af48b3"
 patches:
   "0067":
     - patch_file: "patches/isatty.patch"
-      base_path: "source_subfolder"
   "0066":
     - patch_file: "patches/isatty.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/patches20171106.patch" # from https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066_patches
-      base_path: "source_subfolder"
+    - patch_file: "patches/patches20171106.patch"
+      patch_type: "backport"
+      patch_source: "https://naif.jpl.nasa.gov/pub/naif/misc/toolkit_N0066_patches"

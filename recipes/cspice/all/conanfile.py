@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, rename, rmdir, save
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class CspiceConan(ConanFile):
@@ -25,17 +27,10 @@ class CspiceConan(ConanFile):
         "utilities": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,25 +39,31 @@ class CspiceConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def validate(self):
-        sources_url_per_triplet = self.conan_data["sources"][self.version]["url"]
-        the_os = self._get_os_or_subsystem()
-        if the_os not in sources_url_per_triplet:
+        sources_url_per_triplet = self.conan_data["sources"][self.version]
+        host_os = self._get_os_or_subsystem()
+        if host_os not in sources_url_per_triplet:
             raise ConanInvalidConfiguration(
-                "cspice N{0} does not support {1}".format(self.version, the_os)
+                f"cspice N{self.version} does not support {host_os}",
             )
-        compiler = str(self.settings.compiler)
-        if compiler not in sources_url_per_triplet[the_os]:
+        compiler = str(self.info.settings.compiler)
+        if compiler not in sources_url_per_triplet[host_os]:
             raise ConanInvalidConfiguration(
-                "cspice N{0} does not support {1} on {2}".format(self.version, compiler, the_os)
+                f"cspice N{self.version} does not support {compiler} on {host_os}",
             )
-        arch = str(self.settings.arch)
-        if arch not in sources_url_per_triplet[the_os][compiler]:
+        arch = str(self.info.settings.arch)
+        if arch not in sources_url_per_triplet[host_os][compiler]:
             raise ConanInvalidConfiguration(
-                "cspice N{0} does not support {1} on {2} {3}".format(self.version, compiler, the_os, arch)
+                f"cspice N{self.version} does not support {compiler} on {host_os} {arch}",
             )
 
     def _get_os_or_subsystem(self):
@@ -72,47 +73,53 @@ class CspiceConan(ConanFile):
             os_or_subsystem = str(self.settings.os)
         return os_or_subsystem
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
         pass
 
-    def build(self):
-        self._get_sources()
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CSPICE_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["CSPICE_BUILD_UTILITIES"] = self.options.utilities
+        tc.generate()
+
+    @property
+    def _parent_source_folder(self):
+        return os.path.join(self.source_folder, os.pardir)
 
     def _get_sources(self):
-        the_os = self._get_os_or_subsystem()
-        compiler = str(self.settings.compiler)
-        arch = str(self.settings.arch)
-        url = self.conan_data["sources"][self.version]["url"][the_os][compiler][arch]
-        sha256 = self.conan_data["sources"][self.version]["sha256"][the_os][compiler][arch]
-        if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
-            filename = os.path.basename(url)
-            tools.download(url, filename, sha256=sha256)
-            command = "zcat {} | tar -xf -".format(filename)
-            self.run(command=command)
-            os.remove(filename)
-        else:
-            tools.get(url, sha256=sha256)
-        tools.rename(self.name, self._source_subfolder)
+        with chdir(self, self._parent_source_folder):
+            host_os = self._get_os_or_subsystem()
+            compiler = str(self.settings.compiler)
+            arch = str(self.settings.arch)
+            data = self.conan_data["sources"][self.version][host_os][compiler][arch]
+            url = data["url"]
+            if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
+                tarball = os.path.basename(url)
+                download(self, url, tarball, sha256=data["sha256"])
+                self.run(f"zcat {tarball} | tar -xf -")
+                os.remove(tarball)
+            else:
+                get(self, **data)
+            rmdir(self, self.source_folder)
+            rename(self, "cspice", os.path.basename(self.source_folder))
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_UTILITIES"] = self.options.utilities
-        self._cmake.configure()
-        return self._cmake
+    def build(self):
+        self._get_sources()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self._parent_source_folder)
+        cmake.build()
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
-        cmake = self._configure_cmake()
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        cmake = CMake(self)
         cmake.install()
 
     def _extract_license(self):
-        spiceusr_header = tools.load(os.path.join(self._source_subfolder, "include", "SpiceUsr.h"))
+        spiceusr_header = load(self, os.path.join(self.source_folder, "include", "SpiceUsr.h"))
         begin = spiceusr_header.find("-Disclaimer")
         end = spiceusr_header.find("-Required_Reading", begin)
         return spiceusr_header[begin:end]
@@ -124,5 +131,5 @@ class CspiceConan(ConanFile):
 
         if self.options.utilities:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)

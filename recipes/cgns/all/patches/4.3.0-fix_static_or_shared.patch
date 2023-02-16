@@ -1,0 +1,24 @@
+Enforces that either static or dynamic libs are built
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 103cb1f..aae21a7 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -674,7 +674,9 @@ if(CGNS_BUILD_SHARED)
+ endif()
+ 
+ 
++if(NOT CGNS_BUILD_SHARED)
+ set (install_targets cgns_static)
++endif()
+ if(CGNS_BUILD_SHARED)
+   set(install_targets ${install_targets} cgns_shared)
+ endif ()
+@@ -738,7 +740,6 @@ install(EXPORT cgns-targets
+ # Tools #
+ #########
+ 
+-add_subdirectory(tools)
+ 
+ #########
+ # Tests #

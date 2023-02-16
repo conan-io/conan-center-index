@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9de55a32..1f29f972 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,12 +106,6 @@ endif ()
+ 
+ # Install the project artifacts from the staged directory
+ include(GNUInstallDirs)
+-install(DIRECTORY
+-            ${STAGED_INSTALL_PREFIX}/
+-        DESTINATION
+-            .
+-        USE_SOURCE_PERMISSIONS
+-)
+ install(FILES
+             COPYING README.md INSTALL.md CONTRIBUTING.md CODE_OF_CONDUCT.md
+         DESTINATION

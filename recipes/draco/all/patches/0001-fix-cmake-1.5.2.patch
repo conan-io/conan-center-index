@@ -1,0 +1,17 @@
+--- a/cmake/draco_install.cmake
++++ b/cmake/draco_install.cmake
+@@ -84,12 +84,12 @@ macro(draco_setup_install_target)
+   endif()
+ 
+   if(MSVC)
+-    install(TARGETS draco DESTINATION "${libs_path}")
++    install(TARGETS draco RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+   else()
+     install(TARGETS draco_static DESTINATION "${libs_path}")
+ 
+     if(BUILD_SHARED_LIBS)
+-      install(TARGETS draco_shared DESTINATION "${libs_path}")
++      install(TARGETS draco_shared RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+     endif()
+   endif()
+ 

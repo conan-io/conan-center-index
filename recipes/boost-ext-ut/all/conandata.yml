@@ -2,3 +2,11 @@ sources:
   "1.1.8":
     url: "https://github.com/boost-ext/ut/archive/v1.1.8.tar.gz"
     sha256: "3cc426dcf38397637e889efd9567b06d55dd23fb4e65cc0381eb8103a411d104"
+  "1.1.9":
+    url: "https://github.com/boost-ext/ut/archive/v1.1.9.tar.gz"
+    sha256: "1a666513157905aa0e53a13fac602b5673dcafb04a869100a85cd3f000c2ed0d"
+patches:
+  "1.1.8":
+    - patch_file: "patches/license.patch"
+  "1.1.9":
+    - patch_file: "patches/1.1.9_cmake_project_version.patch"

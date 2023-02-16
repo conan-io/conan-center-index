@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(sml REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::sml)
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
+target_link_libraries(${PROJECT_NAME} PRIVATE sml::sml)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)

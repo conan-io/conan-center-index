@@ -1,0 +1,22 @@
+diff --git a/homog2d.hpp b/homog2d.hpp
+index 77f6841..ab8646b 100644
+--- a/homog2d.hpp
++++ b/homog2d.hpp
+@@ -729,12 +729,11 @@ auto
+ operator << ( std::ostream&, const h2d::base::LPBase<LP,FPT>& )
+ -> std::ostream&;
+ }
+-/*
+-template<typename LP,typename FPT>
+-auto
+-operator << ( std::ostream&, const h2d::Point2d_<FPT>& )
+--> std::ostream&;
+-*/
++
++// forward declaration, related to https://github.com/skramm/homog2d/issues/2
++template<typename T,typename U>
++Line2d_<T>
++operator * ( const Homogr_<U>&, const Line2d_<T>& );
+ 
+ namespace detail {
+ 

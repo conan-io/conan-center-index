@@ -1,0 +1,4 @@
+sources:
+  "0.0.4":
+    url: "https://github.com/chrberger/stringtoolbox/archive/refs/tags/v0.0.4.tar.gz"
+    sha256: "5778bc508f880e9f9d139446059766047108f941cd08f8fba102464289ebb967"

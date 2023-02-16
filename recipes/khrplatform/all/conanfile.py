@@ -1,9 +1,10 @@
+from conan import ConanFile
+from conan.tools.files import copy, download, load, save
+from conan.tools.layout import basic_layout
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.50.0"
 
-required_conan_version = ">=1.37.0"
 
 class KhrplatformConan(ConanFile):
     name = "khrplatform"
@@ -12,20 +13,31 @@ class KhrplatformConan(ConanFile):
     homepage = "https://www.khronos.org/registry/EGL/"
     description = "Khronos EGL platform interfaces"
     topics = ("opengl", "gl", "egl", "khr", "khronos")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def source(self):
-        tools.download(filename="khrplatform.h", **self.conan_data["sources"][self.version])
-
-    def package(self):
-        self.copy(pattern="khrplatform.h", dst=os.path.join("include", "KHR"))
-        license_data = tools.load(os.path.join(self.source_folder, "khrplatform.h"))
-        begin = license_data.find("/*") + len("/*")
-        end = license_data.find("*/")
-        license_data = license_data[begin:end]
-        license_data = license_data.replace("**", "")
-        tools.save("LICENSE", license_data)
-        self.copy("LICENSE", dst="licenses")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        download(self, filename="khrplatform.h", **self.conan_data["sources"][self.version])
+
+    def build(self):
+        pass
+
+    def _extract_license(self):
+        license_data = load(self, os.path.join(self.source_folder, "khrplatform.h"))
+        begin = license_data.find("/*") + len("/*")
+        end = license_data.find("*/")
+        return license_data[begin:end].replace("**", "")
+
+    def package(self):
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        copy(self, "khrplatform.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "KHR"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

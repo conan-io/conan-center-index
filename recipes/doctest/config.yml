@@ -21,3 +21,5 @@ versions:
     folder: 2.x.x
   2.4.8:
     folder: 2.x.x
+  "2.4.9":
+    folder: 2.x.x

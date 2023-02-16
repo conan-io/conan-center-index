@@ -1,7 +1,45 @@
 sources:
-  "2.0.4":
-    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_4/log4cplus-2.0.4.tar.bz2"
-    sha256: "0c8a7b4cabff07032385f0c6d1a078d2a79c69b1c43b06991ca774fb85880252"
+  "2.1.0":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_0/log4cplus-2.1.0.tar.bz2"
+    sha256: "a04945aca5fbc0487503c852befb9cdefbc3ae3fe614b08a905333f6df754387"
+  "2.0.8":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_8/log4cplus-2.0.8.tar.bz2"
+    sha256: "ca36aa366036d1c61fc0366a9ffbcf32bad55d74878b2c36a9c34dcc00b8a0ca"
+  "2.0.7":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_7/log4cplus-2.0.7.tar.bz2"
+    sha256: "8fadbafee2ba4e558a0f78842613c9fb239c775d83f23340d091084c0e1b12ab"
+  "2.0.6":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_6/log4cplus-2.0.6.tar.bz2"
+    sha256: "1a963afd0f883d62de946b18927d238051fd47936e415eabeffe2b1397f16eca"
   "2.0.5":
     url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_5/log4cplus-2.0.5.tar.bz2"
     sha256: "b38dbfc68ef6d771e4de7de0be3544bc51bd3f7d5b75c5f6500d10e23203eb15"
+  "2.0.4":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_4/log4cplus-2.0.4.tar.bz2"
+    sha256: "0c8a7b4cabff07032385f0c6d1a078d2a79c69b1c43b06991ca774fb85880252"
+
+patches:
+  "2.1.0":
+    - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
+      patch_description: "disable fPIC, move cmake_minimum_version to front"
+      patch_type: "conan"
+  "2.0.8":
+    - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
+      patch_description: "disable fPIC, move cmake_minimum_version to front"
+      patch_type: "conan"
+  "2.0.7":
+    - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
+      patch_description: "disable fPIC, move cmake_minimum_version to front"
+      patch_type: "conan"
+  "2.0.6":
+    - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
+      patch_description: "disable fPIC, move cmake_minimum_version to front"
+      patch_type: "conan"
+  "2.0.5":
+    - patch_file: "patches/2.0.4-0001-fix-cmake.patch"
+      patch_description: "disable fPIC, move cmake_minimum_version to front"
+      patch_type: "conan"
+  "2.0.4":
+    - patch_file: "patches/2.0.4-0001-fix-cmake.patch"
+      patch_description: "disable fPIC, move cmake_minimum_version to front"
+      patch_type: "conan"

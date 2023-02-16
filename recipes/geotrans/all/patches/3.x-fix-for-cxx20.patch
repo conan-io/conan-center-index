@@ -1,0 +1,15 @@
+Only in b/CCS/src/dtcc/CoordinateSystems/gars: .GARS.cpp.swp
+diff -ru a/CCS/src/dtcc/CoordinateSystems/gars/GARS.cpp b/CCS/src/dtcc/CoordinateSystems/gars/GARS.cpp
+--- a/CCS/src/dtcc/CoordinateSystems/gars/GARS.cpp	2019-05-09 08:43:20.000000000 +0800
++++ b/CCS/src/dtcc/CoordinateSystems/gars/GARS.cpp	2022-06-23 08:04:37.949610100 +0800
+@@ -199,8 +199,8 @@
+   char _15_minute_value_str[2] = "";
+   char _5_minute_value_str[2] = "";
+   double round_error = 5.0e-11;
+-  char* _15_minute_array[2][2] = {{"3", "1"}, {"4", "2"}};
+-  char* _5_minute_array[3][3] = {{"7", "4", "1"}, {"8", "5", "2"}, {"9", "6", "3"}};
++  const char* _15_minute_array[2][2] = {{"3", "1"}, {"4", "2"}};
++  const char* _5_minute_array[3][3] = {{"7", "4", "1"}, {"8", "5", "2"}, {"9", "6", "3"}};
+   double long_minutes, lat_minutes; 
+   double long_remainder, lat_remainder; 
+   long horiz_index_30, vert_index_30; 

@@ -1,7 +1,11 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.51.1"
 
 
 class VectorclassConan(ConanFile):
@@ -11,32 +15,23 @@ class VectorclassConan(ConanFile):
                   "microprocessors with the x86 or x86/64 instruction set on " \
                   "Windows, Linux, and Mac platforms."
     license = "Apache-2.0"
-    topics = ("conan", "vectorclass", "vector", "simd")
+    topics = ("vectorclass", "vector", "simd")
     homepage = "https://github.com/vectorclass/version2"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    settings = ("os", "arch", "compiler", "build_type")
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
-        "fPIC": True
+        "fPIC": True,
     }
 
-    _cmake = None
+    exports_sources = "CMakeLists.txt"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -44,46 +39,52 @@ class VectorclassConan(ConanFile):
             "Visual Studio": "15.7",
             "gcc": "7",
             "clang": "4.0",
-            "apple-clang": "9.1"
+            "apple-clang": "9.1",
         }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
-        if self.settings.os not in ["Linux", "Windows", "Macos"] or self.settings.arch not in ["x86", "x86_64"]:
+        if self.info.settings.os not in ["Linux", "Windows", "Macos"] or self.info.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("vectorclass supports Linux/Windows/macOS and x86/x86_64 only.")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} {} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name, self.version))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
+        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["VECTORCLASS_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

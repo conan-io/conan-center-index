@@ -1,0 +1,13 @@
+--- a/cmake-library/VCI/VCICommon.cmake
++++ b/cmake-library/VCI/VCICommon.cmake
+@@ -41,9 +41,9 @@
+ if (CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
+   set (VCI_PROJECT_DATADIR ".")
+   set (VCI_PROJECT_LIBDIR "lib")
+-  set (VCI_PROJECT_BINDIR ".")
++  set (VCI_PROJECT_BINDIR "bin")
+   set (VCI_PROJECT_PLUGINDIR "Plugins")
+   if (NOT EXISTS ${CMAKE_BINARY_DIR}/Build/${VCI_PROJECT_LIBDIR})
+     file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Build/${VCI_PROJECT_LIBDIR})
+   endif ()
+ elseif (APPLE)

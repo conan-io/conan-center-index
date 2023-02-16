@@ -1,0 +1,38 @@
+diff --git a/cmake/LibraryConfigurations.cmake b/cmake/LibraryConfigurations.cmake
+index c156d6b3..608fe531 100644
+--- a/cmake/LibraryConfigurations.cmake
++++ b/cmake/LibraryConfigurations.cmake
+@@ -42,7 +42,7 @@ elseif (${PLATFORM} MATCHES "Android")
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+     
+     add_definitions(-DANDROID -D__ANDROID_API__=21)
+-    include_directories(external/android/native_app_glue)
++    include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libatomic.a -Wl,--build-id -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--warn-shared-textrel -Wl,--fatal-warnings -uANativeActivity_onCreate")
+     
+     find_library(OPENGL_LIBRARY OpenGL)
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 6ade9686..4e849ce4 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -66,6 +66,7 @@ endif ()
+ if (${PLATFORM} MATCHES "Android")
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/rlgl_standalone.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/standard_lighting.c)
++	list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/others/raylib_opengl_interop.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_3d_picking.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_vr_simulator.c)
+     list(REMOVE_ITEM example_sources ${CMAKE_CURRENT_SOURCE_DIR}/core/core_3d_camera_free.c)
+diff --git a/src/rcore.c b/src/rcore.c
+index 3b451552..d7e58c1c 100644
+--- a/src/rcore.c
++++ b/src/rcore.c
+@@ -196,7 +196,7 @@
+ 
+     // Support retrieving native window handlers
+     #if defined(_WIN32)
+-        #define GLFW_EXPOSE_NATIVE_WIN32
++
+         #include "GLFW/glfw3native.h"       // WARNING: It requires customization to avoid windows.h inclusion!
+ 
+         #if defined(SUPPORT_WINMM_HIGHRES_TIMER) && !defined(SUPPORT_BUSY_WAIT_LOOP)

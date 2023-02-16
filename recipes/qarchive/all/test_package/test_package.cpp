@@ -1,17 +1,8 @@
-#include <QCoreApplication>
-#include <QArchive/QArchive>
+#include <QArchive>
 
 int main(int argc, char **argv)
 {
-    using QArchive::DiskExtractor;
-    QCoreApplication app(argc, argv);
-    DiskExtractor Extractor("Test.7z");
-
-    /* Connect Signals and Slots. */
-    QObject::connect(&Extractor ,
-                     &DiskExtractor::finished ,
-                     &app ,
-                     &QCoreApplication::quit);
+    QArchive::DiskExtractor Extractor("Test.7z");
 
     Extractor.start();
     Extractor.cancel();

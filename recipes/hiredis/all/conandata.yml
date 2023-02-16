@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/redis/hiredis/archive/v1.1.0.tar.gz"
+    sha256: "fe6d21741ec7f3fc9df409d921f47dfc73a4d8ff64f4ac6f1d95f951bf7f53d6"
   "1.0.2":
     url: "https://github.com/redis/hiredis/archive/v1.0.2.tar.gz"
     sha256: "e0ab696e2f07deb4252dda45b703d09854e53b9703c7d52182ce5a22616c3819"
@@ -6,11 +9,21 @@ sources:
     url: "https://github.com/redis/hiredis/archive/v1.0.0.tar.gz"
     sha256: "2a0b5fe5119ec973a0c1966bfc4bd7ed39dbce1cb6d749064af9121fe971936f"
 patches:
+  "1.1.0":
+    - patch_file: "patches/0001-fix-cmake-1.1.0.patch"
+      patch_description: "divide static/shared build, fix openssl link name"
+      patch_type: "conan"
+    - patch_file: "patches/0002-fix-aix.patch"
+      patch_description: "support AIX build"
+      patch_type: "portability"
   "1.0.2":
-    - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-aix.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-1.0.0.patch"
+      patch_description: "enable static/shared build, fix openssl link name"
+      patch_type: "conan"
+    - patch_file: "patches/0002-fix-aix.patch"
+      patch_description: "support AIX build"
+      patch_type: "portability"
   "1.0.0":
-    - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake-1.0.0.patch"
+      patch_description: "enable static/shared build, fix openssl link name"
+      patch_type: "conan"

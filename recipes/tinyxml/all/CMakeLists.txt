@@ -1,35 +1,27 @@
 cmake_minimum_required(VERSION 3.4)
-project(cmake_wrapper)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+project(tinyxml LANGUAGES CXX)
 
 option(TINYXML_WITH_STL "Compile TinyXML with STL" OFF)
 
-set(SOURCE_SUBFOLDER "source_subfolder")
-
-if(MSVC AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
 set(TINYXML_HDRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER}/tinystr.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER}/tinyxml.h)
+    ${TINYXML_SRC_DIR}/tinystr.h
+    ${TINYXML_SRC_DIR}/tinyxml.h)
 set(TINYXML_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER}/tinystr.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER}/tinyxml.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER}/tinyxmlerror.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER}/tinyxmlparser.cpp)
+    ${TINYXML_SRC_DIR}/tinystr.cpp
+    ${TINYXML_SRC_DIR}/tinyxml.cpp
+    ${TINYXML_SRC_DIR}/tinyxmlerror.cpp
+    ${TINYXML_SRC_DIR}/tinyxmlparser.cpp)
 
-add_library(tinyxml STATIC ${TINYXML_SRCS})
-target_include_directories(tinyxml PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_SUBFOLDER})
+add_library(tinyxml ${TINYXML_SRCS})
+target_include_directories(tinyxml PUBLIC ${TINYXML_SRC_DIR})
 
 if(TINYXML_WITH_STL)
     target_compile_definitions(tinyxml PUBLIC TIXML_USE_STL)
 endif()
 
+include(GNUInstallDirs)
 install(TARGETS tinyxml
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
-install(FILES ${TINYXML_HDRS} DESTINATION include)
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${TINYXML_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

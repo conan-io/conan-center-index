@@ -1,6 +1,8 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -5,7 +5,6 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9b168d9..243bbc2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,7 +5,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
  # Modules
  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
  if (WIN32)
@@ -8,8 +10,8 @@
  endif()
  include(CheckCXXCompilerFlag)
  include(CheckCCompilerFlag)
-@@ -49,14 +48,14 @@
-
+@@ -49,14 +48,14 @@ endif()
+ 
  # Dependencies
  # ============
 -set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
@@ -19,17 +21,17 @@
 +  message(STATUS "Enable Frozen (C++14 support)")
 +  set(LIEF_FROZEN_ENABLED 1)
 +endif()
-
+ 
  # LIEF Source definition
  # ======================
 -set_source_files_properties(${mbedtls_src_crypto} PROPERTIES GENERATED TRUE)
 -set_source_files_properties(${mbedtls_src_x509} PROPERTIES GENERATED TRUE)
 -set_source_files_properties(${mbedtls_src_tls} PROPERTIES GENERATED TRUE)
-
+ 
  if (LIEF_LOGGING)
    set_source_files_properties(${ELG_SOURCE_DIR}/easylogging++.cc PROPERTIES GENERATED TRUE)
-@@ -73,9 +72,6 @@
-
+@@ -73,9 +72,6 @@ set(LIEF_PRIVATE_INCLUDE_FILES)
+ 
  set(LIBLIEF_SOURCE_FILES
    "${ELG_CC_PATH}"
 -  "${mbedtls_src_crypto}"
@@ -38,31 +40,31 @@
    "${LIBFUZZER_SRC_FILES}"
    "${CMAKE_CURRENT_SOURCE_DIR}/src/logging.cpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/src/exception.cpp"
-@@ -126,13 +122,11 @@
+@@ -126,13 +122,11 @@ set(LIEF_INCLUDE_FILES
  set(LIEF_JSON_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/visitors/json.cpp")
  set(LIEF_JSON_HDR
    "${CMAKE_CURRENT_SOURCE_DIR}/include/LIEF/json.hpp"
 -  "${LIBJSON_SOURCE_DIR}/json.hpp"
  )
-
+ 
  if (LIEF_ENABLE_JSON)
    list(APPEND LIBLIEF_SOURCE_FILES     "${LIEF_JSON_SRC}")
    list(APPEND LIEF_INC_FILES           "${LIEF_JSON_HDR}")
 -  list(APPEND LIEF_PUBLIC_INCLUDE_DIR  "${LIBJSON_SOURCE_DIR}/")
  endif()
-
+ 
  source_group("Header Files" FILES ${LIEF_INC_FILES})
-@@ -224,9 +218,6 @@
-
+@@ -224,9 +218,6 @@ endif()
+ 
  # Frozen Configuration
  # ====================
 -if (LIEF_FROZEN_ENABLED)
 -  list(APPEND LIEF_PRIVATE_INCLUDE_DIR "${FROZEN_INCLUDE_DIR}")
 -endif()
-
+ 
  # OAT part
  # ========
-@@ -292,19 +283,15 @@
+@@ -292,19 +283,15 @@ list(APPEND LIEF_PUBLIC_INCLUDE_DIR
  list(APPEND LIEF_PRIVATE_INCLUDE_DIR
    "${LIEF_PUBLIC_INCLUDE_DIR}"
    "${LIEF_PUBLIC_INCLUDE_DIR}"
@@ -73,8 +75,8 @@
    "${ELG_SOURCE_DIR}"
 -  "${MBEDTLS_INCLUDE_DIRS}"
  )
-
-
+ 
+ 
  # Grouping external projects
  # ==========================
 -source_group("mbedtls\\crypto" FILES ${mbedtls_src_crypto})
@@ -83,38 +85,42 @@
  if (LIEF_LOGGING)
    source_group("easylogging"     FILES ${ELG_SOURCE_DIR}/easylogging++.cc)
  endif()
-@@ -316,7 +303,7 @@
+@@ -316,7 +303,8 @@ target_include_directories(LIB_LIEF
    PRIVATE "${LIEF_PRIVATE_INCLUDE_DIR}")
-
+ 
  if (LIEF_ENABLE_JSON)
 -  add_dependencies(LIB_LIEF lief_libjson)
-+  target_link_libraries(LIB_LIEF CONAN_PKG::nlohmann_json)
++  find_package(nlohmann_json REQUIRED CONFIG)
++  target_link_libraries(LIB_LIEF nlohmann_json::nlohmann_json)
  endif()
-
+ 
  if (LIEF_LOGGING)
-@@ -324,18 +311,17 @@
+@@ -324,18 +312,20 @@ if (LIEF_LOGGING)
  endif()
-
+ 
  if (LIEF_FROZEN_ENABLED)
 -  add_dependencies(LIB_LIEF lief_frozen)
-+  target_link_libraries(LIB_LIEF CONAN_PKG::frozen)
++  find_package(frozen REQUIRED CONFIG)
++  target_link_libraries(LIB_LIEF frozen::frozen)
  endif()
-
+ 
 -add_dependencies(LIB_LIEF lief_rang_cpp_color)
-+target_link_libraries(LIB_LIEF CONAN_PKG::rang)
-
++find_package(rang REQUIRED CONFIG)
++target_link_libraries(LIB_LIEF rang::rang)
+ 
 -add_dependencies(LIB_LIEF lief_mbed_tls)
-+target_link_libraries(LIB_LIEF CONAN_PKG::mbedtls)
-
++find_package(MbedTLS REQUIRED CONFIG)
++target_link_libraries(LIB_LIEF MbedTLS::mbedtls)
+ 
  # Flags definition
  # ----------------
  set_property(TARGET LIB_LIEF PROPERTY CXX_STANDARD              11)
  set_property(TARGET LIB_LIEF PROPERTY CXX_STANDARD_REQUIRED     ON)
 -set_property(TARGET LIB_LIEF PROPERTY POSITION_INDEPENDENT_CODE ON)
  set_property(TARGET LIB_LIEF PROPERTY CXX_VISIBILITY_PRESET     hidden)
-
+ 
  target_compile_definitions(LIB_LIEF PUBLIC -D_GLIBCXX_USE_CXX11_ABI=1)
-@@ -345,11 +331,6 @@
+@@ -345,11 +335,6 @@ target_compile_definitions(LIB_LIEF PUBLIC -D_GLIBCXX_USE_CXX11_ABI=1)
  # with the SpcSpAgencyInfo Critical Extension, which mbed TLS doesn't
  # support, so set MBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION to
  # have it skip this extension.
@@ -123,11 +129,11 @@
 -  -DMBEDTLS_MD4_C
 -  -DMBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION
 -)
-
-
+ 
+ 
  # ASAN - LSAN - TSAN - USAN
-@@ -512,16 +493,16 @@
-
+@@ -512,16 +497,16 @@ endif()
+ 
  install(TARGETS LIB_LIEF
    ARCHIVE
 -  DESTINATION lib
@@ -139,7 +145,7 @@
 -  DESTINATION lib
 +  DESTINATION ${CMAKE_INSTALL_BINDIR}
    COMPONENT libraries)
-
+ 
  install(
    DIRECTORY ${LIEF_PUBLIC_INCLUDE_DIR}
 -  DESTINATION include

@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0b094735..de80eb1e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -304,7 +304,7 @@ if(MSVC)
+     # - w4100 - unreferenced formal parameter
+     # - w4201 - nonstandard extension used: nameless struct/union
+     # - w4505 - unreferenced local function has been removed
+-    target_compile_options(Diligent-BuildSettings INTERFACE /W4 /WX /wd4100 /wd4201 /wd4505 /MP)
++    target_compile_options(Diligent-BuildSettings INTERFACE /W1 /wd4100 /wd4201 /wd4505 /MP)
+     # In all release modes also:
+     # - disable w4189 - local variable is initialized but not referenced
+     # - Disable RTTI (/GR-)
+@@ -353,7 +353,6 @@ endif()
+ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+     target_compile_options(Diligent-BuildSettings INTERFACE
+     	# All warnings are errors
+-        -Werror
+         # Some extra warnings
+         -Wall -Wextra -Wuninitialized -Wconditional-uninitialized -Wextra-tokens -Wpointer-arith -Wloop-analysis -Wunused
+         # Disable few warnings

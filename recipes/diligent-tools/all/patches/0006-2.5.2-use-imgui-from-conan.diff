@@ -1,0 +1,21 @@
+diff --git a/Imgui/CMakeLists.txt b/Imgui/CMakeLists.txt
+index 89e8a33..64a2a77 100644
+--- a/Imgui/CMakeLists.txt
++++ b/Imgui/CMakeLists.txt
+@@ -78,8 +78,6 @@ add_library(Diligent-Imgui STATIC
+     ${SOURCE}
+     ${INCLUDE}
+     ${INTERFACE}
+-    ${DEAR_IMGUI_SOURCE}
+-    ${DEAR_IMGUI_INCLUDE}
+     ${DEAR_IMGUI_INTERFACE}
+     ${IMGUIZMO_QUAT_SOURCE}
+ )
+@@ -124,6 +122,7 @@ PRIVATE
+     Diligent-GraphicsEngineInterface
+     Diligent-GraphicsAccessories
+     Diligent-GraphicsTools
++    imgui::imgui
+ )
+ 
+ set_target_properties(Diligent-Imgui PROPERTIES

@@ -1,0 +1,12 @@
+diff --git a/core/src/qrcode/QRVersion.cpp b/core/src/qrcode/QRVersion.cpp
+index 9cebcb6..fb3680e 100644
+--- a/core/src/qrcode/QRVersion.cpp
++++ b/core/src/qrcode/QRVersion.cpp
+@@ -21,6 +21,7 @@
+ #include "BitMatrix.h"
+ 
+ #include <limits>
++#include <cstddef>
+ 
+ namespace ZXing {
+ namespace QRCode {

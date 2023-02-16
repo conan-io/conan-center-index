@@ -1,7 +1,16 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import (
+    apply_conandata_patches, chdir, copy, export_conandata_patches, get, mkdir,
+    rename, replace_in_file, rm, rmdir
+)
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path, MSBuild, MSBuildToolchain
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class Argon2Conan(ConanFile):
@@ -10,19 +19,29 @@ class Argon2Conan(ConanFile):
     homepage = "https://github.com/P-H-C/phc-winner-argon2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Argon2 password hashing library"
-    topics = ("argon2", "crypto", "password hashing")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = "patches/**"
+    topics = ("crypto", "password hashing")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _msbuild_configuration(self):
+        return "Debug" if self.settings.build_type == "Debug" else "Release"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,91 +49,118 @@ class Argon2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _kernel_name(self):
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             return "Darwin"
-        if self.settings.os == "Windows":
-            return "MINGW"
         return {
             "Windows": "MINGW",
         }.get(str(self.settings.os), str(self.settings.os))
 
-    @property
-    def _make_args(self):
-        return (
-            "PREFIX={}".format(tools.unix_path(self.package_folder)),
-            "LIBRARY_REL=lib",
-            "KERNEL_NAME={}".format(self._kernel_name),
-            "RUN_EXT={}".format(".exe" if self.settings.os == "Windows" else ""),
-        )
+    def generate(self):
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.configuration = self._msbuild_configuration
+            tc.properties["WholeProgramOptimization"] = "false"
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.make_args.extend([
+                "LIBRARY_REL=lib",
+                f"KERNEL_NAME={self._kernel_name}",
+                "RUN_EXT={}".format(".exe" if self.settings.os == "Windows" else ""),
+            ])
+            tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        vcxproj = os.path.join(self._source_subfolder, "vs2015", "Argon2OptDll", "Argon2OptDll.vcxproj")
-        argon2_header = os.path.join(self._source_subfolder, "include", "argon2.h")
-        if not self.options.shared:
-            tools.replace_in_file(argon2_header, "__declspec(dllexport)", "")
-            tools.replace_in_file(vcxproj, "DynamicLibrary", "StaticLibrary")
-        tools.replace_in_file(vcxproj, "<ClCompile>", "<ClCompile><AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>")
-        if self.settings.compiler == "Visual Studio":
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            vcxproj = os.path.join(self.source_folder, "vs2015", "Argon2OptDll", "Argon2OptDll.vcxproj")
+            argon2_header = os.path.join(self.source_folder, "include", "argon2.h")
+            if not self.options.shared:
+                replace_in_file(self, argon2_header, "__declspec(dllexport)", "")
+                replace_in_file(self, vcxproj, "DynamicLibrary", "StaticLibrary")
+            replace_in_file(
+                self, vcxproj,
+                "<ClCompile>",
+                "<ClCompile><AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>",
+            )
+            replace_in_file(self, vcxproj, "<WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>", "")
+
+            #==========================
+            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
+            conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+            replace_in_file(self, vcxproj, "<WholeProgramOptimization>true</WholeProgramOptimization>", "")
+            platform_toolset = MSBuildToolchain(self).toolset
+            replace_in_file(
+                self, vcxproj,
+                "<PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>",
+                f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+            )
+            replace_in_file(
+                self, vcxproj,
+                "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+                f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+            )
+            #==========================
+
             msbuild = MSBuild(self)
-            msbuild.build(os.path.join(self._source_subfolder, "Argon2.sln"), targets=("Argon2OptDll",))#, platforms={"x86": "Win32"})
+            msbuild.build_type = self._msbuild_configuration
+            msbuild.build(os.path.join(self.source_folder, "Argon2.sln"), targets=["Argon2OptDll"])
             if self.options.shared:
-                tools.replace_in_file(argon2_header, "__declspec(dllexport)", "__declspec(dllimport)")
+                replace_in_file(self, argon2_header, "__declspec(dllexport)", "__declspec(dllimport)")
         else:
-            with tools.chdir(self._source_subfolder):
-                autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-                with tools.environment_append(autotools.vars):
-                    autotools.make(args=self._make_args, target="libs")
+            autotools = Autotools(self)
+            with chdir(self, self.source_folder):
+                autotools.make(target="libs")
 
     def package(self):
-        self.copy("*LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
-        if self.settings.compiler == "Visual Studio":
-            self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include")
-            self.copy("*.dll", src=os.path.join(self._source_subfolder, "vs2015", "build"), dst="bin")
-            self.copy("*.lib", src=os.path.join(self._source_subfolder, "vs2015", "build"), dst="lib")
-            os.rename(os.path.join(self.package_folder, "lib", "Argon2OptDll.lib"),
-                      os.path.join(self.package_folder, "lib", "argon2.lib"))
+        copy(self, "*LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        bin_folder = os.path.join(self.package_folder, "bin")
+        lib_folder = os.path.join(self.package_folder, "lib")
+        if is_msvc(self):
+            copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+            output_folder = os.path.join(self.source_folder, "vs2015", "build")
+            copy(self, "*.dll", src=output_folder, dst=bin_folder, keep_path=False)
+            copy(self, "*.lib", src=output_folder, dst=lib_folder, keep_path=False)
+            rename(self, os.path.join(lib_folder, "Argon2OptDll.lib"), os.path.join(lib_folder, "argon2.lib"))
         else:
-            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            with tools.chdir(self._source_subfolder):
-                with tools.environment_append(autotools.vars):
-                    autotools.install(args=self._make_args)
-            # drop unneeded dirs
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-            if self.settings.os == "Windows" and self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "lib", "libargon2.a"))
-                self.copy("libargon2.dll.a", src=self._source_subfolder, dst="lib")
-                tools.mkdir(os.path.join(self.package_folder, "bin"))
-                os.rename(os.path.join(self.package_folder, "lib", "libargon2.dll"),
-                          os.path.join(self.package_folder, "bin", "libargon2.dll"))
-            # drop unneeded libs
+            autotools = Autotools(self)
+            with chdir(self, self.source_folder):
+                autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}", "PREFIX=/"])
+            rmdir(self, os.path.join(lib_folder, "pkgconfig"))
+            rmdir(self, bin_folder)
             if self.options.shared:
-                if self.settings.os != "Windows":
-                    tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a*")
+                rm(self, "*.a", lib_folder)
+                if self.settings.os == "Windows":
+                    mkdir(self, bin_folder)
+                    rename(self, os.path.join(lib_folder, "libargon2.dll"), os.path.join(bin_folder, "libargon2.dll"))
+                    copy(self, "libargon2.dll.a", src=self.source_folder, dst=lib_folder)
             else:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so.*")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
+                rm(self, "*.dll", lib_folder)
+                rm(self, "*.so*", lib_folder)
+                rm(self, "*.dylib", lib_folder)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libargon2"
+        self.cpp_info.set_property("pkg_config_name", "libargon2")
         self.cpp_info.libs = ["argon2"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]

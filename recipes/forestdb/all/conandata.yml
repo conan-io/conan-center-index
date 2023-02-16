@@ -1,0 +1,8 @@
+sources:
+  "cci.20220727":
+    url: "https://github.com/ForestDB-KVStore/Simple-ForestDB/archive/123dc7b2e4e99f85df6ed7a5b995393ec2197b09.tar.gz"
+    sha256: f847321479b525dccd9918799d9672d16140de65a3e07b8a2cc1cf92ff41bb65
+patches:
+  "cci.20220727":
+    - patch_file: "patches/0001-proper-cxx-std-flag.patch"
+      base_path: "source_subfolder"

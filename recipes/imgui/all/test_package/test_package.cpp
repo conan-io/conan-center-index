@@ -1,4 +1,8 @@
 #include <imgui.h>
+#ifdef DOCKING
+    #include <imgui_internal.h>
+#endif
+
 #include <stdio.h>
 
 int main(int, char**)
@@ -21,11 +25,19 @@ int main(int, char**)
         io.DeltaTime = 1.0f / 60.0f;
         ImGui::NewFrame();
 
+#ifdef DOCKING
+        auto dockspaceID = ImGui::GetID("MyDockSpace");
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspace_flags);
+        printf("  with docking\n");
+#endif
+
         static float f = 0.0f;
         ImGui::Text("Hello, world!");
         ImGui::Text("%s", textBuffer.begin());
         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::MyFunction("test_package");  // ensure we are using our provided IMGUI_USER_CONFIG
         ImGui::ShowDemoWindow(NULL);
 
         ImGui::Render();

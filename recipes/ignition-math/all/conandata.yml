@@ -1,10 +1,14 @@
 sources:
   "6.7.0":
-    url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.7.0.zip"
-    sha256: "5427a17de6ef9f60ee497b9a170a4e92517de9496781dac91f50cdbeb3364b22"
+    url: "https://github.com/gazebosim/gz-math/archive/ignition-math6_6.7.0.tar.gz"
+    sha256: "e5dac5aca6a117af8bd07ebca6e4ec8255682453487bf8d706bdb0315d17d6af"
+  "6.10.0":
+    url: "https://github.com/gazebosim/gz-math/archive/ignition-math6_6.10.0.tar.gz"
+    sha256: "94e853e1dfba97ebec4b6152691a89af1e94660b02f4ecdf04356b763c2848bd"
 patches:
   "6.7.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-Define-time_regex-locally.patch"
+      patch_file: "patches/0001-ign-math-6.7.0-cmake-fixes.patch"
+  "6.10.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0002-cmake-fixes.patch"
+      patch_file: "patches/0002-ign-math-6.10.0-cmake-fixes.patch"

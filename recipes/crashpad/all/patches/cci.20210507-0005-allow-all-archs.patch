@@ -27,3 +27,14 @@
      }
  
      # fdio is listed in ldflags instead of libs because it’s important for it to
+--- util/BUILD.gn
++++ util/BUILD.gn
+@@ -145,7 +145,7 @@ if (crashpad_is_mac || crashpad_is_ios) {
+         "arm64",
+       ]
+     } else {
+-      assert(false, "Unsupported architecture")
++      print("Unknown architecture -> assume conan knows how to handle it")
+     }
+   }
+ 

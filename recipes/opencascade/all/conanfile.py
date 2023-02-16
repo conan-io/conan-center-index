@@ -1,10 +1,13 @@
+from conan.tools.files import rename
+from conan.tools.microsoft import is_msvc
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import functools
 import json
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.45.0"
 
 
 class OpenCascadeConan(ConanFile):
@@ -46,15 +49,10 @@ class OpenCascadeConan(ConanFile):
 
     short_paths = True
     generators = "cmake"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_linux(self):
@@ -102,19 +100,19 @@ class OpenCascadeConan(ConanFile):
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
-        # TODO: add freeimage support (also vtk?)
+        # TODO: add vtk support?
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/5.0")
         if self.options.with_freeimage:
-            raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
+            self.requires("freeimage/3.18.0")
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.get_safe("with_draco"):
-            self.requires("draco/1.4.3")
+            self.requires("draco/1.5.2")
         if self.options.with_tbb:
-            self.requires("tbb/2020.3")
+            self.requires("onetbb/2020.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -202,14 +200,14 @@ class OpenCascadeConan(ConanFile):
                     occt_csf_cmake,
                     "set (CSF_fontconfig  \"fontconfig\")",
                     "set (CSF_fontconfig  \"{}\")".format(" ".join(self.deps_cpp_info["fontconfig"].libs)))
-        ## tbb
+        ## onetbb
         if self.options.with_tbb:
-            conan_targets.append("CONAN_PKG::tbb")
+            conan_targets.append("CONAN_PKG::onetbb")
             tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tbb\")", "")
             tools.replace_in_file(
                 occt_csf_cmake,
                 "set (CSF_TBB \"tbb tbbmalloc\")",
-                "set (CSF_TBB \"{}\")".format(" ".join(self.deps_cpp_info["tbb"].libs)))
+                "set (CSF_TBB \"{}\")".format(" ".join(self.deps_cpp_info["onetbb"].libs)))
         ## ffmpeg
         if self.options.with_ffmpeg:
             conan_targets.append("CONAN_PKG::ffmpeg")
@@ -294,59 +292,58 @@ class OpenCascadeConan(ConanFile):
                 ""
             )
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
 
         # Inject C++ standard from profile since we have removed hardcoded C++11 from upstream build files
         if not tools.valid_min_cppstd(self, 11):
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
         # Generate a relocatable shared lib on Macos
-        self._cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
-        self._cmake.definitions["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
-        self._cmake.definitions["INSTALL_TEST_CASES"] = False
-        self._cmake.definitions["BUILD_RESOURCES"] = False
-        self._cmake.definitions["BUILD_RELEASE_DISABLE_EXCEPTIONS"] = True
+        cmake.definitions["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
+        cmake.definitions["INSTALL_TEST_CASES"] = False
+        cmake.definitions["BUILD_RESOURCES"] = False
+        cmake.definitions["BUILD_RELEASE_DISABLE_EXCEPTIONS"] = True
         if self.settings.build_type == "Debug":
-            self._cmake.definitions["BUILD_WITH_DEBUG"] = self.options.extended_debug_messages
-        self._cmake.definitions["BUILD_USE_PCH"] = False
-        self._cmake.definitions["INSTALL_SAMPLES"] = False
+            cmake.definitions["BUILD_WITH_DEBUG"] = self.options.extended_debug_messages
+        cmake.definitions["BUILD_USE_PCH"] = False
+        cmake.definitions["INSTALL_SAMPLES"] = False
 
-        self._cmake.definitions["INSTALL_DIR_LAYOUT"] = "Unix"
-        self._cmake.definitions["INSTALL_DIR_BIN"] = "bin"
-        self._cmake.definitions["INSTALL_DIR_LIB"] = "lib"
-        self._cmake.definitions["INSTALL_DIR_INCLUDE"] = "include"
-        self._cmake.definitions["INSTALL_DIR_RESOURCE"] = "res/resource"
-        self._cmake.definitions["INSTALL_DIR_DATA"] = "res/data"
-        self._cmake.definitions["INSTALL_DIR_SAMPLES"] = "res/samples"
-        self._cmake.definitions["INSTALL_DIR_DOC"] = "res/doc"
+        cmake.definitions["INSTALL_DIR_LAYOUT"] = "Unix"
+        cmake.definitions["INSTALL_DIR_BIN"] = "bin"
+        cmake.definitions["INSTALL_DIR_LIB"] = "lib"
+        cmake.definitions["INSTALL_DIR_INCLUDE"] = "include"
+        cmake.definitions["INSTALL_DIR_RESOURCE"] = "res/resource"
+        cmake.definitions["INSTALL_DIR_DATA"] = "res/data"
+        cmake.definitions["INSTALL_DIR_SAMPLES"] = "res/samples"
+        cmake.definitions["INSTALL_DIR_DOC"] = "res/doc"
 
-        if self._is_msvc:
-            self._cmake.definitions["BUILD_SAMPLES_MFC"] = False
-        self._cmake.definitions["BUILD_SAMPLES_QT"] = False
-        self._cmake.definitions["BUILD_Inspector"] = False
+        if is_msvc(self):
+            cmake.definitions["BUILD_SAMPLES_MFC"] = False
+        cmake.definitions["BUILD_SAMPLES_QT"] = False
+        cmake.definitions["BUILD_Inspector"] = False
         if tools.is_apple_os(self.settings.os):
-            self._cmake.definitions["USE_GLX"] = False
+            cmake.definitions["USE_GLX"] = False
         if self.settings.os == "Windows":
-            self._cmake.definitions["USE_D3D"] = False
-        self._cmake.definitions["BUILD_ENABLE_FPE_SIGNAL_HANDLER"] = False
-        self._cmake.definitions["BUILD_DOC_Overview"] = False
+            cmake.definitions["USE_D3D"] = False
+        cmake.definitions["BUILD_ENABLE_FPE_SIGNAL_HANDLER"] = False
+        cmake.definitions["BUILD_DOC_Overview"] = False
 
-        self._cmake.definitions["USE_FREEIMAGE"] = self.options.with_freeimage
-        self._cmake.definitions["USE_OPENVR"] = self.options.with_openvr
-        self._cmake.definitions["USE_FFMPEG"] = self.options.with_ffmpeg
-        self._cmake.definitions["USE_TBB"] = self.options.with_tbb
-        self._cmake.definitions["USE_RAPIDJSON"] = self.options.with_rapidjson
+        cmake.definitions["USE_FREEIMAGE"] = self.options.with_freeimage
+        cmake.definitions["USE_OPENVR"] = self.options.with_openvr
+        cmake.definitions["USE_FFMPEG"] = self.options.with_ffmpeg
+        cmake.definitions["USE_TBB"] = self.options.with_tbb
+        cmake.definitions["USE_RAPIDJSON"] = self.options.with_rapidjson
         if tools.Version(self.version) >= "7.6.0":
-            self._cmake.definitions["USE_DRACO"] = self.options.with_draco
-            self._cmake.definitions["USE_TK"] = self.options.with_tk
-            self._cmake.definitions["USE_OPENGL"] = self.options.with_opengl
+            cmake.definitions["USE_DRACO"] = self.options.with_draco
+            cmake.definitions["USE_TK"] = self.options.with_tk
+            cmake.definitions["USE_OPENGL"] = self.options.with_opengl
 
-        self._cmake.configure(source_folder=self._source_subfolder)
-        return self._cmake
+        cmake.configure(source_folder=self._source_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()
@@ -356,9 +353,8 @@ class OpenCascadeConan(ConanFile):
     def _replace_package_folder(self, source, target):
         if os.path.isdir(os.path.join(self.package_folder, source)):
             tools.rmdir(os.path.join(self.package_folder, target))
-            tools.rename(
-                os.path.join(self.package_folder, source),
-                os.path.join(self.package_folder, target))
+            rename(self, os.path.join(self.package_folder, source),
+                         os.path.join(self.package_folder, target))
 
     def package(self):
         cmake = self._configure_cmake()
@@ -420,7 +416,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
             "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
             "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
-            "CSF_TBB": {"externals": ["tbb::tbb"] if self.options.with_tbb else []},
+            "CSF_TBB": {"externals": ["onetbb::onetbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
             # Android system libs
             "CSF_androidlog": {"system_libs": ["log"] if self.settings.os == "Android" else []},

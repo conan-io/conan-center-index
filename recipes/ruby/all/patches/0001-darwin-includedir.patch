@@ -1,0 +1,14 @@
+diff --git a/tool/mkconfig.rb b/tool/mkconfig.rb
+--- tool/mkconfig.rb
++++ tool/mkconfig.rb
+@@ -123,10 +123,8 @@
+     when /^arch$/
+       if universal
+         platform = val.sub(/universal/, %q[#{arch && universal[/(?:\A|\s)#{Regexp.quote(arch)}=(\S+)/, 1] || RUBY_PLATFORM[/\A[^-]*/]}])
+       end
+-    when /^includedir$/
+-      val = '"$(SDKROOT)"'+val if /darwin/ =~ arch
+     end
+     v = "  CONFIG[\"#{name}\"] #{eq} #{val}\n"
+     if fast[name]
+       v_fast << v

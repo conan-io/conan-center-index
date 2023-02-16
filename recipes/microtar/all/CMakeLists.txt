@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.4)
-project(cmake_wrapper)
+project(microtar LANGUAGES C)
 
-include("conanbuildinfo.cmake")
-conan_basic_setup()
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+include(GNUInstallDirs)
 
-set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/microtar.c")
-set(HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/microtar.h")
+add_library(microtar ${MICROTAR_SRC_DIR}/src/microtar.c)
+set_target_properties(microtar PROPERTIES
+    PUBLIC_HEADER "${MICROTAR_SRC_DIR}/src/microtar.h"
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
 
-add_library(microtar ${SOURCES} ${HEADERS})
-
-set_target_properties(microtar PROPERTIES PUBLIC_HEADER ${HEADERS})
-
-install(TARGETS microtar)
+install(
+    TARGETS microtar
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)

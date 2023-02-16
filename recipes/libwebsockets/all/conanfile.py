@@ -209,7 +209,7 @@ class LibwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.42.0")
+            self.requires("libuv/1.44.1")
 
         if self.options.with_libevent == "libevent":
             self.requires("libevent/2.1.12")
@@ -217,7 +217,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         elif self.options.with_zlib == "miniz":
             self.requires("miniz/2.2.0")
 
@@ -228,7 +228,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("sqlite3/3.37.2")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1o")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
@@ -240,6 +240,8 @@ class LibwebsocketsConan(ConanFile):
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
         if tools.Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
             raise ConanInvalidConfiguration("{}/{} with apple-clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16 and tools.Version(self.version) >= "4.3.2":
+            raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
@@ -428,6 +430,11 @@ class LibwebsocketsConan(ConanFile):
             self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
             self._cmake.definitions["DISABLE_WERROR"] = True
 
+        # Temporary override Windows 10 SDK for Visual Studio 2019, see issue #4450
+        # CCI worker has 10.0.17763.0 SDK installed alongside with 10.0.20348 but only 20348 can be used with Visual Studio 2019
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == 16:
+            self._cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.20348"
+
         self._cmake.configure()
         return self._cmake
 
@@ -446,6 +453,8 @@ class LibwebsocketsConan(ConanFile):
             )
         if tools.Version(self.version) < "4.1.0":
             tools.replace_in_file(cmakelists, "-Werror", "")
+        if tools.Version(self.version) >= "4.1.4":
+            tools.replace_in_file(cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):
         self._patch_sources()
@@ -507,6 +516,7 @@ class LibwebsocketsConan(ConanFile):
         self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = self._cmake_target
         self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["_libwebsockets"].builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.components["_libwebsockets"].set_property("cmake_target_name", self._cmake_target)
         self.cpp_info.components["_libwebsockets"].set_property("pkg_config_name", pkgconfig_name)
         if self.options.with_libuv:

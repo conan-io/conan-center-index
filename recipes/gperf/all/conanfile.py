@@ -1,8 +1,12 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from contextlib import contextmanager
+from conan import ConanFile
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.57.0"
 
 
 class GperfConan(ConanFile):
@@ -11,87 +15,81 @@ class GperfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gperf"
     description = "GNU gperf is a perfect hash function generator"
-    topics = ("gperf", "hash-generator", "hash")
+    topics = ("hash-generator", "hash")
 
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = "patches/*"
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
-
-    def package_id(self):
-        del self.info.settings.compiler
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+        self.folders.build = self.folders.source
+
+    def package_id(self):
+        del self.info.settings.compiler
+
     def build_requirements(self):
-        if self._is_msvc:
-            self.build_requires("automake/1.16.3")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            if self._is_msvc and tools.Version(self.settings.compiler.version) >= "12":
-                self._autotools.flags.append("-FS")
-            self._autotools.configure()
-        return self._autotools
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+        tc = AutotoolsToolchain(self)
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
+            tc.extra_cflags.append("-FS")
+            tc.extra_cxxflags.append("-FS")
+        tc.generate()
 
-    @contextmanager
-    def _build_context(self):
-        with tools.chdir(self._source_subfolder):
-            if self._is_msvc:
-                with tools.vcvars(self.settings):
-                    env = {
-                        "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                        "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                        "CFLAGS": "-{}".format(self.settings.compiler.runtime),
-                        "CXXLAGS": "-{}".format(self.settings.compiler.runtime),
-                        "CPPFLAGS": "-D_WIN32_WINNT=_WIN32_WINNT_WIN8",
-                        "LD": "link",
-                        "NM": "dumpbin -symbols",
-                        "STRIP": ":",
-                        "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                        "RANLIB": ":",
-                    }
-                    with tools.environment_append(env):
-                        yield
-            else:
-                yield
+        if is_msvc(self):
+            env = Environment()
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "compile"))
+            ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.append("CPPFLAGS", "-D_WIN32_WINNT=_WIN32_WINNT_WIN8")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            
+            #Prevent msys2 from performing erroneous path conversions for C++ files
+            # when invoking cl.exe as this is already handled by the compile wrapper.
+            env.define("MSYS2_ARG_CONV_EXCL", "-Tp") 
+            env.vars(self).save_script("conanbuild_gperf_msvc")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with self._build_context():
-            autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        with chdir(self, self.source_folder):
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        with chdir(self, self.source_folder):
+            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

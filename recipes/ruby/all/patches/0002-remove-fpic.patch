@@ -1,0 +1,16 @@
+diff --git a/configure.ac b/configure.ac
+--- configure.ac
++++ configure.ac
+@@ -2911,11 +2911,9 @@
+       # fails to consult /usr/local/include by default.  This causes
+       # mkmf.rb's have_header() to fail if the desired resource happens to be
+       # installed in the /usr/local tree.
+       RUBY_APPEND_OPTION(CCDLFLAGS, -fno-common)],
+-    [bsdi*|cygwin*|msys*|mingw*|aix*|interix*], [ ],
+-    [
+-      RUBY_APPEND_OPTION(CCDLFLAGS, -fPIC)])
++    [ ])
+   ], [
+     AS_CASE(["$target_os"],
+ 	[hpux*],          [CCDLFLAGS="$CCDLFLAGS +Z"],
+ 	[solaris*|irix*], [CCDLFLAGS="$CCDLFLAGS -KPIC"],

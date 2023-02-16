@@ -5,7 +5,13 @@
 #include <iostream>
 
 int main() {
+    // `yml::parse() is deprecated since 0.4.0. Use `yml::parse_in_arena()` instead.
+#ifdef RYML_USE_PARSE_IN_ARENA
+    auto tree = c4::yml::parse_in_arena("{foo: 1}");
+#else
     auto tree = c4::yml::parse("{foo: 1}");
+#endif
+
     auto const value = tree["foo"].val();
     
     std::cout << value << std::endl;

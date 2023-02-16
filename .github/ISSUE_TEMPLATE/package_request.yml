@@ -1,0 +1,42 @@
+name: 'Package: Completely New Recipe'
+description: If you would like to see a completely new recipe
+title: '[request] <LIBRARY-NAME>/<LIBRARY-VERSION>'
+labels: 'library request'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to submit your request.
+        **Please don't forget to update the issue title.**
+  - type: input
+    id: package
+    attributes:
+      label: Package Name/Version
+      placeholder: cmake/3.25.1
+    validations:
+      required: true
+  - type: input
+    id: website
+    attributes:
+      label: Webpage
+      placeholder: https://cmake.org
+    validations:
+      required: true
+  - type: input
+    id: sources
+    attributes:
+      label: Source code
+      placeholder: https://github.com/Kitware/CMake
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the library/tool
+      description: |
+        Give us some context about this library/tool.
+        What is it about?
+      placeholder: |
+        CMake is an open-source, cross-platform family of tools designed to build, test and package software.
+    validations:
+      required: true

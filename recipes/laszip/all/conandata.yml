@@ -1,4 +1,8 @@
 sources:
   "3.4.3":
-    url: "https://github.com/LASzip/LASzip/archive/3.4.3.tar.gz"
-    sha256: "862715affa00609b78b4f469ab5529fee659c597efd40b5006b4305dd56c22d3"
+    url: "https://github.com/LASzip/LASzip/releases/download/3.4.3/laszip-src-3.4.3.tar.bz2"
+    sha256: "5775eb0b97de1b77514d47534cc65c6cfb5bebdd8aed0e47a23af8e75b7ea887"
+patches:
+  "3.4.3":
+    - patch_file: "patches/0001-no-build-laszip-api.patch"
+    - patch_file: "patches/0002-no-rpath-and-relocatable-macos.patch"

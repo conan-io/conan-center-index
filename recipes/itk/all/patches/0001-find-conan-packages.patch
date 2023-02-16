@@ -140,7 +140,7 @@
 -itk_module_target(itkopenjpeg NO_INSTALL)
 +find_package(OpenJPEG REQUIRED)
 +add_library(itkopenjpeg INTERFACE)
-+set_property(TARGET itkopenjpeg PROPERTY INTERFACE_LINK_LIBRARIES OpenJPEG::OpenJPEG)
++set_property(TARGET itkopenjpeg PROPERTY INTERFACE_LINK_LIBRARIES openjp2)
 +#target_compile_definitions(itkopenjpeg INTERFACE)
 +install(TARGETS itkopenjpeg EXPORT ${ITK3P_INSTALL_EXPORT_NAME}) 
 --- Modules/ThirdParty/TBB/CMakeLists.txt

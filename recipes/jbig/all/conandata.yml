@@ -4,7 +4,5 @@ sources:
     url: "https://github.com/ImageMagick/jbig/archive/5d8f5f6fa71766ced5e828bf7bfff642ddb8a6ad.zip"
 patches:
   "20160605":
-    - base_path: source_subfolder
-      patch_file: patches/0001-add-missing-export.patch
-    - base_path: source_subfolder
-      patch_file: patches/0002-fix-msvc-export.patch
+    - patch_file: patches/0001-add-missing-export.patch
+    - patch_file: patches/0002-fix-msvc-export.patch

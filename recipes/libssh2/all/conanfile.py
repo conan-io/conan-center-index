@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.43.0"
@@ -33,7 +34,6 @@ class Libssh2Conan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -56,10 +56,11 @@ class Libssh2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.12")
         if self.options.crypto_backend == "openssl":
-            self.requires("openssl/1.1.1m")
+            self.requires("openssl/1.1.1q")
         elif self.options.crypto_backend == "mbedtls":
+            # libssh2/<=1.10.0 doesn't support mbedtls/3.x.x
             self.requires("mbedtls/2.25.0")
 
     def source(self):
@@ -73,23 +74,24 @@ class Libssh2Conan(ConanFile):
                               "set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)",
                               "list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)")
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_ZLIB_COMPRESSION"] = self.options.with_zlib
-        self._cmake.definitions["ENABLE_CRYPT_NONE"] = self.options.enable_crypt_none
-        self._cmake.definitions["ENABLE_MAC_NONE"] = self.options.enable_mac_none
-        self._cmake.definitions["ENABLE_DEBUG_LOGGING"] = self.options.enable_debug_logging
+        cmake = CMake(self)
+        cmake.definitions["ENABLE_ZLIB_COMPRESSION"] = self.options.with_zlib
+        cmake.definitions["ENABLE_CRYPT_NONE"] = self.options.enable_crypt_none
+        cmake.definitions["ENABLE_MAC_NONE"] = self.options.enable_mac_none
+        cmake.definitions["ENABLE_DEBUG_LOGGING"] = self.options.enable_debug_logging
         if self.options.crypto_backend == "openssl":
-            self._cmake.definitions["CRYPTO_BACKEND"] = "OpenSSL"
-            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
+            cmake.definitions["CRYPTO_BACKEND"] = "OpenSSL"
+            cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         elif self.options.crypto_backend == "mbedtls":
-            self._cmake.definitions["CRYPTO_BACKEND"] = "mbedTLS"
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure()
-        return self._cmake
+            cmake.definitions["CRYPTO_BACKEND"] = "mbedTLS"
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_TESTING"] = False
+        # To install relocatable shared lib on Macos by default
+        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        cmake.configure()
+        return cmake
 
     def build(self):
         self._patch_sources()

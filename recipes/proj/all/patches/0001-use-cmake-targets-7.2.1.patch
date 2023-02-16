@@ -1,0 +1,37 @@
+diff -ru a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2020-12-27 02:57:21.000000000 +0800
++++ b/CMakeLists.txt	2022-12-14 21:21:31.516729458 +0800
+@@ -121,6 +121,8 @@
+ include(ProjMac)
+ include(policies)
+ 
++find_package(nlohmann_json REQUIRED)
++
+ ################################################################################
+ # Check for sqlite3
+ ################################################################################
+--- a/src/lib_proj.cmake
++++ b/src/lib_proj.cmake
+@@ -414,19 +414,16 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+   target_link_libraries(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
+ endif()
+ 
+-target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
+-target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
++target_link_libraries(${PROJ_CORE_TARGET} nlohmann_json::nlohmann_json SQLite::SQLite3)
+ 
+ if(TIFF_ENABLED)
+   target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DTIFF_ENABLED)
+-  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
+-  target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
++  target_link_libraries(${PROJ_CORE_TARGET} TIFF::TIFF)
+ endif()
+ 
+ if(CURL_ENABLED)
+   target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DCURL_ENABLED)
+-  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
+-  target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
++  target_link_libraries(${PROJ_CORE_TARGET} CURL::libcurl)
+ endif()
+ 
+ if(MSVC AND BUILD_SHARED_LIBS)

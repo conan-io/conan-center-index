@@ -1,4 +1,7 @@
 sources:
+  "2.1.0":
+    url: https://github.com/ceres-solver/ceres-solver/archive/2.1.0.tar.gz
+    sha256: ccbd716a93f65d4cb017e3090ae78809e02f5426dce16d0ee2b4f8a4ba2411a8
   "2.0.0":
     url: https://github.com/ceres-solver/ceres-solver/archive/2.0.0.tar.gz
     sha256: 2ab0348e0f65fdf43bebcd325a1c73f7e8999691ee75e2a2981281931c42e9fa
@@ -9,10 +12,19 @@ sources:
     url: https://github.com/ceres-solver/ceres-solver/archive/1.13.0.tar.gz
     sha256: 51ccb201b61ac71501fb6ccef158f078a750bc796ee6a271cd535cfe338202e5
 patches:
+  "2.1.0":
+    - patch_file: "patches/2.0.1-0001-find-glog-conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.1-0002-find-glags-conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.1-0003-fix-mingw-build.patch"
+      base_path: "source_subfolder"
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-find-libraries-conan.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/2.0.0-0002-fix-eigen-version.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.0-0003-fix-mingw-build.patch"
       base_path: "source_subfolder"
   "1.14.0":
     - patch_file: "patches/1.14.0-0001-find-libraries-conan.patch"

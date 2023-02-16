@@ -1,14 +1,15 @@
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <vector>
 #include <limits>
 
 
-#include "fmt/format.h"
-#include "fmt/printf.h"
-#include "fmt/ostream.h"
-#include "fmt/color.h"
+#include <fmt/format.h>
+#include <fmt/printf.h>
+#include <fmt/ostream.h>
+#include <fmt/color.h>
 
 
 void vreport(const char *format, fmt::format_args args) {
@@ -30,6 +31,12 @@ class Date {
     }
 };
 
+#if FMT_VERSION >= 90000
+namespace fmt {
+    template <> struct formatter<Date> : ostream_formatter {};
+}
+#endif
+
 int main() {
     const std::string thing("World");
     fmt::print("PRINT: Hello {}!\n", thing);
@@ -39,7 +46,7 @@ int main() {
     fmt::print("{}\n", formatted);
 
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}", 2.7182818);
+    fmt::format_to(std::begin(buf), "{}", 2.7182818);
     fmt::print("Euler number: {}\n", fmt::to_string(buf));
 
     const std::string date = fmt::format("The date is {}\n", Date(2012, 12, 9));

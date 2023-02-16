@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.4)
-project(cmake_wrapper)
+project(cmp LANGUAGES C)
 
-include("conanbuildinfo.cmake")
-conan_basic_setup()
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+include(GNUInstallDirs)
 
-set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/cmp.c")
-set(HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/cmp.h")
+add_library(cmp ${CMP_SRC_DIR}/cmp.c)
+set_target_properties(cmp PROPERTIES
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+    PUBLIC_HEADER ${CMP_SRC_DIR}/cmp.h
+)
 
-add_library(cmp ${SOURCES} ${HEADERS})
-
-set_target_properties(cmp PROPERTIES PUBLIC_HEADER ${HEADERS})
-
-install(TARGETS cmp)
+install(TARGETS cmp
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)

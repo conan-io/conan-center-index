@@ -1,0 +1,14 @@
+diff --git a/Graphics/Archiver/CMakeLists.txt b/Graphics/Archiver/CMakeLists.txt
+index 1552937ce..73c77158e 100644
+--- a/Graphics/Archiver/CMakeLists.txt
++++ b/Graphics/Archiver/CMakeLists.txt
+@@ -116,7 +116,8 @@ if(VULKAN_SUPPORTED)
+     target_include_directories(Diligent-Archiver-static
+     PRIVATE
+         ../GraphicsEngineVulkan/include
+-        ../../ThirdParty/Vulkan-Headers/include
++        ${VulkanHeaders_INCLUDE_DIR}
++        ${volk_INCLUDE_DIR}/
+     )
+ endif()
+ 

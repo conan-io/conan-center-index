@@ -1,0 +1,9 @@
+sources:
+  "cci.20220205":
+    url: "https://github.com/lemire/FastPFor/archive/773283d4a11fa2440a1b3b28fd77f775e86d7898.tar.gz"
+    sha256: "d4419512420f3bcc65862c5c367021f201b5ba3e8cb0dad895cdf444e0867b30"
+
+patches:
+  "cci.20220205":
+    - patch_file: "patches/cci.20220205-0001-fix-cmake.patch"
+      base_path: "source_subfolder"

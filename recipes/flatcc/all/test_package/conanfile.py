@@ -1,13 +1,17 @@
 import os.path
 
 from conans import ConanFile, CMake, tools, RunEnvironment
+from conans.errors import ConanException
 
 
 class FlatccTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
+        if tools.cross_building(self):
+            return
+
         env_build = RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake = CMake(self)
@@ -22,6 +26,10 @@ class FlatccTestConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if tools.cross_building(self):
+            bin_path = os.path.join(self.deps_cpp_info["flatcc"].rootpath, "bin", "flatcc")
+            if not os.path.isfile(bin_path) or not os.access(bin_path, os.X_OK):
+                raise ConanException("flatcc doesn't exist.")
+        else:
             bin_path = os.path.join(self.build_folder, "bin", "monster")
             self.run(bin_path, cwd=self.source_folder, run_environment=True)

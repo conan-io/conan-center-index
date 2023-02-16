@@ -1,7 +1,9 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import download
+from conan.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.52.0"
 
 class MozillaBuildConan(ConanFile):
     name = "mozilla-build"
@@ -21,8 +23,8 @@ class MozillaBuildConan(ConanFile):
 
     def build(self):
         filename = "mozilla-build.exe"
-        tools.download(**self.conan_data["sources"][self.version][0], filename=filename)
-        tools.download(**self.conan_data["sources"][self.version][1], filename="LICENSE")
+        download(self, **self.conan_data["sources"][self.version][0], filename=filename)
+        download(self, **self.conan_data["sources"][self.version][1], filename="LICENSE")
         self.run(f"7z x {filename}", run_environment=True)
 
 
@@ -35,6 +37,7 @@ class MozillaBuildConan(ConanFile):
         del self.info.settings.compiler
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         binpath = os.path.join(self.package_folder, "bin")
-        self.output.info("Adding to PATH: {}".format(binpath))
+        self.output.info(f"Adding to PATH: {binpath}")
         self.env_info.PATH.append(binpath)

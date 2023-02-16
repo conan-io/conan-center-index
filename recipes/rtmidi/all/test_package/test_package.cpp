@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <rtmidi/RtMidi.h>
+#include <RtMidi.h>
 
 int main (void) {
     std::cout << "Version: " << RtMidi::getVersion() << std::endl;

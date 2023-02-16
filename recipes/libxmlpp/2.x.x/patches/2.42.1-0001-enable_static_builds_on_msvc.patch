@@ -1,0 +1,47 @@
+diff --git a/libxml++config.h.meson b/libxml++config.h.meson
+index fdae143..5d853c2 100755
+--- a/libxml++config.h.meson
++++ b/libxml++config.h.meson
+@@ -21,9 +21,16 @@
+ /* Micro version number of libxml++. */
+ #mesondefine LIBXMLXX_MICRO_VERSION
+ 
+-#if defined (GLIBMM_DLL) && !defined (LIBXMLXX_STATIC)
++/* Defined if libxml++ is built as a static library. */
++#mesondefine LIBXMLXX_STATIC
++
++#if !defined (LIBXMLXX_STATIC)
+   #ifdef LIBXMLPP_BUILD
+-    #define LIBXMLPP_API __declspec(dllexport)
++    #ifdef __GNUC__
++      #define LIBXMLPP_API __attribute__((visibility("default")))
++    #else
++      #define LIBXMLPP_API __declspec(dllexport)
++    #endif
+   #elif !defined (__GNUC__)
+     #define LIBXMLPP_API __declspec(dllimport)
+   #else /* don't dllimport classes/methods on GCC/MinGW */
+diff --git a/meson.build b/meson.build
+index e89f2c6..20d66ed 100644
+--- a/meson.build
++++ b/meson.build
+@@ -292,15 +292,13 @@ endif
+ # Always set for backwards compatibility.
+ pkg_conf_data.set('LIBXMLCPP_EXCEPTIONS_ENABLED', 1)
+ 
++if get_option('default_library') == 'static'
++  pkg_conf_data.set('LIBXMLXX_STATIC', 1)
++endif
++
+ # Static library?
+ library_build_type = get_option('default_library')
+ 
+-if cpp_compiler.get_argument_syntax() == 'msvc'
+-  if library_build_type == 'static' or library_build_type == 'both'
+-    error('Static builds are not supported by MSVC-style builds')
+-  endif
+-endif
+-
+ configure_file(
+   input: 'libxml++-2.6.pc.in',
+   output: '@BASENAME@',

@@ -5,4 +5,3 @@ sources:
 patches:
   "5.2.1":
     - patch_file: "patches/0001-msvc-unistd.patch"
-      base_path: "source_subfolder"

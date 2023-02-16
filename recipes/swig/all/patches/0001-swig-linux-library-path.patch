@@ -1,9 +1,9 @@
 --- Source/Modules/main.cxx
 +++ Source/Modules/main.cxx
-@@ -879,6 +881,30 @@ static void getoptions(int argc, char *argv[]) {
+@@ -879,6 +879,32 @@ static void getoptions(int argc, char *a
    }
  }
-
+ 
 +#if defined(HAVE_UNISTD_H) && !defined(_WIN32)
 +#include <libgen.h>
 +#include <unistd.h>
@@ -12,17 +12,19 @@
 +static String *get_exe_path(void) {
 +    Dl_info info;
 +    if (dladdr("main", &info)) {
-+        char buffer[PATH_MAX];
++        char realp_buffer[PATH_MAX];
 +        char* res = NULL;
 +
-+        res = realpath(info.dli_fname, buffer);
++        res = realpath(info.dli_fname, realp_buffer);
 +        if (!res) {
 +         return NewString(SWIG_LIB);
 +        }
 +
-+        dirname(buffer);
-+        strcat(buffer, "/swiglib");
-+        return NewStringWithSize(buffer, strlen(buffer));
++        const char* dir = dirname(realp_buffer);
++        char dest_buf[PATH_MAX];
++        strcpy(dest_buf, dir);
++        strcat(dest_buf, "/swiglib");
++        return NewStringWithSize(dest_buf, strlen(dest_buf));
 +    }
 +    return NewString(SWIG_LIB);
 +}
@@ -31,8 +33,7 @@
  int SWIG_main(int argc, char *argv[], const TargetLanguageModule *tlm) {
    char *c;
  
-@@ -938,13 +953,15 @@
-     char buf[MAX_PATH];
+@@ -939,12 +965,14 @@ int SWIG_main(int argc, char *argv[], co
      char *p;
      if (!(GetModuleFileName(0, buf, MAX_PATH) == 0 || (p = strrchr(buf, '\\')) == 0)) {
        *(p + 1) = '\0';

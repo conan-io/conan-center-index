@@ -1,0 +1,18 @@
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index f371590..7f8c09a 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -55,12 +55,7 @@ if (WIN32 AND NOT CYGWIN AND NOT MSYS)
+     add_definitions (/EHa)
+     add_definitions (
+         -DNOMINMAX
+-        -DBOOST_REGEX_DYN_LINK
+-        -DBOOST_FILESYSTEM_DYN_LINK
+-        -DBOOST_SYSTEM_DYN_LINK
+-        -DBOOST_IOSTREAMS_DYN_LINK
+-        -DBOOST_PROGRAM_OPTIONS_DYN_LINK
+-        -DBOOST_ALL_NO_LIB)
++    )
+ endif()
+ 
+ if (CMAKE_COMPILER_IS_GNUCXX)

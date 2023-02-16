@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(utf8proc REQUIRED CONFIG)
 
-find_package(utf8proc CONFIG REQUIRED)
-
-add_executable(${PROJECT_NAME} ${PROJECT_NAME}.c)
-target_link_libraries(${PROJECT_NAME} utf8proc::utf8proc)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE utf8proc::utf8proc)

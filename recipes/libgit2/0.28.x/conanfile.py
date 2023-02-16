@@ -1,18 +1,24 @@
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import functools
 import os
+
+required_conan_version = ">=1.45.0"
 
 
 class LibGit2Conan(ConanFile):
     name = "libgit2"
-    description = "libgit2 is a portable, pure C implementation of the Git core methods provided as a re-entrant linkable library with a solid API"
-    topics = ("conan", "libgit2", "git", "scm", )
+    description = (
+        "libgit2 is a portable, pure C implementation of the Git core methods "
+        "provided as a re-entrant linkable library with a solid API"
+    )
+    topics = ("libgit2", "git", "scm")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libgit2.org/"
-    license = ("GPL-2.0-linking-exception",)
-    exports_sources = "CMakeLists.txt",
-    generators = "cmake", "cmake_find_package",
-    settings = "os", "compiler", "build_type", "arch"
+    license = "GPL-2.0-linking-exception"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -32,14 +38,15 @@ class LibGit2Conan(ConanFile):
         "with_sha1": "collisiondetection",
     }
 
-    _cmake = None
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
         if not tools.is_apple_os(self.settings.os):
@@ -51,6 +58,27 @@ class LibGit2Conan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    @property
+    def _need_openssl(self):
+        return "openssl" in (self.options.with_https, self.options.with_sha1)
+
+    @property
+    def _need_mbedtls(self):
+        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
+
+    def requirements(self):
+        self.requires("zlib/1.2.12")
+        self.requires("http_parser/2.9.4")
+        if self.options.with_libssh2:
+            self.requires("libssh2/1.10.0")
+        if self._need_openssl:
+            self.requires("openssl/1.1.1o")
+        if self._need_mbedtls:
+            self.requires("mbedtls/3.1.0")
+        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
+            self.requires("libiconv/1.16")
+
+    def validate(self):
         if self.options.with_https == "security":
             if not tools.is_apple_os(self.settings.os):
                 raise ConanInvalidConfiguration("security is only valid for Apple products")
@@ -62,30 +90,9 @@ class LibGit2Conan(ConanFile):
             if self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("win32 is only valid on Windows")
 
-    @property
-    def _need_openssl(self):
-        return "openssl" in (self.options.with_https, self.options.with_sha1)
-
-    @property
-    def _need_mbedtls(self):
-        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
-
-    def requirements(self):
-        self.requires("zlib/1.2.11")
-        self.requires("http_parser/2.9.4")
-        if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
-        if self._need_openssl:
-            self.requires("openssl/1.1.1j")
-        if self._need_mbedtls:
-            self.requires("mbedtls/2.24.0")
-        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
-            self.requires("libiconv/1.16")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     _cmake_https = {
         "openssl": "OpenSSL",
@@ -104,29 +111,25 @@ class LibGit2Conan(ConanFile):
         "win32": "Win32",
     }
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        self._cmake.definitions["USE_SSH"] = self.options.with_libssh2
+        cmake = CMake(self)
+        cmake.definitions["THREADSAFE"] = self.options.threadsafe
+        cmake.definitions["USE_SSH"] = self.options.with_libssh2
 
-        if tools.is_apple_os(self.settings.os):
-            self._cmake.definitions["USE_ICONV"] = self.options.with_iconv
-        else:
-            self._cmake.definitions["USE_ICONV"] = False
+        cmake.definitions["USE_ICONV"] = self.options.get_safe("with_iconv", False)
 
-        self._cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
-        self._cmake.definitions["SHA1_BACKEND"] = self._cmake_sha1[str(self.options.with_sha1)]
+        cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
+        cmake.definitions["SHA1_BACKEND"] = self._cmake_sha1[str(self.options.with_sha1)]
 
-        self._cmake.definitions["BUILD_CLAR"] = False
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_CLAR"] = False
+        cmake.definitions["BUILD_EXAMPLES"] = False
 
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+        if is_msvc(self):
+            cmake.definitions["STATIC_CRT"] = is_msvc_static_runtime(self)
 
-        self._cmake.configure()
-        return self._cmake
+        cmake.configure()
+        return cmake
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
@@ -139,20 +142,19 @@ class LibGit2Conan(ConanFile):
 
     def build(self):
         self._patch_sources()
-
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libgit2")
         self.cpp_info.libs = ["git2"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32"])
-        if self.settings.os == "Linux" and self.options.threadsafe:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.threadsafe:
             self.cpp_info.system_libs.append("pthread")

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <cppitertools/itertools.hpp>
 
 namespace {
@@ -12,7 +13,7 @@ int main() {
     const std::vector<std::string> vec = {"hi", "ab", "ho", "abc", "def", "abcde", "efghi"};
     std::vector<int> keys;
     std::vector<std::vector<std::string>> groups;
-    
+
     for (auto&& gb : iter::groupby(vec, length)) {
         keys.push_back(gb.first);
         groups.emplace_back(std::begin(gb.second), std::end(gb.second));

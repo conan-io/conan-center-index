@@ -1,0 +1,107 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6b39f0e4..76f69653 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -86,8 +86,7 @@ IF(MSVC)
+ ENDIF()
+ 
+ #Add custom CMake Module
+-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/"
+-  CACHE INTERNAL "Location of our custom CMake modules.")
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
+ 
+ # auto-configure style checks, other CMake modules.
+ INCLUDE(CheckLibraryExists)
+@@ -645,7 +644,7 @@ IF(USE_HDF5)
+     # examples, even though the previous version of what we
+     # had worked.
+     #####
+-    IF(MSVC)
++    IF(0)
+       SET(SEARCH_PACKAGE_NAME ${HDF5_PACKAGE_NAME})
+       FIND_PACKAGE(HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS C HL CONFIG REQUIRED ${NC_HDF5_LINK_TYPE})
+     ELSE(MSVC)
+@@ -848,7 +847,6 @@ ENDIF(USE_HDF5)
+ 
+ # See if we have libcurl
+ FIND_PACKAGE(CURL)
+-ADD_DEFINITIONS(-DCURL_STATICLIB=1)
+ INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIRS})
+ 
+ # Define a test flag for have curl library
+@@ -1920,6 +1918,8 @@
+ #####
+ SET(netCDF_LIB_CORENAME  "netcdf")
+ 
++add_subdirectory(liblib)
++
+ #####
+ # Set the true names of all the libraries, if customized by external project
+ #####
+@@ -1962,8 +1963,6 @@
+        DESTINATION ${netCDF_BINARY_DIR}/nczarr_test/)
+ ENDIF()
+ 
+-add_subdirectory(liblib)
+-
+ IF(ENABLE_FILTER_TESTING)
+   add_subdirectory(plugins)
+ ENDIF()
+@@ -2028,7 +2026,7 @@ ADD_SUBDIRECTORY(docs)
+ # install them in the binary dir. Grab all of the .libs, put them
+ # in the libdir.
+ ##
+-IF(MSVC)
++IF(0)
+   FILE(GLOB COPY_FILES ${CMAKE_PREFIX_PATH}/lib/*.lib)
+   INSTALL(FILES ${COPY_FILES}
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}
+diff --git a/liblib/CMakeLists.txt b/liblib/CMakeLists.txt
+index be72612c..e0edb4ca 100644
+--- a/liblib/CMakeLists.txt
++++ b/liblib/CMakeLists.txt
+@@ -90,14 +90,14 @@ IF(USE_HDF5)
+     # builds:
+     # Make sure that HDF5_C_LIBRARY appears *after*
+     # HDF5_HL_LIBRARY.
+-    SET(TLL_LIBS ${HDF5_HL_LIBRARIES} ${HDF5_C_LIBRARIES} ${TLL_LIBS} ${SZIP_LIBRARY})
++    SET(TLL_LIBS ${HDF5_HL_LIBRARIES} ${HDF5_LIBRARIES} ${TLL_LIBS} ${SZIP_LIBRARY})
+   ELSE() # Windows CMake defines HDF5_LIBRARIES.
+     SET(TLL_LIBS ${HDF5_LIBRARIES} ${TLL_LIBS} ${SZIP_LIBRARY})
+   ENDIF()
+ ENDIF()
+ 
+ IF(FOUND_CURL)
+-  SET(TLL_LIBS ${TLL_LIBS} ${CURL_LIBRARY})
++   SET(TLL_LIBS ${TLL_LIBS} ${CURL_LIBRARIES})
+ ENDIF()
+ 
+ IF(USE_HDF4)
+@@ -174,3 +174,5 @@
+ FILE(GLOB CUR_EXTRA_DIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
+ SET(CUR_EXTRA_DIST ${CUR_EXTRA_DIST} CMakeLists.txt Makefile.am)
+ ADD_EXTRA_DIST("${CUR_EXTRA_DIST}")
++
++SET(TLL_LIBS ${TLL_LIBS} PARENT_SCOPE)
+diff -ru a/libdap4/CMakeLists.txt b/libdap4/CMakeLists.txt
+--- a/libdap4/CMakeLists.txt	2021-08-19 01:49:05.000000000 +0800
++++ b/libdap4/CMakeLists.txt	2022-12-14 15:03:47.416608700 +0800
+@@ -7,6 +7,7 @@
+ SET(dap4_SOURCES d4curlfunctions.c d4fix.c d4data.c d4file.c d4parser.c d4meta.c d4varx.c d4dump.c d4swap.c d4chunk.c d4printer.c d4read.c d4http.c d4util.c d4odom.c d4cvt.c d4debug.c ncd4dispatch.c ezxml_extra.c ezxml.c)
+ 
+ add_library(dap4 OBJECT ${dap4_SOURCES})
++target_link_libraries(dap4 ${TLL_LIBS})
+ 
+ ###
+ # Options related to the man page generation.
+diff -ru a/oc2/CMakeLists.txt b/oc2/CMakeLists.txt
+--- a/oc2/CMakeLists.txt	2021-08-19 01:49:05.000000000 +0800
++++ b/oc2/CMakeLists.txt	2022-12-14 15:05:29.788474600 +0800
+@@ -8,6 +8,7 @@
+ 
+ 
+ add_library(oc2 OBJECT ${oc_SOURCES})
++target_link_libraries(oc2 ${TLL_LIBS})
+ 
+ # Apparently fails under cmake
+ #set(ocprint_FILES ocprint.c )

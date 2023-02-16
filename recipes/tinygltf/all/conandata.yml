@@ -1,10 +1,10 @@
 sources:
-  "2.2.0":
-    url: "https://github.com/syoyo/tinygltf/archive/v2.2.0.tar.gz"
-    sha256: "2d6950c76eba11214bf068b2a569d69c84ae35860a42fcde1aa1c8ad143f351d"
-  "2.4.0":
-    url: "https://github.com/syoyo/tinygltf/archive/v2.4.0.tar.gz"
-    sha256: "8c4d9efac544c5471d672dfd52842cb93df45b1a4c8f91e38487db4a0e500d70"
   "2.5.0":
     url: "https://github.com/syoyo/tinygltf/archive/v2.5.0.tar.gz"
     sha256: "5d85bd556b60b1b69527189293cfa4902957d67fabb8582b6532f23a5ef27ec1"
+  "2.4.0":
+    url: "https://github.com/syoyo/tinygltf/archive/v2.4.0.tar.gz"
+    sha256: "8c4d9efac544c5471d672dfd52842cb93df45b1a4c8f91e38487db4a0e500d70"
+  "2.2.0":
+    url: "https://github.com/syoyo/tinygltf/archive/v2.2.0.tar.gz"
+    sha256: "2d6950c76eba11214bf068b2a569d69c84ae35860a42fcde1aa1c8ad143f351d"

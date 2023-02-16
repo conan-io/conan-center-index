@@ -7,7 +7,7 @@
 -  target_link_libraries(rdkafka PUBLIC ${ZSTD_LIBRARY})
 -  target_include_directories(rdkafka PUBLIC ${ZSTD_INCLUDE_DIR})
 -  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
-+  target_link_libraries(rdkafka PUBLIC CONAN_PKG::zstd)
++  target_link_libraries(rdkafka PUBLIC $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
  endif()
 
  if(WITH_SSL)
@@ -17,7 +17,7 @@
  if(WITH_LZ4_EXT)
 -  target_include_directories(rdkafka PUBLIC ${LZ4_INCLUDE_DIRS})
 -  target_link_libraries(rdkafka PUBLIC LZ4::LZ4)
-+  target_link_libraries(rdkafka PUBLIC CONAN_PKG::lz4)
++  target_link_libraries(rdkafka PUBLIC lz4::lz4)
  endif()
 
  # Set up path to these sources for other sub-projects (tests, examples)

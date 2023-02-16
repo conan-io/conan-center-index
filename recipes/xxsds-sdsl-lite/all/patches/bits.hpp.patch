@@ -1,6 +1,17 @@
---- a/include/sdsl/bits.hpp	2021-03-29 20:24:00.000000000 +0200
-+++ b/include/sdsl/bits.hpp	2021-06-18 14:17:13.556993940 +0200
-@@ -593,7 +593,7 @@
+diff --git a/include/sdsl/bits.hpp b/include/sdsl/bits.hpp
+index 3aa0b4f..5128d04 100644
+--- a/include/sdsl/bits.hpp
++++ b/include/sdsl/bits.hpp
+@@ -19,7 +19,7 @@
+ #endif
+ 
+ #ifdef WIN32
+-#include <sdsl/iso646.h>
++#include <iso646.h>
+ #endif
+ 
+ #ifdef __cpp_constexpr
+@@ -593,7 +593,7 @@ SDSL_CONSTEXPR inline uint64_t bits_impl<T>::map01(uint64_t x, uint64_t c)
  template <typename T>
  SDSL_CONSTEXPR inline uint32_t bits_impl<T>::sel(uint64_t x, uint32_t i)
  {

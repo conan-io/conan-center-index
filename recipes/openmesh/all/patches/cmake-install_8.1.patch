@@ -1,0 +1,11 @@
+--- a/cmake/ACGCommon.cmake
++++ b/cmake/ACGCommon.cmake
+@@ -69,7 +69,7 @@ endmacro ()
+ if (CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
+   set (ACG_PROJECT_DATADIR ".")
+   set (ACG_PROJECT_LIBDIR "lib")
+-  set (ACG_PROJECT_BINDIR ".")
++  set (ACG_PROJECT_BINDIR "bin")
+   set (ACG_PROJECT_PLUGINDIR "Plugins")
+   if (NOT EXISTS ${CMAKE_BINARY_DIR}/Build/${ACG_PROJECT_LIBDIR})
+     file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Build/${ACG_PROJECT_LIBDIR})

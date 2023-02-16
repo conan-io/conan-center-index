@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -362,7 +362,7 @@ endif()
+ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+     target_compile_options(Diligent-BuildSettings INTERFACE
+     	# All warnings are errors
+-        -Werror
++
+         # Some extra warnings
+         -Wall -Wextra -Wuninitialized -Wconditional-uninitialized -Wextra-tokens -Wpointer-arith -Wloop-analysis -Wunused
+         # Disable few warnings

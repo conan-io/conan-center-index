@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+import functools
 import os
 
 required_conan_version = ">=1.36.0"
@@ -24,8 +25,6 @@ class ReadosmConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -54,8 +53,8 @@ class ReadosmConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("expat/2.4.3")
-        self.requires("zlib/1.2.11")
+        self.requires("expat/2.4.8")
+        self.requires("zlib/1.2.12")
 
     def build_requirements(self):
         if not self._is_msvc:
@@ -90,21 +89,22 @@ class ReadosmConan(ConanFile):
 
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+            # Relocatable shared lib for Apple platforms
+            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
             autotools = self._configure_autotools()
             autotools.make()
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--disable-gcov",
         ]
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=args)
-        return self._autotools
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.configure(args=args)
+        return autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -262,7 +262,7 @@ endif()
+ # If a multiconfiguration generator is used, ensure that various output
+ # files are not placed in subdirectories (such as Debug and Release)
+ # as this will cause the CTest test suite to fail.
+-if(JAS_MULTICONFIGURATION_GENERATOR)
++if(0)
+ 	if(CMAKE_CONFIGURATION_TYPES)
+ 		set(CMAKE_DEBUG_POSTFIX d)
+ 	endif()

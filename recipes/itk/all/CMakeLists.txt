@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(KEEP_RPATHS)
 
 # conan created FindXXX.cmake modules that create IMPORTED targets
 # that not have the GLOBAL option set. By requiring them here,

@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(MoltenVK)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
         CMAKE_SYSTEM_NAME STREQUAL "iOS" OR
         CMAKE_SYSTEM_NAME STREQUAL "tvOS"))
@@ -12,12 +9,16 @@ endif()
 
 option(MVK_WITH_SPIRV_TOOLS "Build MoltenVK without the MVK_EXCLUDE_SPIRV_TOOLS build setting" ON)
 option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
+if(MVK_VERSION VERSION_GREATER_EQUAL "1.1.7" AND BUILD_SHARED_LIBS)
+    option(MVK_HIDE_VULKAN_SYMBOLS "Hide Vulkan symbols" OFF)
+endif()
 
-set(MVK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
-set(MVK_COMMON_DIR ${MVK_DIR}/common)
-set(MVK_SC_DIR ${MVK_DIR}/MoltenVKShaderConverter)
-set(MVK_LIB_DIR ${MVK_DIR}/MoltenVK)
+set(MVK_COMMON_DIR ${MVK_SRC_DIR}/common)
+set(MVK_SC_DIR ${MVK_SRC_DIR}/MoltenVKShaderConverter)
+set(MVK_LIB_DIR ${MVK_SRC_DIR}/MoltenVK)
 set(MVK_INSTALL_TARGETS "")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 # PIC required for objects targets linked into shared MoltenVK
 if(BUILD_SHARED_LIBS)
@@ -25,6 +26,8 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 find_package(cereal REQUIRED CONFIG)
+find_package(glslang REQUIRED glslang SPIRV CONFIG)
+find_package(spirv-cross REQUIRED CONFIG)
 find_package(VulkanHeaders REQUIRED CONFIG)
 if(MVK_WITH_SPIRV_TOOLS)
     find_package(SPIRV-Tools REQUIRED CONFIG)
@@ -65,6 +68,15 @@ add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
 target_include_directories(MoltenVKCommon PUBLIC ${MVK_COMMON_DIR})
 target_compile_definitions(MoltenVKCommon PRIVATE $<$<CONFIG:Debug>:DEBUG=1>)
 target_link_libraries(MoltenVKCommon PRIVATE ${FOUNDATION_FRAMEWORK})
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVKCommon PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # MoltenVKShaderConverter
 if(MVK_VERSION VERSION_LESS "1.1.0")
@@ -85,7 +97,11 @@ if(MVK_VERSION VERSION_LESS "1.1.4")
     list(APPEND MVK_SC_SOURCES ${MVK_SC_COMMON_SOURCES})
 endif()
 add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_SOURCES})
-target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
+if(MVK_VERSION VERSION_LESS "1.1.9")
+    target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
+else()
+    target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_17)
+endif()
 target_include_directories(MoltenVKShaderConverter
     PRIVATE
         $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:${MVK_SC_DIR}/MoltenVKSPIRVToMSLConverter>
@@ -95,16 +111,28 @@ target_include_directories(MoltenVKShaderConverter
 )
 target_link_libraries(MoltenVKShaderConverter
     PRIVATE
-        CONAN_PKG::glslang
+        glslang::glslang
+        glslang::SPIRV
         MoltenVKCommon
         $<$<BOOL:${MVK_WITH_SPIRV_TOOLS}>:SPIRV-Tools>
         ${FOUNDATION_FRAMEWORK}
     PUBLIC
-        CONAN_PKG::spirv-cross
+        spirv-cross-core
+        spirv-cross-msl
+        spirv-cross-reflect
 )
 target_compile_definitions(MoltenVKShaderConverter PRIVATE
     $<$<NOT:$<BOOL:${MVK_WITH_SPIRV_TOOLS}>>:MVK_EXCLUDE_SPIRV_TOOLS>
 )
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVKShaderConverter PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+endif()
 
 # MoltenVKShaderConverterTool
 if(MVK_BUILD_SHADERCONVERTER_TOOL)
@@ -113,7 +141,11 @@ if(MVK_BUILD_SHADERCONVERTER_TOOL)
         ${MVK_SC_DIR}/MoltenVKShaderConverterTool/*.mm
     )
     add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
-    target_compile_features(MoltenVKShaderConverterTool PRIVATE cxx_std_11)
+    if(MVK_VERSION VERSION_LESS "1.1.9")
+        target_compile_features(MoltenVKShaderConverterTool PUBLIC cxx_std_11)
+    else()
+        target_compile_features(MoltenVKShaderConverterTool PUBLIC cxx_std_17)
+    endif()
     set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
     target_include_directories(MoltenVKShaderConverterTool PRIVATE
         $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:${MVK_SC_DIR}/MoltenVKGLSLToSPIRVConverter>
@@ -137,7 +169,11 @@ file(GLOB_RECURSE MVK_SOURCES
     ${MVK_LIB_DIR}/MoltenVK/*.cpp
 )
 add_library(MoltenVK ${MVK_SOURCES})
-target_compile_features(MoltenVK PUBLIC cxx_std_11)
+if(MVK_VERSION VERSION_LESS "1.1.9")
+    target_compile_features(MoltenVK PUBLIC cxx_std_11)
+else()
+    target_compile_features(MoltenVK PUBLIC cxx_std_17)
+endif()
 target_include_directories(MoltenVK PRIVATE
     ${MVK_LIB_DIR}/MoltenVK/API
     ${MVK_LIB_DIR}/MoltenVK/Commands
@@ -150,7 +186,6 @@ target_include_directories(MoltenVK PRIVATE
 target_link_libraries(MoltenVK
     PRIVATE
         cereal
-        CONAN_PKG::spirv-cross
         MoltenVKCommon
         MoltenVKShaderConverter
         ${FOUNDATION_FRAMEWORK}
@@ -160,11 +195,22 @@ target_link_libraries(MoltenVK
         $<$<NOT:$<PLATFORM_ID:Darwin>>:${UIKIT_FRAMEWORK}>
     PUBLIC
         Vulkan::Headers
-        $<$<VERSION_LESS:${MVK_VERSION},1.1.0>:CONAN_PKG::vulkan-portability>
         ${METAL_FRAMEWORK}
         ${IOSURFACE_FRAMEWORK}
         ${COREGRAPHICS_FRAMEWORK}
 )
+if(BUILD_SHARED_LIBS)
+    set_target_properties(MoltenVK PROPERTIES
+        C_VISIBILITY_PRESET hidden
+        OBJC_VISIBILITY_PRESET hidden
+        CXX_VISIBILITY_PRESET hidden
+        OBJCXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+    if(MVK_VERSION VERSION_GREATER_EQUAL "1.1.7" AND MVK_HIDE_VULKAN_SYMBOLS)
+        target_compile_definitions(MoltenVK PRIVATE MVK_HIDE_VULKAN_SYMBOLS)
+    endif()
+endif()
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
 # Custom Target to generate internal header file required by MoltenVK target.
@@ -173,7 +219,7 @@ list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 #  - if moltenvk >= 1.0.44: moltenvk commit hash in mvkRevString variable (but we still
 #    use spirv-cross commit hash, since MoltenVK hash is not available in this context,
 #    and hash value is no really important)
-set(MVK_REV_FILE ${MVK_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
+set(MVK_REV_FILE ${MVK_SRC_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
 set(MVK_REV_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/mvk_hash_generated)
 if(MVK_VERSION VERSION_LESS "1.0.44")
     set(MVK_REV_HEADER ${MVK_REV_HEADER_DIR}/SPIRV-Cross/mvkSpirvCrossRevisionDerived.h)
