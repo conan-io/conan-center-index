@@ -348,7 +348,7 @@ class FFMpegConan(ConanFile):
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             )
             target_os = triplet.split("-")[2]
-            if target_os == "gnueabihf":
+            if target_os in ["gnueabihf", "gnueabi"]:
                 target_os = "gnu" # could also be "linux"
             if target_os.startswith("android"):
                 target_os = "android"
@@ -536,13 +536,21 @@ class FFMpegConan(ConanFile):
             ])
         if not self.options.with_programs:
             args.append("--disable-programs")
-        # since ffmpeg"s build system ignores CC and CXX
+        # since ffmpeg"s build system ignores toolchain variables 
+        if tools.get_env("AR"):
+            args.append("--ar={}".format(tools.get_env("AR")))
         if tools.get_env("AS"):
             args.append("--as={}".format(tools.get_env("AS")))
         if tools.get_env("CC"):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
             args.append("--cxx={}".format(tools.get_env("CXX")))
+        if tools.get_env("NM"):
+            args.append("--nm={}".format(tools.get_env("NM")))
+        if tools.get_env("RANLIB"):
+            args.append("--ranlib={}".format(tools.get_env("RANLIB")))
+        if tools.get_env("STRIP"):
+            args.append("--strip={}".format(tools.get_env("STRIP")))
         extra_cflags = []
         extra_ldflags = []
         if is_apple_os(self) and self.settings.os.version:
@@ -775,8 +783,7 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.components["avdevice"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             if self.options.avcodec:
-                self.cpp_info.components["avcodec"].system_libs = [
-                    "Mfplat", "Mfuuid", "strmiids"]
+                self.cpp_info.components["avcodec"].system_libs = ["mfplat", "mfuuid", "strmiids"]
             if self.options.avdevice:
                 self.cpp_info.components["avdevice"].system_libs = [
                     "ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]

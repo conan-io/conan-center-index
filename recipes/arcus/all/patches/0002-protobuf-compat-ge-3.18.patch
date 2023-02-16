@@ -1,0 +1,22 @@
+--- a/src/Socket_p.h
++++ b/src/Socket_p.h
+@@ -41,6 +41,7 @@
+ #include <google/protobuf/message.h>
+ #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+ #include <google/protobuf/io/coded_stream.h>
++#include <google/protobuf/stubs/common.h>
+ 
+ #include "Socket.h"
+ #include "Types.h"
+@@ -548,7 +549,11 @@ namespace Arcus
+ 
+         google::protobuf::io::ArrayInputStream array(wire_message->data, wire_message->size);
+         google::protobuf::io::CodedInputStream stream(&array);
++#if GOOGLE_PROTOBUF_VERSION >= 3006000
++        stream.SetTotalBytesLimit(message_size_maximum);
++#else
+         stream.SetTotalBytesLimit(message_size_maximum, message_size_warning);
++#endif
+         if(!message->ParseFromCodedStream(&stream))
+         {
+             error(ErrorCode::ParseFailedError, "Failed to parse message:" + std::string(wire_message->data));

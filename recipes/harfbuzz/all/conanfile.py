@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.build import can_run
+from conan.tools.build import can_run, stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -17,12 +17,11 @@ from conan.tools.files import (
 )
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
-from conans.tools import stdcpp_library
 
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class HarfbuzzConan(ConanFile):
@@ -93,9 +92,9 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.12.1")
         if self.options.with_icu:
-            self.requires("icu/71.1")
+            self.requires("icu/72.1")
         if self.options.with_glib:
-            self.requires("glib/2.75.0")
+            self.requires("glib/2.75.2")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -141,10 +140,10 @@ class HarfbuzzConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def build_requirements(self):
-        self.tool_requires("meson/0.64.1")
+        self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("glib/2.75.0")
+        self.tool_requires("glib/2.75.2")
 
     def build(self):
         apply_conandata_patches(self)

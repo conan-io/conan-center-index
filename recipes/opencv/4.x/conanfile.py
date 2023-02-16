@@ -135,6 +135,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
         "with_imgcodec_sunraster": [True, False],
+        "with_msmf": [True, False],
+        "with_msmf_dxva": [True, False],
         # objdetect module options
         "with_quirc": [True, False],
         # videoio module options
@@ -188,6 +190,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
         "with_imgcodec_sunraster": False,
+        "with_msmf": True,
+        "with_msmf_dxva": True,
         # objdetect module options
         "with_quirc": True,
         # videoio module options
@@ -265,6 +269,9 @@ class OpenCVConan(ConanFile):
             del self.options.with_v4l
         if self.settings.os in ["iOS", "Android"]:
             del self.options.with_opencl
+        if self.settings.os != "Windows":
+            del self.options.with_msmf
+            del self.options.with_msmf_dxva
 
         if self._has_with_ffmpeg_option:
             # Following the packager choice, ffmpeg is enabled by default when
@@ -969,6 +976,8 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_imgcodec_pfm")
             self.options.rm_safe("with_imgcodec_pxm")
             self.options.rm_safe("with_imgcodec_sunraster")
+            self.options.rm_safe("with_msmf")
+            self.options.rm_safe("with_msmf_dxva")
         if not self.options.objdetect:
             self.options.rm_safe("with_quirc")
         if not self.options.videoio:
@@ -1294,8 +1303,8 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["WITH_DSHOW"] = is_msvc(self)
-        tc.variables["WITH_MSMF"] = is_msvc(self)
-        tc.variables["WITH_MSMF_DXVA"] = is_msvc(self)
+        tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
+        tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 

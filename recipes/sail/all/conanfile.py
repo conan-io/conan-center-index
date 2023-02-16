@@ -1,9 +1,10 @@
-from conan.tools.files import rename
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 class SAILConan(ConanFile):
     name = "sail"
@@ -20,7 +21,7 @@ class SAILConan(ConanFile):
         "with_avif": [True, False],
         "with_gif": [True, False],
         "with_jpeg2000": [True, False],
-        "with_jpeg": [True, False],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_webp": [True, False],
@@ -32,101 +33,105 @@ class SAILConan(ConanFile):
         "with_avif": True,
         "with_gif": True,
         "with_jpeg2000": True,
-        "with_jpeg": True,
+        "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
         "with_webp": True,
     }
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "src"
-
-    @property
-    def _build_subfolder(self):
-        return "build"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_avif:
-            self.requires("libavif/0.9.3")
+            self.requires("libavif/0.11.1")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg2000:
             self.requires("jasper/2.0.33")
-        if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+        if self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            strip_root=True, destination=self.source_folder)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        except_codecs = []
+    def generate(self):
+        enable_codecs = []
 
-        if not self.options.with_avif:
-            except_codecs.append("AVIF")
-        if not self.options.with_gif:
-            except_codecs.append("GIF")
-        if not self.options.with_jpeg2000:
-            except_codecs.append("JPEG2000")
-        if not self.options.with_jpeg:
-            except_codecs.append("JPEG")
-        if not self.options.with_png:
-            except_codecs.append("PNG")
-        if not self.options.with_tiff:
-            except_codecs.append("TIFF")
-        if not self.options.with_webp:
-            except_codecs.append("WEBP")
+        if self.options.with_avif:
+            enable_codecs.append("avif")
+        if self.options.with_gif:
+            enable_codecs.append("gif")
+        if self.options.with_jpeg2000:
+            enable_codecs.append("jpeg2000")
+        if self.options.with_jpeg:
+            enable_codecs.append("jpeg")
+        if self.options.with_png:
+            enable_codecs.append("png")
+        if self.options.with_tiff:
+            enable_codecs.append("tiff")
+        if self.options.with_webp:
+            enable_codecs.append("webp")
 
-        cmake = CMake(self)
-        cmake.definitions["SAIL_BUILD_APPS"] = False
-        cmake.definitions["SAIL_BUILD_EXAMPLES"] = False
-        cmake.definitions["SAIL_BUILD_TESTS"] = False
-        cmake.definitions["SAIL_COMBINE_CODECS"] = True
-        cmake.definitions["SAIL_EXCEPT_CODECS"] = ";".join(except_codecs)
-        cmake.definitions["SAIL_INSTALL_PDB"] = False
-        cmake.definitions["SAIL_THREAD_SAFE"] = self.options.thread_safe
-        cmake.configure(build_folder=self._build_subfolder)
+        tc = CMakeToolchain(self)
+        tc.variables["SAIL_BUILD_APPS"] = False
+        tc.variables["SAIL_BUILD_EXAMPLES"] = False
+        tc.variables["SAIL_BUILD_TESTS"] = False
+        tc.variables["SAIL_COMBINE_CODECS"] = True
+        tc.variables["SAIL_ENABLE_CODECS"] = ";".join(enable_codecs)
+        tc.variables["SAIL_INSTALL_PDB"] = False
+        tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        if is_msvc(self):
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
+        # C3I workaround to force CMake to choose the highest version of
+        # the windows SDK available in the system
+        if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
+            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
+        tc.generate()
 
-        return cmake
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt",       src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.INIH.txt",  src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.MUNIT.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt",       self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.INIH.txt",  self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.MUNIT.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
+        cmake = CMake(self)
         cmake.install()
+
         # Remove CMake and pkg-config rules
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # Move icons
         rename(self, os.path.join(self.package_folder, "share"),
                      os.path.join(self.package_folder, "res"))
@@ -158,7 +163,7 @@ class SAILConan(ConanFile):
         if self.options.with_jpeg2000:
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
         if self.options.with_jpeg:
-            self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
+            self.cpp_info.components["sail-codecs"].requires.append("{0}::{0}".format(self.options.with_jpeg))
         if self.options.with_png:
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
         if self.options.with_tiff:

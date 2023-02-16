@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class HdrhistogramcConan(ConanFile):
@@ -33,18 +34,9 @@ class HdrhistogramcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -80,18 +72,21 @@ class HdrhistogramcConan(ConanFile):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "COPYING.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         target = "hdr_histogram" if self.options.shared else "hdr_histogram_static"
         self.cpp_info.set_property("cmake_file_name", "hdr_histogram")
         self.cpp_info.set_property("cmake_target_name", f"hdr_histogram::{target}")
+        if Version(self.version) >= "0.11.6":
+            self.cpp_info.set_property("pkg_config_name", "hdr_histogram")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["hdr_histrogram"].libs = collect_libs(self)
         self.cpp_info.components["hdr_histrogram"].includedirs.append(os.path.join("include", "hdr"))
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["hdr_histrogram"].system_libs = ["m", "rt"]
+                self.cpp_info.components["hdr_histrogram"].system_libs = ["m", "rt", "pthread"]
             elif self.settings.os == "Windows":
                 self.cpp_info.components["hdr_histrogram"].system_libs = ["ws2_32"]
 

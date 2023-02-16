@@ -23,6 +23,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#ifndef H3_VERSION_4_LATER
+
 int main() {
   // Get the H3 index of some location and print it.
   GeoCoord location;
@@ -51,3 +53,37 @@ int main() {
 
   return 0;
 }
+
+#else
+
+int main() {
+  // Get the H3 index of some location and print it.
+  LatLng location;
+  location.lat = degsToRads(40.689167);
+  location.lng = degsToRads(-74.044444);
+  int resolution = 10;
+  H3Index indexed;
+  latLngToCell(&location, resolution, &indexed);
+  printf("The index is: %" PRIx64 "\n", indexed);
+
+  // Get the vertices of the H3 index.
+  CellBoundary boundary;
+  cellToBoundary(indexed, &boundary);
+  // Indexes can have different number of vertices under some cases,
+  // which is why boundary.numVerts is needed.
+  int v;
+  for (v = 0; v < boundary.numVerts; v++) {
+      printf("Boundary vertex #%d: %lf, %lf\n", v,
+             radsToDegs(boundary.verts[v].lat),
+             radsToDegs(boundary.verts[v].lng));
+  }
+
+  // Get the center coordinates.
+  LatLng center;
+  cellToLatLng(indexed, &center);
+  printf("Center coordinates: %lf, %lf\n", radsToDegs(center.lat), radsToDegs(center.lng));
+
+  return 0;
+}
+
+#endif
