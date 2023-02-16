@@ -163,6 +163,8 @@ class DCMTKConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        # DCMTK tries to consume openssl::openssl target by default but it fails when checking
+        tc.set_property("openssl", "cmake_find_mode", "module")
         tc.generate()
 
     def build(self):
