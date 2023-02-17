@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
     exports_sources = "Imakefile", "Imake.tmpl"
 
     def build_requirements(self):
-        if not self.conf("tools.gnu:make_program", check_type=str):
+        if not self.conf.get("tools.gnu:make_program", check_type=str):
             self.tool_requires("make/4.2.1")
 
     def generate(self):
