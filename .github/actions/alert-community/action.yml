@@ -16,10 +16,12 @@ runs:
   steps:
     # Assume the repo checked out the code since this is running
     - uses: ./.github/actions/pr_changed_files
+      continue-on-error: true
       id: changed_files
       with:
         files: ${{ inputs.files }}
     - if: always() && steps.changed_files.outputs.any_changed == 'true'
+      continue-on-error: true
       uses: actions/github-script@v6
       with:
         script: |
