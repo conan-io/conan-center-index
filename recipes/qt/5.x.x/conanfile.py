@@ -363,7 +363,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.with_pcre2:
             self.requires("pcre2/10.40")
         if self.options.get_safe("with_vulkan"):
@@ -411,7 +411,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.4.9")
             self.requires("opus/1.3.1")
