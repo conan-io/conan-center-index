@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
 import os
@@ -57,19 +57,19 @@ class CassandraCppDriverConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libuv/1.44.2", transitive_headers=True)
+        self.requires("libuv/1.44.2")
         self.requires("http_parser/2.9.4")
         self.requires("rapidjson/cci.20220822")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
 
         if self.options.with_zlib:
             self.requires("minizip/1.2.13")
             self.requires("zlib/1.2.13")
 
         if self.options.use_atomic == "boost":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -86,7 +86,7 @@ class CassandraCppDriverConan(ConanFile):
                 "Kerberos is not supported at the moment")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -132,6 +132,9 @@ class CassandraCppDriverConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "\"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"Clang\"",
                               "\"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"Clang\" OR \"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"AppleClang\"")
+        rm(self, "Findlibssh2.cmake", os.path.join(self.source_folder, "cmake"))
+        rm(self, "Findlibuv.cmake", os.path.join(self.source_folder, "cmake"))
+        rm(self, "FindOpenSSL.cmake", os.path.join(self.source_folder, "cmake"))
 
     def build(self):
         self._patch_sources()
