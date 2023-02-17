@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conans import ConanFile
+from conan import ConanFile
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -96,7 +96,7 @@ class CunitConan(ConanFile):
         tc.configure_args.append("--enable-automated" if self.options.enable_automated else "--disable-automated")
         tc.configure_args.append("--enable-basic" if self.options.enable_basic else "--disable-basic")
         tc.configure_args.append("--enable-console" if self.options.enable_console else "--disable-console")
-        tc.configure_args.append("--enable-curses" if self.options.with_curses != False else "--disable-curses")
+        tc.configure_args.append("--enable-curses" if self.options.with_curses is not False else "--disable-curses")
 
         if is_msvc(self):
             env.append("CC", f'{unix_path(self, self.conf.get("user.automake:compile-wrapper"))} cl -nologo')
