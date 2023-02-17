@@ -6,7 +6,7 @@ inputs:
     description: "Check for changes using only this list of files (Defaults to the entire repo)"
     required: false
     default: ""
-    
+
 outputs:
   all_changed_files:
     description: List of all copied, modified, and added files.
@@ -34,7 +34,13 @@ runs:
 
         patterns = [Path(p).parts for p in '''${{ inputs.files }}'''.splitlines()]
 
-        res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+        for i in range(0, 5):
+          while True:
+            try:
+              res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+            except CalledProcessError:
+              continue
+            break
         files = []
         for f in json.loads(res.stdout):
           if f["status"] == "removed":
