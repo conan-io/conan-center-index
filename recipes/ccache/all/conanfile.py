@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
@@ -18,10 +18,9 @@ class CcacheConan(ConanFile):
         "compilation is being done again."
     )
     license = "GPL-3.0-or-later"
-    topics = ("ccache", "compiler-cache", "recompilation")
+    topics = ("compiler-cache", "recompilation", "cache", "compiler")
     homepage = "https://ccache.dev"
     url = "https://github.com/conan-io/conan-center-index"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "redis_storage_backend": [True, False],
@@ -58,9 +57,6 @@ class CcacheConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def requirements(self):
         self.requires("zstd/1.5.2")
@@ -102,18 +98,18 @@ class CcacheConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("hiredislib", "cmake_target_name", "HIREDIS::HIREDIS")
+        deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
+        deps.set_property("hiredis", "cmake_find_mode", "module")
         deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "GPL-*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*GPL-*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
