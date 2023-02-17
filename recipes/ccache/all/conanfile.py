@@ -46,6 +46,7 @@ class CcacheConan(ConanFile):
                 "clang": "9",
                 "apple-clang": "11",
                 "Visual Studio": "16.2",
+                "msvc": "192",
             }
         else:
             return {
@@ -53,6 +54,7 @@ class CcacheConan(ConanFile):
                 "clang": "6",
                 "apple-clang": "10",
                 "Visual Studio": "15.7" if Version(self.version) < "4.6" else "16.2",
+                "msvc": "191" if Version(self.version) < "4.6" else "192"
             }
 
     def layout(self):
