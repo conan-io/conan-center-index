@@ -1,4 +1,7 @@
 sources:
+  "4.23.1":
+    url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v4.23.1.tar.gz"
+    sha256: "12ba4ad04e6de473d4c216da9964c7d65f41660d57185017dcf551e1be8b6180"
   "3.21.12":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.tar.gz"
     sha256: "930c2c3b5ecc6c9c12615cf5ad93f1cd6e12d0aba862b572e076259970ac3a53"
