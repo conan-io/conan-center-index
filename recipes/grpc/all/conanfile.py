@@ -103,7 +103,7 @@ class grpcConan(ConanFile):
         self.requires("re2/20220601")
         self.requires("zlib/1.2.13")
         self.requires("protobuf/3.21.4")
-        self.requires("googleapis/cci.20220711")
+        self.requires('googleapis/cci.20220711') # TODO: update to 'cci.20221108'
         self.requires("grpc-proto/cci.20220627")
 
     def package_id(self):
