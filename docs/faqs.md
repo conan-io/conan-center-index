@@ -446,7 +446,7 @@ Those projects usually break between patch versions and are very sensitive, so w
 otherwise, it may result in unexpected behavior or even runtime errors.
 
 A very known project is GLib, which requires the very same configuration to prevent multiple instances when using static linkage.
-As a solution, we could consume glib on full package id mode, like:
+As a solution, we could consume GLib on full package id mode, like:
 
 ```python
 def package_id(self):
