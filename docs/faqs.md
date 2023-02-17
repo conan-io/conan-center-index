@@ -453,7 +453,7 @@ def package_id(self):
     self.info.requires["glib"].full_package_mode()
 ```
 
-Perfect solution on the consumer side, but there is a painful side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph with which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests.
+Perfect solution on the consumer side, but there is a side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph with which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests.
 As a trade-off, it would be necessary to update all recipes involved, by opening new PRs,
 then it should generate new packages, but it takes many days and still is a process that is not supported by CCI internally.
 
