@@ -4,6 +4,9 @@ on:
   pull_request_target:
     types: [opened]
 
+env:
+  PYVER: "3.10"
+
 jobs:
   comment:
     if: github.repository == 'conan-io/conan-center-index'
