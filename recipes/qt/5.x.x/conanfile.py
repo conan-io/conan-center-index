@@ -1028,6 +1028,8 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].includedirs = []
             self.cpp_info.components[componentname].defines = []
 
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         if self.options.gui:
             gui_reqs = []
             if self.options.with_dbus:
@@ -1175,8 +1177,6 @@ Examples = bin/datadir/examples""")
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
-        if self.options.with_dbus:
-            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
