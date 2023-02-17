@@ -71,6 +71,8 @@ class ProtobufConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
+        if Version(self.version) >= "3.22.0":
+            self.requires("abseil/20230125.0")
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -109,6 +111,8 @@ class ProtobufConan(ConanFile):
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
+        if Version(self.version) >= "3.22.0":
+            tc.variables["protobuf_ABSL_PROVIDER"] = "package"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -188,12 +192,16 @@ class ProtobufConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
-        rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
-                     os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
+        if Version(self.version) < "3.22.0":
+            rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
+                        os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
         if not self.options.lite:
             rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "lib"))
             rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "bin"))
+
+        if Version(self.version) >= "3.22.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "utf8_range"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -206,10 +214,20 @@ class ProtobufConan(ConanFile):
             os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
         ]
+        if Version(self.version) >= "3.22.0":
+            build_modules.append(os.path.join(self._cmake_install_base_path, "protobuf-config.cmake"))
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
+
+        if Version(self.version) >= "3.22.0":
+            # utf8_range
+            self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "protobuf::utf8_range")
+            self.cpp_info.components["utf8_range"].libs = [lib_prefix + "utf8_range" + lib_suffix]
+            # utf8_validity
+            self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "protobuf::utf8_validity")
+            self.cpp_info.components["utf8_validity"].libs = [lib_prefix + "utf8_validity" + lib_suffix]
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
@@ -218,6 +236,8 @@ class ProtobufConan(ConanFile):
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
+        if Version(self.version) >= "3.22.0":
+            self.cpp_info.components["libprotobuf"].requires.extend(["abseil::abseil", "utf8_range", "utf8_validity"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libprotobuf"].system_libs.extend(["m", "pthread"])
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
