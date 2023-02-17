@@ -115,7 +115,7 @@ class CMakeConan(ConanFile):
                 tc.variables["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             tc.generate()
             tc = CMakeDeps(self)
-            # CMake tries to consume openssl::openssl target by default but it fails when checking
+            # CMake try_compile failure: https://github.com/conan-io/conan-center-index/pull/16073#discussion_r1110037534
             tc.set_property("openssl", "cmake_find_mode", "module")
             tc.generate()
 
