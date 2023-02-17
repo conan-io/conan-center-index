@@ -77,7 +77,7 @@ class XorgProtoConan(ConanFile):
         return os.path.join(self.package_folder, "res", "pc_data.yml")
 
     def package(self):
-        copy(self, "COPYING-*", src=self.source_folder, dst="licenses")
+        copy(self, "COPYING-*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         autotools = Autotools(self)
         autotools.install()
