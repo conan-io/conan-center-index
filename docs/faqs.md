@@ -441,7 +441,7 @@ Doing so requires [deleting the option from the `package_id`](adding_packages/co
 
 ## Can I use full_package_mode for a requirement in my recipe?
 
-For some not regular projects, they may need to be aligned when being used as a requirement, using the very same version, options, and settings and maybe not mixing shared with static linkage.
+For some irregular projects, they may need to be aligned when being used as a requirement, using the very same version, options, and settings and maybe not mixing shared with static linkage.
 Those projects usually break between patch versions and are very sensitive, so we can not use different versions through Conan graph dependencies,
 otherwise, it may result in unexpected behavior or even runtime errors.
 
