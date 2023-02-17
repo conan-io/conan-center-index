@@ -5,6 +5,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.build import build_jobs, cross_building, check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 
 import os
@@ -113,6 +114,11 @@ class CMakeConan(ConanFile):
             if cross_building(self):
                 tc.variables["HAVE_POLL_FINE_EXITCODE"] = ''
                 tc.variables["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
+            # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
+            # C3I workaround to force CMake to choose the highest version of
+            # the windows SDK available in the system
+            if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
+                tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
             tc.generate()
             tc = CMakeDeps(self)
             # CMake try_compile failure: https://github.com/conan-io/conan-center-index/pull/16073#discussion_r1110037534
