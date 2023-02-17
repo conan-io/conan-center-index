@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.gnu import PkgConfigDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get
 from conan.tools.build import cross_building, check_min_cppstd
@@ -88,10 +87,7 @@ class CcacheConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.9.3")
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.settings.os == "Macos" and self.settings.arch == "armv8":
-            self.tool_requires("cmake/3.25.1")
+        self.tool_requires("cmake/3.25.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -104,13 +100,11 @@ class CcacheConan(ConanFile):
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
         tc.generate()
-        deps = PkgConfigDeps(self)
+
+        deps = CMakeDeps(self)
+        deps.set_property("hiredislib", "cmake_target_name", "HIREDIS::HIREDIS")
+        deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
         deps.generate()
-        if is_msvc(self):
-            deps = CMakeDeps(self)
-            deps.set_property("hiredislib", "cmake_target_name", "HIREDIS::HIREDIS")
-            deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
-            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
