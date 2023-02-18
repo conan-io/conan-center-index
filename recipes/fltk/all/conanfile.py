@@ -57,7 +57,7 @@ class FltkConan(ConanFile):
             self.requires("xorg/system")
             self.requires("libxft/2.3.6")
             #Fixes "'libxft/2.3.6' requires 'freetype/2.12.1' while 'fontconfig/2.13.93' requires 'freetype/2.11.1'"
-            self.requires("freetype/2.12.1", override=True)
+            self.requires("freetype/2.12.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
