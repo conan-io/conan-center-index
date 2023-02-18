@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -12,7 +12,7 @@ import os
 import shutil
 import yaml
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.55.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
@@ -69,7 +69,6 @@ class VulkanValidationLayersConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "11": {},
             "17": {
                 "apple-clang": "9",
                 "clang": "6",
@@ -77,7 +76,7 @@ class VulkanValidationLayersConan(ConanFile):
                 "msvc": "191",
                 "Visual Studio": "15.7",
             },
-        }[self._min_cppstd]
+        }.get(self._min_cppstd, {})
 
     def export(self):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
@@ -119,8 +118,8 @@ class VulkanValidationLayersConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
@@ -136,8 +135,7 @@ class VulkanValidationLayersConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -164,10 +162,6 @@ class VulkanValidationLayersConan(ConanFile):
         if self._needs_pkg_config:
             deps = PkgConfigDeps(self)
             deps.generate()
-            # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            env.vars(self).save_script("conanbuildenv_pkg_config_path")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -222,7 +216,6 @@ class VulkanValidationLayersConan(ConanFile):
 
         manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
         vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
-        self.output.info(f"Prepending to VK_LAYER_PATH runtime environment variable: {vk_layer_path}")
         self.runenv_info.prepend_path("VK_LAYER_PATH", vk_layer_path)
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)
