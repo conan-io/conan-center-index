@@ -68,7 +68,8 @@ class LibdisasmConan(ConanFile):
             tc.extra_cflags.append("-FS")
         env = tc.environment()
         if is_msvc(self):
-            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
+            automake_conf = self.dependencies.build["automake"].conf_info
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("CPP", "cl -E -nologo")
