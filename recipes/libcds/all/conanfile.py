@@ -87,7 +87,7 @@ class LibcdsConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["_libcds"].defines = ["CDS_BUILD_STATIC_LIB"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_libcds"].system_libs = ["pthread"]
+            self.cpp_info.components["_libcds"].system_libs = ["m", "pthread"]
         if self.settings.compiler in ["gcc", "clang", "apple-clang"] and self.settings.arch == "x86_64":
             self.cpp_info.components["_libcds"].cxxflags = ["-mcx16"]
         self.cpp_info.components["_libcds"].requires = ["boost::boost"]
