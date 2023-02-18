@@ -93,7 +93,7 @@ class Iir1Conan(ConanFile):
         self.cpp_info.components["iir"].libs = [name]
         if self.options.get_safe("noexceptions"):
             self.cpp_info.components["iir"].defines.append("IIR1_NO_EXCEPTIONS")
-        if self.options.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["iir"].system_libs.append("m")
 
         # TODO: to remove in conan v2
