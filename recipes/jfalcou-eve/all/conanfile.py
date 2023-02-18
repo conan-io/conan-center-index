@@ -35,7 +35,7 @@ class JfalcouEveConan(ConanFile):
                 "Visual Studio": "16.9",
                 "msvc": "1928",
                 "clang": "13",
-                "apple-clang": "13"}
+                "apple-clang": "14"}
 
     def configure(self):
         version = Version(self.version.strip("v"))
@@ -53,8 +53,6 @@ class JfalcouEveConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self):
             raise ConanInvalidConfiguration("EVE does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("EVE does not support apple Clang due to an incomplete libcpp.")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]

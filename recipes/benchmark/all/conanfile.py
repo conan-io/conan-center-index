@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
 
@@ -44,9 +44,8 @@ class BenchmarkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= "12":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio <= 12")
-        if Version(self.version) < "1.7.0" and is_msvc(self) and self.info.options.shared:
+        check_min_vs(self, "190")
+        if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
     def _cmake_new_enough(self, required_version):
@@ -62,11 +61,10 @@ class BenchmarkConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.7.1" and not self._cmake_new_enough("3.16.3"):
-            self.tool_requires("cmake/3.25.0")
+            self.tool_requires("cmake/3.25.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

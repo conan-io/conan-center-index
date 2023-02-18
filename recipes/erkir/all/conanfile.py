@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
+
 
 class ErkirConan(ConanFile):
     name = "erkir"
@@ -15,6 +15,7 @@ class ErkirConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/vahancho/erkir"
     topics = ("earth", "geodesy", "geography", "coordinate-systems", "geodetic", "datum")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,8 +27,8 @@ class ErkirConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
+    def _min_cppstd(self):
+        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -38,18 +39,17 @@ class ErkirConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,5 +81,7 @@ class ErkirConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "erkir")
+        self.cpp_info.set_property("cmake_target_name", "erkir::erkir")
         postfix = "d" if Version(self.version) >= "2.0.0" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"erkir{postfix}"]

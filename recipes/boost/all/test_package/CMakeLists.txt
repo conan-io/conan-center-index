@@ -134,6 +134,15 @@ if(NOT HEADER_ONLY)
         add_test(NAME boost_numpy COMMAND numpy_exe)
         set_property(TEST boost_numpy PROPERTY ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
     endif()
+
+    if(WITH_URL)
+        find_package(Boost COMPONENTS url REQUIRED)
+        add_executable(url_exe url.cpp)
+        target_link_libraries(url_exe PRIVATE Boost::url)
+        set_property(TARGET url_exe PROPERTY CXX_STANDARD 11)
+        add_test(NAME boost_url COMMAND url_exe)
+    endif()
+
 endif()
 
 # Test header-only target

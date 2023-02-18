@@ -1,0 +1,11 @@
+--- a/cmake/OpenCVInstallLayout.cmake
++++ b/cmake/OpenCVInstallLayout.cmake
+@@ -1,7 +1,7 @@
+ # message(STATUS "Initial install layout:")
+ # ocv_cmake_dump_vars("OPENCV_.*_INSTALL_PATH")
+ 
+-if(ANDROID)
++if(0)
+ 
+   ocv_update(OPENCV_BIN_INSTALL_PATH            "sdk/native/bin/${ANDROID_NDK_ABI_NAME}")
+   ocv_update(OPENCV_TEST_INSTALL_PATH           "${OPENCV_BIN_INSTALL_PATH}")

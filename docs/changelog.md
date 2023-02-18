@@ -1,5 +1,43 @@
 # Changelog
 
+### 14-February-2023 - 15:32 CET
+
+- [fix] Fix ScheduledExportCheck job not updating hook validation issues.
+- [fix] Fix missing GitHub labels for PRs with "bump version" and "bump dependencies"
+- [feature] PromotePackages: Add a parameter to promote multiple references.
+- [feature] Increase `conan test` time limit to 1 hour.
+- [feature] Add request header for GitHub API version.
+
+### 03-February-2023 - 10:24 CET
+
+- [fix] Fix macOS deployment target / minos value.
+- [feature] Validate: Add return code for license check.
+- [feature] Add references list and force parameters to TapaholesRepo job.
+- [feature] Add new ListPackages job.
+- [feature] Update Conan versions library requirements to 1.58.0 and 2.0.0-beta9.
+
+### 20-January-2023 - 16:09 CET
+
+- [feature] Make feedback messages of PRs configurable.
+- [feature] Add status icon to the title of PRs comments.
+- [fix] Fix Conan v2 error when getting revisions.
+
+### 16-January-2023 - 16:43 CET
+
+- [fix] ValidateInfrastructure: Fix Conan version check.
+- [feature] TapaholesRepo: Build references when there are 0 packages for a recipe revision.
+
+### 12-January-2023 - 19:33 CET
+
+- [fix] Fix Conan v2 download/upload recipe commands.
+
+### 12-January-2023 - 11:21 CET
+
+- [feature] Add support for Conan v2 beta 7.
+- [feature] Check complete Conan version on ValidateInfrastructure.
+- [fix] Increase `conan test` timeout value.
+- [fix] Fix stage name when calculating build configurations.
+
 ### 10-January-2023 - 15:20 CET
 
 - [feature] Add entry in config to disable merging labels from the multibranch job.
