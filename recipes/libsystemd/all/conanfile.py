@@ -49,7 +49,7 @@ class LibsystemdConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("libcap/2.66")
