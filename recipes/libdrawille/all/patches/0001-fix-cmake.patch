@@ -19,18 +19,25 @@ index 8d225ed..dc1a1b3 100644
 -add_subdirectory(examples)
 -add_subdirectory(benchmark)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 3c74714..203dd5d 100644
+index 3c74714..240ca8b 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -4,6 +4,21 @@ set(SOURCE_FILES Canvas.c stamp.c mat3.c polygon.c point.c utils.c x86/sse.c x86
+@@ -1,9 +1,26 @@
+-find_library(MATH m)
+-
+ set(SOURCE_FILES Canvas.c stamp.c mat3.c polygon.c point.c utils.c x86/sse.c x86/avx2.c)
  set_source_files_properties(x86/sse.c PROPERTIES COMPILE_FLAGS "-msse -msse2 -msse4")
  set_source_files_properties(x86/avx2.c PROPERTIES COMPILE_FLAGS "-msse -msse2 -msse4 -mavx -mavx2")
  
 -add_library(libdrawille ${SOURCE_FILES})
 -target_link_libraries(libdrawille ${MATH})
 +add_library(drawille ${SOURCE_FILES})
-+target_link_libraries(drawille ${MATH})
- 
++
++find_library(MATH m)
++if(MATH)
++  target_link_libraries(drawille ${MATH})
++endif()
++
 +include(GNUInstallDirs)
 +
 +install(
@@ -39,7 +46,7 @@ index 3c74714..203dd5d 100644
 +    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +)
-+
+ 
 +install(
 +    FILES
 +      Canvas.h

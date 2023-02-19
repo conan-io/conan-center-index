@@ -4,6 +4,6 @@ sources:
     sha256: "c4f4e4b74d419bb06e8fdf4886421216d65eb095e69fb8bcdeb33960bbd7ae16"
 patches:
   "cci.20160428":
-    - patch_file: "patches/0001-use-cmake.patch"
-      patch_description: "disable test,examples add installer"
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "disable test, examples add installer, link mathlib only on Linux"
       patch_type: "conan"
