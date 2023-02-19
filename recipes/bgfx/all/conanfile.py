@@ -75,11 +75,10 @@ class bgfxConan(ConanFile):
 
     @property
     def _projs(self):
-        projs = ""
-        if not self.options.shared:
-            self.projs = [f"{self._lib_target_prefix}bgfx"]
+        if self.options.shared:
+            projs = [f"{self._lib_target_prefix}bgfx-shared-lib"]
         else:
-            self.projs = [f"{self._lib_target_prefix}bgfx-shared-lib"]
+            projs = [f"{self._lib_target_prefix}bgfx"]
         if self.options.tools:
             projs.extend([f"{self._tool_target_prefix}{self._shaderc_target_prefix}shaderc",
                           f"{self._tool_target_prefix}texturev",
@@ -225,10 +224,16 @@ class bgfxConan(ConanFile):
                 lib_pat = "*bgfx*.lib"
             package_lib_prefix = ""
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            lib_pat = "*bgfx*.a"
+            if self.options.shared:
+                lib_pat = "*bgfx*.so"
+            else:
+                lib_pat = "*bgfx*.a"
             package_lib_prefix = "lib"
         elif self.settings.os == "Macos":
-            lib_pat = "*bgfx*.a"
+            if self.options.shared:
+                lib_pat = "*bgfx*.dylib"
+            else:
+                lib_pat = "*bgfx*.a"
             package_lib_prefix = "lib"
 
         # Get build bin folder
@@ -279,8 +284,20 @@ class bgfxConan(ConanFile):
         self.cpp_info.includedirs = ["include"]
         self.cpp_info.libs = ["bgfx"]
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["gdi32"])
+            if not is_msvc(self):
+                self.cpp_info.system_libs.extend(["comdlg32"])
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["X11", "GL"])
+        elif self.settings.os in ["Macos", "iOS"]:
+            self.cpp_info.frameworks.extend(["IOKit", "QuartzCore", "Metal"])
+            if self.settings.os in ["Macos"]:
+                self.cpp_info.frameworks.extend(["OpenGL"])
+            else:
+                self.cpp_info.frameworks.extend(["OpenGLES", "UIKit"])
+        elif self.settings.os in ["Android"]:
+            self.cpp_info.system_libs.extend(["EGL", "GLESv2"])
 
         self.cpp_info.set_property("cmake_file_name", "bgfx")
         self.cpp_info.set_property("cmake_target_name", "bgfx::bgfx")
