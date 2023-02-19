@@ -66,7 +66,7 @@ class ThriftConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.81.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_libevent:
@@ -86,8 +86,7 @@ class ThriftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
