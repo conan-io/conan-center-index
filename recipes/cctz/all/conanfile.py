@@ -76,7 +76,9 @@ class CCTZConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cctz")
         self.cpp_info.set_property("cmake_target_name", "cctz::cctz")
         self.cpp_info.libs = ["cctz"]
-        if is_apple_os(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+        elif is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
 
         # TODO: to remove in conan v2
