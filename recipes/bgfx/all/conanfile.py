@@ -91,7 +91,9 @@ class bgfxConan(ConanFile):
         return {
             "gcc": "8",
             "clang": "3.3",
-            "apple-clang": "5",
+            "apple-clang": "12", #to keep CCI compiling on osx 11.0 or higher, for now
+            "msvc": "191",
+            "Visual Studio": "15" #TODO remove with conan 2.0
         }
 
     @property
@@ -292,7 +294,7 @@ class bgfxConan(ConanFile):
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["X11", "GL"])
         elif self.settings.os in ["Macos", "iOS"]:
-            self.cpp_info.frameworks.extend(["IOKit", "QuartzCore", "Metal"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "AppKit", "IOKit", "QuartzCore", "Metal"])
             if self.settings.os in ["Macos"]:
                 self.cpp_info.frameworks.extend(["OpenGL"])
             else:
