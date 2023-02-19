@@ -31,7 +31,7 @@ class LibGphoto2(ConanFile):
         "with_libjpeg": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_libusb": True,
         "with_libcurl": True,
@@ -74,6 +74,8 @@ class LibGphoto2(ConanFile):
             self.requires("libjpeg/9e")
 
     def validate(self):
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("building libgphoto2 as a static library is not supported")
         if is_msvc(self):
             raise ConanInvalidConfiguration("Visual Studio not supported yet")
 
