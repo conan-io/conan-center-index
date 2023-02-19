@@ -112,6 +112,7 @@ class bgfxConan(ConanFile):
     def requirements(self):
         self.requires(f"bx/{self._bx_version[self.version]}")
         self.requires(f"bimg/{self._bimg_version[self.version]}")
+        self.requires("opengl/system")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
