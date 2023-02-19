@@ -19,11 +19,9 @@ class LibGphoto2(ConanFile):
     homepage = "http://www.gphoto.org/"
     license = "LGPL-2.1"
     topics = ("gphoto2", "libgphoto2", "libgphoto", "photo")
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_libusb": [True, False],
         "with_libcurl": [True, False],
         "with_libxml2": [True, False],
@@ -31,8 +29,6 @@ class LibGphoto2(ConanFile):
         "with_libjpeg": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "with_libusb": True,
         "with_libcurl": True,
         "with_libxml2": True,
@@ -47,13 +43,7 @@ class LibGphoto2(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -74,8 +64,6 @@ class LibGphoto2(ConanFile):
             self.requires("libjpeg/9e")
 
     def validate(self):
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("building libgphoto2 as a static library is not supported")
         if is_msvc(self):
             raise ConanInvalidConfiguration("Visual Studio not supported yet")
 
