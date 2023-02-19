@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -223,6 +224,7 @@ class VulkanValidationLayersConan(ConanFile):
             # Move json files to res, but keep in mind to preserve relative
             # path between module library and manifest json file
             rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["VkLayer_utils"]
