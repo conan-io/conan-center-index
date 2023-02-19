@@ -1,5 +1,5 @@
-#include <gphoto2/gphoto2-camera.h>
-#include <gphoto2/gphoto2-abilities-list.h>
+#include <gphoto2-camera.h>
+#include <gphoto2-abilities-list.h>
 
 int main() {
     GPContext* context;
@@ -17,7 +17,7 @@ int main() {
         return 1;
     }
     int count = gp_abilities_list_count(list);
-    if (count == 0) {
+    if (count < 0) {
         return 1;
     }
     gp_camera_new(&camera);
