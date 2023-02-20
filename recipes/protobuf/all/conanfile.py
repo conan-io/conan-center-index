@@ -232,10 +232,10 @@ class ProtobufConan(ConanFile):
         if Version(self.version) >= "3.22.0":
             # utf8_range
             self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "protobuf::utf8_range")
-            self.cpp_info.components["utf8_range"].libs = [lib_prefix + "utf8_range" + lib_suffix]
+            self.cpp_info.components["utf8_range"].libs = [lib_prefix + "utf8_range"]
             # utf8_validity
             self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "protobuf::utf8_validity")
-            self.cpp_info.components["utf8_validity"].libs = [lib_prefix + "utf8_validity" + lib_suffix]
+            self.cpp_info.components["utf8_validity"].libs = [lib_prefix + "utf8_validity"]
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
