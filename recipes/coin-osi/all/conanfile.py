@@ -1,14 +1,15 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
-from conan.tools.files import get, apply_conandata_patches, rmdir, rm, rename
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conans import AutoToolsBuildEnvironment, tools
-import contextlib
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
 import os
-import shutil
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.57.0"
 
 
 class CoinOsiConan(ConanFile):
@@ -17,7 +18,8 @@ class CoinOsiConan(ConanFile):
     topics = ("clp", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Osi"
-    license = ("EPL-2.0",)
+    license = "EPL-2.0"
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
@@ -27,26 +29,13 @@ class CoinOsiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**.patch"
-    generators = "pkg_config"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,19 +43,13 @@ class CoinOsiConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.version == "0.108.6":
-            self.requires("coin-utils/2.11.4")
-        else:
-            self.requires("coin-utils/2.11.6")
-
-    def build_requirements(self):
-        self.build_requires("gnu-config/cci.20201022")
-        self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.requires("coin-utils/2.11.6")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -75,76 +58,80 @@ class CoinOsiConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
 
+    def build_requirements(self):
+        self.tool_requires("gnu-config/cci.20210814")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl -nologo",
-                    "CXX": "cl -nologo",
-                    "LD": "link -nologo",
-                    "AR": "lib",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        configure_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--without-blas"
-            "--without-lapack"
-        ]
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.cxx_flags.append("-EHsc")
-            configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
-            if Version(self.settings.compiler.version) >= 12:
-                self._autotools.flags.append("-FS")
-        self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
-        return self._autotools
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--without-blas",
+            "--without-lapack",
+        ])
+        if is_msvc(self):
+            tc.extra_cxxflags.append("-EHsc")
+            tc.configure_args.append(f"--enable-msvc={msvc_runtime_flag(self)}")
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
+        env = tc.environment()
+        if is_msvc(self):
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", "lib -nologo")
+        if self._settings_build.os == "Windows":
+            # TODO: Something to fix in conan client or pkgconf recipe?
+            # This is a weird workaround when build machine is Windows. Here we have to inject regular
+            # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
+        tc.generate(env)
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install(args=["-j1"]) # due to configure generated with old autotools version
-
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install(args=["-j1"])
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-
-        if self.settings.compiler == "Visual Studio":
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
+        if is_msvc(self):
             for l in ("Osi", "OsiCommonTests"):
                 rename(self, os.path.join(self.package_folder, "lib", f"lib{l}.lib"),
                              os.path.join(self.package_folder, "lib", f"{l}.lib"))
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-
     def package_info(self):
+        self.cpp_info.components["libosi"].set_property("pkg_config_name", "osi")
         self.cpp_info.components["libosi"].libs = ["Osi"]
         self.cpp_info.components["libosi"].includedirs = [os.path.join("include", "coin")]
         self.cpp_info.components["libosi"].requires = ["coin-utils::coin-utils"]
-        self.cpp_info.components["libosi"].names["pkg_config"] = "osi"
 
+        self.cpp_info.components["osi-unittests"].set_property("pkg_config_name", "osi-unittests")
         self.cpp_info.components["osi-unittests"].libs = ["OsiCommonTests"]
         self.cpp_info.components["osi-unittests"].requires = ["libosi"]
-        self.cpp_info.components["osi-unittests"].names["pkg_config"] = "osi-unittests"
