@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, load, save
 from conan.tools.layout import basic_layout
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.50.0"
@@ -24,6 +25,10 @@ class GliConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
