@@ -66,6 +66,7 @@ class CunitConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.win_bash = True
             self.tool_requires("autoconf/2.71")
+            self.tool_requires("automake/1.16.5")
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
