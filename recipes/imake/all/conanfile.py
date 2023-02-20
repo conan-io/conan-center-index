@@ -107,10 +107,10 @@ class ImakeConan(ConanFile):
 
         env = tc.environment()
         if is_msvc(self):
-            compile_wrapper = f"{unix_path(self, self.conf.get('user.automake:compile-wrapper'))} cl -nologo"
-            env.define("CC", compile_wrapper)
-            env.define("CXX", compile_wrapper)
-            env.define("CPP", compile_wrapper)
+            compile_wrapper = unix_path(self, self.conf.get('user.automake:compile-wrapper'))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("CPP", f"{compile_wrapper} cl -E")
         tc.generate(env)
 
         pkgconf = PkgConfigDeps(self)
