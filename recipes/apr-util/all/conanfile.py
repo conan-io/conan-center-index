@@ -192,9 +192,9 @@ class AprUtilConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["APU_DECLARE_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs = ["dl", "pthread", "rt"]
+                self.cpp_info.system_libs = ["crypt", "dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
+                self.cpp_info.system_libs = ["mswsock", "odbc32", "rpcrt4", "ws2_32"]
 
         self.runenv_info.define_path("APR_UTIL_ROOT", self.package_folder)
 
