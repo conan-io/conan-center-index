@@ -1,0 +1,24 @@
+diff --git a/lib/cpp/src/thrift/transport/TBufferTransports.h b/lib/cpp/src/thrift/transport/TBufferTransports.h
+index f72d8f6..6df339f 100644
+--- a/lib/cpp/src/thrift/transport/TBufferTransports.h
++++ b/lib/cpp/src/thrift/transport/TBufferTransports.h
+@@ -20,6 +20,7 @@
+ #ifndef _THRIFT_TRANSPORT_TBUFFERTRANSPORTS_H_
+ #define _THRIFT_TRANSPORT_TBUFFERTRANSPORTS_H_ 1
+ 
++#include <cstddef>
+ #include <cstdlib>
+ #include <cstring>
+ #include <limits>
+diff --git a/lib/cpp/src/thrift/transport/THeaderTransport.cpp b/lib/cpp/src/thrift/transport/THeaderTransport.cpp
+index b3b8333..7078767 100644
+--- a/lib/cpp/src/thrift/transport/THeaderTransport.cpp
++++ b/lib/cpp/src/thrift/transport/THeaderTransport.cpp
+@@ -23,6 +23,7 @@
+ #include <thrift/protocol/TBinaryProtocol.h>
+ #include <thrift/protocol/TCompactProtocol.h>
+ 
++#include <cstddef>
+ #include <limits>
+ #include <utility>
+ #include <string>
