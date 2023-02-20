@@ -87,6 +87,7 @@ class DbusConan(ConanFile):
     def build_requirements(self):
         if self._meson_available:
             self.tool_requires("meson/1.0.0")
+        if self._meson_available or self.options.get_safe("with_systemd"):
             if not self.conf.get("tools.gnu:pkg_config",check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
 
@@ -94,9 +95,9 @@ class DbusConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if self._meson_available:
-            env = VirtualBuildEnv(self)
-            env.generate()
             tc = MesonToolchain(self)
             tc.project_options["asserts"] = not is_apple_os(self)
             tc.project_options["checks"] = False
@@ -137,6 +138,9 @@ class DbusConan(ConanFile):
             tc.generate()
             cmake_deps = CMakeDeps(self)
             cmake_deps.generate()
+            if self.options.get_safe("with_systemd"):
+                deps = PkgConfigDeps(self)
+                deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
