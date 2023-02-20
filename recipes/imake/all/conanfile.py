@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
 import os
@@ -111,13 +111,14 @@ class ImakeConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("CPP", f"{compile_wrapper} cl -E")
+            # We may be able to use AutotoolsDeps, however there are outstanding
+            # issues with path conversions: https://github.com/conan-io/conan/issues/12784
+            xorg_proto_include = unix_path(self, self.dependencies['xorg-proto'].cpp_info.aggregated_components().includedirs[0])
+            env.append("CFLAGS", f"-I{xorg_proto_include}")
         tc.generate(env)
 
         pkgconf = PkgConfigDeps(self)
         pkgconf.generate()
-
-        deps = AutotoolsDeps(self)
-        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
