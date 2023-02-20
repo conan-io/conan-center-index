@@ -186,8 +186,16 @@ class AprUtilConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "apr-util-1")
-        prefix = "lib" if self.settings.os == "Windows" and self.options.shared else ""
-        self.cpp_info.libs = [f"{prefix}aprutil-1"]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["apr_dbd_odbc-1"]
+            if self._with_crypto:
+                self.cpp_info.libs.append("apr_crypto_openssl-1")
+            if self.options.with_ldap:
+                self.cpp_info.libs.append("apr_ldap-1")
+            prefix = "lib" if self.options.shared else ""
+            self.cpp_info.libs.append(f"{prefix}aprutil-1")
+        else:
+            self.cpp_info.libs = ["aprutil-1"]
         self.cpp_info.libdirs.append(os.path.join("lib", "apr-util-1"))
         if not self.options.shared:
             self.cpp_info.defines = ["APU_DECLARE_STATIC"]
