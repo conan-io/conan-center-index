@@ -26,9 +26,23 @@ class LiblslConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return "14"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "5",
+            "clang": "3.5",
+            "apple-clang": "10",
+        }
+
     def requirements(self):
-        self.requires("boost/1.78.0")
-        self.requires("pugixml/1.11")
+        self.requires("boost/1.81.0")
+        self.requires("pugixml/1.13")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,6 +54,15 @@ class LiblslConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
