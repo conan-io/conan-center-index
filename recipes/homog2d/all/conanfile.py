@@ -4,12 +4,9 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc, check_min_vs
 import os
 
-
 required_conan_version = ">=1.52.0"
-
 
 class Homog2dConan(ConanFile):
     name = "homog2d"
@@ -27,11 +24,11 @@ class Homog2dConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "6",
             "clang": "5",
-            "apple-clang": "5.1",
-            "Visual Studio": "16",
-            "msvc": "192",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def export_sources(self):
