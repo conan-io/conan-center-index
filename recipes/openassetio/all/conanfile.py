@@ -152,11 +152,6 @@ class PackageConan(ConanFile):
 
         self.cpp_info.components["openassetio-core"].set_property("cmake_target_name", "OpenAssetIO::openassetio-core")
         self.cpp_info.components["openassetio-core"].libs = ["openassetio"]
-        self.cpp_info.components["openassetio-core-c"].set_property("cmake_target_name", "OpenAssetIO::openassetio-core-c")
-        self.cpp_info.components["openassetio-core-c"].requires = ["openassetio-core"]
-        self.cpp_info.components["openassetio-core-c"].libs = ["openassetio-c"]
-        if not self.options.shared and self._stdcpp_library:
-            self.cpp_info.components["openassetio-core-c"].system_libs.append(self._stdcpp_library)
         if self.options.with_python:
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]
