@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-fix-cmake.patch"
       patch_description: "disable test, examples add installer, link mathlib only on Linux"
       patch_type: "conan"
+    - patch_file: "patches/0002-support-msvc.patch"
+      patch_description: "rename restrict keyword for msvc"
+      patch_type: "portability"
