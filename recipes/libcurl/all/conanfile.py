@@ -602,8 +602,7 @@ class LibcurlConan(ConanFile):
         else:
             tc.cache_variables["CURL_CA_PATH"] = "none"
 
-        if self.options.with_ca_fallback:
-            tc.cache_variables["CURL_CA_FALLBACK"] = True
+        tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
 
         tc.generate()
 
