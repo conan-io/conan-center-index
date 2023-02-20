@@ -48,7 +48,7 @@ class ImakeConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
-        self.requires("xorg-proto/2021.4")
+        self.requires("xorg-proto/2022.2")
 
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
