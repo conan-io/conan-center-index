@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.files import get
 
 
 class TestPackageConan(ConanFile):
@@ -30,10 +29,9 @@ class TestPackageConan(ConanFile):
             self.requires(f"cpython/{python_version}")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def generate(self):
-        get(self, **self.conan_data["sources"][self.dependencies["openassetio"].ref.version], destination=self.source_folder, strip_root=True)
         tc = CMakeToolchain(self)
 
         tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
