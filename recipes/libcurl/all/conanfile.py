@@ -70,6 +70,7 @@ class LibcurlConan(ConanFile):
         "with_verbose_strings": [True, False],
         "with_ca_bundle": [False, "auto", "ANY"],
         "with_ca_path": [False, "auto", "ANY"],
+        "with_ca_fallback": [True, False],
     }
     default_options = {
         "shared": False,
@@ -115,6 +116,7 @@ class LibcurlConan(ConanFile):
         "with_verbose_strings": True,
         "with_ca_bundle": "auto",
         "with_ca_path": "auto",
+        "with_ca_fallback": False,
     }
 
     @property
@@ -478,6 +480,9 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ca_path != "auto":
             tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
 
+        if self.options.with_ca_fallback:
+            tc.configure_args.append("--with-ca-fallback")
+
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -596,6 +601,9 @@ class LibcurlConan(ConanFile):
             tc.cache_variables["CURL_CA_PATH"] = str(self.options.with_ca_path)
         else:
             tc.cache_variables["CURL_CA_PATH"] = "none"
+
+        if self.options.with_ca_fallback:
+            tc.cache_variables["CURL_CA_FALLBACK"] = True
 
         tc.generate()
 
