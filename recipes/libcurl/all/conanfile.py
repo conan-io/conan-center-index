@@ -480,8 +480,7 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ca_path != "auto":
             tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
 
-        if self.options.with_ca_fallback:
-            tc.configure_args.append("--with-ca-fallback")
+        tc.configure_args.append(f"--with-ca-fallback={self._yes_no(self.options.with_ca_fallback)}")
 
         # Cross building flags
         if cross_building(self):
