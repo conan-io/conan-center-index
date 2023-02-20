@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
@@ -151,6 +151,9 @@ class Mpg123Conan(ConanFile):
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
             ])
+            if is_apple_os(self):
+                # Needed for fix_apple_shared_install_name invocation in package method
+                tc.extra_cflags = ["-headerpad_max_install_names"]
             tc.generate()
             tc = AutotoolsDeps(self)
             tc.generate()
