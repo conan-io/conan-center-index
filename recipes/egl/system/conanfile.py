@@ -31,7 +31,7 @@ class SysConfigEGLConan(ConanFile):
         yum.install(["mesa-libEGL-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install_substitutes(["libegl-dev", "libegl1-mesa-dev"], update=True, check=True)
+        apt.install_substitutes(["libegl-dev"], ["libegl1-mesa-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
         pacman.install(["libglvnd"], update=True, check=True)
