@@ -72,6 +72,10 @@ class PackageConan(ConanFile):
             )
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+
+        if is_msvc(self) and not self.dependencies["cpython"].options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} requires cpython:shared=True when using MSVC compiler")
+
         check_min_vs(self, 191)
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
