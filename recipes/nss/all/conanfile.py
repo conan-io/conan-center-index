@@ -47,18 +47,18 @@ class NSSConan(ConanFile):
         self.options["sqlite3"].shared = True
 
     def requirements(self):
-        self.requires("nspr/4.35")
-        self.requires("sqlite3/3.41.2", run=not cross_building(self))
+        self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlite3/3.42.0", run=not cross_building(self))
         self.requires("zlib/1.2.13")
 
     def validate(self):
         if not self.options.shared:
             raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
-        if not self.options["nspr"].shared:
+        if not self.dependencies["nspr"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
         if msvc_runtime_flag(self) == "MTd":
             raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
-        if not self.options["sqlite3"].shared:
+        if not self.dependencies["sqlite3"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
@@ -74,7 +74,7 @@ class NSSConan(ConanFile):
         if self.settings.os == "Windows":
             self.tool_requires("mozilla-build/3.3")
         if cross_building(self):
-            self.build_requires("sqlite3/3.41.2")
+            self.tool_requires("sqlite3/3.42.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
