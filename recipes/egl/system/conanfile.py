@@ -43,12 +43,7 @@ class SysConfigEGLConan(ConanFile):
         pkg.install(["libglvnd"], update=True, check=True)
 
     def package_info(self):
-        # TODO: Workaround for #2311 until a better solution can be found
-        self.cpp_info.filenames["cmake_find_package"] = "egl_system"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "egl_system"
-
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         pkg_config = PkgConfig(self, "egl")
         pkg_config.fill_cpp_info(self.cpp_info, is_system=True)
-
