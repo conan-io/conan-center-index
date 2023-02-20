@@ -19,7 +19,6 @@ class Homog2dConan(ConanFile):
     homepage = "https://github.com/skramm/homog2d"
     topics = ("computational-geometry", "homography", "2d-geometric", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -31,6 +30,8 @@ class Homog2dConan(ConanFile):
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1",
+            "Visual Studio": "16",
+            "msvc": "192",
         }
 
     def export_sources(self):
@@ -45,16 +46,14 @@ class Homog2dConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 192)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
