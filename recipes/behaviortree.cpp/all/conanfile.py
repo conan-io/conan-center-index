@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -32,23 +31,27 @@ class BehaviorTreeCPPConan(ConanFile):
     }
 
     @property
-    def _minimum_cppstd_required(self):
-        return 14 if Version(self.version) < "4.0" else 17
+    def _min_cppstd(self):
+        return "14" if Version(self.version) < "4.0" else "17"
 
     @property
     def _minimum_compilers_version(self):
-        if Version(self.version) < "4.0":
-            return {
+        return {
+            "14": {
                 "gcc": "5",
                 "clang": "5",
                 "apple-clang": "12",
-            }
-        else:
-            return {
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+            "17": {
                 "gcc": "8",
                 "clang": "7",
                 "apple-clang": "12",
-            }
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -66,8 +69,8 @@ class BehaviorTreeCPPConan(ConanFile):
 
     def requirements(self):
         if self.options.with_coroutines:
-            self.requires("boost/1.80.0")
-        self.requires("ncurses/6.3")
+            self.requires("boost/1.81.0")
+        self.requires("ncurses/6.4")
         self.requires("zeromq/4.3.4")
         self.requires("cppzmq/4.9.0")
 
@@ -75,21 +78,18 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Windows.")
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cppstd_required)
-        check_min_vs(self, 191 if Version(self.version) < "4.0" else 192)
-        if not is_msvc(self):
-            minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
-            if not minimum_version:
-                self.output.warn(f"{self.ref} requires C++{self._minimum_cppstd_required}. Your compiler is unknown. Assuming it supports C++{self._minimum_cppstd_required}.")
-            elif Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("BehaviorTree.CPP requires C++{}, which your compiler does not support."
-                                                .format(self._minimum_cppstd_required))
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        elif Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"BehaviorTree.CPP requires C++{self._min_cppstd}, which your compiler does not support.")
 
         if self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv. please switch to gcc, or to libc++")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -147,7 +147,7 @@ class BehaviorTreeCPPConan(ConanFile):
 
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var with : {}".format(bin_path))
+            self.output.info(f"Appending PATH env var with : {bin_path}")
             self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
