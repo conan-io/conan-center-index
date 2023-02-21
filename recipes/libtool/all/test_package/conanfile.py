@@ -48,11 +48,10 @@ class TestPackageConan(ConanFile):
     def generate(self):
         # Coulld reuse single autotools instance because they are identical, but good example of
         # how to use "namespace" should they differ.
-        compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
         ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
         msvc_vars = {
-            "CC": f"{compile_wrapper} cl -nologo", 
-            "CXX": f"{compile_wrapper} cl -nologo", 
+            "CC": "cl -nologo", 
+            "CXX": "cl -nologo", 
             "AR": f"{ar_wrapper} \"lib -nologo\"",
             "LD": "link"
         }
@@ -74,7 +73,7 @@ class TestPackageConan(ConanFile):
         tc.extra_ldflags.append(f"-L{lib_folder}")
         env = tc.environment()
         if is_msvc(self):
-            for key, value in msvc_vars:
+            for key, value in msvc_vars.items():
                 env.append(key, value)
         tc.generate(env)
 
