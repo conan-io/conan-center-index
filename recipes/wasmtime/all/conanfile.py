@@ -82,7 +82,7 @@ class WasmtimeConan(ConanFile):
     def build(self):
         # This is packaging binaries so the download needs to be in build
         get(self, **self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)],
-            destination=self.source_folder, strip_root=True)
+            strip_root=True)
 
     def package(self):
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
