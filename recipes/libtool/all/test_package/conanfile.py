@@ -152,14 +152,14 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(build_script_folder="ltdl")
         cmake.build(target="static_lib")
-        
-        self.run(f"cmake --install . --config {self.settings.build_type} --prefix {self.sis_package_folder} --component static_lib")
+        install_prefix = unix_path(self, self.sis_package_folder)
+        self.run(f"cmake --install . --config {self.settings.build_type} --prefix {install_prefix} --component static_lib")
 
         with chdir(self, autotools_sis_folder):
             self.run("autoreconf --install --verbose --force -Wall")
             autotools = Autotools(self, namespace="sis")
             autotools.configure(build_script_folder=autotools_sis_folder)
-            autotools.install(args=[f"DESTDIR={self.sis_package_folder}"])
+            autotools.install(args=[f"DESTDIR={unix_path(self, self.sis_package_folder)}"])
 
     def _test_static_lib_in_shared(self):
         """ Test existence of shared library """
