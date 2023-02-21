@@ -8,7 +8,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class XorgCfFilesConan(ConanFile):
@@ -41,6 +41,7 @@ class XorgCfFilesConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+        del self.info.settings.arch
         # self.info.settings.os  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
 
     def validate(self):
@@ -55,7 +56,7 @@ class XorgCfFilesConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,4 +93,7 @@ class XorgCfFilesConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
-        self.user_info.CONFIG_PATH = os.path.join(self.package_folder, "lib", "X11", "config").replace("\\", "/")
+        x11_config_files = os.path.join(self.package_folder, "lib", "X11", "config")
+        self.conf_info.define("user.xorg-cf-files:config-path", x11_config_files)
+
+        self.user_info.CONFIG_PATH = x11_config_files.replace("\\", "/")
