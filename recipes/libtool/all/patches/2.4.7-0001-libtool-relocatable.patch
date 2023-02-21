@@ -3,10 +3,10 @@
 
 --- libtoolize.in
 +++ libtoolize.in
-@@ -1903,11 +1903,18 @@
+@@ -1903,8 +1903,15 @@
    pkgmacro_files="@pkgmacro_files@"
 
-+  if [ "$(uname -s)" = "Darwin" ]; then
++  if [ ! -x /bin/realpath ]; then
 +    realpath() {
 +      echo $(cd "$(dirname "$1")" ; pwd -P)/$(basename "$1")
 +    }
