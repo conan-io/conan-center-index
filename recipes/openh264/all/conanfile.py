@@ -1,17 +1,16 @@
 from conan import ConanFile
-from conans import tools
+from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, msvc_runtime_flag
 
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -150,7 +149,8 @@ class OpenH264Conan(ConanFile):
 
         if is_msvc(self):
             tc.extra_cxxflags.append("-nologo")
-            if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
+            if check_min_vs(self, "180", raise_invalid=False):
+                # https://github.com/conan-io/conan/issues/6514
                 tc.extra_cxxflags.append("-FS")
         # not needed during and after 2.3.1
         elif self.settings.compiler in ("apple-clang",):
@@ -185,7 +185,6 @@ class OpenH264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        # TODO: switch to conan.tools.build.stdcpp_library in conan 1.54
-        libcxx = tools.stdcpp_library(self)
+        libcxx = stdcpp_library(self)
         if libcxx:
             self.cpp_info.system_libs.append(libcxx)

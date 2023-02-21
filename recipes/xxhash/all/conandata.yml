@@ -8,3 +8,10 @@ sources:
 patches:
   "0.8.1":
     - patch_file: "patches/0.8.1-fix-cmakelists.patch"
+      patch_description: "Update CMakeLists.txt to properly install manuals"
+      patch_type: conan
+
+    - patch_file: "patches/0.8.1-fix-static-assert-link-error.patch"
+      patch_source: "https://github.com/Cyan4973/xxHash/commit/6189ecd3d44a693460f86280ccf49d33cb4b18e1"
+      patch_description: "Backport fix for link error"
+      patch_type: bugfix

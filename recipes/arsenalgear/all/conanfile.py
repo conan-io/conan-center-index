@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class ArsenalgearConan(ConanFile):
     name = "arsenalgear"
@@ -35,6 +35,7 @@ class ArsenalgearConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12.0",
@@ -49,17 +50,14 @@ class ArsenalgearConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) < "2.0.0":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
             if self.settings.os in ["Linux", "Macos"]:
                 self.requires("exprtk/0.0.1")
 

@@ -8,17 +8,18 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.49.0"
+required_conan_version = ">=1.53.0"
 
 
 class InihConan(ConanFile):
     name = "inih"
     description = "Simple .INI file parser in C, good for embedded systems "
     license = "BSD-3-Clause"
-    topics = ("inih", "ini", "configuration", "parser")
+    topics = ("ini", "configuration", "parser")
     homepage = "https://github.com/benhoyt/inih"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,41 +36,30 @@ class InihConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def validate(self):
-        if self.info.options.shared and is_msvc(self):
-            raise ConanInvalidConfiguration("Shared inih is not supported with msvc")
-
-    def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.options.shared and is_msvc(self):
+            raise ConanInvalidConfiguration("Shared inih is not supported with msvc")
+
+    def build_requirements(self):
+        self.tool_requires("meson/1.0.0")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = MesonToolchain(self)
         tc.project_options["distro_install"] = True
         tc.project_options["with_INIReader"] = True
-        # TODO: fixed in conan 1.51.0?
-        tc.project_options["bindir"] = "bin"
-        tc.project_options["libdir"] = "lib"
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate(scope="build")
 
     def build(self):
         meson = Meson(self)
@@ -95,10 +85,10 @@ class InihConan(ConanFile):
         self.cpp_info.components["inireader"].requires = ["libinih"]
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
-    """remove lib prefix & change extension to .lib"""
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
     from conan.tools.files import rename
     import glob
-    if not is_msvc(conanfile):
+    if not conanfile.settings.get_safe("compiler.runtime"):
         return
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:

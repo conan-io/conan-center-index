@@ -1,19 +1,22 @@
 sources:
-  0.1.0:
-    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.0/main.tar.gz
-    sha256: a936abb1493b0d189d7909a79c45bdc6703b6016801e10b5cd129ba39642d2b2
-  0.1.1:
-    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.1/main.tar.gz
-    sha256: a9ea899315851bfacdb234b7acc917b1a9c67593f0d68e1920321a8f6fa2cfbf
-  0.1.2:
-    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.2/main.tar.gz
-    sha256: 0f456d6c53730445c3dbf57afd285493cf748c66a02f77d6e48c075128fd0896
-  0.3.0:
-    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.3.0/main.tar.gz
-    sha256: ef29ea4c09520b8aaa2d78ce5e79cbbcd87511ed14d6abf3c4b249ae67a4153b
-  0.4.0:
-    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.4.0/main.tar.gz
-    sha256: c0ab99e51005fa8b74fe9ca1ed23b205cf532b8b0723eedd243f35a28d7b466b
+  0.9.0:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.9.0/main.tar.gz"
+    sha256: "e17702fcc0259bf72eab0d84d3fa6e02c051256357ab7ba4421462f2c02b434f"
   0.5.0:
-    url: https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.5.0/main.tar.gz
-    sha256: 408e255a6c6419b16de38a9ecbdd9729d60adc657767b2d52a234d1da1185349
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.5.0/main.tar.gz"
+    sha256: "408e255a6c6419b16de38a9ecbdd9729d60adc657767b2d52a234d1da1185349"
+  0.4.0:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.4.0/main.tar.gz"
+    sha256: "c0ab99e51005fa8b74fe9ca1ed23b205cf532b8b0723eedd243f35a28d7b466b"
+  0.3.0:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.3.0/main.tar.gz"
+    sha256: "ef29ea4c09520b8aaa2d78ce5e79cbbcd87511ed14d6abf3c4b249ae67a4153b"
+  0.1.2:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.2/main.tar.gz"
+    sha256: "0f456d6c53730445c3dbf57afd285493cf748c66a02f77d6e48c075128fd0896"
+  0.1.1:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.1/main.tar.gz"
+    sha256: "a9ea899315851bfacdb234b7acc917b1a9c67593f0d68e1920321a8f6fa2cfbf"
+  0.1.0:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v0.1.0/main.tar.gz"
+    sha256: "a936abb1493b0d189d7909a79c45bdc6703b6016801e10b5cd129ba39642d2b2"

@@ -1,10 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.55.0"
 
 
 class CalcephConan(ConanFile):
@@ -12,7 +16,7 @@ class CalcephConan(ConanFile):
     description = "C Library designed to access the binary planetary ephemeris " \
                   "files, such INPOPxx, JPL DExxx and SPICE ephemeris files."
     license = ["CECILL-C", "CECILL-B", "CECILL-2.1"]
-    topics = ("calceph", "ephemeris", "astronomy", "space", "planet")
+    topics = ("ephemeris", "astronomy", "space", "planet")
     homepage = "https://www.imcce.fr/inpop/calceph"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -29,113 +33,100 @@ class CalcephConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self._is_msvc:
+        if is_msvc(self):
             del self.options.threadsafe
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self._is_msvc and self.options.shared:
-            raise ConanInvalidConfiguration("calceph doesn't support shared builds with Visual Studio yet")
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        if self._is_msvc:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.vc"),
-                                  "CFLAGS = /O2 /GR- /MD /nologo /EHs",
-                                  "CFLAGS = /nologo /EHs")
-            with tools.chdir(self._source_subfolder):
-                with self._msvc_build_environment():
-                    self.run("nmake -f Makefile.vc {}".format(self._nmake_args))
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
         else:
-            # relocatable shared lib on macOS
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
-                                  "-install_name \\$rpath/",
-                                  "-install_name @rpath/")
-            autotools = self._configure_autotools()
-            autotools.make()
-
-    @contextmanager
-    def _msvc_build_environment(self):
-        with tools.vcvars(self):
-            with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                yield
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
+            tc.configure_args.extend([
+                f"--enable-thread={yes_no(self.options.threadsafe)}",
+                "--disable-fortran",
+                "--disable-python",
+                "--disable-python-package-system",
+                "--disable-python-package-user",
+                "--disable-mex-octave",
+            ])
+            tc.generate()
 
     @property
     def _nmake_args(self):
         return " ".join([
-            "DESTDIR=\"{}\"".format(self.package_folder),
+            f"DESTDIR=\"{self.package_folder}\"",
             "ENABLEF2003=0",
             "ENABLEF77=0",
         ])
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-thread={}".format(yes_no(self.options.threadsafe)),
-            "--disable-fortran",
-            "--disable-python",
-            "--disable-python-package-system",
-            "--disable-python-package-user",
-            "--disable-mex-octave",
-        ]
-        autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return autotools
+    def build(self):
+        if is_msvc(self):
+            replace_in_file(
+                self, os.path.join(self.source_folder, "Makefile.vc"),
+                "CFLAGS = /O2 /GR- /MD /nologo /EHs",
+                "CFLAGS = /nologo /EHs",
+            )
+            with chdir(self, self.source_folder):
+                self.run(f"nmake -f Makefile.vc {self._nmake_args}")
+        else:
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
-        if self._is_msvc:
-            with tools.chdir(self._source_subfolder):
-                with self._msvc_build_environment():
-                    self.run("nmake -f Makefile.vc install {}".format(self._nmake_args))
-            tools.rmdir(os.path.join(self.package_folder, "doc"))
+        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            with chdir(self, self.source_folder):
+                self.run(f"nmake -f Makefile.vc install {self._nmake_args}")
+            rmdir(self, os.path.join(self.package_folder, "doc"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "libexec"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
+        rmdir(self, os.path.join(self.package_folder, "libexec"))
 
     def package_info(self):
-        prefix = "lib" if self._is_msvc else ""
-        self.cpp_info.libs = ["{}calceph".format(prefix)]
+        prefix = "lib" if is_msvc(self) else ""
+        self.cpp_info.libs = [f"{prefix}calceph"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")
 
-        if not self._is_msvc:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+        # TODO: to remove in conan v2
+        if not is_msvc(self):
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

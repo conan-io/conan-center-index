@@ -1,0 +1,9 @@
+sources:
+  "1.7.0":
+    url: "https://github.com/google/oboe/archive/refs/tags/1.7.0.tar.gz"
+    sha256: "b01896f9180f725a38806cfef73a29b36b2ea37f91389ed4e69d664ce83b79b6"
+patches:
+  "1.7.0":
+    - patch_file: "patches/1.7.0-0001-fix-cmake.patch"
+      patch_description: "Fix CMakeLists"
+      patch_type: "conan"

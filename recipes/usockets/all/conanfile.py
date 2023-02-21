@@ -121,14 +121,14 @@ class UsocketsConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1s")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.3.0")
+            self.requires("wolfssl/5.5.1")
 
         if self.options.eventloop == "libuv":
             self.requires("libuv/1.44.2")
         elif self.options.eventloop == "gcd":
             self.requires("libdispatch/5.3.2")
         elif self.options.eventloop == "boost":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):

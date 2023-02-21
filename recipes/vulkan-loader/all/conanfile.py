@@ -87,25 +87,11 @@ class VulkanLoaderConan(ConanFile):
         if self.dependencies["vulkan-headers"].ref.version != self.version:
             self.output.warn("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
         if self._is_pkgconf_needed:
             self.tool_requires("pkgconf/1.9.3")
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
-        # see https://github.com/KhronosGroup/Vulkan-Loader/issues/1095#issuecomment-1352420456
-        if Version(self.version) >= "1.3.232" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

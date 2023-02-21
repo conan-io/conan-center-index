@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
@@ -44,16 +44,13 @@ class RapidYAMLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("c4core/0.1.10")
+        self.requires("c4core/0.1.11")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
