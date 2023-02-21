@@ -1,17 +1,17 @@
 # How to bump a package version for an existing recipe in ConanCenterIndex?
 
 Once a recipe is approved and merged to ConanCenterIndex, it may need to be updated with new versions released by the upstream.
-When someone needs a new package version which is not available in ConanCenterIndex, then open a new pull request adding, is what is
+When someone needs a new package version that is not available in ConanCenterIndex, then open a new pull request adding, is what is
 called `bump version`.
 A bumping version process is when a PR only adds a new package version and nothing more. Removing older versions, or updating
-the recipe are not classified as a bump version action.
+the recipe is not classified as a bump version action.
 
 ## Choosing which version should be updated
 
-The first step is checking the version which should be added from the uptream. Please, avoid adding multiple versions which you really do not
+The first step is checking the version which should be added from the upstream. Please, avoid adding multiple versions which you do not
 need. Adding a new version will increase the building time and storage for each new package configuration.
 
-Once you dectect which version should be update, please, first check if the project `license` keeps the same.
+Once you detect which version should be updated, please, first check if the project `license` keeps the same.
 
 ## What should be modified when bumping a version?
 
@@ -37,9 +37,9 @@ sources:
     sha256: "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9"
 ```
 
-In case a patch should be re-used, it should be present in `conandata.yml` to the specfic version as well.
+In case a patch should be re-used, it should be present in `conandata.yml` to the specific version as well.
 
-## Reviewing and merginging
+## Reviewing and merging
 
-Bumping version PRs follow the same regular review [process](review_process.md), with the excetion of being merged automatically
+Bumping version PRs follow the same regular review [process](review_process.md), except for being merged automatically
 as listed on [Labels](labels.md#bump-version) section.
