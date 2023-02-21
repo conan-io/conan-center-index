@@ -160,12 +160,3 @@ class PackageConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenAssetIO"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAssetIO"
-
-    @property
-    def _stdcpp_library(self):
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ("libstdc++", "libstdc++11"):
-            return "stdc++"
-        elif libcxx in ("libc++",):
-            return "c++"
-        return False
