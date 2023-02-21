@@ -44,7 +44,7 @@ class PcapplusplusConan(ConanFile):
             if self.version < "22.11":
                 self.requires("pthreads4w/3.0.0")
         else:
-            self.requires("libpcap/1.9.1")
+            self.requires("libpcap/1.10.1")
 
         # TODO: use conan recipe instead of embedded one
         # self.requires("hash-library/8.0")
