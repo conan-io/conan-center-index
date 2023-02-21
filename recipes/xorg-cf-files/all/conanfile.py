@@ -41,7 +41,6 @@ class XorgCfFilesConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-        del self.info.settings.arch
         # self.info.settings.os  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
 
     def validate(self):
