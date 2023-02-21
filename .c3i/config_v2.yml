@@ -68,7 +68,7 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "apple-clang":
-              compiler.version: ["13" ]
+              compiler.version: [ "13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: configs/macos-m1-clang
@@ -76,6 +76,7 @@ configurations:
     hrname: "macOS M1, Clang"
     build_profile:
       os: "Macos"
+      arch: [ "x86_64" ]
     content:
       - os: [ "Macos" ]
         arch: [ "armv8" ]
