@@ -52,7 +52,7 @@ class TestPackageConan(ConanFile):
         msvc_vars = {
             "CC": "cl -nologo", 
             "CXX": "cl -nologo", 
-            "AR": f"{ar_wrapper} \"lib -nologo\"",
+            "AR": f"{ar_wrapper} lib",
             "LD": "link"
         }
 
