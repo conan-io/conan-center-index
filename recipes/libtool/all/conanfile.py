@@ -218,18 +218,6 @@ class LibtoolConan(ConanFile):
         self.output.info(f'Setting LIBTOOLIZE env to {libtoolize}')
         self.env_info.LIBTOOLIZE = libtoolize
 
-        libtool_relocatable_env = {
-            "LIBTOOL_PREFIX": self.package_folder,
-            "LIBTOOL_DATADIR": os.path.join(self.package_folder, "share"),
-            "LIBTOOL_PKGAUXDIR": os.path.join(self.package_folder, "share", "libtool", "build-aux"),
-            "LIBTOOL_PKGLTDLDIR": os.path.join(self.package_folder, "share", "libtool"),
-            "LIBTOOL_ACLOCALDIR": os.path.join(self.package_folder, "share", "aclocal"),
-        }
-
-        for key, value in libtool_relocatable_env.items():
-            self.output.info(f'Setting {key} environment variable to {value}')
-            setattr(self.env_info, key, value)
-
         aclocal_path = "/" + aclocal_path.replace("\\", "/").replace(":", "") # Can't use unix_path with Conan 2.0
         self.output.info(f'Appending ACLOCAL_PATH env: {aclocal_path}')
         self.env_info.ACLOCAL_PATH.append(aclocal_path)
