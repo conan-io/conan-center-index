@@ -19,5 +19,9 @@ add_library(static_lib STATIC
 )
 
 install(TARGETS static_lib
-        ARCHIVE DESTINATION lib
-        ARCHIVE COMPONENT static_lib)
+        LIBRARY
+            DESTINATION lib
+            COMPONENT static_lib
+        ARCHIVE
+            DESTINATION lib
+            COMPONENT static_lib)
