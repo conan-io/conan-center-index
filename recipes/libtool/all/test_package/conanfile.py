@@ -2,7 +2,8 @@ from conan import ConanFile, conan_version
 from conan.tools.build import cross_building, can_run
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, mkdir, rm
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.apple import is_apple_os
@@ -23,7 +24,7 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def layout(self):
-        cmake_layout(self)
+        basic_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str) # Since we are testing libltdl as well
@@ -139,7 +140,7 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_executable = unix_path(self, os.path.join(self.cpp.build.bindirs[0], "test_package"))
             lib_path = unix_path(self, os.path.join(self.cpp.build.libdirs[0], f'{lib_prefix}liba.{lib_extension}'))
-            self.run(f'{bin_executable} {lib_path}')
+            self.run(f'{bin_executable} {lib_path}', env="conanrun")
 
     def _build_static_lib_in_shared(self):
         """ Build shared library using libtool (while linking to a static library) """
