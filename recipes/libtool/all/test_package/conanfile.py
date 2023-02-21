@@ -30,8 +30,8 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str) # We are testing libtool/libtoolize
-        # self.tool_requires("autoconf/2.71") # Needed for autoreconf
-        # self.tool_requires("automake/1.16.5") # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
+        self.tool_requires("autoconf/2.71")
+        self.tool_requires("automake/1.16.5")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -62,7 +62,7 @@ class TestPackageConan(ConanFile):
         tc = AutotoolsToolchain(self, namespace="autotools")
         env = tc.environment()
         if is_msvc(self):
-            for key, value in msvc_vars:
+            for key, value in msvc_vars.items():
                 env.append(key, value)
         tc.generate(env)
 
