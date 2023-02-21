@@ -27,7 +27,7 @@ class XorgMakedepend(ConanFile):
 
     def requirements(self):
         self.requires("xorg-macros/1.19.3")
-        self.requires("xorg-proto/2021.4")
+        self.requires("xorg-proto/2022.2")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
