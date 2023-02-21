@@ -1,46 +1,45 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a2f23cf..d427d37 100644
+index b713372..90fffec 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -67,14 +67,14 @@ endif()
+@@ -59,9 +59,9 @@ endif()
  
  #---- Find other packages ----
- find_package(Threads)
+ find_package(Threads REQUIRED)
 -find_package(ZMQ)
 +find_package(ZeroMQ)
  
- list(APPEND BEHAVIOR_TREE_PUBLIC_LIBRARIES
-     ${CMAKE_THREAD_LIBS_INIT}
-     ${CMAKE_DL_LIBS}
- )
- 
 -if( ZMQ_FOUND )
 +if( ZeroMQ_FOUND )
-     message(STATUS "ZeroMQ found.")
+     message(STATUS "ZeroMQ: found.")
      add_definitions( -DZMQ_FOUND )
      list(APPEND BT_SOURCE src/loggers/bt_zmq_publisher.cpp)
-@@ -221,7 +221,7 @@ target_link_libraries(${BEHAVIOR_TREE_LIBRARY}
-         ${BEHAVIOR_TREE_PUBLIC_LIBRARIES}
+@@ -124,7 +124,10 @@ endif()
+ #############################################################
+ # LIBRARY
+ 
+-add_subdirectory(3rdparty/lexy)
++find_package(cppzmq REQUIRED CONFIG)
++find_package(lexy REQUIRED CONFIG)
++find_package(minitrace REQUIRED CONFIG)
++find_package(tinyxml2 REQUIRED CONFIG)
+ 
+ list(APPEND BT_SOURCE
+     src/action_node.cpp
+@@ -198,7 +201,10 @@ target_link_libraries(${BEHAVIOR_TREE_LIBRARY}
+         Threads::Threads
+         ${CMAKE_DL_LIBS}
      PRIVATE
-         ${Boost_LIBRARIES}
--        ${ZMQ_LIBRARIES}
-+        ${ZeroMQ_LIBRARIES}
-         $<BUILD_INTERFACE:foonathan::lexy>
+-        $<BUILD_INTERFACE:foonathan::lexy>
++        cppzmq
++        foonathan::lexy
++        minitrace::minitrace
++        tinyxml2::tinyxml2
  )
  
-@@ -243,8 +243,8 @@ target_include_directories(${BEHAVIOR_TREE_LIBRARY} PRIVATE
-     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/lexy/include>
-     )
- 
--if( ZMQ_FOUND )
--    target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PUBLIC ZMQ_FOUND)
-+if( ZeroMQ_FOUND )
-+    target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PUBLIC ZeroMQ_FOUND)
- endif()
- 
- if(MSVC)
+ target_include_directories(${BEHAVIOR_TREE_LIBRARY}
 diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
-index 163e703..b98f525 100644
+index c73ee37..db957f4 100644
 --- a/tools/CMakeLists.txt
 +++ b/tools/CMakeLists.txt
 @@ -7,9 +7,9 @@ target_link_libraries(bt3_log_cat  ${BEHAVIOR_TREE_LIBRARY} )

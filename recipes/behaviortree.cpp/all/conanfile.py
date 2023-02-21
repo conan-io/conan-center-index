@@ -73,6 +73,11 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("ncurses/6.4")
         self.requires("zeromq/4.3.4")
         self.requires("cppzmq/4.9.0")
+        if Version(self.version) >= "4.0.0":
+            self.requires("foonathan-lexy/2022.12.1")
+            self.requires("tinyxml2/9.0.0")
+        if Version(self.version) >= "4.0.2":
+            self.requires("minitrace/cci.20210321")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -137,6 +142,11 @@ class BehaviorTreeCPPConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components[libname].libs = [f"{libname}{postfix}"]
         self.cpp_info.components[libname].requires = ["zeromq::zeromq", "cppzmq::cppzmq", "ncurses::ncurses"]
+        if Version(self.version) >= "4.0.0":
+            self.cpp_info.components[libname].requires.extend(["foonathan-lexy::foonathan-lexy", "tinyxml2::tinyxml2"])
+        if Version(self.version) >= "4.0.2":
+            self.cpp_info.components[libname].requires.append("minitrace::minitrace")
+
         if self.options.with_coroutines:
             self.cpp_info.components[libname].requires.append("boost::coroutine")
         if self.settings.os in ("Linux", "FreeBSD"):
