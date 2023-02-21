@@ -6,7 +6,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.meson import Meson, MesonToolchain, MesonDeps
+from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
@@ -113,9 +113,6 @@ class PackageConan(ConanFile):
         tc.generate()
         # In case there are dependencies listed on requirements, PkgConfigDeps should be used
         tc = PkgConfigDeps(self)
-        tc.generate()
-        # Sometimes, when PkgConfigDeps is not enough to find requirements, MesonDeps should solve it
-        tc = MesonDeps(self)
         tc.generate()
         # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
         tc = VirtualBuildEnv(self)

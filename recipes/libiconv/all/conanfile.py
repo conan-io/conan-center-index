@@ -1,13 +1,13 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
     export_conandata_patches,
     get,
     rename,
-    replace_in_file,
     rm,
     rmdir
 )
@@ -17,7 +17,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibiconvConan(ConanFile):
@@ -27,6 +27,8 @@ class LibiconvConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = ("iconv", "text", "encoding", "locale", "unicode", "conversion")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,8 +41,8 @@ class LibiconvConan(ConanFile):
 
     @property
     def _is_clang_cl(self):
-        return (self.settings.compiler == "clang" and self.settings.os == "Windows") \
-               or self.settings.get_safe("compiler.toolset") == "ClangCL"
+        return self.settings.compiler == "clang" and self.settings.os == "Windows" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _msvc_tools(self):
@@ -77,7 +79,7 @@ class LibiconvConan(ConanFile):
             self.win_bash = True
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -93,7 +95,7 @@ class LibiconvConan(ConanFile):
             # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
             host_arch = triplet_arch_windows.get(str(self.settings.arch))
             build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
-            
+
             if host_arch and build_arch:
                 host = f"{host_arch}-w64-mingw32"
                 build = f"{build_arch}-w64-mingw32"
@@ -101,10 +103,8 @@ class LibiconvConan(ConanFile):
                     f"--host={host}",
                     f"--build={build}",
                 ])
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self) or self._is_clang_cl:
-            env = Environment()
             cc, lib, link = self._msvc_tools
             build_aux_path = os.path.join(self.source_folder, "build-aux")
             lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
@@ -117,17 +117,10 @@ class LibiconvConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
-            env.vars(self).save_script("conanbuild_libiconv_msvc")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # relocatable shared libs on macOS
-        for configure in ["configure", os.path.join("libcharset", "configure")]:
-            replace_in_file(self, os.path.join(self.source_folder, configure),
-                                  "-install_name \\$rpath/", "-install_name @rpath/")
+        tc.generate(env)
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -135,11 +128,10 @@ class LibiconvConan(ConanFile):
     def package(self):
         copy(self, "COPYING.LIB", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
-
+        autotools.install()
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-
+        fix_apple_shared_install_name(self)
         if (is_msvc(self) or self._is_clang_cl) and self.options.shared:
             for import_lib in ["iconv", "charset"]:
                 rename(self, os.path.join(self.package_folder, "lib", f"{import_lib}.dll.lib"),

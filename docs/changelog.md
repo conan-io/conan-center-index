@@ -1,5 +1,21 @@
 # Changelog
 
+### 14-February-2023 - 15:32 CET
+
+- [fix] Fix ScheduledExportCheck job not updating hook validation issues.
+- [fix] Fix missing GitHub labels for PRs with "bump version" and "bump dependencies"
+- [feature] PromotePackages: Add a parameter to promote multiple references.
+- [feature] Increase `conan test` time limit to 1 hour.
+- [feature] Add request header for GitHub API version.
+
+### 03-February-2023 - 10:24 CET
+
+- [fix] Fix macOS deployment target / minos value.
+- [feature] Validate: Add return code for license check.
+- [feature] Add references list and force parameters to TapaholesRepo job.
+- [feature] Add new ListPackages job.
+- [feature] Update Conan versions library requirements to 1.58.0 and 2.0.0-beta9.
+
 ### 20-January-2023 - 16:09 CET
 
 - [feature] Make feedback messages of PRs configurable.

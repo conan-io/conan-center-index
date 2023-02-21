@@ -433,9 +433,10 @@ class QtConan(ConanFile):
             self.requires("md4c/0.4.8")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.0")
+        self.tool_requires("cmake/3.25.2")
         self.tool_requires("ninja/1.11.1")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
