@@ -11,3 +11,6 @@ sources:
   "v2022.09.1":
     url: "https://github.com/jfalcou/eve/archive/refs/tags/v2022.09.1.tar.gz"
     sha256: "d8d3ae55f0ca2690f8a22883eaaa8251275b76702da0267e8e1725b22c51e978"
+  "v2023.02.15":
+    url: "https://github.com/jfalcou/eve/archive/refs/tags/v2023.02.15.tar.gz"
+    sha256: "7a5fb59c0e6ef3bef3e8b36d62e138d31e7f2a9f1bdfe95a8e96512b207f84c5"
