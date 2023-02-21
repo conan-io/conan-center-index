@@ -2,7 +2,7 @@
 // like querying library version. It doesn't intended to do some lengthy work
 // or running library tests - just only check that package is properly created.
 // See docs for details:
-// https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder
+// https://docs.conan.io/1/creating_packages/getting_started.html#the-test-package-folder
 #include <boost/simd/pack.hpp>
 #include <boost/date_time.hpp>
 #include <iostream>

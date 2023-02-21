@@ -32,7 +32,7 @@ This file is intended to provide all the commands you need to run in order to be
 ## Setup your environment
 
 1. Install a C++ development toolchain - ConanCenter's [build images](#testing-more-environments) are available
-2. [Install the Conan client](https://docs.conan.io/en/latest/installation.html) - make sure to keep it up to date!
+2. [Install the Conan client](https://docs.conan.io/1/installation.html) - make sure to keep it up to date!
 3. Install CMake - this is the only tool which is assumed to be present
    [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default) for details.
 
@@ -71,7 +71,7 @@ We recommend working from the `recipes/project` folder itself. You can learn abo
 
 > **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](adding_packages/README.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
 
-The [entire workflow of a recipe](https://docs.conan.io/en/latest/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/en/latest/reference/commands/creator/create.html). This should look like:
+The [entire workflow of a recipe](https://docs.conan.io/1/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/1/reference/commands/creator/create.html). This should look like:
 
 * `conan create all/conanfile.py 0.0.0@ -pr:b=default -pr:h=default`
 
@@ -91,7 +91,7 @@ conan create all/conanfile.py fmt/9.0.0@ -s build_type=Debug -o fmt:shared=True 
 
 ## Debugging Failed Builds
 
-Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
+Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/1/faq/troubleshooting.html) section.
 For ConanCenter Hook errors, go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about those.
 
 To test with the same environment, the [build images](supported_platforms_and_configurations.md#build-images) are available.
@@ -218,13 +218,13 @@ docker run -e CONAN_SYSREQUIRES_MODE=enabled conanio/gcc11-ubuntu16.04 conan ins
 ## Using Conan 2.0
 
 Everything you need to know about the methods, commands line, outputs can be found in the
-[Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs.
+[Conan 2.0 Migrations](https://docs.conan.io/1/conan_v2.html) docs.
 
 This should be non-intrusive. Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate caches, profiles, and settings.
 This will leave your Conan 1.0 setup completely intact when using Conan 2.0.
 
 > **Note**: There are substantial changes to the CLI so very few of the commands will remain the same.
-> The new [Unified Command Pattern](https://docs.conan.io/en/latest/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments),
+> The new [Unified Command Pattern](https://docs.conan.io/1/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments),
 > as an example, changes how settings and options are passed.
 
 ### Installing Conan 2.0 beta

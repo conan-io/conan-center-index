@@ -99,8 +99,8 @@ def main():
                         f"::notice file={args.path},line={base_path.start_line},endline={base_path.end_line},"
                         f"title=conandata.yml v2 migration suggestion"
                         "::'base_path' should not be required once a recipe has been upgraded to take advantage of"
-                        " layouts (see https://docs.conan.io/en/latest/reference/conanfile/tools/layout.html) and"
-                        " the new helper (see https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
+                        " layouts (see https://docs.conan.io/1/reference/conanfile/tools/layout.html) and"
+                        " the new helper (see https://docs.conan.io/1/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
                     )
 
 
@@ -111,7 +111,7 @@ def pretty_print_yaml_validate_error(args, error):
         f"title=conandata.yml schema error"
         f"::Schema outlined in {CONANDATA_YAML_URL}#patches-fields is not followed.%0A%0A{error.problem} in %0A{snippet}%0A"
     )
-    
+
 def pretty_print_yaml_validate_warning(args, error):
     snippet = error.context_mark.get_snippet().replace("\n", "%0A")
     print(
