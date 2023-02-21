@@ -1,5 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.tools.build import cross_building, can_run
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, mkdir, rm
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
@@ -15,7 +16,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
     short_paths = True
-    generators = "VirtualBuildEnv"  # Need VirtualBuildEnv for Conan 1.x env_info support
     win_bash = True # This assignment must be *here* to avoid "Cannot wrap command with different envs." in Conan 1.x
 
     @property
@@ -26,12 +26,12 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str) # Needed as a requirement for CMake to see libraries
+        self.requires(self.tested_reference_str) # Since we are testing libltdl as well
 
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-        self.tool_requires("autoconf/2.71") # Needed for autoreconf
-        self.tool_requires("automake/1.16.5") # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
+        self.tool_requires(self.tested_reference_str) # We are testing libtool/libtoolize
+        # self.tool_requires("autoconf/2.71") # Needed for autoreconf
+        # self.tool_requires("automake/1.16.5") # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -48,22 +48,34 @@ class TestPackageConan(ConanFile):
     def generate(self):
         # Coulld reuse single autotools instance because they are identical, but good example of
         # how to use "namespace" should they differ.
+        msvc_vars = {
+            "CC": "cl -nologo", 
+            "CXX": "cl -nologo", 
+            "AR": f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib',
+            "LD": "link"
+        }
+
+        # "Autotools" subfolder: project to test integration of Autotools with libtool 
+        # at build time
         tc = AutotoolsToolchain(self, namespace="autotools")
         env = tc.environment()
         if is_msvc(self):
-            env.append("CC", "cl -nologo") # Don't use compile-wrapper as it doesn't work with CMake
-            env.append("CXX", "cl -nologo")
-            env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
-            env.append("LD", "link")
+            for key, value in msvc_vars:
+                env.append(key, value)
         tc.generate(env)
+
+        # "sis" subfder: project to test building shared library using libtool
+        # while linking to a static library
         tc = AutotoolsToolchain(self, namespace="sis")
+        tc.configure_args.extend(["--enable-shared", "--disable-static"])
+        lib_folder = unix_path(self, os.path.join(self.sis_package_folder, "lib"))
+        tc.extra_ldflags.append(f"-L{lib_folder}")
         env = tc.environment()
         if is_msvc(self):
-            env.append("CC", "cl -nologo")
-            env.append("CXX", "cl -nologo")
-            env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
-            env.append("LD", "link")
+            for key, value in msvc_vars:
+                env.append(key, value)
         tc.generate(env)
+
         # Note: Using AutotoolsDeps causes errors on Windows when configure tries to determine compiler
         #       because injected values for environment variables CPPFLAGS and LDFLAGS that are not
         #       interpreted correctly
@@ -76,7 +88,18 @@ class TestPackageConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        # Need VirtualBuildEnv for Conan 1.x env_info support
+
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        env = Environment()
+        for var in ["DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]:
+            env.append_path(var, os.path.join(self.autotools_package_folder, "lib"))
+        env.vars(self, scope="run").save_script("conanrun_libtool_testpackage")
+
+        runenv = VirtualRunEnv(self)
+        runenv.generate()
+
 
     def _build_autotools(self):
         """ Test autotools integration """
@@ -87,8 +110,7 @@ class TestPackageConan(ConanFile):
             self.run("autoreconf --install --verbose --force -Wall")
 
         mkdir(self, self.autotools_package_folder)
-        mkdir(self, "bin_autotools")
-        with chdir(self, "bin_autotools"):
+        with chdir(self, autotools_build_folder):
             autotools = Autotools(self, namespace="autotools")
             autotools.configure(build_script_folder=autotools_build_folder)
             autotools.make(args=["V=1"])
@@ -100,44 +122,23 @@ class TestPackageConan(ConanFile):
         assert os.path.isdir(os.path.join(self.autotools_package_folder, "lib"))
 
         if can_run(self):
-            if self.settings.os == "Windows":
-                libpath = ""
-            elif is_apple_os(self):
-                libpath = f'DYLD_LIBRARY_PATH={os.path.join(self.autotools_package_folder, "lib")}'
-            else:
-                libpath = f'LD_LIBRARY_PATH={os.path.join(self.autotools_package_folder, "lib")}'
-            self.run(f'{libpath} {unix_path(self, os.path.join(self.autotools_package_folder, "bin", "test_package"))}')
+            self.run(f'{unix_path(self, os.path.join(self.autotools_package_folder, "bin", "test_package"))}', env="conanrun")
 
     def _build_ltdl(self):
         """ Build library using ltdl library """
         cmake = CMake(self)
         cmake.configure(build_script_folder="ltdl")
         cmake.build()
-        # Conan 1.x does not define self.package_folder when running the "test" command,
-        # which prevents the use of cmake.install in the build method of a test package
-        if Version(conan_version).major >= 2:
-            cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
 
     def _test_ltdl(self):
         """ Test library using ltdl library"""
-        lib_suffix = {
-            "Linux": "so",
-            "FreeBSD": "so",
-            "Macos": "dylib",
-            "Windows": "dll",
-        }[str(self.settings.os)]
+        lib_prefix = "lib" if self.settings.os != "Windows" else ""
+        lib_extension = "dll" if self.settings.os == "Windows" else "so"
 
         if can_run(self):
-            if Version(conan_version).major >= 2:
-                # In Conan 2.0, we can call cmake.install, which places artifacts in subdirectories of <self.package_folder>
-                bin_path = unix_path(self, os.path.join(self.package_folder, "bin", "test_package"))
-                libdir = "bin" if self.settings.os == "Windows" else "lib"
-                lib_path = unix_path(self, os.path.join(self.package_folder, libdir, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
-            else:
-                # We can't call cmake.install with Conan 1.x, so we find artifacts in <self.build_folder>
-                bin_path = unix_path(self, os.path.join(self.build_folder, "test_package"))
-                lib_path = unix_path(self, os.path.join(self.build_folder, f'{"lib" if self.settings.os != "Windows" else ""}liba.{lib_suffix}'))
-            self.run(f'{bin_path} {lib_path}')
+            bin_executable = unix_path(self, os.path.join(self.cpp.build.bindirs[0], "test_package"))
+            lib_path = unix_path(self, os.path.join(self.cpp.build.libdirs[0], f'{lib_prefix}liba.{lib_extension}'))
+            self.run(f'{bin_executable} {lib_path}')
 
     def _build_static_lib_in_shared(self):
         """ Build shared library using libtool (while linking to a static library) """
@@ -146,28 +147,18 @@ class TestPackageConan(ConanFile):
         autotools_sis_folder = os.path.join(self.build_folder, "sis")
         shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder)
 
-        # Build static library using CMake
-        rm(self, "CMakeCache.txt", self.build_folder) # or pass --fresh to cmake.configure()
+        # Build static library using CMake and install into a folder inside the build folder
         cmake = CMake(self)
-        cmake.configure(build_script_folder=autotools_sis_folder) # cli_args=["--fresh"]) # Requires CMake 3.24
-        cmake.build()
-        # Conan 1.x does not define self.package_folder when running the "test" command,
-        # which prevents the use of cmake.install in the build method of a test package
-        if Version(conan_version).major >= 2:
-            cmake.install() # Installs into self.package_folder, which is test_package/test_ouput
+        cmake.configure(build_script_folder="ltdl")
+        cmake.build(target="static_lib")
+        
+        self.run(f"cmake --install . --config {self.settings.build_type} --prefix {self.sis_package_folder} --component static_lib")
 
-        # Copy autotools directory to build folder
         with chdir(self, autotools_sis_folder):
             self.run("autoreconf --install --verbose --force -Wall")
-
-        with chdir(self, autotools_sis_folder):
             autotools = Autotools(self, namespace="sis")
             autotools.configure(build_script_folder=autotools_sis_folder)
-            if Version(conan_version).major >= 2:
-                autotools.make(args=["V=1", f'LDFLAGS+=-L{unix_path(self, os.path.join(self.package_folder, "lib"))}']) # CMake installs in <self.package_folder>/lib
-            else:
-                autotools.make(args=["V=1", f'LDFLAGS+=-L{unix_path(self, self.build_folder)}']) # CMake creates artifacts in <self.build_folder> sans install
-            autotools.install(args=[f'DESTDIR={unix_path(self, self.sis_package_folder)}'])
+            autotools.install(args=[f"DESTDIR={self.sis_package_folder}"])
 
     def _test_static_lib_in_shared(self):
         """ Test existence of shared library """
