@@ -22,11 +22,13 @@ class QuillConan(ConanFile):
         "fPIC": [True, False],
         "with_bounded_queue": [True, False],
         "with_no_exceptions": [True, False],
+        "with_x86_arch": [True, False],
     }
     default_options = {
         "fPIC": True,
         "with_bounded_queue": False,
         "with_no_exceptions": False,
+        "with_x86_arch": False,
     }
 
     @property
@@ -106,7 +108,7 @@ class QuillConan(ConanFile):
         tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
         tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if self.is_quilll_x86_arch():
+        if self.options.with_x86_arch and self.is_quilll_x86_arch():
             tc.variables["QUILL_X86ARCH"] = True
             tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
         tc.generate()
@@ -142,7 +144,7 @@ class QuillConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["quill"]
         self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
-        if self.is_quilll_x86_arch():
+        if self.options.with_x86_arch and self.is_quilll_x86_arch():
             self.cpp_info.defines.append("QUILL_X86ARCH")
             self.cpp_info.cxxflags.append("-mclflushopt")
 
