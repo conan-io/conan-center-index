@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rmdir, rename, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, unix_path_package_info_legac
+from conan.tools.microsoft import is_msvc, unix_path, unix_path_package_info_legacy
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.errors import ConanException
 import os
