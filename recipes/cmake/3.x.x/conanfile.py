@@ -11,7 +11,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 import json
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -40,12 +40,9 @@ class CMakeConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1t")
 
-    def validate(self):
+    def validate_build(self):
         if self.settings.os == "Windows" and self.options.bootstrap:
             raise ConanInvalidConfiguration("CMake does not support bootstrapping on Windows")
-
-        if self.settings.os == "Macos" and self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
         minimal_cpp_standard = "11"
         if self.settings.get_safe("compiler.cppstd"):
@@ -71,6 +68,10 @@ class CMakeConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
+
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "x86":
+            raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
     def layout(self):
         if self.options.bootstrap:
