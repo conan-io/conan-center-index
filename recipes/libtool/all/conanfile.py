@@ -77,7 +77,7 @@ class LibtoolConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
 
-        if is_msvc(self) and not check_min_vs(self, "180", raise_invalid=False):
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
 
         tc.configure_args.extend([
