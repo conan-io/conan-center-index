@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.files import copy
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 
 
@@ -29,6 +29,8 @@ class TestPackageConan(ConanFile):
         env = tc.environment()
         if is_msvc(self):
             env.define("CC", "cl -nologo")
+            ms = VCVars(self)
+            ms.generate(scope="run")
         tc.generate(env)
 
     def build(self):
