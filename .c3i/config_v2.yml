@@ -76,7 +76,7 @@ configurations:
     hrname: "macOS M1, Clang"
     build_profile:
       os: "Macos"
-      arch: [ "x86_64" ]
+      arch: "x86_64"
     content:
       - os: [ "Macos" ]
         arch: [ "armv8" ]
