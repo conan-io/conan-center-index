@@ -1,5 +1,10 @@
 # Changelog
 
+### 21-February-2023 - 17:22 CET
+
+- [fix] Fix bug with cppstd entry in configuration files.
+- [fix] Fix configuration read of list from an external yaml file.
+
 ### 21-February-2023 - 12:44 CET
 
 - [feature] ScheduledExportCheck: Collect warnings from hooks and publish them to a separate table.
