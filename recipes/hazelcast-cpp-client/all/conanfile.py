@@ -69,6 +69,9 @@ class HazelcastCppClient(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.19.7")
+
     def build(self):
         files.apply_conandata_patches(self)
         cmake = CMake(self)
