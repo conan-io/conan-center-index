@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
@@ -80,9 +80,6 @@ class SnappyConan(ConanFile):
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["snappylib"].system_libs.append("m")
-            libcxx = stdcpp_library(self)
-            if libcxx:
-                self.cpp_info.components["snappylib"].system_libs.append(libcxx)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Snappy"
