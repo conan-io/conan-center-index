@@ -59,4 +59,4 @@ class TestPackageConan(ConanFile):
         if not can_run(self):
             return
         with chdir(self, self.folders.build_folder):
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env="conanrun")
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}")

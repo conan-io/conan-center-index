@@ -869,8 +869,7 @@ class BoostConan(ConanFile):
         full_command = f"{self._b2_exe} {b2_flags}"
         # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
-        full_command += f' --debug-configuration --build-dir="{self.build_folder}"'
-        self.output.warning(full_command)
+        full_command += f' --debug-configuration --build-dir="{self.build_folder}" stage'
 
         # If sending a user-specified toolset to B2, setting the vcvars
         # interferes with the compiler selection.
@@ -1140,8 +1139,6 @@ class BoostConan(ConanFile):
             flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
         flags.extend([
-            "install",
-            f"--prefix={self.package_folder}",
             f"-j{build_jobs(self)}",
             "--abbreviate-paths",
             f"-d{self.options.debug_level}",
@@ -1361,14 +1358,16 @@ class BoostConan(ConanFile):
     ####################################################################
 
     def package(self):
-        # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
-        # copy to source with the good lib name
         copy(self, "LICENSE_1_0.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        if self.options.header_only:
-            copy(self, "*", src=os.path.join(self.source_folder, "boost"),
-                            dst=os.path.join(self.package_folder, "include", "boost"))
 
+        # src/boost contains all of the header files
+        copy(self, "*", src=os.path.join(self.source_folder, "boost"),
+                        dst=os.path.join(self.package_folder, "include", "boost"))
+        if not self.options.header_only:
+            # stage/lib is in source folder and contains the libs that were built
+            copy(self, "*", src=os.path.join(self.source_folder, "stage", "lib"),
+                            dst=os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.os == "Emscripten" and not self.options.header_only:
             self._create_emscripten_libs()
 
