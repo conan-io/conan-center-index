@@ -11,31 +11,38 @@ class DoctestConan(ConanFile):
     topics = ("doctest", "header-only", "unit-test", "tdd")
     settings = "os", "compiler"
     license = "MIT"
-    _source_subfolder = "source_subfolder"
 
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*doctest.h", dst="include", src=self._source_subfolder)
+        files.copy(
+            self,
+            pattern="LICENSE.txt",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        files.copy(
+            self,
+            pattern="*doctest.h",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "include"),
+        )
 
         cmake_script_dirs = {
-            "src": os.path.join(self._source_subfolder, "scripts/cmake"),
-            "dst": "lib/cmake"
+            "src": os.path.join(self.source_folder, "scripts/cmake"),
+            "dst": os.path.join(self.package_folder, "lib/cmake"),
         }
 
-        self.copy(pattern="doctest.cmake", **cmake_script_dirs)
-        self.copy(pattern="doctestAddTests.cmake", **cmake_script_dirs)
+        files.copy(self, pattern="doctest.cmake", **cmake_script_dirs)
+        files.copy(self, pattern="doctestAddTests.cmake", **cmake_script_dirs)
 
     def package_info(self):
         if self._is_mingw:
@@ -44,7 +51,9 @@ class DoctestConan(ConanFile):
             self.cpp_info.defines.append("DOCTEST_THREAD_LOCAL=")
 
         self.cpp_info.builddirs.append("lib/cmake")
-        self.cpp_info.build_modules.append("lib/cmake/doctest.cmake")
+        self.cpp_info.set_property(
+            "cmake_build_modules", [os.path.join("lib", "cmake", "doctest.cmake")]
+        )
 
     def package_id(self):
         self.info.clear()
