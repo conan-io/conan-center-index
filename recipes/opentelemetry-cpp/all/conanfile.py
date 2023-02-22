@@ -198,6 +198,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
         tc.variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
+        tc.variables["WITH_EXAMPLES"] = False
 
         tc.generate()
 
