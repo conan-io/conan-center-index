@@ -1,0 +1,39 @@
+sources:
+  "11.3.0":
+    "Linux":
+      "x86_64":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v11.3/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz"
+        sha256: "d420d87f68615d9163b99bbb62fe69e85132dc0a8cd69fca04e813597fe06121"
+      "armv8":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v11.3/arm-gnu-toolchain-11.3.rel1-aarch64-arm-none-eabi.tar.xz"
+        sha256: "6c713c11d018dcecc16161f822517484a13af151480bbb722badd732412eb55e"
+    "Macos":
+      "x86_64":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v11.3/arm-gnu-toolchain-11.3.rel1-darwin-x86_64-arm-none-eabi.tar.xz"
+        sha256: "826353d45e7fbaa9b87c514e7c758a82f349cb7fc3fd949423687671539b29cf"
+      "armv8":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v11.3/arm-gnu-toolchain-11.3.rel1-darwin-x86_64-arm-none-eabi.tar.xz"
+        sha256: "826353d45e7fbaa9b87c514e7c758a82f349cb7fc3fd949423687671539b29cf"
+    "Windows":
+      "x86_64":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v11.3/arm-gnu-toolchain-11.3.rel1-mingw-w64-i686-arm-none-eabi.zip"
+        sha256: "23f24595aa575fba4fdb0cb086df4b053862af60837502cb7e52bd4fb3d76c36"
+  "12.2.0":
+    "Linux":
+      "x86_64":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v12.2/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz"
+        sha256: "84be93d0f9e96a15addd490b6e237f588c641c8afdf90e7610a628007fc96867"
+      "armv8":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v12.2/arm-gnu-toolchain-12.2.rel1-aarch64-arm-none-eabi.tar.xz"
+        sha256: "7ee332f7558a984e239e768a13aed86c6c3ac85c90b91d27f4ed38d7ec6b3e8c"
+    "Macos":
+      "x86_64":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v12.2/arm-gnu-toolchain-12.2.rel1-darwin-x86_64-arm-none-eabi.tar.xz"
+        sha256: "00c0eeb57ae92332f216151ac66df6ba17d2d3b306dac86f4006006f437b2902"
+      "armv8":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v12.2/arm-gnu-toolchain-12.2.rel1-darwin-arm64-arm-none-eabi.tar.xz"
+        sha256: "21a9e875250bcb0db8df4cb23dd43c94c00a1d3b98ecba9cdd6ed51586b12248"
+    "Windows":
+      "x86_64":
+        url: "https://github.com/libhal/gnu-arm-embedded-toolchain/releases/download/v12.2/arm-gnu-toolchain-12.2.rel1-mingw-w64-i686-arm-none-eabi.zip"
+        sha256: "ad1427496cde9bbe7604bc448ec6e115c6538e04af1c8275795ebb1c2b7b2830"
