@@ -49,7 +49,7 @@ class LibtoolConan(ConanFile):
 
     def requirements(self):
         self.requires("automake/1.16.5")
-        self.requires("m4/1.4.19")
+        #self.requires("m4/1.4.19") TODO: add as runtime dependency
 
     @property
     def _settings_build(self):

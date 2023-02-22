@@ -47,8 +47,8 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.build_folder, "pkg_sis")
 
     def generate(self):
-        # Coulld reuse single autotools instance because they are identical, but good example of
-        # how to use "namespace" should they differ.
+        # Use two instances of AutotoolsToolchain with namespaceas,
+        # as we have two different projects with different settings.
         ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
         msvc_vars = {
             "CC": "cl -nologo", 
