@@ -30,7 +30,9 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str) # Since we are testing libltdl as well
 
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str) # We are testing libtool/libtoolize
+        if hasattr(self, "settings_build") and not cross_building(self):
+            self.tool_requires(self.tested_reference_str) # We are testing libtool/libtoolize
+    
         self.tool_requires("autoconf/2.71")
         self.tool_requires("automake/1.16.5")
         if self._settings_build.os == "Windows":
@@ -179,7 +181,7 @@ class TestPackageConan(ConanFile):
             self._build_static_lib_in_shared()
 
     def test(self):
-        self._test_ltdl()
         if can_run(self):
+            self._test_ltdl()
             self._test_autotools()
             self._test_static_lib_in_shared()
