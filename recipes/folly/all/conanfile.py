@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
-from conan.tools.build import can_run, check_min_cppstd, supported_cppstd
+from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -95,19 +95,12 @@ class FollyConan(ConanFile):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
     def validate(self):
-        compiler_cppstd = self.settings.compiler.get_safe("cppstd")
-        if compiler_cppstd:
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-        supported_cppstds = supported_cppstd(self)
-        if supported_cppstds and self._min_cppstd not in supported_cppstds:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                f" Supported cppstds: {supported_cppstds}"
             )
 
         if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
@@ -174,6 +167,7 @@ class FollyConan(ConanFile):
                 tc.variables["CMAKE_C_FLAGS"] = "/arch:FMA"
                 tc.variables["CMAKE_CXX_FLAGS"] = "/arch:FMA"
 
+        # Folly is not respecting this from the helper https://github.com/conan-io/conan-center-index/pull/15726/files#r1097068754
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
