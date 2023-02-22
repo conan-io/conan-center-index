@@ -1,5 +1,15 @@
 # Changelog
 
+### 21-February-2023 - 12:44 CET
+
+- [feature] ScheduledExportCheck: Collect warnings from hooks and publish them to a separate table.
+- [feature] AutomaticMerge: Add conditional status checks with allowlist.
+- [feature] AutomaticMerge: Add branches config to merge branches automatically.
+- [feature] Conan: Add methods to get the latest recipe revision.
+- [feature] Bump library requirements to support the latest Conan versions.
+- [fix] PromotePackages: Fix an issue when promoting multiple references.
+- [fix] UpdateSearchIndex: Fix conan inspect call command.
+
 ### 14-February-2023 - 15:32 CET
 
 - [fix] Fix ScheduledExportCheck job not updating hook validation issues.
