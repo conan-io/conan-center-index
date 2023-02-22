@@ -1,6 +1,6 @@
 ---
-# Configuration for `https://github.com/conan-io/conan-center-index-staging` repository (using Conan v2)
-id: 'conan-io/conan-center-index-staging-v2'
+# Configuration for `https://github.com/conan-io/conan-center-index` repository (using Conan v2)
+id: 'conan-io/conan-center-index'
 
 conan:
   version: 2.0.0-beta10
@@ -16,13 +16,6 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
-
-# Requirements to merge a given pull-request:
-# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-# * check_runs refers to notifications from GH actions
-#status_checks:
-#  - "license/cla"
-#  - "continuous-integration/jenkins/pr-merge"
 
 #slack:
 #  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
@@ -75,6 +68,20 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "apple-clang":
+              compiler.version: [ "13" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release"]
+  - id: configs/macos-m1-clang
+    epochs: [0, 20220628]
+    hrname: "macOS M1, Clang"
+    build_profile:
+      os: "Macos"
+      arch: "x86_64"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "armv8" ]
+        compiler:
+          - "apple-clang":
               compiler.version: ["13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
@@ -93,6 +100,14 @@ configurations:
                 - "Release":
                     compiler.runtime: [ "static", "dynamic" ]
                     compiler.runtime_type: [ "Release" ]
+
+cppstd:
+  apple-clang:
+    "13": ["gnu17"]
+  gcc:
+    "11": ["gnu17"]
+  msvc:
+    "192": ["14"]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"
