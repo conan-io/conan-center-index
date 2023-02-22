@@ -8,8 +8,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 import functools
 import os
 
-required_conan_version = ">=1.51.3"
-
+required_conan_version = ">=1.54.0"
 
 class OpenTDFConan(ConanFile):
     name = "opentdf-client"
@@ -72,9 +71,6 @@ class OpenTDFConan(ConanFile):
         self.requires("libxml2/2.9.14")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
-        # Do not need libarchive after 1.0.0
-        if Version(self.version) < "1.1.0":
-            self.requires("libarchive/3.6.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -117,5 +113,3 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["pkg_config"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
-        if Version(self.version) < "1.1.0":
-            self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
