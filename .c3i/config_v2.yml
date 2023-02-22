@@ -7,7 +7,7 @@ conan:
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
-  main_repo: "conan-center-v2"
+  main_repo: "conan-center"
   pull-request_repo_prefix: "c3i_PR-v2"
   pull-request_permission: "c3i-pr"
   logs_repo: "misc-v2"
