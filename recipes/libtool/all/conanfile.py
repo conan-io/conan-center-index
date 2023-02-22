@@ -9,7 +9,7 @@ import os
 import re
 import shutil
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=1.58.0"
 
 class LibtoolConan(ConanFile):
     name = "libtool"
