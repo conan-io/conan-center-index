@@ -1,6 +1,6 @@
 import os
 from conan import ConanFile
-from conan.tools import files
+from conan.tools.files import copy, get
 
 
 class DoctestConan(ConanFile):
@@ -17,19 +17,19 @@ class DoctestConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
 
     def package(self):
-        files.copy(
+        copy(
             self,
             pattern="LICENSE.txt",
             src=self.source_folder,
             dst=os.path.join(self.package_folder, "licenses"),
         )
-        files.copy(
+        copy(
             self,
             pattern="*doctest.h",
             src=self.source_folder,
@@ -41,8 +41,8 @@ class DoctestConan(ConanFile):
             "dst": os.path.join(self.package_folder, "lib/cmake"),
         }
 
-        files.copy(self, pattern="doctest.cmake", **cmake_script_dirs)
-        files.copy(self, pattern="doctestAddTests.cmake", **cmake_script_dirs)
+        copy(self, pattern="doctest.cmake", **cmake_script_dirs)
+        copy(self, pattern="doctestAddTests.cmake", **cmake_script_dirs)
 
     def package_info(self):
         if self._is_mingw:

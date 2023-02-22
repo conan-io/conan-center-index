@@ -1,5 +1,6 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -22,6 +23,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.build.can_run(self):
+        if can_run(self):
             cmake = self._configure_cmake()
             cmake.test()
