@@ -2,7 +2,7 @@ required_for_references:
   - asio
   - b2
   - bzip2
-#  - boost ? error with some configs
+  - boost
   - catch2
   - cmake
   - flex
