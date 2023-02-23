@@ -16,6 +16,7 @@ required_conan_version = ">=1.53.0"
 
 class Libxml2Conan(ConanFile):
     name = "libxml2"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libxml2 is a software library for parsing XML documents"
     topics = "xml", "parser", "validation"
@@ -96,7 +97,7 @@ class Libxml2Conan(ConanFile):
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.iconv:
-            self.requires("libiconv/1.17")
+            self.requires("libiconv/1.17", transitive_headers=True, transitive_libs=True)
         if self.options.icu:
             self.requires("icu/72.1")
 

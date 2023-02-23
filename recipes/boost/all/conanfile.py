@@ -539,7 +539,7 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             self.requires("zstd/1.5.2")
         if self._with_stacktrace_backtrace:
-            self.requires("libbacktrace/cci.20210118", transitive_headers=True)
+            self.requires("libbacktrace/cci.20210118", transitive_headers=True, transitive_libs=True)
 
         if self._with_icu:
             self.requires("icu/72.1")
@@ -774,12 +774,12 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        return "b2.exe" if self._settings_build == "Windows" else "b2"
+        return "b2"
 
     @property
     def _bcp_exe(self):
         folder = os.path.join(self.source_folder, "dist", "bin")
-        return os.path.join(folder, "bcp.exe" if self._settings_build == "Windows" else "bcp")
+        return os.path.join(folder, "bcp")
 
     @property
     def _use_bcp(self):
@@ -816,11 +816,19 @@ class BoostConan(ConanFile):
             self.run(command)
 
     def build(self):
+        stacktrace_jamfile = os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2")
         if cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
-            replace_in_file(self, os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2"),
-                                  "$(>) > $(<)",
-                                  "echo \"\" > $(<)", strict=False)
+            replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)", strict=False)
+        if self._with_stacktrace_backtrace and self.settings.os != "Windows" and not cross_building(self):
+            # When libbacktrace is shared, give extra help to the test-executable
+            linker_var = "DYLD_LIBRARY_PATH" if self.settings.os == "Macos" else "LD_LIBRARY_PATH"
+            libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.aggregated_components().libdirs[0]
+            patched_run_rule = f"{linker_var}={libbacktrace_libdir} $(>) > $(<)"
+            replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", patched_run_rule, strict=False)
+            if self.dependencies["libbacktrace"].options.shared:
+                replace_in_file(self, stacktrace_jamfile, "<link>static", "<link>shared", strict=False)
+
         # Older clang releases require a thread_local variable to be initialized by a constant value
         replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* thread_local */", "thread_local", strict=False)
@@ -1099,7 +1107,8 @@ class BoostConan(ConanFile):
 
             if self.conf.get("tools.apple:enable_bitcode", check_type=bool):
                 cxx_flags.append("-fembed-bitcode")
-
+        if self._with_stacktrace_backtrace:
+            flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.dependencies['libiconv'].package_folder}")
         if self._with_icu:
@@ -1565,7 +1574,8 @@ class BoostConan(ConanFile):
                 if abi:
                     libsuffix_data["abi"] = f"-{abi}"
 
-            libsuffix_data["arch"] = f"-{self._b2_architecture[0]}{self._b2_address_model}"
+            if self._b2_architecture:
+                libsuffix_data["arch"] = f"-{self._b2_architecture[0]}{self._b2_address_model}"
             version = Version(self.version)
             if not version.patch or version.patch == "0":
                 libsuffix_data["version"] = f"-{version.major}_{version.minor}"

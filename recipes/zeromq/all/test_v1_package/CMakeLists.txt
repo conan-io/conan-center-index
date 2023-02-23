@@ -1,25 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package LANGUAGES CXX)
+project(test_package)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-option(WITH_LIBSODIUM "zeromq is built with libsodium")
-option(WITH_NORM "zeromq is built with norm")
-
-find_package(ZeroMQ REQUIRED CONFIG)
-
-add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-if(ZEROMQ_SHARED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE libzmq)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE libzmq-static)
-endif()
-
-if(WITH_LIBSODIUM)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_LIBSODIUM")
-endif()
-
-if(WITH_NORM)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_NORM")
-endif()
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package)

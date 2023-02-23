@@ -159,13 +159,10 @@ class LibVPXConan(ConanFile):
             compiler = f"vs{vc_version}"
         elif is_msvc(self):
             vc_version = str(self.settings.compiler.version)
-            if Version(self.settings.compiler.version) > "100": # New msvc compiler to triplet used in configure script for vpx
-                vc_version = {"190": "14", "191": "15", "192": "16"}[vc_version]
+            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}[vc_version]
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
-        else:
-            raise ConanInvalidConfiguration(f"Unknown compiler '{self.settings.compiler}'")
 
         host_os = str(self.settings.os)
         if host_os == 'Windows':
