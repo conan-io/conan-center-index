@@ -15,6 +15,7 @@ class ZstdConan(ConanFile):
     topics = ("zstandard", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
