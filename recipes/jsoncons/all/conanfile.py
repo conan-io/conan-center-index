@@ -21,7 +21,8 @@ class JsonconsConan(ConanFile):
 
     def source(self):
         get(
-            f"https://github.com/danielaparker/jsoncons/archive/refs/tags/v{self.version}.tar.gz", 
+            self,
+            url=f"https://github.com/danielaparker/jsoncons/archive/refs/tags/v{self.version}.tar.gz", 
             destination=self.source_folder,
             strip_root=True
         )
