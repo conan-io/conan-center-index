@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.tools.build import cross_building, can_run
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, mkdir, rm
+from conan.tools.files import chdir, mkdir, rmdir
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
@@ -119,7 +119,8 @@ class TestPackageConan(ConanFile):
         """ Test autotools integration """
         # Copy autotools directory to build folder
         autotools_build_folder = os.path.join(self.build_folder, "autotools")
-        shutil.copytree(os.path.join(self.source_folder, "autotools"), autotools_build_folder, dirs_exist_ok=True)
+        rmdir(self, autotools_build_folder)
+        shutil.copytree(os.path.join(self.source_folder, "autotools"), autotools_build_folder)
         with chdir(self, "autotools"):
             self.run("autoreconf --install --verbose --force -Wall")
 
@@ -159,7 +160,8 @@ class TestPackageConan(ConanFile):
 
         # Copy static-in-shared directory to build folder
         autotools_sis_folder = os.path.join(self.build_folder, "sis")
-        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder, dirs_exist_ok=True)
+        rmdir(self, autotools_sis_folder)
+        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder)
 
         # Build static library using CMake and install into a folder inside the build folder
         cmake = CMake(self)
