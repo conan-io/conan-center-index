@@ -49,6 +49,16 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.build_folder, "pkg_sis")
 
     def generate(self):
+        if is_msvc(self):
+            # __VSCMD_ARG_NO_LOGO: this test_package has too many invocations,
+            #                      this avoids printing the logo everywhere
+            # VSCMD_SKIP_SENDTELEMETRY: avoid the telemetry process holding onto the directory
+            #                           unnecessarily
+            env = Environment()
+            env.define("__VSCMD_ARG_NO_LOGO", "1")
+            env.define("VSCMD_SKIP_SENDTELEMETRY", "1")
+            env.vars(self, scope="build").save_script("conanbuild_vcvars_options.bat")
+
         # Use two instances of AutotoolsToolchain with namespaceas,
         # as we have two different projects with different settings.
         ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
@@ -109,7 +119,7 @@ class TestPackageConan(ConanFile):
         """ Test autotools integration """
         # Copy autotools directory to build folder
         autotools_build_folder = os.path.join(self.build_folder, "autotools")
-        shutil.copytree(os.path.join(self.source_folder, "autotools"), autotools_build_folder)
+        shutil.copytree(os.path.join(self.source_folder, "autotools"), autotools_build_folder, dirs_exist_ok=True)
         with chdir(self, "autotools"):
             self.run("autoreconf --install --verbose --force -Wall")
 
@@ -149,7 +159,7 @@ class TestPackageConan(ConanFile):
 
         # Copy static-in-shared directory to build folder
         autotools_sis_folder = os.path.join(self.build_folder, "sis")
-        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder)
+        shutil.copytree(os.path.join(self.source_folder, "sis"), autotools_sis_folder, dirs_exist_ok=True)
 
         # Build static library using CMake and install into a folder inside the build folder
         cmake = CMake(self)
