@@ -14,15 +14,25 @@ class MdnsResponderConan(ConanFile):
     homepage = "https://opensource.apple.com/tarballs/mDNSResponder/"
     license = "Apache-2.0", "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
+    generators = "make"
     options = {
         "with_opt_patches": [True, False],
+        "use_tls": [True, False],
+        "build_debug": [True, False],
     }
     default_options = {
         "with_opt_patches": False,
+        "use_tls": True,
+        "build_debug": False,
     }
     exports_sources = ["patches/**"]
 
     _autotools = None
+
+    def requirements(self):
+        if self.options.use_tls:
+            self.requires("mbedtls/[>=2.23.0 <3.0.0]")
+            self.options['mbedtls'].shared = True
 
     @property
     def _source_subfolder(self):
@@ -58,10 +68,16 @@ class MdnsResponderConan(ConanFile):
     @property
     def _make_build_args(self):
         # the Makefile does not support parallel builds
-        return [
+        build_args = [
             "os=linux",
             "-j1",
         ]
+        if not self.options.use_tls:
+            build_args.append("tls=no")
+        if self.options.build_debug:
+            build_args.append("DEBUG=1")
+
+        return build_args
 
     @property
     def _make_build_targets(self):
