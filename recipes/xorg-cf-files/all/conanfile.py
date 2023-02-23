@@ -73,7 +73,7 @@ class XorgCfFilesConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("CPP", f"{compile_wrapper} cl -E")
-        tc.generate()
+        tc.generate(env)
 
         deps = PkgConfigDeps(self)
         deps.generate()
