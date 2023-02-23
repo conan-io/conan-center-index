@@ -19,7 +19,7 @@ class XorgCfFilesConan(ConanFile):
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/cf"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _settings_build(self):
@@ -41,6 +41,8 @@ class XorgCfFilesConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+        del self.info.settings.arch
+        del self.info.settings.build_type
         # self.info.settings.os  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
 
     def validate(self):
