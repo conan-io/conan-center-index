@@ -1,4 +1,5 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 import os
 
@@ -19,15 +20,15 @@ class JsonconsConan(ConanFile):
         basic_layout(self)
 
     def source(self):
-        tools.get(
+        get(
             f"https://github.com/danielaparker/jsoncons/archive/refs/tags/v{self.version}.tar.gz", 
             destination=self.source_folder,
             strip_root=True
         )
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        self.copy(pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_id(self):
         self.info.header_only()
