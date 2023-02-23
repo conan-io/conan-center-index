@@ -5,8 +5,10 @@ required_for_references:
   - boost
   - catch2
   - cmake
+  - eigen
   - flex
   - fmt
+  - gtest
   - jsoncpp
   - libbacktrace
   - libelf
@@ -16,6 +18,9 @@ required_for_references:
 #  - openssl ? 3.0.0 version still not working
   - ogg
   - pcre2
+  - rapidjson
+  - sqlite3
   - yaml-cpp
   - xz_utils
   - zlib
+  - zstd
