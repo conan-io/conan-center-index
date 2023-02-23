@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -75,6 +76,16 @@ class LibtoolConan(ConanFile):
         return os.path.join(self.package_folder, "res")
 
     def generate(self):
+        if is_msvc(self):
+            # __VSCMD_ARG_NO_LOGO: this test_package has too many invocations,
+            #                      this avoids printing the logo everywhere
+            # VSCMD_SKIP_SENDTELEMETRY: avoid the telemetry process holding onto the directory
+            #                           unnecessarily
+            env = Environment()
+            env.define("__VSCMD_ARG_NO_LOGO", "1")
+            env.define("VSCMD_SKIP_SENDTELEMETRY", "1")
+            env.vars(self, scope="build").save_script("conanbuild_vcvars_options.bat")
+
         tc = AutotoolsToolchain(self)
 
         if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
