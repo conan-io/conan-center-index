@@ -17,7 +17,7 @@ class JsonconsConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(
