@@ -1,0 +1,21 @@
+required_for_references:
+  - asio
+  - b2
+  - bzip2
+  - boost
+  - catch2
+  - cmake
+  - flex
+  - fmt
+  - jsoncpp
+  - libbacktrace
+  - libelf
+  - libiconv
+  - ninja
+  - nlohmann_json
+#  - openssl ? 3.0.0 version still not working
+  - ogg
+  - pcre2
+  - yaml-cpp
+  - xz_utils
+  - zlib
