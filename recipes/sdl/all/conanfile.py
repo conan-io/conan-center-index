@@ -147,7 +147,7 @@ class SDLConan(ConanFile):
             if self.options.opengl:
                 self.requires("opengl/system")
             if self.options.nas:
-                self.requires("nas/1.9.4")
+                self.requires("nas/1.9.5")
             if self.options.wayland:
                 self.requires("wayland/1.21.0")
                 self.requires("xkbcommon/1.4.1")
@@ -184,7 +184,7 @@ class SDLConan(ConanFile):
             # set. This could be because you are using a Mac OS X version less than 10.5
             # or because CMake's platform configuration is corrupt.
             # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.build_requires("cmake/3.22.0")
+            self.tool_requires("cmake/3.25.2")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
@@ -203,12 +203,11 @@ class SDLConan(ConanFile):
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
         if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
-            wayland_bin_path = " ".join("\"{}\"".format(path) for path in self.deps_env_info["wayland"].PATH)
             replace_in_file(self,
-                            os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
-                            "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
-                            "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS {} NO_DEFAULT_PATH)".format(wayland_bin_path),
-                            )
+                os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
+                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
+                'find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS "${WAYLAND_BIN_DIR}" NO_DEFAULT_PATH)',
+            )
 
     def define_toolchain(self):
         tc = CMakeToolchain(self)
@@ -241,7 +240,7 @@ class SDLConan(ConanFile):
 
                 tc.variables["ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    tc.variables["ALSA_SHARED"] = self.options["libalsa"].shared
+                    tc.variables["ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
                     tc.variables["HAVE_ASOUNDLIB_H"] = True
                     tc.variables["HAVE_LIBASOUND"] = True
                 tc.variables["JACK"] = self.options.jack
@@ -307,7 +306,7 @@ class SDLConan(ConanFile):
 
                 tc.variables["SDL_ALSA"] = self.options.alsa
                 if self.options.alsa:
-                    tc.variables["SDL_ALSA_SHARED"] = self.options["libalsa"].shared
+                    tc.variables["SDL_ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
                     tc.variables["HAVE_ASOUNDLIB_H"] = True
                     tc.variables["HAVE_LIBASOUND"] = True
                 tc.variables["SDL_JACK"] = self.options.jack
@@ -318,7 +317,7 @@ class SDLConan(ConanFile):
                     tc.variables["SDL_ESD_SHARED"] = self.options["esd"].shared
                 tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
                 if self.options.pulse:
-                    tc.variables["SDL_PULSEAUDIO_SHARED"] = self.options["pulseaudio"].shared
+                    tc.variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.shared
                     for component in self.dependencies["pulseaudio"].cpp_info.components:
                         if self.dependencies["pulseaudio"].cpp_info.components[component].libs:
                             cmake_extra_libs += self.dependencies["pulseaudio"].cpp_info.components[component].libs
@@ -331,7 +330,7 @@ class SDLConan(ConanFile):
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
                     cmake_required_includes += self.dependencies["nas"].cpp_info.includedirs
-                    tc.variables["SDL_NAS_SHARED"] = self.options["nas"].shared
+                    tc.variables["SDL_NAS_SHARED"] = self.dependencies["nas"].options.shared
                 tc.variables["SDL_X11"] = self.options.x11
                 if self.options.x11:
                     tc.variables["HAVE_XEXT_H"] = True
@@ -360,7 +359,11 @@ class SDLConan(ConanFile):
                 if self.options.wayland:
                     # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
                     cmake_extra_ldflags += ["-L{}".format(it) for it in self.dependencies["wayland"].cpp_info.libdirs]
-                    tc.variables["SDL_WAYLAND_SHARED"] = self.options["wayland"].shared
+                    tc.variables["SDL_WAYLAND_SHARED"] = self.dependencies["wayland"].options.shared
+
+                    wayland = self.dependencies["wayland"] if not hasattr(self, "settings_build") else self.dependencies.build["wayland"]
+                    wayland_bin_dir = wayland.cpp_info.bindirs[0] # for wayland scanner
+                    tc.variables["WAYLAND_BIN_DIR"] = wayland_bin_dir
 
                 tc.variables["SDL_DIRECTFB"] = self.options.directfb
                 tc.variables["SDL_RPI"] = self.options.video_rpi
