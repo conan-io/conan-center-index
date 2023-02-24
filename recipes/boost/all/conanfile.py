@@ -1360,14 +1360,20 @@ class BoostConan(ConanFile):
     def package(self):
         copy(self, "LICENSE_1_0.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        # src/boost contains all of the header files
-        copy(self, "*", src=os.path.join(self.source_folder, "boost"),
-                        dst=os.path.join(self.package_folder, "include", "boost"))
+        # Use b2 install to move files to package folder
+        b2_flags = " ".join(self._build_flags)
+        full_command = f"{self._b2_exe} {b2_flags}"
+        full_command += f' --debug-configuration --build-dir="{self.build_folder}" install --prefix="{self.package_folder}"'
+
+        sources = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
+        with chdir(self, sources):
+            # To show the libraries *1
+            # self.run("%s --show-libraries" % b2_exe)
+            self.run(full_command)
+
         if not self.options.header_only:
-            # stage/lib is in source folder and contains the libs that were built
-            copy(self, "*", src=os.path.join(self.source_folder, "stage", "lib"),
-                            dst=os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
         if self.settings.os == "Emscripten" and not self.options.header_only:
             self._create_emscripten_libs()
 
