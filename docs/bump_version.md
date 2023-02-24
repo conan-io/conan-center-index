@@ -1,10 +1,10 @@
 # How to bump a package version for an existing recipe in ConanCenterIndex?
 
 Once a recipe is approved and merged to ConanCenterIndex, it may need to be updated with new versions released by the upstream.
-When someone needs a new package version that is not available in ConanCenterIndex, then open a new pull request adding. This is
-called a `bump version`.
-The [build service](#) bumping process is limited to pull requests which **only** adds a new package version and nothing more. Removing older versions, or updating
-the recipe will disqualify a pull request from the `Bump version` [review process](#)
+When someone needs a new package version that is not available in ConanCenterIndex, that person can open an issue [resquesting a new version](https://github.com/conan-io/conan-center-index/issues/new?assignees=&labels=upstream+update&template=package_upstream_update.yml&title=%5Brequest%5D+%3CLIBRARY-NAME%3E%2F%3CLIBRARY-VERSION%3E).
+Or, by opening a pull request changing and adding that needed version, this is called a `bump version`.
+The [build service](adding_packages/README.md#the-build-service) bumping process is limited to pull requests which **only** adds a new package version and nothing more. Removing older versions, or updating
+the recipe will disqualify a pull request from the `Bump version` [review process](review_process.md)
 
 ## Choosing which version should be updated
 
@@ -41,5 +41,5 @@ In case a patch should be re-used, it should be present in `conandata.yml` to th
 
 ## Reviewing and merging
 
-Bumping version PRs follow the same regular review [process](review_process.md), except for being merged automatically
+Bumping version PRs follow the same regular [review process](review_process.md), except for being merged automatically
 as listed on [Labels](labels.md#bump-version) section.
