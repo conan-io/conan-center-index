@@ -18,6 +18,7 @@ class BenchmarkConan(ConanFile):
     homepage = "https://github.com/google/benchmark"
     topics = ("google", "microbenchmark")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
