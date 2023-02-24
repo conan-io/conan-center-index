@@ -4,7 +4,7 @@ Once a recipe is approved and merged to ConanCenterIndex, it may need to be upda
 When someone needs a new package version that is not available in ConanCenterIndex, then open a new pull request adding. This is
 called a `bump version`.
 A bumping version process is when a PR only adds a new package version and nothing more. Removing older versions, or updating
-the recipe is not classified as a bump version action.
+the recipe will disqualify a pull request from the `Bump version` [review process](#)
 
 ## Choosing which version should be updated
 
