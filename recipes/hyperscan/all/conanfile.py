@@ -16,6 +16,7 @@ class HyperscanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.hyperscan.io"
     topics = ("regex", "regular expressions")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
