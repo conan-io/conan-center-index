@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, replace_in_file
 import os
 
+
+required_conan_version = ">=1.50.0"
 
 class RmluiConan(ConanFile):
     name = "rmlui"
@@ -31,7 +36,6 @@ class RmluiConan(ConanFile):
     }
     build_requires = ["cmake/3.23.2"]
     exports_sources = ["CMakeLists.txt"]
-    generators = ["cmake", "cmake_find_package"]
 
     @property
     def _minimum_compilers_version(self):
@@ -59,8 +63,8 @@ class RmluiConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -70,12 +74,10 @@ class RmluiConan(ConanFile):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
             if lazy_lt_semver(str(self.settings.compiler.version), min_version):
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def requirements(self):
         if self.options.font_interface == "freetype":
@@ -87,69 +89,69 @@ class RmluiConan(ConanFile):
         if self.options.with_thirdparty_containers:
             self.requires("robin-hood-hashing/3.11.3")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if not hasattr(self, "_cmake"):
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
-            self._cmake.definitions["BUILD_SAMPLES"] = False
-            self._cmake.definitions["CUSTOM_CONFIGURATION"] = True
-            self._cmake.definitions["CUSTOM_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["robin-hood-hashing"].include_paths)
-            self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
-            self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = True
-            self._cmake.definitions["ENABLE_TRACY_PROFILING"] = False
-            self._cmake.definitions["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
-            self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = self.options.font_interface is None
-            self._cmake.definitions["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
+        tc.cache_variables["BUILD_SAMPLES"] = False
+        tc.cache_variables["CUSTOM_CONFIGURATION"] = True
+        tc.cache_variables["CUSTOM_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["robin-hood-hashing"].include_paths)
+        tc.cache_variables["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
+        tc.cache_variables["ENABLE_PRECOMPILED_HEADERS"] = True
+        tc.cache_variables["ENABLE_TRACY_PROFILING"] = False
+        tc.cache_variables["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
+        tc.cache_variables["NO_FONT_INTERFACE_DEFAULT"] = self.options.font_interface is None
+        tc.cache_variables["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+        tc.generate()
 
-            self._cmake.configure()
-
-        return self._cmake
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        # The *.cmake files that conan generates using cmake_find_package for CMake's find_package to consume use
-        # different variable naming than described in CMake's documentation, thus the need for most of the replacements.
-        # References:
-        #  * https://cmake.org/cmake/help/latest/module/FindFreetype.html
-        #  * https://cmake.org/cmake/help/latest/module/FindLua.html
+        # Since we have switched to CMakeDeps, the targets are named differently, so we need to patch
+        # the CMakeLists.txt to use the new names
         replace_mapping = {
-            "FREETYPE_FOUND": "Freetype_FOUND",
-            "FREETYPE_INCLUDE_DIRS": "Freetype_INCLUDE_DIRS",
-            "FREETYPE_LINK_DIRS": "Freetype_LINK_DIRS",
-            "FREETYPE_LIBRARY": "Freetype_LIBRARIES",
-            "FREETYPE_LIBRARIES": "Freetype_LIBRARIES",
-            "LUA_FOUND": "lua_FOUND",
-            "LUA_INCLUDE_DIR": "lua_INCLUDE_DIR",
-            "LUA_LIBRARIES": "lua_LIBRARIES",
+            "if(FREETYPE_FOUND)": "if(TRUE)", # only in 4.0
+            "include_directories(${FREETYPE_INCLUDE_DIRS})": "",    # only in 4.0
+            "link_directories(${FREETYPE_LINK_DIRS})": "",    # only in 4.0
+            "list(APPEND CORE_LINK_LIBS ${FREETYPE_LIBRARY})": "list(APPEND CORE_LINK_LIBS freetype)", # only in 4.0
+            "list(APPEND CORE_LINK_LIBS ${FREETYPE_LIBRARIES})": "list(APPEND CORE_LINK_LIBS freetype)",
+            "list(APPEND CORE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})": "",
+            "if(LUA_FOUND)": "if(TRUE)", # only in 4.0
+            "list(include_directories(${LUA_INCLUDE_DIR}))": "", # only in 4.0
+            "list(APPEND LUA_BINDINGS_INCLUDE_DIRS ${LUA_INCLUDE_DIR})": "",
+            "list(APPEND LUA_BINDINGS_LINK_LIBS ${LUA_LIBRARIES})": "list(APPEND LUA_BINDINGS_LINK_LIBS lua::lua)",
             # disables the built-in generation of package configuration files
             "if(PkgHelpers_AVAILABLE)": "if(FALSE)"
         }
 
         cmakelists_path = os.path.join(
-            self._source_subfolder, "CMakeLists.txt")
+            self.source_folder, "CMakeLists.txt")
         for key, value in replace_mapping.items():
-            tools.replace_in_file(cmakelists_path, key, value, strict=False)
+            replace_in_file(self, cmakelists_path, key, value, strict=False)
 
         if self.options.with_thirdparty_containers:
-            config_path = os.path.join(self._source_subfolder,
+            config_path = os.path.join(self.source_folder,
                                        "Include", "RmlUi", "Config", "Config.h")
-            tools.replace_in_file(
-                config_path, "\"../Core/Containers/robin_hood.h\"", "<robin_hood.h>")
+            replace_in_file(
+                self, config_path, "\"../Core/Containers/robin_hood.h\"", "<robin_hood.h>")
 
     def build(self):
         self._patch_sources()
-        self._configure_cmake().build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self._configure_cmake().install()
-        self.copy("*LICENSE.txt", dst="licenses", src=self._source_subfolder, excludes=("Samples/*", "Tests/*"))
+        cmake = CMake(self)
+        cmake.install()
+        self.copy("*LICENSE.txt", dst="licenses", src=self.source_folder, excludes=("Samples/*", "Tests/*"))
 
     def package_info(self):
         if self.options.matrix_mode == "row_major":
