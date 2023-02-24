@@ -1,4 +1,4 @@
 sources:
   "2022g":
-    url: "https://data.iana.org/time-zones/releases/tzdata2022g.tar.gz"
-    sha256: "4491db8281ae94a84d939e427bdd83dc389f26764d27d9a5c52d782c16764478"
+    url: "https://github.com/eggert/tz/archive/refs/tags/2022g.tar.gz"
+    sha256: "cc1169a43591201964ba6977ce8a63bb9cbe2d6e6bdcde34cd609f50e9866039"
