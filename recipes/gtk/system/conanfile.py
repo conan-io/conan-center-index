@@ -1,19 +1,21 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.system import package_manager
-from conans import tools
+from conan.tools.gnu import PkgConfig
 
-required_conan_version = ">=1.47"
+
+required_conan_version = ">=1.53"
 
 
 class ConanGTK(ConanFile):
     name = "gtk"
-    url = "https://github.com/conan-io/conan-center-index"
-    license = "LGPL-2.1-or-later"
-    homepage = "https://www.gtk.org"
     description = "A free and open-source cross-platform widget toolkit for creating graphical user interfaces"
+    package_type = "library"
+    license = "LGPL-2.1-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.gtk.org"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"version": [2, 3]}
+    options = {"version": [2, 3, 4]}
     default_options = {"version": 2}
     topics = ("gui", "widget", "graphical")
 
@@ -25,7 +27,7 @@ class ConanGTK(ConanFile):
         self.info.settings.clear()
 
     def _fill_cppinfo_from_pkgconfig(self, name):
-        pkg_config = tools.PkgConfig(name)
+        pkg_config = PkgConfig(name)
         if not pkg_config.provides:
             raise ConanException(f"GTK-{self.options.version} development files aren't available, give up.")
         libs = [lib[2:] for lib in pkg_config.libs_only_l]
@@ -52,7 +54,7 @@ class ConanGTK(ConanFile):
         yum.install([f"gtk{self.options.version}-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install(["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"], update=True, check=True)
+        apt.install(["libgtk2.0-dev"] if self.options.version == 2 else [f"libgtk-{self.options.version}-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
         pacman.install([f"gtk{self.options.version}"], update=True, check=True)
@@ -64,5 +66,9 @@ class ConanGTK(ConanFile):
         pkg.install([f"gtk{self.options.version}"], update=True, check=True)
 
     def package_info(self):
-        for name in [f"gtk+-{self.options.version}.0"]:
-            self._fill_cppinfo_from_pkgconfig(name)
+        if self.options.version < 4:
+            for name in [f"gtk+-{self.options.version}.0"]:
+                self._fill_cppinfo_from_pkgconfig(name)
+        else:
+            for name in [f"gtk{self.options.version}"]:
+                self._fill_cppinfo_from_pkgconfig(name)
