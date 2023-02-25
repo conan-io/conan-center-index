@@ -8,7 +8,7 @@ from conan.tools.layout import basic_layout
 
 class TzConan(ConanFile):
     name = "tz"
-    license = "Public Domain"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The Time Zone Database contains data that represent the history of local time for many representative locations around the globe."
     topics = ("tz", "tzdb", "time", "zone", "date")
