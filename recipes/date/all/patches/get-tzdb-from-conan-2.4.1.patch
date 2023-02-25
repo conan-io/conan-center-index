@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7bc93df..be8a34a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,6 +11,7 @@ set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are req
+ 
+ option( USE_SYSTEM_TZ_DB "Use the operating system's timezone database" OFF )
+ option( USE_TZ_DB_IN_DOT "Save the timezone database in the current folder" OFF )
++option( USE_TZ_PACKAGE "The TZ DB will be provided by a package manager" OFF )
+ option( BUILD_SHARED_LIBS  "Build a shared version of library" OFF )
+ option( ENABLE_DATE_TESTING "Enable unit tests" ON )
+ 
+@@ -24,6 +25,7 @@ endfunction( )
+ 
+ print_option( USE_SYSTEM_TZ_DB )
+ print_option( USE_TZ_DB_IN_DOT )
++print_option( USE_TZ_PACKAGE )
+ print_option( BUILD_SHARED_LIBS  )
+ print_option( ENABLE_DATE_TESTING )
+ 
+@@ -45,12 +47,14 @@ set( HEADER_FILES
+ 
+ add_library( tz ${HEADER_FILES} ${SOURCE_FOLDER}/tz.cpp )
+ 
+-if( USE_SYSTEM_TZ_DB )
++if( USE_SYSTEM_TZ_DB OR USE_TZ_PACKAGE )
+ 	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=0 )
+ 	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=0 )
+ 	# cannot set USE_OS_TZDB to 1 on Windows
+-	if( NOT WIN32 )
++	if( NOT WIN32 AND NOT USE_TZ_PACKAGE )
+ 		target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=1 )
++	else( )
++		target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=0 )
+ 	endif( )
+ else( )
+ 	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=1 )
+@@ -67,6 +71,8 @@ endif( )
+ 
+ if( USE_TZ_DB_IN_DOT )
+ 	target_compile_definitions( tz PRIVATE -DINSTALL=. )
++elseif( USE_TZ_PACKAGE )
++    target_compile_definitions( tz PRIVATE -DINSTALL=${TZ_PACKAGE_DIR} )
+ endif( )
+ 
+ target_link_libraries( tz ${CMAKE_THREAD_LIBS_INIT} ${OPTIONAL_LIBRARIES} )
+-- 
+2.39.1
+

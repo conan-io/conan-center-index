@@ -1,0 +1,50 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c606f47..367bb14 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,6 +30,7 @@ set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are req
+ option( USE_SYSTEM_TZ_DB "Use the operating system's timezone database" OFF )
+ option( MANUAL_TZ_DB "User will set TZ DB manually by invoking set_install in their code" OFF )
+ option( USE_TZ_DB_IN_DOT "Save the timezone database in the current folder" OFF )
++option( USE_TZ_PACKAGE "The TZ DB will be provided by a package manager" OFF )
+ option( BUILD_SHARED_LIBS  "Build a shared version of library" OFF )
+ option( ENABLE_DATE_TESTING "Enable unit tests" OFF )
+ option( DISABLE_STRING_VIEW "Disable string view" OFF )
+@@ -52,6 +53,7 @@ endfunction( )
+ print_option( USE_SYSTEM_TZ_DB )
+ print_option( MANUAL_TZ_DB )
+ print_option( USE_TZ_DB_IN_DOT )
++print_option( USE_TZ_PACKAGE )
+ print_option( BUILD_SHARED_LIBS  )
+ print_option( ENABLE_DATE_TESTING )
+ print_option( DISABLE_STRING_VIEW )
+@@ -121,7 +123,7 @@ if( BUILD_TZ_LIB )
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+         $<INSTALL_INTERFACE:include> )
+ 
+-    if ( USE_SYSTEM_TZ_DB OR MANUAL_TZ_DB )
++    if ( USE_SYSTEM_TZ_DB OR MANUAL_TZ_DB OR USE_TZ_PACKAGE)
+       target_compile_definitions( date-tz PRIVATE AUTO_DOWNLOAD=0 HAS_REMOTE_API=0 )
+     else()
+       target_compile_definitions( date-tz PRIVATE AUTO_DOWNLOAD=1 HAS_REMOTE_API=1 )
+@@ -129,6 +131,8 @@ if( BUILD_TZ_LIB )
+ 
+     if ( USE_SYSTEM_TZ_DB AND NOT WIN32 AND NOT MANUAL_TZ_DB )
+       target_compile_definitions( date-tz PRIVATE INSTALL=. PUBLIC USE_OS_TZDB=1 )
++    elseif ( USE_TZ_PACKAGE )
++      target_compile_definitions( date-tz PRIVATE INSTALL=${TZ_PACKAGE_DIR} PUBLIC USE_OS_TZDB=0 )
+     else()
+       target_compile_definitions( date-tz PUBLIC USE_OS_TZDB=0 )
+     endif()
+@@ -151,7 +155,7 @@ if( BUILD_TZ_LIB )
+         find_package( Threads )
+         target_link_libraries( date-tz PUBLIC Threads::Threads )
+     endif( )
+-    if( NOT USE_SYSTEM_TZ_DB AND NOT MANUAL_TZ_DB )
++    if( NOT USE_SYSTEM_TZ_DB AND NOT MANUAL_TZ_DB AND NOT USE_TZ_PACKAGE )
+         find_package( CURL REQUIRED )
+         target_include_directories( date-tz SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} )
+         target_link_libraries( date-tz PRIVATE ${CURL_LIBRARIES} )
+-- 
+2.39.1
+
