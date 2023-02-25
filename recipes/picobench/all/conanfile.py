@@ -29,7 +29,7 @@ class PicobenchConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.options.with_cli:
+        if self.info.options.with_cli:
             del self.info.settings.compiler
         else:
             self.info.clear()
