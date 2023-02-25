@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
@@ -96,8 +96,12 @@ class VulkanValidationLayersConan(ConanFile):
 
     def requirements(self):
         self.requires("robin-hood-hashing/3.11.5")
-        # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
-        self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
+        self.requires(self._require("spirv-headers"))
+        if Version(conan_version).major < "2":
+            # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
+            self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
+        else:
+            self.requires(self._require("spirv-tools"))
         self.requires(self._require("vulkan-headers"))
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
