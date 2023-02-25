@@ -22,6 +22,7 @@ class CprConan(ConanFile):
     homepage = "https://docs.libcpr.org/"
     topics = ("requests", "web", "curl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -142,7 +143,7 @@ class CprConan(ConanFile):
         return validators[library]
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -168,12 +169,12 @@ class CprConan(ConanFile):
                 else f"Invalid value of ssl option, {ssl_library}"
             )
 
-        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
+        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.dependencies["libcurl"].options.with_ssl:
             raise ConanInvalidConfiguration(
                 f"{self.ref}:with_ssl={self.options.with_ssl} requires libcurl:with_ssl={self.options.with_ssl}"
             )
 
-        if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
+        if ssl_library == "winssl" and self.dependencies["libcurl"].options.with_ssl != "schannel":
             raise ConanInvalidConfiguration(
                 f"{self.ref}:with_ssl=winssl requires libcurl:with_ssl=schannel"
             )
@@ -185,8 +186,7 @@ class CprConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _get_cmake_option(self, option):
         CPR_1_6_CMAKE_OPTIONS_TO_OLD = {
