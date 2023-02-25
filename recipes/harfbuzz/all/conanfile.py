@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.build import can_run, cross_building, stdcpp_library
+from conan.tools.build import can_run, stdcpp_library
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -75,7 +75,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/72.1")
         if self.options.with_glib:
-            self.requires("glib/2.75.3", run=not cross_building(self))
+            self.requires("glib/2.75.3", run=can_run(self))
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -95,7 +95,7 @@ class HarfbuzzConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if self.options.with_glib and cross_building(self):
+        if self.options.with_glib and not can_run(self):
             self.tool_requires("glib/2.75.3")
 
     def source(self):
@@ -116,7 +116,7 @@ class HarfbuzzConan(ConanFile):
             return "ninja", []
 
         VirtualBuildEnv(self).generate()
-        if self.options.with_glib and not cross_building(self):
+        if self.options.with_glib and can_run(self):
             VirtualRunEnv(self).generate(scope="build")
         PkgConfigDeps(self).generate()
 
