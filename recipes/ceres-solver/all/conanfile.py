@@ -22,6 +22,7 @@ class CeressolverConan(ConanFile):
     )
     topics = ("optimization", "non-linear least squares")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
