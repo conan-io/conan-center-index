@@ -56,7 +56,6 @@ class CeressolverConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "98": {},
             "14": {
                 "apple-clang": "5",
                 "clang": "5",
@@ -64,7 +63,7 @@ class CeressolverConan(ConanFile):
                 "msvc": "190",
                 "Visual Studio": "14",
             },
-        }[self._min_cppstd]
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
