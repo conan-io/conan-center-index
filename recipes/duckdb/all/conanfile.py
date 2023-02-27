@@ -16,6 +16,7 @@ class DuckdbConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cwida/duckdb"
     topics = ("sql", "database", "olap", "embedded-database")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -76,7 +77,7 @@ class DuckdbConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace 
+        # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
