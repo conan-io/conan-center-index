@@ -1,6 +1,6 @@
 #!groovy
 
-@Library('c3i') _
+@Library('c3i@rr/canary-build') _
 
 String configurationFile = '.c3i/config_v2.yml'
 cci.runBuild(this, configurationFile)
