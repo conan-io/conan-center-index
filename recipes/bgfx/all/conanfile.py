@@ -286,7 +286,10 @@ class bgfxConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
-        self.cpp_info.libs = ["bgfx"]
+        if self.options.shared and self.settings.os in ["Macos", "iOS"]:
+            self.cpp_info.libs = [f"bgfx-shared-lib{self.settings.build_type}"]
+        else:
+            self.cpp_info.libs = ["bgfx"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["gdi32"])
