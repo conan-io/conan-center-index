@@ -13,7 +13,7 @@ need. Adding a new version will increase the building time and storage for each 
 
 Once you detect which version should be updated, please, first check if the project `license` keeps the same.
 
-> In case needing to update attributes, dependencies versions, patches, or anything besides the package version in `conandata.yml` and `config.yml`,
+> In case you need to update attributes, dependencies versions, patches, or anything besides the package version in `conandata.yml` and `config.yml`,
   then your pull request will not be classified as bump version.
 
 ## What should be modified when bumping a version?
