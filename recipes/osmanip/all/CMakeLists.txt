@@ -26,6 +26,12 @@ target_sources(osmanip PRIVATE
         ${OSMANIP_SRC_DIR}/src/progressbar/progress_bar.cpp
     >
     ${OSMANIP_SRC_DIR}/src/utility/windows.cpp
+    $<$<VERSION_GREATER_EQUAL:${OSMANIP_VERSION},4.4.0>:
+        ${OSMANIP_SRC_DIR}/src/utility/iostream.cpp
+        ${OSMANIP_SRC_DIR}/src/utility/output_redirector.cpp
+        ${OSMANIP_SRC_DIR}/src/utility/sstream.cpp
+        ${OSMANIP_SRC_DIR}/src/utility/strings.cpp
+    >
 )
 target_include_directories(osmanip PUBLIC ${OSMANIP_SRC_DIR}/include/)
 target_compile_features(osmanip PUBLIC cxx_std_17)

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -16,6 +16,7 @@ class OsmanipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JustWhit3/osmanip"
     topics = ("manipulator", "iostream", "output-stream", "iomanip")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,17 +34,20 @@ class OsmanipConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "4.5.0":
+            del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/1.81.0")
         if Version(self.version) < "4.2.0":
-            self.requires("arsenalgear/1.2.2")
+            self.requires("arsenalgear/1.2.2", transitive_headers=True)
         else:
-            self.requires("arsenalgear/2.0.1")
+            self.requires("arsenalgear/2.0.1", transitive_headers=True)
 
     @property
     def _minimum_cpp_standard(self):
@@ -79,8 +83,11 @@ class OsmanipConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OSMANIP_VERSION"] = str(self.version)
-        tc.variables["OSMANIP_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if Version(self.version) < "4.5.0":
+            tc.variables["OSMANIP_VERSION"] = str(self.version)
+            tc.variables["OSMANIP_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        else:
+            tc.variables["OSMANIP_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -89,13 +96,19 @@ class OsmanipConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        if Version(self.version) < "4.5.0":
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        else:
+            cmake.configure()
+            
         cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["osmanip"]
