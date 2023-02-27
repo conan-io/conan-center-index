@@ -1,13 +1,14 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import download, rmdir
 
 
 class MingwConan(ConanFile):
     name = "mingw-builds"
     description = "MinGW is a contraction of Minimalist GNU for Windows"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/ericLemanissier/mingw-builds"
+    homepage = "https://github.com/niXman/mingw-builds"
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
     settings = "os", "arch"
@@ -60,7 +61,7 @@ class MingwConan(ConanFile):
         # Source should be downloaded in the build step since it depends on specific options
         url = self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)]
         self.output.info("Downloading: %s" % url["url"])
-        tools.download(url["url"], "file.7z", sha256=url["sha256"])
+        download(self, url["url"], "file.7z", sha256=url["sha256"])
         self.run("7z x file.7z")
         os.remove('file.7z')
 
@@ -68,9 +69,9 @@ class MingwConan(ConanFile):
     def package(self):
         target = "mingw64" if self.settings.arch == "x86_64" else "mingw32"
         self.copy("*", dst="", src=target)
-        tools.rmdir(target)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "opt", "lib", "cmake"))
+        rmdir(self, target)
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "opt", "lib", "cmake"))
 
     def package_info(self):
         if getattr(self, "settings_target", None):
