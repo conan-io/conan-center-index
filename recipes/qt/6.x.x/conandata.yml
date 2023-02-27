@@ -42,6 +42,11 @@ patches:
       patch_description: "Fix PCRE2 detection"
       patch_type: "bugfix"
       patch_source: "https://codereview.qt-project.org/c/qt/qtbase/+/445885"
+    - patch_file: "patches/1391383.diff"
+      base_path: "qtmultimedia"
+      patch_description: "Remove .dll extension as QSystemLibrary unconditionally adds it"
+      patch_type: "bugfix"
+      patch_source: "https://codereview.qt-project.org/c/qt/qtmultimedia/+/445672"
   "6.4.1":
     - base_path: "qtbase/cmake"
       patch_file: "patches/qt6-pri-helpers-fix.diff"

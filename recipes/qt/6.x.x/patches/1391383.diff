@@ -1,0 +1,13 @@
+diff --git a/src/multimedia/windows/qwindowsmediafoundation_p.h b/src/multimedia/windows/qwindowsmediafoundation_p.h
+index 125a20b87..de7fb1dd4 100644
+--- a/src/multimedia/windows/qwindowsmediafoundation_p.h
++++ b/src/multimedia/windows/qwindowsmediafoundation_p.h
+@@ -37,7 +37,7 @@ class QWindowsMediaFoundation
+     decltype(&::MFCreateSample) mfCreateSample = nullptr;
+ 
+ private:
+-    QWindowsMediaFoundation() : m_mfplat(QStringLiteral("Mfplat.dll")) {}
++    QWindowsMediaFoundation() : m_mfplat(QStringLiteral("Mfplat")) {}
+ 
+     QSystemLibrary m_mfplat;
+ };
