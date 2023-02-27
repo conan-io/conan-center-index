@@ -225,8 +225,6 @@ class LibtoolConan(ConanFile):
 
         # Define environment variables such that libtool m4 files are seen by Automake
         libtool_aclocal_dir = os.path.join(self._datarootdir, "aclocal")
-        self.output.info(f"Appending ACLOCAL_PATH env: {libtool_aclocal_dir}")
-        self.output.info(f"Appending AUTOMAKE_CONAN_INCLUDES environment variable: {libtool_aclocal_dir}")
 
         self.buildenv_info.append_path("ACLOCAL_PATH", libtool_aclocal_dir)
         self.buildenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", libtool_aclocal_dir)
