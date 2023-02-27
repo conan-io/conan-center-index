@@ -14,7 +14,7 @@ class EmbeddedTemplateLibraryConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.etlcpp.com/"
     topics = ("cpp", "embedded", "template", "container", "utility", "framework", "messaging")
-    package_type = "library"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
