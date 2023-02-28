@@ -136,16 +136,6 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Emscripten":
             if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
-        # Attempting to use the legacy provider as shared object will result in a failing test
-        # package on the Mac OS platform: the digest_legacy test application is not able to load
-        # the ossl-modules/legacy.so library.
-        # FIXME: Remove this exception once loading the legacy provider as shared object is fixed.
-        # A workaround for now is to either use openssl:no_legacy = True so that there are no legacy
-        # algorithms at all. Or to use openssl:no_module = True to compile the legacy providers
-        # directly into the main library, see https://github.com/conan-io/conan/pull/14426
-        elif self.settings.os == "Macos":
-            if (not self.options.no_legacy) and (not self.options.no_module):
-                raise ConanInvalidConfiguration("os=Macos needs a fix for loading the legacy provider as shared module")
 
     @property
     def _is_clangcl(self):
