@@ -15,6 +15,7 @@ class ZstdConan(ConanFile):
     topics = ("zstandard", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,22 +43,6 @@ class ZstdConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
-    def build_requirements(self):
-        # zstd/>=1.5.4 uses `check_linker_flag` which is introduced since cmake 3.1.8.
-        if Version(self.version) >= "1.5.4" and not self._cmake_new_enough("3.18"):
-            self.tool_requires("cmake/3.25.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
