@@ -95,7 +95,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         # As of ANTLR 4.12.0, one can choose to build the shared/static library only instead of both of them
         # Related Issue: https://github.com/antlr/antlr4/issues/3993
         # Related PR: https://github.com/antlr/antlr4/pull/3996
-        if Version(self.version) > "4.12":
+        if Version(self.version) >= "4.12":
             tc.variables["ANTLR_BUILD_SHARED"] = self.options.shared
             tc.variables["ANTLR_BUILD_STATIC"] = not self.options.shared
         tc.generate()
