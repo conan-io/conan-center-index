@@ -10,7 +10,7 @@ import os
 import re
 import shlex
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=1.57.0"
 
 
 class MpfrConan(ConanFile):
