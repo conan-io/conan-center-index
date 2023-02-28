@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 from conan.tools.microsoft import is_msvc
@@ -23,11 +24,13 @@ class QhullConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "reentrant": [True, False],
+        "cpp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "reentrant": True,
+        "cpp": False,
     }
 
     def export_sources(self):
@@ -41,14 +44,19 @@ class QhullConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+
+        if not self.options.cpp:
+            try:
+                del self.settings.compiler.libcxx
+            except Exception:
+                pass
+            try:
+                del self.settings.compiler.cppstd
+            except Exception:
+                pass
+
+        if self.options.cpp and not (not self.options.shared and self.options.reentrant):
+            raise ConanInvalidConfiguration("The option 'cpp==True' requires shared==False and reentrant==True")
 
     def package_id(self):
         del self.info.options.reentrant
@@ -67,7 +75,7 @@ class QhullConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(variables={"BUILD_QHULLCPP": self.options.cpp})
         cmake.build()
 
     def package(self):
@@ -92,6 +100,9 @@ class QhullConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])
 
+        if self.options.cpp:
+            self.cpp_info.components["qhullcpp"].libs = [self._qhull_libcpp_name]
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
@@ -105,6 +116,13 @@ class QhullConan(ConanFile):
         self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
         self.cpp_info.components["libqhull"].set_property("cmake_target_name", f"Qhull::{self._qhull_cmake_name}")
         self.cpp_info.components["libqhull"].set_property("pkg_config_name", self._qhull_pkgconfig_name)
+
+        if self.options.cpp:
+            self.cpp_info.components["qhullcpp"].names["cmake_find_package"] = self._qhull_libcpp_name
+            self.cpp_info.components["qhullcpp"].names["cmake_find_package_multi"] = self._qhull_libcpp_name
+            self.cpp_info.components["qhullcpp"].names["pkg_config"] = self._qhull_pkgconfig_name
+            self.cpp_info.components["qhullcpp"].set_property("cmake_target_name", f"Qhull::{self._qhull_libcpp_name}")
+            self.cpp_info.components["qhullcpp"].set_property("pkg_config_name", self._qhull_libcpp_name)
 
     @property
     def _qhull_cmake_name(self):
@@ -135,4 +153,9 @@ class QhullConan(ConanFile):
                 name += "r"
             if self.settings.build_type == "Debug":
                 name += "d"
+        return name
+
+    @property
+    def _qhull_libcpp_name(self):
+        name = "qhullcpp"
         return name
