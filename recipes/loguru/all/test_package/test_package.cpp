@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     LOG_F(INFO, "Verbose scope endings: {}", LOGURU_VERBOSE_SCOPE_ENDINGS);
     LOG_F(INFO, "Redefine assert: {}", LOGURU_REDEFINE_ASSERT);
     LOG_F(INFO, "With fileabs: {}", LOGURU_WITH_FILEABS);
-    LOG_F(INFO, "With rtti: {}", LOGURU_WITH_RTTI);
+    LOG_F(INFO, "With rtti: {}", LOGURU_RTTI);
     LOG_F(INFO, "With streams: {}", LOGURU_WITH_STREAMS);
 
 #if LOGURU_WITH_STREAMS == 1
@@ -35,4 +35,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

@@ -18,7 +18,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        #tc.variables["SPDLOG_HEADER_ONLY"] = self.dependencies["spdlog"].options.header_only
         tc.generate()
 
     def build(self):
