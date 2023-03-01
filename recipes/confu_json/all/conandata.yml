@@ -1,13 +1,13 @@
 sources:
-  0.0.5:
-    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.5.tar.gz
-    sha256: bc506d4b7836a7689b1c6a2d89bb0c3441f774c8f845fef79d85c71099df5bf9
-  0.0.9:
-    url: https://github.com/werto87/confu_json/archive/refs/tags/v0.0.9.tar.gz
-    sha256: 29b2940b939cb04f11fdab4964c86bcb23ac75c588550bf54048e024444d2718
-  0.0.10:
-    url: "https://github.com/werto87/confu_json/archive/v0.0.10.tar.gz"
+  "1.0.0":
+    url: "https://github.com/werto87/confu_json/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "f165172220b440d37a7a8301e490cf791b3b25b0cc3f2a08b355609c5f777db0"
+  "0.0.10":
+    url: "https://github.com/werto87/confu_json/archive/refs/tags/v0.0.10.tar.gz"
     sha256: "b31aab1bce952c0dc0bfc1f955a7b88be5103350b5a5eee1a4586ccec0e51fc1"
-  1.0.0:
-    url: https://github.com/werto87/confu_json/archive/refs/tags/v1.0.0.tar.gz
-    sha256: f165172220b440d37a7a8301e490cf791b3b25b0cc3f2a08b355609c5f777db0
+  "0.0.9":
+    url: "https://github.com/werto87/confu_json/archive/refs/tags/v0.0.9.tar.gz"
+    sha256: "29b2940b939cb04f11fdab4964c86bcb23ac75c588550bf54048e024444d2718"
+  "0.0.5":
+    url: "https://github.com/werto87/confu_json/archive/refs/tags/v0.0.5.tar.gz"
+    sha256: "bc506d4b7836a7689b1c6a2d89bb0c3441f774c8f845fef79d85c71099df5bf9"

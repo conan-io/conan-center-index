@@ -2,11 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    replace_in_file, rm, rmdir
+)
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class GeographiclibConan(ConanFile):
@@ -32,8 +35,7 @@ class GeographiclibConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,7 +43,10 @@ class GeographiclibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     @property
     def _compilers_minimum_version(self):
@@ -51,34 +56,33 @@ class GeographiclibConan(ConanFile):
             "gcc": "4.9",
             "clang": "6",
             "Visual Studio": "14", # guess
+            "msvc": "190",
         }
 
     def validate(self):
         if Version(self.version) >= "1.51":
-            if self.info.settings.compiler.cppstd:
+            if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
 
-            def lazy_lt_semver(v1, v2):
+            def loose_lt_semver(v1, v2):
                 lv1 = [int(v) for v in v1.split(".")]
                 lv2 = [int(v) for v in v2.split(".")]
                 min_length = min(len(lv1), len(lv2))
                 return lv1[:min_length] < lv2[:min_length]
 
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and lazy_lt_semver(str(self.info.settings.compiler.version), minimum_version):
-                raise ConanInvalidConfiguration("geographiclib {} requires C++11 math functions, which your compiler does not support.".format(self.version))
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++11 math functions, which your compiler does not support."
+                )
 
-        if self.info.options.precision not in ["float", "double"]:
+        if self.options.precision not in ["float", "double"]:
             # FIXME: add support for extended, quadruple and variable precisions
             # (may require external libs: boost multiprecision for quadruple, mpfr for variable)
             raise ConanInvalidConfiguration("extended, quadruple and variable precisions not yet supported in this recipe")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _cmake_option_precision(self):
@@ -135,13 +139,10 @@ class GeographiclibConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
 
-        if self.options.tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "geographiclib"
         self.cpp_info.filenames["cmake_find_package_multi"] = "geographiclib"
         self.cpp_info.names["cmake_find_package"] = "GeographicLib"
         self.cpp_info.names["cmake_find_package_multi"] = "GeographicLib"
+        if self.options.tools:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
