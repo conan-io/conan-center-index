@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 find_package(foxglove-websocket REQUIRED CONFIG)
 
-add_executable(test_package test_package.cpp)
-set_target_properties(test_package PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-target_link_libraries(test_package foxglove-websocket::foxglove-websocket)
+if (${FOXGLOVE_WEBSOCKET_VERSION} VERSION_LESS "1.0.0")
+    add_executable(${PROJECT_NAME} test_package_pre_1_0_0.cpp)
+else()
+    add_executable(${PROJECT_NAME} test_package.cpp)
+endif()
+
+target_link_libraries(${PROJECT_NAME} foxglove-websocket::foxglove-websocket)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
