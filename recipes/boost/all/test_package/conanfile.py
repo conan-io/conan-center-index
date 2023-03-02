@@ -7,7 +7,7 @@ from conan.tools.files import chdir
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
     def _boost_option(self, name, default):
@@ -58,4 +58,5 @@ class TestPackageConan(ConanFile):
         if not can_run(self):
             return
         with chdir(self, self.folders.build_folder):
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type}")
+            env = "conanrun" if self.settings.os == "Windows" else "conanbuild"
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env=env)
