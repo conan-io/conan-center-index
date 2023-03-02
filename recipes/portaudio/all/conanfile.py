@@ -40,7 +40,7 @@ class PortaudioConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             if self.options.with_alsa:
-                self.requires("libalsa/1.1.9")
+                self.requires("libalsa/1.2.7.2")
 
     def system_requirements(self):
         if self.settings.os == "Linux":
@@ -67,7 +67,7 @@ class PortaudioConan(ConanFile):
         if self.options.get_safe("with_alsa", False): # with_alsa=False just makes portaudio use the Linux distro's alsa
             # as a workaround to the fact that conancenter's alsa does not work,
             # at least some of the time (no devices detected by portaudio)
-            self.variables["PA_USE_ALSA"] = True
+            tc.variables["PA_USE_ALSA"] = True
         tc.generate()
 
     def layout(self):
