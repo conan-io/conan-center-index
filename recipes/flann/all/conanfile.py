@@ -42,7 +42,7 @@ class FlannConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lz4/1.9.4")
+        self.requires("lz4/1.9.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if Version(self.version) >= "1.9.2" and self.settings.compiler.get_safe("cppstd"):
