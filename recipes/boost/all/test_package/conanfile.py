@@ -3,8 +3,6 @@ from conan.errors import ConanException
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import chdir
-from conan.tools.scm import Version
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -56,7 +54,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not can_run(self):
-            return
-        with chdir(self, self.folders.build_folder):
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env="conanrun")
+        if can_run(self):
+            cmake = CMake(self)
+            cmake.test()
