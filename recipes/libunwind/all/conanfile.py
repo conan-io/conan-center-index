@@ -18,6 +18,7 @@ class LiunwindConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libunwind/libunwind"
     topics = ("unwind", "debuggers", "exception-handling", "introspection", "setjmp")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,16 +53,16 @@ class LiunwindConan(ConanFile):
 
     def requirements(self):
         if self.options.minidebuginfo:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.zlibdebuginfo:
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.info.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libunwind is only supported on Linux and FreeBSD")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if not cross_building(self):

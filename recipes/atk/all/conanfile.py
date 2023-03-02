@@ -52,9 +52,6 @@ class AtkConan(ConanFile):
     def requirements(self):
         self.requires("glib/2.75.2")
 
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
-
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
