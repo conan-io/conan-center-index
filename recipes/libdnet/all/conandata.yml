@@ -1,0 +1,4 @@
+sources:
+  "1.16.3":
+    url: "https://github.com/ofalk/libdnet/archive/refs/tags/libdnet-1.16.3.tar.gz"
+    sha256: "83171a9f6e96d7a5047d6537fce4c376bdf6d867f8d49cf6ba434a0f3f7b45c1"
