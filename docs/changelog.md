@@ -1,5 +1,10 @@
 # Changelog
 
+### 03-March-2023 - 11:05 CET
+
+- [feature] Update ready_v2_references.yml file automatically
+- [fix] Do not reuse the same build folder to avoid busy files
+
 ### 21-February-2023 - 17:22 CET
 
 - [fix] Fix bug with cppstd entry in configuration files.
