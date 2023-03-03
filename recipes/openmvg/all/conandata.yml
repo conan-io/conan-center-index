@@ -1,0 +1,12 @@
+sources:
+  "2.0":
+    url: "https://github.com/openMVG/openMVG/archive/refs/tags/v2.0.tar.gz"
+    sha256: "950da7d6fc370cc99ad29092fd3b46196f782af2f905e475a7262ceb96170618"
+patches:
+  "2.0":
+    - patch_file: "patches/2.0-0001-robust-dependencies.patch"
+      patch_description: "Robust discovery of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/2.0-0002-dont-force-c++11.patch"
+      patch_description: "Allow newer C++ standard than C++11"
+      patch_type: "conan"
