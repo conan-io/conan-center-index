@@ -3,6 +3,7 @@ import glob
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import (
@@ -18,7 +19,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class PangoConan(ConanFile):
@@ -36,7 +37,7 @@ class PangoConan(ConanFile):
         "with_cairo": [True, False],
         "with_xft": [True, False, "auto"],
         "with_freetype": [True, False, "auto"],
-        "with_fontconfig": [True, False, "auto"]
+        "with_fontconfig": [True, False, "auto"],
     }
     default_options = {
         "shared": False,
@@ -45,7 +46,7 @@ class PangoConan(ConanFile):
         "with_cairo": True,
         "with_xft": "auto",
         "with_freetype": "auto",
-        "with_fontconfig": "auto"
+        "with_fontconfig": "auto",
     }
 
     def config_options(self):
@@ -71,7 +72,7 @@ class PangoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
@@ -110,8 +111,9 @@ class PangoConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.9.3")
         self.tool_requires("meson/1.0.0")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -164,6 +166,7 @@ class PangoConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "pango-all-do-no-use")
