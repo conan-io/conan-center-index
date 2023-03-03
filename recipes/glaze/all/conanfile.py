@@ -15,6 +15,7 @@ class GlazeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/stephenberry/glaze"
     topics = ("json", "memory", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -67,7 +68,7 @@ class GlazeConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
