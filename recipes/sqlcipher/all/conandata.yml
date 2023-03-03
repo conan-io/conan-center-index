@@ -1,4 +1,10 @@
 sources:
+  "4.5.3":
+    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.5.3.zip"
+    sha256: "e3509338717cd75366ddbd25f6fb1e467fe6a37ec33fda54a6b24f05ce5ac179"
+  "4.5.2":
+    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.5.2.zip"
+    sha256: "b7281269fa4005a2c516932f260ca1333449acd93a8347efaf8dd6844b5ed223"
   "4.5.1":
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.5.1.zip"
     sha256: "08a1024b299b5527d5b5ed79f67957938b516567f68662e973c4bec1b843b28e"

@@ -1,4 +1,5 @@
 from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.files import replace_in_file
 from conans import tools, ConanFile, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import functools
@@ -66,18 +67,19 @@ class SqlcipherConan(ConanFile):
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1t")
         elif self.options.crypto_library == "libressl":
             self.requires("libressl/3.4.3")
 
     def validate(self):
         if self.options.crypto_library == "commoncrypto" and not tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("commoncrypto is only supported on Macos")
+            raise ConanInvalidConfiguration(
+                "commoncrypto is only supported on Macos")
 
     def build_requirements(self):
         self.build_requires("tcl/8.6.11")
         if not self._is_msvc:
-            self.build_requires("gnu-config/cci.20201022")
+            self.build_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
@@ -103,31 +105,48 @@ class SqlcipherConan(ConanFile):
         crypto_dep = self.deps_cpp_info[str(self.options.crypto_library)]
         crypto_incdir = crypto_dep.include_paths[0]
         crypto_libdir = crypto_dep.lib_paths[0]
-        libs = map(lambda lib : lib + ".lib", crypto_dep.libs)
-        system_libs = map(lambda lib : lib + ".lib", crypto_dep.system_libs)
+        libs = map(lambda lib: lib + ".lib", crypto_dep.libs)
+        system_libs = map(lambda lib: lib + ".lib", crypto_dep.system_libs)
+
 
         nmake_flags = [
-                "TLIBS=\"%s %s\"" % (" ".join(libs), " ".join(system_libs)),
-                "LTLIBPATHS=/LIBPATH:%s" % crypto_libdir,
-                "OPTS=\"-I%s -DSQLITE_HAS_CODEC\"" % (crypto_incdir),
-                "NO_TCL=1",
-                "USE_AMALGAMATION=1",
-                "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL",
-                "SQLITE_TEMP_STORE=%s" % self._temp_store_nmake_value,
-                "TCLSH_CMD=%s" % self.deps_env_info.TCLSH,
-                ]
+        #    "TLIBS=\"%s %s\"" % (" ".join(libs), " ".join(system_libs)),
+            "LTLIBPATHS=/LIBPATH:%s" % crypto_libdir,
+            "OPTS=\"-I%s -DSQLITE_HAS_CODEC\"" % (crypto_incdir),
+            "NO_TCL=1",
+            "USE_AMALGAMATION=1",
+            "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL",
+            "SQLITE_TEMP_STORE=%s" % self._temp_store_nmake_value,
+            "TCLSH_CMD=%s" % self.deps_env_info.TCLSH,
+            "SQLITE3LIB=sqlcipher.lib",
+            "SQLITE3DLL=sqlcipher.dll"
+        ]
 
-        main_target = "dll" if self.options.shared else "sqlcipher.lib"
+        main_target = "sqlcipher.lib"
+        if self.options.shared:
+            main_target = "dll" 
+            dll_required_libs= "TLIBS=\"%s %s\"" % (" ".join(libs), " ".join(system_libs))
+            nmake_flags.append(dll_required_libs)
+
+        replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.msc"), "/d2guard4", "")        
+        replace_in_file(self, os.path.join(self._source_subfolder, "Makefile.msc"), "libsqlite3.lib", "sqlcipher.lib")
 
         if msvc_runtime_flag(self) in ["MD", "MDd"]:
             nmake_flags.append("USE_CRT_DLL=1")
         if self.settings.build_type == "Debug":
             nmake_flags.append("DEBUG=2")
-        nmake_flags.append("FOR_WIN10=1")
+        # It is very unlikely that __stdcall convetions are really wanted for 32bit windows
+        # It would also not work with tcl extensions are enabled, so deactivate it
+        # Ff someone really needs that, please feel free to add it as on option for 32bit msvc builds only
+        if self.settings.arch != "x86":
+            nmake_flags.append("FOR_WIN10=1")
         platforms = {"x86": "x86", "x86_64": "x64"}
         nmake_flags.append("PLATFORM=%s" % platforms[str(self.settings.arch)])
         vcvars = tools.vcvars_command(self.settings)
-        self.run("%s && nmake /f Makefile.msc %s %s" % (vcvars, main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
+        s = "%s && nmake /f Makefile.msc %s %s" % (vcvars, main_target, " ".join(nmake_flags))
+        print(s)      
+        self.run("%s && nmake /f Makefile.msc %s %s" % (vcvars,
+                 main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
 
     @staticmethod
     def _chmod_plus_x(filename):
@@ -142,21 +161,23 @@ class SqlcipherConan(ConanFile):
         configure = os.path.join(self._source_subfolder, "configure")
         self._chmod_plus_x(configure)
         # relocatable shared libs on macOS
-        tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
+        tools.replace_in_file(
+            configure, "-install_name \\$rpath/", "-install_name @rpath/")
         # avoid SIP issues on macOS when dependencies are shared
         if tools.is_apple_os(self.settings.os):
             libpaths = ":".join(self.deps_cpp_info.lib_paths)
             tools.replace_in_file(
                 configure,
                 "#! /bin/sh\n",
-                "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(libpaths),
+                "#! /bin/sh\nexport DYLD_LIBRARY_PATH={}:$DYLD_LIBRARY_PATH\n".format(
+                    libpaths),
             )
         autotools = self._configure_autotools()
         autotools.make()
 
     @functools.lru_cache(1)
     def _configure_autotools(self):
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v): return "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -164,13 +185,17 @@ class SqlcipherConan(ConanFile):
             "--disable-tcl",
         ]
         if self.settings.os == "Windows":
-            args.extend(["config_BUILD_EXEEXT='.exe'", "config_TARGET_EXEEXT='.exe'"])
+            args.extend(["config_BUILD_EXEEXT='.exe'",
+                        "config_TARGET_EXEEXT='.exe'"])
 
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(
+            self, win_bash=tools.os_info.is_windows)
         if self.settings.os == "Linux":
             autotools.libs.append("dl")
             if not self.options.with_largefile:
                 autotools.defines.append("SQLITE_DISABLE_LFS=1")
+        if self.settings.os == "Android":
+            autotools.libs.append("log")
         autotools.defines.append("SQLITE_HAS_CODEC")
 
         env_vars = autotools.vars
@@ -182,7 +207,8 @@ class SqlcipherConan(ConanFile):
         else:
             autotools.defines.append("SQLCIPHER_CRYPTO_OPENSSL")
 
-        autotools.configure(configure_dir=self._source_subfolder, args=args, vars=env_vars)
+        autotools.configure(
+            configure_dir=self._source_subfolder, args=args, vars=env_vars)
         if self.settings.os == "Windows":
             # sqlcipher will create .exe for the build machine, which we defined to Linux...
             tools.replace_in_file("Makefile", "BEXE = .exe", "BEXE = ")
@@ -202,13 +228,15 @@ class SqlcipherConan(ConanFile):
     def _package_unix(self):
         autotools = self._configure_autotools()
         autotools.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.remove_files_by_mask(os.path.join(
+            self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _package_visual(self):
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("sqlite3.h", src=self._source_subfolder, dst=os.path.join("include", "sqlcipher"))
+        self.copy("sqlite3.h", src=self._source_subfolder,
+                  dst=os.path.join("include", "sqlcipher"))
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -224,7 +252,8 @@ class SqlcipherConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "dl"])
             if tools.Version(self.version) >= "4.5.0":
                 self.cpp_info.system_libs.append("m")
-        self.cpp_info.defines = ["SQLITE_HAS_CODEC", "SQLITE_TEMP_STORE={}".format(self._temp_store_nmake_value)]
+        self.cpp_info.defines = ["SQLITE_HAS_CODEC", "SQLITE_TEMP_STORE={}".format(
+            self._temp_store_nmake_value)]
         if self._use_commoncrypto():
             self.cpp_info.frameworks = ["Security", "CoreFoundation"]
         else:
