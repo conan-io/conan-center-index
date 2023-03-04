@@ -16,6 +16,7 @@ class KangaruConan(ConanFile):
     homepage = "https://github.com/gracicot/kangaru/wiki"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "reverse_destruction": [True, False],
@@ -40,7 +41,7 @@ class KangaruConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
