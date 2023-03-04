@@ -3,19 +3,20 @@ import os
 from conan import ConanFile
 from conan.tools.build import cross_building
 
-required_conan_version = ">=2.0.0"
+required_conan_version = "<2.0.0"
 
 class TzTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "VirtualBuildEnv", "VirtualRunEnv"
     apply_env = False
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
 
     def test(self):
         if not cross_building(self):
-            if not self.dependencies["tz"].options.data_only:
+            if not self.options["tz"].data_only:
                 which = "where" if self.settings.os == "Windows" else "which"
                 cmd = f"{which} zdump"
                 self.output.info(f"Executing '{cmd}'")

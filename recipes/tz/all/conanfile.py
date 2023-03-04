@@ -5,6 +5,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 
+required_conan_version = ">=1.53.0"
 
 class TzConan(ConanFile):
     name = "tz"
@@ -19,7 +20,7 @@ class TzConan(ConanFile):
     default_options = {"fPIC": True, "data_only": False}
 
     def package_id(self):
-        if self.options.data_only:
+        if self.info.options.data_only:
             self.info.clear()
 
     def config_options(self):
