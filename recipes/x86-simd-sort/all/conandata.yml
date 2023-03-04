@@ -1,0 +1,4 @@
+sources:
+  "cci.20230304":
+    url: "https://github.com/intel/x86-simd-sort/archive/7d7591cf5927e83e4a1e7c4b6f2c4dc91a97889f.tar.gz"
+    sha256: "643c1ab25679ffa93855a699ec3131262d678a52b01e37bc674ea9353f6f881a"
