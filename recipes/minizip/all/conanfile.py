@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.tools import files
-from conans import CMake
-import functools
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save
+import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class MinizipConan(ConanFile):
@@ -28,16 +28,9 @@ class MinizipConan(ConanFile):
         "tools": False,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,51 +38,53 @@ class MinizipConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13", transitive_headers=True)
         if self.options.bzip2:
-            self.requires("bzip2/1.0.8")
+            self.requires("bzip2/1.0.8", transitive_headers=True)
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_BZIP2"] = self.options.bzip2
-        cmake.definitions["BUILD_TOOLS"] = self.options.tools
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MINIZIP_SRC_DIR"] = os.path.join(self.source_folder, "contrib", "minizip").replace("\\", "/")
+        tc.variables["MINIZIP_ENABLE_BZIP2"] = self.options.bzip2
+        tc.variables["MINIZIP_BUILD_TOOLS"] = self.options.tools
+        # fopen64 and similar are unavailable before API level 24: https://github.com/madler/zlib/pull/436
+        if self.settings.os == "Android" and int(str(self.settings.os.api_level)) < 24:
+            tc.preprocessor_definitions["IOAPI_NO_64"] = "1"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        files.apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def _extract_license(self):
-        with files.chdir(self, f"{self.source_folder}/{self._source_subfolder}"):
-            tmp = files.load(self, "zlib.h")
-            license_contents = tmp[2:tmp.find("*/", 1)]
-            files.save(self, "LICENSE", license_contents)
+        zlib_h = load(self, os.path.join(self.source_folder, "zlib.h"))
+        return zlib_h[2:zlib_h.find("*/", 1)]
 
     def package(self):
-        self._extract_license()
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
-        self.cpp_info.includedirs = ["include", "include/minizip"]
+        self.cpp_info.includedirs.append(os.path.join("include", "minizip"))
         if self.options.bzip2:
             self.cpp_info.defines.append("HAVE_BZIP2")
 
         if self.options.tools:
-            bin_path = f"{self.package_folder}/bin"
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

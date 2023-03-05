@@ -1,4 +1,10 @@
 sources:
+  "1.3.236.0":
+    url: "https://github.com/zeux/volk/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "fba21aeccd8df4ce49fd0cce54cc9b1808e24e4283cad733f65fdd52f1729f16"
+  "1.3.231.1":
+    url: "https://github.com/zeux/volk/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "fac8d3d295e88bcc6bfb2b729d2c4babb2ea04ccb39fd918a3471b2d756789b9"
   "1.3.224.1":
     url: "https://github.com/zeux/volk/archive/refs/tags/sdk-1.3.224.1.tar.gz"
     sha256: "86505052a83d3085e34d22f8b9969e9961efc24c0c902fefb0b6b43d496f69b4"

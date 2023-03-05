@@ -14,7 +14,7 @@ int main() {
     GQueue *queue = g_queue_new();
     g_queue_free(queue);
 
-    g_module_supported();
+    printf("glib module supported: %s\n", g_module_supported() ? "true" : "false");
 
     GMutex m;
     g_mutex_init(&m);

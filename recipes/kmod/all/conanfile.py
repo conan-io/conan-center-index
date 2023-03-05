@@ -1,18 +1,19 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, save
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class KModConan(ConanFile):
     name = "kmod"
     description = "linux kernel module handling library"
-    topics = ("kmod", "libkmod", "linux", "kernel", "module")
+    topics = ("libkmod", "linux", "kernel", "module")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kmod-project/kmod"
     license = "LGPL-2.1-only"
@@ -37,40 +38,40 @@ class KModConan(ConanFile):
     }
 
     def configure(self):
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.5")
+            self.requires("openssl/3.0.7")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("kmod is Linux-only!")
 
     def build_requirements(self):
-        self.tool_requires("libtool/2.4.7")
-        self.tool_requires("pkgconf/1.7.4")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--with-zstd=%s" % yes_no(self.options.with_zstd))
@@ -90,14 +91,9 @@ class KModConan(ConanFile):
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-        # inject tools_require env vars in build context
-        ms = VirtualBuildEnv(self)
-        ms.generate(scope="build")
 
     def build(self):
-        save(self, os.path.join(self.source_folder, "libkmod", "docs", "gtk-doc.make"), "")
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 

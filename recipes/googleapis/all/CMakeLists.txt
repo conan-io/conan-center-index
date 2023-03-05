@@ -3,9 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(googleapis)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
-
 find_package(Protobuf REQUIRED CONFIG)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/generated_targets.cmake")

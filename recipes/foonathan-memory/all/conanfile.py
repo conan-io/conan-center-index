@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, 
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class FoonathanMemoryConan(ConanFile):
@@ -43,7 +43,7 @@ class FoonathanMemoryConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         # FIXME: jenkins servers throw error with this combination

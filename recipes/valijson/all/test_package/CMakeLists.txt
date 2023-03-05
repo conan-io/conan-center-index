@@ -1,17 +1,18 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
-set(CMAKE_CXX_STANDARD 11)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(ValiJSON REQUIRED)
+find_package(ValiJSON REQUIRED CONFIG)
+find_package(nlohmann_json REQUIRED CONFIG)
+find_package(picojson REQUIRED CONFIG)
+find_package(RapidJSON REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(
 	${PROJECT_NAME}
+	PRIVATE
 	ValiJSON::valijson
-	CONAN_PKG::nlohmann_json
-	CONAN_PKG::picojson
-	CONAN_PKG::rapidjson
+	nlohmann_json::nlohmann_json
+	picojson::picojson
+	rapidjson
 )
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

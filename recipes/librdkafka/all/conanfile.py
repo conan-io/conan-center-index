@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -46,8 +46,7 @@ class LibrdkafkaConan(ConanFile):
         return self.options.sasl and self.settings.os != "Windows"
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,27 +56,27 @@ class LibrdkafkaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("lz4/1.9.3")
-        if self.options.zlib:
-            self.requires("zlib/1.2.12")
-        if self.options.zstd:
-            self.requires("zstd/1.5.2")
-        if self.options.ssl:
-            self.requires("openssl/1.1.1q")
-        if self._depends_on_cyrus_sasl:
-            self.requires("cyrus-sasl/2.1.27")
-        if self.options.get_safe("curl", False):
-            self.requires("libcurl/7.84.0")
-
-    def build_requirements(self):
-        if self._depends_on_cyrus_sasl:
-            self.tool_requires("pkgconf/1.7.4")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("lz4/1.9.4")
+        if self.options.zlib:
+            self.requires("zlib/1.2.13")
+        if self.options.zstd:
+            self.requires("zstd/1.5.2")
+        if self.options.ssl:
+            self.requires("openssl/1.1.1s")
+        if self._depends_on_cyrus_sasl:
+            self.requires("cyrus-sasl/2.1.27")
+        if self.options.get_safe("curl", False):
+            self.requires("libcurl/7.87.0")
+
+    def build_requirements(self):
+        if self._depends_on_cyrus_sasl:
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

@@ -1,0 +1,18 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,6 +70,7 @@ enable_language(C)
+ 
+ # Library version
+ set(VERSION "3.0.7")
++project(minizip${MZ_PROJECT_SUFFIX} VERSION ${VERSION} LANGUAGES C)
+ 
+ # API version
+ set(SOVERSION "3")
+@@ -670,7 +671,6 @@ endif()
+ list(APPEND MINIZIP_INC ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ # Create minizip library
+-project(minizip${MZ_PROJECT_SUFFIX} LANGUAGES C VERSION ${VERSION})
+ 
+ if(NOT ${MZ_PROJECT_SUFFIX} STREQUAL "")
+     message(STATUS "Project configured as ${PROJECT_NAME}")

@@ -1,22 +1,20 @@
-cmake_minimum_required(VERSION 3.15)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(fmt REQUIRED CONFIG)
 
-# TEST_PACKAGE #################################################################
-add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
-set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+add_executable(test_package test_package.cpp)
+target_compile_features(test_package PRIVATE cxx_std_14)
 if(FMT_HEADER_ONLY)
-    target_link_libraries(${CMAKE_PROJECT_NAME} fmt::fmt-header-only)
+    target_link_libraries(test_package PRIVATE fmt::fmt-header-only)
 else()
-    target_link_libraries(${CMAKE_PROJECT_NAME} fmt::fmt)
+    target_link_libraries(test_package PRIVATE fmt::fmt)
 endif()
 
-# TEST_RANGES ##################################################################
 add_executable(test_ranges test_ranges.cpp)
-set_property(TARGET test_ranges PROPERTY CXX_STANDARD 14)
+target_compile_features(test_ranges PRIVATE cxx_std_14)
 if(FMT_HEADER_ONLY)
-    target_link_libraries(test_ranges fmt::fmt-header-only)
+    target_link_libraries(test_ranges PRIVATE fmt::fmt-header-only)
 else()
-    target_link_libraries(test_ranges fmt::fmt)
+    target_link_libraries(test_ranges PRIVATE fmt::fmt)
 endif()

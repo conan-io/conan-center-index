@@ -1,0 +1,19 @@
+diff --git a/sdk/perfetto.h b/sdk/perfetto.h
+index 175c092..682cea7 100644
+--- a/sdk/perfetto.h
++++ b/sdk/perfetto.h
+@@ -18090,8 +18090,9 @@ class TrackEventDataSource
+   } while (false)
+ 
+ // C++17 doesn't like a move constructor being defined for the EventFinalizer
+-// class but C++11 doesn't compile without it being defined so support both.
+-#if PERFETTO_IS_AT_LEAST_CPP17()
++// class but C++11 and MSVC doesn't compile without it being defined so support
++// both.
++#if PERFETTO_IS_AT_LEAST_CPP17() && !PERFETTO_BUILDFLAG(PERFETTO_COMPILER_MSVC)
+ #define PERFETTO_INTERNAL_EVENT_FINALIZER_KEYWORD delete
+ #else
+ #define PERFETTO_INTERNAL_EVENT_FINALIZER_KEYWORD default
+-- 
+2.24.3 (Apple Git-128)
+

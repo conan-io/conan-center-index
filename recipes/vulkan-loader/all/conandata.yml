@@ -1,4 +1,16 @@
 sources:
+  "1.3.239.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.239.0.tar.gz"
+    sha256: "fa2078408793b2173f174173a8784de56b6bbfbcb5fb958a07e46ef126c7eada"
+  "1.3.236.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "157d2230b50bb5be3ef9b9467aa90d1c109d5f188a49b11f741246d7ca583bf3"
+  "1.3.231.1":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "5226fbc6a90e4405200c8cfdd5733d5e0c6a64e64dcc614c485ea06e03d66578"
+  "1.3.231":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.3.231.tar.gz"
+    sha256: "02e185b939635167ea8f8815f8daab76af36923a3b995951fe6a5d3e25c55bf7"
   "1.3.224.0":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.224.0.tar.gz"
     sha256: "9f102a89b7d350ce5a6c82887459821aa9725c521128495ed7cbda637ed52022"
@@ -42,7 +54,25 @@ sources:
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.154.0.tar.gz"
     sha256: "418017d7bab907e72291476df231dd0e7dc7fe20b97e55389c975bcfc48d6433"
 patches:
+  "1.3.236.0":
+    - patch_file: "patches/1.3.236.0-0001-cmake-minimum-required-3.10.patch"
+      patch_description: "Do not use features of CMake 3.16, back to 3.10 as min version"
+      patch_type: "portability"
+      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1102"
+  "1.3.231.1":
+    - patch_file: "patches/1.3.231.1-0001-no-find-package-wayland.patch"
+      patch_description: "CMake: remove attempt to find Wayland"
+      patch_type: "portability"
+      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1020"
   "1.2.182":
-    - patch_file: "patches/fix-mingw-1.2.182.patch"
+    - patch_file: "patches/1.2.182-0001-fix-mingw.patch"
+      patch_description: "Fix MinGW"
+      patch_type: "portability"
   "1.2.154.0":
-    - patch_file: "patches/fix-mingw-1.2.154.0.patch"
+    - patch_file: "patches/1.2.154.0-0001-fix-mingw.patch"
+      patch_description: "Fix MinGW"
+      patch_type: "portability"
+      patch_source:
+        - "https://github.com/KhronosGroup/Vulkan-Loader/pull/475"
+        - "https://github.com/KhronosGroup/Vulkan-Loader/pull/495"
+        - "https://github.com/KhronosGroup/Vulkan-Loader/pull/523"

@@ -67,7 +67,10 @@ class LunaSVGConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("plutovg/cci.20220103")
+        if Version(self.version) < "2.3.5":
+            self.requires("plutovg/cci.20220103")
+        else:
+            self.requires("plutovg/cci.20221030")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:

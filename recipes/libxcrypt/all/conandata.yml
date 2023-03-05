@@ -24,5 +24,5 @@ sources:
     url: "https://github.com/besser82/libxcrypt/archive/v4.4.17.tar.gz"
     sha256: "7665168d0409574a03f7b484682e68334764c29c21ca5df438955a381384ca07"
   "4.4.16":
-    sha256: "a98f65b8baffa2b5ba68ee53c10c0a328166ef4116bce3baece190c8ce01f375"
     url: "https://github.com/besser82/libxcrypt/archive/v4.4.16.tar.gz"
+    sha256: "a98f65b8baffa2b5ba68ee53c10c0a328166ef4116bce3baece190c8ce01f375"

@@ -1,12 +1,13 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
 import os
 import glob
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 class CBlosc2Conan(ConanFile):
     name = "c-blosc2"
@@ -36,8 +37,7 @@ class CBlosc2Conan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,13 +71,28 @@ class CBlosc2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
             self.requires("zlib-ng/2.0.6")
         elif self.options.with_zlib == "zlib":
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.4.1" and not self._cmake_new_enough("3.16.3"):
+            self.tool_requires("cmake/3.25.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

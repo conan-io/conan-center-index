@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class ZziplibConan(ConanFile):
@@ -33,8 +33,7 @@ class ZziplibConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,21 +41,15 @@ class ZziplibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def requirements(self):
-        self.requires("zlib/1.2.12")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("zlib/1.2.13")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -108,12 +101,18 @@ class ZziplibConan(ConanFile):
         # libzzipmmapped
         if self.options.zzipmapped:
             self.cpp_info.components["zzipmmapped"].set_property("pkg_config_name", "zzipmmapped")
-            self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped{suffix}"]
+            if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
+                self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped"]
+            else:
+                self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped{suffix}"]
             self.cpp_info.components["zzipmmapped"].requires = ["zlib::zlib"]
         # libzzipfseeko
         if self.options.zzipfseeko:
             self.cpp_info.components["zzipfseeko"].set_property("pkg_config_name", "zzipfseeko")
-            self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
+            if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
+                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko"]
+            else:
+                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]            
             self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
         # libzzipwrap
         if self.options.zzipwrap:

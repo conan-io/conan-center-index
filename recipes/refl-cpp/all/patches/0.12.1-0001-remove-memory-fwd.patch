@@ -1,0 +1,27 @@
+diff --git a/a/refl.hpp b/b/refl.hpp
+index 7099200..c6580cf 100644
+--- a/a/refl.hpp
++++ b/b/refl.hpp
+@@ -34,20 +34,8 @@
+ #include <sstream>
+ #include <iomanip> // std::quoted
+ 
+-namespace std
+-{
+-    template <typename T, typename Deleter>
+-    class unique_ptr;
+-
+-    template <typename T>
+-    class shared_ptr;
+-
+-    template <typename T>
+-    class weak_ptr;
+-
+-    template <typename T>
+-    class complex;
+-} // namespace std
++#include <memory>
++#include <complex>
+ 
+ #ifdef _MSC_VER
+ // Disable VS warning for "Not enough arguments for macro"

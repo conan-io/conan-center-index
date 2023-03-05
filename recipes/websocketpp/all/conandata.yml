@@ -6,6 +6,16 @@ sources:
     url: "https://github.com/zaphoyd/websocketpp/archive/0.8.1.tar.gz"
     sha256: "178899de48c02853b55b1ea8681599641cedcdfce59e56beaff3dd0874bf0286"
 patches:
+  "0.8.2":
+    - patch_file: "patches/support-gcc-12.patch"
+      patch_type: "portability"
+      patch_description: "support gcc 12"
+      patch_source: "https://github.com/zaphoyd/websocketpp/issues/991"
   "0.8.1":
     - patch_file: "patches/websocket_boost_support_1_7_x.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Boost 1.70+ support: Mostly captures zaphoyd/websocketpp#814"
+    - patch_file: "patches/support-gcc-12.patch"
+      patch_type: "portability"
+      patch_description: "support gcc 12"
+      patch_source: "https://github.com/zaphoyd/websocketpp/issues/991"

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class LuauConan(ConanFile):
     name = "luau"
@@ -23,12 +23,14 @@ class LuauConan(ConanFile):
         "fPIC": [True, False],
         "with_cli": [True, False],
         "with_web": [True, False],
+        "native_code_gen": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_cli": False,
         "with_web": False,
+        "native_code_gen": False,
     }
 
     @property
@@ -38,9 +40,11 @@ class LuauConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "8" if Version(self.version) < "0.549" else "9",
             "clang": "7",
             "apple-clang": "12",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def export_sources(self):
@@ -53,20 +57,18 @@ class LuauConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.549":
+            del self.options.native_code_gen
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        check_min_vs(self, 191)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
@@ -84,6 +86,8 @@ class LuauConan(ConanFile):
         tc.variables["LUAU_BUILD_WEB"] = self.options.with_web
         tc.variables["LUAU_WERROR"] = False
         tc.variables["LUAU_STATIC_CRT"] = False
+        if Version(self.version) >= "0.549":
+            tc.variables["LUAU_NATIVE"] = self.options.native_code_gen
         tc.variables["LUAU_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 

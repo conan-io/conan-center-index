@@ -1,4 +1,4 @@
 sources:
   "7.0.3":
-    url: "https://github.com/slembcke/Chipmunk2D/archive/refs/tags/Chipmunk-7.0.3.tar.gz"
-    sha256: "1e6f093812d6130e45bdf4cb80280cb3c93d1e1833d8cf989d554d7963b7899a"
+    url: "https://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.3.tgz"
+    sha256: "048b0c9eff91c27bab8a54c65ad348cebd5a982ac56978e8f63667afbb63491a"

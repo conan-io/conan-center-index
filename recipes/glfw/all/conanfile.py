@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class GlfwConan(ConanFile):
@@ -31,8 +31,7 @@ class GlfwConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,25 +39,19 @@ class GlfwConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.3.216.0")
+            self.requires("vulkan-loader/1.3.236.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -80,16 +73,26 @@ class GlfwConan(ConanFile):
         # don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # don't force static link to libgcc if MinGW
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
             cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-            replace_in_file(self, cmakelists,
-                                  'message(FATAL_ERROR "You are trying to link the Vulkan loader static library into the GLFW shared library")',
-                                  "")
-            replace_in_file(self, cmakelists,
-                                  'list(APPEND glfw_PKG_DEPS "vulkan")',
-                                  ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
-                                   'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
+            replace_in_file(
+                self,
+                cmakelists,
+                'message(FATAL_ERROR "You are trying to link the Vulkan loader static library into the GLFW shared library")',
+                "",
+            )
+            vulkan_lib = self.dependencies["vulkan-loader"].cpp_info.libs[0]
+            replace_in_file(
+                self,
+                cmakelists,
+                'list(APPEND glfw_PKG_DEPS "vulkan")',
+                f'list(APPEND glfw_PKG_DEPS "vulkan")\nlist(APPEND glfw_LIBRARIES "{vulkan_lib}")',
+            )
 
     def build(self):
         self._patch_sources()
@@ -111,17 +114,17 @@ class GlfwConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glfw3")
@@ -130,15 +133,19 @@ class GlfwConan(ConanFile):
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
-        if is_msvc(self) and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             libname += "dll"
+            self.cpp_info.defines.append("GLFW_DLL")
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("gdi32")
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+            self.cpp_info.frameworks.extend([
+                "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
+                "CoreServices", "Foundation", "IOKit",
+            ])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
@@ -148,11 +155,3 @@ class GlfwConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "glfw3"
-
-        # FIXME: shouldn't be necessary.
-        # It's a workaround to support conan v1 generators
-        self.cpp_info.requires.append("opengl::opengl")
-        if self.options.vulkan_static:
-            self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.requires.append("xorg::xorg")

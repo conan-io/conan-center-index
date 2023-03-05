@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibtiffConan(ConanFile):
@@ -22,7 +22,7 @@ class LibtiffConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "lzma": [True, False],
-        "jpeg": [False, "libjpeg-turbo", "libjpeg"],
+        "jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "zlib": [True, False],
         "libdeflate": [True, False],
         "zstd": [True, False],
@@ -70,34 +70,27 @@ class LibtiffConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if not self.options.cxx:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.12")
+            self.requires("libdeflate/1.15")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
-        if self.options.jpeg == "libjpeg-turbo":
+        elif self.options.jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
@@ -106,7 +99,7 @@ class LibtiffConan(ConanFile):
             self.requires("libwebp/1.2.4")
 
     def validate(self):
-        if self.info.options.get_safe("libdeflate") and not self.info.options.zlib:
+        if self.options.get_safe("libdeflate") and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def source(self):
@@ -129,6 +122,8 @@ class LibtiffConan(ConanFile):
         if Version(self.version) >= "4.3.0":
             tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
         tc.variables["cxx"] = self.options.cxx
+        # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
+        tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -136,32 +131,13 @@ class LibtiffConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        top_cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        libtiff_cmakelists = os.path.join(self.source_folder, "libtiff", "CMakeLists.txt")
-
-        # Handle libjpeg-turbo
-        if self.options.jpeg == "libjpeg-turbo":
-            if Version(self.version) < "4.3.0":
-                file_find_package_jpeg = top_cmakelists
-                file_jpeg_target = top_cmakelists
-            else:
-                file_find_package_jpeg = os.path.join(self.source_folder, "cmake", "JPEGCodec.cmake")
-                file_jpeg_target = libtiff_cmakelists
-            cpp_info_jpeg_turbo = self.dependencies["libjpeg-turbo"].cpp_info
-            jpeg_config = cpp_info_jpeg_turbo.get_property("cmake_file_name") or "libjpeg-turbo"
-            jpeg_target = cpp_info_jpeg_turbo.components["jpeg"].get_property("cmake_target_name") or "libjpeg-turbo::jpeg"
-            replace_in_file(self, file_find_package_jpeg,
-                                  "find_package(JPEG)",
-                                  f"find_package({jpeg_config} REQUIRED CONFIG)\nset(JPEG_FOUND TRUE)")
-            replace_in_file(self, file_jpeg_target, "JPEG::JPEG", jpeg_target)
-
         # Export symbols of tiffxx for msvc shared
-        replace_in_file(self, libtiff_cmakelists,
+        replace_in_file(self, os.path.join(self.source_folder, "libtiff", "CMakeLists.txt"),
                               "set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})",
                               "set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} WINDOWS_EXPORT_ALL_SYMBOLS ON)")
 
         # Disable tools, test, contrib, man & html generation
-        replace_in_file(self, top_cmakelists,
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
                               "add_subdirectory(man)\nadd_subdirectory(html)", "")
 
@@ -190,7 +166,26 @@ class LibtiffConan(ConanFile):
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
 
+        self.cpp_info.requires = []
+        if self.options.zlib:
+            self.cpp_info.requires.append("zlib::zlib")
+        if self.options.get_safe("libdeflate"):
+            self.cpp_info.requires.append("libdeflate::libdeflate")
+        if self.options.lzma:
+            self.cpp_info.requires.append("xz_utils::xz_utils")
+        if self.options.jpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.jpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.jpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::libjpeg")
+        if self.options.jbig:
+            self.cpp_info.requires.append("jbig::jbig")
+        if self.options.get_safe("zstd"):
+            self.cpp_info.requires.append("zstd::zstd")
+        if self.options.get_safe("webp"):
+            self.cpp_info.requires.append("libwebp::libwebp")
+
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "TIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
-        self.cpp_info.names["pkg_config"] = f"libtiff-{Version(self.version).major}"

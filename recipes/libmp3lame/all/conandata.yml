@@ -5,8 +5,13 @@ sources:
 patches:
   "3.100":
     - patch_file: "patches/6410.patch"
-      base_path: "source_subfolder"
+      patch_type: "backport"
+      patch_description: "bug tracker item #487: v3.100 breaks Windows compatibility"
+      patch_source: "https://sourceforge.net/p/lame/svn/commit_browser -- [r6410]"
     - patch_file: "patches/6416.patch"
-      base_path: "source_subfolder"
+      patch_type: "backport"
+      patch_description: "lame patches ticket #75: Fix for completing svn-r6410"
+      patch_source: "https://sourceforge.net/p/lame/svn/commit_browser -- [r6410]"
     - patch_file: "patches/android.patch"
-      base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_description: "Add __ANDROID__ test to one bit"

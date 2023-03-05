@@ -1,16 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import functools
 import os
 import textwrap
 import yaml
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class SpirvtoolsConan(ConanFile):
@@ -74,8 +74,7 @@ class SpirvtoolsConan(ConanFile):
         copy(self, f"dependencies/{self._dependencies_filename}", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -83,7 +82,10 @@ class SpirvtoolsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def _require(self, recipe_name):
         if recipe_name not in self._dependencies_versions:
@@ -94,17 +96,33 @@ class SpirvtoolsConan(ConanFile):
         self.requires(self._require("spirv-headers"))
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if (Version(self.version) >= "1.3.239" and Version(self.version) < "2016.6") or \
+           Version(self.version) >= "2023.1":
+            if not self._cmake_new_enough("3.17.2"):
+                self.tool_requires("cmake/3.25.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
 
         #====================
@@ -144,7 +162,11 @@ class SpirvtoolsConan(ConanFile):
         tc.variables["SPIRV_BUILD_FUZZER"] = False
         tc.variables["SPIRV_SKIP_EXECUTABLES"] = not self.options.build_executables
         # To install relocatable shared libs on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "1.3.239" or \
+           (Version(self.version) >= "2016.6" and Version(self.version) < "2023.1"):
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # For iOS/tvOS/watchOS
+        tc.variables["CMAKE_MACOSX_BUNDLE"] = False
 
         tc.generate()
 
@@ -174,6 +196,7 @@ class SpirvtoolsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
         rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-lint"))
         rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-diff"))
+        rmdir(self, os.path.join(self.package_folder, "SPIRV-Tools-tools"))
         if self.options.shared:
             for file_name in [
                 "*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link",
@@ -237,7 +260,7 @@ class SpirvtoolsConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["spirv-tools-core"].system_libs.extend(["m", "rt"])
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["spirv-tools-core"].system_libs.append(libcxx)
 
@@ -273,9 +296,7 @@ class SpirvtoolsConan(ConanFile):
                 self.cpp_info.components["spirv-tools-diff"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
         if self.options.build_executables:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.path.append(bin_path)
+            self.env_info.path.append(os.path.join(self.package_folder, "bin"))
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "SPIRV-Tools"

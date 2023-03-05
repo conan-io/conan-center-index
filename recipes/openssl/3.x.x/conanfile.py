@@ -120,7 +120,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if not self.options.no_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -610,6 +610,7 @@ class OpenSSLConan(ConanFile):
                 self._create_targets()
                 with self._make_context():
                     self._make()
+                    self.run("perl source_subfolder/configdata.pm --dump")
 
     @property
     def _win_bash(self):
@@ -756,3 +757,10 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
         self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
         self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
+
+        openssl_modules_dir = os.path.join(self.package_folder, "lib", "ossl-modules")
+        self.runenv_info.define_path("OPENSSL_MODULES", openssl_modules_dir)
+
+        # For legacy 1.x downstream consumers, remove once recipe is 2.0 only:
+        self.env_info.OPENSSL_MODULES = openssl_modules_dir
+

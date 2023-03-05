@@ -1,4 +1,7 @@
 sources:
+  "2.1.1":
+    url: "https://www.qcustomplot.com/release/2.1.1/QCustomPlot-source.tar.gz"
+    sha256: "5e2d22dec779db8f01f357cbdb25e54fbcf971adaee75eae8d7ad2444487182f"
   "2.1.0":
     url: "https://www.qcustomplot.com/release/2.1.0fixed/QCustomPlot-source.tar.gz"
     sha256: "357b78be0f52b2d01c17ec3e2e1271255761810af7e8a9476cef51fccf1a0f44"

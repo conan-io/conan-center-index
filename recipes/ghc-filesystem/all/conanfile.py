@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class GhcFilesystemRecipe(ConanFile):
@@ -14,26 +16,31 @@ class GhcFilesystemRecipe(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+
+        tc.variables["GHC_FILESYSTEM_BUILD_TESTING"] = False
+        tc.variables["GHC_FILESYSTEM_BUILD_EXAMPLES"] = False
+        tc.variables["GHC_FILESYSTEM_WITH_INSTALL"] = True
+
+        tc.generate()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
         cmake = CMake(self)
-        cmake.definitions["GHC_FILESYSTEM_BUILD_TESTING"] = False
-        cmake.definitions["GHC_FILESYSTEM_BUILD_EXAMPLES"] = False
-        cmake.definitions["GHC_FILESYSTEM_WITH_INSTALL"] = True
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ghc_filesystem")

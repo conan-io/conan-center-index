@@ -9,7 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 #
 # INFO: Please, remove all comments before pushing your PR!
@@ -37,7 +37,7 @@ class PackageConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
@@ -60,20 +60,10 @@ class PackageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                # once removed by config_options, need try..except for a second del
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         # for plain C projects only
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         # src_folder must use the same source folder name the project
@@ -85,17 +75,17 @@ class PackageConan(ConanFile):
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
         if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
         # in case it does not work in another configuration, it should validated here too
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
@@ -103,7 +93,7 @@ class PackageConan(ConanFile):
         self.tool_requires("tool/x.y.z")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist

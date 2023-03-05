@@ -1,8 +1,11 @@
-from conans import CMake, ConanFile, tools
-import functools
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
+from conan.tools.build import check_min_cppstd
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
+
 
 class PicobenchConan(ConanFile):
     name = "picobench"
@@ -18,54 +21,47 @@ class PicobenchConan(ConanFile):
     default_options = {
         "with_cli": False,
     }
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["PICOBENCH_BUILD_TOOLS"] = self.options.with_cli
+        tc.generate()
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
 
     def package_id(self):
         if self.options.with_cli:
             del self.info.settings.compiler
         else:
-            self.info.header_only()
+            self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PICOBENCH_BUILD_TOOLS"] = self.options.with_cli
-        cmake.configure()
-        return cmake
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.install()
 
     def package_info(self):
         if self.options.with_cli:
+            # TODO: Legacy, to be removed on Conan 2.0
             binpath = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var: {}".format(binpath))
             self.env_info.PATH.append(binpath)

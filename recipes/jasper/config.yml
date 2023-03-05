@@ -1,27 +1,7 @@
 versions:
+  "4.0.0":
+    folder: all
+  "3.0.6":
+    folder: all
   "2.0.33":
-    folder: all
-  "2.0.32":
-    folder: all
-  "2.0.28":
-    folder: all
-  "2.0.27":
-    folder: all
-  "2.0.26":
-    folder: all
-  "2.0.25":
-    folder: all
-  "2.0.24":
-    folder: all
-  "2.0.23":
-    folder: all
-  "2.0.22":
-    folder: all
-  "2.0.21":
-    folder: all
-  "2.0.19":
-    folder: all
-  "2.0.16":
-    folder: all
-  "2.0.14":
     folder: all

@@ -4,7 +4,6 @@ try:
 except ImportError:
     from conans.tools import check_min_cppstd  # FIXME : not in 1.49
 from conan.tools.files import get
-from conan.tools.cmake import CMake
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -46,10 +45,6 @@ class PlatformInterfacesConan(ConanFile):
     @property
     def _minimum_cpp_standard(self):
         return 20
-
-    def requirements(self):
-        if Version(self.version) >= "0.3.0":
-            self.requires("platform.delegates/0.2.7")
 
     def validate(self):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))

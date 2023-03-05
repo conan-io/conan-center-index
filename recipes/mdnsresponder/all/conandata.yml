@@ -1,10 +1,10 @@
 sources:
   "878.200.35":
-    url: "https://opensource.apple.com/tarballs/mDNSResponder/mDNSResponder-878.200.35.tar.gz"
-    sha256: "e777b4d7dbf5eb1552cb80090ad1ede319067ab6e45e3990d68aabf6e8b3f5a0"
+    url: "https://github.com/apple-oss-distributions/mDNSResponder/archive/mDNSResponder-878.200.35.tar.gz"
+    sha256: "71769924286328a3c405700856c9897c5277360b2f9fd0f450440304d315f6c1"
   "1310.140.1":
-    sha256: "040f6495c18b9f0557bcf9e00cbcfc82b03405f5ba6963dc147730ca0ca90d6f"
-    url: "https://opensource.apple.com/tarballs/mDNSResponder/mDNSResponder-1310.140.1.tar.gz"
+    url: "https://github.com/apple-oss-distributions/mDNSResponder/archive/mDNSResponder-1310.140.1.tar.gz"
+    sha256: "ecb0043ffc5a3cbf4f43da0298e351d787654d980b291d1cb567c6ddee9dc983"
 patches:
   "878.200.35":
     - base_path: "source_subfolder"

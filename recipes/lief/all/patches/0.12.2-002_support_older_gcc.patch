@@ -1,0 +1,13 @@
+diff --git a/src/PE/Binary.cpp b/src/PE/Binary.cpp
+index 0e032c3..d2eaae9 100644
+--- a/src/PE/Binary.cpp
++++ b/src/PE/Binary.cpp
+@@ -1732,7 +1732,7 @@ std::ostream& Binary::print(std::ostream& os) const {
+   if (has_debug()) {
+     os << "Debug" << std::endl;
+     os << "=====" << std::endl;
+-    for (const Debug& debug : debug()) {
++    for (const Debug& debug : this->debug()) {
+       os << debug << std::endl;
+     }
+     os << std::endl;
