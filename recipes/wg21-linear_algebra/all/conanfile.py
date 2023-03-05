@@ -1,7 +1,4 @@
-#from conans import ConanFile, tools
-#from conans.errors import ConanInvalidConfiguration
-#import os
-
+import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -19,11 +16,8 @@ class LAConan(ConanFile):
     license = "NCSA"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-library"
     no_copy_source = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def requirements(self):
         self.requires("mdspan/0.1.0")
@@ -43,7 +37,7 @@ class LAConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
@@ -51,7 +45,7 @@ class LAConan(ConanFile):
                              "compiler support.".format(
                                  self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
@@ -60,20 +54,15 @@ class LAConan(ConanFile):
                         self.settings.compiler.version))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="*", dst="include",
-                  src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*LICENSE*", dst="licenses", keep_path=False)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "wg21_linear_algebra")
         self.cpp_info.set_property("cmake_target_name", "wg21_linear_algebra::wg21_linear_algebra")
-
-        self.cpp_info.names["cmake_find_package"] = "wg21_linear_algebra"
-        self.cpp_info.names["cmake_find_package_multi"] = "wg21_linear_algebra"
