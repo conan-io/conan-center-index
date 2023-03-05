@@ -1,0 +1,12 @@
+diff --git a/include/assert.hpp b/include/assert.hpp
+index d4cc580..f1cc9f9 100644
+--- a/include/assert.hpp
++++ b/include/assert.hpp
+@@ -5,6 +5,7 @@
+ // https://github.com/jeremy-rifkin/asserts
+ 
+ #include <cstdio>
++#include <cstring>
+ #include <sstream>
+ #include <string>
+ #include <string_view>
