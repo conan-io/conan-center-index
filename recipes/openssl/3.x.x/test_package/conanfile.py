@@ -30,7 +30,6 @@ class TestPackageConan(ConanFile):
         if self.settings.os == "Android":
             tc.cache_variables["CONAN_LIBCXX"] = ""
         openssl = self.dependencies["openssl"]
-        openssl_version = Version(openssl.ref.version)
         tc.cache_variables["OPENSSL_WITH_ZLIB"] = not openssl.options.no_zlib
         tc.cache_variables["OPENSSL_WITH_LEGACY"] = self._with_legacy
         tc.cache_variables["OPENSSL_WITH_MD4"] = not openssl.options.no_md4
