@@ -31,7 +31,8 @@ class OpenVDBConan(ConanFile):
         "with_zlib": [True, False],
         "with_log4cplus": [True, False],
         "simd": [None, "SSE42", "AVX"],
-        "delayed_load": [True,False]
+        "delayed_load": [True, False],
+        "nanovdb": [True, False],
     }
     default_options = {
         "shared": False,
@@ -41,6 +42,7 @@ class OpenVDBConan(ConanFile):
         "with_log4cplus": False,
         "simd": None,
         "delayed_load": True,
+        "nanovdb": False,
     }
 
     @property
@@ -154,6 +156,11 @@ class OpenVDBConan(ConanFile):
         tc.variables["OPENVDB_BUILD_AX_BINARIES"] = False
         tc.variables["OPENVDB_BUILD_AX_UNITTESTS"] = False
 
+        tc.variables["OPENVDB_BUILD_NANOVDB"] = self.options.nanovdb
+        tc.variables["NANOVDB_USE_OPENVDB"] = True
+        tc.variables["NANOVDB_USE_INTRINSICS"] = True
+        tc.variables["NANOVDB_BUILD_TOOLS"] = False
+
         tc.variables["OPENVDB_BUILD_MAYA_PLUGIN"] = False
         tc.variables["OPENVDB_ENABLE_RPATH"] = False
         tc.variables["OPENVDB_CXX_STRICT"] = False
@@ -177,6 +184,17 @@ class OpenVDBConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Create alias for Blosc target
+        with open(os.path.join(self.source_folder, "cmake", "FindBlosc.cmake"), "w") as f:
+            f.write(
+                """find_package(c-blosc)
+if(c-blosc_FOUND)
+    add_library(blosc INTERFACE)
+    target_link_libraries(blosc INTERFACE c-blosc::c-blosc)
+    add_library(Blosc::blosc ALIAS blosc)
+endif()
+"""
+            )
 
     def build(self):
         self._patch_sources()
@@ -192,7 +210,6 @@ class OpenVDBConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "OpenVDB")
-        self.cpp_info.set_property("cmake_target_name", "OpenVDB::openvdb")
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         lib_prefix = "lib" if is_msvc(self) and not self.options.shared else ""
@@ -238,3 +255,35 @@ class OpenVDBConan(ConanFile):
         self.cpp_info.components["openvdb-core"].names["cmake_find_package"] = "openvdb"
         self.cpp_info.components["openvdb-core"].names["cmake_find_package_multi"] = "openvdb"
         self.cpp_info.components["openvdb-core"].set_property("cmake_target_name", "OpenVDB::openvdb")
+
+
+        #NanoVDB
+        if self.options.nanovdb:
+            self.cpp_info.components["nanovdb"].bindirs = []
+            self.cpp_info.components["nanovdb"].libdirs = []
+            self.cpp_info.components["nanovdb"].requires = ["openvdb-core", "onetbb::onetbb"]
+            if self.options.with_zlib:
+                self.cpp_info.components["nanovdb"].requires.append("zlib::zlib")
+            if self.options.with_blosc:
+                self.cpp_info.components["nanovdb"].requires.append("c-blosc::c-blosc")
+
+            if self.settings.os in ("Linux", "FreeBSD"):
+                self.cpp_info.components["nanovdb"].system_libs = ["pthread"]        
+
+            self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_INTRINSICS")
+            self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_OPENVDB")
+            self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_TBB")
+
+            if self.settings.os == "Windows":
+                self.cpp_info.components["nanovdb"].defines.append("_USE_MATH_DEFINES")
+                self.cpp_info.components["nanovdb"].defines.append("NOMINMAX")
+                self.cpp_info.components["nanovdb"].defines.append("TBB_USE_PREVIEW_BINARY")
+            
+            if self.options.with_zlib:
+                self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_ZIP")
+            if self.options.with_blosc:
+                self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_BLOSC")
+
+            self.cpp_info.components["nanovdb"].names["cmake_find_package"] = "nanovdb"
+            self.cpp_info.components["nanovdb"].names["cmake_find_package_multi"] = "nanovdb"
+            self.cpp_info.components["nanovdb"].set_property("cmake_target_name", "OpenVDB::nanovdb")
