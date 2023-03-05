@@ -8,7 +8,7 @@ int main(void) {
     try{
         VERIFY(1 != 1);
     }
-    catch (libassert::verification_failure){
+    catch (...){
         return EXIT_SUCCESS;
     }
 

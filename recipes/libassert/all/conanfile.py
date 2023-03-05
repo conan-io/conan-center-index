@@ -107,18 +107,14 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["assert"]
 
-
-        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
-        self.cpp_info.set_property("cmake_file_name", "libassert")
-        self.cpp_info.set_property("cmake_target_name", "libassert::assert")
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "libassert")
+        self.cpp_info.set_property("cmake_file_name", "assert")
+        self.cpp_info.set_property("cmake_target_name", "assert::assert")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "libassert"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libassert"
-        self.cpp_info.names["cmake_find_package"] = "libassert"
-        self.cpp_info.names["cmake_find_package_multi"] = "libassert"
+        self.cpp_info.filenames["cmake_find_package"] = "assert"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "assert"
+        self.cpp_info.names["cmake_find_package"] = "assert"
+        self.cpp_info.names["cmake_find_package_multi"] = "assert"
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("dl")

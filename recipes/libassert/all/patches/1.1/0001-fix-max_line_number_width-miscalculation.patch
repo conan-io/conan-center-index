@@ -8,7 +8,6 @@ Subject: [PATCH] fix max_line_number_width miscalculation (#40)
  1 file changed, 14 insertions(+), 4 deletions(-)
 
 diff --git a/src/assert.cpp b/src/assert.cpp
-index 3e60725..10b3797 100644
 --- a/src/assert.cpp
 +++ b/src/assert.cpp
 @@ -2024,10 +2024,20 @@ namespace libassert::detail {
