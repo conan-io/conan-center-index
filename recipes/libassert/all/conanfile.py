@@ -25,7 +25,7 @@ class PackageConan(ConanFile):
     url = "https://github.com/jeremy-rifkin/libassert"
     homepage = "https://github.com/jeremy-rifkin/libassert"
 
-    topics = ("assert", "library", "assertions")
+    topics = ("assert", "library", "assertions", "stacktrace")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
