@@ -690,15 +690,14 @@ class QtConan(ConanFile):
             if package in [d.ref.name for d in self.dependencies.direct_host.values()]:
                 p = self.dependencies[package]
                 if package == "freetype":
-                    args.append("\"%s_INCDIR=%s\"" % (var, p.cpp_info.includedirs[-1]))
-
+                    args.append("\"%s_INCDIR=%s\"" % (var, p.cpp_info.aggregated_components().includedirs[-1]))
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(p))))
 
         for dependency in self.dependencies.direct_host.values():
-            args += [f"-I \"{s}\"" for s in dependency.cpp_info.includedirs]
-            args += [f"-D {s}" for s in dependency.cpp_info.defines]
+            args += [f"-I \"{s}\"" for s in dependency.cpp_info.aggregated_components().includedirs]
+            args += [f"-D {s}" for s in dependency.cpp_info.aggregated_components().defines]
 
-        libdirs = [l for dependency in self.dependencies.direct_host.values() for l in dependency.cpp_info.libdirs]
+        libdirs = [l for dependency in self.dependencies.direct_host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
         args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(libdirs))
         if not is_msvc(self):
             args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(libdirs))
@@ -1477,10 +1476,10 @@ Examples = bin/datadir/examples""")
             yield element
 
     def _gather_libs(self, p):
-        libs = ["-l" + i for i in p.cpp_info.libs + p.cpp_info.system_libs]
+        libs = ["-l" + i for i in p.cpp_info.aggregated_components().libs + p.cpp_info.aggregated_components().system_libs]
         if is_apple_os(self):
-            libs += ["-framework " + i for i in p.cpp_info.frameworks]
-        libs += p.cpp_info.sharedlinkflags
+            libs += ["-framework " + i for i in p.cpp_info.aggregated_components().frameworks]
+        libs += p.cpp_info.aggregated_components().sharedlinkflags
         for dep in p.dependencies.direct_host.values():
             libs += self._gather_libs(dep)
         return self._remove_duplicate(libs)
