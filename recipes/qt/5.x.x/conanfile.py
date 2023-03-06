@@ -440,7 +440,7 @@ class QtConan(ConanFile):
         ms.generate()
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
-        env.prepend_path("PKG_CONFIG_PATH": self.build_folder)
+        env.prepend_path("PKG_CONFIG_PATH", self.build_folder)
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
         if self._settings_build.os == "Macos":
