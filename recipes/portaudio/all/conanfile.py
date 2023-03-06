@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.system.package_manager import Apt, Yum
+from conan.tools.scm import Version
 import os
 
 class PortaudioConan(ConanFile):
@@ -23,11 +24,15 @@ class PortaudioConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_alsa": False,
-        "with_jack": False
+        "with_alsa": True,
+        "with_jack": True
     }
 
     exports = ["CMakeLists.txt"]
+
+    def validate(self):
+        if  self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11":
+            raise ConanInvalidConfiguration("This recipe does not support Apple-Clang versions < 11")
 
     def configure(self):
         del self.settings.compiler.cppstd
@@ -37,22 +42,17 @@ class PortaudioConan(ConanFile):
             self.options.rm_safe("with_alsa")
             self.options.rm_safe("with_jack")
 
-    def requirements(self):
-        if self.settings.os == "Linux":
-            if self.options.with_alsa:
-                self.requires("libalsa/1.2.7.2")
-
     def system_requirements(self):
         if self.settings.os == "Linux":
-                Apt(self).install(["libasound2-dev"]) 
-                if self.options.with_jack:
-                    Apt(self).install(["libjack-dev"])
+            if self.options.with_alsa:
+                Apt(self).install(["libasound2-dev"])
                 Yum(self).install(["alsa-lib-devel"])
-                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
-                    Yum(self).install(["glibmm24.i686"])
-                    Yum(self).install(["glibc-devel.i686"])
-                if self.options.with_jack:
-                    Yum(self).install(["jack-audio-connection-kit-devel"])
+            if self.options.with_jack:
+                Apt(self).install(["libjack-dev"])
+                Yum(self).install(["jack-audio-connection-kit-devel"])
+            if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
+                Yum(self).install(["glibmm24.i686"])
+                Yum(self).install(["glibc-devel.i686"])
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
