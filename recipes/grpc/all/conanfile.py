@@ -6,6 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -20,7 +21,7 @@ class grpcConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
-    topics = ("rpc")
+    topics = ("rpc",)
 
     settings = "os", "arch", "compiler", "build_type"
 
@@ -82,6 +83,9 @@ class grpcConan(ConanFile):
             self.options["googleapis"].shared = True
             self.options["grpc-proto"].shared = True
 
+            if cross_building(self):
+                self.options["grpc"].shared = True
+
     def requirements(self):
         if is_msvc(self) and Version(self.version) < "1.47":
             self.requires("abseil/20211102.0", transitive_headers=True)
@@ -91,8 +95,8 @@ class grpcConan(ConanFile):
         self.requires("openssl/1.1.1s")
         self.requires("re2/20220601")
         self.requires("zlib/1.2.13")
-        self.requires("protobuf/3.21.4", transitive_headers=True)
-        self.requires("googleapis/cci.20220711")
+        self.requires("protobuf/3.21.4", transitive_headers=True, transitive_libs=True)
+        self.requires("googleapis/cci.20221108")
         self.requires("grpc-proto/cci.20220627")
 
     def package_id(self):
@@ -181,7 +185,9 @@ class grpcConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
-
+        # Set up environment so that we can run grpc-cpp-plugin at build time
+        if hasattr(self, "settings_build"):
+            VirtualBuildEnv(self).generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -196,13 +202,17 @@ class grpcConan(ConanFile):
                 "if (FALSE)  # Do not download, it is provided by Conan"
             )
 
-        # We are fine with protobuf::protoc coming from conan generated Find/config file
-        # TODO: to remove when moving to CMakeToolchain (see https://github.com/conan-io/conan/pull/10186)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "protobuf.cmake"),
-            "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
-            "set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)"
-        )
-
+        # On macOS if all the following are true:
+        # - protoc from protobuf has shared library dependencies
+        # - grpc_cpp_plugin has shared library deps (when crossbuilding)
+        # - using `make` as the cmake generator
+        # Make will run commands via `/bin/sh` which will strip all env vars that start with `DYLD*`
+        # This workaround wraps the protoc command to be invoked by CMake with a modified environment
+        settings_build = getattr(self, "settings_build", self.settings)
+        if settings_build.os == "Macos":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 
+                            "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
+                            'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
     def build(self):
         self._patch_sources()
         cmake = CMake(self)

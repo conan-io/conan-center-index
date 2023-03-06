@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 import os
@@ -8,7 +8,6 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps"
     test_type = "explicit"
 
     def layout(self):
@@ -44,6 +43,9 @@ class TestPackageConan(ConanFile):
         # Environment so that the compiled test executable can load shared libraries
         runenv = VirtualRunEnv(self)
         runenv.generate(scope="run")
+
+        deps = CMakeDeps(self)
+        deps.generate()
         
     def build(self):
         cmake = CMake(self)
