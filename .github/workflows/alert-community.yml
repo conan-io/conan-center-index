@@ -4,6 +4,9 @@ on:
   pull_request_target:
     types: [opened]
 
+env:
+  PYVER: "3.10"
+
 jobs:
   comment:
     if: github.repository == 'conan-io/conan-center-index'
@@ -61,7 +64,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/boost/*/*"
-          reviewers: "@Hopobcn @jwillikers"
+          reviewers: "@grafikrobot @Hopobcn @jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:

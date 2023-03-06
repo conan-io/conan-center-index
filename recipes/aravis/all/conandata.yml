@@ -5,4 +5,3 @@ sources:
 patches:
   "0.8.20":
     - patch_file: "patches/0.8.19-gst-shared-lib.patch"
-      base_path: "source_subfolder"

@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54.0"
 
 
 class GlogConan(ConanFile):
@@ -13,9 +13,10 @@ class GlogConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/glog/"
     description = "Google logging library"
-    topics = ("conan", "glog", "logging")
+    topics = ("logging",)
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,8 +34,7 @@ class GlogConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,7 +44,7 @@ class GlogConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if self.options.with_gflags:
             self.options["gflags"].shared = self.options.shared
 
@@ -53,24 +53,36 @@ class GlogConan(ConanFile):
 
     def requirements(self):
         if self.options.with_gflags:
-            self.requires("gflags/2.2.2")
+            self.requires("gflags/2.2.2", transitive_headers=True, transitive_libs=True)
         # 0.4.0 requires libunwind unconditionally
         if self.options.get_safe("with_unwind") or (Version(self.version) < "0.5.0" and self.settings.os in ["Linux", "FreeBSD"]):
             self.requires("libunwind/1.6.2")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
-        if Version(self.version) >= "0.6.0":
-            self.tool_requires("cmake/3.22.3")
+        if Version(self.version) >= "0.6.0" and not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["WITH_GFLAGS"] = self.options.with_gflags
         tc.variables["WITH_THREADS"] = self.options.with_threads
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         if Version(self.version) >= "0.5.0":
             tc.variables["WITH_PKGCONFIG"] = True
             if self.settings.os == "Emscripten":
@@ -86,9 +98,6 @@ class GlogConan(ConanFile):
 
         tc = CMakeDeps(self)
         tc.generate()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -122,7 +131,7 @@ class GlogConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libglog")
         postfix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["glog" + postfix]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["dbghelp"]

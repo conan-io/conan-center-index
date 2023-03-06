@@ -18,6 +18,7 @@ class CycloneDDSConan(ConanFile):
                   " of the OMG Data Distribution Service (DDS) specification"
     topics = ("dds", "ipc", "ros", "middleware")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -70,13 +71,13 @@ class CycloneDDSConan(ConanFile):
         if self.options.with_shm:
             self.requires("iceoryx/2.0.2")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
 
     def validate(self):
         if self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -97,7 +98,7 @@ class CycloneDDSConan(ConanFile):
 
     def build_requirements(self):
         if not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.1")
+            self.tool_requires("cmake/3.25.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
