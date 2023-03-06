@@ -439,9 +439,9 @@ class QtConan(ConanFile):
         ms = VCVars(self)
         ms.generate()
         vbe = VirtualBuildEnv(self)
-        vbe.generate(
+        vbe.generate()
         vre = VirtualRunEnv(self)
-        vre.generate())
+        vre.generate()
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.prepend_path("PKG_CONFIG_PATH", self.build_folder)
