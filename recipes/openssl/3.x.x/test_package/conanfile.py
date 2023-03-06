@@ -26,13 +26,13 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.os == "Android":
-            tc.cache_variables["CONAN_LIBCXX"] = ""
         openssl = self.dependencies["openssl"]
         tc.cache_variables["OPENSSL_WITH_ZLIB"] = not openssl.options.no_zlib
         tc.cache_variables["OPENSSL_WITH_LEGACY"] = self._with_legacy
         tc.cache_variables["OPENSSL_WITH_MD4"] = not openssl.options.no_md4
         tc.cache_variables["OPENSSL_WITH_RIPEMD160"] = not openssl.options.no_rmd160
+        if self.settings.os == "Android":
+            tc.cache_variables["CONAN_LIBCXX"] = ""
         tc.generate()
 
 
@@ -46,7 +46,11 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "digest")
             self.run(bin_path, env="conanrun")
 
-            bin_legacy_path = os.path.join("bin", "digest_legacy")
-            if os.path.exists(bin_legacy_path):
+            if not self.options["openssl"].no_legacy:
+                bin_legacy_path = os.path.join(self.cpp.build.bindirs[0], "digest_legacy")
+                assert os.path.exists(bin_legacy_path)
                 self.run(bin_legacy_path, run_environment=True)
+
+            if not self.options["openssl"].no_stdio:
+                self.run("openssl version", run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))

@@ -35,5 +35,6 @@ class TestPackageConan(ConanFile):
                 self.run("openssl version", run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
 
+        # check for pkg_config files in build folder of this test package
         for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
             assert os.path.isfile(os.path.join(self.build_folder, fn))
