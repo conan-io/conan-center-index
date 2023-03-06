@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -28,13 +28,31 @@ class CprConan(ConanFile):
         "fPIC": [True, False],
         "with_ssl": ["openssl", "darwinssl", "winssl", _AUTO_SSL, _NO_SSL],
         "signal": [True, False],
+        "verbose_logging": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": _AUTO_SSL,
         "signal": True,
+        "verbose_logging": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11 if Version(self.version) < "1.10.0" else 17
+
+    @property
+    def _compilers_minimum_version(self):
+        if self._min_cppstd == 11:
+            return {}
+        return {
+            "gcc": "9",
+            "clang": "7",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
 
     @property
     def _supports_openssl(self):
@@ -93,6 +111,9 @@ class CprConan(ConanFile):
                 self.output.info("Auto SSL is not available below version 1.6.0 (or below 1.6.2 on macOS), and openssl not supported. Disabling SSL")
                 self.options.with_ssl = CprConan._NO_SSL
 
+        if Version(self.version) < "1.10.0":
+            del self.options.verbose_logging
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -101,7 +122,7 @@ class CprConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.86.0")
+        self.requires("libcurl/7.87.0")
 
     # Check if the system supports the given ssl library
     def _supports_ssl_library(self, library):
@@ -121,6 +142,14 @@ class CprConan(ConanFile):
         return validators[library]
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         SSL_FAILURE_MESSAGES = {
             "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
             "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
@@ -173,8 +202,14 @@ class CprConan(ConanFile):
         if self._uses_old_cmake_options:
             # Get the translated option if we can, or the original if one isn't defined.
             return CPR_1_6_CMAKE_OPTIONS_TO_OLD.get(option, option)
-        else:
-            return option
+
+        CPR_1_6_CMAKE_OPTIONS_TO_1_10 = {
+            "CPR_FORCE_USE_SYSTEM_CURL": "CPR_USE_SYSTEM_CURL"
+        }
+
+        if Version(self.version) >= "1.10.0":
+            return CPR_1_6_CMAKE_OPTIONS_TO_1_10.get(option, option)
+        return option
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -195,6 +230,9 @@ class CprConan(ConanFile):
         # If we are on a version where disabling SSL requires a cmake option, disable it
         if not self._uses_old_cmake_options and str(self.options.get_safe("with_ssl")) == CprConan._NO_SSL:
             tc.variables["CPR_ENABLE_SSL"] = False
+
+        if self.options.get_safe("verbose_logging", False):
+            tc.variables["CURL_VERBOSE_LOGGING"] = True
         if cross_building(self, skip_x64_x86=True):
             tc.variables["THREAD_SANITIZER_AVAILABLE_EXITCODE"] = 1
             tc.variables["THREAD_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1

@@ -6,11 +6,11 @@ patches:
   "1.0.2":
     - patch_file: "patches/0001-fix-asan-1.0.2.patch"
       patch_description: "Handle ASAN flag properly in CMakeLists.txt"
-      patch_type: backport
+      patch_type: "portability"
       patch_source: "https://github.com/sgieseking/anyrpc/pull/42"
     - patch_file: "patches/0002-fix-shared-library-1.0.2.patch"
       patch_description: "Fixed 'undefined reference' error when compile for windows platform"
-      patch_type: backport
+      patch_type: "portability"
       patch_source: "https://github.com/sgieseking/anyrpc/pull/43"
     - patch_file: "patches/0003-use-conan-libs-1.0.2.patch"
       patch_description: "Link to conan libs"
