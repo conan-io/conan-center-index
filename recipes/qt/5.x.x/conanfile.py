@@ -444,7 +444,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
         if self._settings_build.os == "Macos":
-            save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(Environment(self).vars.get("DYLD_LIBRARY_PATH")))
+            save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(env.vars.get("DYLD_LIBRARY_PATH")))
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
 
     def _make_program(self):
