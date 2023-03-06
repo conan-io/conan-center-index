@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 109a252d..e5d46bce 100644
+index 95610d55..2b48507d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -415,7 +415,7 @@ if(USE_MPI)
+@@ -444,7 +444,7 @@ if(USE_MPI)
  endif(USE_MPI)
  
  if(USE_OPENMP)
