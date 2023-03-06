@@ -1,6 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -11,7 +14,7 @@ class LiblslConan(ConanFile):
     description = "Lab Streaming Layer is a C++ library for multi-modal " \
                   "time-synched data transmission over the local network"
     license = "MIT"
-    topics = ("labstreaminglayer", "lsl", "network", "stream", "signal", 
+    topics = ("labstreaminglayer", "lsl", "network", "stream", "signal",
               "transmission")
     homepage = "https://github.com/sccn/liblsl"
     url = "https://github.com/conan-io/conan-center-index"
