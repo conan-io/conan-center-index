@@ -79,3 +79,16 @@
  
  # Install catkin package.xml
  install(FILES package.xml DESTINATION share/libnabo)
+@@ -195,6 +189,7 @@ install(FILES package.xml DESTINATION share/libnabo)
+ # 1- local build #
+ 
+ # Register the local build in case one doesn't use "make install"
++if(0)
+ export(PACKAGE libnabo)
+ 
+ # Create variable with the library location
+@@ -244,3 +239,4 @@ configure_file(
+ 
+ add_custom_target(uninstall
+ 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
++endif()
