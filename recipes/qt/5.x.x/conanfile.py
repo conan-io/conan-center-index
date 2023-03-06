@@ -3,7 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc, VCVars
 from conan.tools.scm import Version
 from conan.tools.env import Environment
 import configparser
@@ -11,6 +12,7 @@ import glob
 import itertools
 import os
 import textwrap
+import shutil
 
 required_conan_version = ">=1.52.0"
 
@@ -119,7 +121,6 @@ class QtConan(ConanFile):
 
     no_copy_source = True
     short_paths = True
-    generators = "PkgConfigDeps"
 
     @property
     def _settings_build(self):
@@ -147,10 +148,10 @@ class QtConan(ConanFile):
 
             # Check if a valid python2 is available in PATH or it will failflex
             # Start by checking if python2 can be found
-            python_exe = tools.which("python2")
+            python_exe = shutil.which("python2")
             if not python_exe:
                 # Fall back on regular python
-                python_exe = tools.which("python")
+                python_exe = shutil.which("python")
 
             if not python_exe:
                 msg = ("Python2 must be available in PATH "
@@ -431,6 +432,20 @@ class QtConan(ConanFile):
             "-ldbus-1"
         )
         save(self, os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "")
+
+    def generate(self):
+        pc = PkgConfigDeps(self)
+        pc.generate()
+        ms = VCVars(self)
+        ms.generate()
+        env = Environment()
+        env.define("MAKEFLAGS", f"j{build_jobs(self)}")
+        env.prepend_path("PKG_CONFIG_PATH": self.build_folder)
+        if self.settings.os == "Windows":
+            env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
+        if self._settings_build.os == "Macos":
+            save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(Environment(self).vars["DYLD_LIBRARY_PATH"]))
+            env.define_path("BASH_ENV", os.path.abspath("bash_env"))
 
     def _make_program(self):
         if is_msvc(self):
@@ -756,24 +771,12 @@ class QtConan(ConanFile):
 
         os.mkdir("build_folder")
         with chdir(self, "build_folder"):
-            with tools.vcvars(self) if is_msvc(self) else tools.no_op():
-                build_env = {"MAKEFLAGS": f"j{build_jobs(self)}", "PKG_CONFIG_PATH": [self.build_folder]}
-                if self.settings.os == "Windows":
-                    build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
+            if self._settings_build.os == "Macos":
+                save(self, ".qmake.stash" , "")
+                save(self, ".qmake.super" , "")
 
-                with tools.environment_append(build_env):
-
-                    if self._settings_build.os == "Macos":
-                        save(self, ".qmake.stash" , "")
-                        save(self, ".qmake.super" , "")
-
-                    self.run("%s %s" % (os.path.join(self.source_folder, "qt5", "configure"), " ".join(args)), run_environment=True)
-                    if self._settings_build.os == "Macos":
-                        save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % ":".join(Environment(self).vars["DYLD_LIBRARY_PATH"]))
-                    with tools.environment_append({
-                        "BASH_ENV": os.path.abspath("bash_env")
-                    }) if self._settings_build.os == "Macos" else tools.no_op():
-                        self.run(self._make_program(), run_environment=True)
+            self.run("%s %s" % (os.path.join(self.source_folder, "qt5", "configure"), " ".join(args)), run_environment=True)
+            self.run(self._make_program(), run_environment=True)
 
     @property
     def _cmake_core_extras_file(self):
