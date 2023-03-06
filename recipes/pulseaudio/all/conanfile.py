@@ -6,17 +6,18 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgCon
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class PulseAudioConan(ConanFile):
     name = "pulseaudio"
     description = "PulseAudio is a sound system for POSIX OSes, meaning that it is a proxy for sound applications."
-    topics = "sound",
+    topics = ("sound",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,15 +46,9 @@ class PulseAudioConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_dbus:
             del self.options.with_fftw
 

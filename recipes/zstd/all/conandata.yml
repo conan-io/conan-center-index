@@ -40,6 +40,10 @@ patches:
     - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
       patch_description: "use assembler codes only on x86_64"
       patch_type: "portability"
+    - patch_file: "patches/1.5.4-decrease-min-cmake-version.patch"
+      patch_description: "Don't require CMake 3.18 or later"
+      patch_type: "portability"
+      patch_source: "https://github.com/facebook/zstd/pull/3510"
   "1.5.2":
     - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
       patch_description: "use assembler codes only on x86_64"
