@@ -697,7 +697,7 @@ class QtConan(ConanFile):
             args += [f"-I \"{s}\"" for s in dependency.cpp_info.aggregated_components().includedirs]
             args += [f"-D {s}" for s in dependency.cpp_info.aggregated_components().defines]
 
-        libdirs = [l for dependency in self.dependencies.direct_host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+        libdirs = [l for dependency in self.dependencies.direct_host.topological_sort.values() for l in dependency.cpp_info.aggregated_components().libdirs]
         args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(libdirs))
         if not is_msvc(self):
             args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(libdirs))
