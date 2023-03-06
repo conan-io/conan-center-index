@@ -41,6 +41,7 @@ class ScnlibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        self.package_type = "header-library" if self.options.header_only else "library"
         if self.options.header_only or self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
