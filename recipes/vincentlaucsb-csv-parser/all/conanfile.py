@@ -1,9 +1,11 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+
 import os
 
 required_conan_version = ">=1.33.0"
-
 
 class VincentlaucsbCsvParserConan(ConanFile):
     name = "vincentlaucsb-csv-parser"
@@ -15,29 +17,30 @@ class VincentlaucsbCsvParserConan(ConanFile):
     settings = "os", "compiler"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.build.check_min_cppstd(self, 11)
 
         compiler = self.settings.compiler
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = tools.scm.Version(self.settings.compiler.version)
+
         if compiler == "gcc" and compiler_version < "7":
             raise ConanInvalidConfiguration("gcc version < 7 not supported")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+        
+    def layout(self):
+        basic_layout(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "single_include"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="*", src=os.path.join(self.source_folder, "single_include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("pthread")
+
