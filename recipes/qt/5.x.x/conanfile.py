@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc, VCVars
 from conan.tools.scm import Version
-from conan.tools.env import Environment
 import configparser
 import glob
 import itertools
@@ -438,6 +438,10 @@ class QtConan(ConanFile):
         pc.generate()
         ms = VCVars(self)
         ms.generate()
+        vbe = VirtualBuildEnv(self)
+        vbe.generate(
+        vre = VirtualRunEnv(self)
+        vre.generate())
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.prepend_path("PKG_CONFIG_PATH", self.build_folder)
@@ -775,8 +779,8 @@ class QtConan(ConanFile):
                 save(self, ".qmake.stash" , "")
                 save(self, ".qmake.super" , "")
 
-            self.run("%s %s" % (os.path.join(self.source_folder, "qt5", "configure"), " ".join(args)), run_environment=True)
-            self.run(self._make_program(), run_environment=True)
+            self.run("%s %s" % (os.path.join(self.source_folder, "qt5", "configure"), " ".join(args)))
+            self.run(self._make_program())
 
     @property
     def _cmake_core_extras_file(self):
