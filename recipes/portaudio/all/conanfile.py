@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
-from conan.tools.system.package_manager import Apt, Yum
+from conan.tools.system import package_manager
 from conan.tools.scm import Version
 import os
 
@@ -44,14 +44,14 @@ class PortaudioConan(ConanFile):
     def system_requirements(self):
         if self.settings.os == "Linux":
             if self.options.with_alsa:
-                Apt(self).install(["libasound2-dev"])
-                Yum(self).install(["alsa-lib-devel"])
+                package_manager.Apt(self).install(["libasound2-dev"])
+                package_manager.Yum(self).install(["alsa-lib-devel"])
             if self.options.with_jack:
-                Apt(self).install(["libjack-dev"])
-                Yum(self).install(["jack-audio-connection-kit-devel"])
+                package_manager.Apt(self).install(["libjack-dev"])
+                package_manager.Yum(self).install(["jack-audio-connection-kit-devel"])
             if self.settings.arch == "x86":
-                Yum(self).install(["glibmm24.i686"])
-                Yum(self).install(["glibc-devel.i686"])
+                package_manager.Yum(self).install(["glibmm24.i686"])
+                package_manager.Yum(self).install(["glibc-devel.i686"])
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,7 +70,7 @@ class PortaudioConan(ConanFile):
         tc.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def build(self):
         cmake = CMake(self)
