@@ -1,6 +1,7 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, save
 
 
 class LinuxSyscallSupportConan(ConanFile):
@@ -18,20 +19,17 @@ class LinuxSyscallSupportConan(ConanFile):
             raise ConanInvalidConfiguration("{} supported only on Linux".format(self.name))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
-    def _extract_license(self):
+    def package(self):
+        copy(self, pattern="linux_syscall_support.h", src=self.source_folder, dst="include")
         with open(os.path.join(self.source_folder, "linux_syscall_support.h")) as f:
             content_lines = f.readlines()
         license_content = []
         for i in range(0, 29):
             license_content.append(content_lines[i][3:-1])
-        tools.save("LICENSE", "\n".join(license_content))
-
-    def package(self):
-        self.copy(pattern="linux_syscall_support.h", dst="include")
-        self._extract_license()
-        self.copy(pattern="LICENSE", dst="licenses", keep_path=False)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
+             "\n".join(license_content))
