@@ -5,7 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.gnu import AutotoolsToolchain, Autotools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
 class ReadLineConan(ConanFile):
     name = "readline"
@@ -46,10 +46,10 @@ class ReadLineConan(ConanFile):
             raise ConanInvalidConfiguration("readline does not support Visual Studio")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -65,9 +65,9 @@ class ReadLineConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(os.path.join(self._source_subfolder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
+        replace_in_file(self, os.path.join(self.source_folder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
                               "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS) -ltermcap")
-        replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
+        replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
 
     def build(self):
         self._patch_sources()
@@ -75,12 +75,12 @@ class ReadLineConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
 
-        rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["history", "readline"]
