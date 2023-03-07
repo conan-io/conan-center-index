@@ -25,6 +25,7 @@ class LibwebsocketsConan(ConanFile):
         "with_sqlite3": [True, False],
         "with_libmount": [True, False],
         "with_hubbub": [True, False],
+        "with_max_smp": [1, 16, 32],                                            # Set DLWS_MAX_SMP > 1 for multithreading support
         "ssl_client_use_os_ca_certs": [True, False],                            # SSL support should make use of the OS-installed CA root certs
         "ssl_server_with_ecdh_cert": [True, False],                             # Include SSL server use ECDH certificate
 
@@ -109,6 +110,7 @@ class LibwebsocketsConan(ConanFile):
         "with_sqlite3": False,
         "with_libmount": False,
         "with_hubbub": False,
+        "with_max_smp": 1,
 
         "ssl_client_use_os_ca_certs": True,
         "ssl_server_with_ecdh_cert": False,
@@ -355,6 +357,7 @@ class LibwebsocketsConan(ConanFile):
             self._cmake.definitions["LWS_LIBMOUNT_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["libmount"].include_paths)
 
         self._cmake.definitions["LWS_WITH_HUBBUB"] = self.options.with_hubbub
+        self._cmake.definitions["LWS_MAX_SMP"] = self.options.with_max_smp
 
         self._cmake.definitions["LWS_SSL_CLIENT_USE_OS_CA_CERTS"] = self.options.ssl_client_use_os_ca_certs
         self._cmake.definitions["LWS_SSL_SERVER_WITH_ECDH_CERT"] = self.options.ssl_server_with_ecdh_cert
