@@ -16,6 +16,8 @@ class MysqlConnectorCppConan(ConanFile):
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
     requires = "openssl/1.1.1k"
+    source_folder = "mysql-connector-cpp"
+    build_folder = "build"
 
     def config_options(self):
         pass
@@ -27,7 +29,7 @@ class MysqlConnectorCppConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="mysql-connector-cpp", build_folder="build")
+        cmake.configure()
         cmake.build()
 
         # Explicit way:
