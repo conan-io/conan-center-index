@@ -10,10 +10,12 @@ required_conan_version = ">=1.50.0"
 class LinuxSyscallSupportConan(ConanFile):
     name = "linux-syscall-support"
     description = "Linux Syscall Support provides a header file that can be included into your application whenever you need to make direct system calls."
+    license = "BSD-3-Clause"
+    topics = ("linux", "syscall", "chromium")
     homepage = "https://chromium.googlesource.com/linux-syscall-support"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "linux", "syscall", "chromium")
-    license = "BSD-3-Clause"
+
+    package_type = "header-library"
     settings = "os"
     no_copy_source = True
 
