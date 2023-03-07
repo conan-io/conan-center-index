@@ -1,9 +1,11 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -39,6 +41,10 @@ class CgifConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared build with Visual Studio")
 
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
