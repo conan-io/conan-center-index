@@ -1,4 +1,4 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
@@ -12,8 +12,7 @@ class PortaudioConan(ConanFile):
     description = "PortAudio is a free, cross-platform, open-source, audio I/O library"
     url = "https://github.com/bincrafters/community"
     homepage = "http://www.portaudio.com"
-    license = "MIT"    
-    
+    license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -50,7 +49,7 @@ class PortaudioConan(ConanFile):
             if self.options.with_jack:
                 Apt(self).install(["libjack-dev"])
                 Yum(self).install(["jack-audio-connection-kit-devel"])
-            if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
+            if self.settings.arch == "x86":
                 Yum(self).install(["glibmm24.i686"])
                 Yum(self).install(["glibc-devel.i686"])
 
