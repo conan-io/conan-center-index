@@ -1,11 +1,14 @@
 import os
 from conan import ConanFile
-from conan.tools.files import get, replace_in_file, rmdir
+from conan.tools.files import get, replace_in_file, rmdir, copy
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.53.0"
 
 class ReadLineConan(ConanFile):
     name = "readline"
@@ -38,8 +41,9 @@ class ReadLineConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
         if is_msvc(self):
@@ -56,11 +60,7 @@ class ReadLineConan(ConanFile):
         tc.configure_args.extend([
             "--with-curses={}".format("yes" if self.options.with_library == "curses" else "no"),
         ])
-        if self.options.shared:
-            tc.configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            tc.configure_args.extend(["--enable-static", "--disable-shared"])
-        if cross_building(self.settings):
+        if cross_building(self):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")
         tc.generate()
 
@@ -75,12 +75,13 @@ class ReadLineConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self.source_folder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["history", "readline"]
