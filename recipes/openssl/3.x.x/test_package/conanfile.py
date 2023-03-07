@@ -48,7 +48,6 @@ class TestPackageConan(ConanFile):
 
             if not self.options["openssl"].no_legacy:
                 bin_legacy_path = os.path.join(self.cpp.build.bindirs[0], "digest_legacy")
-                assert os.path.exists(bin_legacy_path)
                 self.run(bin_legacy_path, run_environment=True)
 
             if not self.options["openssl"].no_stdio:
