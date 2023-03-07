@@ -90,8 +90,8 @@ class CubicInterpolationConan(ConanFile):
         deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**patch)
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(**p)
 
         cmake = CMake(self)
         cmake.configure()
