@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile
+from conan.tools.cmake import CMake
 
 
 class MysqlConnectorCppConan(ConanFile):
