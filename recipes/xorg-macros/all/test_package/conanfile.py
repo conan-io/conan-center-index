@@ -1,30 +1,34 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import os
-import shutil
+from conan import ConanFile
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.layout import basic_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "configure.ac", "Makefile.am",
-    generators = "pkg_config"
     test_type = "explicit"
+    win_bash = True
 
     @property
     def _settings_build(self):
         return self.settings_build if hasattr(self, "settings_build") else self.settings
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
-        self.build_requires("automake/1.16.3")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires(self.tested_reference_str)
+        self.build_requires("automake/1.16.5")
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
+            self.tool_requires("msys2/cci.latest")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def build(self):
-        for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        print(tools.get_env("AUTOMAKE_CONAN_INCLUDES"))
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=self._settings_build.os == "Windows", run_environment=True)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
+        # Only make sure the project configures correctly, as these are build scripts
+        autotools = Autotools(self)
+        autotools.autoreconf(args=["--debug"])
         autotools.configure()
 
     def test(self):
