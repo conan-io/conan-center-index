@@ -1,7 +1,7 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, patch
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 import os
 
@@ -91,7 +91,7 @@ class CubicInterpolationConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            patch(**patch)
 
         cmake = CMake(self)
         cmake.configure()
