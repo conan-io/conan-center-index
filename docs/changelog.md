@@ -1,5 +1,10 @@
 # Changelog
 
+### 07-March-2023 - 17:05 CET
+
+- [hotfix] Automatic merge skips git conflicts
+- [hotfix] Conan V2 ready label depends on PR author
+
 ### 03-March-2023 - 11:05 CET
 
 - [feature] Update ready_v2_references.yml file automatically
