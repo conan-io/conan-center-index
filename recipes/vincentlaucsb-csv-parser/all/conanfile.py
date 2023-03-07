@@ -1,5 +1,6 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools import build, scm
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
@@ -19,10 +20,10 @@ class VincentlaucsbCsvParserConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.build.check_min_cppstd(self, 11)
+            build.check_min_cppstd(self, 11)
 
         compiler = self.settings.compiler
-        compiler_version = tools.scm.Version(self.settings.compiler.version)
+        compiler_version = scm.Version(self.settings.compiler.version)
 
         if compiler == "gcc" and compiler_version < "7":
             raise ConanInvalidConfiguration("gcc version < 7 not supported")
@@ -31,7 +32,7 @@ class VincentlaucsbCsvParserConan(ConanFile):
         self.info.clear()
         
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
