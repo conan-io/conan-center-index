@@ -1,7 +1,8 @@
 import os
 
-from conans import ConanFile, CMake, tools
-
+from conans import ConanFile
+from conan.tools.cmake import CMake
+from conan.tools import cross_building
 
 class MysqlConnectorCppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
