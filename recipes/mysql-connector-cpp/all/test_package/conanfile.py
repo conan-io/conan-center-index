@@ -25,6 +25,6 @@ class MysqlConnectorCppTestConan(ConanFile):
 
 
     def test(self):
-        if not tools.cross_building(self):
+        if not cross_building(self):
             os.chdir("bin")
             self.run(".%sexample" % os.sep)
