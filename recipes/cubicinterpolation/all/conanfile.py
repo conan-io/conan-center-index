@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy, rmdir, patch
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.files import get, copy, rmdir, patch, apply_conandata_patches, export_conandata_patches
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=1.43.0"
@@ -15,7 +15,6 @@ class CubicInterpolationConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Leightweight interpolation library based on boost and eigen."
     topics = ("interpolation", "splines", "cubic", "bicubic", "boost", "eigen3")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,12 +28,12 @@ class CubicInterpolationConan(ConanFile):
     _cmake = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    def export_sources(self):
+        #self.copy("CMakeLists.txt")
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,6 +42,9 @@ class CubicInterpolationConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # TODO: update boost dependency as soon as issue #11207 is fixed
@@ -90,8 +92,7 @@ class CubicInterpolationConan(ConanFile):
         deps.generate()
 
     def build(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(**p)
+        apply_conandata_patches(self)
 
         cmake = CMake(self)
         cmake.configure()
