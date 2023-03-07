@@ -60,9 +60,6 @@ class GoogleAPIS(ConanFile):
     def requirements(self):
         self.requires(f"protobuf/{self._protobuf_version}", transitive_headers=True)
 
-    def package_id(self):
-        self.info.requires["protobuf"].full_package_mode()
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
