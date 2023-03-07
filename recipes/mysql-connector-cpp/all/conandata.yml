@@ -1,0 +1,3 @@
+sources:
+  "8.0.27":
+    "https://github.com/mysql/mysql-connector-cpp/archive/refs/tags/8.0.27.tar.gz"
