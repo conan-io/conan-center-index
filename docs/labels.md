@@ -47,6 +47,8 @@ This is a regression test, in case package is working with Conan v2, it can not 
 
 > These pull-requests will be merged right away without requiring any approval (CI and CLA checks must have passed).
 
+Only team members can open a pull request with these changes.
+
 ## Infrastructure
 
 Label [`infrastructure`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3Ainfrastructure) is
