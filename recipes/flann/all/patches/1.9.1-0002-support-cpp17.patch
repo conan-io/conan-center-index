@@ -5,7 +5,7 @@
  #include <stdarg.h>
  #include <cmath>
 +#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
-+#incude <random>
++#include <random>
 +#endif
  
  #include "flann/general.h"
@@ -47,7 +47,7 @@
  #include <iomanip>
  #include <limits.h>
 +#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
-+#incude <random>
++#include <random>
 +#endif
  // TODO as soon as we use C++0x, use the code in USE_UNORDERED_MAP
  #if USE_UNORDERED_MAP
@@ -73,7 +73,7 @@
  #include <cstdlib>
  #include <cstddef>
 +#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
-+#incude <random>
++#include <random>
 +#endif
  #include <vector>
  
