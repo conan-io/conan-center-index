@@ -167,6 +167,7 @@ class CeressolverConan(ConanFile):
         if not self.options.use_glog:
             self.cpp_info.components["ceres"].includedirs.append(os.path.join("include", "ceres", "internal", "miniglog"))
         if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ceres"].system_libs.append("m")
             if self.options.get_safe("use_CXX11_threads", True):
                 self.cpp_info.components["ceres"].system_libs.append("pthread")
         elif is_apple_os(self):
