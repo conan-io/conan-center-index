@@ -19,7 +19,7 @@ class FreetypeConan(ConanFile):
     homepage = "https://www.freetype.org"
     license = "FTL"
     topics = ("freetype", "fonts")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,7 +37,7 @@ class FreetypeConan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "with_brotli": True,
-        "subpixel": False
+        "subpixel": False,
     }
 
     @property
