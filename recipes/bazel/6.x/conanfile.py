@@ -1,4 +1,5 @@
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, rename, copy, download, check_sha256 
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -23,7 +24,8 @@ class BazelConan(ConanFile):
     @property
     def _bazel_filename(self):
         platform = "darwin" if self.settings.os == "Macos" else str(self.settings.os).lower()
-        return f"bazel-{}-{}-{}{}".format(self.version, platform, self.settings.arch, self._program_suffix)
+        fname = "bazel-{}-{}-{}{}".format(self.version, platform, self.settings.arch, self._program_suffix)
+        return fname
 
     def validate(self):
         try:
@@ -37,15 +39,15 @@ class BazelConan(ConanFile):
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
             if filename in ["LICENSE", self._bazel_filename]:
-                tools.download(url, filename)
-                tools.check_sha256(filename, source["sha256"])
+                download(url, filename)
+                check_sha256(filename, source["sha256"])
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses")
         self.copy(pattern=self._bazel_filename, dst="bin")
         old_target_filename = os.path.join(self.package_folder, "bin", self._bazel_filename)
         new_target_filename = os.path.join(self.package_folder, "bin", "bazel" + self._program_suffix)
-        tools.rename(old_target_filename, new_target_filename)
+        rename(old_target_filename, new_target_filename)
         self._chmod_plus_x(new_target_filename)
 
     def package_info(self):

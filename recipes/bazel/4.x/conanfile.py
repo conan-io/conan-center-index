@@ -23,7 +23,8 @@ class BazelConan(ConanFile):
     @property
     def _bazel_filename(self):
         platform = "darwin" if self.settings.os == "Macos" else str(self.settings.os).lower()
-        return f"bazel-{}-{}-{}{}".format(self.version, platform, self.settings.arch, self._program_suffix)
+        fname = "bazel-{}-{}-{}{}".format(self.version, platform, self.settings.arch, self._program_suffix)
+        return fname
 
     def validate(self):
         if self.settings.arch != "x86_64":

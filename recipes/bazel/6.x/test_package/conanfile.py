@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tool.build import can_run
+from conan.tools.build import can_run
 
 
 class TestPackage(ConanFile):
@@ -7,4 +7,4 @@ class TestPackage(ConanFile):
 
     def test(self):
         if can_run(self):
-          self.run("bazel --version", run_environment=True)
+            self.run("bazel --version", run_environment=True)
