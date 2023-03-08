@@ -25,6 +25,7 @@ patches:
     - patch_file: "patches/upstream-macos-gid-max-macro.patch"
       patch_description: "Handle case where GID_MAX is defined as a macro by macOS SDK"
       patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
   "3.19.6":
     - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
       patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
