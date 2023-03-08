@@ -57,7 +57,7 @@ class LibNlConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["nl"].libs = ["nl-3"]
         self.cpp_info.components["nl"].includedirs = [os.path.join('include', 'libnl3')]
-        if self._settings_build.os != "Windows":
+        if self.settings.os != "Windows":
             self.cpp_info.components["nl"].system_libs = ["pthread", "m"]
         self.cpp_info.components["nl-route"].libs = ["nl-route-3"]
         self.cpp_info.components["nl-route"].requires = ["nl"]
