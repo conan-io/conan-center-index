@@ -106,17 +106,15 @@ class JasperConan(ConanFile):
 
     # FIXME: Missing CMake alias variables. See https://github.com/conan-io/conan/issues/7691
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             set(JASPER_FOUND TRUE)
             if(DEFINED Jasper_INCLUDE_DIR)
-                set(JASPER_INCLUDE_DIR ${Jasper_INCLUDE_DIR})
+                set(JASPER_INCLUDE_DIR ${{Jasper_INCLUDE_DIR}})
             endif()
             if(DEFINED Jasper_LIBRARIES)
-                set(JASPER_LIBRARIES ${Jasper_LIBRARIES})
+                set(JASPER_LIBRARIES ${{Jasper_LIBRARIES}})
             endif()
-            if(DEFINED Jasper_VERSION)
-                set(JASPER_VERSION_STRING ${Jasper_VERSION})
-            endif()
+            set(JASPER_VERSION_STRING "{self.version}")
         """)
         save(self, module_file, content)
 
