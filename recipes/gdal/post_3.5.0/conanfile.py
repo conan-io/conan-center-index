@@ -68,6 +68,8 @@ class GdalConan(ConanFile):
         "with_proj": [True, False],
         "with_qhull": [True, False],
         "with_sqlite3": [True, False],
+        "with_spatialite": [True, False],
+        "with_rasterlite2": [True, False],
         "with_webp": [True, False],
         "with_xerces": [True, False],
         "with_xml2": [True, False],
@@ -118,6 +120,8 @@ class GdalConan(ConanFile):
         "with_proj": True,
         "with_qhull": True,
         "with_sqlite3": True,
+        "with_spatialite": True,
+        "with_rasterlite2": False,
         "with_webp": False,
         "with_xerces": False,
         "with_xml2": False,
@@ -275,6 +279,12 @@ class GdalConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.39.3")
 
+        if self.options.with_spatialite:
+            self.requires("libspatialite/5.0.1")
+
+        if self.options.with_rasterlite2:
+            self.requires("librasterlite2/1.1.0-beta1")
+
         if self.options.with_webp:
             self.requires("libwebp/1.2.4")
 
@@ -311,6 +321,17 @@ class GdalConan(ConanFile):
 
         if self.options.get_safe("with_poppler") and self.options["poppler"].with_libjpeg != self.options.get_safe("with_jpeg"):
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
+            self.output.error(msg)
+            raise ConanInvalidConfiguration(msg)
+
+
+        if self.options.with_spatialite and not self.options.with_sqlite3:
+            msg = "with_spatialite requires with_sqlite3, but with_sqlite3 is disabled"
+            self.output.error(msg)
+            raise ConanInvalidConfiguration(msg)
+
+        if self.options.with_rasterlite2 and not self.options.with_spatialite:
+            msg = "with_rasterlite2 requires with_spatialite, but with_spatialite is disabled"
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
@@ -664,6 +685,15 @@ class GdalConan(ConanFile):
             cmake.definitions["GDAL_CONAN_PACKAGE_FOR_SQLITE3"] = "sqlite3"
             cmake.definitions["TARGET_FOR_SQLITE3"] = \
                     self.dependencies["sqlite3"].cpp_info.get_property("cmake_target_name")
+            if self.options.with_spatialite:
+                cmake.definitions["GDAL_USE_SPATIALITE"] = True
+                cmake.definitions["GDAL_CONAN_PACKAGE_FOR_SPATIALITE"] = "libspatialite"
+                cmake.definitions["TARGET_FOR_SPATIALITE"] = "libspatialite::libspatialite"
+            if self.options.with_rasterlite2:
+                cmake.definitions["GDAL_USE_RASTERLITE2"] = True
+                cmake.definitions["GDAL_CONAN_PACKAGE_FOR_RASTERLITE2"] = "librasterlite2"
+                cmake.definitions["TARGET_FOR_RASTERLITE2"] = \
+                        self.dependencies["librasterlite2"].cpp_info.get_property("cmake_target_name")
         else:
             cmake.definitions["SQLite3_FOUND"] = False
 
@@ -867,6 +897,12 @@ class GdalConan(ConanFile):
 
         if self.options.with_sqlite3:
             self.cpp_info.requires.extend(['sqlite3::sqlite'])
+
+        if self.options.with_spatialite:
+            self.cpp_info.requires.extend(['libspatialite::libspatialite'])
+
+        if self.options.with_rasterlite2:
+            self.cpp_info.requires.extend(['librasterlite2::librasterlite2'])
 
         if self.options.with_webp:
             self.cpp_info.requires.extend(['libwebp::libwebp'])

@@ -76,6 +76,18 @@ endif()
 
 if (${GDAL_USE_SQLITE3})
     find_package(SQLite3)
+    set(SQLite3_HAS_MUTEX_ALLOC ON)
+endif()
+
+if (${GDAL_USE_SPATIALITE})
+    find_package(libspatialite REQUIRED)
+    add_library(SPATIALITE::SPATIALITE ALIAS libspatialite::libspatialite)
+endif()
+
+if (${GDAL_USE_RASTERLITE2})
+    find_package(librasterlite2 REQUIRED)
+    add_library(RASTERLITE2::RASTERLITE2 ALIAS librasterlite2::librasterlite2)
+    string(REPLACE "-beta" "" RASTERLITE2_VERSION_STRING ${librasterlite2_VERSION})
 endif()
 
 if (${GDAL_USE_LIBXML2})
