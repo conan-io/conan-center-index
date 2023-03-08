@@ -6,13 +6,12 @@ from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
 
 class XapianCoreConan(ConanFile):
@@ -85,10 +84,9 @@ class XapianCoreConan(ConanFile):
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
-        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
-            tc.extra_cflags.append("-FS")
-            tc.extra_cxxflags.append("-FS")
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
         tc.configure_args.extend([
             "--datarootdir=${prefix}/res",
             "--disable-documentation",
