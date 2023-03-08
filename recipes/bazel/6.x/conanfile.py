@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rename, copy, download, check_sha256 
+from conan.tools.files import get 
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -39,15 +39,15 @@ class BazelConan(ConanFile):
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
             if filename in ["LICENSE", self._bazel_filename]:
-                download(url, filename)
-                check_sha256(filename, source["sha256"])
+                tools.download(url, filename)
+                tools.check_sha256(filename, source["sha256"])
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses")
         self.copy(pattern=self._bazel_filename, dst="bin")
         old_target_filename = os.path.join(self.package_folder, "bin", self._bazel_filename)
         new_target_filename = os.path.join(self.package_folder, "bin", "bazel" + self._program_suffix)
-        rename(old_target_filename, new_target_filename)
+        tools.rename(old_target_filename, new_target_filename)
         self._chmod_plus_x(new_target_filename)
 
     def package_info(self):
