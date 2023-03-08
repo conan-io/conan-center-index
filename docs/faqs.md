@@ -438,3 +438,27 @@ Generally no, these sorts of options can most likely be set from a profile or do
 and would otherwise dynamically embed this into the CMake config files or generated pkg-config files then it should be allowed.
 
 Doing so requires [deleting the option from the `package_id`](adding_packages/conanfile_attributes.md#removing-from-package_id).
+
+## Can I use full_package_mode for a requirement in my recipe?
+
+For some irregular projects, they may need to be aligned when being used as a requirement, using the very same version, options, and settings and maybe not mixing shared with static linkage.
+Those projects usually break between patch versions and are very sensitive, so we can not use different versions through Conan graph dependencies,
+otherwise, it may result in unexpected behavior or even runtime errors.
+
+A very known project is GLib, which requires the very same configuration to prevent multiple instances when using static linkage.
+As a solution, we could consume GLib on full package id mode, like:
+
+```python
+def package_id(self):
+    self.info.requires["glib"].full_package_mode()
+```
+
+Perfect solution on the consumer side, but there is a side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph with which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests.
+As a trade-off, it would be necessary to update all recipes involved, by opening new PRs,
+then it should generate new packages, but it takes many days and still is a process that is not supported by CCI internally.
+
+To have more context about it, please, visit issues #11684 and #11022
+
+In summary, we do not recommend `full_package_mode` or any other custom package id mode for requirements on CCI, it will break other PRs soon or later.
+Instead, prefer using `shared=True` by default, when needed.
+Also, when having a similar situation, do not hesitate in opening an issue explaining your case, and ask for support from the community.

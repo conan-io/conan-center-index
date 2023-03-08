@@ -1,0 +1,13 @@
+diff --git a/include/watcher/detail/adapter/adapter.hpp b/include/watcher/detail/adapter/adapter.hpp
+index 3d43bb8..597c0bc 100644
+--- a/include/watcher/detail/adapter/adapter.hpp
++++ b/include/watcher/detail/adapter/adapter.hpp
+@@ -23,7 +23,7 @@ namespace adapter {
+ 
+ namespace {
+ inline constexpr size_t watch_count_max
+-    = std::numeric_limits<size_t>::max() - 1;
++    = (std::numeric_limits<size_t>::max)() - 1;
+ } /* namespace */
+ 
+ /* @brief wtr/watcher/detail/adapter/message
