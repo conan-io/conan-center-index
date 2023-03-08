@@ -127,6 +127,12 @@ class LelyConan(ConanFile):
                 f"{self.ref} can only be compiled with GCC currently"
             )
 
+    def build_requirements(self):
+        self.tool_requires("make/4.3")
+        self.tool_requires("autoconf/2.71")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(
             self,
