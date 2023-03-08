@@ -6,8 +6,7 @@ from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-from conans import tools as tools_legacy
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
 import os
 import textwrap
 
@@ -200,7 +199,8 @@ class XapianCoreConan(ConanFile):
             elif self.settings.os == "SunOS":
                 self.cpp_info.system_libs = ["socket", "nsl"]
 
-        self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", os.path.join(self._datarootdir, "aclocal"))
+        xapian_aclocal_dir = os.path.join(self._datarootdir, "aclocal")
+        self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", xapian_aclocal_dir)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "xapian"
@@ -208,4 +208,4 @@ class XapianCoreConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools_legacy.unix_path(os.path.join(self._datarootdir, "aclocal")))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, xapian_aclocal_dir))
