@@ -282,3 +282,4 @@ required_for_references:
 - zlib
 - zstd
 - zulu-openjdk
+- charls
