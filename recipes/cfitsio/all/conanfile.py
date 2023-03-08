@@ -84,7 +84,7 @@ class CfitsioConan(ConanFile):
             tc.variables["TESTS"] = False
             tc.variables["UTILS"] = False
         else:
-            tc.variables["UseCurl"] = self.optionsget_safe("with_curl", False)
+            tc.variables["UseCurl"] = self.options.get_safe("with_curl", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
