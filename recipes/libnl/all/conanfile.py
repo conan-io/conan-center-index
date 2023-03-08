@@ -25,7 +25,7 @@ class LibNlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.settings.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
