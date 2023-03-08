@@ -362,7 +362,7 @@ class Libxml2Conan(ConanFile):
             else()
                 set(LIBXML2_DEFINITIONS "")
             endif()
-            set(LIBXML2_VERSION_STRING {self.version})
+            set(LIBXML2_VERSION_STRING "{self.version}")
         """)
         save(self, module_file, content)
 
