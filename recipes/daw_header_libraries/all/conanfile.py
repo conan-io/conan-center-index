@@ -15,7 +15,8 @@ class DawHeaderLibrariesConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/header_libraries"
-    topics = ("algorithms", "helpers", "data-structures")
+    topics = ("algorithms", "helpers", "data-structures", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -42,15 +43,9 @@ class DawHeaderLibrariesConan(ConanFile):
         minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def build(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
