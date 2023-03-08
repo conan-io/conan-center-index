@@ -17,7 +17,7 @@ class JasperConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("toolkit", "coding", "jpeg", "images")
     description = "JasPer Image Processing/Coding Tool Kit"
-    package_type = "jasper"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
