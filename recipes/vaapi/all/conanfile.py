@@ -45,9 +45,9 @@ class SysConfigVAAPIConan(ConanFile):
         pkg.install(["libva"], update=True, check=True)
 
     def package_info(self):
-        self.cpp_info.includedirs = []
-        self.cpp_info.libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             for name in ['libva', 'libva-x11', 'libva-drm']:
                 pkg_config = PkgConfig(self, name)
-                pkg_config.fill_cpp_info(self.cpp_info)
+                self.cpp_info.components[name].includedirs = []
+                self.cpp_info.components[name].libdirs = []
+                pkg_config.fill_cpp_info(self.cpp_info.components[name])
