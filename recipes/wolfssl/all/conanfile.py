@@ -2,11 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -133,11 +132,6 @@ class WolfSSLConan(ConanFile):
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
-        if is_msvc(self) and (Version(self.version) < "4.7" or self.version == "5.0.0"):
-            replace_in_file(
-                self, os.path.join(self.build_folder, "libtool"),
-                "AR_FLAGS=\"Ucru\"", "AR_FLAGS=\"cru\"",
-            )
         autotools.make()
 
     def package(self):
