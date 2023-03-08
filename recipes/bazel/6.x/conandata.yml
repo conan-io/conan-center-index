@@ -5,8 +5,8 @@ sources:
         url: "https://github.com/bazelbuild/bazel/releases/download/6.1.0/bazel-6.1.0-windows-x86_64.exe"
         sha256: "585cc8656a5dde312f66fb669c21378c265466d79b56361cf5d521557904b22c"
       "armv8":
-          url: "https://github.com/bazelbuild/bazel/releases/download/6.1.0/bazel-6.1.0-windows-arm64.exe"
-          sha256: "cd3f70c51715c6db5d3433a4a911975c291b0d048898d8cf2e5ea12e4deb0eb3"
+        url: "https://github.com/bazelbuild/bazel/releases/download/6.1.0/bazel-6.1.0-windows-arm64.exe"
+        sha256: "cd3f70c51715c6db5d3433a4a911975c291b0d048898d8cf2e5ea12e4deb0eb3"
     Linux:
       "x86_64":
         url: "https://github.com/bazelbuild/bazel/releases/download/6.1.0/bazel-6.1.0-linux-x86_64"

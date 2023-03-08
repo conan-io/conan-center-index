@@ -1,5 +1,5 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, tools
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -23,7 +23,7 @@ class BazelConan(ConanFile):
     @property
     def _bazel_filename(self):
         platform = "darwin" if self.settings.os == "Macos" else str(self.settings.os).lower()
-        return "bazel-{}-{}-{}{}".format(self.version, platform, self.settings.arch, self._program_suffix)
+        return f"bazel-{}-{}-{}{}".format(self.version, platform, self.settings.arch, self._program_suffix)
 
     def validate(self):
         if self.settings.arch != "x86_64":
