@@ -74,21 +74,17 @@ class CfitsioConan(ConanFile):
         if Version(self.version) >= "4.1.0":
             tc.variables["USE_SSE2"] = self.options.get_safe("simd_intrinsics") == "sse2"
             tc.variables["USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
+            tc.variables["USE_BZIP2"] = self.options.with_bzip2
         else:
             tc.variables["CFITSIO_USE_SSE2"] = self.options.get_safe("simd_intrinsics") == "sse2"
             tc.variables["CFITSIO_USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
-        if Version(self.version) >= "4.1.0":
-            tc.variables["USE_BZIP2"] = self.options.with_bzip2
-        else:
             tc.variables["CFITSIO_USE_BZIP2"] = self.options.with_bzip2
-        if self.settings.os != "Windows":
-            if Version(self.version) >= "4.0.0":
-                tc.variables["USE_CURL"] = self.options.with_curl
-            else:
-                tc.variables["UseCurl"] = self.options.with_curl
         if Version(self.version) >= "4.0.0":
+            tc.variables["USE_CURL"] = self.options.get_safe("with_curl", False)
             tc.variables["TESTS"] = False
             tc.variables["UTILS"] = False
+        else:
+            tc.variables["UseCurl"] = self.optionsget_safe("with_curl", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
