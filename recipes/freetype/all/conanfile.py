@@ -203,17 +203,15 @@ class FreetypeConan(ConanFile):
         )
 
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             set(FREETYPE_FOUND TRUE)
             if(DEFINED Freetype_INCLUDE_DIRS)
-                set(FREETYPE_INCLUDE_DIRS ${Freetype_INCLUDE_DIRS})
+                set(FREETYPE_INCLUDE_DIRS ${{Freetype_INCLUDE_DIRS}})
             endif()
             if(DEFINED Freetype_LIBRARIES)
-                set(FREETYPE_LIBRARIES ${Freetype_LIBRARIES})
+                set(FREETYPE_LIBRARIES ${{Freetype_LIBRARIES}})
             endif()
-            if(DEFINED Freetype_VERSION)
-                set(FREETYPE_VERSION_STRING ${Freetype_VERSION})
-            endif()
+            set(FREETYPE_VERSION_STRING "{self.version}")
         """)
         save(self, module_file, content)
 
