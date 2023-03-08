@@ -117,7 +117,7 @@ class QtConan(ConanFile):
         "config": None,
         "multiconfiguration": False
     }
-    default_options.update({module: (module in ["qttools", "qttranslations"]) for module in _submodules})
+    default_options.update({module: False for module in _submodules})
 
     no_copy_source = True
     short_paths = True
@@ -1016,6 +1016,8 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].includedirs = []
             self.cpp_info.components[componentname].defines = []
 
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         if self.options.gui:
             gui_reqs = []
             if self.options.with_dbus:
@@ -1163,8 +1165,6 @@ Examples = bin/datadir/examples""")
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
-        if self.options.with_dbus:
-            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
@@ -1198,8 +1198,8 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtquick3d and self.options.gui:
             _create_module("Quick3DUtils", ["Gui"])
-            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
             _create_module("Quick3DRender", ["Quick3DUtils", "Quick"])
+            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
             _create_module("Quick3DRuntimeRender", ["Quick3DRender", "Quick3DAssetImport", "Quick3DUtils"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
@@ -1271,6 +1271,15 @@ Examples = bin/datadir/examples""")
         if self.options.qtcharts:
             _create_module("Charts", ["Gui", "Widgets"])
 
+        if self.options.qtgamepad:
+            _create_module("Gamepad", ["Gui"])
+            if self.settings.os == "Linux":
+                _create_plugin("QEvdevGamepadBackendPlugin", "evdevgamepad", "gamepads", [])
+            if self.settings.os == "Macos":
+                _create_plugin("QDarwinGamepadBackendPlugin", "darwingamepad", "gamepads", [])
+            if self.settings.os =="Windows":
+                _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
+
         if self.options.qt3d:
             _create_module("3DCore", ["Gui", "Network"])
 
@@ -1292,15 +1301,6 @@ Examples = bin/datadir/examples""")
             _create_module("3DQuickInput", ["3DInput", "3DQuick", "3DCore", "Gui", "Qml"])
             _create_module("3DQuickRender", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
             _create_module("3DQuickScene2D", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
-
-        if self.options.qtgamepad:
-            _create_module("Gamepad", ["Gui"])
-            if self.settings.os == "Linux":
-                _create_plugin("QEvdevGamepadBackendPlugin", "evdevgamepad", "gamepads", [])
-            if self.settings.os == "Macos":
-                _create_plugin("QDarwinGamepadBackendPlugin", "darwingamepad", "gamepads", [])
-            if self.settings.os =="Windows":
-                _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
 
         if self.options.qtmultimedia:
             multimedia_reqs = ["Network", "Gui"]
