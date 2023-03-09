@@ -41,14 +41,14 @@ class NanorangeConan(ConanFile):
            not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
             raise ConanInvalidConfiguration(f"{self.ref} requires at least c++17")
         elif is_msvc(self):
-            check_min_vs("192")
+            check_min_vs(self, 192)
             if not any([self.settings.compiler.cppstd == std for std in ["17", "20"]]):
                 raise ConanInvalidConfiguration(f"{self.ref} requires at least c++17")
         else:
             if ( compiler == "gcc" and version < "7" ) or ( compiler == "clang" and version < "5" ):
                 raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
             elif compiler == "apple-clang" and version < "10":
-                    raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
+                raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
