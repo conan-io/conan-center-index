@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -62,6 +63,9 @@ class TaoCPPPEGTLConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
