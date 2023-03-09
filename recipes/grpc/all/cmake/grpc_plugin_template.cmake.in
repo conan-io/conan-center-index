@@ -2,9 +2,13 @@ if(NOT TARGET @target_name@)
     if(CMAKE_CROSSCOMPILING)
         find_program(@find_program_variable@
             NAMES @executable_name@
-            PATHS ENV PATH
+            PATHS ENV GRPC_BIN_PATH ENV PATH
             NO_DEFAULT_PATH
         )
+        # Should we fail here?
+        if (NOT @find_program_variable@)
+           message(FATAL_ERROR "Cannot find generator for @executable_name@")
+        endif()
     else()
         find_program(@find_program_variable@
             NAMES @executable_name@
