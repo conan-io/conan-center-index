@@ -87,9 +87,13 @@ class NasRecipe(ConanFile):
     def build(self):
         apply_conandata_patches(self)
 
-        config_folder = os.path.join(self.source_folder, "config")
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB, os.path.join(config_folder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS, os.path.join(config_folder, "config.guess"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                config_folder = os.path.join(self.source_folder, "config")
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=config_folder)
 
         with chdir(self, self.source_folder):
             self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
