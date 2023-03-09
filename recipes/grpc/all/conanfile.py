@@ -179,6 +179,10 @@ class grpcConan(ConanFile):
 
         if is_msvc(self) and Version(self.version) >= "1.48":
             tc.cache_variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+            
+        # On Cross-Targets, the find lookup must be assisted.
+        if cross_building(self):
+            tc.cache_variables["CMAKE_PROGRAM_PATH"] = ";".join(list(set(self.deps_env_info["grpc"].PATH)))
 
         tc.generate()
 
