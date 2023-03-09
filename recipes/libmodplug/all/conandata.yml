@@ -5,4 +5,3 @@ sources:
 patches:
   "0.8.9.0":
     - patch_file: "patches/0001-cmake-install-dll.patch"
-      base_path: "source_subfolder"
