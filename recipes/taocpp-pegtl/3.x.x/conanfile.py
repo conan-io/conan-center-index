@@ -57,7 +57,7 @@ class TaoCPPPEGTLConan(ConanFile):
            compiler_version >= "10" and compiler_version < "12":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support filesystem experimental")
 
-        if self.options.boost_filesystem and (self.options["boost"].header_only or self.options["boost"].without_filesystem):
+        if self.options.boost_filesystem and (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_filesystem):
             raise ConanInvalidConfiguration("{self.ref} requires non header-only boost with filesystem component")
 
     def package_id(self):
