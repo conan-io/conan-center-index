@@ -13,7 +13,7 @@ class UnqliteConan(ConanFile):
     topics = ("nosql", "database", "transactional", "storage")
     homepage = "https://unqlite.org"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
