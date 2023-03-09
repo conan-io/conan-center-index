@@ -769,11 +769,17 @@ class QtConan(ConanFile):
             if self.settings.os == "Windows":
                 if "PATH" not in build_env:
                     build_env["PATH"] = []
-                build_env["PATH"].append(os.path.join(self.source_folder, "gnuwin32", "bin"))
+                build_env["PATH"].insert(0, os.path.join(self.source_folder, "gnuwin32", "bin"))
             if is_msvc(self):
                 # this avoids cmake using gcc from strawberryperl
                 build_env["CC"] = "cl"
                 build_env["CXX"] = "cl"
+                
+            # avoid cmake of ms-studio to be used as first catch (when using cmake as build-requirement e.g.)
+            # cmake must be >= 3.23.
+            if "PATH" in self.env:
+                build_env["PATH"].extend(self.env["PATH"])
+                
             with tools.environment_append(build_env):
 
                 if self.settings.os == "Macos":
