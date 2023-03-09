@@ -5,7 +5,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 import os
-import shutil
 
 
 required_conan_version = ">=1.54.0"
