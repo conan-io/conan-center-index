@@ -183,6 +183,8 @@ class QtConan(ConanFile):
 
         if self.options.qtwayland:
             self.tool_requires("wayland/1.21.0")
+        if self.options.with_doubleconversion:
+            self.tool_requires("double-conversion/3.2.1")
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
