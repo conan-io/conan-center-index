@@ -61,7 +61,9 @@ class FmtConan(ConanFile):
             basic_layout(self, src_folder="src")
         else:
             cmake_layout(self, src_folder="src")
-
+            self.cpp.source.components["_fmt"].includedirs = self.cpp.source.includedirs
+            self.cpp.build.components["_fmt"].bindirs = self.cpp.build.bindirs
+            self.cpp.build.components["_fmt"].libdirs = self.cpp.build.libdirs
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
