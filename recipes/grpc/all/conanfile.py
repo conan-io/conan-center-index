@@ -437,6 +437,8 @@ class grpcConan(ConanFile):
             bindir = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
+            # Propagate BIN Path for Plugin Access on Native/Cross Builds
+            self.env_info.GRPC_BIN_PATH.append(bindir)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "gRPC"
