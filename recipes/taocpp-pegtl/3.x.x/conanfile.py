@@ -49,9 +49,7 @@ class TaoCPPPEGTLConan(ConanFile):
             return lv1[:min_length] < lv2[:min_length]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+        if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
 
         compiler_version = Version(self.settings.compiler.version)
