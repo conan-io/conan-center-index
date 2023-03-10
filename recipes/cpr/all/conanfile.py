@@ -41,19 +41,19 @@ class CprConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if Version(self.version) < "1.10.0" else 17
+        return "11" if Version(self.version) < "1.10.0" else "17"
 
     @property
     def _compilers_minimum_version(self):
-        if self._min_cppstd == 11:
-            return {}
         return {
-            "gcc": "9",
-            "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
+            "17": {
+                "gcc": "9",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     @property
     def _supports_openssl(self):
