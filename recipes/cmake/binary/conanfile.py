@@ -19,20 +19,26 @@ class CMakeConan(ConanFile):
     settings = "os", "arch"
 
     def validate(self):
-        if self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("No 32-bit binaries are currently provided for CMake")
+        if self.settings.arch not in ["x86_64", "armv8"]:
+            raise ConanInvalidConfiguration("CMake binaries are only provided for x86_64 and armv8 architectures")
+
         if self.settings.os == "Windows" and self.settings.arch == "armv8" and Version(self.version) < "3.24":
             raise ConanInvalidConfiguration("CMake only supports ARM64 binaries on Windows starting from 3.24")
-
+    
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
+        arch = str(self.settings.arch) if self.settings.os != "Macos" else "universal"
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][arch],
             destination=self.source_folder, strip_root=True)
+        
+    def package_id(self):
+        if self.info.settings.os == "Macos":
+            del self.info.settings.arch
 
     def package(self):
         copy(self, "*", src=self.build_folder, dst=self.package_folder)
 
         if self.settings.os == "Macos":
-            docs_folder = os.path.join(self.build_folder, "Cmake.app", "Contents", "doc")
+            docs_folder = os.path.join(self.build_folder, "CMake.app", "Contents", "doc")
         else:
             docs_folder = os.path.join(self.build_folder, "doc")
 
