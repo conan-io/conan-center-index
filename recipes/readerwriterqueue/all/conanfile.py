@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rename
+from conan.tools.files import get, copy
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
