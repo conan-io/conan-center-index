@@ -273,7 +273,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.24.1")
+            self.requires("sdl/2.26.0")
         if self.options.with_libx264:
             self.requires("libx264/cci.20220602")
         if self.options.with_libx265:
@@ -299,7 +299,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.231.1")
+            self.requires("vulkan-loader/1.3.236.0")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -355,7 +355,7 @@ class FFMpegConan(ConanFile):
             return target_os
 
     def _patch_sources(self):
-        if self._is_msvc and self.options.with_libx264 and not self.options["libx264"].shared:
+        if self._is_msvc and self.options.with_libx264 and not self.options["libx264"].shared and Version(self.version) <= "5.0":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
