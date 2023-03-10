@@ -185,6 +185,14 @@ class QtConan(ConanFile):
             self.tool_requires("wayland/1.21.0")
         if self.options.with_doubleconversion:
             self.tool_requires("double-conversion/3.2.1")
+        if self.options.get_safe("with_icu", False):
+            self.tool_requires("icu/72.1")
+        if self.options.with_pcre2:
+            self.tool_requires("pcre2/10.42")
+        if self.options.with_zstd:
+            self.tool_requires("zstd/1.5.4")
+        if self.options.with_glib:
+            self.tool_requires("glib/2.75.3")
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -348,13 +356,13 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1t")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.40")
+            self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.224.0")
             if is_apple_os(self):
                 self.requires("moltenvk/1.1.10")
         if self.options.with_glib:
-            self.requires("glib/2.75.2")
+            self.requires("glib/2.75.3")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -364,7 +372,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/71.1")
+            self.requires("icu/72.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/5.3.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
