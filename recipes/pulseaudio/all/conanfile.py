@@ -109,7 +109,7 @@ class PulseAudioConan(ConanFile):
             f"--enable-static={yes_no(not self.options.shared)}",
             f"--enable-glib2={yes_no(self.options.with_glib)}",
             f"--with-fftw={yes_no(self.options.get_safe('with_fftw'))}",
-            f"--with-udev-rules-dir={os.path.join(self.package_folder, 'bin', 'udev', 'rules.d')}",
+            "--with-udev-rules-dir=${prefix}/bin/udev/rules.d",
             f"--with-systemduserunitdir={os.path.join(self.build_folder, 'ignore')}",
         ])
         for lib in ["alsa", "x11", "openssl", "dbus"]:
