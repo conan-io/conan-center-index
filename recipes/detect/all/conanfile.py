@@ -25,11 +25,11 @@ class PackageConan(ConanFile):
         return 11
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        tools.files.copy(self, "*.hpp", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include"))
-        tools.files.copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_id(self):
         self.info.clear()
