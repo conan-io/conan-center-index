@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.build import cross_building
+from conan.tools.build import cross_building
 
 
 class TestPackageConan(ConanFile):
