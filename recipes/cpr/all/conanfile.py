@@ -69,7 +69,7 @@ class CprConan(ConanFile):
     @property
     def _supports_darwinssl(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return Version(self.version) >= "1.6.1" and is_apple_os(self.settings.os)
+        return Version(self.version) >= "1.6.1" and is_apple_os(self)
 
     @property
     def _can_auto_ssl(self):
@@ -77,7 +77,7 @@ class CprConan(ConanFile):
         return not self._uses_old_cmake_options and not (
            #  https://github.com/libcpr/cpr/issues/546
             Version(self.version) in ["1.6.0", "1.6.1"]
-            and is_apple_os(self.settings.os)
+            and is_apple_os(self)
         )
 
     @property
