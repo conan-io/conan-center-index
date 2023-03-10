@@ -1,0 +1,4 @@
+sources:
+  "2.0.1":
+    url: https://github.com/JoelLefkowitz/detect/archive/refs/tags/v2.0.1.tar.gz
+    sha256: b850e3e47bcdde491b8b8393cd355874809473d19f9dea31ca7acd1675b2eafc
