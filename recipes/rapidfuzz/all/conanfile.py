@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
@@ -32,6 +33,9 @@ class PackageConan(ConanFile):
             "clang": "6",
             "apple-clang": "12",
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
