@@ -135,7 +135,10 @@ class PackageConan(ConanFile):
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
         else:
-            self.cpp_info.libs = [f"{self.name}"]
+            if self.settings.build_type == "Debug":
+                self.cpp_info.libs = [f"{self.name}-debug"]
+            else:
+                self.cpp_info.libs = [f"{self.name}"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("m")
                 self.cpp_info.system_libs.append("pthread")
