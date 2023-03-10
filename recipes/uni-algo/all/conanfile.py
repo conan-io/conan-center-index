@@ -136,7 +136,10 @@ class PackageConan(ConanFile):
             self.cpp_info.libdirs = []
         else:
             if self.settings.build_type == "Debug":
-                self.cpp_info.libs = [f"{self.name}-debug"]
+                if Version(self.version) < "0.7":
+                    self.cpp_info.libs = [f"{self.name}d"]
+                else:
+                    self.cpp_info.libs = [f"{self.name}-debug"]
             else:
                 self.cpp_info.libs = [f"{self.name}"]
             if self.settings.os in ["Linux", "FreeBSD"]:
