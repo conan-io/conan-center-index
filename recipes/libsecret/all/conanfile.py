@@ -69,7 +69,7 @@ class LibsecretConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if not can_run(self):
-            self.requires("glib/2.76.0")
+            self.tool_requires("glib/2.76.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
