@@ -1,12 +1,13 @@
 import functools
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, collect_libs, copy
+from conan.tools.scm import Version
 
 from helpers import parse_proto_libraries
 
@@ -37,19 +38,23 @@ class GRPCProto(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-            self.options["protobuf"].shared = True
-            self.options["googleapis"].shared = True
+            if Version(conan_version) < "2.0.0":
+                self.options["protobuf"].shared = True
+                self.options["googleapis"].shared = True
+            else:
+                self.options["protobuf/*"].shared = True
+                self.options["googleapis/*"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/3.21.4", transitive_headers=True, run=not cross_building(self))
+        self.requires("protobuf/3.21.4", transitive_headers=True, run=can_run(self))
         self.requires("googleapis/cci.20221108")
 
     def validate(self):
@@ -64,7 +69,7 @@ class GRPCProto(ConanFile):
             )
 
     def build_requirements(self):
-        if cross_building(self):
+        if not can_run(self):
             self.tool_requires("protobuf/3.21.4")
 
     def source(self):
@@ -73,7 +78,7 @@ class GRPCProto(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = CMakeToolchain(self)
