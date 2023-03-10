@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -54,7 +54,7 @@ class LibsecretConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.3", transitive_headers=True, transitive_libs=True, run=not cross_building(self))
+        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
@@ -68,8 +68,8 @@ class LibsecretConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if cross_building(self):
-            self.requires("glib/2.75.3")
+        if not can_run(self):
+            self.requires("glib/2.76.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,7 +77,7 @@ class LibsecretConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = MesonToolchain(self)
