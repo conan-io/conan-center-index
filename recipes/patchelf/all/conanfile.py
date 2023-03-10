@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
@@ -6,6 +6,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, download, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 import os
 
@@ -65,3 +66,10 @@ class PatchElfConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+
+    def package_info(self):
+        # TODO: remove in conan v2
+        if Version(conan_version).major < 2:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
