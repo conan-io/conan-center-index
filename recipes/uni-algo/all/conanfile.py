@@ -141,10 +141,6 @@ class PackageConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
                 self.cpp_info.system_libs.append("dl")
 
-        self.cpp_info.set_property("cmake_file_name", f"{self.name}")
-        self.cpp_info.set_property("cmake_target_name", f"{self.name}::{self.name}")
-        self.cpp_info.set_property("pkg_config_name", f"{self.name}")
-
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = f"{self.name}".upper()
         self.cpp_info.filenames["cmake_find_package_multi"] = f"{self.name}"
