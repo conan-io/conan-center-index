@@ -1,6 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
@@ -67,11 +67,11 @@ class XercesCConan(ConanFile):
 
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
-            self.requires("icu/72.1", run=not cross_building(self))
+            self.requires("icu/72.1", run=can_run(self))
         if self.options.network_accessor == "curl":
             self.requires("libcurl/7.87.0")
 
-    def _validate(self, option, value, os):
+    def _validate(self, option, value, host_os):
         """
         Validate that the given `option` has the required `value` for the given `os`
         If not raises a ConanInvalidConfiguration error
@@ -81,8 +81,8 @@ class XercesCConan(ConanFile):
         :param os: either a single string or a tuple of strings containing the
                    OS(es) that `value` is valid on
         """
-        if self.settings.os not in os and getattr(self.options, option) == value:
-            raise ConanInvalidConfiguration(f"Option '{option}={value}' is only supported on {os}")
+        if self.settings.os not in host_os and getattr(self.options, option) == value:
+            raise ConanInvalidConfiguration(f"Option '{option}={value}' is only supported on {host_os}")
 
     def validate(self):
         if self.settings.os not in ("Windows", "Macos", "Linux"):
@@ -98,9 +98,8 @@ class XercesCConan(ConanFile):
         self._validate("mutex_manager", "windows", ("Windows", ))
 
     def build_requirements(self):
-        if self.options.message_loader == "icu":
-            if hasattr(self, "settings_build") and cross_building(self):
-                self.tool_requires("icu/72.1")
+        if self.options.message_loader == "icu" and not can_run(self):
+            self.tool_requires("icu/72.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,7 +107,7 @@ class XercesCConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = CMakeToolchain(self)
