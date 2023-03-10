@@ -21,10 +21,12 @@ class SnappyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_avx": [False, "avx", "avx2"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_avx": False,
     }
 
     def export_sources(self):
@@ -33,6 +35,8 @@ class SnappyConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"] or Version(self.version) < "1.1.8":
+            del self.options.with_avx
 
     def configure(self):
         if self.options.shared:
@@ -53,8 +57,8 @@ class SnappyConan(ConanFile):
         tc.variables["SNAPPY_BUILD_TESTS"] = False
         if Version(self.version) >= "1.1.8":
             tc.variables["SNAPPY_FUZZING_BUILD"] = False
-            tc.variables["SNAPPY_REQUIRE_AVX"] = False
-            tc.variables["SNAPPY_REQUIRE_AVX2"] = False
+            tc.variables["SNAPPY_REQUIRE_AVX"] = self.options.get_safe("with_avx") in ("avx", "avx2")
+            tc.variables["SNAPPY_REQUIRE_AVX2"] = self.options.get_safe("with_avx") == "avx2"
             tc.variables["SNAPPY_INSTALL"] = True
         if Version(self.version) >= "1.1.9":
             tc.variables["SNAPPY_BUILD_BENCHMARKS"] = False
