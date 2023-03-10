@@ -43,7 +43,7 @@ class HiponyEnumerateConan(ConanFile):
         return "17" if self.options.aggregates else "11"
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.aggregates:
