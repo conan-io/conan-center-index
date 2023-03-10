@@ -12,7 +12,7 @@ class TzTestConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def layout(self):
-        basic_layout()
+        basic_layout(self)
 
     def test(self):
         if not cross_building(self):
