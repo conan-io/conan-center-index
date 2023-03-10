@@ -74,7 +74,6 @@ class CunitConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.win_bash = True
             self.tool_requires("autoconf/2.71")
-            self.tool_requires("automake/1.16.5")
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
@@ -102,9 +101,10 @@ class CunitConan(ConanFile):
         env = tc.environment()
 
         if is_msvc(self):
-            env.append("CC", f'{unix_path(self, self.conf.get("user.automake:compile-wrapper"))} cl -nologo')
-            env.append("CXX", f'{unix_path(self, self.conf.get("user.automake:compile-wrapper"))} cl -nologo')
-            env.append("AR", f'{unix_path(self, self.conf.get("user.automake:lib-wrapper"))} lib')
+            automake_info = self.dependencies.build["automake"].conf_info
+            env.append("CC", f'{unix_path(self, automake_info.get("user.automake:compile-wrapper", check_type=str))} cl -nologo')
+            env.append("CXX", f'{unix_path(self, automake_info.get("user.automake:compile-wrapper", check_type=str))} cl -nologo')
+            env.append("AR", f'{unix_path(self, automake_info.get("user.automake:lib-wrapper", check_type=str))} lib')
             env.define("LD", "link -nologo")
             env.append("NM", "dumpbin -symbols")
             env.append("OBJDUMP", ":")
