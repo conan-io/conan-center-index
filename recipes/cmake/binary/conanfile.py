@@ -38,9 +38,9 @@ class CMakeConan(ConanFile):
         copy(self, "*", src=self.build_folder, dst=self.package_folder)
 
         if self.settings.os == "Macos":
-            docs_folder = os.path.join(self.build_folder, "CMake.app", "Contents", "doc")
+            docs_folder = os.path.join(self.build_folder, "CMake.app", "Contents", "doc", "cmake")
         else:
-            docs_folder = os.path.join(self.build_folder, "doc")
+            docs_folder = os.path.join(self.build_folder, "doc", "cmake")
 
         copy(self, "Copyright.txt", src=docs_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
 
