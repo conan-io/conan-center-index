@@ -68,6 +68,9 @@ class PatchElfConan(ConanFile):
         del self.info.settings.compiler
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+
         # TODO: remove in conan v2
         if Version(conan_version).major < 2:
             bin_path = os.path.join(self.package_folder, "bin")
