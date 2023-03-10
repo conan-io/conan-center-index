@@ -19,7 +19,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "docs/*/*"
-          reviewers: "@prince-chrismc @MartinDelille"
+          reviewers: "@prince-chrismc @MartinDelille @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
