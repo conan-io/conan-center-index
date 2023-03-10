@@ -52,6 +52,9 @@ class PulseAudioConan(ConanFile):
         if not self.options.with_dbus:
             del self.options.with_fftw
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("libiconv/1.17")
         self.requires("libsndfile/1.2.0")
@@ -71,7 +74,7 @@ class PulseAudioConan(ConanFile):
             self.requires("dbus/1.15.2")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
 
         if self.options.get_safe("with_fftw"):
@@ -88,12 +91,8 @@ class PulseAudioConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
