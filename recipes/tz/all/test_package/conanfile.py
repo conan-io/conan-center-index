@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=2.0.0"
 
 class TzTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -10,6 +10,9 @@ class TzTestConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def layout(self):
+        basic_layout()
 
     def test(self):
         if not cross_building(self):
