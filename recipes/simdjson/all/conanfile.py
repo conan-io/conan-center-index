@@ -17,6 +17,7 @@ class SimdjsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/simdjson"
     topics = ("json", "parser", "simd", "format")
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
