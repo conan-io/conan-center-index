@@ -63,13 +63,6 @@ class SentryBreakpadConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) <= "0.4.1":
-            if self.settings.os == "Android" or is_apple_os(self):
-                raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
-        if Version(self.version) <= "0.2.6":
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
 

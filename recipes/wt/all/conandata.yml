@@ -1,4 +1,7 @@
 sources:
+  "4.9.1":
+    url: "https://github.com/emweb/wt/archive/4.9.1.tar.gz"
+    sha256: "253c61779623ed125bdd604a7b7fe48e64bd991548d17180f040bfa88ccafd98"
   "4.8.0":
     url: "https://github.com/emweb/wt/archive/4.8.0.tar.gz"
     sha256: "e4030d8f530ec7bdd6b341a2bf31a608fb9ebcedb905155f83ec7f300a7d420d"
@@ -24,12 +27,48 @@ sources:
     url: "https://github.com/emweb/wt/archive/4.3.1.tar.gz"
     sha256: "6c0130f36c829ed67119679770c2f62d7768a62eaa281bb10070c4cf1b145139"
 patches:
+  "4.9.1":
+    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "4.8.0":
+    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "4.7.1":
+    - patch_file: "patches/4.7.1-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "4.6.2":
+    - patch_file: "patches/4.6.2-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "4.6.0":
+    - patch_file: "patches/4.6.2-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "4.5.1":
+    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "4.5.0":
-    - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+    - patch_file: "patches/4.3.1-0002-gcc_11.patch"
+      patch_description: "include limits header"
+      patch_type: "portability"
   "4.4.0":
-    - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+    - patch_file: "patches/4.3.1-0002-gcc_11.patch"
+      patch_description: "include limits header"
+      patch_type: "portability"
   "4.3.1":
-    - patch_file: "patches/wt_4_5_0_gcc_11.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+    - patch_file: "patches/4.3.1-0002-gcc_11.patch"
+      patch_description: "include limits header"
+      patch_type: "portability"
