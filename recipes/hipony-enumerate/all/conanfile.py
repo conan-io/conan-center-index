@@ -34,6 +34,7 @@ class HiponyEnumerateConan(ConanFile):
         return {
             "gcc": "8" if self.options.aggregates else "6",
             "Visual Studio": "16" if self.options.aggregates else "14",
+            "msvc": "192"  if self.options.aggregates else "190",
             "clang": "5.0" if self.options.aggregates else "3.9",
             "apple-clang": "10",
         }
@@ -65,7 +66,7 @@ class HiponyEnumerateConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn(
+            self.output.warning(
                 "{0} {1} requires C++{2}. Your compiler is unknown. Assuming it supports C++{2}."
                 .format(self.name, self.version, self._minimum_standard))
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
