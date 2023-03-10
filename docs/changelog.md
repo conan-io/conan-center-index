@@ -1,5 +1,11 @@
 # Changelog
 
+### 10-March-2023 - 13:15 CET
+
+- [hotfix] No longer update conan_v2_ready_references.yml automatically
+- [bugfix] Validate Green and clean PRs first when executing automatic merge CI job
+
+
 ### 07-March-2023 - 17:05 CET
 
 - [hotfix] Automatic merge skips git conflicts
