@@ -127,6 +127,10 @@ class GnuTLSConan(ConanFile):
             "--enable-tools={}".format(yes_no(self.options.enable_tools)),
             "--enable-openssl-compatibility={}".format(yes_no(self.options.enable_openssl_compatibility)),
         ])
+        if is_apple_os(self):
+            # fix_apple_shared_install_name() may fail without -headerpad_max_install_names
+            # (see https://github.com/conan-io/conan-center-index/pull/15946#issuecomment-1464321305)
+            tc.extra_ldflags.append("-headerpad_max_install_names")
         env = tc.environment()
         if cross_building(self):
             # INFO: Undefined symbols for architecture Mac arm64 rpl_malloc and rpl_realloc
