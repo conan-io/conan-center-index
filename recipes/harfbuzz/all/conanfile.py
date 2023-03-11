@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import can_run, stdcpp_library
@@ -64,7 +64,8 @@ class HarfbuzzConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.shared and self.options.with_glib:
-            self.options["glib"].shared = True
+            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
+            self.options[f"glib{wildcard}"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
