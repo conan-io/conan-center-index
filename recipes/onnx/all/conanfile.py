@@ -33,6 +33,12 @@ class OnnxConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "1.13.0" and is_msvc(self):
+            return 17
+        return 11
+
+    @property
     def _protobuf_version(self):
         # onnx < 1.9.0 doesn't support protobuf >= 3.18
         return "3.21.9" if Version(self.version) >= "1.9.0" else "3.17.1"
@@ -56,7 +62,7 @@ class OnnxConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
