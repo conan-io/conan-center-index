@@ -4,8 +4,7 @@ project(test_package CXX)
 find_package(folly REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME}
-    Folly::folly)
+target_link_libraries(${PROJECT_NAME} PRIVATE Folly::folly)
 
 
 if (${FOLLY_VERSION} VERSION_LESS "2021.07.20.00")
