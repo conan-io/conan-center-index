@@ -65,3 +65,5 @@ class Libsgp4Conan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["sgp4s" if self.options.shared else "sgp4"]
         self.cpp_info.includedirs.append(os.path.join("include", "SGP4"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
