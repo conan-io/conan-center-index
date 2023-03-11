@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
+from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
@@ -1013,7 +1013,7 @@ class OpenCVConan(ConanFile):
             self.requires("intel-ipp/2020")
         # dnn module dependencies
         if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}", run=not cross_building(self))
+            self.requires(f"protobuf/{self._protobuf_version}", run=can_run(self))
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.239.0")
         # gapi module dependencies
@@ -1056,7 +1056,7 @@ class OpenCVConan(ConanFile):
             self.requires("ffmpeg/4.4")
         # freetype module dependencies
         if self.options.freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
             self.requires("harfbuzz/6.0.0")
         # hdf module dependencies
         if self.options.hdf:
@@ -1123,9 +1123,8 @@ class OpenCVConan(ConanFile):
             )
 
     def build_requirements(self):
-        if self.options.dnn:
-            if hasattr(self, "settings_build") and cross_building(self):
-                self.tool_requires(f"protobuf/{self._protobuf_version}")
+        if self.options.dnn and not can_run(self):
+            self.tool_requires(f"protobuf/{self._protobuf_version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],
@@ -1180,10 +1179,10 @@ class OpenCVConan(ConanFile):
 
     def generate(self):
         if self.options.dnn:
-            if hasattr(self, "settings_build") and cross_building(self):
-                VirtualBuildEnv(self).generate()
-            else:
+            if can_run(self):
                 VirtualRunEnv(self).generate(scope="build")
+            else:
+                VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
         tc.variables["OPENCV_CONFIG_INSTALL_PATH"] = "cmake"
