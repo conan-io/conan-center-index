@@ -22,7 +22,7 @@ class PackageConan(ConanFile):
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     # In case not listed there, use "LicenseRef-<license-file-name>"
     license = "MIT"
-    url = "https://github.com/jeremy-rifkin/libassert"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jeremy-rifkin/libassert"
 
     topics = ("assert", "library", "assertions", "stacktrace")
