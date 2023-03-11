@@ -1,0 +1,33 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -413,6 +413,9 @@
+ 
+ if(SENTRY_BACKEND_CRASHPAD)
+ 	option(SENTRY_CRASHPAD_SYSTEM "Use system crashpad" OFF)
++	if(CRASHPAD_WER_ENABLED)
++		add_compile_definitions(CRASHPAD_WER_ENABLED)
++	endif()
+ 	if(SENTRY_CRASHPAD_SYSTEM)
+ 		find_package(crashpad REQUIRED)
+ 		target_link_libraries(sentry PUBLIC crashpad::client)
+@@ -426,9 +429,6 @@
+ 			set(CRASHPAD_ENABLE_INSTALL ON CACHE BOOL "Enable crashpad installation" FORCE)
+ 		endif()
+ 		add_subdirectory(external/crashpad crashpad_build)
+-		if(CRASHPAD_WER_ENABLED)
+-			add_compile_definitions(CRASHPAD_WER_ENABLED)
+-		endif()
+ 
+ 		# set static runtime if enabled
+ 		if(SENTRY_BUILD_RUNTIMESTATIC AND MSVC)
+@@ -482,9 +482,6 @@
+ 		endif()
+ 	endif()
+ 	add_dependencies(sentry crashpad::handler)
+-	if(CRASHPAD_WER_ENABLED)
+-		add_dependencies(sentry crashpad::wer)
+-	endif()
+ elseif(SENTRY_BACKEND_BREAKPAD)
+ 	option(SENTRY_BREAKPAD_SYSTEM "Use system breakpad" OFF)
+ 	if(SENTRY_BREAKPAD_SYSTEM)
+
