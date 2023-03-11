@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
@@ -68,7 +68,8 @@ class GlibmmConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.shared:
-            self.options["glib"].shared = True
+            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
+            self.options[f"glib{wildcard}"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
