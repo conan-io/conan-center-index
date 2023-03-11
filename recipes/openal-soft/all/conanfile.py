@@ -18,7 +18,7 @@ class OpenALSoftConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openal-soft.org/"
     license = "LGPL-2.0-or-later"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
