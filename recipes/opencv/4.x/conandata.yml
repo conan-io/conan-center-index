@@ -1,4 +1,14 @@
 sources:
+  "4.7.0":
+    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.7.0.tar.gz"
+      sha256: "8df0079cdbe179748a18d44731af62a245a45ebf5085223dc03133954c662973"
+    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.7.0.tar.gz"
+      sha256: "42df840cf9055e59d0e22c249cfb19f04743e1bdad113d31b1573d3934d62584"
+  "4.6.0":
+    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.6.0.tar.gz"
+      sha256: "1EC1CBA65F9F20FE5A41FDA1586E01C70EA0C9A6D7B67C9E13EDF0CFE2239277"
+    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.6.0.tar.gz"
+      sha256: "1777D5FD2B59029CF537E5FD6F8AA68D707075822F90BDE683FCDE086F85F7A7"
   "4.5.5":
     - url: "https://github.com/opencv/opencv/archive/refs/tags/4.5.5.tar.gz"
       sha256: "a1cfdcf6619387ca9e232687504da996aaa9f7b5689986b8331ec02cb61d28ad"
@@ -30,6 +40,38 @@ sources:
     - url: "https://github.com/opencv/opencv_contrib/archive/4.1.2.tar.gz"
       sha256: "0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b"
 patches:
+  "4.7.0":
+    - patch_file: "patches/4.5.5-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.6.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.6.0-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
+  "4.6.0":
+    - patch_file: "patches/4.5.5-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.6.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.6.0-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
   "4.5.5":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
