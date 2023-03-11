@@ -5,7 +5,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class CbloscConan(ConanFile):
@@ -47,18 +47,9 @@ class CbloscConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -130,4 +121,4 @@ class CbloscConan(ConanFile):
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}blosc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])

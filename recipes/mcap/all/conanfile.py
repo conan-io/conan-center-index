@@ -1,60 +1,79 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools import files
 from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.47.0"
-
+required_conan_version = ">=1.52.0"
 
 class McapConan(ConanFile):
     name = "mcap"
+    description = (
+        "MCAP is a modular, performant, and serialization-agnostic container file format for pub/sub messages, "
+        "primarily intended for use in robotics applications."
+    )
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/foxglove/mcap"
-    description = "A C++ implementation of the MCAP file format"
-    license = "MIT"
-    topics = ("mcap", "serialization", "deserialization", "recording")
-
-    settings = ("os", "compiler", "build_type", "arch")
-    generators = ("cmake", "cmake_find_package")
+    topics = ("serialization", "deserialization", "recording", "header-only")
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "191",
+            "gcc": "9",
+            "clang": "9",
+            "apple-clang": "12",
+        }
 
     @property
     def _source_package_path(self):
-        return os.path.join(self._source_subfolder, "cpp", "mcap")
-
-    def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def requirements(self):
-        self.requires("lz4/1.9.3")
-        self.requires("zstd/1.5.2")
-        if Version(self.version) < "0.1.1":
-            self.requires("fmt/8.1.1")
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "17")
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) <= "11":
-            raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if (self.settings.compiler in ("gcc", "clang")) and Version(self.settings.compiler.version) <= "8":
-            raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
-        if Version(self.version) < "0.1.1" and self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio compiler support is added in 0.1.1")
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("Compiler version is not supported, c++17 support is required")
+        return os.path.join(self.source_folder, "cpp", "mcap")
 
     def configure(self):
         if Version(self.version) < "0.3.0":
             self.license = "Apache-2.0"
 
-    def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_package_path)
-        self.copy("include/*", src=self._source_package_path)
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("lz4/1.9.4")
+        self.requires("zstd/1.5.2")
+        if Version(self.version) < "0.1.1":
+            self.requires("fmt/9.1.0")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if Version(self.version) < "0.1.1" and is_msvc(self):
+            raise ConanInvalidConfiguration("Visual Studio compiler has been supported since 0.1.1")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_package_path)
+        copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self._source_package_path, "include"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

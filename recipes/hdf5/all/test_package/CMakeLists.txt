@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package LANGUAGES C CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 set(HDF5_COMPONENTS C)
 if (HDF5_HL)
     list(APPEND HDF5_COMPONENTS HL)

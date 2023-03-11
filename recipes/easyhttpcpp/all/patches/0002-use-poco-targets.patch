@@ -1,0 +1,27 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,7 +70,6 @@ set(LIBRARY_TARGET_NAME "easyhttp")
+ if (WIN32)
+     find_package(Poco REQUIRED Foundation Data DataSQLite Net NetSSLWin CONFIG)
+ else ()
+-    find_package(OpenSSL REQUIRED)
+     find_package(Poco REQUIRED Foundation Data DataSQLite Net NetSSL Crypto CONFIG)
+ endif ()
+ 
+@@ -109,10 +108,12 @@ set_target_properties(${LIBRARY_TARGET_NAME}
+                       OUTPUT_NAME ${LIBRARY_TARGET_NAME}
+                       )
+ 
+-target_link_libraries(${LIBRARY_TARGET_NAME}
+-	              ${Poco_LIBRARIES}
+-                      ${OPENSSL_SSL_LIBRARY}
+-                      ${OPENSSL_CRYPTO_LIBRARY})
++target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC Poco::Foundation Poco::Data Poco::DataSQLite Poco::Net)
++if(WIN32)
++    target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC Poco::NetSSLWin)
++else()
++    target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC Poco::NetSSL Poco::Crypto)
++endif()
+ 
+ target_include_directories(${LIBRARY_TARGET_NAME}
+                            PUBLIC

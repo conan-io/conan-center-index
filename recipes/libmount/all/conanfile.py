@@ -40,7 +40,7 @@ class LibmountConan(ConanFile):
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("only Linux is supported")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -67,9 +67,11 @@ class LibmountConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "sbin"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "usr"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["mount", "blkid"]
+        self.cpp_info.system_libs = ["rt"]
         self.cpp_info.includedirs.append(os.path.join("include", "libmount"))
         self.cpp_info.set_property("pkg_config_name", "mount")

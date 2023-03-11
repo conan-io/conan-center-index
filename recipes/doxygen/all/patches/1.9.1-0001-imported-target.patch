@@ -1,25 +1,3 @@
-diff --git a/addon/doxysearch/CMakeLists.txt b/addon/doxysearch/CMakeLists.txt
-index d0c8724..ac66577 100644
---- addon/doxysearch/CMakeLists.txt
-+++ addon/doxysearch/CMakeLists.txt
-@@ -15,7 +15,7 @@ add_executable(doxyindexer
-                doxyindexer.cpp
- )
- target_link_libraries(doxyindexer
--                      ${XAPIAN_LIBRARIES}
-+                      CONAN_PKG::xapian-core
-                       ${ZLIB_LIBRARIES}
-                       ${WIN_EXTRA_LIBS}
-                       ${COVERAGE_LINKER_FLAGS}
-@@ -28,7 +28,7 @@ add_executable(doxysearch.cgi
- )
- target_link_libraries(doxysearch.cgi
-                       doxygen_version
--                      ${XAPIAN_LIBRARIES}
-+                      CONAN_PKG::xapian-core
-                       ${ZLIB_LIBRARIES}
-                       ${WIN_EXTRA_LIBS}
- )
 diff --git a/libmscgen/mscgen_bool.h b/libmscgen/mscgen_bool.h
 index e982d80..d16ef98 100644
 --- libmscgen/mscgen_bool.h

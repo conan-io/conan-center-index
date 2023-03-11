@@ -1,0 +1,13 @@
+--- a/Source/Common/CMakeLists.txt
++++ b/Source/Common/CMakeLists.txt
+@@ -52,9 +52,7 @@ unset(CMAKE_REQUIRED_LIBRARIES)
+ CHECK_FUNCTION_EXISTS(gettimeofday GDCM_HAVE_GETTIMEOFDAY)
+ # json-c API changed:
+ if(GDCM_USE_SYSTEM_JSON)
+-  set(CMAKE_REQUIRED_INCLUDES ${JSON_INCLUDE_DIRS})
+-  set(CMAKE_REQUIRED_LIBRARIES ${JSON_LIBRARIES})
+-  CHECK_SYMBOL_EXISTS(json_object_object_get_ex "json.h" GDCM_HAVE_JSON_OBJECT_OBJECT_GET_EX)
++  set(GDCM_HAVE_JSON_OBJECT_OBJECT_GET_EX ON CACHE INTERNAL "")
+ endif()
+ 
+ include(CheckCXXSourceCompiles)

@@ -1,0 +1,13 @@
+--- a/addon/doxysearch/CMakeLists.txt	2020-08-24 13:12:55.000000000 +0200
++++ b/addon/doxysearch/CMakeLists.txt	2022-12-16 20:41:07.040801300 +0100
+@@ -1,8 +1,8 @@
+-find_package(Xapian REQUIRED)
++find_package(xapian REQUIRED)
+ find_package(ZLIB REQUIRED)
+ 
+ if (WIN32)
+-  set(WIN_EXTRA_LIBS "uuid.lib rpcrt4.lib ws2_32.lib")
++  set(WIN_EXTRA_LIBS uuid.lib rpcrt4.lib ws2_32.lib)
+ endif()
+ 
+ include_directories(

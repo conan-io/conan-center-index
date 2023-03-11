@@ -1,12 +1,15 @@
-from conan import ConanFile, Version
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, vs_layout
-from conan.tools.layout import basic_layout
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibmicrohttpdConan(ConanFile):
@@ -42,12 +45,13 @@ class LibmicrohttpdConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.os != "Linux":
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
             del self.options.epoll
         if is_msvc(self):
             del self.options.with_https
@@ -58,62 +62,45 @@ class LibmicrohttpdConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def validate(self):
-        if is_msvc(self):
-            if self.info.settings.arch not in ("x86", "x86_64"):
-                raise ConanInvalidConfiguration("Unsupported architecture (only x86 and x86_64 are supported)")
-            if self.info.settings.build_type not in ("Release", "Debug"):
-                raise ConanInvalidConfiguration("Unsupported build type (only Release and Debug are supported)")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_zlib", False):
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.13")
-        if self.options.get_safe("with_https", False):
+
+    def validate(self):
+        if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("Unsupported architecture (only x86 and x86_64 are supported)")
+        if self.options.get_safe("with_https"):
             raise ConanInvalidConfiguration("gnutls is not (yet) available in cci")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def layout(self):
-        if is_msvc(self):
-            vs_layout(self)
-        else:
-            basic_layout(self)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msvc_configuration
+            tc.properties["WholeProgramOptimization"] = "false"
             tc.generate()
         else:
+            VirtualBuildEnv(self).generate()
+            if not cross_building(self):
+                VirtualRunEnv(self).generate(scope="build")
+            tc = AutotoolsToolchain(self)
             yes_no = lambda v: "yes" if v else "no"
-            pkg = PkgConfigDeps(self)
-            pkg.generate()
-            autotools = AutotoolsToolchain(self)
-            autotools.configure_args.extend([
+            tc.configure_args.extend([
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
                 f"--enable-https={yes_no(self.options.with_https)}",
@@ -125,44 +112,48 @@ class LibmicrohttpdConan(ConanFile):
                 "--disable-examples",
                 "--disable-curl",
             ])
-            if self.settings.os == "Windows":
-                if self.options.with_zlib:
-                    # This fixes libtool refusing to build a shared library when it sees `-lz`
-                    libdir = self.deps_cpp_info["zlib"].lib_paths[0]
-                    autotools.extra_ldflags.extend([os.path.join(libdir, lib).replace("\\", "/") for lib in os.listdir(libdir)])
-            autotools.generate()
+            tc.generate()
+            AutotoolsDeps(self).generate()
 
     @property
     def _msvc_configuration(self):
-        return f"{self.settings.build_type}-{'dll' if self.options.shared else 'static'}"
+        prefix = "Debug" if self.settings.build_type == "Debug" else "Release"
+        suffix = "dll" if self.options.shared else "static"
+        return f"{prefix}-{suffix}"
 
     @property
     def _msvc_sln_folder(self):
-        if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) >= 16:
-                subdir = "VS-Any-Version"
-            else:
-                subdir = "VS2017"
-        else:
-            subdir = "VS-Any-Version"
-        return os.path.join("w32", subdir)
-
-    @property
-    def _msvc_platform(self):
-        return {
-            "x86": "Win32",
-            "x86_64": "x64",
-        }[str(self.settings.arch)]
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
+        # TODO: use VS-Any-Version folder once https://github.com/conan-io/conan/pull/12817 available in conan client
+        return os.path.join(self.source_folder, "w32", "VS2022")
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         if is_msvc(self):
+            #==============================
+            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
+            vcxproj_file = os.path.join(self._msvc_sln_folder, "libmicrohttpd.vcxproj")
+            replace_in_file(
+                self, vcxproj_file,
+                "<WholeProgramOptimization Condition=\"! $(Configuration.StartsWith('Debug'))\">true</WholeProgramOptimization>",
+                "",
+            )
+            toolset = MSBuildToolchain(self).toolset
+            replace_in_file(
+                self, vcxproj_file,
+                "<PlatformToolset>v143</PlatformToolset>",
+                f"<PlatformToolset>{toolset}</PlatformToolset>",
+            )
+            conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+            replace_in_file(
+                self, vcxproj_file,
+                "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+                f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+            )
+            #==============================
+
             msbuild = MSBuild(self)
             msbuild.build_type = self._msvc_configuration
-            msbuild.platform = self._msvc_platform
+            msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
             msbuild.build(sln=os.path.join(self._msvc_sln_folder, "libmicrohttpd.sln"), targets=["libmicrohttpd"])
         else:
             autotools = Autotools(self)
@@ -170,22 +161,18 @@ class LibmicrohttpdConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "COPYING", os.path.join(self.source_folder), os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            # 32-bit (x86) libraries are stored in the root
-            output_dir = os.path.join(self.build_folder, self._msvc_sln_folder, "Output")
-            if self.settings.arch in ("x86_64", ):
-                # 64-bit (x64) libraries are stored in a subfolder
-                output_dir = os.path.join(output_dir, self._msvc_platform)
-            copy(self, "*.lib", output_dir, os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", output_dir, os.path.join(self.package_folder, "bin"))
-            copy(self, "*.h", output_dir, os.path.join(self.package_folder, "include"))
+            output_dir = os.path.join(self._msvc_sln_folder, "Output")
+            copy(self, "*.lib", src=output_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            copy(self, "*.h", src=output_dir, dst=os.path.join(self.package_folder, "include"), keep_path=False)
         else:
             autotools = Autotools(self)
             autotools.install()
-
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmicrohttps")

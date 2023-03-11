@@ -8,7 +8,7 @@ import os
 import textwrap
 
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53"
 
 
 class SQLiteCppConan(ConanFile):
@@ -40,13 +40,10 @@ class SQLiteCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("sqlite3/3.39.3")
+        self.requires("sqlite3/3.40.0")
 
     def validate(self):
         if Version(self.version) >= "3.0.0" and self.info.settings.compiler.get_safe("cppstd"):
@@ -120,12 +117,19 @@ class SQLiteCppConan(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SQLiteCpp")
         self.cpp_info.set_property("cmake_target_name", "SQLiteCpp")
         self.cpp_info.libs = ["SQLiteCpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
+
+        if self._is_mingw:
+            self.cpp_info.system_libs = ["ssp"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "SQLiteCpp"

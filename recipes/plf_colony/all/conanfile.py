@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -11,11 +11,13 @@ class PlfcolonyConan(ConanFile):
     description = "An unordered data container providing fast iteration/insertion/erasure " \
                   "while maintaining pointer/iterator/reference validity to non-erased elements."
     license = "Zlib"
-    topics = ("plf_colony", "container", "bucket", "unordered")
+    topics = ("container", "bucket", "unordered", "header-only")
     homepage = "https://github.com/mattreecebentley/plf_colony"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
@@ -28,7 +30,7 @@ class PlfcolonyConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

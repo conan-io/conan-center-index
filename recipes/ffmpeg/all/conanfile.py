@@ -273,7 +273,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.24.1")
+            self.requires("sdl/2.26.0")
         if self.options.with_libx264:
             self.requires("libx264/cci.20220602")
         if self.options.with_libx265:
@@ -299,7 +299,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.231.1")
+            self.requires("vulkan-loader/1.3.236.0")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -348,12 +348,14 @@ class FFMpegConan(ConanFile):
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             )
             target_os = triplet.split("-")[2]
-            if target_os == "gnueabihf":
+            if target_os in ["gnueabihf", "gnueabi"]:
                 target_os = "gnu" # could also be "linux"
+            if target_os.startswith("android"):
+                target_os = "android"
             return target_os
 
     def _patch_sources(self):
-        if self._is_msvc and self.options.with_libx264 and not self.options["libx264"].shared:
+        if self._is_msvc and self.options.with_libx264 and not self.options["libx264"].shared and Version(self.version) <= "5.0":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
@@ -534,13 +536,21 @@ class FFMpegConan(ConanFile):
             ])
         if not self.options.with_programs:
             args.append("--disable-programs")
-        # since ffmpeg"s build system ignores CC and CXX
-        if tools.get_env("AS"):
+        # since ffmpeg's build system ignores toolchain variables 
+        if tools.get_env("AR"):
+            args.append("--ar={}".format(tools.get_env("AR")))
+        if tools.get_env("AS") and self.options.with_asm:
             args.append("--as={}".format(tools.get_env("AS")))
         if tools.get_env("CC"):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
             args.append("--cxx={}".format(tools.get_env("CXX")))
+        if tools.get_env("NM"):
+            args.append("--nm={}".format(tools.get_env("NM")))
+        if tools.get_env("RANLIB"):
+            args.append("--ranlib={}".format(tools.get_env("RANLIB")))
+        if tools.get_env("STRIP"):
+            args.append("--strip={}".format(tools.get_env("STRIP")))
         extra_cflags = []
         extra_ldflags = []
         if is_apple_os(self) and self.settings.os.version:
@@ -773,8 +783,7 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.components["avdevice"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             if self.options.avcodec:
-                self.cpp_info.components["avcodec"].system_libs = [
-                    "Mfplat", "Mfuuid", "strmiids"]
+                self.cpp_info.components["avcodec"].system_libs = ["mfplat", "mfuuid", "strmiids"]
             if self.options.avdevice:
                 self.cpp_info.components["avdevice"].system_libs = [
                     "ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]

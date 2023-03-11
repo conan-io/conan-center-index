@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
-from conan.tools.microsoft import check_min_vs
 from conan.tools.layout import basic_layout
 import os
 
@@ -28,6 +27,8 @@ class WatcherConan(ConanFile):
             "gcc": "11",
             "clang": "13",
             "apple-clang": "13.1",
+            "Visual Studio": "16",
+            "msvc": "192",
         }
 
     def export_sources(self):
@@ -42,7 +43,6 @@ class WatcherConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
-        check_min_vs(self, 192)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -57,7 +57,7 @@ class WatcherConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)

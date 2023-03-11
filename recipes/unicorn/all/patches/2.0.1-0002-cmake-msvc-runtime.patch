@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 85597f46..1467bc55 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -108,8 +108,10 @@ if(MSVC)
+     add_compile_options($<$<COMPILE_LANGUAGE:C>:/wd4244>)
+     add_compile_options($<$<COMPILE_LANGUAGE:C>:/wd4267>)
+ 
++    message(OUTPUT "CMAKE_MSVC_RUNTIME_LIBRARY ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_C_FLAGS ${CMAKE_C_FLAGS}")
++
+     # handle msvcrt setting being passed in CMAKE_C_FLAGS
+-    if(DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
++    if(FALSE)
+         # do not support other methods of setting this (it would be more conformant, tho)
+         message(FATAL_ERROR "please set msvcrt via CMAKE_C_FLAGS")
+     endif()

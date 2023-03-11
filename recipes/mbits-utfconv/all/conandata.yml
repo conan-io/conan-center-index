@@ -1,0 +1,4 @@
+sources:
+  "1.0.3":
+    url: "https://github.com/mbits-libs/utfconv/archive/v1.0.3.tar.gz"
+    sha256: "2077e3dcb999dc76d2bdc06cc141b38e10f15762975c261f72cc1a8c2519a27a"

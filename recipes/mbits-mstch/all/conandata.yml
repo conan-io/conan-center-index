@@ -1,0 +1,5 @@
+sources:
+  # Newer versions at the top
+  "1.0.4":
+    url: "https://github.com/mbits-libs/libmstch/archive/v1.0.4.tar.gz"
+    sha256: "ee3052b9c2321b46fffabb5db5d5659e5f963070cdfd0004701b515867ed6857"

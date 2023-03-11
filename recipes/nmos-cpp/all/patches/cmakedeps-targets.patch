@@ -1,0 +1,20 @@
+--- a/Development/cmake/NmosCppDependencies.cmake
++++ b/Development/cmake/NmosCppDependencies.cmake
+@@ -197,7 +197,7 @@
+     endif()
+ 
+     add_library(json_schema_validator INTERFACE)
+-    target_link_libraries(json_schema_validator INTERFACE nlohmann_json_schema_validator::nlohmann_json_schema_validator)
++    target_link_libraries(json_schema_validator INTERFACE nlohmann_json_schema_validator)
+ else()
+     set(JSON_SCHEMA_VALIDATOR_SOURCES
+         third_party/nlohmann/json-patch.cpp
+@@ -264,7 +264,7 @@
+             message(STATUS "Found Avahi version " ${Avahi_VERSION})
+         endif()
+ 
+-        target_link_libraries(DNSSD INTERFACE Avahi::compat-libdns_sd)
++        target_link_libraries(DNSSD INTERFACE avahi::compat-libdns_sd)
+     else()
+         find_package(DNSSD REQUIRED)
+         if(NOT DNSSD_VERSION)

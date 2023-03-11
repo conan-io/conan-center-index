@@ -1,17 +1,22 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 import os
 
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+required_conan_version = ">=1.53.0"
 
-required_conan_version = ">=1.29.1"
 
 class LibnumaConan(ConanFile):
     name = "libnuma"
     description = "NUMA support for Linux."
     license = "LGPL-2.1-or-later"
-    topics = ("conan", "numa")
+    topics = ("numa",)
     homepage = "https://github.com/numactl/numactl"
     url = "https://github.com/conan-io/conan-center-index"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,60 +26,46 @@ class LibnumaConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("{} is only supported on Linux".format(self.name))
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches",{}).get(self.version, []):
-            tools.patch(**patch)
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("libnuma is only supported on Linux")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("numactl-" + self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        self._autotools = AutoToolsBuildEnvironment(self)
-
-        args = []
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
-
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("LICENSE.LGPL2.1", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "LICENSE.LGPL2.1", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "numa")
         self.cpp_info.libs = ["numa"]
-        self.cpp_info.names["pkg_config"] = "numa"
         self.cpp_info.system_libs = ["dl", "pthread"]

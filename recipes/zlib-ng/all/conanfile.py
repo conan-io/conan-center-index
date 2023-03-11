@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class ZlibNgConan(ConanFile):
@@ -43,22 +43,16 @@ class ZlibNgConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.info.options.zlib_compat and not self.info.options.with_gzfileop:
             raise ConanInvalidConfiguration("The option 'with_gzfileop' must be True when 'zlib_compat' is True.")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

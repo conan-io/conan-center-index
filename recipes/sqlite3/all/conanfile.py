@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class Sqlite3Conan(ConanFile):
@@ -17,6 +17,7 @@ class Sqlite3Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
     topics = ("sqlite", "database", "sql", "serverless")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,9 +41,9 @@ class Sqlite3Conan(ConanFile):
         "enable_unlock_notify": [True, False],
         "enable_default_secure_delete": [True, False],
         "disable_gethostuuid": [True, False],
-        "max_column": "ANY",
-        "max_variable_number": "ANY",
-        "max_blob_size": "ANY",
+        "max_column": [None, "ANY"],
+        "max_variable_number": [None, "ANY"],
+        "max_blob_size": [None, "ANY"],
         "build_executable": [True, False],
         "enable_default_vfs": [True, False],
         "enable_dbpage_vtab": [True, False],
@@ -91,30 +92,23 @@ class Sqlite3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def validate(self):
-        if self.info.options.build_executable:
-            if not self.info.options.enable_default_vfs:
-                # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
-                raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
-            if self.info.options.omit_load_extension:
-                raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.options.build_executable:
+            if not self.options.enable_default_vfs:
+                # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
+                raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
+            if self.options.omit_load_extension:
+                raise ConanInvalidConfiguration("build_executable=True requires omit_load_extension=True")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -191,7 +185,7 @@ class Sqlite3Conan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -214,11 +208,6 @@ class Sqlite3Conan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components["sqlite"].defines.append("SQLITE_API=__declspec(dllimport)")
 
-        if self.options.build_executable:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var with : {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
@@ -230,3 +219,5 @@ class Sqlite3Conan(ConanFile):
         self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["sqlite"].set_property("cmake_target_name", "SQLite::SQLite3")
         self.cpp_info.components["sqlite"].set_property("pkg_config_name", "sqlite3")
+        if self.options.build_executable:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

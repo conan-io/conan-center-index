@@ -41,7 +41,7 @@ class JsonSchemaValidatorConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.2", transitive_headers=True)
 
     def validate(self):
         version = scm.Version(self.version)
@@ -72,8 +72,12 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
+        if scm.Version(self.version) < "2.2.0":
+            tc.variables["BUILD_TESTS"] = False
+            tc.variables["BUILD_EXAMPLES"] = False
+        else:
+            tc.variables["JSON_VALIDATOR_BUILD_TESTS"] = False
+            tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
         if scm.Version(self.version) < "2.1.0":
             tc.variables["NLOHMANN_JSON_DIR"] = ";".join(self.deps_cpp_info["nlohmann_json"].include_paths).replace("\\", "/")
         tc.generate()
@@ -121,6 +125,9 @@ class JsonSchemaValidatorConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "nlohmann_json_schema_validator")
         self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator")
         self.cpp_info.libs = ["json-schema-validator" if scm.Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"

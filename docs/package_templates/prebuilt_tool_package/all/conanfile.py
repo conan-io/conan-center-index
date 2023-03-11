@@ -29,7 +29,7 @@ class PackageConan(ConanFile):
 
     # in case some configuration is not supported
     def validate(self):
-        if self.info.settings.os == "Macos" and Version(self.info.settings.os.version) < 11:
+        if self.settings.os == "Macos" and Version(self.settings.os.version) < 11:
             raise ConanInvalidConfiguration(f"{self.ref} requires OSX >=11.")
 
     # do not cache as source, instead, use build folder
@@ -41,7 +41,6 @@ class PackageConan(ConanFile):
         get(
             self,
             **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
-            destination=self.source_folder,
             strip_root=True,
         )
 

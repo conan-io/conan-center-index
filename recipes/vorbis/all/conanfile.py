@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class VorbisConan(ConanFile):
@@ -34,7 +34,7 @@ class VorbisConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -45,7 +45,7 @@ class VorbisConan(ConanFile):
             pass
 
     def requirements(self):
-        self.requires("ogg/1.3.5")
+        self.requires("ogg/1.3.5", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")

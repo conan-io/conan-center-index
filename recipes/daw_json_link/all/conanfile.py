@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy, rmdir
@@ -38,21 +38,17 @@ class DawJsonLinkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.74.2")
-        self.requires("daw_utf_range/2.2.2")
+        self.requires("daw_header_libraries/2.85.1")
+        self.requires("daw_utf_range/2.2.3")
 
     def package_id(self):
         self.info.clear()
 
-    @property
-    def _info(self):
-        return self if Version(conan_version).major < 2 else self.info
-
     def validate(self):
-        if self._info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self._info.settings.compiler), False)
-        if minimum_version and Version(self._info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )

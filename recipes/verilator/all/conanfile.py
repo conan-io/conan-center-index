@@ -1,14 +1,14 @@
 from conan import ConanFile
-from conan.tools.files import get
-from conan.tools.files import rmdir
+from conan.tools.files import get, rmdir, patch, replace_in_file, rename
 from conan.tools.build import cross_building
+from conan.tools.scm   import Version
 from conans import AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 class VerilatorConan(ConanFile):
     name = "verilator"
@@ -36,7 +36,7 @@ class VerilatorConan(ConanFile):
             
     @property
     def _needs_old_bison(self):
-        return tools.Version(self.version) < "4.100"
+        return Version(self.version) < "4.100"
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
@@ -58,7 +58,7 @@ class VerilatorConan(ConanFile):
                 self.build_requires("bison/3.5.3")
             else:
                 self.build_requires("bison/3.7.6")
-        if tools.Version(self.version) >= "4.224":
+        if Version(self.version) >= "4.224":
             self.build_requires("autoconf/2.71")
 
 
@@ -76,10 +76,10 @@ class VerilatorConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
-        if tools.Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
+        if Version(self.version) >= "4.200" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
         
-        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.200":
+        if self.settings.os == "Windows" and Version(self.version) >= "4.200":
             raise ConanInvalidConfiguration("Windows build is not yet supported. Contributions are welcome")
     @contextmanager
     def _build_context(self):
@@ -115,7 +115,7 @@ class VerilatorConan(ConanFile):
             if yacc.endswith(" -y"):
                 yacc = yacc[:-3]
         with tools.environment_append({"YACC": yacc}):
-            if tools.Version(self.version) >= "4.224":
+            if Version(self.version) >= "4.224":
                with tools.chdir(self._source_subfolder):
                     self.run("autoconf", win_bash=tools.os_info.is_windows, run_environment=True)
             self._autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, self._source_subfolder))
@@ -135,17 +135,16 @@ class VerilatorConan(ConanFile):
         return args
 
     def _patch_sources(self):
-        if tools.Version(self.version) < "4.200":
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-
+        if Version(self.version) < "4.200":
+            for patch_file in self.conan_data.get("patches", {}).get(self.version, []):
+                patch(self, **patch_file)
         try:
             os.unlink(os.path.join(self._source_subfolder, "src", "config_build.h"))
         except FileNotFoundError:
             pass
 
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile_obj.in"),
+            replace_in_file(self, os.path.join(self._source_subfolder, "src", "Makefile_obj.in"),
                                   "${LINK}", "${PROGLINK}")
 
     def build(self):
@@ -164,18 +163,24 @@ class VerilatorConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "bin", "share", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "bin", "share", "verilator", "examples"))
         os.unlink(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config-version.cmake"))
-        tools.rename(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
+        rename(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-config.cmake"),
                      os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"))
-        tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"), 
                             "${CMAKE_CURRENT_LIST_DIR}", "${CMAKE_CURRENT_LIST_DIR}/../../..")
         if self.settings.build_type == "Debug":
-            tools.replace_in_file(os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"),
+            replace_in_file(self, os.path.join(self.package_folder, "bin", "share", "verilator", "verilator-tools.cmake"),
                                  "verilator_bin", "verilator_bin_dbg")
 
         shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "include"), 
                     os.path.join(self.package_folder))
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"), "*")
+        if Version(self.version) >= "4.224":
+            shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "bin", "verilator_ccache_report"), 
+                    os.path.join(self.package_folder, "bin", "verilator_ccache_report"))
+
+        shutil.move(os.path.join(self.package_folder, "bin", "share", "verilator", "bin", "verilator_includer"), 
+                    os.path.join(self.package_folder, "bin", "verilator_includer"))
+
         rmdir(self, os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
 
     def package_id(self):

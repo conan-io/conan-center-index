@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class Re2Conan(ConanFile):
@@ -18,11 +18,11 @@ class Re2Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
 
     def config_options(self):
@@ -31,14 +31,14 @@ class Re2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -61,10 +61,12 @@ class Re2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "re2")
         self.cpp_info.set_property("cmake_target_name", "re2::re2")
+        self.cpp_info.set_property("pkg_config_name", "re2")
         self.cpp_info.libs = ["re2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]

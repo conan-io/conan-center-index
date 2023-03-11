@@ -10,6 +10,7 @@ Conan v2 in pull requests.
   * [Using Layout](#using-layout)
     * [With New Generators](#with-new-generators)
     * [With Multiple Build Helpers](#with-multiple-build-helpers)
+  * [CMakeToolchain](#cmaketoolchain)
   * [New conf_info properties](#new-conf_info-properties)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
     * [CMakeDeps](#cmakedeps)
@@ -54,6 +55,31 @@ When different build tools are use, at least one layout needs to be set.
 
 The `src_folder` must be the same when using different layouts and should
 not depend on settings or options.
+
+## CMakeToolchain
+
+The old `CMake.definition` should be replaced by `CMakeToolchain.variables` and moved to the `generate` method.
+However, certain options need to be passed as `cache_variables`. You'll need to check project's `CMakeLists.txt`
+as there are a few cases to look out for: 
+
+- When an `option` is configured before `project()` is called.
+
+  ```cmake
+  cmake_minimum_required(3.1)
+  option(BUILD_EXAMPLES "Build examples using foorbar")
+  project(foobar)
+  ```
+
+- When an variable is declared with `CACHE`.
+
+  ```cmake
+  cmake_minimum_required(3.1)
+  project(foobar)
+  set(USE_JPEG ON CACHE BOOL "include jpeg support?")
+  ```
+
+For more information refere to the [CMakeToolchain docs](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html)
+or check out the converstaion in conan-io/conan#11937 for the brave.
 
 ## New conf_info properties
 

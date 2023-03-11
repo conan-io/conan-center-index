@@ -1,0 +1,4 @@
+sources:
+  "v1":
+    url: "https://github.com/djarek/canary/archive/refs/tags/v1.tar.gz"
+    sha256: "f3e2e80f5c01b4d60aed4b5ec73663158b495caa4f9324a10d05e55ea8f3938c"

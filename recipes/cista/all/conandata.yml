@@ -1,4 +1,9 @@
 sources:
+  "0.11":
+    - url: "https://github.com/felixguendling/cista/releases/download/v0.11/cista.h"
+      sha256: "e2e37fa1f7278e7f1a8dab7d84b6b00f5a0a4fb48f42fbe5761b7ddd0d07314c"
+    - url: "https://raw.githubusercontent.com/felixguendling/cista/v0.11/LICENSE"
+      sha256: "fcd47e35fd6dc22feec454c5c1e572ccb7587dedd91d824528ebbb00a7f37c56"
   "0.10":
     - url: "https://github.com/felixguendling/cista/releases/download/v0.10/cista.h"
       sha256: "c06162c73c0fb034170198d79940d2eeecc233140797ab7e3b66053d61a0169b"

@@ -159,8 +159,13 @@ class EmSDKConan(ConanFile):
         self.buildenv_info.define_path("EM_CONFIG", self._em_config)
         self.buildenv_info.define_path("EM_CACHE",  self._em_cache)
 
-        self.buildenv_info.define_path("CC", self._define_tool_var("emcc"))
-        self.buildenv_info.define_path("CXX", self._define_tool_var("em++"))
+        compiler_executables = {
+            "c": self._define_tool_var("emcc"),
+            "cpp": self._define_tool_var("em++"),
+        }
+        self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.buildenv_info.define_path("CC", compiler_executables["c"])
+        self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
         self.buildenv_info.define_path("AR", self._define_tool_var("emar"))
         self.buildenv_info.define_path("NM", self._define_tool_var("emnm"))
         self.buildenv_info.define_path("RANLIB", self._define_tool_var("emranlib"))
@@ -183,8 +188,8 @@ class EmSDKConan(ConanFile):
             self.env_info.EMSCRIPTEN = self._emscripten
             self.env_info.EM_CONFIG = self._em_config
             self.env_info.EM_CACHE = self._em_cache
-            self.env_info.CC = self._define_tool_var("emcc")
-            self.env_info.CXX = self._define_tool_var("em++")
+            self.env_info.CC = compiler_executables["c"]
+            self.env_info.CXX = compiler_executables["cpp"]
             self.env_info.AR = self._define_tool_var("emar")
             self.env_info.NM = self._define_tool_var("emnm")
             self.env_info.RANLIB = self._define_tool_var("emranlib")
