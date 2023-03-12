@@ -41,7 +41,6 @@ class Catch2Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.package_type = "static-library" if self.options.with_main else "header-library"
         if not self.options.with_main:
             self.options.rm_safe("fPIC")
             self.options.rm_safe("with_benchmark")
