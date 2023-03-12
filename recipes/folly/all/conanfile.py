@@ -186,6 +186,7 @@ class FollyConan(ConanFile):
         if not self.dependencies["boost"].options.header_only:
             tc.cache_variables["BOOST_LINK_STATIC"] = not self.dependencies["boost"].options.shared
 
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"  # Honor Boost_ROOT set by boost recipe
         tc.generate()
 
         deps = CMakeDeps(self)
