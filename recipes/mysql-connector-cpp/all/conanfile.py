@@ -13,9 +13,9 @@ class MysqlConnectorCppConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = {"shared": False}
-    generators = "cmake"
+    generators = "CMakeToolchain"
     exports_sources = "CMakeLists.txt"
-    requires = "openssl/1.1.1k"
+    requires = "openssl/1.1.0l"
     source_folder = "mysql-connector-cpp"
     build_folder = "build"
 
@@ -47,4 +47,3 @@ class MysqlConnectorCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mysqlcppconn8"]
-
