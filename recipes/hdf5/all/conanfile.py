@@ -161,7 +161,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
 
         # FIXME is there no built-in way of doing the replace?
-        tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf5").replace("\\", "/")
+        tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
         tc.variables["HDF5_BUILD_TOOLS"] = False
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
