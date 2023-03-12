@@ -1,0 +1,12 @@
+diff --git a/folly/TimeoutQueue.cpp b/folly/TimeoutQueue.cpp
+index 706715f71..5ea970679 100644
+--- a/folly/TimeoutQueue.cpp
++++ b/folly/TimeoutQueue.cpp
+@@ -16,6 +16,7 @@
+
+ #include <folly/TimeoutQueue.h>
+ #include <algorithm>
++#include <limits>
+ #include <vector>
+
+ namespace folly {
