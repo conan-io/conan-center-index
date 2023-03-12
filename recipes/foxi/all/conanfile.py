@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rename, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file
 import glob
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class FoxiConan(ConanFile):
@@ -18,39 +18,35 @@ class FoxiConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "onnxifi_loader_logging": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "onnxifi_loader_logging": False
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.compiler.rm_safe("cppstd")
+        self.settings.compiler.rm_safe("libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["FOXI_WERROR"] = False
+        if self.options.onnxifi_loader_logging:
+            tc.preprocessor_definitions["ONNXIFI_LOADER_LOGGING"] = "1"
         tc.generate()
 
     def _patch_sources(self):
@@ -77,6 +73,16 @@ class FoxiConan(ConanFile):
             rename(self, src=dll_file, dst=os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
     def package_info(self):
-        self.cpp_info.libs = ["foxi_dummy", "foxi_loader"]
+        self.cpp_info.components["header_only"].libs = []
+        self.cpp_info.components["header_only"].libdirs = []
+        self.cpp_info.components["header_only"].set_property("cmake_target_name", "foxi")
+
+        self.cpp_info.components["foxi_loader"].libs = ["foxi_loader"]
+        self.cpp_info.components["foxi_loader"].set_property("cmake_target_name", "foxi_loader")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl"]
+            self.cpp_info.components["foxi_loader"].system_libs = ["dl"]
+
+        self.cpp_info.components["foxi_dummy"].libs = ["foxi_loader"]
+        self.cpp_info.components["foxi_dummy"].set_property("cmake_target_name", "foxi_dummy")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["foxi_dummy"].system_libs = ["dl"]
