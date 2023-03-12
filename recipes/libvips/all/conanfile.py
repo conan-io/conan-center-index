@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -164,18 +164,18 @@ class LibvipsConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support Visual Studio yet. See https://github.com/libvips/libvips/issues/3378. "
+                "Feel free to contribute"
+            )
+
         if self.options.vapi and not self.options.introspection:
             raise ConanInvalidConfiguration("vapi requires introspection")
         if self.options.with_pangocairo and not self.dependencies["pango"].options.with_cairo:
             raise ConanInvalidConfiguration(f"{self.ref}:with_pangocairo=True requires pango/*:with_cairo=True")
         if self.options.with_pdfium and self.options.with_poppler:
             raise ConanInvalidConfiguration("pdf support is enabled either with pdfium or poppler")
-
-        if is_msvc(self) and is_msvc_static_runtime(self) and not self.options.shared and \
-           self.dependencies["glib"].options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} static with MT runtime not supported if glib shared due to conancenter CI limitations"
-            )
 
         if self.options.with_cgif:
             raise ConanInvalidConfiguration("cgif recipe not available in conancenter yet")
