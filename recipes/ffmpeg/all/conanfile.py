@@ -296,7 +296,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-loader/1.3.236.0")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
