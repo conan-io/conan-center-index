@@ -34,6 +34,29 @@
      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
      set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
  endif()
+--- a/cmake/JPEGCodec.cmake
++++ b/cmake/JPEGCodec.cmake
+@@ -47,19 +47,7 @@
+     cmake_push_check_state(RESET)
+     set(CMAKE_REQUIRED_INCLUDES "${JPEG_INCLUDE_DIRS}")
+     set(CMAKE_REQUIRED_LIBRARIES "${JPEG_LIBRARIES}")
+-    check_c_source_compiles(
+-        "
+-        #include <stddef.h>
+-        #include <stdio.h>
+-        #include \"jpeglib.h\"
+-        int main()
+-        {
+-            jpeg_read_scanlines(0,0,0);
+-            jpeg12_read_scanlines(0,0,0);
+-            return 0;
+-        }
+-        "
+-        HAVE_JPEGTURBO_DUAL_MODE_8_12)
++    set(HAVE_JPEGTURBO_DUAL_MODE_8_12 FALSE)
+     cmake_pop_check_state()
+ endif()
+ 
 --- a/cmake/ZSTDCodec.cmake
 +++ b/cmake/ZSTDCodec.cmake
 @@ -28,7 +28,10 @@ set(ZSTD_USABLE FALSE)
