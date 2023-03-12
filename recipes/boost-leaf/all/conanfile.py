@@ -19,10 +19,7 @@ class BoostLEAFConan(ConanFile):
               "header-only", "low-latency", "no-dependencies", "single-header")
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
-    deprecated = True
-
-    def configure(self):
-        raise ConanInvalidConfiguration(f"{self.ref} is deprecated in favor of Boost >=1.75.0")
+    deprecated = "boost"       
 
     def package_id(self):
         self.info.clear()
@@ -66,8 +63,7 @@ class BoostLEAFConan(ConanFile):
         basic_layout(self)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "LICENSE_1_0.txt", dst=os.path.join(
