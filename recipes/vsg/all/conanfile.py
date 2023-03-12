@@ -17,14 +17,14 @@ class VsgConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vulkanscenegraph.org"
-    topics = ("Vulkan", "scenegraph", "graphics")
+    topics = ("vulkan", "scenegraph", "graphics", "3d")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
     }
 
@@ -85,7 +85,8 @@ class VsgConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        
         cmake = CMake(self)
         cmake.install()
 
