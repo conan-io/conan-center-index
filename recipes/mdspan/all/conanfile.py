@@ -53,7 +53,7 @@ class MDSpanConan(ConanFile):
                     f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
                     "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
-        if self.settings.compiler == "Visual Studio" and "16.6" <= Version(self.settings.compiler.version) < "17.0":
+        if str(self.settings.compiler) == "Visual Studio" and "16.6" <= Version(self.settings.compiler.version) < "17.0":
             raise ConanInvalidConfiguration(
                 "Unsupported Visual Studio version due to upstream bug. The supported Visual Studio versions are (< 16.6 or 17.0 <=)."
                 "See upstream issue https://github.com/kokkos/mdspan/issues/26 for details.")
