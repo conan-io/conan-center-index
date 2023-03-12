@@ -44,6 +44,9 @@ patches:
       patch_description: "CMake: Handle generator expressions requiring a target for pkg-config #1433"
       patch_type: "portability"
       patch_source: "https://github.com/facebook/folly/pull/1433"
+    - patch_file: "patches/0027-fix-numeric-limits-include.patch"
+      patch_description: "include limits"
+      patch_type: "conan"
   "2020.08.10.00":
     - patch_file: "patches/0008-find-packages.patch"
       patch_description: "fix folly-deps.cmake"
@@ -70,6 +73,9 @@ patches:
       patch_description: "CMake: Handle generator expressions requiring a target for pkg-config #1433"
       patch_type: "portability"
       patch_source: "https://github.com/facebook/folly/pull/1433"
+    - patch_file: "patches/0028-fix-numeric-limits-include.patch"
+      patch_description: "include limits"
+      patch_type: "conan"
   "2022.01.31.00":
     - patch_file: "patches/0016-find-packages.patch"
       patch_description: "fix folly-deps.cmake"
