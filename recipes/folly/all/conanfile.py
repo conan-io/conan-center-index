@@ -183,6 +183,9 @@ class FollyConan(ConanFile):
         else:
             tc.variables["CXX_STD"] = cxx_std_value
 
+        if not self.dependencies["boost"].options.header_only:
+            tc.cache_variables["BOOST_LINK_STATIC"] = not self.dependencies["boost"].options.shared
+
         tc.generate()
 
         deps = CMakeDeps(self)
