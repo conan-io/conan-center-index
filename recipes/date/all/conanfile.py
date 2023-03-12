@@ -43,7 +43,6 @@ class DateConan(ConanFile):
             self.options.use_system_tz_db = True
 
     def configure(self):
-        self.package_type = "header-library" if self.options.header_only else "library"
         if self.options.shared or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
