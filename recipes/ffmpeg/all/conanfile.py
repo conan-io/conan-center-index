@@ -2,7 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.build import cross_building
-from conan.tools.files import chdir, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import (
+    apply_conandata_patches, chdir, export_conandata_patches, get, rename,
+    replace_in_file, rm, rmdir
+)
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 from conans import AutoToolsBuildEnvironment, tools
@@ -221,6 +224,13 @@ class FFMpegConan(ConanFile):
             "with_sdl": ["with_programs"],
         }
 
+    @property
+    def _version_supports_vulkan(self):
+        return Version(self.version) >= "4.3.0"
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -239,7 +249,7 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
-        if not self._version_supports_vulkan():
+        if not self._version_supports_vulkan:
             self.options.rm_safe("with_vulkan")
 
     def configure(self):
@@ -295,8 +305,8 @@ class FFMpegConan(ConanFile):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
-        if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.236.0")
+        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
+            self.requires("vulkan-loader/1.3.239.0")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -352,6 +362,7 @@ class FFMpegConan(ConanFile):
             return target_os
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if is_msvc(self) and self.options.with_libx264 and not self.dependencies["libx264"].options.shared and Version(self.version) <= "5.0":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
@@ -517,9 +528,8 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
-        if self._version_supports_vulkan():
-            args.append(opt_enable_disable(
-                "vulkan", self.options.get_safe("with_vulkan")))
+        if self._version_supports_vulkan:
+            args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -905,9 +915,6 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
 
-        if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
+        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
                 "vulkan-loader::vulkan-loader")
-
-    def _version_supports_vulkan(self):
-        return Version(self.version) >= "4.3.0"
