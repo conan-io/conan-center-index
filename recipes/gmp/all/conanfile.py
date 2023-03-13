@@ -83,7 +83,7 @@ class GmpConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0")
+            self.tool_requires("yasm/1.3.0") # Needed for determining 32-bit word size
             self.tool_requires("automake/1.16.5")
 
     def source(self):
