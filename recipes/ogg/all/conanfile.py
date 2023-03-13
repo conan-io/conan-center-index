@@ -1,15 +1,15 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class OggConan(ConanFile):
     name = "ogg"
     description = "The OGG library"
-    topics = ("ogg", "codec", "audio", "lossless")
+    topics = ("codec", "audio", "lossless")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/ogg"
     license = "BSD-2-Clause"
@@ -25,8 +25,7 @@ class OggConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,15 +33,9 @@ class OggConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

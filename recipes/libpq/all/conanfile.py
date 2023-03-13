@@ -118,10 +118,15 @@ class LibpqConan(ConanFile):
                 replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "MKvcbuild.pm"),
                                       "$libpq = $solution->AddProject('libpq', 'dll', 'interfaces',",
                                       "$libpq = $solution->AddProject('libpq', 'lib', 'interfaces',")
-            system_libs = ", ".join(["'{}.lib'".format(lib) for lib in self.deps_cpp_info.system_libs])
+            host_deps = [dep for _, dep in self.dependencies.host.items()]
+            system_libs = []
+            for dep in host_deps:
+                system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
+        
+            linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   "libraries             => [],",
-                                  "libraries             => [{}],".format(system_libs))
+                                  "libraries             => [{}],".format(linked_system_libs))
             runtime = {
                 "MT": "MultiThreaded",
                 "MTd": "MultiThreadedDebug",
@@ -142,11 +147,11 @@ class LibpqConan(ConanFile):
                 for ssl in ["VC\\libssl32", "VC\\libssl64", "libssl"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % ssl,
-                                          "%s.lib" % openssl.libs[0])
+                                          "%s.lib" % openssl.cpp_info.components["ssl"].libs[0])
                 for crypto in ["VC\\libcrypto32", "VC\\libcrypto64", "libcrypto"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
-                                          "%s.lib" % openssl.libs[1])
+                                          "%s.lib" % openssl.cpp_info.components["crypto"].libs[0])
                 replace_in_file(self,config_default_pl,
                                       "openssl   => undef",
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))

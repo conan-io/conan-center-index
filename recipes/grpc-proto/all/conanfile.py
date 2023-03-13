@@ -20,11 +20,11 @@ class GRPCProto(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False]
         }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
         }
     exports = "helpers.py"
@@ -37,11 +37,11 @@ class GRPCProto(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
             self.options["googleapis"].shared = True
 
@@ -49,7 +49,7 @@ class GRPCProto(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
-        if self.options.shared and (not self.options["protobuf"].shared or not self.options["googleapis"].shared):
+        if self.options.shared and (not self.dependencies["protobuf"].options.shared or not self.dependencies["googleapis"].options.shared):
             raise ConanInvalidConfiguration("If built as shared, protobuf and googleapis must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True`")
 
     def generate(self):
@@ -60,7 +60,7 @@ class GRPCProto(ConanFile):
 
     def requirements(self):
         self.requires('protobuf/3.21.4', transitive_headers=True)
-        self.requires('googleapis/cci.20220711')
+        self.requires('googleapis/cci.20221108')
 
     def build_requirements(self):
         self.build_requires('protobuf/3.21.4')
@@ -69,7 +69,7 @@ class GRPCProto(ConanFile):
     def _parse_proto_libraries(self):
         # Generate the libraries to build dynamically
         proto_libraries = parse_proto_libraries(os.path.join(self.source_folder, 'BUILD.bazel'), self.source_folder, self.output.error)
-        
+
         # Validate that all files exist and all dependencies are found
         all_deps = [it.cmake_target for it in proto_libraries]
         all_deps += ["googleapis::googleapis", "protobuf::libprotobuf"]
