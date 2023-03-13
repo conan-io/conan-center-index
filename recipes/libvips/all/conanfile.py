@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 import os
 
 required_conan_version = ">=1.53.0"
@@ -173,6 +173,8 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref}:with_pangocairo=True requires pango/*:with_cairo=True")
         if self.options.with_pdfium and self.options.with_poppler:
             raise ConanInvalidConfiguration("pdf support is enabled either with pdfium or poppler")
+
+        check_min_vs(self, "192", raise_invalid=False)
 
         if is_msvc(self) and is_msvc_static_runtime(self) and not self.options.shared and \
            self.dependencies["glib"].options.shared:
