@@ -10,7 +10,7 @@ class SysConfigVDPAUConan(ConanFile):
     name = "vdpau"
     version = "system"
     description = "VDPAU is the Video Decode and Presentation API for UNIX. It provides an interface to video decode acceleration and presentation hardware present in modern GPUs."
-    topics = ("conan", "vdpau", "hwaccel", "video")
+    topics = ("vdpau", "hwaccel", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/VDPAU/"
     license = "MIT"
