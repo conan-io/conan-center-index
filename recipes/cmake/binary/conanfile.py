@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -43,6 +43,13 @@ class CMakeConan(ConanFile):
             docs_folder = os.path.join(self.build_folder, "doc", "cmake")
 
         copy(self, "Copyright.txt", src=docs_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
+
+        if self.settings.os != "Macos":
+            # Remove unneeded folders (also cause long paths on Windows)
+            # Note: on macOS we don't want to modify the bundle contents
+            #       to preserve signature validation
+            rmdir(self, os.path.join(self.package_folder, "doc"))
+            rmdir(self, os.path.join(self.package_folder, "man"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
