@@ -174,7 +174,8 @@ class LibvipsConan(ConanFile):
         if self.options.with_pdfium and self.options.with_poppler:
             raise ConanInvalidConfiguration("pdf support is enabled either with pdfium or poppler")
 
-        check_min_vs(self, "192", raise_invalid=False)
+        # Visual Studio < 2019 doesn't seem to like pointer restrict of pointer restrict in libnsgif
+        check_min_vs(self, "192")
 
         if is_msvc(self) and is_msvc_static_runtime(self) and not self.options.shared and \
            self.dependencies["glib"].options.shared:
