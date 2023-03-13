@@ -84,12 +84,13 @@ class MsgpackCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msgpack")
-        self.cpp_info.set_property("cmake_target_name", "msgpackc")
         self.cpp_info.set_property("pkg_config_name", "msgpack")
         if Version(self.version) < "6.0.0":
             self.cpp_info.libs = ["msgpackc"]
+            self.cpp_info.set_property("cmake_target_name", "msgpackc")
         else:
             self.cpp_info.libs = ["msgpack-c"]
+            self.cpp_info.set_property("cmake_target_name", "msgpack-c")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "msgpack"
