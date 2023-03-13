@@ -5,7 +5,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
@@ -63,6 +63,8 @@ class ReadLineConan(ConanFile):
         if cross_building(self):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")
         tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
