@@ -19,7 +19,7 @@ class ExprTkConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 11
 
     def layout(self):
         basic_layout(self, src_folder="src")
