@@ -14,6 +14,8 @@ class ProtobufPythonPkg(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
+    no_copy_source = True
+    settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
         basic_layout(self,src_folder="src")
