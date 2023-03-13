@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
     name = "uni-algo"
-    description = "short description"
+    description = "Unicode Algorithms Implementation for C/C++"
     license = ("MIT", "Unlicense")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/uni-algo/uni-algo"
@@ -37,6 +37,8 @@ class PackageConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
+            "Visual Studio": "16",
+            "msvc": "191",
             "gcc": "7",
             "clang": "8",
             "apple-clang": "11",
@@ -53,10 +55,6 @@ class PackageConan(ConanFile):
         if self.options.header_only:
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
-            del self.settings.os
-            del self.settings.arch
-            del self.settings.compiler
-            del self.settings.build_type
         elif self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -74,7 +72,7 @@ class PackageConan(ConanFile):
         if not self.options.header_only:
             if self.settings.compiler.cppstd:
                 check_min_cppstd(self, self._min_cppstd)
-            check_min_vs(self, 191)
+            check_min_vs(self, int(self.settings.compiler.get_safe("cppstd")))
             if not is_msvc(self):
                 minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
                 if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -90,7 +88,6 @@ class PackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables = dict()
-        print(f"self.options.header_only {self.options.header_only}")
         if self.options.header_only:
             tc.variables["UNI_ALGO_HEADER_ONLY"] = True
         elif self.options["shared"]:
@@ -99,7 +96,6 @@ class PackageConan(ConanFile):
         if is_msvc(self):
             # don't use self.settings.compiler.runtime
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        print(dict(tc.variables))
 
         tc.generate()
 
