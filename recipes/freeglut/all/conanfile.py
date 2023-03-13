@@ -87,18 +87,19 @@ class freeglutConan(ConanFile):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
         self._cmake = CMake(self, set_cmake_flags=True)
 
-        self._cmake.definitions["FREEGLUT_BUILD_DEMOS"] = False
-        self._cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.definitions["FREEGLUT_GLES"] = self.options.gles
-        self._cmake.definitions["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
-        self._cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
-        self._cmake.definitions["FREEGLUT_INSTALL_PDB"] = False
-        self._cmake.definitions["INSTALL_PDB"] = False
-        self._cmake.definitions["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
-        # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
+        variables = {}
+        variables["FREEGLUT_BUILD_DEMOS"] = False
+        variables["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
+        variables["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
+        variables["FREEGLUT_GLES"] = self.options.gles
+        variables["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
+        variables["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
+        variables["FREEGLUT_INSTALL_PDB"] = False
+        variables["INSTALL_PDB"] = False
+        variables["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
+        # variables["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder, variables=variables)
         return self._cmake
 
     def build(self):
