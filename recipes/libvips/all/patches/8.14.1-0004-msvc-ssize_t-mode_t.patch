@@ -1,0 +1,41 @@
+--- a/libvips/foreign/magick.h
++++ b/libvips/foreign/magick.h
+@@ -42,6 +42,11 @@
+ #define MaxPathExtent MagickPathExtent
+ #endif /*HAVE_MAGICK7*/
+ 
++#ifdef _MSC_VER
++#include <BaseTsd.h>
++typedef SSIZE_T ssize_t;
++#endif
++
+ Image *magick_acquire_image( const ImageInfo *image_info, 
+ 	ExceptionInfo *exception );
+ void magick_acquire_next_image( const ImageInfo *image_info, 
+--- a/libvips/iofuncs/mapfile.c
++++ b/libvips/iofuncs/mapfile.c
+@@ -89,6 +89,10 @@
+ #include <io.h>
+ #endif /*G_OS_WIN32*/
+ 
++#ifdef _MSC_VER
++#define mode_t unsigned short
++#endif
++
+ /* Does this fd support mmap. Pipes won't, for example.
+  * FIXME unused internal function
+  */
+--- a/libvips/iofuncs/vips.c
++++ b/libvips/iofuncs/vips.c
+@@ -103,6 +103,11 @@
+ #include <vips/debug.h>
+ #include <vips/internal.h>
+ 
++#ifdef _MSC_VER
++#include <BaseTsd.h>
++typedef SSIZE_T ssize_t;
++#endif
++
+ /**
+  * SECTION: vips
+  * @short_description: startup, shutdown, version
