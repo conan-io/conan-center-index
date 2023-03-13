@@ -11,7 +11,7 @@ class ExprTkConan(ConanFile):
     name = "exprtk"
     description = "C++ Mathematical Expression Parsing And Evaluation Library ExprTk"
     license = "MIT"
-    topics = ("math", "mathematics", "parser", "lexer", "numerical")
+    topics = ("math", "mathematics", "parser", "lexer", "numerical", "header-only")
     homepage = "https://www.partow.net/programming/exprtk/index.html"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
