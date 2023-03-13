@@ -14,7 +14,7 @@ class ExprTkConan(ConanFile):
     topics = ("math", "mathematics", "parser", "lexer", "numerical")
     homepage = "https://www.partow.net/programming/exprtk/index.html"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
