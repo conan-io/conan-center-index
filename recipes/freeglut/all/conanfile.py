@@ -85,7 +85,7 @@ class freeglutConan(ConanFile):
             return self._cmake
 
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
-        self._cmake = CMake(self, set_cmake_flags=True)
+        self._cmake = CMake(self)
 
         variables = {}
         variables["FREEGLUT_BUILD_DEMOS"] = False
@@ -99,7 +99,7 @@ class freeglutConan(ConanFile):
         variables["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
         # variables["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
-        self._cmake.configure(build_folder=self._build_subfolder, variables=variables)
+        self._cmake.configure(variables=variables)
         return self._cmake
 
     def build(self):
