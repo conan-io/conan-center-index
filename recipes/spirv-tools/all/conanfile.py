@@ -115,7 +115,7 @@ class SpirvtoolsConan(ConanFile):
         if (Version(self.version) >= "1.3.239" and Version(self.version) < "2016.6") or \
            Version(self.version) >= "2023.1":
             if not self._cmake_new_enough("3.17.2"):
-                self.tool_requires("cmake/3.25.2")
+                self.tool_requires("cmake/3.25.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
