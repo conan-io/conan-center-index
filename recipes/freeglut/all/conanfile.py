@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.files import get, rmdir, collect_libs
-from conans import CMake
+from conan.tools.cmake import CMake
 import os
 
 required_conan_version = ">=1.47.0"
