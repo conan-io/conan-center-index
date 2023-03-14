@@ -74,9 +74,11 @@ class SwigConan(ConanFile):
             "--with-swiglibdir=${prefix}/bin/swiglib",
             f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}",
         ]
+
         env = tc.environment()
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("LIBS=-ldl")
+            tc.extra_cxxflags.append("-DHAVE_UNISTD_H=1")
         elif self.settings.os == "Windows":
             if is_msvc(self):
                 env.define("CC", "cccl")
