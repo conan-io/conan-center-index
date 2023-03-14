@@ -536,10 +536,10 @@ class FFMpegConan(ConanFile):
             ])
         if not self.options.with_programs:
             args.append("--disable-programs")
-        # since ffmpeg"s build system ignores toolchain variables 
+        # since ffmpeg's build system ignores toolchain variables 
         if tools.get_env("AR"):
             args.append("--ar={}".format(tools.get_env("AR")))
-        if tools.get_env("AS"):
+        if tools.get_env("AS") and self.options.with_asm:
             args.append("--as={}".format(tools.get_env("AS")))
         if tools.get_env("CC"):
             args.append("--cc={}".format(tools.get_env("CC")))
