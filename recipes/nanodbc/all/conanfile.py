@@ -29,10 +29,6 @@ class NanodbcConan(ConanFile):
     }
     generators = "CMakeDeps"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,7 +37,7 @@ class NanodbcConan(ConanFile):
         self.version = self.version or load(self, "version.txt")
 
     def layout(self):
-        cmake_layout(self, src_folder=self._source_subfolder)
+        cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
@@ -57,7 +53,7 @@ class NanodbcConan(ConanFile):
             self.requires("odbc/2.3.9")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
 
         apply_conandata_patches(self)
 
@@ -81,7 +77,7 @@ class NanodbcConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
