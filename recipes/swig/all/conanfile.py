@@ -98,6 +98,7 @@ class SwigConan(ConanFile):
         ]
         if self.settings.os == "Linux":
             args.append("LIBS=-ldl")
+            autotools.flags.append("-DHAVE_UNISTD_H=1")
 
         host, build = None, None
 
