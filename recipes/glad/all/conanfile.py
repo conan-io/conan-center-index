@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 class GladConan(ConanFile):
     name = "glad"
     description = "Multi-Language GL/GLES/EGL/GLX/WGL Loader-Generator based on the official specs."
-    topics = ("glad", "opengl")
+    topics = ("opengl",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Dav1dde/glad"
     license = "MIT"
@@ -52,7 +52,8 @@ class GladConan(ConanFile):
         "wgl_version": "None"
     }
 
-    _cmake = None
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -81,14 +82,12 @@ class GladConan(ConanFile):
         if self.options.spec != "wgl":
             del self.options.wgl_version
 
+    def validate(self):
         if self.options.spec == "wgl" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration(f"{self.options.spec} specification is not compatible with {self.settings.os}")
+            raise ConanInvalidConfiguration(f"{self.ref}:{self.options.spec} specification is not compatible with {self.settings.os}")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,14 +107,9 @@ class GladConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        self._configure_cmake().build()
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def _get_api(self):
         if self.options.spec == "gl":
@@ -132,13 +126,13 @@ class GladConan(ConanFile):
         elif self.options.spec == "wgl":
             spec_api = {"wgl": self.options.wgl_version}
 
-        api_concat = ",".join("{0}={1}".format(api_name, api_version)
+        api_concat = ",".join(f"{api_name}={api_version}".format()
                               for api_name, api_version in spec_api.items() if api_version != "None")
 
         return api_concat
 
     def package(self):
-        self._configure_cmake().install()
+        CMake(self).install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
