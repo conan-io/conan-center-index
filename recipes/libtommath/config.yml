@@ -1,5 +1,3 @@
 versions:
-  "1.2.0-dev":
-    folder: "development"
   "1.2.0":
-    folder: "release"
+    folder: "all"

@@ -1,9 +1,0 @@
-{
-    "version": 4,
-    "vendor": {
-        "conan": {}
-    },
-    "include": [
-        "C:\\Users\\jowr\\Repos\\TMP\\conan-center-index.win.git\\recipes\\libtommath\\development\\test_package\\build\\msvc-193-x86_64-14-release\\generators\\CMakePresets.json"
-    ]
-}
