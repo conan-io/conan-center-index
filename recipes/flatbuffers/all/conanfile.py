@@ -128,7 +128,11 @@ class FlatbuffersConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        license_file_name = "LICENSE"
+        if Version(self.version) < "23.3.3":
+            license_file_name += ".txt"
+
+        copy(self, license_file_name, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
