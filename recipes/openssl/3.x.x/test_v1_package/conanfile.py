@@ -33,7 +33,7 @@ class TestPackageConan(ConanFile):
 
             if not self.options["openssl"].no_stdio:
                 self.run("openssl version", run_environment=True)
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
+        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
 
         # check for pkg_config files in build folder of this test package
         for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
