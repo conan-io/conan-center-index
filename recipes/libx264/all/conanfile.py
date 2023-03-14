@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, XCRun, fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, rename, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.57.0"
@@ -40,10 +39,6 @@ class LibX264Conan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -63,12 +58,10 @@ class LibX264Conan(ConanFile):
 
     def build_requirements(self):
         if self._with_nasm:
-            self.build_requires("nasm/2.15.05")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
+            self.tool_requires("nasm/2.15.05")
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -77,10 +70,6 @@ class LibX264Conan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
 
@@ -140,9 +129,6 @@ class LibX264Conan(ConanFile):
                 env.vars(self).save_script("conanbuild_android")
         if is_msvc(self):
             env = Environment()
-            # TODO why doesn't this work?
-            # compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            # env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CC", "cl -nologo")
             if check_min_vs(self, 180, False):
                 extra_cflags.append("-FS")
