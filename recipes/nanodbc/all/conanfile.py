@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import load, get, apply_conandata_patches, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-import glob
 import os
 
 class NanodbcConan(ConanFile):
