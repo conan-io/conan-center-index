@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(gdal_cmake_wrapper)
-
+message(STATUS "TRUC")
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 include(CMakePushCheckState)
 

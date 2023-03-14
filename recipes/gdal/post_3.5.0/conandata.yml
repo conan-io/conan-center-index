@@ -1,4 +1,7 @@
 sources:
+  "3.6.2":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.6.2/gdal-3.6.2.tar.gz"
+    sha256: "cd5bf004af85b88414676b0d5694d3192414e556961ee3d47164f3298078a818"
   "3.5.2":
     url: "https://github.com/OSGeo/gdal/releases/download/v3.5.2/gdal-3.5.2.tar.gz"
     sha256: "fbd696e1b2a858fbd2eb3718db16b14ed9ba82521d3578770d480c74fe1146d2"
