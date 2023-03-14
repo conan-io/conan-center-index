@@ -54,7 +54,7 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "1.0":
-            self.requires("fast_float/3.9.0")
+            self.requires("fast_float/3.10.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
