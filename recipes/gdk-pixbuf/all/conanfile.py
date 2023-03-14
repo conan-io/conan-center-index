@@ -30,7 +30,7 @@ class GdkPixbufConan(ConanFile):
         "fPIC": [True, False],
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg", False],
         "with_introspection": [True, False],
     }
     default_options = {
@@ -72,6 +72,8 @@ class GdkPixbufConan(ConanFile):
             self.requires("libjpeg-turbo/2.1.5")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
 
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
