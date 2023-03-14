@@ -1,10 +1,10 @@
 sources:
   "2.14":
-    url: "https://github.com/mm2/Little-CMS/archive/lcms2.14.tar.gz"
-    sha256: "05869269f14e589b0b6d05a76f510c68c67fabb304904d16c6bd818abec80a83"
+    url: "https://github.com/mm2/Little-CMS/releases/download/lcms2.14/lcms2-2.14.tar.gz"
+    sha256: "28474ea6f6591c4d4cee972123587001a4e6e353412a41b3e9e82219818d5740"
   "2.13.1":
-    url: "https://github.com/mm2/Little-CMS/archive/refs/tags/lcms2.13.1.tar.gz"
-    sha256: "6f84c942ecde1b4852b5a051894502ac8c98d010acb3400dec958c6db1bc94ef"
+    url: "https://github.com/mm2/Little-CMS/releases/download/lcms2.13.1/lcms2-2.13.1.tar.gz"
+    sha256: "d473e796e7b27c5af01bd6d1552d42b45b43457e7182ce9903f38bb748203b88"
 patches:
   "2.14":
     - patch_file: "patches/2.13.1-0001-fix-msvc-import-lib.patch"

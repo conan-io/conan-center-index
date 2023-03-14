@@ -80,7 +80,7 @@ class ProtobufConan(ConanFile):
 
         if self.settings.compiler == "clang":
             if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
-                raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,11 +94,11 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
-        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = True
+        tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
         if Version(self.version) >= "3.14.0":
-            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = True
+            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
         if self._can_disable_rtti:
             tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
@@ -192,8 +192,8 @@ class ProtobufConan(ConanFile):
                      os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
         if not self.options.lite:
-            rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "lib"))
-            rm(self, "libprotobuf-lite.*", os.path.join(self.package_folder, "bin"))
+            rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "lib"))
+            rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -219,7 +219,7 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
+            self.cpp_info.components["libprotobuf"].system_libs.extend(["m", "pthread"])
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
         if self.settings.os == "Android":
@@ -229,9 +229,10 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
         # libprotoc
-        self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
-        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
-        self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
+        if self.settings.os != "tvOS":
+            self.cpp_info.components["libprotoc"].set_property("cmake_target_name", "protobuf::libprotoc")
+            self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
+            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         # libprotobuf-lite
         if self.options.lite:
@@ -240,7 +241,7 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
+                self.cpp_info.components["libprotobuf-lite"].system_libs.extend(["m", "pthread"])
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
                     self.cpp_info.components["libprotobuf-lite"].system_libs.append("atomic")
             if self.settings.os == "Windows":
@@ -248,10 +249,6 @@ class ProtobufConan(ConanFile):
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
             if self.settings.os == "Android":
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
-
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
@@ -262,3 +259,4 @@ class ProtobufConan(ConanFile):
         if self.options.lite:
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

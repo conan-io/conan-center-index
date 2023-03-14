@@ -41,7 +41,8 @@ This section gathers the most common questions from the community related to pac
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
   * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
-    * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)<!-- endToc -->
+    * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
+  * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -123,7 +124,8 @@ Unless they are a general and extended utility in recipes (in which case, we sho
 
 ## What version should packages use for libraries without official releases?
 
-The notation shown below is used for publishing packages where the original library does not make official releases. Thus, we use a format which includes the datestamp corresponding to the date of a commit: `cci.<YYYYMMDD>`. In order to create reproducible builds, we also "commit-lock" to the latest commit on that day (use UTC+00). Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [conandata.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conandata.yml#L5). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+This happens for a number of reasons, some projects have a "live on main" others are less maintained but still merge pull requests.
+Read about the [ConanCenter specific version format](adding_packages/conanfile_attributes.md#conancenter-specific-releases-format) for more information.
 
 ## Is the Jenkins orchestration library publicly available?
 
@@ -179,7 +181,7 @@ default_options = {"foobar": "deprecated"}
 
 def configure(self):
     if self.options.foobar != "deprecated":
-        self.output.warn("foobar option is deprecated, do not use anymore.")
+        self.output.warning("foobar option is deprecated, do not use anymore.")
 
 def package_id(self):
     del self.info.options.foobar
@@ -419,12 +421,44 @@ Please, read [Inactivity and user removal section](adding_packages/README.md#ina
 
 ## Can we add package which are parts of bigger projects like Boost?
 
-Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version. See #14660 for recent discussions.
+Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version.
+See #14660 for recent discussions. There is one main "boost" recipe with many versions maintained. Adding boost libraries with no dependencies
+just opens the door to graph resolution problems and once available allows for dependent libraries to be added.
 
-There is one main "boost" recipe with many versions maintained.
-
-There are good arguments for permitting some boost libraries but we feel doing so is not fair to the rest.
+In order to avoid this the sole permutation which is permissible is when the project does not package any headers under the `boost/` folder, does not use the boost namespace
+and does not install libraries with the boost prefix.
 
 ### Can I add my project which I will submit to Boost?
 
-Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts.
+Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts. In addition to follow the rules outlined above.
+
+## Can I add options that do not affect `package_id` or the package contents
+
+Generally no, these sorts of options can most likely be set from a profile or downstream recipes. However if the project supports this option from its build script
+and would otherwise dynamically embed this into the CMake config files or generated pkg-config files then it should be allowed.
+
+Doing so requires [deleting the option from the `package_id`](adding_packages/conanfile_attributes.md#removing-from-package_id).
+
+## Can I use full_package_mode for a requirement in my recipe?
+
+For some irregular projects, they may need to be aligned when being used as a requirement, using the very same version, options, and settings and maybe not mixing shared with static linkage.
+Those projects usually break between patch versions and are very sensitive, so we can not use different versions through Conan graph dependencies,
+otherwise, it may result in unexpected behavior or even runtime errors.
+
+A very known project is GLib, which requires the very same configuration to prevent multiple instances when using static linkage.
+As a solution, we could consume GLib on full package id mode, like:
+
+```python
+def package_id(self):
+    self.info.requires["glib"].full_package_mode()
+```
+
+Perfect solution on the consumer side, but there is a side-effect: CCI will not re-generate all involved packages for any change in the dependencies graph with which glib is associated, which means, users will start to see **MISSING_PACKAGES** error during their pull requests.
+As a trade-off, it would be necessary to update all recipes involved, by opening new PRs,
+then it should generate new packages, but it takes many days and still is a process that is not supported by CCI internally.
+
+To have more context about it, please, visit issues #11684 and #11022
+
+In summary, we do not recommend `full_package_mode` or any other custom package id mode for requirements on CCI, it will break other PRs soon or later.
+Instead, prefer using `shared=True` by default, when needed.
+Also, when having a similar situation, do not hesitate in opening an issue explaining your case, and ask for support from the community.

@@ -17,6 +17,7 @@ class Catch2Conan(ConanFile):
     license = "BSL-1.0"
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -71,10 +72,10 @@ class Catch2Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support",
             )
@@ -89,7 +90,7 @@ class Catch2Conan(ConanFile):
                                             f"got '{self.options.console_width}'") from e
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

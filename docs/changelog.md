@@ -1,5 +1,67 @@
 # Changelog
 
+### 10-March-2023 - 19:55 CET
+
+- [feature] Add priority to pull requests
+- [hotfix] Avoid extra http requests to run automatic merge faster
+
+### 10-March-2023 - 13:15 CET
+
+- [hotfix] No longer update conan_v2_ready_references.yml automatically
+- [bugfix] Validate Green and clean PRs first when executing automatic merge CI job
+
+### 07-March-2023 - 17:05 CET
+
+- [hotfix] Automatic merge skips git conflicts
+- [hotfix] config label for "v2 ready" depends on PR author
+
+### 03-March-2023 - 11:05 CET
+
+- [feature] Update ready_v2_references.yml file automatically
+- [fix] Do not reuse the same build folder to avoid busy files
+
+### 21-February-2023 - 17:22 CET
+
+- [fix] Fix bug with cppstd entry in configuration files.
+- [fix] Fix configuration read of list from an external yaml file.
+
+### 21-February-2023 - 12:44 CET
+
+- [feature] ScheduledExportCheck: Collect warnings from hooks and publish them to a separate table.
+- [feature] AutomaticMerge: Add conditional status checks with allowlist.
+- [feature] AutomaticMerge: Add branches config to merge branches automatically.
+- [feature] Conan: Add methods to get the latest recipe revision.
+- [feature] Bump library requirements to support the latest Conan versions.
+- [fix] PromotePackages: Fix an issue when promoting multiple references.
+- [fix] UpdateSearchIndex: Fix conan inspect call command.
+
+### 14-February-2023 - 15:32 CET
+
+- [fix] Fix ScheduledExportCheck job not updating hook validation issues.
+- [fix] Fix missing GitHub labels for PRs with "bump version" and "bump dependencies"
+- [feature] PromotePackages: Add a parameter to promote multiple references.
+- [feature] Increase `conan test` time limit to 1 hour.
+- [feature] Add request header for GitHub API version.
+
+### 03-February-2023 - 10:24 CET
+
+- [fix] Fix macOS deployment target / minos value.
+- [feature] Validate: Add return code for license check.
+- [feature] Add references list and force parameters to TapaholesRepo job.
+- [feature] Add new ListPackages job.
+- [feature] Update Conan versions library requirements to 1.58.0 and 2.0.0-beta9.
+
+### 20-January-2023 - 16:09 CET
+
+- [feature] Make feedback messages of PRs configurable.
+- [feature] Add status icon to the title of PRs comments.
+- [fix] Fix Conan v2 error when getting revisions.
+
+### 16-January-2023 - 16:43 CET
+
+- [fix] ValidateInfrastructure: Fix Conan version check.
+- [feature] TapaholesRepo: Build references when there are 0 packages for a recipe revision.
+
 ### 12-January-2023 - 19:33 CET
 
 - [fix] Fix Conan v2 download/upload recipe commands.

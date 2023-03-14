@@ -1,0 +1,45 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -426,7 +426,7 @@ else()
+ endif()
+ 
+ if(GDCM_USE_SYSTEM_JSON)
+-  find_package(JSON REQUIRED)
++  find_package(json-c REQUIRED CONFIG)
+ endif()
+ if(GDCM_USE_SYSTEM_PAPYRUS3)
+   find_package(PAPYRUS3 REQUIRED)
+--- a/Source/MediaStorageAndFileFormat/CMakeLists.txt
++++ b/Source/MediaStorageAndFileFormat/CMakeLists.txt
+@@ -187,11 +187,6 @@ else()
+   )
+   set(GDCMUUID gdcmuuid)
+ endif()
+-if(GDCM_USE_SYSTEM_JSON)
+-  include_directories(
+-    ${JSON_INCLUDE_DIRS}
+-  )
+-endif()
+ 
+ add_library(gdcmMSFF ${MSFF_SRCS})
+ # gdcmPVRGCodec calls gdcmjpeg
+@@ -226,7 +221,7 @@ else()
+   target_link_libraries(gdcmMSFF LINK_PRIVATE ${GDCMUUID})
+ endif()
+ if(GDCM_USE_SYSTEM_JSON)
+-  target_link_libraries(gdcmMSFF LINK_PRIVATE ${JSON_LIBRARIES})
++  target_link_libraries(gdcmMSFF PRIVATE json-c::json-c)
+ endif()
+ if(UNIX)
+   find_package(Iconv)
+--- a/Source/MediaStorageAndFileFormat/gdcmJSON.cxx
++++ b/Source/MediaStorageAndFileFormat/gdcmJSON.cxx
+@@ -18,7 +18,7 @@
+ #include "gdcmSystem.h"
+ 
+ #ifdef GDCM_USE_SYSTEM_JSON
+-#include <json.h>
++#include <json-c/json.h>
+ #endif
+ 
+ #ifdef GDCM_HAVE_JSON_OBJECT_OBJECT_GET_EX

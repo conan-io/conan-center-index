@@ -16,6 +16,7 @@ required_conan_version = ">=1.53.0"
 
 class Libxml2Conan(ConanFile):
     name = "libxml2"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libxml2 is a software library for parsing XML documents"
     topics = "xml", "parser", "validation"
@@ -63,8 +64,9 @@ class Libxml2Conan(ConanFile):
     options = {name: [True, False] for name in default_options.keys()}
 
     @property
-    def _option_names(self):
-        return [name for name in self.info.options.keys() if name not in ["shared", "fPIC", "include_utils"]]
+    def _configure_option_names(self):
+        return [name for name in self.default_options.keys() if (name in self.options)
+                and (name not in ["shared", "fPIC", "include_utils"])]
 
     @property
     def _settings_build(self):
@@ -95,7 +97,7 @@ class Libxml2Conan(ConanFile):
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.iconv:
-            self.requires("libiconv/1.17")
+            self.requires("libiconv/1.17", transitive_headers=True, transitive_libs=True)
         if self.options.icu:
             self.requires("icu/72.1")
 
@@ -139,7 +141,7 @@ class Libxml2Conan(ConanFile):
                 f"--enable-shared={yes_no(self.options.shared)}",
                 f"--enable-static={yes_no(not self.options.shared)}",
             ])
-            for option_name in self._option_names:
+            for option_name in self._configure_option_names:
                 option_value = getattr(self.options, option_name)
                 tc.configure_args.append(f"--with-{option_name}={yes_no(option_value)}")
 
@@ -171,7 +173,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{';'.join(incdirs)}\"")
             args.append(f"lib=\"{';'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {"mem-debug": "mem_debug",
                          "run-debug": "run_debug",
                          "docbook": "docb"}.get(name, name)
@@ -233,7 +235,7 @@ class Libxml2Conan(ConanFile):
             args.append(f"include=\"{' -I'.join(incdirs)}\"")
             args.append(f"lib=\"{' -L'.join(libdirs)}\"")
 
-            for name in self._option_names:
+            for name in self._configure_option_names:
                 cname = {
                     "mem-debug": "mem_debug",
                     "run-debug": "run_debug",

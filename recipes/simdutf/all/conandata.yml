@@ -1,4 +1,13 @@
 sources:
+  "3.2.2":
+    url: "https://github.com/simdutf/simdutf/archive/v3.2.2.tar.gz"
+    sha256: "5a5c84c05bf30d681126d1dcbde903615f2c927e201e0c6d489f74a91b7f506f"
+  "3.2.0":
+    url: "https://github.com/simdutf/simdutf/archive/v3.2.0.tar.gz"
+    sha256: "0d9f63e2f308b6b54f399ebbe3a02776b902a2670c88c28de2d75ea2197dc4e9"
+  "3.1.0":
+    url: "https://github.com/simdutf/simdutf/archive/v3.1.0.tar.gz"
+    sha256: "9757a04085ad3ebab9fe933d9198ec6b84a857632a540418b6cfeb7b889a8017"
   "3.0.0":
     url: "https://github.com/simdutf/simdutf/archive/v3.0.0.tar.gz"
     sha256: "cc23b47fd0caf9018fc0dcf49ebeff2676654fff997f9f6ce50fa93cd36f661f"
@@ -12,21 +21,27 @@ sources:
     url: "https://github.com/simdutf/simdutf/archive/v2.0.9.tar.gz"
     sha256: "ff6a19de4c23671e7f1077cf6c0f60bc01197f29c6e4f56fa485c9cd732576ac"
   "2.0.8":
-    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.8.tar.gz"
+    url: "https://github.com/simdutf/simdutf/archive/v2.0.8.tar.gz"
     sha256: "bd7aa550a8d9a1aba2c0b4eb2088f90c964375b13394f9076f7ba49f51dc40b5"
   "2.0.6":
-    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.6.tar.gz"
+    url: "https://github.com/simdutf/simdutf/archive/v2.0.6.tar.gz"
     sha256: "40f1f9a4403f81c2c3d736ef9c73662835b2241871caa262fcd654e0898f9e4e"
-  "2.0.3":
-    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.3.tar.gz"
-    sha256: "076bd07f6fd88c5befba28992cd5a9bf033225c5564d8b88559b8059c3c49cfc"
-  "2.0.2":
-    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v2.0.2.tar.gz"
-    sha256: "ae02a923434c32a9c800e6b136ac039708838ba1f7f6d338175ecb35bf959173"
   "1.0.1":
-    url: "https://github.com/simdutf/simdutf/archive/refs/tags/v1.0.1.tar.gz"
+    url: "https://github.com/simdutf/simdutf/archive/v1.0.1.tar.gz"
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
+  "3.2.2":
+    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
+      patch_description: "remove static build, enable rpath on macOS"
+      patch_type: "conan"
+  "3.2.0":
+    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
+      patch_description: "remove static build, enable rpath on macOS"
+      patch_type: "conan"
+  "3.1.0":
+    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
+      patch_description: "remove static build, enable rpath on macOS"
+      patch_type: "conan"
   "3.0.0":
     - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"
@@ -52,21 +67,6 @@ patches:
       patch_description: "remove static build, enable rpath on macOS"
       patch_type: "conan"
     - patch_file: "patches/2.0.6-0002-add-workaround-gcc9.patch"
-      patch_description: "apply gcc8 workaround to gcc9"
-      patch_type: "portability"
-  "2.0.3":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-    - patch_file: "patches/2.0.2-0002-add-workaround-gcc9.patch"
-      patch_description: "apply gcc8 workaround to gcc9"
-      patch_type: "portability"
-  "2.0.2":
-    - patch_file: "patches/2.0.2-0001-fix-cmake.patch"
-      patch_description: "remove static build, stop to link static libc++ and enable\
-        \ rpath on macOS"
-      patch_type: "conan"
-    - patch_file: "patches/2.0.2-0002-add-workaround-gcc9.patch"
       patch_description: "apply gcc8 workaround to gcc9"
       patch_type: "portability"
   "1.0.1":

@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, unix_path, NMakeToolchain
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class LibdeflateConan(ConanFile):
@@ -57,23 +57,15 @@ class LibdeflateConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         if is_msvc(self) or self._is_clangcl:
-            vc = VCVars(self)
-            vc.generate()
-            # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
-            #        So populate CL with AutotoolsToolchain cflags
-            env = Environment()
-            c_flags = AutotoolsToolchain(self).cflags
-            if c_flags:
-                env.define("CL", c_flags)
-            env.vars(self).save_script("conanbuildenv_nmake")
+            tc = NMakeToolchain(self)
+            tc.generate()
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
             tc = AutotoolsToolchain(self)
             tc.generate()
 
