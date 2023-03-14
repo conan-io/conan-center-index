@@ -53,7 +53,7 @@ class DateConan(ConanFile):
 
     def requirements(self):
         if not self.options.header_only and not self.options.use_system_tz_db:
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/7.88.1")
 
     def package_id(self):
         if self.info.options.header_only:
