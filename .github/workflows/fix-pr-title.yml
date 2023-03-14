@@ -1,0 +1,48 @@
+name: "[service] Fix Pull Request Title"
+
+on:
+  pull_request_target:
+
+jobs:
+  fix-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            pr = {
+                owner: context.issue.owner,
+                repo: context.issue.repo,
+                pull_number: context.issue.number,
+            }
+            files = await github.rest.pulls.listFiles(pr);
+            recipe = ""
+            for (file of files.data) {
+                filepath = file.filename.split("/")
+                if (filepath.length < 2){
+                    core.debug(`ignore file path too short : ${filepath}`)
+                    continue
+                }
+                if (filepath[0] != "recipes") {
+                    core.debug(`ignore file path not in recipes : ${filepath}`)
+                    continue
+                }
+                if (!recipe){
+                    recipe = filepath[1]
+                    core.debug(`Initializing recipe to ${recipe}`)
+                }
+                else if (recipe != filepath[1]) {
+                    core.setFailed(`pull request is modifying several recipe: ${recipe} and ${filepath[1]}`);
+                    return
+                }
+            }
+            if (!recipe){
+                core.debug("no recipe modified")
+                return
+            }
+            title = (await github.rest.pulls.get(pr)).data.title;
+            if (!title.toLowerCase().includes(recipe)) {
+                core.debug(`Modifying title because it does not contain recipe name ${recipe}: ${title}`)
+                pr.title = recipe + ": " + title
+                await github.rest.pulls.update(pr);
+            }
