@@ -69,7 +69,7 @@ class XercesCConan(ConanFile):
         if "icu" in (self.options.transcoder, self.options.message_loader):
             self.requires("icu/72.1", run=can_run(self))
         if self.options.network_accessor == "curl":
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/7.88.1")
 
     def _validate(self, option, value, host_os):
         """
