@@ -14,13 +14,17 @@ sources:
 patches:
   "cci.20220514":
     - patch_file: "patches/0001-gtest-catch-integration-20220514.patch"
-      base_path: "source_subfolder"
+      patch_description: "Remove dependency on test frameworks for for rapidcheck tests"
+      patch_type: "conan"
   "cci.20210702":
     - patch_file: "patches/0001-gtest-catch-integration-20210702.patch"
-      base_path: "source_subfolder"
+      patch_description: "Remove dependency on test frameworks for for rapidcheck tests"
+      patch_type: "conan"
   "cci.20210107":
     - patch_file: "patches/0001-gtest-catch-integration-20210107.patch"
-      base_path: "source_subfolder"
+      patch_description: "Remove dependency on test frameworks for for rapidcheck tests"
+      patch_type: "conan"
   "cci.20200131":
     - patch_file: "patches/0001-gtest-catch-integration-20200131.patch"
-      base_path: "source_subfolder"
+      patch_description: "Remove dependency on test frameworks for for rapidcheck tests"
+      patch_type: "conan"
