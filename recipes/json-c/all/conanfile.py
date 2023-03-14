@@ -57,7 +57,7 @@ class JSONCConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -68,5 +68,3 @@ class JSONCConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "json-c::json-c")
         self.cpp_info.set_property("pkg_config_name", "json-c")
         self.cpp_info.libs = collect_libs(self)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
