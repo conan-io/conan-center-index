@@ -55,7 +55,7 @@ class FlatbuffersConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.0.7" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.2")
+            self.tool_requires("cmake/3.25.3")
 
     def configure(self):
         if self.options.shared or self.options.header_only:
