@@ -87,7 +87,7 @@ class TesseractConan(ConanFile):
             self.requires("libarchive/3.6.2")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/7.88.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
