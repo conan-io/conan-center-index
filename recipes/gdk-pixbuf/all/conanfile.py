@@ -1,7 +1,8 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import can_run
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -62,7 +63,7 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.0")
+        self.requires("glib/2.76.0", run=can_run(self))
         if self.options.with_libpng:
             self.requires("libpng/1.6.39")
         if self.options.with_libtiff:
@@ -90,6 +91,8 @@ class GdkPixbufConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
+        if not can_run(self):
+            self.tool_requires("glib/2.76.0")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
@@ -101,23 +104,22 @@ class GdkPixbufConan(ConanFile):
         return self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "12" and self.settings.build_type == "Debug"
 
     def generate(self):
-        def is_enabled(value):
-            return "enabled" if value else "disabled"
-
-        def is_true(value):
-            return "true" if value else "false"
-
         env = VirtualBuildEnv(self)
         env.generate()
+        if can_run(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         deps = PkgConfigDeps(self)
         deps.generate()
 
         tc = MesonToolchain(self)
+        enabled_disabled = lambda v: "enabled" if v else "disabled"
+        true_false = lambda v: "true" if v else "false"
         tc.project_options.update({
             "builtin_loaders": "all",
             "gio_sniffing": "false",
-            "introspection": is_enabled(self.options.with_introspection),
+            "introspection": enabled_disabled(self.options.with_introspection),
             "docs": "false",
             "man": "false",
             "installed_tests": "false"
@@ -127,15 +129,15 @@ class GdkPixbufConan(ConanFile):
 
         if Version(self.version) >= "2.42.8":
             tc.project_options.update({
-                "png": is_enabled(self.options.with_libpng),
-                "tiff": is_enabled(self.options.with_libtiff),
-                "jpeg": is_enabled(self.options.with_libjpeg)
+                "png": enabled_disabled(self.options.with_libpng),
+                "tiff": enabled_disabled(self.options.with_libtiff),
+                "jpeg": enabled_disabled(self.options.with_libjpeg)
             })
         else:
             tc.project_options.update({
-                "png": is_true(self.options.with_libpng),
-                "tiff": is_true(self.options.with_libtiff),
-                "jpeg": is_true(self.options.with_libjpeg)
+                "png": true_false(self.options.with_libpng),
+                "tiff": true_false(self.options.with_libtiff),
+                "jpeg": true_false(self.options.with_libjpeg)
             })
 
         # Workaround for https://bugs.llvm.org/show_bug.cgi?id=16404
