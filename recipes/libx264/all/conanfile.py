@@ -133,19 +133,12 @@ class LibX264Conan(ConanFile):
             if check_min_vs(self, 180, False):
                 extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
-        # build_canonical_name = None
-        # host_canonical_name = None
-        if is_msvc(self) or self.settings.os in ["iOS", "watchOS", "tvOS"]:
-            # autotools does not know about the msvc and Apple embedded OS canonical name(s)
-            build_canonical_name = False
-            host_canonical_name = False
         if extra_asflags:
             args["--extra-asflags"] = " ".join(extra_asflags)
         if extra_cflags:
             args["--extra-cflags"] = " ".join(extra_cflags)
         if extra_ldflags:
             args["--extra-ldflags"] = " ".join(extra_ldflags)
-        # self._autotools.configure(args=args, vars=self._override_env, configure_dir=self.source_folder, build=build_canonical_name, host=host_canonical_name)
         tc.update_configure_args(args)
         tc.generate()
 
