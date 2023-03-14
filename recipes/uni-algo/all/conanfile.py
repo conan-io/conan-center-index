@@ -77,7 +77,7 @@ class PackageConan(ConanFile):
                 )
         if is_msvc(self):
             check_min_vs(self, int(self._compilers_minimum_version["msvc"]))
-            if self.options.shared:
+            if self.options.get_safe("shared"):
                 raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def source(self):
