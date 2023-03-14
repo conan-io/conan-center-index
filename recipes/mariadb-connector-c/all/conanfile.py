@@ -58,7 +58,7 @@ class MariadbConnectorcConan(ConanFile):
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.17")
         if self.options.with_curl:
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/7.88.1")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1t")
 
