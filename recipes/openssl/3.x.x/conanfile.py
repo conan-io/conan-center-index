@@ -2,9 +2,9 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import XCRun
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import (
-    apply_conandata_patches, chdir, copy, get, load, rename, rmdir,
+    apply_conandata_patches, chdir, copy, get, load, rename, rm, rmdir,
     export_conandata_patches, replace_in_file, save
     )
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
@@ -12,7 +12,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
 from contextlib import contextmanager
-import contextlib
 import fnmatch
 import json
 import os
@@ -118,9 +117,9 @@ class OpenSSLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("self.options.fPIC")
-        self.options.rm_safe("self.settings.compiler.libcxx")
-        self.options.rm_safe("self.settings.compiler.cppstd")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         if not self.options.no_zlib:
@@ -159,16 +158,6 @@ class OpenSSLConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-
-    def _run_make(self, targets=None, makefile=None, parallel=True):
-        command = [self._make_program]
-        if makefile:
-            command.extend(["-f", makefile])
-        if targets:
-            command.extend(targets)
-        if not self._use_nmake:
-            command.append(("-j%s" % tools.cpu_count()) if parallel else "-j1")
-        self.run(" ".join(command), win_bash=self._win_bash)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -218,7 +207,7 @@ class OpenSSLConan(ConanFile):
                 "armv8.3": "ios64",
                 "armv7k": "ios32",
             }.get(str(self.settings.arch), None)
-        elif self.settings.os == "Android":
+        if self.settings.os == "Android":
             return {
                 "armv7": "void",
                 "armv8": "linux64",
@@ -402,16 +391,16 @@ class OpenSSLConan(ConanFile):
             gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
             replace_in_file(self, makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), gen_info["CFLAGS"]))
             if "AR" in os.environ:
-                replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % adjust_path(os.environ["AR"]))
+                replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
             if "RANLIB" in os.environ:
-                replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % adjust_path(os.environ["RANLIB"]))
+                replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
             rc = os.environ.get("WINDRES", os.environ.get("RC"))
             if rc:
-                replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % adjust_path(rc))
+                replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
             if "NM" in os.environ:
-                replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % adjust_path(os.environ["NM"]))
+                replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
             if "AS" in os.environ:
-                replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
+                replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
 
     def _get_default_openssl_dir(self):
         if self.settings.os == "Linux":
@@ -635,8 +624,8 @@ class OpenSSLConan(ConanFile):
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, f"/{e} ", f"/{runtime} ", strict=False)
-            tools.replace_in_file(filename, f"/{e}\"", f"/{runtime}\"", strict=False)
+            replace_in_file(self, filename, f"/{e} ", f"/{runtime} ", strict=False)
+            replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"", strict=False)
 
     def package(self):
         copy(self, "*LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
@@ -644,7 +633,7 @@ class OpenSSLConan(ConanFile):
             args = [f"DESTDIR={self.package_folder}"]
 
             with chdir(self, self.source_folder):
-                self.run(f'nmake -f Makefile {target} {" ".join(args)}')
+                self.run(f'nmake -f Makefile install_sw {" ".join(args)}')
             rm(self, "*.pdb", self.package_folder, recursive=True)
             if self.settings.build_type == "Debug":
                 with chdir(self, os.path.join(self.package_folder, "lib")):
