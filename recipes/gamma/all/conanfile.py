@@ -86,4 +86,4 @@ class Gammaconan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["Gamma"]
         if not self.options.shared and self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append(["m", "pthread"])
+            self.cpp_info.system_libs.extend(["m", "pthread"])
