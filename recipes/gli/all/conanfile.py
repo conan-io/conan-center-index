@@ -13,7 +13,7 @@ class GliConan(ConanFile):
     topics = ("opengl", "image")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/g-truc/gli"
-    license = "MIT"
+    license = "LicenseRef-copying.txt"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
