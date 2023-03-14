@@ -1,0 +1,146 @@
+--- makefile.msvc
++++ makefile.msvc
+@@ -12,13 +12,16 @@
+ #The following can be overridden from command line e.g. make -f makefile.msvc CC=gcc ARFLAGS=rcs
+ PREFIX    = c:\devel
+ CFLAGS    = /Ox
++LDFLAGS   =
+ 
+ #Compilation flags
+ LTM_CFLAGS  = /nologo /I./ /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D__STDC_WANT_SECURE_LIB__=1 /D_CRT_HAS_CXX17=0 /Wall /wd4146 /wd4127 /wd4668 /wd4710 /wd4711 /wd4820 /wd5045 /WX $(CFLAGS)
+-LTM_LDFLAGS = advapi32.lib
++LTM_LDFLAGS = $(LDFLAGS) advapi32.lib
+ 
+-#Libraries to be created (this makefile builds only static libraries)
+-LIBMAIN_S =tommath.lib
++#Libraries to be created
++LIBMAIN_S = tommath.lib
++LIBMAIN_I = tommath.dll.lib
++LIBMAIN_D = tommath.dll
+ 
+ #List of objects to compile (all goes to tommath.lib)
+ OBJECTS=bn_cutoffs.obj bn_deprecated.obj bn_mp_2expt.obj bn_mp_abs.obj bn_mp_add.obj bn_mp_add_d.obj bn_mp_addmod.obj \
+@@ -67,15 +70,19 @@
+ $(LIBMAIN_S): $(OBJECTS)
+ 	lib /out:$(LIBMAIN_S) $(OBJECTS)
+ 
++#Create DLL + import library tommath.dll.lib
++$(LIBMAIN_D) $(LIBMAIN_I): $(OBJECTS) tommath.def
++	link /dll /out:$(LIBMAIN_D) /implib:$(LIBMAIN_I) /def:tommath.def $(LTM_LDFLAGS) $(OBJECTS)
++
+ #Build test suite
+ test.exe: $(LIBMAIN_S) demo/shared.obj demo/test.obj
+ 	cl $(LTM_CFLAGS) $(TOBJECTS) $(LIBMAIN_S) $(LTM_LDFLAGS) demo/shared.c demo/test.c /Fe$@
+ 	@echo NOTICE: start the tests by launching test.exe
+ 
+ test_standalone: test.exe
+ 	@echo test_standalone is deprecated, please use make-target 'test.exe'
+ 
+-all: $(LIBMAIN_S) test.exe
++all: $(LIBMAIN_S) test.exe $(LIBMAIN_D)
+ 
+ tune: $(LIBMAIN_S)
+ 	$(MAKE) -C etc tune
+@@ -85,9 +92,11 @@ clean:
+ 	@-cmd /c del /Q /S *.OBJ *.LIB *.EXE *.DLL 2>nul
+ 
+ #Install the library + headers
+-install: $(LIBMAIN_S)
++install: $(LIBMAIN_S) $(LIBMAIN_I) $(LIBMAIN_D)
+ 	cmd /c if not exist "$(PREFIX)\bin" mkdir "$(PREFIX)\bin"
+ 	cmd /c if not exist "$(PREFIX)\lib" mkdir "$(PREFIX)\lib"
+ 	cmd /c if not exist "$(PREFIX)\include" mkdir "$(PREFIX)\include"
+ 	copy /Y $(LIBMAIN_S) "$(PREFIX)\lib"
++	copy /Y $(LIBMAIN_I) "$(PREFIX)\lib"
++	copy /Y $(LIBMAIN_D) "$(PREFIX)\bin"
+ 	copy /Y tommath*.h "$(PREFIX)\include"
+--- bn_s_mp_rand_platform.c
++++ bn_s_mp_rand_platform.c
+@@ -14,6 +14,12 @@
+    arc4random_buf(p, n);
+    return MP_OKAY;
+ }
++#else
++static mp_err s_read_arc4random(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
+ #endif
+ 
+ #if defined(_WIN32) || defined(_WIN32_WCE)
+@@ -46,6 +46,12 @@
+    }
+    return CryptGenRandom(hProv, (DWORD)n, (BYTE *)p) == TRUE ? MP_OKAY : MP_ERR;
+ }
++#else
++static mp_err s_read_wincsp(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
+ #endif /* WIN32 */
+ 
+ #if !defined(BN_S_READ_WINCSP_C) && defined(__linux__) && defined(__GLIBC_PREREQ)
+@@ -73,6 +85,14 @@
+ #endif
+ #endif
+ 
++#ifndef BN_S_READ_GETRANDOM_C
++static mp_err s_read_getrandom(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
++#endif
++
+ /* We assume all platforms besides windows provide "/dev/urandom".
+  * In case yours doesn't, define MP_NO_DEV_URANDOM at compile-time.
+  */
+@@ -111,6 +131,12 @@
+    close(fd);
+    return MP_OKAY;
+ }
++#else
++static mp_err s_read_urandom(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
+ #endif
+ 
+ #if defined(MP_PRNG_ENABLE_LTM_RNG)
+@@ -126,6 +132,12 @@
+    if (res != n) return MP_ERR;
+    return MP_OKAY;
+ }
++#else
++static mp_err s_read_ltm_rng(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
+ #endif
+ 
+ mp_err s_read_arc4random(void *p, size_t n);
+--- tommath.def
++++ tommath.def
+@@ -102,6 +102,7 @@
+     mp_prime_strong_lucas_selfridge
+     mp_radix_size
+     mp_rand
++    mp_rand_source
+     mp_read_radix
+     mp_reduce
+     mp_reduce_2k
+--- bn_mp_set_double.c
++++ bn_mp_set_double.c
+@@ -3,7 +3,7 @@
+ /* LibTomMath, multiple-precision integer library -- Tom St Denis */
+ /* SPDX-License-Identifier: Unlicense */
+ 
+-#if defined(__STDC_IEC_559__) || defined(__GCC_IEC_559)
++#if 1
+ mp_err mp_set_double(mp_int *a, double b)
+ {
+    uint64_t frac;

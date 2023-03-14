@@ -1,5 +1,6 @@
 versions:
+  # Newer versions at the top
   "1.2.0-dev":
-    folder: "development"
+    folder: all
   "1.2.0":
-    folder: "release"
+    folder: all
