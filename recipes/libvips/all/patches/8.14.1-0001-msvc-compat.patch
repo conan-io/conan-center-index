@@ -1,3 +1,29 @@
+--- a/fuzz/mosaic_fuzzer.cc
++++ b/fuzz/mosaic_fuzzer.cc
+@@ -1,13 +1,21 @@
+ #include <cstring>
+ #include <vips/vips.h>
+ 
+-struct mosaic_opt {
++#ifdef __GNUC__
++#define PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
++#elif defined(_MSC_VER)
++#define PACK( ... ) __pragma( pack(push, 1) ) __VA_ARGS__ __pragma( pack(pop) )
++#else
++#define PACK( ... ) __VA_ARGS__
++#endif
++
++PACK(struct mosaic_opt {
+ 	guint8 dir : 1;
+ 	guint16 xref;
+ 	guint16 yref;
+ 	guint16 xsec;
+ 	guint16 ysec;
+-} __attribute__ ((packed));
++});
+ 
+ extern "C" int
+ LLVMFuzzerInitialize( int *argc, char ***argv )
 --- a/libvips/conversion/composite.cpp
 +++ b/libvips/conversion/composite.cpp
 @@ -480,7 +480,7 @@ vips_composite_base_select( VipsCompositeSequence *seq, VipsRect *r )
@@ -40,6 +66,69 @@
  
  	v4f B;
  	float aB;
+--- a/libvips/conversion/meson.build
++++ b/libvips/conversion/meson.build
+@@ -53,7 +53,6 @@ conversion_lib = static_library('conversion',
+     conversion_sources,
+     conversion_headers,
+     dependencies: libvips_deps,
+-    c_args: [ '-Wno-unknown-pragmas' ],
+     gnu_symbol_visibility: 'hidden',
+ )
+ 
+--- a/libvips/foreign/magick.c
++++ b/libvips/foreign/magick.c
+@@ -150,7 +150,7 @@ magick_set_image_size( Image *image, const size_t width, const size_t height,
+ }
+ 
+ int
+-magick_import_pixels( Image *image, const ssize_t x, const ssize_t y,
++magick_import_pixels( Image *image, const gssize x, const gssize y,
+ 	const size_t width, const size_t height, const char *map,
+ 	const StorageType type,const void *pixels, ExceptionInfo *exception )
+ {
+@@ -358,7 +358,7 @@ magick_set_image_size( Image *image, const size_t width, const size_t height,
+ }
+ 
+ int
+-magick_import_pixels( Image *image, const ssize_t x, const ssize_t y,
++magick_import_pixels( Image *image, const gssize x, const gssize y,
+ 	const size_t width, const size_t height, const char *map,
+ 	const StorageType type, const void *pixels, ExceptionInfo *exception )
+ {
+--- a/libvips/foreign/magick.h
++++ b/libvips/foreign/magick.h
+@@ -48,7 +48,7 @@ void magick_acquire_next_image( const ImageInfo *image_info,
+ 	Image *image, ExceptionInfo *exception );
+ int magick_set_image_size( Image *image, 
+ 	const size_t width, const size_t height, ExceptionInfo *exception );
+-int magick_import_pixels( Image *image, const ssize_t x, const ssize_t y,
++int magick_import_pixels( Image *image, const gssize x, const gssize y,
+ 	const size_t width, const size_t height, const char *map,
+ 	const StorageType type,const void *pixels, ExceptionInfo *exception );
+ void *magick_images_to_blob( const ImageInfo *image_info, Image *images, 
+--- a/libvips/foreign/niftiload.c
++++ b/libvips/foreign/niftiload.c
+@@ -373,7 +373,7 @@ vips_foreign_load_nifti_set( const char *name, GValue *value, glong offset,
+ 
+ 	char vips_name[256];
+ 
+-	vips_gvalue_read( value, (gpointer) nim + offset );
++	vips_gvalue_read( value, (char *) nim + offset );
+ 	vips_snprintf( vips_name, 256, "nifti-%s", name );
+ 	vips_image_set( out, vips_name, value );
+ 
+--- a/libvips/foreign/niftisave.c
++++ b/libvips/foreign/niftisave.c
+@@ -221,7 +221,7 @@ vips_foreign_save_nifti_set_fields( const char *name,
+ 		vips_snprintf( vips_name, 256, "nifti-%s", name );
+ 		if( vips_image_get( info->image, vips_name, &value_copy ) )
+ 			return( info );
+-		vips_gvalue_write( &value_copy, (gpointer) info->nim + offset );
++		vips_gvalue_write( &value_copy, (char *) info->nim + offset );
+ 		g_value_unset( &value_copy );
+ 	}
+ 
 --- a/libvips/include/vips/internal.h
 +++ b/libvips/include/vips/internal.h
 @@ -326,10 +326,10 @@ char *vips__xml_properties( VipsImage *image );
@@ -47,15 +136,39 @@
   */
  VIPS_API
 -void vips__premultiplied_bgra2rgba( guint32 * restrict p, int n );
-+void vips__premultiplied_bgra2rgba( guint32 * p, int n );
++void vips__premultiplied_bgra2rgba( guint32 *p, int n );
  VIPS_API
 -void vips__rgba2bgra_premultiplied( guint32 * restrict p, int n );
 -void vips__bgra2rgba( guint32 * restrict p, int n );
-+void vips__rgba2bgra_premultiplied( guint32 * p, int n );
-+void vips__bgra2rgba( guint32 * p, int n );
++void vips__rgba2bgra_premultiplied( guint32 *p, int n );
++void vips__bgra2rgba( guint32 *p, int n );
  void vips__Lab2LabQ_vec( VipsPel *out, float *in, int width );
  void vips__LabQ2Lab_vec( float *out, VipsPel *in, int width );
  
+--- a/libvips/iofuncs/mapfile.c
++++ b/libvips/iofuncs/mapfile.c
+@@ -89,6 +89,10 @@
+ #include <io.h>
+ #endif /*G_OS_WIN32*/
+ 
++#ifdef _MSC_VER
++#define mode_t guint16
++#endif
++
+ /* Does this fd support mmap. Pipes won't, for example.
+  * FIXME unused internal function
+  */
+--- a/libvips/iofuncs/vips.c
++++ b/libvips/iofuncs/vips.c
+@@ -480,7 +480,7 @@ read_chunk( int fd, gint64 offset, size_t length )
+ 		return( NULL );
+ 	if( !(buf = vips_malloc( NULL, length + 1 )) )
+ 		return( NULL );
+-	if( read( fd, buf, length ) != (ssize_t) length ) {
++	if( read( fd, buf, length ) != (gssize) length ) {
+ 		g_free( buf );
+ 		vips_error( "VipsImage", "%s", _( "unable to read history" ) );
+ 		return( NULL );
 --- a/libvips/resample/bicubic.cpp
 +++ b/libvips/resample/bicubic.cpp
 @@ -109,8 +109,8 @@ bicubic_unsigned_int_tab( void *pout, const VipsPel *pin,
@@ -510,11 +623,36 @@
    const double relative_y = absolute_y - iy;
 --- a/meson.build
 +++ b/meson.build
-@@ -30,7 +30,6 @@ pymod = import('python')
+@@ -30,8 +30,6 @@ pymod = import('python')
  pkg = import('pkgconfig')
  i18n = import('i18n')
  
 -add_project_arguments('-Drestrict=__restrict', language: 'cpp')
- 
+-
  # if we're optimising (eg. release mode) we turn off cast checks and g_asserts
  if get_option('optimization') in ['2', '3', 's']
+     add_project_arguments('-DG_DISABLE_CAST_CHECKS', language : ['cpp', 'c'])
+--- a/test/test_connections.c
++++ b/test/test_connections.c
+@@ -4,7 +4,9 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
++#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
++#endif /*HAVE_UNISTD_H*/
+ #include <string.h>
+ #include <vips/vips.h>
+ 
+--- a/test/test_descriptors.c
++++ b/test/test_descriptors.c
+@@ -5,7 +5,9 @@
+  */
+ 
+ #include <stdio.h>
++#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
++#endif /*HAVE_UNISTD_H*/
+ 
+ #define _GNU_SOURCE
+ #include <stdlib.h>
