@@ -15,7 +15,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
 
     topics = ("os", "header-only")
-    settings = ()
+    settings = ("os", "arch", "compiler", "build_type")
     
     no_copy_source = True
     exports_sources = "src/*"
@@ -31,7 +31,7 @@ class PackageConan(ConanFile):
         copy(self, "*.hpp", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include"))
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
-    def package_id(self):
+    def package_id(self):-
         self.info.clear()
 
     def package_info(self):
