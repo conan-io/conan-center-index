@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -45,7 +46,7 @@ class AafConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_apple_os(self):
             tc.cache_variables["PLATFORM"] = "apple-clang"
-        elif self.settings.compiler == "Visual Studio":
+        elif is_msvc(self):
             tc.cache_variables["PLATFORM"] = "vc"
         else:
             tc.cache_variables["PLATFORM"] = str(self.settings.os)
