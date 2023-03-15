@@ -65,14 +65,24 @@ class OpenVDBConan(ConanFile):
 
     @property
     def _compilers_min_version(self):
-        return {
-            "msvc": "191",
-            "Visual Studio": "15",  # Should we check toolset?
-            "gcc": "6.3.1",
-            "clang": "3.8",
-            "apple-clang": "3.8",
-            "intel": "17",
-        }
+        if Version(self.version) == "8.0.1":
+            return {
+                "msvc": "191",
+                "Visual Studio": "15",  # Should we check toolset?
+                "gcc": "6.3.1",
+                "clang": "3.8",
+                "apple-clang": "3.8",
+                "intel": "17",
+            }
+        elif Version(self.version) == "10.0.1":
+            return {
+                "msvc": "1928",
+                "Visual Studio": "16.8.1",  # Should we check toolset?
+                "gcc": "9.3.1",
+                "clang": "5",
+                "apple-clang": "5",
+                "intel": "19",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
