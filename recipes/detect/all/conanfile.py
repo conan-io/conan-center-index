@@ -31,7 +31,7 @@ class PackageConan(ConanFile):
         copy(self, "*.hpp", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include"))
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
-    def package_id(self):-
+    def package_id(self):
         self.info.clear()
 
     def package_info(self):
