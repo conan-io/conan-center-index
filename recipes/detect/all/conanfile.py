@@ -24,6 +24,9 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
+    def package_info(self):
+        pass
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -46,6 +49,3 @@ class PackageConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
-
-    def package_info(self):
-        self.cpp_info.libs = ["detect"]
