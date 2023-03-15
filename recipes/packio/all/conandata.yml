@@ -38,3 +38,6 @@ sources:
   "2.4.0":
     url: "https://github.com/qchateau/packio/archive/2.4.0.tar.gz"
     sha256: "2815d7772ef8d2360c5e15de7738ec7267e1e54a7afb817bf42a18a9f100ff52"
+  "2.4.1":
+    url: "https://github.com/qchateau/packio/archive/2.4.1.tar.gz"
+    sha256: "c115548146d6da432048265037b30f77ba6ad7a39350693c4fb36fd896bc7a4b"
