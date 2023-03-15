@@ -33,6 +33,8 @@ class OpenVDBConan(ConanFile):
         "simd": [None, "SSE42", "AVX"],
         "delayed_load": [True, False],
         "nanovdb": [True, False],
+        "nanovdb_with_openvdb": [True, False],
+        "nanovdb_with_tbb": [True, False],
     }
     default_options = {
         "shared": False,
@@ -42,7 +44,9 @@ class OpenVDBConan(ConanFile):
         "with_log4cplus": False,
         "simd": None,
         "delayed_load": True,
-        "nanovdb": False,
+        "nanovdb": False,        
+        "nanovdb_with_openvdb": True,
+        "nanovdb_with_tbb": True,
     }
 
     @property
@@ -92,6 +96,11 @@ class OpenVDBConan(ConanFile):
             del self.options.fPIC
         if not self._has_sse_avx:
             del self.options.simd
+        
+        if Version(self.version) < "9.0.0":
+            del self.options.nanovdb
+            del self.options.nanovdb_with_openvdb
+            del self.options.nanovdb_with_tbb
 
     def configure(self):
         if self.options.shared:
@@ -166,11 +175,6 @@ class OpenVDBConan(ConanFile):
         tc.variables["OPENVDB_BUILD_AX_BINARIES"] = False
         tc.variables["OPENVDB_BUILD_AX_UNITTESTS"] = False
 
-        tc.variables["OPENVDB_BUILD_NANOVDB"] = self.options.nanovdb
-        tc.variables["NANOVDB_USE_OPENVDB"] = True
-        tc.variables["NANOVDB_USE_INTRINSICS"] = True
-        tc.variables["NANOVDB_BUILD_TOOLS"] = False
-
         tc.variables["OPENVDB_BUILD_MAYA_PLUGIN"] = False
         tc.variables["OPENVDB_ENABLE_RPATH"] = False
         tc.variables["OPENVDB_CXX_STRICT"] = False
@@ -179,6 +183,13 @@ class OpenVDBConan(ConanFile):
         tc.variables["USE_STATIC_DEPENDENCIES"] = False
         tc.variables["USE_PKGCONFIG"] = False
         tc.variables["OPENVDB_INSTALL_CMAKE_MODULES"] = False
+
+        if Version(self.version) >= "9.0.0":
+            tc.variables["OPENVDB_BUILD_NANOVDB"] = self.options.nanovdb
+            tc.variables["NANOVDB_USE_OPENVDB"] = self.options.nanovdb_with_openvdb
+            tc.variables["USE_TBB"] = self.options.nanovdb_with_tbb
+            tc.variables["NANOVDB_USE_INTRINSICS"] = True
+            tc.variables["NANOVDB_BUILD_TOOLS"] = False
 
         if self._needs_boost:
             tc.variables["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
@@ -268,10 +279,14 @@ endif()
 
 
         #NanoVDB
-        if self.options.nanovdb:
+        if Version(self.version) >= "9.0.0" and self.options.nanovdb:
             self.cpp_info.components["nanovdb"].bindirs = []
             self.cpp_info.components["nanovdb"].libdirs = []
-            self.cpp_info.components["nanovdb"].requires = ["openvdb-core", "onetbb::onetbb"]
+            self.cpp_info.components["nanovdb"].requires = []
+            if self.options.nanovdb_with_openvdb:
+                self.cpp_info.components["nanovdb"].requires.append("openvdb-core")
+            if self.options.nanovdb_with_tbb:
+                self.cpp_info.components["nanovdb"].requires.append("onetbb::onetbb")
             if self.options.with_zlib:
                 self.cpp_info.components["nanovdb"].requires.append("zlib::zlib")
             if self.options.with_blosc:
@@ -281,14 +296,16 @@ endif()
                 self.cpp_info.components["nanovdb"].system_libs = ["pthread"]        
 
             self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_INTRINSICS")
-            self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_OPENVDB")
-            self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_TBB")
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["nanovdb"].defines.append("_USE_MATH_DEFINES")
                 self.cpp_info.components["nanovdb"].defines.append("NOMINMAX")
                 self.cpp_info.components["nanovdb"].defines.append("TBB_USE_PREVIEW_BINARY")
-            
+
+            if self.options.nanovdb_with_openvdb:
+                self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_OPENVDB")
+            if self.options.nanovdb_with_tbb:
+                self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_TBB")
             if self.options.with_zlib:
                 self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_ZIP")
             if self.options.with_blosc:
