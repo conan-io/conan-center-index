@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(test_package C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(zbar CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
