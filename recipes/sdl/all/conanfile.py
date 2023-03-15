@@ -62,7 +62,7 @@ class SDLConan(ConanFile):
         "jack": False,
         "pulse": True,
         "sndio": False,
-        "nas": True,
+        "nas": False,
         "esd": False,
         "arts": False,
         "x11": True,
