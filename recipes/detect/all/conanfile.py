@@ -10,8 +10,7 @@ class PackageConan(ConanFile):
     description = "A single header library to detect the OS at compile time."
     license = "MIT"
 
-    author = "Joel Lefkowitz joellefkowitz@hotmail.com"
-    url = "https://github.com/JoelLefkowitz/detect"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
 
     topics = ("os", "header-only")
