@@ -14,6 +14,7 @@ class CppcheckConan(ConanFile):
     topics = ("code quality", "static analyzer", "linter")
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
@@ -25,7 +26,7 @@ class CppcheckConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if Version(self.version) >= Version("2.8.0"):
+        if Version(self.version) >= "2.8.0":
             del self.options.with_z3
 
     def requirements(self):
@@ -62,6 +63,10 @@ class CppcheckConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package_info(self):
         self.cpp_info.includedirs = []
