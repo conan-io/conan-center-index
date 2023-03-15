@@ -27,6 +27,9 @@ class PackageConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build(self):
+        pass
+
     def package(self):
         copy(
             self,
