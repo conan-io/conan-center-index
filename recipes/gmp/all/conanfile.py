@@ -84,7 +84,7 @@ class GmpConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
             self.tool_requires("yasm/1.3.0") # Needed for determining 32-bit word size
-            self.tool_requires("automake/1.16.5")
+            self.tool_requires("automake/1.16.5") # Needed for lib-wrapper
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -112,7 +112,7 @@ class GmpConan(ConanFile):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-        env = tc.environment()
+        env = tc.environment() # Environment must be captured *after* setting extra_cflags, etc. to pick up changes
         if is_msvc(self):
             yasm_wrapper = unix_path(self, os.path.join(self.source_folder, "yasm_wrapper.sh"))
             yasm_machine = {
