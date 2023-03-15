@@ -21,11 +21,16 @@ class VsgConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "shader_compiler": [True, False],
+        "max_devices": [1,2,3,4],
         "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
+        "shader_compiler": True,
+        "max_devices" : 1,
         "fPIC": True,
+        
     }
 
     @property
@@ -46,7 +51,7 @@ class VsgConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
+       
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -58,6 +63,10 @@ class VsgConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
+        
+        if is_msvc(self) and self.settings.compiler.runtime in ["MTd", "MT"]:
+            raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
+            
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
@@ -67,12 +76,23 @@ class VsgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
+        #Working around submodules
+        #TODO: semantic versioning
+        if self.version == "1.0.3":
+            self.run("git clone https://github.com/vsg-dev/glslang.git src/glslang")
+            self.run("cd src/glslang && git reset --hard e4075496f6895ce6b747a6690ba13fa3836a93e5")
+        
+        
+        
     def generate(self):
         tc = CMakeToolchain(self)
         #???
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 1 if self.options.shader_compiler else 0
+        tc.variables["VSG_MAX_DEVICES"] = self.options.max_devices
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
