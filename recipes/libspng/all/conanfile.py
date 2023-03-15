@@ -44,7 +44,7 @@ class LibspngConan(ConanFile):
 
     def requirements(self):
         if self.options.with_miniz:
-            self.requires("miniz/3.0.1")
+            self.requires("miniz/3.0.2")
         else:
             self.requires("zlib/1.2.13")
 
