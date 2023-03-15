@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, rmdir, save, load
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=1.53.0"
@@ -13,16 +14,15 @@ class TinyEXIFConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cdcseacave/TinyEXIF/"
     topics = ("exif", "exif-metadata", "exif-ata-extraction", "exif-reader", "xmp", "xmp-parsing-library")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "link_crt_static": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "link_crt_static": False,
     }
 
     @property
@@ -53,7 +53,7 @@ class TinyEXIFConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.variables["LINK_CRT_STATIC_LIBS"] = self.options.link_crt_static
+        tc.variables["LINK_CRT_STATIC_LIBS"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_DEMO"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
