@@ -43,6 +43,9 @@ class NasRecipe(ConanFile):
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("Recipe supports Linux only")
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def requirements(self):
         self.requires("xorg/system")
