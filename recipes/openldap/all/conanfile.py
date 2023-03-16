@@ -69,7 +69,8 @@ class OpenldapConan(ConanFile):
 
         # Need to link to -pthread instead of -lpthread for gcc 8 shared=True
         # on CI job. Otherwise, linking fails.
-        self._autotools.libs.remove("pthread")
+        if "pthread" in self._autotools.libs:
+            self._autotools.libs.remove("pthread")
         self._configure_vars["LIBS"] = self._configure_vars["LIBS"].replace(
             "-lpthread", "-pthread")
 
