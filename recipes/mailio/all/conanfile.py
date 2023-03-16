@@ -70,9 +70,21 @@ class mailioConan(ConanFile):
         except KeyError:
             self.output.warn(f"{self.ref} has no support for the current compiler. Please consider adding it.")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
     def build_requirements(self):
         # mailio requires cmake >= 3.16.3
-        self.tool_requires("cmake/3.25.0")
+        if not self._cmake_new_enough("3.16.3")
+            self.tool_requires("cmake/3.25.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
