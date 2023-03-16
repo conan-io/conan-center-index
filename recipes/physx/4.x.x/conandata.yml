@@ -2,15 +2,11 @@ sources:
   "4.1.1":
     url: "https://github.com/NVIDIAGameWorks/PhysX/archive/ae80dede0546d652040ae6260a810e53e20a06fa.zip"
     sha256: "dd7db4c7879659658753029de57d04b18047ec04687b60f70335cde148a48d68"
+    strip_root: true
 patches:
   "4.1.1":
     - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-GuGJKType-const-discard-qualifiers.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-PsWindowsInlineAoS-msvc142-bug-workaround.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-Conan-PhysXGpu-name-workaround.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-CMake-macos-ios-android-install-targets.patch"
-      base_path: "source_subfolder"

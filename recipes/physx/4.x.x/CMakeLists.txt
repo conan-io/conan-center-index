@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.11)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
-add_subdirectory("source_subfolder/physx/compiler/public")
+add_subdirectory("src/physx/compiler/public")
