@@ -19,7 +19,7 @@ class ProtobufConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -72,7 +72,7 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if Version(self.version) >= "3.22.0":
-            self.requires("abseil/20230125.0")
+            self.requires("abseil/20230125.1", transitive_headers=True)
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -150,6 +150,7 @@ class ProtobufConan(ConanFile):
                 endif()
                 get_filename_component(PROTOC_PROGRAM \"${{PROTOC_PROGRAM}}\" ABSOLUTE)
                 set(Protobuf_PROTOC_EXECUTABLE ${{PROTOC_PROGRAM}} CACHE FILEPATH \"The protoc compiler\")
+                set(protobuf_PROTOC_EXE ${{PROTOC_PROGRAM}} CACHE FILEPATH \"The protoc compiler\")
                 add_executable(protobuf::protoc IMPORTED)
                 set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{Protobuf_PROTOC_EXECUTABLE}})
             endif()
@@ -194,9 +195,9 @@ class ProtobufConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
         if Version(self.version) < "3.22.0":
+            os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
+            os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
             rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
                         os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
         else:
