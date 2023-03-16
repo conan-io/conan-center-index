@@ -83,7 +83,7 @@ class mailioConan(ConanFile):
 
     def build_requirements(self):
         # mailio requires cmake >= 3.16.3
-        if not self._cmake_new_enough("3.16.3")
+        if not self._cmake_new_enough("3.16.3"):
             self.tool_requires("cmake/3.25.0")
 
     def source(self):
