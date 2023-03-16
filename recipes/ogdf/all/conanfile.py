@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from os.path import join
 
@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class OGDFConan(ConanFile):
     name = "ogdf"
     description = "Open Graph algorithms and Data structures Framework"
-    license = "GPL-2.0-or-later"
+    license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ogdf.net"
     topics = ("graph", "algorithm", "data-structures")
@@ -50,7 +50,6 @@ class OGDFConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["COIN_SOLVER"] = "CLP"
         tc.variables["COIN_SOLVER_IS_EXTERNAL"] = 0
         tc.generate()
@@ -83,7 +82,7 @@ class OGDFConan(ConanFile):
         cmake.build(target="OGDF")
 
     def package(self):
-        copy(self, pattern="LICENSE.txt", src=self.source_folder, dst=join(self.package_folder, "licenses"))
+        copy(self, pattern="LICENSE*.txt", src=self.source_folder, dst=join(self.package_folder, "licenses"))
         copy(self, pattern="*.h", src=join(self.source_folder, "include"), dst=join(self.package_folder, "include"))
         copy(self, pattern="*.h", src=join(self.build_folder, "include"), dst=join(self.package_folder, "include"))
         if self.options.shared:
@@ -95,7 +94,7 @@ class OGDFConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["OGDF"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
