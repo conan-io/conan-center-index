@@ -17,6 +17,7 @@ class NumCppConan(ConanFile):
     homepage = "https://github.com/dpilger26/NumCpp"
     license = "MIT"
 
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_boost" : [True, False],
@@ -61,7 +62,7 @@ class NumCppConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_boost", True):
-            self.requires("boost/1.80.0", transitive_headers=True)
+            self.requires("boost/1.81.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
