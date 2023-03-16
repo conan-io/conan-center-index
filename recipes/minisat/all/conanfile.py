@@ -45,7 +45,7 @@ class MiniSatConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/1.2.13", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
