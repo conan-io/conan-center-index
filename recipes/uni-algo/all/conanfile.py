@@ -65,7 +65,7 @@ class PackageConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.clear()
 
     def validate(self):
@@ -85,7 +85,6 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables = dict()
         if self.options.header_only:
             tc.variables["UNI_ALGO_HEADER_ONLY"] = True
         elif self.options["shared"]:
@@ -114,7 +113,6 @@ class PackageConan(ConanFile):
             )
         else:
             cmake = CMake(self)
-            cmake.configure()
             cmake.install()
 
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
