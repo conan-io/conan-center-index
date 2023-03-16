@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
@@ -17,6 +17,7 @@ class MpppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/bluescarni/mppp/"
     topics = ("multiprecision", "gmp", "math-bignum", "computer-algebra")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,7 +41,7 @@ class MpppConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -61,27 +62,27 @@ class MpppConan(ConanFile):
 
     def requirements(self):
         self.requires("gmp/6.2.1")
-        if self.options.with_mpfr == True:
+        if self.options.with_mpfr:
             self.requires("mpfr/4.1.0")
-        if self.options.with_mpc == True:
+        if self.options.with_mpc:
             self.requires("mpc/1.2.0")
-        if self.options.with_boost == True:
+        if self.options.with_boost:
             self.requires("boost/1.81.0")
         if self.options.get_safe("with_fmt"):
             self.requires("fmt/9.1.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
         if self.options.with_arb:
             raise ConanInvalidConfiguration(f"{self.ref}:with_arb=True is not supported because `fredrik-johansson/arb` is not packaged in CCI. (yet)")
         if self.options.with_quadmath:
-            raise ConanInvalidConfiguration(f"{self.ref}:with_quadmath=True is not supported because   `libquadmath` is not available from CCI. (yet)")
-        if self.options.with_boost and self.options["boost"].without_serialization:
-            raise ConanInvalidConfiguration(f"{self.name}:with_boost=True requires boost::without_serialization=False")
+            raise ConanInvalidConfiguration(f"{self.ref}:with_quadmath=True is not supported because `libquadmath` is not available from CCI. (yet)")
+        if self.options.with_boost and self.dependencies["boost"].options.without_serialization:
+            raise ConanInvalidConfiguration(f"{self.ref}:with_boost=True requires boost:without_serialization=False")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -120,7 +121,7 @@ class MpppConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        if self.options.get_safe("with_fmt"):    
+        if self.options.get_safe("with_fmt"):
             self.cpp_info.defines.append("MPPP_WITH_FMT")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
