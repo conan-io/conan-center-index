@@ -855,6 +855,8 @@ class QtConan(ConanFile):
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
+        if self.options.get_safe("qtscxml"):
+            targets.append("qscxmlc")
         for target in targets:
             exe_path = None
             for path_ in ["bin/{0}{1}".format(target, extension),
