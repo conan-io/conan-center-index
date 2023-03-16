@@ -79,7 +79,7 @@ class SoPlexConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/1.2.13", transitive_headers=True)
         if self.options.GMP:
             self.requires("gmp/6.2.1")
         if self.options.BOOST:
