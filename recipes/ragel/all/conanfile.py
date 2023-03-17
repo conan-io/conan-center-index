@@ -39,6 +39,7 @@ class RagelConan(ConanFile):
     def generate(self):
         if self.settings.os == "Windows":
             tc = CMakeToolchain(self)
+            tc.variables["RAGEL_SRC_DIR"] = self.source_folder.replace("\\", "/")
             tc.generate()
 
             dpes = CMakeDeps(self)
