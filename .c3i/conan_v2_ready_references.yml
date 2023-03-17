@@ -33,6 +33,7 @@ required_for_references:
 - cwalk
 - cxxopts
 - cyrus-sasl
+- date
 - daw_header_libraries
 - double-conversion
 - draco
@@ -49,9 +50,12 @@ required_for_references:
 - fmt
 - fontconfig
 - freetype
+- ftxui
 - fxdiv
 - ghc-filesystem
+- glad
 - glu
+- gmp
 - gnu-config
 - gperf
 - gtest
@@ -61,6 +65,7 @@ required_for_references:
 - indicators
 - jasper
 - jbig
+- jfalcou-eve
 - joltphysics
 - jsoncpp
 - jwt-cpp
@@ -114,6 +119,7 @@ required_for_references:
 - make
 - mbedtls
 - md4c
+- mdspan
 - meson
 - mgs
 - minizip
@@ -164,6 +170,7 @@ required_for_references:
 - tinyxml2
 - toml11
 - univalue
+- unqlite
 - uriparser
 - utf8proc
 - vaapi
@@ -176,6 +183,7 @@ required_for_references:
 - wayland
 - wayland-protocols
 - wslay
+- xapian-core
 - xkbcommon
 - xkeyboard-config
 - xorg
