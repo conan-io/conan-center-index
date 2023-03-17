@@ -1,4 +1,6 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout
+from conan.tools.files import copy, get
 import os
 
 required_conan_version = ">=1.33.0"
@@ -13,19 +15,18 @@ class ShieldConan(ConanFile):
     license = "MIT"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
+        copy(self, pattern="*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "shield"
