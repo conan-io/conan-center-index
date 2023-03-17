@@ -102,6 +102,12 @@ class NumCppConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
+        if Version(self.version) >= "2.10.0":
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
+                self.cpp_info.system_libs.append("stdc++fs")
+            if self.settings.compiler == "clang" and Version(self.settings.compiler.version).major == "7":
+                self.cpp_info.system_libs.append("c++fs")
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "NumCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "NumCpp"
