@@ -2,6 +2,8 @@
 
 This section gathers the most common questions from the community related to packages and usability of this repository.
 
+> **Note**: These policies and guidelines are subject to change so please open an issue or comment to an existing one to share your thoughts.
+
 <!-- toc -->
 ## Contents
 
@@ -463,3 +465,11 @@ To have more context about it, please, visit issues #11684 and #11022
 In summary, we do not recommend `full_package_mode` or any other custom package id mode for requirements on CCI, it will break other PRs soon or later.
 Instead, prefer using `shared=True` by default, when needed.
 Also, when having a similar situation, do not hesitate in opening an issue explaining your case, and ask for support from the community.
+
+## Do ConanCenter recipes support editable mode?
+
+No, as they download source code the expectations is that it should not require development - which is the purpose of editable mode. 
+
+Recipes by default should support this however many use components to model upstream build system configuration files (see able why those are not allowed) as a result there is little support within ConanCenterIndex.
+
+Small modifications (less then 5 lines) to enable support for this feature are more the welcome.
