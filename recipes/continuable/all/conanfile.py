@@ -1,7 +1,11 @@
 import os
+import functools
 
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy, rename
+from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.28.0"
@@ -40,14 +44,10 @@ class ContinuableConan(ConanFile):
         "immediate_types": False
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def validate(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
             "gcc": "5",
             "clang": "3.4",
@@ -56,23 +56,24 @@ class ContinuableConan(ConanFile):
         }
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
-            self.output.warn(
+            self.output.warning(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
+            self.output.warning(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "continuable-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst=os.path.join("include", "continuable"), src=os.path.join(self._source_subfolder, "include", "continuable"))
+        src = functools.partial(os.path.join, self.source_folder)
+        dst = functools.partial(os.path.join, self.package_folder)
+        hdrs = ("include", "continuable")
+        copy(self, pattern="LICENSE.txt", dst=dst("licenses"), src=src(""))
+        copy(self, pattern="*", dst=dst(*hdrs), src=src(*hdrs))
 
     def package_info(self):
         if self.settings.os == "Linux":
@@ -89,4 +90,4 @@ class ContinuableConan(ConanFile):
             self.cpp_info.defines.append("CONTINUABLE_WITH_IMMEDIATE_TYPES")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
