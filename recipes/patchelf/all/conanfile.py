@@ -14,6 +14,7 @@ required_conan_version = ">=1.54.0"
 
 class PatchElfConan(ConanFile):
     name = "patchelf"
+    package_type = "application"
     description = "A small utility to modify the dynamic linker and RPATH of ELF executables"
     topics = ("conan", "elf", "linker", "interpreter", "RPATH", "binaries")
     url = "https://github.com/conan-io/conan-center-index"
