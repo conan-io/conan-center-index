@@ -112,6 +112,25 @@ class OpenVDBConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "10.0.0" and not self._cmake_new_enough("3.18"):
+            self.tool_requires("cmake/[>=3.18.0]")
+        elif Version(self.version) >= "9.0.0" and not self._cmake_new_enough("3.15"):
+            self.tool_requires("cmake/[>=3.15.0]")
+        elif not self._cmake_new_enough("3.12"):
+            self.tool_requires("cmake/[>=3.12.0]")
+
     def requirements(self):
         if self._needs_boost:
             self.requires("boost/1.80.0")
