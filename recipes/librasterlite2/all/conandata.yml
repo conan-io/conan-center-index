@@ -5,4 +5,3 @@ sources:
 patches:
   "1.1.0-beta1":
     - patch_file: "patches/0001-missing-include.patch"
-      base_path: "source_subfolder"
