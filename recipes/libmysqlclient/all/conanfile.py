@@ -154,7 +154,7 @@ class LibMysqlClientCConan(ConanFile):
 
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
                         "NAMES zstd",
-                        f"NAMES zstd {self.dependencies['zstd'].cpp_info.components['zstdlib'].libs[0]}")
+                        f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
 
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
                         "NAMES ssl",
