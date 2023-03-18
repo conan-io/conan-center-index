@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, stdcpp_library
+from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
@@ -35,6 +35,10 @@ class LibMysqlClientCConan(ConanFile):
     short_paths = True
 
     @property
+    def _min_cppstd(self):
+        return "17" if Version(self.version) >= "8.0.27" else "11"
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
@@ -66,6 +70,9 @@ class LibMysqlClientCConan(ConanFile):
             self.requires("libunwind/1.6.2")
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
