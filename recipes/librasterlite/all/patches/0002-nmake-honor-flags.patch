@@ -1,6 +1,5 @@
 This patch for msvc build allows to:
 * define OPTFLAG ourself from conanfile (allow to honor profile)
-* inject a custom SYSTEM_LIBS variable from conanfile (allow robust shared build)
 * not hardcode this very specific C:\OSGeo4W environment
 * define rasterliteGetVersion() to be compliant with autotools build
 
@@ -37,7 +36,7 @@ This patch for msvc build allows to:
 -		C:\OSGeo4W\lib\libpng13.lib C:\OSGeo4W\lib\zlib.lib \
 -		C:\OSGeo4W\lib\geotiff_i.lib C:\OSGeo4W\lib\spatialite_i.lib
 +	link /dll /out:$(RASTERLITE_DLL) \
-+		/implib:rasterlite_i.lib $(LIBOBJ) $(SYSTEM_LIBS)
++		/implib:rasterlite_i.lib $(LIBOBJ)
  	if exist $(RASTERLITE_DLL).manifest mt -manifest \
  		$(RASTERLITE_DLL).manifest -outputresource:$(RASTERLITE_DLL);2
  
