@@ -129,6 +129,21 @@ class FollyConan(ConanFile):
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output=output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if not self._cmake_new_enough("3.13"):  # Make sure CMP0077 is honored
+            self.tool_requires("cmake/3.25.3")
+
     def _preserve_tarball_root(self):
         return Version(self.version) >= "2022.01.31.00"
 
@@ -172,6 +187,8 @@ class FollyConan(ConanFile):
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Honor CMAKE_REQUIRED_LIBRARIES in check_include_file_xxx
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0075"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
