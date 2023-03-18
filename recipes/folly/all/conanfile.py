@@ -113,17 +113,18 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration("Folly requires a 64bit target architecture on Windows")
 
         if self.settings.os in ["Macos", "Windows"] and self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built on {} as shared library".format(self.settings.os))
+            raise ConanInvalidConfiguration(f"Folly could not be built on {self.settings.os} as shared library")
 
         if Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
+            raise ConanInvalidConfiguration(f"Folly {self.version} could not be built by clang as a shared library")
 
         if self.options["boost"].header_only:
             raise ConanInvalidConfiguration("Folly could not be built with a header only Boost")
 
-        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        miss_boost_required_comp = any(getattr(self.options["boost"], f"without_{boost_comp}", True) for boost_comp in self._required_boost_components)
         if miss_boost_required_comp:
-            raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
+            required_components = ", ".join(self._required_boost_components)
+            raise ConanInvalidConfiguration(f"Folly requires these boost components: {required_components}")
 
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
