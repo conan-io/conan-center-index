@@ -129,7 +129,7 @@ class LibtorrentConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+        tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.get_safe("shared", False)
         tc.variables["deprecated-functions"] = self.options.enable_deprecated_functions
         tc.variables["dht"] = self.options.enable_dht
         tc.variables["encryption"] = self.options.enable_encryption
@@ -191,7 +191,7 @@ class LibtorrentConan(ConanFile):
         self.cpp_info.components["libtorrent-rasterbar"].includedirs = ["include", os.path.join("include", "libtorrent")]
         self.cpp_info.components["libtorrent-rasterbar"].libs = ["torrent-rasterbar"]
 
-        self.cpp_info.components["libtorrent-rasterbar"].requires = ["boost::boost"]
+        self.cpp_info.components["libtorrent-rasterbar"].requires = ["boost::headers", "boost::system"]
         if self.options.enable_encryption:
             self.cpp_info.components["libtorrent-rasterbar"].requires.append("openssl::openssl")
         if self.options.enable_iconv:
