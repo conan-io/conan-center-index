@@ -100,13 +100,13 @@ class WtConan(ConanFile):
         if self.options.connector_http:
             self.requires("zlib/1.2.13")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.40.1")
+            self.requires("sqlite3/3.41.1")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.30", transitive_headers=True, transitive_libs=True)
+            self.requires("libmysqlclient/8.0.31", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.5", transitive_headers=True, transitive_libs=True)
+            self.requires("libpq/14.7", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
