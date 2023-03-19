@@ -4,7 +4,7 @@ Before you can contribute any code changes, you'll need to make sure you are fam
 
 This file is intended to provide all the commands you need to run in order to be an expert ConanCenterIndex contributor.
 
-> **Note**: If you are workiwith Conan 2.0, the [instructions are below](#using-conan-20)
+> **Note**: If you are working with Conan 2.0, the [instructions are below](#using-conan-20)
 
 <!-- toc -->
 ## Contents
