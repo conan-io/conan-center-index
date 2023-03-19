@@ -2,8 +2,8 @@ from conan import ConanFile
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cppstd, stdcpp_library
-from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.files import apply_conndata_patches, export_conandata_patches, copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conans.model.version import Version
 import functools
@@ -48,12 +48,6 @@ class ceressolverConan(ConanFile):
         "use_schur_specializations": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _is_msvc(self):
         return str(self.settings.compiler) in ["Visual Studio", "msvc"]
@@ -63,6 +57,10 @@ class ceressolverConan(ConanFile):
     
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -107,14 +105,13 @@ class ceressolverConan(ConanFile):
             raise ConanInvalidConfiguration("Ceres-solver requires options gflags:nothreads=False") # This could use a source as to why
         if Version(self.version) >= "2.0":
             # 1.x uses ceres-solver specific FindXXX.cmake modules
-            self.generators.append("cmake_find_package")
             if self.settings.compiler.get_safe("cppstd"):
                 cppstd.check_min_cppstd(self, 14)
             self._check_cxx14_supported()
 
     def source(self):
-        get(**self.conan_data["sources"][self.version],
-                  destination = self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
@@ -153,9 +150,9 @@ class ceressolverConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self._source_subfolder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
 
