@@ -14,20 +14,12 @@ sources:
 patches:
   "2.1.0":
     - patch_file: "patches/2.0.1-0001-find-glog-conan.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.0.1-0002-find-glags-conan.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.0.1-0003-fix-mingw-build.patch"
-      base_path: "source_subfolder"
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-find-libraries-conan.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.0.0-0002-fix-eigen-version.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.0.0-0003-fix-mingw-build.patch"
-      base_path: "source_subfolder"
   "1.14.0":
     - patch_file: "patches/1.14.0-0001-find-libraries-conan.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.14.0-0002-fix-msvc-c++17.patch"
-      base_path: "source_subfolder"
