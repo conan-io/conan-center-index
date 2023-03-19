@@ -2,6 +2,7 @@ from conan import ConanFile
 
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 import os
@@ -42,6 +43,9 @@ class NasRecipe(ConanFile):
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("Recipe supports Linux only")
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def requirements(self):
         self.requires("xorg/system")
@@ -70,9 +74,12 @@ class NasRecipe(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
     @property
     def _imake_irulesrc(self):
-        return self._user_info_build["xorg-cf-files"].CONFIG_PATH
+        return self.conf.get("user.xorg-cf-files:config-path")
 
     @property
     def _imake_defines(self):
@@ -86,7 +93,7 @@ class NasRecipe(ConanFile):
         apply_conandata_patches(self)
 
         with chdir(self, self.source_folder):
-            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
+            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), env="conanbuild")
             autotools = Autotools(self)
             # j1 avoids some errors while trying to run this target
             autotools.make(target="World", args=["-j1"] + self._imake_make_args)
