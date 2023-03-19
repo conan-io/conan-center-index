@@ -42,7 +42,8 @@ This section gathers the most common questions from the community related to pac
   * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
-  * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)<!-- endToc -->
+  * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
+  * [Can I use full_package_mode for a requirement in my recipe?](#can-i-use-full_package_mode-for-a-requirement-in-my-recipe)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
