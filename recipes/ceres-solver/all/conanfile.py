@@ -1,7 +1,10 @@
 from conan import ConanFile
 from conan.tools.microsoft import msvc_runtime_flag
-from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cppstd, stdcpp_library
+from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.errors import ConanInvalidConfiguration
 from conans.model.version import Version
 import functools
 import os
@@ -64,7 +67,7 @@ class ceressolverConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "2.0":
+        if Version(self.version) >= "2.0":
             del self.options.use_CXX11_threads
             del self.options.use_CXX11
 
@@ -92,7 +95,7 @@ class ceressolverConan(ConanFile):
         }.get(str(self.settings.compiler))
         if not min_compiler_version:
             self.output.warn("Unknown compiler. Presuming it supports c++14.")
-        elif tools.Version(self.settings.compiler.version) < min_compiler_version:
+        elif Version(self.settings.compiler.version) < min_compiler_version:
             raise ConanInvalidConfiguration("Current compiler version does not support c++14")
 
     def validate(self):
@@ -102,15 +105,15 @@ class ceressolverConan(ConanFile):
             raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
         if self.options.use_gflags and self.options["gflags"].nothreads:
             raise ConanInvalidConfiguration("Ceres-solver requires options gflags:nothreads=False") # This could use a source as to why
-        if tools.Version(self.version) >= "2.0":
+        if Version(self.version) >= "2.0":
             # 1.x uses ceres-solver specific FindXXX.cmake modules
             self.generators.append("cmake_find_package")
             if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
+                cppstd.check_min_cppstd(self, 14)
             self._check_cxx14_supported()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(**self.conan_data["sources"][self.version],
                   destination = self._source_subfolder, strip_root=True)
 
     @functools.lru_cache(1)
@@ -131,7 +134,7 @@ class ceressolverConan(ConanFile):
         definitions["MINIGLOG"] = not self.options.use_glog
         if not self.options.use_TBB:
             definitions["CMAKE_DISABLE_FIND_PACKAGE_TBB"] = True
-        if tools.Version(self.version) < "2.0":
+        if Version(self.version) < "2.0":
             definitions["TBB"] = self.options.use_TBB
             definitions["OPENMP"] = False
             definitions["EIGEN_PREFER_EXPORTED_EIGEN_CMAKE_CONFIGURATION"] = False    #Set to false to Force CMake to use the conan-generated dependencies
@@ -153,8 +156,8 @@ class ceressolverConan(ConanFile):
         copy(self, "LICENSE", self._source_subfolder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
@@ -171,8 +174,8 @@ class ceressolverConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("use_CXX11_threads", True):
                 self.cpp_info.components["ceres"].system_libs.append("pthread")
-        elif tools.is_apple_os(self.settings.os):
-            if tools.Version(self.version) >= "2":
+        elif is_apple_os(self.settings.os):
+            if Version(self.version) >= "2":
                 self.cpp_info.components["ceres"].frameworks = ["Accelerate"]
         self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
         if self.options.use_glog:
@@ -181,7 +184,7 @@ class ceressolverConan(ConanFile):
             self.cpp_info.components["ceres"].requires.append("gflags::gflags")
         if self.options.use_TBB:
             self.cpp_info.components["ceres"].requires.append("onetbb::onetbb")
-        libcxx = tools.stdcpp_library(self)
+        libcxx = stdcpp_library(self)
         if libcxx:
             self.cpp_info.components["ceres"].system_libs.append(libcxx)
 
