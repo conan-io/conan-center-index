@@ -15,7 +15,11 @@ class RobinHoodHashingConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     no_copy_source = True
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -24,12 +28,8 @@ class RobinHoodHashingConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -43,9 +43,7 @@ class RobinHoodHashingConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "robin_hood")
         self.cpp_info.set_property("cmake_target_name", "robin_hood::robin_hood")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "robin_hood"
