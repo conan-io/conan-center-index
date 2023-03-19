@@ -3,7 +3,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cppstd, stdcpp_library
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import apply_conndata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 from conans.model.version import Version
 import functools
