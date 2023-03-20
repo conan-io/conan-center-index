@@ -68,7 +68,6 @@ class OpenTDFConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1q")
         self.requires("ms-gsl/2.1.0")
-        self.requires("libxml2/2.10.3")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
         # Use newer boost+libxml2 after 1.3.6
