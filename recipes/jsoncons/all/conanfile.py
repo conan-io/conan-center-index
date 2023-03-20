@@ -10,9 +10,8 @@ class JsonconsConan(ConanFile):
     name = "jsoncons"
     description = "A C++, header-only library for constructing JSON and JSON-like data formats, with JSON Pointer, JSON Patch, JSON Schema, JSONPath, JMESPath, CSV, MessagePack, CBOR, BSON, UBJSON"
     license = "BSL-1.0"
-    url = "https://github.com/danielaparker/jsoncons"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/danielaparker/jsoncons"
-    author = "Daniel Parker danielaparker@yahoo.com"
     topics = ("json", "csv", "cpp", "json-serialization", "cbor", "json-parser", "messagepack", "json-pointer", "json-patch", "json-diff", "bson", "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser", "csv-reader", "jsonschema", "json-construction", "streaming-json-read", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
