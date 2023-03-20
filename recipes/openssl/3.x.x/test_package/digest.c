@@ -2,7 +2,7 @@
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
-#if defined(WITH_ZLIB)
+#if defined(WITH_ZLIB_HEADERS)
 #include <zlib.h>
 #endif
 
@@ -65,7 +65,7 @@ int main()
     printf("sha3 256 digest: %s\n", sha3_256_string);
     printf("sha3 512 digest: %s\n", sha3_512_string);
     printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
-#if defined(WITH_ZLIB)
+#if defined(WITH_ZLIB_HEADERS)
     printf("ZLIB version: %s\n", ZLIB_VERSION);
 #endif
 

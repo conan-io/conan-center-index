@@ -29,6 +29,8 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         openssl = self.dependencies["openssl"]
         tc.cache_variables["OPENSSL_WITH_ZLIB"] = not openssl.options.no_zlib
+        if Version(conan_version) >= 2:
+            tc.cache_variables["TRANSITIVE_ZLIB_HEADERS"] = "OFF"
         tc.cache_variables["OPENSSL_WITH_LEGACY"] = self._with_legacy
         tc.cache_variables["OPENSSL_WITH_MD4"] = not openssl.options.no_md4
         tc.cache_variables["OPENSSL_WITH_RIPEMD160"] = not openssl.options.no_rmd160
@@ -39,6 +41,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.verbose = True
         cmake.configure()
         cmake.build()
 

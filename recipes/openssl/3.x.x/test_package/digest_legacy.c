@@ -10,7 +10,7 @@
 #include <openssl/err.h>
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
-#if defined(WITH_ZLIB)
+#if defined(WITH_ZLIB_HEADERS)
 #include <zlib.h>
 #endif
 
@@ -140,7 +140,7 @@ int main()
     printf("RIPEMD160 digest (variant 2): %s\n", ripemd160_string2);
 #endif
     printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
-#if defined(WITH_ZLIB)
+#if defined(WITH_ZLIB_HEADERS)
     printf("ZLIB version: %s\n", ZLIB_VERSION);
 #endif
 
