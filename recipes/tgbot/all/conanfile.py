@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, replace_in_file, get
 import os
 
 required_conan_version = ">=1.33.0"
@@ -24,27 +26,23 @@ class TgbotConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("boost/1.81.0", transitive_headers=True)
+        self.requires("libcurl/7.87.0")
+        self.requires("openssl/1.1.1t")
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-    def requirements(self):
-        self.requires("boost/1.79.0")
-        self.requires("libcurl/7.84.0")
-        self.requires("openssl/1.1.1q")
+        self.options["boost"].header_only = False
+        
+        for boost_comp in self._required_boost_components:
+            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
 
     @property
     def _required_boost_components(self):
@@ -52,40 +50,41 @@ class TgbotConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
-        if self.options["boost"].header_only or miss_boost_required_comp:
-            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
+            check_min_cppstd(self, 11)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         # Don't force PIC
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
             "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
             ""
         )
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_TESTS"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_TESTS"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
