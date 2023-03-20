@@ -16,4 +16,4 @@ class TestPackageConan(ConanFile):
             if self.settings.os == "Windows":
                 self.run("set CPPCHECK_HTMLREPORT")
             else:
-                self.run("cppcheck-htmlreport -h")
+                self.run("which cppcheck-htmlreport")
