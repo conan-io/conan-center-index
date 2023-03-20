@@ -9,15 +9,19 @@ required_conan_version = ">=1.50.0"
 class JsonconsConan(ConanFile):
     name = "jsoncons"
     description = "A C++, header-only library for constructing JSON and JSON-like data formats, with JSON Pointer, JSON Patch, JSON Schema, JSONPath, JMESPath, CSV, MessagePack, CBOR, BSON, UBJSON"
-    topics = ("json", "csv", "cpp", "json-serialization", "cbor", "json-parser", "messagepack", "json-pointer", "json-patch", "json-diff", "bson", "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser", "csv-reader", "jsonschema", "json-construction", "streaming-json-read", "header-only")
-    homepage = "https://github.com/danielaparker/jsoncons"
-    url = "https://github.com/danielaparker/jsoncons"
-    author = "Daniel Parker danielaparker@yahoo.com"
     license = "BSL-1.0"
+    url = "https://github.com/danielaparker/jsoncons"
+    homepage = "https://github.com/danielaparker/jsoncons"
+    author = "Daniel Parker danielaparker@yahoo.com"
+    topics = ("json", "csv", "cpp", "json-serialization", "cbor", "json-parser", "messagepack", "json-pointer", "json-patch", "json-diff", "bson", "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser", "csv-reader", "jsonschema", "json-construction", "streaming-json-read", "header-only")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
         get(
@@ -30,9 +34,6 @@ class JsonconsConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-
-    def package_id(self):
-        self.info.clear()
 
     def package_info(self):
         # Folders not used for header-only
