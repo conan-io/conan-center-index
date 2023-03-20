@@ -5,7 +5,7 @@ find_package(GLUT REQUIRED MODULE)
 find_package(OpenGL REQUIRED)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE GLUT::GLUT)
+target_link_libraries(${PROJECT_NAME} PRIVATE GLUT::GLUT OpenGL::GL)
 
 # Test whether variables from https://cmake.org/cmake/help/latest/module/FindGLUT.html are properly defined
 set(_custom_vars
