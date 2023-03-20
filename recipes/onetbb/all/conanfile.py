@@ -44,14 +44,14 @@ class OneTBBConan(ConanFile):
             del self.options.interprocedural_optimization
         if Version(self.version) < "2021.2.0":
             del self.options.shared
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def configure(self):
         if self.options.get_safe("shared", True):
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def package_id(self):
         if Version(self.version) < "2021.6.0":
