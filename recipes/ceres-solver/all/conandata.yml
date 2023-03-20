@@ -14,12 +14,28 @@ sources:
 patches:
   "2.1.0":
     - patch_file: "patches/2.0.1-0001-find-glog-conan.patch"
+      patch_description: "mingw patch"
+      patch_type: "conan"
     - patch_file: "patches/2.0.1-0002-find-glags-conan.patch"
+      patch_description: "mingw patch"
+      patch_type: "conan"
     - patch_file: "patches/2.0.1-0003-fix-mingw-build.patch"
+      patch_description: "mingw patch"
+      patch_type: "conan"
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-find-libraries-conan.patch"
+      patch_description: "add support for c++17"
+      patch_type: "conan"
     - patch_file: "patches/2.0.0-0002-fix-eigen-version.patch"
+      patch_description: "fix ceres-solver on ARM architecture"
+      patch_type: "conan"
     - patch_file: "patches/2.0.0-0003-fix-mingw-build.patch"
+      patch_description: "fix ceres mingw build"
+      patch_type: "conan"
   "1.14.0":
     - patch_file: "patches/1.14.0-0001-find-libraries-conan.patch"
+      patch_description: "add support for c++17"
+      patch_type: "backport"
     - patch_file: "patches/1.14.0-0002-fix-msvc-c++17.patch"
+      patch_description: "add support for c++17"
+      patch_type: "backport"
