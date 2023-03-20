@@ -9,11 +9,11 @@ required_conan_version = ">=1.50.0"
 class JsonconsConan(ConanFile):
     name = "jsoncons"
     description = "A C++, header-only library for constructing JSON and JSON-like data formats, with JSON Pointer, JSON Patch, JSON Schema, JSONPath, JMESPath, CSV, MessagePack, CBOR, BSON, UBJSON"
-    topics = ("json", "csv", "cpp", "json-serialization", "cbor", "json-parser", "messagepack", "json-pointer", "json-patch", "json-diff", "bson", "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser", "csv-reader", "jsonschema", "json-construction", "streaming-json-read")
+    topics = ("json", "csv", "cpp", "json-serialization", "cbor", "json-parser", "messagepack", "json-pointer", "json-patch", "json-diff", "bson", "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser", "csv-reader", "jsonschema", "json-construction", "streaming-json-read", "header-only")
     homepage = "https://github.com/danielaparker/jsoncons"
     url = "https://github.com/danielaparker/jsoncons"
     author = "Daniel Parker danielaparker@yahoo.com"
-    license = "Boost Software License"
+    license = "BSL-1.0"
     no_copy_source = True
 
     def layout(self):
@@ -21,8 +21,8 @@ class JsonconsConan(ConanFile):
 
     def source(self):
         get(
-            self,
-            url=f"https://github.com/danielaparker/jsoncons/archive/refs/tags/v{self.version}.tar.gz", 
+            self, 
+            **self.conan_data["sources"][self.version],
             destination=self.source_folder,
             strip_root=True
         )
@@ -32,9 +32,13 @@ class JsonconsConan(ConanFile):
         copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def package_info(self):
+        # Folders not used for header-only
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "jsoncons")
         self.cpp_info.set_property("cmake_target_name", "jsoncons")
 
