@@ -100,10 +100,10 @@ class OpenSSLConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Windows":
-            del self.options.capieng_dialog
-            del self.options.enable_capieng
+            self.options.rm_safe("capieng_dialog")
+            self.options.rm_safe("enable_capieng")
         else:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
         if self.settings.os == "Emscripten":
             self.options.no_asm = True
@@ -112,7 +112,7 @@ class OpenSSLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
