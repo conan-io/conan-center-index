@@ -1,18 +1,17 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
-from conan.tools.files import get, rename, rmdir, save
+from conan.tools.apple import XCRun
+from conan.tools.build import build_jobs, cross_building
+from conan.tools.files import chdir, copy, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans import AutoToolsBuildEnvironment, tools
-import contextlib
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+
 import fnmatch
-import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.57.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -21,7 +20,7 @@ class OpenSSLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
     license = "Apache-2.0"
-    topics = ("openssl", "ssl", "tls", "encryption", "security")
+    topics = ("ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
     options = {
         "shared": [True, False],
@@ -83,7 +82,7 @@ class OpenSSLConan(ConanFile):
         "no_ts": [True, False],
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
-        "openssldir": "ANY",
+        "openssldir": [None, "ANY"],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -93,7 +92,6 @@ class OpenSSLConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -119,13 +117,14 @@ class OpenSSLConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if not self._win_bash:
-                self.build_requires("strawberryperl/5.30.0.1")
-            if not self.options.no_asm and not tools.which("nasm"):
-                self.build_requires("nasm/2.15.05")
-        if self._win_bash:
-            if not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+            if not self.options.no_asm:
+                self.tool_requires("nasm/2.15.05")
+            if self._use_nmake:
+                self.tool_requires("strawberryperl/5.32.1.1")
+            else:
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def validate(self):
         if self.settings.os == "Emscripten":
@@ -338,10 +337,6 @@ class OpenSSLConan(ConanFile):
     #         return getattr(tools.XCRun(self.settings), apple_name)
     #     return None
 
-    @functools.lru_cache(1)
-    def _get_env_build(self):
-        return AutoToolsBuildEnvironment(self)
-
     def _get_default_openssl_dir(self):
         if self.settings.os == "Linux":
             return "/etc/ssl"
@@ -350,12 +345,11 @@ class OpenSSLConan(ConanFile):
     @property
     def _configure_args(self):
         openssldir = self.options.openssldir or self._get_default_openssl_dir()
-        prefix = tools.unix_path(self.package_folder) if self._win_bash else self.package_folder
-        openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
+        openssldir = unix_path(self, openssldir) if self.win_bash else openssldir
         args = [
             '"%s"' % (self._target),
             "shared" if self.options.shared else "no-shared",
-            "--prefix=\"%s\"" % prefix,
+            "--prefix=/",
             "--libdir=lib",
             "--openssldir=\"%s\"" % openssldir,
             "no-unit-test",
@@ -384,19 +378,19 @@ class OpenSSLConan(ConanFile):
             args.append("no-asm -lsocket -latomic")
 
         if not self.options.no_zlib:
-            zlib_info = self.deps_cpp_info["zlib"]
-            include_path = zlib_info.include_paths[0]
+            zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
+            include_path = zlib_info.includedirs[0]
             if self.settings.os == "Windows":
-                lib_path = "%s/%s.lib" % (zlib_info.lib_paths[0], zlib_info.libs[0])
+                lib_path = "%s/%s.lib" % (zlib_info.libdirs[0], zlib_info.libs[0])
             else:
                 # Just path, linux will find the right file
-                lib_path = zlib_info.lib_paths[0]
-            if tools.os_info.is_windows:
+                lib_path = zlib_info.libdirs[0]
+            if self._settings_build.os == "Windows":
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
                 include_path = include_path.replace("\\", "/")
                 lib_path = lib_path.replace("\\", "/")
 
-            if self.options["zlib"].shared:
+            if self.dependencies["zlib"].options.shared:
                 args.append("zlib-dynamic")
             else:
                 args.append("zlib")
@@ -406,7 +400,7 @@ class OpenSSLConan(ConanFile):
                 '--with-zlib-lib="%s"' % lib_path
             ])
 
-        for option_name in self.options.values.fields:
+        for option_name in self.default_options.keys():
             if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
@@ -414,10 +408,15 @@ class OpenSSLConan(ConanFile):
     
     def generate(self):
         tc = AutotoolsToolchain(self)
-        # deps = AutotoolsDeps(self)
+        env = tc.environment()
+        env.define_path("PERL", self._perl)
+        if self.settings.compiler == "apple-clang":
+            xcrun = XCRun(self)
+            env.define_path("CROSS_SDK", os.path.basename(xcrun.sdk_path))
+            env.define_path("CROSS_TOP", os.path.dirname(os.path.dirname(xcrun.sdk_path)))
 
         self._create_targets(tc.cflags, tc.cxxflags, tc.defines, tc.ldflags)
-        tc.generate()
+        tc.generate(env)
 
     def _create_targets(self, cflags, cxxflags, defines, ldflags):
         config_template = textwrap.dedent("""\
@@ -502,24 +501,20 @@ class OpenSSLConan(ConanFile):
 
         save(self, os.path.join(self.source_folder, "Configurations", "20-conan.conf"), config)
 
-    def _run_make(self, targets=None, makefile=None, parallel=True):
+    def _run_make(self, targets=None, parallel=True, install=False):
         command = [self._make_program]
-        if makefile:
-            command.extend(["-f", makefile])
+        if install:
+            command.append(f"DESTDIR={self.package_folder}")
         if targets:
             command.extend(targets)
         if not self._use_nmake:
-            command.append(("-j%s" % tools.cpu_count()) if parallel else "-j1")
-        self.run(" ".join(command), win_bash=self._win_bash)
+            command.append(("-j%s" % build_jobs(self)) if parallel else "-j1")
+        self.run(" ".join(command), env="conanrun")
 
     @property
     def _perl(self):
-        if tools.os_info.is_windows and not self._win_bash:
-            # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
-            if "strawberryperl" in self.deps_cpp_info.deps:
-                return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
-            elif hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
-                return self.user_info_build["strawberryperl"].perl
+        if self._use_nmake:
+            return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
 
     @property
@@ -527,22 +522,22 @@ class OpenSSLConan(ConanFile):
         return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
     def _make(self):
-        with tools.chdir(self.source_folder):
+        with chdir(self, self.source_folder):
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
-                tools.save("ossl_static.pdb", "")
+                save(self, "ossl_static.pdb", "")
             args = " ".join(self._configure_args)
 
             if self._use_nmake:
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
-            self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), win_bash=self._win_bash)
+            self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), env="conanrun")
 
             self._run_make()
 
     def _make_install(self):
-        with tools.chdir(self.source_folder):
-            self._run_make(targets=["install_sw"], parallel=False)
+        with chdir(self, self.source_folder):
+            self._run_make(targets=["install_sw"], parallel=False, install=True)
 
     @property
     def _cc(self):
@@ -551,72 +546,41 @@ class OpenSSLConan(ConanFile):
         if "CC" in os.environ:
             return os.environ["CC"]
         if self.settings.compiler == "apple-clang":
-            return tools.XCRun(self.settings).find("clang")
+            return XCRun(self).find("clang")
         elif self.settings.compiler == "clang":
             return "clang"
         elif self.settings.compiler == "gcc":
             return "gcc"
         return "cc"
 
-    @contextlib.contextmanager
-    def _make_context(self):
-        if self._use_nmake:
-            # Windows: when cmake generates its cache, it populates some environment variables as well.
-            # If cmake also initiates openssl build, their values (containing spaces and forward slashes)
-            # break nmake (don't know about mingw make). So we fix them
-            def sanitize_env_var(var):
-                return '"{}"'.format(var).replace('/', '\\') if '"' not in var else var
-            env = {key: sanitize_env_var(tools.get_env(key)) for key in ("CC", "RC") if tools.get_env(key)}
-            with tools.environment_append(env):
-                yield
-        else:
-            yield
 
     def build(self):
-        with tools.vcvars(self) if self._use_nmake else tools.no_op():
-            env_vars = {"PERL": self._perl}
-            if self.settings.compiler == "apple-clang":
-                xcrun = tools.XCRun(self.settings)
-                env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
-                env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
-            with tools.environment_append(env_vars):
-                with self._make_context():
-                    self._make()
-                    self.run(f"perl {self.source_folder}/configdata.pm --dump")
-
-    @property
-    def _win_bash(self):
-        return self._settings_build.os == "Windows" and \
-               not self._use_nmake and \
-            (self._is_mingw or cross_building(self, skip_x64_x86=True))
+        self._make()
+        self.run(f"{self._perl} {self.source_folder}/configdata.pm --dump")
 
     @property
     def _make_program(self):
         if self._use_nmake:
             return "nmake"
-        make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
-        if not make_program:
-            raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
-        make_program = tools.unix_path(make_program)
-        return make_program
+        else:
+            return "make"
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
         for e in ["MDd", "MTd", "MD", "MT"]:
-            tools.replace_in_file(filename, f"/{e} ", f"/{runtime} ", strict=False)
-            tools.replace_in_file(filename, f"/{e}\"", f"/{runtime}\"", strict=False)
+            replace_in_file(self, filename, f"/{e} ", f"/{runtime} ", strict=False)
+            replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"", strict=False)
 
     def package(self):
-        self.copy("*LICENSE*", src=self.source_folder, dst="licenses")
-        with tools.vcvars(self) if self._use_nmake else tools.no_op():
-            self._make_install()
+        copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        self._make_install()
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
                     os.unlink(os.path.join(self.package_folder, root, filename))
         if self._use_nmake:
             if self.settings.build_type == "Debug":
-                with tools.chdir(os.path.join(self.package_folder, "lib")):
+                with chdir(self, os.path.join(self.package_folder, "lib")):
                     rename(self, "libssl.lib", "libssld.lib")
                     rename(self, "libcrypto.lib", "libcryptod.lib")
 
@@ -628,15 +592,15 @@ class OpenSSLConan(ConanFile):
                 if file.endswith(".a"):
                     os.unlink(os.path.join(libdir, file))
 
-
         if not self.options.no_fips:
             provdir = os.path.join(self.source_folder, "providers")
+            modules_dir = os.path.join(self.package_folder, "lib", "ossl-modules")
             if self.settings.os == "Macos":
-                self.copy("fips.dylib", src=provdir,dst="lib/ossl-modules")
+                copy(self, "fips.dylib", src=provdir, dst=modules_dir)
             elif self.settings.os == "Windows":
-                self.copy("fips.dll", src=provdir,dst="lib/ossl-modules")
+                copy(self, "fips.dll", src=provdir, dst=modules_dir)
             else:
-                self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
+                copy(self, "fips.so", src=provdir, dst=modules_dir)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -644,8 +608,7 @@ class OpenSSLConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
             set(OPENSSL_FOUND TRUE)
             if(DEFINED OpenSSL_INCLUDE_DIR)
@@ -672,7 +635,7 @@ class OpenSSLConan(ConanFile):
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
         """)
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_subfolder(self):
