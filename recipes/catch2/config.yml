@@ -13,6 +13,8 @@ versions:
     folder: 3.x.x
   "3.0.1":
     folder: 3.x.x
+  "2.13.10":
+    folder: 2.x.x
   "2.13.9":
     folder: 2.x.x
   "2.13.8":
