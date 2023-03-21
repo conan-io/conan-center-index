@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import os
 import textwrap
 
@@ -17,6 +18,10 @@ class ArduinojsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def validate(self):
+        if Version(self.version) >= "6.21.0":
+            check_min_cppstd(self, 11)
 
     def package_id(self):
         self.info.clear()
