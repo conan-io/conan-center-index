@@ -171,10 +171,19 @@ class OpenSSLConan(ConanFile):
         env.define("PERL", self._perl)
         tc.generate(env)
         gen_info = {}
-        gen_info["CFLAGS"] = tc.cflags
+        if self.settings.compiler == "Visual Studio":
+            # add /nologo as defined for the "VC-common" toolchain in Configurations/10-main.conf
+            gen_info["CFLAGS"] = tc.cflags + ["/nologo"]
+        else:
+            gen_info["CFLAGS"] = tc.cflags
         gen_info["CXXFLAGS"] = tc.cxxflags
         gen_info["DEFINES"] = tc.defines
-        gen_info["LDFLAGS"] = tc.ldflags
+        if self.settings.compiler == "Visual Studio":
+            # add /nologo and /debug as defined for the "VC-common" toolchain in Configurations/10-main.conf
+            # /debug is needed so that the fips.pdb and legacy.pdb files are generated even in release builds
+            gen_info["LDFLAGS"] = tc.ldflags + ["/nologo", "/debug"]
+        else:
+            gen_info["LDFLAGS"] = tc.ldflags 
         if not self.options.get_safe("no_zlib"):
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
             gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
