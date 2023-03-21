@@ -341,36 +341,6 @@ class OpenSSLConan(ConanFile):
             return getattr(tools.XCRun(self.settings), apple_name)
         return None
 
-    def _patch_configure(self):
-        # since _patch_makefile_org will replace binutils variables
-        # use a more restricted regular expresion to prevent that Configure script trying to do it again
-        configure = os.path.join(self.source_folder, "Configure")
-        tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
-
-    def _patch_makefile_org(self):
-        # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
-        # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
-        def adjust_path(path):
-            return path.replace("\\", "/") if tools.os_info.is_windows else path
-
-        makefile_org = os.path.join(self.source_folder, "Makefile.org")
-        env_build = self._get_env_build()
-        with tools.environment_append(env_build.vars):
-            if not "CROSS_COMPILE" in os.environ:
-                cc = os.environ.get("CC", "cc")
-                tools.replace_in_file(makefile_org, "CC= cc\n", "CC= %s %s\n" % (adjust_path(cc), os.environ["CFLAGS"]))
-                if "AR" in os.environ:
-                    tools.replace_in_file(makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % adjust_path(os.environ["AR"]))
-                if "RANLIB" in os.environ:
-                    tools.replace_in_file(makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % adjust_path(os.environ["RANLIB"]))
-                rc = os.environ.get("WINDRES", os.environ.get("RC"))
-                if rc:
-                    tools.replace_in_file(makefile_org, "RC= windres\n", "RC= %s\n" % adjust_path(rc))
-                if "NM" in os.environ:
-                    tools.replace_in_file(makefile_org, "NM= nm\n", "NM= %s\n" % adjust_path(os.environ["NM"]))
-                if "AS" in os.environ:
-                    tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
-
     @functools.lru_cache(1)
     def _get_env_build(self):
         return AutoToolsBuildEnvironment(self)
