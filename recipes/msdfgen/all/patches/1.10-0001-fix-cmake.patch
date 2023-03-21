@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6dec916..432f218 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,9 @@
+ cmake_minimum_required(VERSION 3.15)
+ include(cmake/version.cmake)
+ 
++# Version is specified in vcpkg.json
++project(msdfgen VERSION ${MSDFGEN_VERSION} LANGUAGES CXX)
++
+ option(MSDFGEN_CORE_ONLY "Only build the core library with no dependencies" OFF)
+ option(MSDFGEN_BUILD_STANDALONE "Build the msdfgen standalone executable" ON)
+ option(MSDFGEN_USE_VCPKG "Use vcpkg package manager to link project dependencies" ON)
+@@ -67,9 +70,6 @@ if(MSDFGEN_USE_VCPKG)
+     endif()
+ endif()
+ 
+-# Version is specified in vcpkg.json
+-project(msdfgen VERSION ${MSDFGEN_VERSION} LANGUAGES CXX)
+-
+ file(GLOB_RECURSE MSDFGEN_CORE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "core/*.h" "core/*.hpp")
+ file(GLOB_RECURSE MSDFGEN_CORE_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "core/*.cpp")
+ file(GLOB_RECURSE MSDFGEN_EXT_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "ext/*.h" "ext/*.hpp")
