@@ -64,7 +64,7 @@ class Antlr4CppRuntimeConan(ConanFile):
         # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
         # Note that the above PR points that libuuid can be removed from 4.9.3, 4.10 and 4.10.1 as well.
         # We have patched the CMakeLists.txt to drop the dependency on libuuid from aforementioned antlr versions.
-        self.requires("utfcpp/3.2.1")
+        self.requires("utfcpp/3.2.3")
 
     def validate(self):
         # Compilation of this library on version 15 claims C2668 Error.
