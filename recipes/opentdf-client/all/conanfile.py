@@ -77,9 +77,6 @@ class OpenTDFConan(ConanFile):
         else:
             self.requires("boost/1.81.0")
             self.requires("libxml2/2.10.3")
-        # Do not need libarchive after 1.0.0
-        if Version(self.version) < "1.1.0":
-            self.requires("libarchive/3.6.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
