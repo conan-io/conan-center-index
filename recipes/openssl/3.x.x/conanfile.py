@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import get, rename, rmdir
+from conan.tools.files import get, rename, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
@@ -331,12 +331,12 @@ class OpenSSLConan(ConanFile):
             )
         return ancestor
 
-    def _tool(self, env_name, apple_name):
-        if env_name in os.environ:
-            return os.environ[env_name]
-        if self.settings.compiler == "apple-clang":
-            return getattr(tools.XCRun(self.settings), apple_name)
-        return None
+    # def _tool(self, env_name, apple_name):
+    #     if env_name in os.environ:
+    #         return os.environ[env_name]
+    #     if self.settings.compiler == "apple-clang":
+    #         return getattr(tools.XCRun(self.settings), apple_name)
+    #     return None
 
     @functools.lru_cache(1)
     def _get_env_build(self):
@@ -411,8 +411,15 @@ class OpenSSLConan(ConanFile):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
+    
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        # deps = AutotoolsDeps(self)
 
-    def _create_targets(self):
+        self._create_targets(tc.cflags, tc.cxxflags, tc.defines, tc.ldflags)
+        tc.generate()
+
+    def _create_targets(self, cflags, cxxflags, defines, ldflags):
         config_template = textwrap.dedent("""\
             {targets} = (
                 "{target}" => {{
@@ -433,17 +440,11 @@ class OpenSSLConan(ConanFile):
                 }},
             );
         """)
-        cflags = []
-        cxxflags = []
 
-        env_build = self._get_env_build()
-        cflags.extend(env_build.vars_dict["CFLAGS"])
-        cxxflags.extend(env_build.vars_dict["CXXFLAGS"])
-
-        cc = self._tool("CC", "cc")
-        cxx = self._tool("CXX", "cxx")
-        ar = self._tool("AR", "ar")
-        ranlib = self._tool("RANLIB", "ranlib")
+        cc = None # self._tool("CC", "cc")
+        cxx = None # self._tool("CXX", "cxx")
+        ar = None # self._tool("AR", "ar")
+        ranlib = None # self._tool("RANLIB", "ranlib")
 
         perlasm_scheme = ""
         if self._perlasm_scheme:
@@ -452,11 +453,11 @@ class OpenSSLConan(ConanFile):
         cc = 'cc => "%s",' % cc if cc else ""
         cxx = 'cxx => "%s",' % cxx if cxx else ""
         ar = 'ar => "%s",' % ar if ar else ""
-        defines = " ".join(env_build.defines)
+        defines = " ".join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         ranlib = 'ranlib => "%s",' % ranlib if ranlib else ""
         targets = "my %targets"
-        includes = ", ".join(['"%s"' % include for include in env_build.include_paths])
+        includes = "" 
         if self.settings.os == "Windows":
             includes = includes.replace("\\", "/")  # OpenSSL doesn't like backslashes
 
@@ -494,12 +495,12 @@ class OpenSSLConan(ConanFile):
             shared_target=shared_target,
             shared_extension=shared_extension,
             shared_cflag=shared_cflag,
-            lflags=" ".join(env_build.link_flags)
+            lflags=" ".join(ldflags)
         )
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
 
-        tools.save(os.path.join(self.source_folder, "Configurations", "20-conan.conf"), config)
+        save(self, os.path.join(self.source_folder, "Configurations", "20-conan.conf"), config)
 
     def _run_make(self, targets=None, makefile=None, parallel=True):
         command = [self._make_program]
@@ -579,7 +580,6 @@ class OpenSSLConan(ConanFile):
                 env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
-                self._create_targets()
                 with self._make_context():
                     self._make()
                     self.run(f"perl {self.source_folder}/configdata.pm --dump")
