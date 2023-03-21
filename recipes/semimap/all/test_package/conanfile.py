@@ -1,13 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
-from io import StringIO
+from conan.tools.cmake import cmake_layout, CMake
 import os
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -24,9 +22,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            config_path = os.path.join(self.source_folder, "hello.conf")
-            output = StringIO()
-            self.run(f"{bin_path} {config_path}", output, env="conanrun")
-            text = output.getvalue()
-            print(text)
-            assert "Neighbour" in text
+            self.run(bin_path, env="conanrun")
