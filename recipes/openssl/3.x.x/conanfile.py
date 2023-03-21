@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import get, rename, rmdir
+from conan.tools.gnu import AutotoolsToolchain
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conans import AutoToolsBuildEnvironment, tools
 import contextlib
@@ -89,10 +91,6 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -136,6 +134,9 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Emscripten":
             if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
+            
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _is_clangcl(self):
@@ -151,7 +152,7 @@ class OpenSSLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
     @property
     def _target(self):
@@ -343,7 +344,7 @@ class OpenSSLConan(ConanFile):
     def _patch_configure(self):
         # since _patch_makefile_org will replace binutils variables
         # use a more restricted regular expresion to prevent that Configure script trying to do it again
-        configure = os.path.join(self._source_subfolder, "Configure")
+        configure = os.path.join(self.source_folder, "Configure")
         tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
 
     def _patch_makefile_org(self):
@@ -352,7 +353,7 @@ class OpenSSLConan(ConanFile):
         def adjust_path(path):
             return path.replace("\\", "/") if tools.os_info.is_windows else path
 
-        makefile_org = os.path.join(self._source_subfolder, "Makefile.org")
+        makefile_org = os.path.join(self.source_folder, "Makefile.org")
         env_build = self._get_env_build()
         with tools.environment_append(env_build.vars):
             if not "CROSS_COMPILE" in os.environ:
@@ -531,7 +532,7 @@ class OpenSSLConan(ConanFile):
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
 
-        tools.save(os.path.join(self._source_subfolder, "Configurations", "20-conan.conf"), config)
+        tools.save(os.path.join(self.source_folder, "Configurations", "20-conan.conf"), config)
 
     def _run_make(self, targets=None, makefile=None, parallel=True):
         command = [self._make_program]
@@ -558,7 +559,7 @@ class OpenSSLConan(ConanFile):
         return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
     def _make(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.chdir(self.source_folder):
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
                 tools.save("ossl_static.pdb", "")
@@ -572,7 +573,7 @@ class OpenSSLConan(ConanFile):
             self._run_make()
 
     def _make_install(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.chdir(self.source_folder):
             self._run_make(targets=["install_sw"], parallel=False)
 
     @property
@@ -614,7 +615,7 @@ class OpenSSLConan(ConanFile):
                 self._create_targets()
                 with self._make_context():
                     self._make()
-                    self.run("perl source_subfolder/configdata.pm --dump")
+                    self.run(f"perl {self.source_folder}/configdata.pm --dump")
 
     @property
     def _win_bash(self):
@@ -639,7 +640,7 @@ class OpenSSLConan(ConanFile):
             tools.replace_in_file(filename, f"/{e}\"", f"/{runtime}\"", strict=False)
 
     def package(self):
-        self.copy("*LICENSE*", src=self._source_subfolder, dst="licenses")
+        self.copy("*LICENSE*", src=self.source_folder, dst="licenses")
         with tools.vcvars(self) if self._use_nmake else tools.no_op():
             self._make_install()
         for root, _, files in os.walk(self.package_folder):
@@ -662,7 +663,7 @@ class OpenSSLConan(ConanFile):
 
 
         if not self.options.no_fips:
-            provdir = os.path.join(self._source_subfolder, "providers")
+            provdir = os.path.join(self.source_folder, "providers")
             if self.settings.os == "Macos":
                 self.copy("fips.dylib", src=provdir,dst="lib/ossl-modules")
             elif self.settings.os == "Windows":
