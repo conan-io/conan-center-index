@@ -1,14 +1,4 @@
 sources:
-  "8.14.1":
-    url: "https://github.com/libvips/libvips/releases/download/v8.14.1/vips-8.14.1.tar.xz"
-    sha256: "5abde2a61f99ced7be4c32ccb13a654256eb7a0f6f0520ab61cc11412a1233fa"
-patches:
-  "8.14.1":
-    - patch_file: "patches/8.14.1-0001-msvc-compat.patch"
-      patch_description: "Fix compatibility wih MSVC"
-      patch_type: "portability"
-      patch_source: "https://github.com/libvips/libvips/pull/3383"
-    - patch_file: "patches/8.14.1-0002-void-pointer-arithmetic.patch"
-      patch_description: "Prevent use of void pointer arithmetic"
-      patch_type: "portability"
-      patch_source: "https://github.com/libvips/libvips/pull/3381"
+  "8.14.2":
+    url: "https://github.com/libvips/libvips/releases/download/v8.14.2/vips-8.14.2.tar.xz"
+    sha256: "27dad021f0835a5ab14e541d02abd41e4c3bd012d2196438df5a9e754984f7ce"
