@@ -5,3 +5,6 @@ sources:
   "0.9.0":
     url: "https://github.com/symengine/symengine/releases/download/v0.9.0/symengine-0.9.0.tar.gz"
     sha256: "dcf174ac708ed2acea46691f6e78b9eb946d8a2ba62f75e87cf3bf4f0d651724"
+  "0.10.0":
+    url: "https://github.com/symengine/symengine/releases/download/v0.10.0/symengine-0.10.0.tar.gz"
+    sha256: "27eae7982f010e4901a5922d44e0de4b81c3b8dd52c57b147a1994f0541da50e"
