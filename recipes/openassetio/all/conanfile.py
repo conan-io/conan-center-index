@@ -61,7 +61,10 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("tomlplusplus/3.2.0")
         if self.options.with_python:
+            # Avoid conflict with cmake vs cpython openssl dependency.
             self.requires("openssl/1.1.1s")
+            # TODO: cpython requires ncurses/6.2 but no pre-built package exists.
+            self.requires(f"ncurses/6.3")
             self.requires(f"cpython/{self.options.python_version}")
             self.requires("pybind11/2.10.1")
 
