@@ -521,10 +521,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _make_program(self):
-        if self._use_nmake:
-            return "nmake"
-        else:
-            return "make"
+        return "nmake" if self._use_nmake else "make"
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
