@@ -1,5 +1,10 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, copy
+from conan.tools.scm import Version
+from conan.tools.layout import basic_layout
 import os
+
+required_conan_version = ">=1.50.0"
 
 
 class ReaderWriterQueue(ConanFile):
@@ -11,27 +16,28 @@ class ReaderWriterQueue(ConanFile):
     license = "BSD-2-Clause"
     no_copy_source = True
     settings = "os"
-    
-    @property
-    def _source_subfolder(self):
-        return "sources_subfolder"
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("readerwriterqueue-{}".format(self.version),
-                  self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("atomicops.h", src=self._source_subfolder, dst=os.path.join("include", "readerwriterqueue"))
-        self.copy("readerwriterqueue.h", src=self._source_subfolder, dst=os.path.join("include", "readerwriterqueue"))
-        if tools.Version(self.version) >= "1.0.5":
-            self.copy("readerwritercircularbuffer.h", src=self._source_subfolder, dst=os.path.join("include", "readerwriterqueue"))
-
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "atomicops.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "readerwriterqueue"))
+        copy(self, "readerwriterqueue.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "readerwriterqueue"))
+        if Version(self.version) >= "1.0.5":
+            copy(self, "readerwritercircularbuffer.h", src=self.source_folder, dst=os.path.join("include", "readerwriterqueue"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]

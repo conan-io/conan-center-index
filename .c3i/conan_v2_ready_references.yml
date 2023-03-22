@@ -235,7 +235,6 @@ required_for_references:
 - opengl
 - openh264
 - openjpeg
-- openssl
 - opus
 - pcre
 - pcre2
