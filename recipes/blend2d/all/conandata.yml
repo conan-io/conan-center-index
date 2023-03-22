@@ -5,7 +5,6 @@ sources:
   "0.0.17":
     url: "https://blend2d.com/download/blend2d-beta17.zip"
     sha256: "06ee8fb0bea281d09291e498900093139426501a1a7f09dba0ec801dd340635e"
-
 patches:
   "0.0.18":
     - patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"

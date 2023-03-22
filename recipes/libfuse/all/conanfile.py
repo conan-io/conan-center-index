@@ -16,6 +16,7 @@ class LibfuseConan(ConanFile):
     license = "LGPL-2.1"
     description = "The reference implementation of the Linux FUSE interface"
     topics = ("fuse", "libfuse", "filesystem", "linux")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,15 +37,14 @@ class LibfuseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.os not in ("Linux", "FreeBSD"):
+        if self.settings.os not in ("Linux", "FreeBSD"):
             raise ConanInvalidConfiguration("libfuse supports only Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.64.0")
+        self.tool_requires("meson/1.0.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
