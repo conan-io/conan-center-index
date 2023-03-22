@@ -1,5 +1,25 @@
 # Changelog
 
+### 10-March-2023 - 19:55 CET
+
+- [feature] Add priority to pull requests
+- [hotfix] Avoid extra http requests to run automatic merge faster
+
+### 10-March-2023 - 13:15 CET
+
+- [hotfix] No longer update conan_v2_ready_references.yml automatically
+- [bugfix] Validate Green and clean PRs first when executing automatic merge CI job
+
+### 07-March-2023 - 17:05 CET
+
+- [hotfix] Automatic merge skips git conflicts
+- [hotfix] config label for "v2 ready" depends on PR author
+
+### 03-March-2023 - 11:05 CET
+
+- [feature] Update ready_v2_references.yml file automatically
+- [fix] Do not reuse the same build folder to avoid busy files
+
 ### 21-February-2023 - 17:22 CET
 
 - [fix] Fix bug with cppstd entry in configuration files.
