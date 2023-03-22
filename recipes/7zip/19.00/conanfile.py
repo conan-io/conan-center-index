@@ -42,10 +42,10 @@ class SevenZipConan(ConanFile):
         from six.moves.urllib.parse import urlparse
         url = self.conan_data["sources"][self.version]["url"]
 
-        if isinstance(url, list):
-            # Allow the urls to be a list either.
-            first_url = url[0]
-            filename = os.path.basename(urlparse(first_url).path)
+        first_url = url[0] if isinstance(url, list) else url
+        # Allow the urls to be a list either.
+
+        filename = os.path.basename(urlparse(first_url).path)
 
         sha256 = self.conan_data["sources"][self.version]["sha256"]
         download(self, url, filename, sha256)
