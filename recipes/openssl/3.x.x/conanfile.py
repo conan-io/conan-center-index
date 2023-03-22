@@ -517,21 +517,6 @@ class OpenSSLConan(ConanFile):
         with chdir(self, self.source_folder):
             self._run_make(targets=["install_sw"], parallel=False, install=True)
 
-    @property
-    def _cc(self):
-        if "CROSS_COMPILE" in os.environ:
-            return "gcc"
-        if "CC" in os.environ:
-            return os.environ["CC"]
-        if self.settings.compiler == "apple-clang":
-            return XCRun(self).find("clang")
-        elif self.settings.compiler == "clang":
-            return "clang"
-        elif self.settings.compiler == "gcc":
-            return "gcc"
-        return "cc"
-
-
     def build(self):
         self._make()
         self.run(f"{self._perl} {self.source_folder}/configdata.pm --dump")
