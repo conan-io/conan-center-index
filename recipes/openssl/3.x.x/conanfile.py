@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import XCRun
-from conan.tools.build import build_jobs, cross_building
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
+from conan.tools.build import build_jobs
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -130,6 +130,9 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Emscripten":
             if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
                 raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
+            
+        if self.settings.os == "iOS" and self.options.shared:
+            raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
             
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -431,31 +434,17 @@ class OpenSSLConan(ConanFile):
                     {shared_target}
                     {shared_cflag}
                     {shared_extension}
-                    {cc}
-                    {cxx}
-                    {ar}
-                    {ranlib}
                     {perlasm_scheme}
                 }},
             );
         """)
 
-        # TODO: evaluate this from within the config file, not from python
-        cc = None # self._tool("CC", "cc")
-        cxx = None # self._tool("CXX", "cxx")
-        ar = None # self._tool("AR", "ar")
-        ranlib = None # self._tool("RANLIB", "ranlib")
-
         perlasm_scheme = ""
         if self._perlasm_scheme:
             perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
 
-        cc = 'cc => "%s",' % cc if cc else ""
-        cxx = 'cxx => "%s",' % cxx if cxx else ""
-        ar = 'ar => "%s",' % ar if ar else ""
         defines = " ".join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
-        ranlib = 'ranlib => "%s",' % ranlib if ranlib else ""
         targets = "my %targets"
         includes = "" 
         if self.settings.os == "Windows":
@@ -483,10 +472,6 @@ class OpenSSLConan(ConanFile):
             targets=targets,
             target=self._target,
             ancestor=ancestor,
-            cc=cc,
-            cxx=cxx,
-            ar=ar,
-            ranlib=ranlib,
             cflags=" ".join(cflags),
             cxxflags=" ".join(cxxflags),
             defines=defines,
@@ -574,6 +559,9 @@ class OpenSSLConan(ConanFile):
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         self._make_install()
+        if is_apple_os(self):
+            fix_apple_shared_install_name(self)
+
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
