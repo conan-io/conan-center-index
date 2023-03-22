@@ -53,6 +53,253 @@ def _is_module_NO(flag):
 
 
 
+# Load the entire list of modules
+# Discovered by this command in src folder:
+# find . -name "vtk.module" -exec head -2 '{}' \; | grep -v ^NAME$ | grep "^  VTK::" | cut -c8- | sort | uniq > vtk-modules.txt
+# TODO put these in an external file... for now, using vim to bring it into the recipe by hand
+vtk_all_modules = [
+    "AcceleratorsVTKmCore",
+    "AcceleratorsVTKmDataModel",
+    "AcceleratorsVTKmFilters",
+    "cgns",
+    "ChartsCore",
+    "cli11",
+    "CommonArchive",
+    "CommonColor",
+    "CommonComputationalGeometry",
+    "CommonCore",
+    "CommonDataModel",
+    "CommonExecutionModel",
+    "CommonMath",
+    "CommonMisc",
+    "CommonPython",
+    "CommonSystem",
+    "CommonTransforms",
+    "DICOMParser",
+    "diy2",
+    "DomainsChemistry",
+    "DomainsChemistryOpenGL2",
+    "DomainsMicroscopy",
+    "DomainsParallelChemistry",
+    "doubleconversion",
+    "eigen",
+    "exodusII",
+    "expat",
+    "exprtk",
+    "fides",
+    "FiltersAMR",
+    "FiltersCore",
+    "FiltersExtraction",
+    "FiltersFlowPaths",
+    "FiltersGeneral",
+    "FiltersGeneric",
+    "FiltersGeometry",
+    "FiltersHybrid",
+    "FiltersHyperTree",
+    "FiltersImaging",
+    "FiltersModeling",
+    "FiltersOpenTURNS",
+    "FiltersParallel",
+    "FiltersParallelDIY2",
+    "FiltersParallelFlowPaths",
+    "FiltersParallelGeometry",
+    "FiltersParallelImaging",
+    "FiltersParallelMPI",
+    "FiltersParallelStatistics",
+    "FiltersParallelVerdict",
+    "FiltersPoints",
+    "FiltersProgrammable",
+    "FiltersPython",
+    "FiltersReebGraph",
+    "FiltersSelection",
+    "FiltersSMP",
+    "FiltersSources",
+    "FiltersStatistics",
+    "FiltersTexture",
+    "FiltersTopology",
+    "FiltersVerdict",
+    "fmt",
+    "freetype",
+    "GeovisCore",
+    "GeovisGDAL",
+    "gl2ps",
+    "glew",
+    "GUISupportMFC",
+    "GUISupportQt",
+    "GUISupportQtQuick",
+    "GUISupportQtSQL",
+    "h5part",
+    "hdf5",
+    "ImagingColor",
+    "ImagingCore",
+    "ImagingFourier",
+    "ImagingGeneral",
+    "ImagingHybrid",
+    "ImagingMath",
+    "ImagingMorphological",
+    "ImagingOpenGL2",
+    "ImagingSources",
+    "ImagingStatistics",
+    "ImagingStencil",
+    "InfovisBoost",
+    "InfovisBoostGraphAlgorithms",
+    "InfovisCore",
+    "InfovisLayout",
+    "InteractionImage",
+    "InteractionStyle",
+    "InteractionWidgets",
+    "IOADIOS2",
+    "IOAMR",
+    "IOAsynchronous",
+    "IOCatalystConduit",
+    "IOCesium3DTiles",
+    "IOCGNSReader",
+    "IOChemistry",
+    "IOCityGML",
+    "IOCONVERGECFD",
+    "IOCore",
+    "IOEnSight",
+    "IOExodus",
+    "IOExport",
+    "IOExportGL2PS",
+    "IOExportPDF",
+    "IOFFMPEG",
+    "IOFides",
+    "IOGDAL",
+    "IOGeoJSON",
+    "IOGeometry",
+    "IOH5part",
+    "IOH5Rage",
+    "IOHDF",
+    "IOImage",
+    "IOImport",
+    "IOInfovis",
+    "IOIOSS",
+    "IOLAS",
+    "IOLegacy",
+    "IOLSDyna",
+    "IOMINC",
+    "IOMotionFX",
+    "IOMovie",
+    "IOMPIImage",
+    "IOMPIParallel",
+    "IOMySQL",
+    "IONetCDF",
+    "IOODBC",
+    "IOOggTheora",
+    "IOOMF",
+    "IOOpenVDB",
+    "IOParallel",
+    "IOParallelExodus",
+    "IOParallelLSDyna",
+    "IOParallelNetCDF",
+    "IOParallelXdmf3",
+    "IOParallelXML",
+    "IOPDAL",
+    "IOPIO",
+    "IOPLY",
+    "IOPostgreSQL",
+    "IOSegY",
+    "IOSQL",
+    "ioss",
+    "IOTecplotTable",
+    "IOTRUCHAS",
+    "IOVeraOut",
+    "IOVideo",
+    "IOVPIC",
+    "IOXdmf2",
+    "IOXdmf3",
+    "IOXML",
+    "IOXMLParser",
+    "Java",
+    "jpeg",
+    "jsoncpp",
+    "kissfft",
+    "kwiml",
+    "libharu",
+    "libproj",
+    "libxml2",
+    "loguru",
+    "lz4",
+    "lzma",
+    "metaio",
+    "mpi",
+    "mpi4py",
+    "netcdf",
+    "nlohmannjson",
+    "octree",
+    "ogg",
+    "opengl",
+    "ParallelCore",
+    "ParallelDIY",
+    "ParallelMPI",
+    "ParallelMPI4Py",
+    "pegtl",
+    "png",
+    "pugixml",
+    "Python",
+    "PythonContext2D",
+    "PythonInterpreter",
+    "RenderingAnnotation",
+    "RenderingContext2D",
+    "RenderingContextOpenGL2",
+    "RenderingCore",
+    "RenderingExternal",
+    "RenderingFFMPEGOpenGL2",
+    "RenderingFreeType",
+    "RenderingFreeTypeFontConfig",
+    "RenderingGL2PSOpenGL2",
+    "RenderingHyperTreeGrid",
+    "RenderingImage",
+    "RenderingLabel",
+    "RenderingLICOpenGL2",
+    "RenderingLOD",
+    "RenderingMatplotlib",
+    "RenderingOpenGL2",
+    "RenderingOpenVR",
+    "RenderingOpenXR",
+    "RenderingParallel",
+    "RenderingParallelLIC",
+    "RenderingQt",
+    "RenderingRayTracing",
+    "RenderingSceneGraph",
+    "RenderingTk",
+    "RenderingUI",
+    "RenderingVolume",
+    "RenderingVolumeAMR",
+    "RenderingVolumeOpenGL2",
+    "RenderingVR",
+    "RenderingVtkJS",
+    "sqlite",
+    "TestingCore",
+    "TestingDataModel",
+    "TestingGenericBridge",
+    "TestingIOSQL",
+    "TestingRendering",
+    "theora",
+    "tiff",
+    "utf8",
+    "UtilitiesBenchmarks",
+    "verdict",
+    "ViewsContext2D",
+    "ViewsCore",
+    "ViewsInfovis",
+    "ViewsQt",
+    "vpic",
+    "vtkm",
+    "vtksys",
+    "WebCore",
+    "WebGLExporter",
+    "WebPython",
+    "WrappingPythonCore",
+    "WrappingTools",
+    "xdmf2",
+    "xdmf3",
+    "zfp",
+    "zlib",
+]
+
+
 
 class VtkConan(ConanFile):
     name = "vtk"
@@ -190,6 +437,7 @@ class VtkConan(ConanFile):
             "group_enable_Imaging":    ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_MPI":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Rendering":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
+            "group_enable_Tk":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Views":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
             "group_enable_Web":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
@@ -198,33 +446,13 @@ class VtkConan(ConanFile):
             # We will use the conan version, as we always set VTK_USE_EXTERNAL=True (for now)
             "group_enable_StandAlone": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
-            # Modules (many not listed)
-            "module_enable_IOExport":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_IOLegacy":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_RenderingCore":     ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_RenderingExternal": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-
             # Qt-specific modules
             "qt_version": ["Auto", "5", "6"],
-            "module_enable_GUISupportQt":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_GUISupportQtQuick": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_GUISupportQtSQL":   ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_RenderingQt":       ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_ViewsQt":           ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
 
-            # TODO modules that require extra stuff to be installed
-            "module_enable_IOPDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_IOPostgreSQL":      ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_IOOpenVDB":         ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_IOLAS":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_IOADIOS2":          ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_fides":             ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_GeovisGDAL":        ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_IOGDAL":            ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_FiltersOpenTURNS":  ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_DomainsMicroscopy": ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            "module_enable_CommonArchive":     ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"],
-            }
+            # Note: there are a LOT of "module_enable_XXX" options loaded via a for loop below
+        }
+
+
 
     default_options = {
             "shared": False,
@@ -280,25 +508,16 @@ class VtkConan(ConanFile):
             "group_enable_MPI":        "DEFAULT",
             "group_enable_Rendering":  "DEFAULT",
             "group_enable_StandAlone": "DEFAULT",
+            "group_enable_Tk":         "DEFAULT",
             "group_enable_Views":      "DEFAULT",
             "group_enable_Web":        "DEFAULT",
 
             # Qt-specific modules
             "qt_version":                      "Auto",
             "group_enable_Qt":                 "DEFAULT",   # can keep this false/default, enable specific QT modules
-            "module_enable_GUISupportQt":      "DEFAULT",
-            "module_enable_GUISupportQtQuick": "DEFAULT",
-            "module_enable_GUISupportQtSQL":   "DEFAULT",
-            "module_enable_RenderingQt":       "DEFAULT",
-            "module_enable_ViewsQt":           "DEFAULT",
-
-            # More specific modules
-            "module_enable_IOExport":          "DEFAULT",
-            "module_enable_IOLegacy":          "DEFAULT",
-            "module_enable_RenderingCore":     "DEFAULT",
-            "module_enable_RenderingExternal": "DEFAULT",
 
             # these aren't supported yet, need to system-install packages
+            # These are NOT listed in options (above), instead they are loaded via a loop below.
             "module_enable_IOPDAL":            "NO",
             "module_enable_IOPostgreSQL":      "NO",
             "module_enable_IOOpenVDB":         "NO",
@@ -310,7 +529,17 @@ class VtkConan(ConanFile):
             "module_enable_FiltersOpenTURNS":  "NO",
             "module_enable_DomainsMicroscopy": "NO",
             "module_enable_CommonArchive":     "NO",
-            }
+        }
+
+
+
+    # Add in other modules that have not been added manually
+    for mod in vtk_all_modules:
+        option_name = f"module_enable_{mod}"
+        options[option_name] = ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"]
+        # Don't add all to default_options, as we may have some in there forced to be "NO"
+        if option_name not in default_options:
+            default_options[option_name] = "DEFAULT"
 
 
     # If build_all_modules=True, then we will ask the consumer will set modules=NO if they really don't want that requirement.
@@ -591,13 +820,6 @@ class VtkConan(ConanFile):
             tc.variables["NetCDF_HAS_PARALLEL"] = self.dependencies["hdf5"].options.parallel
 
 
-        # There are LOTS of these modules now ...
-        # for vtkModule in self.required_modules:
-            # tc.variables["VTK_MODULE_ENABLE_VTK_" + vtkModule] = _yesno(True)
-
-        # TODO support more modules - see notes above re hdf5
-        # tc.variables["VTK_MODULE_ENABLE_VTK_hdf5"] = _yesno(True)
-
         # https://gitlab.kitware.com/vtk/vtk/-/blob/master/Documentation/dev/build.md
         # TODO try VTK_USE_VIDEO_FOR_WINDOWS   for video capture
         # TODO try VTK_USE_VIDEO_FOR_WINDOWS_CAPTURE   for video capture
@@ -627,32 +849,15 @@ class VtkConan(ConanFile):
         ##### QT ######
         # QT has a few modules, we'll be specific
         tc.variables["VTK_QT_VERSION"]                          = self.options.qt_version
-        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQt"]      = _yesno(self.options.module_enable_GUISupportQt)
-        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtQuick"] = _yesno(self.options.module_enable_GUISupportQtQuick)
-        tc.variables["VTK_MODULE_ENABLE_VTK_GUISupportQtSQL"]   = _yesno(self.options.module_enable_GUISupportQtSQL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingQt"]       = _yesno(self.options.module_enable_RenderingQt)
-        tc.variables["VTK_MODULE_ENABLE_VTK_ViewsQt"]           = _yesno(self.options.module_enable_ViewsQt)
 
-        ### Other stuff ###
-
-        # Modules
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOExport"]          = _yesno(self.options.module_enable_IOExport)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOLegacy"]          = _yesno(self.options.module_enable_IOLegacy)
-        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingCore"]     = _yesno(self.options.module_enable_RenderingCore)
-        tc.variables["VTK_MODULE_ENABLE_VTK_RenderingExternal"] = _yesno(self.options.module_enable_RenderingExternal)
-
-        # Modules that aren't supported yet
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOPDAL"]            = _yesno(self.options.module_enable_IOPDAL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOPostgreSQL"]      = _yesno(self.options.module_enable_IOPostgreSQL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOOpenVDB"]         = _yesno(self.options.module_enable_IOOpenVDB)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOLAS"]             = _yesno(self.options.module_enable_IOLAS)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOADIOS2"]          = _yesno(self.options.module_enable_IOADIOS2)
-        tc.variables["VTK_MODULE_ENABLE_VTK_fides"]             = _yesno(self.options.module_enable_fides)
-        tc.variables["VTK_MODULE_ENABLE_VTK_GeovisGDAL"]        = _yesno(self.options.module_enable_GeovisGDAL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_IOGDAL"]            = _yesno(self.options.module_enable_IOGDAL)
-        tc.variables["VTK_MODULE_ENABLE_VTK_FiltersOpenTURNS"]  = _yesno(self.options.module_enable_FiltersOpenTURNS)
-        tc.variables["VTK_MODULE_ENABLE_VTK_DomainsMicroscopy"] = _yesno(self.options.module_enable_DomainsMicroscopy)
-        tc.variables["VTK_MODULE_ENABLE_VTK_CommonArchive"]     = _yesno(self.options.module_enable_CommonArchive)
+        # Setup ALL our discovered modules
+        # this will generate lots of variables, such as:
+        # tc.variables["VTK_MODULE_ENABLE_VTK_RenderingCore"]     = _yesno(self.options.module_enable_RenderingCore)
+        for mod in vtk_all_modules:
+            option_name   = f"module_enable_{mod}"
+            variable_name = f"VTK_MODULE_ENABLE_VTK_{mod}"
+            tc.variables[variable_name] = _yesno(self.options.get_safe(option_name))
+            # print(f"Added variable {variable_name} = {_yesno(self.options.get_safe(option_name))}")
 
         # TODO if true (or all) then system has to install postgres dev package
 
