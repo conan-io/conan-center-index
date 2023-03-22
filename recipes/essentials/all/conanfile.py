@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.59"
 
 class EssentialsConan(ConanFile):
     name = "essentials"
