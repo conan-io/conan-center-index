@@ -108,8 +108,8 @@ class OpenSSLConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         if not self.options.no_zlib:
@@ -440,6 +440,7 @@ class OpenSSLConan(ConanFile):
             );
         """)
 
+        # TODO: evaluate this from within the config file, not from python
         cc = None # self._tool("CC", "cc")
         cxx = None # self._tool("CXX", "cxx")
         ar = None # self._tool("AR", "ar")
@@ -527,8 +528,11 @@ class OpenSSLConan(ConanFile):
             if self._use_nmake:
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
-            self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), env="conanrun")
-
+            self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), env="conanbuild")
+            if self._use_nmake:
+                # When `--prefix=/`, the scripts derive `\` without escaping, which
+                # causes issues on Windows
+                replace_in_file(self, "Makefile", "INSTALLTOP_dir=\\", "INSTALLTOP_dir=\\\\")
             self._run_make()
 
     def _make_install(self):
