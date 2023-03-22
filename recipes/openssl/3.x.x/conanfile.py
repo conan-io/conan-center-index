@@ -509,17 +509,13 @@ class OpenSSLConan(ConanFile):
             command.extend(targets)
         if not self._use_nmake:
             command.append(("-j%s" % build_jobs(self)) if parallel else "-j1")
-        self.run(" ".join(command), env="conanrun")
+        self.run(" ".join(command), env="conanbuild")
 
     @property
     def _perl(self):
         if self._use_nmake:
             return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
-
-    @property
-    def _nmake_makefile(self):
-        return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
     def _make(self):
         with chdir(self, self.source_folder):
