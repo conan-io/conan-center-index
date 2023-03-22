@@ -1,6 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import XCRun
+from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import (
@@ -619,11 +619,10 @@ class OpenSSLConan(ConanFile):
                 self.run("perl configdata.pm --dump")
 
     def _patch_install_name(self):
-        # not needed for OpenSSL 3.x.x ?
-        #if is_apple_os(self) and self.options.shared:
-        #    old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
-        #    new_str = '-install_name @rpath/'
-        #    replace_in_file(self, "Makefile", old_str, new_str)
+        if is_apple_os(self) and self.options.shared:
+            old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
+            new_str = '-install_name @rpath/'
+            replace_in_file(self, "Makefile", old_str, new_str)
         if self._use_nmake:
             # NMAKE interprets trailing backslash as line continuation
             replace_in_file(self, "Makefile", 'INSTALLTOP_dir=\\', 'INSTALLTOP_dir=/')

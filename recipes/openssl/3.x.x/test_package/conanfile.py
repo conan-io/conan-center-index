@@ -55,7 +55,8 @@ class TestPackageConan(ConanFile):
                 bin_legacy_path = os.path.join(self.cpp.build.bindirs[0], "digest_legacy")
                 self.run(bin_legacy_path, env="conanrun")
 
-            if not openssl_options.no_stdio:
+            if not openssl_options.no_stdio and Version(conan_version) < 2:
+                # NOTE: this test is not suitable for conan v2 where the build profile can differ from the host profile
                 self.run("openssl version", env="conanrun")
         # cannot be checked with Conan v2
         #assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
