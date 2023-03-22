@@ -47,7 +47,7 @@ class GStreamerConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
+        self.requires("glib/2.76.0")
 
     def validate(self):
         if not self.dependencies.direct_host["glib"].options.shared and self.info.options.shared:
@@ -56,7 +56,7 @@ class GStreamerConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
-        self.tool_requires("glib/2.75.2")
+        self.tool_requires("glib/2.76.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
