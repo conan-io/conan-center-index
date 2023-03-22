@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -14,7 +15,7 @@ import os
 import textwrap
 import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.59.0"
 
 
 class QtConan(ConanFile):
@@ -969,6 +970,8 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(module)
 
         libsuffix = ""
+        if self.settings.os == "Android":
+            libsuffix = f"_{android_abi(self)}"
         if not self.options.multiconfiguration:
             if self.settings.build_type == "Debug":
                 if self.settings.os == "Windows" and is_msvc(self):
