@@ -7,17 +7,12 @@ from conan.tools.cmake import cmake_layout
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
-    
-    default_options = {
-        "spdlog/1.11.0:header_only": True
-    }
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("spdlog/1.11.0")
 
     def generate(self):
         tc = CMakeToolchain(self)
