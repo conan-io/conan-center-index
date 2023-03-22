@@ -735,10 +735,7 @@ class QtConan(ConanFile):
                 args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
-            args += ["-android-abis %s" % {"armv7": "armeabi-v7a",
-                                           "armv8": "arm64-v8a",
-                                           "x86": "x86",
-                                           "x86_64": "x86_64"}.get(str(self.settings.arch))]
+            args += [f"-android-abis {android_abi(self)}"]
 
         if self.settings.get_safe("compiler.libcxx") == "libstdc++":
             args += ["-D_GLIBCXX_USE_CXX11_ABI=0"]
