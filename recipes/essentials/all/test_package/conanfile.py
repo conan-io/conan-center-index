@@ -7,8 +7,7 @@ from conan.tools.cmake import cmake_layout
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
-    requires = "spdlog/1.11.0", "fmt/9.1.0"
-    build_policy = "missing"
+    
     default_options = {
         "spdlog/1.11.0:header_only": True
     }
@@ -18,6 +17,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("spdlog/1.11.0")
 
     def generate(self):
         tc = CMakeToolchain(self)

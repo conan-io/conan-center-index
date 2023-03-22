@@ -7,7 +7,7 @@ import os
 class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
-    requires = "spdlog/1.11.0", "fmt/9.1.0"
+
     default_options = {
         "spdlog/1.11.0:header_only": True
     }

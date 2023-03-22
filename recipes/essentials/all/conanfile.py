@@ -8,28 +8,23 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 required_conan_version = ">=1.59"
 
-class EssentialsConan(ConanFile):
-    name = "essentials"
+class SeadexEssentialsConan(ConanFile):
+    name = "seadex-essentials"
     description = "essentials is a small c++ library that offers very basic capabilities for applications and libraries."
-    license = "MIT License"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://essentials.seadex.de/"
     topics = ("utility", "C++", "library")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "build_unit_tests": [True, False],
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_unit_tests": False,
         "spdlog/*:header_only": True
     }
-
-    requires = "spdlog/1.11.0", "fmt/9.1.0"
-    build_policy = "missing"
 
     @property
     def _min_cppstd(self):
@@ -60,8 +55,8 @@ class EssentialsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.build_unit_tests:
-            self.requires("gtest/1.13.0")
+        self.requires("spdlog/1.11.0")
+        self.requires("fmt/9.1.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -81,8 +76,6 @@ class EssentialsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.build_unit_tests:
-            tc.variables["ESS_BUILD_UNIT_TESTS"] = "ON"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
