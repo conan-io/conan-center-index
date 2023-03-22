@@ -17,6 +17,7 @@ import os
 import textwrap
 
 import json # for auto-component generation
+import itertools # for autoinit header generation
 
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
@@ -1131,6 +1132,84 @@ class VtkConan(ConanFile):
                 # requires are added in the next loop, if disabled
 
         self.output.info("Processing modules")
+
+
+        ### VTK AUTOINIT ###
+        # records each implements --> [many modules]
+        # This function is called for each module, with a list of the things that this implements.
+        # VTK has a special factory registration system, and modules that implement others have to be registered.
+        # This mechanism was encoded into VTK's cmake autoinit system, which we (probably) can't use in a conan context.
+        # So, we will implement the required autoinit registration things here.
+        #
+        # This recipe will ultimately generate special header files that contain lines like:
+        #       #define vtkRenderingCore_AUTOINIT 2(vtkRenderingFreeType, vtkInteractionStyle)
+        #           (this module is implemented)              (by these modules)
+        #                IMPLEMENTED         by                 IMPLEMENTING
+        #
+        # There is one header per implementable module, and each user of an implementing-module must
+        # have a special #define that tells the VTK system where this header is.  The header will be
+        # included into the compilation and the autoinit system will register the implementing-module.
+        #
+        # But the trick is the library comsumer will only declare they want to use an implementing module
+        # (eg vtkRenderingOpenGL2) but will not use that module directly.
+        # Instead, they will only use vtkRenderingCore and expect the OpenGL2 module to be magically built
+        # by the core factory.  OpenGL2 module has to register with the Core module, without the library
+        # comsumer specifically calling the registration.
+        #
+        # VTK's cmake seems to generate headers for different combinations of components,
+        #   so they need to create a unique autoinit file when a downstream consumer calls cmake function
+        #   vtk_module_autoinit(TARGETS <target>... MODULES <module>...), so each target must know ALL
+        #   of the vtk modules they will use (at cmake-time), and a unique header will be made for that combination.
+        #  That header will be #included via a clever define for that target.
+        #
+        # This won't work in our case, and that would only work for cmake consumers.
+        #
+        # So I'm going to try a different approach:
+        #  * define a header for all possible combinations of implementing-modules for a implemented-module.
+        #  * use a define for each of the implementing-modules.  If a target is using that implementing-module,
+        #     it will activate the autoinit for that module thanks to the #define flag
+        #
+        # Note that we can't just register every possible module, as not every possible module will be linked to the exe.
+        #
+        # Also note we have to be clever with the ordering of the combinations, as we only want to pick ONE of the combos.
+        #
+        # Example of a 2-module combination autoinit file:
+        ################
+        ##  #if 0
+        ##
+        ##  #elif defined(VTK_CONAN_WANT_AUTOINIT_vtkRenderingOpenGL2) && defined(VTK_CONAN_WANT_AUTOINIT_vtkInteractionStyle)
+        ##  #  define vtkRenderingCore_AUTOINIT 2(vtkRenderingOpenGL2,vtkInteractionStyle)
+        ##
+        ##  #elif defined(VTK_CONAN_WANT_AUTOINIT_vtkRenderingOpenGL2)
+        ##  #  define vtkRenderingCore_AUTOINIT 1(vtkRenderingOpenGL2)
+        ##
+        ##  #elif defined(VTK_CONAN_WANT_AUTOINIT_vtkInteractionStyle)
+        ##  #  define vtkRenderingCore_AUTOINIT 1(vtkInteractionStyle)
+        ##
+        ##  #endif
+        ################
+        # 
+        #
+        autoinits = {}
+        def autoinit_add_implements( comp, implements ):
+            for vtk_implemented in implements:
+                implemented = "vtk" + vtk_implemented.split(':')[2]
+                vtkcomp = "vtk" + comp
+                headerdef = f'{implemented}_AUTOINIT_INCLUDE="vtk-conan/vtk_autoinit_{implemented}.h"'
+                cmddef = f"VTK_CONAN_WANT_AUTOINIT_vtk{comp}"
+
+                print(f"ADDING AUTOINIT {implemented} --> {vtkcomp}")
+
+                if implemented not in autoinits:
+                    autoinits[implemented] = []
+                if vtkcomp not in autoinits[implemented]:
+                    autoinits[implemented].append( "vtk" + comp )
+                if headerdef not in self.cpp_info.components[comp].defines:
+                    self.cpp_info.components[comp].defines.append(headerdef)
+                if cmddef    not in self.cpp_info.components[comp].defines:
+                    self.cpp_info.components[comp].defines.append(cmddef)
+
+
         for module_name in vtkmods["modules"]:
             comp = module_name.split(':')[2]
             comp_libname = vtkmods["modules"][module_name]["library_name"] + self._lib_suffix
@@ -1147,6 +1226,8 @@ class VtkConan(ConanFile):
 
             if has_lib or use_kit:
                 self.output.info("Processing module {}{}".format(module_name, f" (in kit {comp_kit})" if use_kit else ""))
+                # Add any required autoinit definitions for this component
+                autoinit_add_implements( comp, vtkmods["modules"][module_name]["implements"] )
                 self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                 if has_lib:
                     self.cpp_info.components[comp].libs = [comp_libname]
@@ -1164,6 +1245,24 @@ class VtkConan(ConanFile):
                 self.cpp_info.components[comp].requires.append(thirds[module_name])
             else:
                 self.output.warning(f"Skipping module (lib file does not exist, or no kit) {module_name}")
+
+
+        # write those special autoinit header files
+        for implemented in autoinits:
+            content = "#if 0\n\n"
+            all_impls = autoinits[implemented]
+            is_first = True
+            for L in reversed(range(1, len(all_impls)+1)):
+                for subset in itertools.combinations(all_impls, L):
+                    print(subset)
+                    num = len(subset)
+                    impls = ','.join(subset)
+                    gateways = [f"defined(VTK_CONAN_WANT_AUTOINIT_{comp})" for comp in subset]
+                    content += "#elif " + " && ".join(gateways) + "\n"
+                    content += f"#  define {implemented}_AUTOINIT {num}({impls})\n\n"
+            content += "#endif\n"
+            save(self, os.path.join(self.package_folder, "include", "vtk", "vtk-conan", f"vtk_autoinit_{implemented}.h"), content)
+
 
         self.output.info("Components:")
         for dep in self.cpp_info.components:
