@@ -13,6 +13,9 @@
 #include <vtkRenderWindowInteractor.h>
 */
 
+// for testing autoinit
+#include <vtkTextRenderer.h>
+
 #include <vtkVersion.h>
 #include <vtkIntArray.h>
 
@@ -30,6 +33,19 @@ int main(int, char *[])
   vtkSmartPointer<vtkIntArray> numbers = vtkSmartPointer<vtkIntArray>::New();
 
   std::cout << "Using VTK version " << GetVTKVersion() << std::endl;
+
+  vtkSmartPointer<vtkTextRenderer> textrender = vtkSmartPointer<vtkTextRenderer>::New();
+
+  if (textrender)
+  {
+     std::cout << "Check AutoInit TextRenderer:" << std::endl;
+     textrender->PrintSelf(std::cout, vtkIndent(3));
+     std::cout << std::endl;
+  }
+  else
+  {
+     std::cout << "ERROR: Did NOT create TextRenderer ... autoinit not working?" << std::endl;
+  }
 
   return EXIT_SUCCESS;
 }
