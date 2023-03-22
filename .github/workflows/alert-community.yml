@@ -4,8 +4,12 @@ on:
   pull_request_target:
     types: [opened]
 
+env:
+  PYVER: "3.10"
+
 jobs:
   comment:
+    if: github.repository == 'conan-io/conan-center-index'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,17 +19,17 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "docs/*/*"
-          reviewers: "@prince-chrismc @MartinDelille"
+          reviewers: "@prince-chrismc @MartinDelille @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
           files: ".github/*/*"
-          reviewers: "@ericLemanissier @prince-chrismc"
+          reviewers: "@ericLemanissier @prince-chrismc @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
           files: "linter/*/*"
-          reviewers: "@ericLemanissier @prince-chrismc"
+          reviewers: "@ericLemanissier @prince-chrismc @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -36,6 +40,11 @@ jobs:
         with:
           files: "recipes/abseil/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/avahi/*/*"
+          reviewers: "@jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -55,7 +64,12 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/boost/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@grafikrobot @Hopobcn @jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/boost-ext-ut/*/*"
+          reviewers: "@jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -69,6 +83,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/cmake/*/*"
+          reviewers: "@Croydon"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/cppcheck/*/*"
           reviewers: "@MartinDelille"
 
@@ -79,8 +98,18 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/dbus/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/double-conversion/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/eigen/*/*"
+          reviewers: "@jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -95,7 +124,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/fmt/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -140,7 +169,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/gtest/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -161,6 +190,16 @@ jobs:
         with:
           files: "recipes/jemalloc/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libalsa/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libarchive/*/*"
+          reviewers: "@jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -224,8 +263,18 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/libspatialite/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/libunwind/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libuuid/*/*"
+          reviewers: "@jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -249,8 +298,13 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/ms-gsl/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/nlohmann_json/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -275,7 +329,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/openssl/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -290,7 +344,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/qt/*/*"
-          reviewers: "@ericLemanissier @MartinDelille"
+          reviewers: "@ericLemanissier @jwillikers @MartinDelille"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -309,6 +363,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/shapelib/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/snappy/*/*"
           reviewers: "@Hopobcn"
 
@@ -319,13 +378,28 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/wayland/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/wayland-protocols/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/xkbcommon/*/*"
+          reviewers: "@jwillikers"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/xorg/*/*"
           reviewers: "@Hopobcn"
 
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/yaml-cpp/*/*"
-          reviewers: "@MartinDelille"
+          reviewers: "@jwillikers @MartinDelille"
 
       - uses: ./.github/actions/alert-community
         with:

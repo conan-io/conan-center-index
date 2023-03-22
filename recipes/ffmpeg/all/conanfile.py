@@ -3,10 +3,13 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import (
+    apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename,
+    replace_in_file, rm, rmdir
+)
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
 from conans.tools import get_gnu_triplet
 import os
@@ -24,9 +27,9 @@ class FFMpegConan(ConanFile):
     # https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md
     license = ("LGPL-2.1-or-later", "GPL-2.0-or-later")
     homepage = "https://ffmpeg.org"
-    topics = ("ffmpeg", "multimedia", "audio", "video", "encoder", "decoder", "encoding", "decoding",
+    topics = ("multimedia", "audio", "video", "encoder", "decoder", "encoding", "decoding",
               "transcoding", "multiplexer", "demultiplexer", "streaming")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -216,6 +219,13 @@ class FFMpegConan(ConanFile):
             "with_sdl": ["with_programs"],
         }
 
+    @property
+    def _version_supports_vulkan(self):
+        return Version(self.version) >= "4.3.0"
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -234,8 +244,8 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
-        if not self._version_supports_vulkan():
-            del self.options.with_vulkan
+        if not self._version_supports_vulkan:
+            self.options.rm_safe("with_vulkan")
 
     def configure(self):
         if self.options.shared:
@@ -252,11 +262,11 @@ class FFMpegConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openh264:
@@ -282,7 +292,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
@@ -293,7 +303,7 @@ class FFMpegConan(ConanFile):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
-        if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
+        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.239.0")
 
     def validate(self):
@@ -345,7 +355,7 @@ class FFMpegConan(ConanFile):
                 str(self.settings.compiler) if self.settings.os == "Windows" else None,
             )
             target_os = triplet.split("-")[2]
-            if target_os == "gnueabihf":
+            if target_os in ["gnueabihf", "gnueabi"]:
                 target_os = "gnu" # could also be "linux"
             if target_os.startswith("android"):
                 target_os = "android"
@@ -494,9 +504,8 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
-        if self._version_supports_vulkan():
-            args.append(opt_enable_disable(
-                "vulkan", self.options.get_safe("with_vulkan")))
+        if self._version_supports_vulkan:
+            args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -527,8 +536,7 @@ class FFMpegConan(ConanFile):
             args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
             args.append("--toolchain=msvc")
-            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) < "14") or \
-               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) <= "190"):
+            if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.extra_defines.append("inline=__inline")
         if cross_building(self):
@@ -577,6 +585,7 @@ class FFMpegConan(ConanFile):
         return [_format_options_list_item(flag_name, item) for item in _split_options_string(options_string)]
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if is_msvc(self) and self.options.with_libx264 and not self.dependencies["libx264"].options.shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
@@ -896,9 +905,6 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
 
-        if self._version_supports_vulkan() and self.options.get_safe("with_vulkan"):
+        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
                 "vulkan-loader::vulkan-loader")
-
-    def _version_supports_vulkan(self):
-        return Version(self.version) >= "4.3.0"

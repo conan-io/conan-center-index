@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES C)
 
 find_package(rabbitmq-c REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} test_package.c)
 if(RABBITMQ_SHARED)
     target_link_libraries(${PROJECT_NAME} PRIVATE rabbitmq::rabbitmq)
 else()
@@ -12,4 +12,9 @@ endif()
 
 if(WITH_SSL)
     target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_SSL)
+endif()
+
+IF (rabbitmq-c_VERSION VERSION_GREATER_EQUAL "0.12.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE RABBITMQ_C_0_12_0_LATER)
+    target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 endif()

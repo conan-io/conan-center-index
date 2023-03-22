@@ -27,22 +27,23 @@ class GetTextConan(ConanFile):
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"],
+        "threads": ["posix", "solaris", "pth", "windows", "disabled"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "threads": "auto",
+        # Handle default value for `threads` in `config_options` method
     }
 
     @property
     def _is_clang_cl(self):
-        return (str(self.settings.compiler) in ["clang"] and str(self.settings.os) in ["Windows"]) or \
-               self.settings.get_safe("compiler.toolset") == "ClangCL"
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _gettext_folder(self):
@@ -52,17 +53,16 @@ class GetTextConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+
+        self.options.threads = {"Solaris": "solaris", "Windows": "windows"}.get(str(self.settings.os), "posix")
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
-        if (self.options.threads == "auto"):
-            self.options.threads = {"Solaris": "solaris", "Windows": "windows"}.get(str(self.settings.os), "posix")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -74,10 +74,6 @@ class GetTextConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -87,7 +83,7 @@ class GetTextConan(ConanFile):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -108,7 +104,7 @@ class GetTextConan(ConanFile):
             "--disable-libasprintf",
             "--disable-curses",
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
-            f"--with-libiconv-prefix={unix_path(self, self.deps_cpp_info['libiconv'].rootpath)}"
+            f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
         ]
         if is_msvc(self) or self._is_clang_cl:
             target = None
@@ -120,40 +116,11 @@ class GetTextConan(ConanFile):
             if target is not None:
                 tc.configure_args += [f"--host={target}", f"--build={target}"]
 
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
+               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags += ["-FS"]
-
         tc.make_args += ["-C", "intl"]
-        tc.generate()
-
-        deps = AutotoolsDeps(self)
-
-        if is_msvc(self) or self._is_clang_cl:
-            # This mimics the v1 recipe, on the basis that it works and the defaults do not.
-            def lib_paths():
-                for dep in self.deps_cpp_info.deps:
-                    dep_info = self.deps_cpp_info[dep]
-                    for lib_path in dep_info.lib_paths:
-                        yield unix_path(self, lib_path)
-
-            fixed_cppflags_args = deps.vars().get("CPPFLAGS").replace("/I", "-I")
-            deps.environment.define("CPPFLAGS", f"$CPPFLAGS {fixed_cppflags_args}")
-            if self._is_clang_cl:
-                fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-LIBPATH:")
-            else:
-                fixed_ldflags_args = deps.vars().get("LDFLAGS").replace("/LIBPATH:", "-L")
-            deps.environment.define("LDFLAGS", f"$LDFLAGS {fixed_ldflags_args}")
-
-            libs = deps.vars().get("LIBS")
-            deps.environment.define("_LINK_", libs)
-            deps.environment.unset("LIBS")
-
-            for lib_path in lib_paths():
-                deps.environment.prepend_path("LIB", lib_path)
-
-        deps.generate()
-
+        env = tc.environment()
         if is_msvc(self) or self._is_clang_cl:
             def programs():
                 rc = None
@@ -165,10 +132,9 @@ class GetTextConan(ConanFile):
                     return os.environ.get("CC", "clang-cl"), os.environ.get("AR", "llvm-lib"), os.environ.get("LD", "lld-link"), rc
                 if is_msvc(self):
                     return "cl -nologo", "lib", "link", rc
-                    
-            env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
             cc, ar, link, rc = programs()
             env.define("CC", f"{compile_wrapper} {cc}")
             env.define("CXX", f"{compile_wrapper} {cc}")
@@ -180,8 +146,38 @@ class GetTextConan(ConanFile):
             if rc is not None:
                 env.define("RC", rc)
                 env.define("WINDRES", rc)
+        tc.generate(env)
 
-            env.vars(self).save_script("conanbuild_msvc")
+        if is_msvc(self) or self._is_clang_cl:
+            # Custom AutotoolsDeps for cl like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
+
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -201,8 +197,7 @@ class GetTextConan(ConanFile):
         copy(self, "*gnuintl*.dylib", self.build_folder, dest_lib_dir, keep_path=False)
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
-        if (is_msvc(self) or self._is_clang_cl) and self.options.shared:
-            rename(self, os.path.join(dest_lib_dir, "gnuintl.dll.lib"), os.path.join(dest_lib_dir, "gnuintl.lib"))
+        fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -214,3 +209,19 @@ class GetTextConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "Intl"
         self.cpp_info.names["cmake_find_package_multi"] = "Intl"
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    from conan.tools.files import rename
+    import glob
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

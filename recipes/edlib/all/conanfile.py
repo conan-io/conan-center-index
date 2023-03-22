@@ -1,24 +1,24 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.54.0"
 
 
 class EdlibConan(ConanFile):
     name = "edlib"
     description = "Lightweight, super fast C/C++ (& Python) library for " \
                   "sequence alignment using edit (Levenshtein) distance."
-    topics = ("edlib", "sequence-alignment", "edit-distance", "levehnstein-distance", "alignment-path")
+    topics = ("sequence-alignment", "edit-distance", "levehnstein-distance", "alignment-path")
     license = "MIT"
     homepage = "https://github.com/Martinsos/edlib"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,9 +29,24 @@ class EdlibConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "1.2.7" else "14"
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "14": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "5.1",
+            },
+        }.get(self._min_cppstd, {})
+
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,38 +54,23 @@ class EdlibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
-
-    def validate(self):
-        if Version(self.version) < "1.2.7":
-            if self.info.settings.compiler.cppstd:
-                check_min_cppstd(self, 11)
-            return
-
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
-
-        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{}/{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
-        elif Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("{}/{} requires C++14, which your compiler does not support.".format(self.name, self.version))
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -100,11 +100,13 @@ class EdlibConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "edlib")
         self.cpp_info.set_property("cmake_target_name", "edlib::edlib")
-        self.cpp_info.set_property("pkg_config_name", "edlib-{}".format(Version(self.version).major))
+        self.cpp_info.set_property("pkg_config_name", f"edlib-{Version(self.version).major}")
         self.cpp_info.libs = ["edlib"]
         if self.options.shared:
             self.cpp_info.defines = ["EDLIB_SHARED"]
         if not self.options.shared:
-            stdcpp_library = tools_legacy.stdcpp_library(self)
-            if stdcpp_library:
-                self.cpp_info.system_libs.append(stdcpp_library)
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)

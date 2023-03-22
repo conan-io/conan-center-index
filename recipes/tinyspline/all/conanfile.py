@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
-
+required_conan_version = ">=1.53.0"
 
 class TinysplineConan(ConanFile):
     name = "tinyspline"
@@ -34,8 +33,7 @@ class TinysplineConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,20 +41,14 @@ class TinysplineConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.cxx:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
         if Version(self.version) >= "0.4.0" and self.options.cxx:
-            if self.info.settings.compiler.cppstd:
+            if self.settings.compiler.cppstd:
                 check_min_cppstd(self, 11)
 
     def layout(self):

@@ -2,21 +2,22 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class ClhepConan(ConanFile):
     name = "clhep"
     description = "Class Library for High Energy Physics."
     license = "LGPL-3.0-only"
-    topics = ("clhep", "cern", "hep", "high energy", "physics", "geometry", "algebra")
+    topics = ("cern", "hep", "high energy", "physics", "geometry", "algebra")
     homepage = "http://proj-clhep.web.cern.ch/proj-clhep"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,8 +31,7 @@ class ClhepConan(ConanFile):
     short_paths = True
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,20 +39,19 @@ class ClhepConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration("CLHEP doesn't properly build its shared libs with Visual Studio")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration("CLHEP doesn't properly build its shared libs with Visual Studio")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

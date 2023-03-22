@@ -203,7 +203,7 @@ class Hdf5Conan(ConanFile):
             "hdf5_hl_cpp": {"component": "HL_CXX", "alias_target": "hdf5_hl_cpp", "requirements": ["hdf5_c", "hdf5_cpp", "hdf5_hl"]},
         }
 
-    def _create_cmake_module_alias_targets(self, module_file, targets, is_parallel):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -220,13 +220,21 @@ class Hdf5Conan(ConanFile):
                     set_property(TARGET hdf5::hdf5_hl_cpp PROPERTY INTERFACE_LINK_LIBRARIES HDF5::HL_CXX)
                 endif()
             """)
-        content += textwrap.dedent("set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF"))
+        save(self, module_file, content)
+
+    def _create_cmake_module_variables(self, module_file, is_parallel):
+        content = "set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF")
         save(self, module_file, content)
 
     @property
-    def _module_file_rel_path(self):
+    def _module_targets_file_rel_path(self):
         return os.path.join("lib", "cmake",
                             f"conan-official-{self.name}-targets.cmake")
+
+    @property
+    def _module_variables_file_rel_path(self):
+        return os.path.join("lib", "cmake",
+                            f"conan-official-{self.name}-variables.cmake")
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -236,12 +244,20 @@ class Hdf5Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "libhdf5.settings", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+        # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+
         # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
         components = self._components()
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {f"hdf5::{component['alias_target']}": f"HDF5::{component['component']}" for component in components.values()},
+            os.path.join(self.package_folder, self._module_targets_file_rel_path),
+            {f"hdf5::{component['alias_target']}": f"HDF5::{component['component']}" for component in components.values()}
+        )
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_variables_file_rel_path),
             self.options.get_safe("parallel", False)
         )
 
@@ -265,13 +281,14 @@ class Hdf5Conan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[component_name].names["cmake_find_package"] = component
             self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "HDF5")
         self.cpp_info.set_property("cmake_target_name", "HDF5::HDF5")
         self.cpp_info.set_property("pkg_config_name", "hdf5-all-do-not-use") # to avoid conflict with hdf5_c component
+        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         components = self._components()
         add_component("hdf5_c", **components["hdf5_c"])
