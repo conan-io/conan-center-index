@@ -1,7 +1,138 @@
-diff -ru a/Common/Core/vtkSMPTools.h b/Common/Core/vtkSMPTools.h
---- a/Common/Core/vtkSMPTools.h	2022-11-08 21:35:20.594032199 +0800
-+++ b/Common/Core/vtkSMPTools.h	2022-11-08 21:44:00.668497642 +0800
-@@ -102,7 +102,7 @@
+These are patches that have already been merged into master,
+but are not yet part of the 9.2.x series (last checked: 9.2.6)
+
+commit e9a5bb1b0ccb2a68eee7aeb26bcd6e52a5939d14
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Fri Jun 10 21:58:57 2022 +0800
+
+    Don't call GetClassName() on an null pointer
+
+commit afe6b6b1c9f8b46434e215523d0e7c2487a7e21a
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Fri Jun 17 00:05:41 2022 +0800
+
+    Don't inherit from std::iterator
+
+commit 7c256c72fc7a20679166755e81f6c796fe45bf81
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Fri Jun 10 21:56:47 2022 +0800
+
+    Fix lambda = capture: be explicit
+    
+    Avoid [=] if you need this (C++20 no longer captures 'this' implicitly),
+    and avoid [=, this] because it causes warnings pre C++20,
+    so just use [this, var1, var2] for full compiler support.
+
+commit aaaed2e7175b3643cc0370c5cc14b46f5188dbcb
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Thu Jun 16 17:21:29 2022 +0800
+
+    Improve error printout for vtkGLTFWriter.cxx
+
+commit f48086d0e5598ab156583d4b95e990ead6efe06d
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Fri Jun 10 22:04:19 2022 +0800
+
+    C++20 does not like (enum * float) operations.
+    
+    Can perhaps convert the enum to a static int or some other explicit int
+    constant.
+
+commit 16977faa88b48b566448e1457ab768e91d771b5d
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Fri Jun 10 21:59:37 2022 +0800
+
+    Enforce char[256] function param
+    
+    This is required for istream >> char[]
+    which now does not work with istream >> char* as of C++20
+    https://open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0487r1.html
+    
+    Function array parameters like char[256] will decay to a char* and thus
+    fail to work with istream, so we need to be strict about the array
+    parameter type with func(char (&param)[256])
+    
+    This also means all func callers can only pass a char[256], and there
+    were a few calls that were using char[1024] (and others with char[256]).
+    Those have been adjusted to 256, as I could not see any reason to use
+    the longer buffer - it would have always only read 256 bytes in the
+    past.
+
+commit ea7cf14495911136122e10670b29c322e76668a4
+Author: Paul Harris <harris.pc@gmail.com>
+Date:   Fri Jun 10 03:59:03 2022 -0400
+
+    Tweak to fix compiling for gcc11 and -std=c++20
+
+=====================================================================
+
+diff --git a/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h b/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h
+index 3a64fb7129..e63ab157f8 100644
+--- a/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h
++++ b/Common/Core/SMP/Common/vtkSMPThreadLocalAPI.h
+@@ -122,9 +122,15 @@ public:
+   }
+ 
+   //--------------------------------------------------------------------------------
+-  class iterator : public std::iterator<std::forward_iterator_tag, T> // for iterator_traits
++  class iterator
+   {
+   public:
++    using iterator_category = std::forward_iterator_tag;
++    using value_type = T;
++    using difference_type = std::ptrdiff_t;
++    using pointer = T*;
++    using reference = T&;
++
+     iterator() = default;
+ 
+     iterator(const iterator& other)
+diff --git a/Common/Core/vtkCollectionRange.h b/Common/Core/vtkCollectionRange.h
+index 221e7b9367..9ac161b03d 100644
+--- a/Common/Core/vtkCollectionRange.h
++++ b/Common/Core/vtkCollectionRange.h
+@@ -98,23 +98,18 @@ public:
+ // vtkObjects consts makes them unusable.
+ template <typename CollectionType>
+ struct CollectionIterator
+-  : public std::iterator<std::forward_iterator_tag,
+-      typename GetCollectionItemType<CollectionType>::Type*, int,
+-      typename GetCollectionItemType<CollectionType>::Type*,
+-      typename GetCollectionItemType<CollectionType>::Type*>
+ {
+   static_assert(IsCollection<CollectionType>::value, "Invalid vtkCollection subclass.");
+ 
+ private:
+   using ItemType = typename GetCollectionItemType<CollectionType>::Type;
+-  using Superclass = std::iterator<std::forward_iterator_tag, ItemType*, int, ItemType*, ItemType*>;
+ 
+ public:
+-  using iterator_category = typename Superclass::iterator_category;
+-  using value_type = typename Superclass::value_type;
+-  using difference_type = typename Superclass::difference_type;
+-  using pointer = typename Superclass::pointer;
+-  using reference = typename Superclass::reference;
++  using iterator_category = std::forward_iterator_tag;
++  using value_type = typename GetCollectionItemType<CollectionType>::Type*;
++  using difference_type = int;
++  using pointer = typename GetCollectionItemType<CollectionType>::Type*;
++  using reference = typename GetCollectionItemType<CollectionType>::Type*;
+ 
+   CollectionIterator() noexcept
+     : Element(nullptr)
+diff --git a/Common/Core/vtkSMPTools.h b/Common/Core/vtkSMPTools.h
+index 405608d291..11ab60fd45 100644
+--- a/Common/Core/vtkSMPTools.h
++++ b/Common/Core/vtkSMPTools.h
+@@ -37,7 +37,6 @@
+ #include "vtkSMPThreadLocal.h" // For Initialized
+ 
+ #include <functional>  // For std::function
+-#include <iterator>    // For std::iterator
+ #include <type_traits> // For std:::enable_if
+ 
+ #ifndef DOXYGEN_SHOULD_SKIP_THIS
+@@ -102,7 +101,7 @@ struct vtkSMPTools_FunctorInternal<Functor, false>
    }
    vtkSMPTools_FunctorInternal<Functor, false>& operator=(
      const vtkSMPTools_FunctorInternal<Functor, false>&);
@@ -10,7 +141,7 @@ diff -ru a/Common/Core/vtkSMPTools.h b/Common/Core/vtkSMPTools.h
  };
  
  template <typename Functor>
-@@ -133,7 +133,7 @@
+@@ -133,7 +132,7 @@ struct vtkSMPTools_FunctorInternal<Functor, true>
    }
    vtkSMPTools_FunctorInternal<Functor, true>& operator=(
      const vtkSMPTools_FunctorInternal<Functor, true>&);
@@ -19,64 +150,266 @@ diff -ru a/Common/Core/vtkSMPTools.h b/Common/Core/vtkSMPTools.h
  };
  
  template <typename Functor>
-diff -ru a/Filters/Extraction/vtkValueSelector.cxx b/Filters/Extraction/vtkValueSelector.cxx
---- a/Filters/Extraction/vtkValueSelector.cxx	2022-11-08 21:35:18.582194958 +0800
-+++ b/Filters/Extraction/vtkValueSelector.cxx	2022-11-08 21:44:00.672497694 +0800
-@@ -180,7 +180,7 @@
+diff --git a/Common/DataModel/vtkCompositeDataSetRange.h b/Common/DataModel/vtkCompositeDataSetRange.h
+index 19c5981f6b..3c22876c7c 100644
+--- a/Common/DataModel/vtkCompositeDataSetRange.h
++++ b/Common/DataModel/vtkCompositeDataSetRange.h
+@@ -54,21 +54,17 @@ using CompositeDataSetIteratorReference =
+ //------------------------------------------------------------------------------
+ // vtkCompositeDataSet iterator. Returns vtk::CompositeDataSetNodeReference.
+ struct CompositeDataSetIterator
+-  : public std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-      CompositeDataSetIteratorReference, CompositeDataSetIteratorReference>
+ {
+ private:
+-  using Superclass = std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-    CompositeDataSetIteratorReference, CompositeDataSetIteratorReference>;
+   using InternalIterator = vtkCompositeDataIterator;
+   using SmartIterator = vtkSmartPointer<InternalIterator>;
+ 
+ public:
+-  using iterator_category = typename Superclass::iterator_category;
+-  using value_type = typename Superclass::value_type;
+-  using difference_type = typename Superclass::difference_type;
+-  using pointer = typename Superclass::pointer;
+-  using reference = typename Superclass::reference;
++  using iterator_category = std::forward_iterator_tag;
++  using value_type = vtkDataObject*;
++  using difference_type = int;
++  using pointer = CompositeDataSetIteratorReference;
++  using reference = CompositeDataSetIteratorReference;
+ 
+   CompositeDataSetIterator(const CompositeDataSetIterator& o)
+     : Iterator(o.Iterator ? SmartIterator::Take(o.Iterator->NewInstance()) : nullptr)
+diff --git a/Common/DataModel/vtkDataObjectTreeRange.h b/Common/DataModel/vtkDataObjectTreeRange.h
+index 1a4c27729d..484a06c8d3 100644
+--- a/Common/DataModel/vtkDataObjectTreeRange.h
++++ b/Common/DataModel/vtkDataObjectTreeRange.h
+@@ -54,21 +54,17 @@ using DataObjectTreeIteratorReference =
+   vtk::CompositeDataSetNodeReference<vtkDataObjectTreeIterator, DataObjectTreeIterator>;
+ 
+ struct DataObjectTreeIterator
+-  : public std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-      DataObjectTreeIteratorReference, DataObjectTreeIteratorReference>
+ {
+ private:
+-  using Superclass = std::iterator<std::forward_iterator_tag, vtkDataObject*, int,
+-    DataObjectTreeIteratorReference, DataObjectTreeIteratorReference>;
+   using InternalIterator = vtkDataObjectTreeIterator;
+   using SmartIterator = vtkSmartPointer<InternalIterator>;
+ 
+ public:
+-  using iterator_category = typename Superclass::iterator_category;
+-  using value_type = typename Superclass::value_type;
+-  using difference_type = typename Superclass::difference_type;
+-  using pointer = typename Superclass::pointer;
+-  using reference = typename Superclass::reference;
++  using iterator_category = std::forward_iterator_tag;
++  using value_type = vtkDataObject*;
++  using difference_type = int;
++  using pointer = DataObjectTreeIteratorReference;
++  using reference = DataObjectTreeIteratorReference;
+ 
+   DataObjectTreeIterator(const DataObjectTreeIterator& o)
+     : Iterator(o.Iterator ? SmartIterator::Take(o.Iterator->NewInstance()) : nullptr)
+diff --git a/Documentation/release/dev/fix-for-cxx20.md b/Documentation/release/dev/fix-for-cxx20.md
+new file mode 100644
+index 0000000000..3c996ea8e7
+--- /dev/null
++++ b/Documentation/release/dev/fix-for-cxx20.md
+@@ -0,0 +1,9 @@
++## Fixes for C++20
++
++Several fixes to allow VTK to build with gcc11 -std=c++20
++
++* C++20 does not like (enum * float) operations, forced to int*float.
++* Enforce char[256] function param.
++* Fixup lambdas that capture 'this' ('this' is no longer captured implicitly with =).
++
++And a bonus bugfix: Don't call GetClassName() on an null pointer.
+diff --git a/Filters/Extraction/vtkValueSelector.cxx b/Filters/Extraction/vtkValueSelector.cxx
+index 5d4a6cd6c5..4cb7d4cecf 100644
+--- a/Filters/Extraction/vtkValueSelector.cxx
++++ b/Filters/Extraction/vtkValueSelector.cxx
+@@ -180,49 +180,51 @@ struct ArrayValueRangeFunctor
  
      if (comp >= 0)
      {
 -      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
-+      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
-         const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
-         const auto selRange = vtk::DataArrayTupleRange<2>(selList);
-         auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
-@@ -201,7 +201,7 @@
+-        const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
+-        const auto selRange = vtk::DataArrayTupleRange<2>(selList);
+-        auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
++      vtkSMPTools::For(0, fArray->GetNumberOfTuples(),
++        [this, comp, fArray, selList](vtkIdType begin, vtkIdType end) {
++          const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
++          const auto selRange = vtk::DataArrayTupleRange<2>(selList);
++          auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
+ 
+-        using FTupleCRefType = typename decltype(fRange)::ConstTupleReferenceType;
+-        using STupleCRefType = typename decltype(selRange)::ConstTupleReferenceType;
++          using FTupleCRefType = typename decltype(fRange)::ConstTupleReferenceType;
++          using STupleCRefType = typename decltype(selRange)::ConstTupleReferenceType;
+ 
+-        auto insideIter = insideRange.begin();
+-        for (FTupleCRefType fTuple : fRange)
+-        {
+-          const ValueType val = fTuple[comp];
+-          auto matchIter = std::find_if(selRange.cbegin(), selRange.cend(),
+-            [&](STupleCRefType range) -> bool { return val >= range[0] && val <= range[1]; });
+-          *insideIter++ = matchIter != selRange.cend() ? 1 : 0;
+-        }
+-      });
++          auto insideIter = insideRange.begin();
++          for (FTupleCRefType fTuple : fRange)
++          {
++            const ValueType val = fTuple[comp];
++            auto matchIter = std::find_if(selRange.cbegin(), selRange.cend(),
++              [&](STupleCRefType range) -> bool { return val >= range[0] && val <= range[1]; });
++            *insideIter++ = matchIter != selRange.cend() ? 1 : 0;
++          }
++        });
+     }
      else
      {
        // compare vector magnitude.
 -      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
-+      vtkSMPTools::For(0, fArray->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
-         const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
-         const auto selRange = vtk::DataArrayTupleRange<2>(selList);
-         auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
-diff -ru a/Filters/General/vtkDeflectNormals.cxx b/Filters/General/vtkDeflectNormals.cxx
---- a/Filters/General/vtkDeflectNormals.cxx	2022-11-08 21:35:18.606193014 +0800
-+++ b/Filters/General/vtkDeflectNormals.cxx	2022-11-08 21:44:00.672497694 +0800
-@@ -70,7 +70,7 @@
+-        const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
+-        const auto selRange = vtk::DataArrayTupleRange<2>(selList);
+-        auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
++      vtkSMPTools::For(
++        0, fArray->GetNumberOfTuples(), [this, fArray, selList](vtkIdType begin, vtkIdType end) {
++          const auto fRange = vtk::DataArrayTupleRange(fArray, begin, end);
++          const auto selRange = vtk::DataArrayTupleRange<2>(selList);
++          auto insideRange = vtk::DataArrayValueRange<1>(this->InsidednessArray, begin, end);
+ 
+-        using FTupleCRefType = typename decltype(fRange)::ConstTupleReferenceType;
+-        using STupleCRefType = typename decltype(selRange)::ConstTupleReferenceType;
++          using FTupleCRefType = typename decltype(fRange)::ConstTupleReferenceType;
++          using STupleCRefType = typename decltype(selRange)::ConstTupleReferenceType;
+ 
+-        auto insideIter = insideRange.begin();
+-        for (FTupleCRefType fTuple : fRange)
+-        {
+-          ValueType val{ 0 };
+-          for (const ValueType fComp : fTuple)
++          auto insideIter = insideRange.begin();
++          for (FTupleCRefType fTuple : fRange)
+           {
+-            val += fComp * fComp;
++            ValueType val{ 0 };
++            for (const ValueType fComp : fTuple)
++            {
++              val += fComp * fComp;
++            }
++            const auto mag = static_cast<ValueType>(std::sqrt(val));
++            auto matchIter = std::find_if(selRange.cbegin(), selRange.cend(),
++              [&](STupleCRefType range) -> bool { return mag >= range[0] && mag <= range[1]; });
++            *insideIter++ = matchIter != selRange.cend() ? 1 : 0;
+           }
+-          const auto mag = static_cast<ValueType>(std::sqrt(val));
+-          auto matchIter = std::find_if(selRange.cbegin(), selRange.cend(),
+-            [&](STupleCRefType range) -> bool { return mag >= range[0] && mag <= range[1]; });
+-          *insideIter++ = matchIter != selRange.cend() ? 1 : 0;
+-        }
+-      });
++        });
+     }
+   }
+ 
+diff --git a/Filters/General/vtkDeflectNormals.cxx b/Filters/General/vtkDeflectNormals.cxx
+index e991ea2cc2..69987edc32 100644
+--- a/Filters/General/vtkDeflectNormals.cxx
++++ b/Filters/General/vtkDeflectNormals.cxx
+@@ -70,29 +70,31 @@ struct vtkDeflectNormalsWorker
    void operator()(VectorArrayT* vectors)
    {
      const double* normal = this->Self->GetUserNormal();
 -    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
-+    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
-       for (vtkIdType t = begin; t < end; ++t)
-       {
-         typename VectorArrayT::ValueType vec[3];
-@@ -83,7 +83,7 @@
+-      for (vtkIdType t = begin; t < end; ++t)
+-      {
+-        typename VectorArrayT::ValueType vec[3];
+-        vectors->GetTypedTuple(t, vec);
+-        this->ComputeTuple(t, vec, normal);
+-      }
+-    });
++    vtkSMPTools::For(
++      0, vectors->GetNumberOfTuples(), [this, vectors, normal](vtkIdType begin, vtkIdType end) {
++        for (vtkIdType t = begin; t < end; ++t)
++        {
++          typename VectorArrayT::ValueType vec[3];
++          vectors->GetTypedTuple(t, vec);
++          this->ComputeTuple(t, vec, normal);
++        }
++      });
+   }
+ 
    template <typename VectorArrayT, typename NormalArrayT>
    void operator()(VectorArrayT* vectors, NormalArrayT* normals)
    {
 -    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=](vtkIdType begin, vtkIdType end) {
-+    vtkSMPTools::For(0, vectors->GetNumberOfTuples(), [=, this](vtkIdType begin, vtkIdType end) {
-       for (vtkIdType t = begin; t < end; ++t)
-       {
-         typename VectorArrayT::ValueType vec[3];
-diff -ru a/Filters/General/vtkMergeTimeFilter.cxx b/Filters/General/vtkMergeTimeFilter.cxx
---- a/Filters/General/vtkMergeTimeFilter.cxx	2022-11-08 21:35:20.674025735 +0800
-+++ b/Filters/General/vtkMergeTimeFilter.cxx	2022-11-08 21:44:00.672497694 +0800
-@@ -100,7 +100,7 @@
+-      for (vtkIdType t = begin; t < end; ++t)
+-      {
+-        typename VectorArrayT::ValueType vec[3];
+-        typename NormalArrayT::ValueType normal[3];
+-        vectors->GetTypedTuple(t, vec);
+-        normals->GetTypedTuple(t, normal);
+-        this->ComputeTuple(t, vec, normal);
+-      }
+-    });
++    vtkSMPTools::For(
++      0, vectors->GetNumberOfTuples(), [this, vectors, normals](vtkIdType begin, vtkIdType end) {
++        for (vtkIdType t = begin; t < end; ++t)
++        {
++          typename VectorArrayT::ValueType vec[3];
++          typename NormalArrayT::ValueType normal[3];
++          vectors->GetTypedTuple(t, vec);
++          normals->GetTypedTuple(t, normal);
++          this->ComputeTuple(t, vec, normal);
++        }
++      });
+   }
+ };
+ } // end anon namespace
+diff --git a/Filters/General/vtkMergeTimeFilter.cxx b/Filters/General/vtkMergeTimeFilter.cxx
+index b4bef5954c..fa914dabe4 100644
+--- a/Filters/General/vtkMergeTimeFilter.cxx
++++ b/Filters/General/vtkMergeTimeFilter.cxx
+@@ -100,7 +100,7 @@ void vtkMergeTimeFilter::MergeTimeSteps(const std::vector<double>& timeSteps)
    for (double newTime : timeSteps)
    {
      // lambda to find TimeStep in the list, depending on Tolerance.
 -    auto insideTolerance = [=](double outputTime) {
-+    auto insideTolerance = [=, this](double outputTime) {
++    auto insideTolerance = [this, newTime](double outputTime) {
        return this->AreTimesWithinTolerance(outputTime, newTime);
      };
  
-diff -ru a/IO/Legacy/vtkDataReader.cxx b/IO/Legacy/vtkDataReader.cxx
---- a/IO/Legacy/vtkDataReader.cxx	2022-11-08 21:35:20.738020563 +0800
-+++ b/IO/Legacy/vtkDataReader.cxx	2022-11-08 21:44:00.680497797 +0800
-@@ -291,7 +291,7 @@
+diff --git a/IO/Geometry/vtkGLTFWriter.cxx b/IO/Geometry/vtkGLTFWriter.cxx
+index 29e4d734a0..057ea5e282 100644
+--- a/IO/Geometry/vtkGLTFWriter.cxx
++++ b/IO/Geometry/vtkGLTFWriter.cxx
+@@ -805,8 +805,15 @@ void vtkGLTFWriter::WriteToStreamMultiBlock(ostream& output, vtkMultiBlockDataSe
+       }
+       else
+       {
+-        vtkLog(
+-          WARNING, "Expecting vtkPolyData but got: " << it->GetCurrentDataObject()->GetClassName());
++        if (it->GetCurrentDataObject())
++        {
++          vtkLog(
++            WARNING, "Expecting vtkPolyData, got: " << it->GetCurrentDataObject()->GetClassName());
++        }
++        else
++        {
++          vtkLog(WARNING, "Expecting vtkPolyData, got: NULL");
++        }
+       }
+     }
+   }
+diff --git a/IO/Legacy/vtkDataReader.cxx b/IO/Legacy/vtkDataReader.cxx
+index 848be9ab69..cfc498e603 100644
+--- a/IO/Legacy/vtkDataReader.cxx
++++ b/IO/Legacy/vtkDataReader.cxx
+@@ -291,7 +291,7 @@ int vtkDataReader::ReadLine(char result[256])
  //------------------------------------------------------------------------------
  // Internal function to read in a string up to 256 characters.
  // Returns zero if there was an error.
@@ -85,10 +418,11 @@ diff -ru a/IO/Legacy/vtkDataReader.cxx b/IO/Legacy/vtkDataReader.cxx
  {
    // Force the parameter to be seen as a 256-byte array rather than a decayed
    // pointer.
-diff -ru a/IO/Legacy/vtkDataReader.h b/IO/Legacy/vtkDataReader.h
---- a/IO/Legacy/vtkDataReader.h	2022-11-08 21:35:18.818175844 +0800
-+++ b/IO/Legacy/vtkDataReader.h	2022-11-08 21:44:00.684497850 +0800
-@@ -468,7 +468,7 @@
+diff --git a/IO/Legacy/vtkDataReader.h b/IO/Legacy/vtkDataReader.h
+index 4bad0fdc6e..e074632307 100644
+--- a/IO/Legacy/vtkDataReader.h
++++ b/IO/Legacy/vtkDataReader.h
+@@ -468,7 +468,7 @@ public:
     * Internal function to read in a string up to 256 characters.
     * Returns zero if there was an error.
     */
@@ -97,22 +431,32 @@ diff -ru a/IO/Legacy/vtkDataReader.h b/IO/Legacy/vtkDataReader.h
  
    /**
     * Helper method for reading in data.
-diff -ru a/IO/XML/vtkXMLPHyperTreeGridReader.cxx b/IO/XML/vtkXMLPHyperTreeGridReader.cxx
---- a/IO/XML/vtkXMLPHyperTreeGridReader.cxx	2022-11-08 21:35:18.858172604 +0800
-+++ b/IO/XML/vtkXMLPHyperTreeGridReader.cxx	2022-11-08 21:44:00.684497850 +0800
-@@ -201,7 +201,7 @@
+diff --git a/IO/XML/vtkXMLPHyperTreeGridReader.cxx b/IO/XML/vtkXMLPHyperTreeGridReader.cxx
+index a6097323e6..ffa0eb19d1 100644
+--- a/IO/XML/vtkXMLPHyperTreeGridReader.cxx
++++ b/IO/XML/vtkXMLPHyperTreeGridReader.cxx
+@@ -201,7 +201,15 @@ int vtkXMLPHyperTreeGridReader::ReadPieceData()
  
    if (!output)
    {
 -    vtkErrorMacro("Incorrect type of output: " << output->GetClassName());
-+    vtkErrorMacro("Incorrect type of output: " << this->GetClassName());
++    if (this->GetCurrentOutput())
++    {
++      vtkErrorMacro(
++        "Expected: vtkHyperTreeGrid, got: " << this->GetCurrentOutput()->GetClassName());
++    }
++    else
++    {
++      vtkErrorMacro("Expected: vtkHyperTreeGrid, got NULL output");
++    }
      return 0;
    }
  
-diff -ru a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx
---- a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx	2022-11-08 21:35:19.134150262 +0800
-+++ b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx	2022-11-08 21:44:00.684497850 +0800
-@@ -538,14 +538,14 @@
+diff --git a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx
+index 27a0c4d18d..f6388615ef 100644
+--- a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx
++++ b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx
+@@ -538,14 +538,14 @@ void vtkUnstructuredGridPartialPreIntegration::BuildPsiTable()
  
    for (int gammafi = 0; gammafi < PSI_TABLE_SIZE; gammafi++)
    {
@@ -130,10 +474,11 @@ diff -ru a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.cxx b/Rende
          vtkUnstructuredGridLinearRayIntegrator::Psi(1, taufD, taubD);
      }
    }
-diff -ru a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h
---- a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h	2022-11-08 21:35:19.134150262 +0800
-+++ b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h	2022-11-08 21:44:00.684497850 +0800
-@@ -113,8 +113,8 @@
+diff --git a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h
+index 72b7fb6b42..3807b05dc4 100644
+--- a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h
++++ b/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h
+@@ -113,8 +113,8 @@ inline float vtkUnstructuredGridPartialPreIntegration::Psi(float taufD, float ta
  {
    float gammaf = taufD / (taufD + 1);
    float gammab = taubD / (taubD + 1);
@@ -144,23 +489,3 @@ diff -ru a/Rendering/Volume/vtkUnstructuredGridPartialPreIntegration.h b/Renderi
    return PsiTable[gammafi * PSI_TABLE_SIZE + gammabi];
  }
  
---- IO/CGNS/vtkCGNSReader.cxx
-+++ IO/CGNS/vtkCGNSReader.cxx
-@@ -4222,17 +4222,6 @@
- }
-
- //----------------------------------------------------------------------------
--class WithinTolerance : public std::binary_function<double, double, bool>
--{
--public:
--  result_type operator()(first_argument_type a, second_argument_type b) const
--  {
--    bool result = (std::fabs(a - b) <= (a * 1E-6));
--    return (result_type)result;
--  }
--};
--
--//----------------------------------------------------------------------------
- int vtkCGNSReader::RequestData(vtkInformation* vtkNotUsed(request),
-   vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector)
- {

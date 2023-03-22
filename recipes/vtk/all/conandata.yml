@@ -1,13 +1,13 @@
 sources:
+  "9.2.6":
+    url: "https://www.vtk.org/files/release/9.2/VTK-9.2.6.tar.gz"
+    sha256: "06fc8d49c4e56f498c40fcb38a563ed8d4ec31358d0101e8988f0bb4d539dd12"
   "9.2.5":
     url: "https://www.vtk.org/files/release/9.2/VTK-9.2.5.tar.gz"
     sha256: "128d601baa980e98ee034207974b33fb38d2c98ab9cf4a5756efdb09ed6c0949"
-  "9.2.2":
-    url: "https://www.vtk.org/files/release/9.2/VTK-9.2.2.tar.gz"
-    sha256: "1c5b0a2be71fac96ff4831af69e350f7a0ea3168981f790c000709dcf9121075"
 
 patches:
-  "9.2.5":
+  "9.2.6":
     - patch_file: "patches/9.2.2-remove-qt-59-limit.patch"
       patch_type: "conan"
       patch_description: "Don't limit QT to 5.9.x"
@@ -17,7 +17,10 @@ patches:
     - patch_file: "patches/9.2.2-fix-cxx20-3rdparty-diy.patch"
       patch_type: "conan"
       patch_description: "Upgrade small_vector.hpp to newer code, patch is upstreamed but stuck"
-  "9.2.2":
+    - patch_file: "patches/9.2.6-fix-vtkConstrainedPointHandleRepresentation.patch"
+      patch_type: "conan"
+      patch_description: "Minor typo fix, patch has been upstreamed"
+  "9.2.5":
     - patch_file: "patches/9.2.2-remove-qt-59-limit.patch"
       patch_type: "conan"
       patch_description: "Don't limit QT to 5.9.x"
