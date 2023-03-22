@@ -422,7 +422,6 @@ class OpenSSLConan(ConanFile):
                     cflags => add("{cflags}"),
                     cxxflags => add("{cxxflags}"),
                     {defines}
-                    includes => add({includes}),
                     lflags => add("{lflags}"),
                     {shared_target}
                     {shared_cflag}
@@ -468,7 +467,6 @@ class OpenSSLConan(ConanFile):
             cflags=" ".join(cflags),
             cxxflags=" ".join(cxxflags),
             defines=defines,
-            includes=includes,
             perlasm_scheme=perlasm_scheme,
             shared_target=shared_target,
             shared_extension=shared_extension,
