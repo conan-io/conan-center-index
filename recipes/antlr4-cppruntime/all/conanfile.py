@@ -60,11 +60,16 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # As of 4.11, antlr4-cppruntime no longer requires libuuid.
-        # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
+        # 1. As of 4.10, antlr4-cppruntime no longer requires `utfcpp`.
+        # Reference: [C++] Implement standalone Unicode encoding and decoding handling
+        #      Link: https://github.com/antlr/antlr4/pull/3398
+        # 2. As of 4.11, antlr4-cppruntime no longer requires `libuuid`.
+        # Reference: [C++] Remove libuuid dependency
+        #      Link: https://github.com/antlr/antlr4/pull/3787
         # Note that the above PR points that libuuid can be removed from 4.9.3, 4.10 and 4.10.1 as well.
         # We have patched the CMakeLists.txt to drop the dependency on libuuid from aforementioned antlr versions.
-        self.requires("utfcpp/3.2.3")
+        if Version(self.version) < "4.10":
+            self.requires("utfcpp/3.2.3")
 
     def validate(self):
         # Compilation of this library on version 15 claims C2668 Error.
