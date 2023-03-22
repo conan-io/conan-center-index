@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 import functools
 import os
@@ -18,7 +18,7 @@ class DCMTKConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://dicom.offis.de/dcmtk"
     license = "BSD-3-Clause"
-    topics = ("dcmtk", "dicom", "image")
+    topics = ("dicom", "image")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -68,42 +68,38 @@ class DCMTKConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
         self.copy("CMakeLists.txt")
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-            del self.options.with_tcpwrappers
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("with_tcpwrappers")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.charset_conversion == "libiconv":
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/71.1")
+            self.requires("icu/72.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.13")
+            self.requires("libxml2/2.10.3")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_openssl:
             if self.settings.os == "Windows":
                 # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
                 self.requires("openssl/1.0.2u")
             else:
-                self.requires("openssl/1.1.1n")
+                self.requires("openssl/1.1.1t")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
 
@@ -162,7 +158,10 @@ class DCMTKConan(ConanFile):
 
         cmake.definitions["DCMTK_ENABLE_PRIVATE_TAGS"] = self.options.builtin_private_tags
         if self.options.external_dictionary is not None:
-            cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+            if Version(self.version) < "3.6.7":
+                cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+            else:
+                cmake.definitions["DCMTK_DEFAULT_DICT"] = self.options.external_dictionary
         if self.options.builtin_dictionary is not None:
             cmake.definitions["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
         cmake.definitions["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
@@ -171,7 +170,7 @@ class DCMTKConan(ConanFile):
         if self.settings.os == "Windows":
             cmake.definitions["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
 
-        if self._is_msvc:
+        if is_msvc(self):
             cmake.definitions["DCMTK_ICONV_FLAGS_ANALYZED"] = True
             cmake.definitions["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = "MD" in msvc_runtime_flag(self)
 
@@ -191,6 +190,7 @@ class DCMTKConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
