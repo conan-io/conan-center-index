@@ -85,7 +85,7 @@ class VulkanLoaderConan(ConanFile):
         check_min_vs(self, "191")
         # TODO: to replace by some version range check
         if self.dependencies["vulkan-headers"].ref.version != self.version:
-            self.output.warn("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
+            self.output.warning("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
 
     def build_requirements(self):
         if self._is_pkgconf_needed:
