@@ -333,13 +333,6 @@ class OpenSSLConan(ConanFile):
             )
         return ancestor
 
-    # def _tool(self, env_name, apple_name):
-    #     if env_name in os.environ:
-    #         return os.environ[env_name]
-    #     if self.settings.compiler == "apple-clang":
-    #         return getattr(tools.XCRun(self.settings), apple_name)
-    #     return None
-
     def _get_default_openssl_dir(self):
         if self.settings.os == "Linux":
             return "/etc/ssl"
