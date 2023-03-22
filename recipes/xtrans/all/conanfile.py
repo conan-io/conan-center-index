@@ -12,7 +12,7 @@ class XtransConan(ConanFile):
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
     description = "X Network Transport layer shared code"
-    settings = "os", "compiler", "build_type" # no arch here, because the xtrans system package is arch independant
+    settings = "os", "arch", "compiler", "build_type"
     topics = ("x11", "xorg")
 
     def validate(self):
@@ -20,7 +20,9 @@ class XtransConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
-        self.info.header_only()
+        del self.info.settings.compiler
+        del self.info.settings.arch
+        del self.info.settings.build_type
 
     def system_requirements(self):
         apt = package_manager.Apt(self)

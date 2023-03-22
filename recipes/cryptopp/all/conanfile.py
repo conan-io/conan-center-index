@@ -177,7 +177,7 @@ class CryptoPPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cryptopp")
         self.cpp_info.set_property("cmake_target_name", "cryptopp::cryptopp")
         legacy_cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
-        self.cpp_info.set_property("cmake_target_name_aliases", [legacy_cmake_target])
+        self.cpp_info.set_property("cmake_target_aliases", [legacy_cmake_target])
         self.cpp_info.set_property("pkg_config_name", "libcryptopp")
 
         # TODO: back to global scope once cmake_find_package* generators removed

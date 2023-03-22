@@ -1,45 +1,51 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
 import os
-import shutil
+
+from conan import ConanFile
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.files import copy
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.microsoft import is_msvc
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = "Imakefile", "test_package.c"
+    test_type = "explicit"
 
     def build_requirements(self):
-        self.build_requires("imake/1.0.8")
-        if not tools.get_env("CONAN_MAKE_PROGRAM"):
-            self.build_requires("make/4.3")
+        self.tool_requires(self.tested_reference_str)
+        self.tool_requires("imake/1.0.8")
+        if not self.conf_info.get("tools.gnu:make_program", check_type=str):
+            self.tool_requires("make/4.3")
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl -nologo",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def layout(self):
+        basic_layout(self)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        env = tc.environment()
+        if is_msvc(self):
+            env.define("CC", "cl -nologo")
+        tc.generate()
+
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
     def build(self):
         for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
-        if not tools.cross_building(self):
-            with self._build_context():
-                self.run("imake -DUseInstalled -I{}".format(self.deps_user_info["xorg-cf-files"].CONFIG_PATH), run_environment=True)
-        with self._build_context():
-            autotools = AutoToolsBuildEnvironment(self)
-            with tools.environment_append(autotools.vars):
-                autotools.make(target="test_package")
+            copy(self, src, self.source_folder, self.build_folder)
+
+        config_path = self.conf.get("user.xorg-cf-files:config-path")
+        self.run(f"imake -DUseInstalled -I{config_path}", env="conanbuild")
+        autotools = Autotools(self)
+        autotools.make(target="test_package")
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run(os.path.join(".", "test_package"), run_environment=True)
+        if can_run(self):
+            self.run(os.path.join(".", "test_package"), env="conanrun")
