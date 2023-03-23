@@ -407,13 +407,13 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.4")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.4.9")
+            self.requires("expat/2.5.0")
             self.requires("opus/1.3.1")
             if not self.options.qtwayland:
                 self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.84")
-            self.requires("libdrm/2.4.109")
+            self.requires("nss/3.89")
+            self.requires("libdrm/2.4.114")
             self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
