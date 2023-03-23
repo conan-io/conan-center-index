@@ -14,7 +14,6 @@ from conan.tools.scm import Version
 from conans.tools import get_gnu_triplet
 import os
 import glob
-import shutil
 import re
 
 required_conan_version = ">=1.57.0"
@@ -361,6 +360,24 @@ class FFMpegConan(ConanFile):
                 target_os = "android"
             return target_os
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if is_msvc(self) and self.options.with_libx264 and not self.dependencies["libx264"].options.shared:
+            # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
+            # warning LNK4049: locally defined symbol x264_levels imported
+            # warning LNK4049: locally defined symbol x264_bit_depth imported
+            replace_in_file(self, os.path.join(self.source_folder, "libavcodec", "libx264.c"),
+                                  "#define X264_API_IMPORTS 1", "")
+        if self.options.with_ssl == "openssl":
+            # https://trac.ffmpeg.org/ticket/5675
+            openssl_libraries = " ".join(
+                [f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                                  "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
+                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
+
+        replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -584,29 +601,13 @@ class FFMpegConan(ConanFile):
         options_string = str(options_list)
         return [_format_options_list_item(flag_name, item) for item in _split_options_string(options_string)]
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        if is_msvc(self) and self.options.with_libx264 and not self.dependencies["libx264"].options.shared:
-            # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
-            # warning LNK4049: locally defined symbol x264_levels imported
-            # warning LNK4049: locally defined symbol x264_bit_depth imported
-            replace_in_file(self, os.path.join(self.source_folder, "libavcodec", "libx264.c"),
-                                  "#define X264_API_IMPORTS 1", "")
-        if self.options.with_ssl == "openssl":
-            # https://trac.ffmpeg.org/ticket/5675
-            openssl_libraries = " ".join(
-                [f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
-            replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                                  "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
-
-        replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
-        if self.options.with_libx264:
-            with chdir(self, self.generators_folder):
-                shutil.copy("x264.pc", "libx264.pc")
-
     def build(self):
         self._patch_sources()
+        if self.options.with_libx264:
+            # ffmepg expects libx264.pc instead of x264.pc
+            expected_libx264_pc = os.path.join(self.generators_folder, "libx264.pc")
+            if not os.path.exists(expected_libx264_pc):
+                copy(self, os.path.join(self.generators_folder, "x264.pc"), expected_libx264_pc)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
