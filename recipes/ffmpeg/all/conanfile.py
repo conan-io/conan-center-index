@@ -607,7 +607,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libx264:
             # ffmepg expects libx264.pc instead of x264.pc
             with chdir(self, self.generators_folder):
-                shutil.copy(self, "x264.pc", "libx264.pc")
+                shutil.copy("x264.pc", "libx264.pc")
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
