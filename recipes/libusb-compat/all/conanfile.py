@@ -120,11 +120,13 @@ class LibUSBCompatConan(ConanFile):
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
+                # use automake infos from build definition on cross build, otherwise fall back on userinfo.
+                automake = self.deps_user_info.get("automake", self.user_info_build.get("automake"))
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": f"{automake.compile} cl -nologo",
+                    "CXX": f"{automake.compile} cl -nologo",
                     "LD": "link -nologo",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": f"{automake.ar_lib} lib",
                     "DLLTOOL": ":",
                     "OBJDUMP": ":",
                     "RANLIB": ":",
