@@ -15,9 +15,9 @@ class ImportTools(BaseChecker):
     name = "conan-import-tools"
     msgs = {
         "E9011": (
-            "Import tools following pattern 'from conan.tools.xxxx import yyyyy' (https://docs.conan.io/1/reference/conanfile/tools.html).",
+            "Import tools following pattern 'from conan.tools.xxxx import yyyyy' (https://docs.conan.io/en/latest/reference/conanfile/tools.html).",
             "conan-import-tools",
-            "Import tools following pattern 'from conan.tools.xxxx import yyyyy' (https://docs.conan.io/1/reference/conanfile/tools.html).",
+            "Import tools following pattern 'from conan.tools.xxxx import yyyyy' (https://docs.conan.io/en/latest/reference/conanfile/tools.html).",
         ),
     }
 
