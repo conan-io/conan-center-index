@@ -22,6 +22,8 @@ class PackageConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if self.version == "cci.20210513":
+            return None
         return 17
 
     @property
