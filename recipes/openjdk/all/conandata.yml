@@ -7,8 +7,8 @@ sources:
       url: "https://download.java.net/java/GA/jdk19.0.2/fdb695a9d9064ad6b064dc6df578380c/7/GPL/openjdk-19.0.2_linux-x64_bin.tar.gz"
       sha256: "34cf8d095cc071e9e10165f5c45023f96ec68397fdaabf6c64bfec1ffeee6198"
     Macos_x86_64:
-      url: "https://download.java.net/java/GA/jdk19.0.2/fdb695a9d9064ad6b064dc6df578380c/7/GPL/openjdk-19.0.2_macos-aarch64_bin.tar.gz"
-      sha256: "4317442e14c5c2f4f698db0e41347df99d050a32137b2a02dfec28ed856577cc"
+      url: "https://download.java.net/java/GA/jdk19.0.2/fdb695a9d9064ad6b064dc6df578380c/7/GPL/openjdk-19.0.2_macos-x64_bin.tar.gz"
+      sha256: "c57c7c511706738fff6540945e0159e97b8b328777e6460977dd64e00f4c2c0b"
     Macos_armv8:
       url: "https://download.java.net/java/GA/jdk19.0.2/fdb695a9d9064ad6b064dc6df578380c/7/GPL/openjdk-19.0.2_macos-aarch64_bin.tar.gz"
       sha256: "4317442e14c5c2f4f698db0e41347df99d050a32137b2a02dfec28ed856577cc"
