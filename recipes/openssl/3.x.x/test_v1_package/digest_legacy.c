@@ -10,6 +10,9 @@
 #include <openssl/err.h>
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
+#if defined(WITH_ZLIB)
+#include <zlib.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,7 +53,7 @@ int MDx_hash(const EVP_MD *type, const unsigned char *message, size_t message_le
     return 0;
 }
 
-int digest_legacy()
+int main()
 {
     unsigned int digest_len;
     unsigned char md5_digest[MD5_DIGEST_LENGTH];
@@ -135,6 +138,10 @@ int digest_legacy()
 #if OPENSSL_WITH_RIPEMD160
     printf("RIPEMD160 digest: %s\n", ripemd160_string);
     printf("RIPEMD160 digest (variant 2): %s\n", ripemd160_string2);
+#endif
+    printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
+#if defined(WITH_ZLIB)
+    printf("ZLIB version: %s\n", ZLIB_VERSION);
 #endif
 
     return 0;
