@@ -14,6 +14,7 @@ from conan.tools.scm import Version
 from conans.tools import get_gnu_triplet
 import os
 import glob
+import shutil
 import re
 
 required_conan_version = ">=1.57.0"
@@ -605,9 +606,8 @@ class FFMpegConan(ConanFile):
         self._patch_sources()
         if self.options.with_libx264:
             # ffmepg expects libx264.pc instead of x264.pc
-            expected_libx264_pc = os.path.join(self.generators_folder, "libx264.pc")
-            if not os.path.exists(expected_libx264_pc):
-                copy(self, os.path.join(self.generators_folder, "x264.pc"), expected_libx264_pc)
+            with chdir(self, self.generators_folder):
+                shutil.copy(self, "x264.pc", "libx264.pc")
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
