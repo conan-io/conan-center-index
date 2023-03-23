@@ -2,7 +2,9 @@
 
 Before you can contribute any code changes, you'll need to make sure you are familiar with the Conan client and have an environment that is conducive to developing recipes.
 
-This file is intended to provide all the commands you need to run in order to be an expert ConanCenter contributor.
+This file is intended to provide all the commands you need to run in order to be an expert ConanCenterIndex contributor.
+
+> **Note**: If you are working with Conan 2.0, the [instructions are below](#using-conan-20)
 
 <!-- toc -->
 ## Contents
@@ -39,6 +41,8 @@ This file is intended to provide all the commands you need to run in order to be
 > **Note**: It's recommended to use a dedicated Python virtualenv when installing with `pip`.
 
 ### Installing the ConanCenter Hooks
+
+> **Warning**: This is not yet supported with Conan 2.0
 
 The system will use the [conan-center hooks](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hooks by running:
 
@@ -102,6 +106,8 @@ It's not uncommon to [patch build scripts](adding_packages/sources_and_patches.m
 [patch policy](adding_packages/sources_and_patches.md#policy-about-patching). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
+
+> **Warning**: This is not yet supported with Conan 2.0
 
 Linters are always executed by GitHub Actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 
