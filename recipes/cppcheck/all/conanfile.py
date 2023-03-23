@@ -16,8 +16,8 @@ class CppcheckConan(ConanFile):
     license = "GPL-3.0-or-later"
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_z3": [True, False], "have_rules": [True, False]}
-    default_options = {"with_z3": True, "have_rules": True}
+    options = {"have_rules": [True, False]}
+    default_options = {"have_rules": True}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -25,14 +25,8 @@ class CppcheckConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if Version(self.version) >= "2.8.0":
-            del self.options.with_z3
-
     def requirements(self):
-        if self.options.get_safe("with_z3", default=False):
-            self.requires("z3/4.10.2")
-        if self.options.have_rules:
+        if self.options.get_safe("have_rules"):
             self.requires("pcre/8.45")
 
     def source(self):
@@ -40,9 +34,7 @@ class CppcheckConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "2.8.0":
-            tc.variables["USE_Z3"] = self.options.with_z3
-        tc.variables["HAVE_RULES"] = self.options.have_rules
+        tc.variables["HAVE_RULES"] = self.options.get_safe("have_rules", False)
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
         tc.variables["FILESDIR"] = "bin"
