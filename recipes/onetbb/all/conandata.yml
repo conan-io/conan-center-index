@@ -11,11 +11,11 @@ sources:
 patches:
   "2021.6.0":
     - patch_description: "cherry-pick upstream patch: avoid android compile errors for current NDKs on releases <= 2021.6.0"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/oneapi-src/oneTBB/pull/716.diff"
       patch_file: "patches/fix-overeager-stripping-of-compile-flag.diff"
   "2021.3.0":
     - patch_description: "cherry-pick upstream patch: avoid android compile errors for current NDKs on releases <= 2021.6.0"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/oneapi-src/oneTBB/pull/716.diff"
       patch_file: "patches/fix-overeager-stripping-of-compile-flag.diff"
