@@ -25,6 +25,7 @@ class LibcurlConan(ConanFile):
     topics = ("curl", "data-transfer",
             "ftp", "gopher", "http", "imap", "ldap", "mqtt", "pop3", "rtmp", "rtsp",
             "scp", "sftp", "smb", "smtp", "telnet", "tftp")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -190,9 +191,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.18.1")
+            self.requires("c-ares/1.19.0")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -220,8 +221,7 @@ class LibcurlConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         download(self, "https://curl.se/ca/cacert-2023-01-10.pem", "cacert.pem", verify=True, sha256="fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0")
 
     def generate(self):

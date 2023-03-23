@@ -16,7 +16,6 @@ class Catch2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
 
-    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
