@@ -1,5 +1,5 @@
 diff --git a/homog2d.hpp b/homog2d.hpp
-index f30d150..68bc280 100644
+index f30d150..d82d7e5 100644
 --- a/homog2d.hpp
 +++ b/homog2d.hpp
 @@ -115,12 +115,18 @@ See https://github.com/skramm/homog2d
@@ -31,15 +31,3 @@ index f30d150..68bc280 100644
  			<< "\n -Error count=" << ++errorCount(); \
  		throw std::runtime_error( oss.str() ); \
  	}
-@@ -2914,11 +2920,6 @@ private:
- 	h2d::operator * ( const h2d::Point2d_<FPT1>&, const h2d::Point2d_<FPT2>& )
- 	-> h2d::Line2d_<FPT1>;
-
--	template<typename T,typename U>
--	friend auto
--	h2d::operator * ( const h2d::Homogr_<U>&, const h2d::Line2d_<T>& )
--	-> h2d::Line2d_<T>;
--
- 	template<typename T1,typename T2,typename FPT1,typename FPT2>
- 	friend base::LPBase<T1,FPT1>
- 	detail::crossProduct( const base::LPBase<T2,FPT1>&, const base::LPBase<T2,FPT2>& );

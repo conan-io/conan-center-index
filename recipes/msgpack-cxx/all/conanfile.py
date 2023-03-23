@@ -1,64 +1,67 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, copy, save
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class MsgpackCXXConan(ConanFile):
     name = "msgpack-cxx"
     description = "The official C++ library for MessagePack"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/msgpack/msgpack-c"
-    topics = ("msgpack", "message-pack", "serialization")
-    license = "BSL-1.0"
-    no_copy_source = True
-
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("msgpack", "message-pack", "serialization", "header-only")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "use_boost": [True, False],
     }
     default_options = {
-        "use_boost": True
+        "use_boost": True,
     }
-
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    no_copy_source = True
 
     def configure_options(self):
-        # No boost was added in 4.1.0
-        if tools.Version(self.version) < "4.1.0":
+        # No boost was added since 4.1.0
+        if Version(self.version) < "4.1.0":
             del self.options.use_boost
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("use_boost", True):
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.81.0")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, pattern="LICENSE_1_0.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.h",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
+        copy(
+            self,
+            pattern="*.hpp",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"msgpackc-cxx": "msgpackc-cxx::msgpackc-cxx"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -67,7 +70,7 @@ class MsgpackCXXConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_subfolder(self):
@@ -75,20 +78,24 @@ class MsgpackCXXConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msgpack")
         self.cpp_info.set_property("cmake_target_name", "msgpackc-cxx")
 
+        self.cpp_info.libdirs = []
+        self.cpp_info.bindirs = []
+
+        if Version(self.version) >= "4.1.0" and not self.options.use_boost:
+            self.cpp_info.defines.append("MSGPACK_NO_BOOST")
+        else:
+            self.cpp_info.requires.append("boost::headers")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "msgpack"
         self.cpp_info.filenames["cmake_find_package_multi"] = "msgpack"
         self.cpp_info.names["cmake_find_package"] = "msgpackc-cxx"
         self.cpp_info.names["cmake_find_package_multi"] = "msgpackc-cxx"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
-        if tools.Version(self.version) >= "4.1.0" and not self.options.use_boost:
-            self.cpp_info.defines.append("MSGPACK_NO_BOOST")

@@ -1,4 +1,13 @@
 sources:
+  "1.89.4":
+    url: "https://github.com/ocornut/imgui/archive/v1.89.4.tar.gz"
+    sha256: "69f1e83adcab3fdd27b522f5075f407361b0d3875e3522b13d33bc2ae2c7d48c"
+  "1.89.3":
+    url: "https://github.com/ocornut/imgui/archive/v1.89.3.tar.gz"
+    sha256: "3b665fadd5580b7ef494d5d8bb1c12b2ec53ee723034caf43332956381f5d631"
+  "1.89.2":
+    url: "https://github.com/ocornut/imgui/archive/v1.89.2.tar.gz"
+    sha256: "e110beffda505e6954feb7b13541d35a7c12a176b9723290c853684713df6a67"
   "1.89.1":
     url: "https://github.com/ocornut/imgui/archive/v1.89.1.tar.gz"
     sha256: "6d02a0079514d869e4b5f8f590f9060259385fcddd93a07ef21298b6a9610cbd"
@@ -18,6 +27,9 @@ sources:
   # These versions belong to the docking branch in ImGUI repository. This branch is declared stable and production ready, and
   # it is synced with `master` regularly. These versions are taken from that branch using the commit where `master` was synced
   # after a regular release
+  "cci.20230105+1.89.2.docking":
+    url: "https://github.com/ocornut/imgui/archive/d822c65317ba881798bed8fce9ffba267d27dada.zip"
+    sha256: "0d2c09ae4c450d4c74f62e66667809752c9d11438354fc331ed9da5d5e850071"
   "cci.20220621+1.88.docking":
     url: "https://github.com/ocornut/imgui/archive/9cd9c2eff99877a3f10a7f9c2a3a5b9c15ea36c6.tar.gz"
     sha256: "61fb1ce5d48089bce1b4f92e9320fd234b2ce960f35f965b313c4842b3c8e440"

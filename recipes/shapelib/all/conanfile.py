@@ -1,11 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.layout import cmake_layout
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ShapelibConan(ConanFile):
@@ -31,18 +30,9 @@ class ShapelibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.compiler.rm_safe("cppstd")
+        self.settings.compiler.rm_safe("libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,8 +41,7 @@ class ShapelibConan(ConanFile):
         export_conandata_patches(self)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

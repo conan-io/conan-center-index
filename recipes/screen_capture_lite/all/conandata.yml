@@ -1,4 +1,7 @@
 sources:
+  "17.1.613":
+    url: "https://github.com/smasherprog/screen_capture_lite/archive/refs/tags/17.1.613.tar.gz"
+    sha256: "ab111e52379fc4bca852b9a79535329e12dca9b25a0b87a2ef84ab7348a64064"
   "17.1.462":
     url: "https://github.com/smasherprog/screen_capture_lite/archive/refs/tags/17.1.462.tar.gz"
     sha256: "4c7d9b23a458645534c4e2a7315eb12fc7d6dc0fb914f1d6787ee9d5d16e6dfd"

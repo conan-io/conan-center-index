@@ -1,4 +1,7 @@
 sources:
+  "1.22.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/1.22.0.tar.gz"
+    sha256: "4b244241cd56893fccb22f7c874588f0d86b444912382ed6e9a4cf95e55ffda2"
   "1.21.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/1.21.0.tar.gz"
     sha256: "a6b07eaaf628225a34e4402c1a6e311430e8431455669ac03691d92f44081172"
@@ -9,31 +12,20 @@ sources:
     url: "https://github.com/hosseinmoein/DataFrame/archive/1.19.0.tar.gz"
     sha256: "81382e9c68df7c52f69f645b1830fcd3634eedc07fa3d2024ee6c57cf2cdb7ff"
   "1.18.0":
-    sha256: 8cdb8b246263fbd8fcef07b6300f6aefb58b3a54cd67e5cbe5383bc948305844
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.18.0.tar.gz
+    url: "https://github.com/hosseinmoein/DataFrame/archive/1.18.0.tar.gz"
+    sha256: "8cdb8b246263fbd8fcef07b6300f6aefb58b3a54cd67e5cbe5383bc948305844"
   "1.17.0":
-    sha256: 669e9663de358330b15eacaa783ccf42fe16db27b9556fdcd18f1114c0335557
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.17.0.tar.gz
+    url: "https://github.com/hosseinmoein/DataFrame/archive/1.17.0.tar.gz"
+    sha256: "669e9663de358330b15eacaa783ccf42fe16db27b9556fdcd18f1114c0335557"
   "1.16.0":
-    sha256: a5a24ec07fb4761a294a291d7bed7c72e82e2dde8bba8bfc1ca2f68e07afd7fc
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.16.0.tar.gz
+    url: "https://github.com/hosseinmoein/DataFrame/archive/1.16.0.tar.gz"
+    sha256: "a5a24ec07fb4761a294a291d7bed7c72e82e2dde8bba8bfc1ca2f68e07afd7fc"
   "1.15.0":
-    sha256: 68eb3fca66dff3f8473722d561e9391800957a09c2c6d4dde5f9ad37cbf88954
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.15.0.tar.gz
+    url: "https://github.com/hosseinmoein/DataFrame/archive/1.15.0.tar.gz"
+    sha256: "68eb3fca66dff3f8473722d561e9391800957a09c2c6d4dde5f9ad37cbf88954"
   "1.14.0":
-    sha256: 45991cc16e478b24641d0548aab24fd59ad534ada30fca8776fd9990e1914ac7
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.14.0.tar.gz
+    url: "https://github.com/hosseinmoein/DataFrame/archive/1.14.0.tar.gz"
+    sha256: "45991cc16e478b24641d0548aab24fd59ad534ada30fca8776fd9990e1914ac7"
   "1.12.0":
-    sha256: e951a699bd048bd7a034ac60bdd45f15cf066a04fda33cb22030d192b91a836c
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.12.0.tar.gz
-  "1.8.0":
-    sha256: 43b057f6dedbdfc328667dc4dcdcd3384b4551cc2825ca546405ec955fb8cb35
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.8.0.tar.gz
-  "1.7.0":
-    sha256: b5f25e331bcd25f2ddd222e65563df3c316d726d92134789f043338545faa4d4
-    url: https://github.com/hosseinmoein/DataFrame/archive/1.7.0.tar.gz
-patches:
-  "1.8.0":
-    - patch_file: "patches/0001-remove-tests-bin-for-conan-package.patch"
-  "1.7.0":
-    - patch_file: "patches/0001-remove-tests-bin-for-conan-package.patch"
+    url: "https://github.com/hosseinmoein/DataFrame/archive/1.12.0.tar.gz"
+    sha256: "e951a699bd048bd7a034ac60bdd45f15cf066a04fda33cb22030d192b91a836c"

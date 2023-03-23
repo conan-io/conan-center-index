@@ -29,10 +29,7 @@ class TestPackageConan(ConanFile):
             not self._is_mingw()
 
     def _qmake_supported(self):
-        return self.settings.compiler != "Visual Studio" or self.options["qt"].shared
-
-    def _cmake_multi_supported(self):
-        return True
+        return self.options["qt"].shared
 
     def _build_with_qmake(self):
         if not self._qmake_supported():
@@ -89,8 +86,6 @@ class TestPackageConan(ConanFile):
                 meson.build()
 
     def _build_with_cmake_find_package_multi(self):
-        if not self._cmake_multi_supported():
-            return
         self.output.info("Building with cmake_find_package_multi")
         env_build = RunEnvironment(self)
         with tools.environment_append(env_build.vars):
@@ -123,8 +118,6 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
 
     def _test_with_cmake_find_package_multi(self):
-        if not self._cmake_multi_supported():
-            return
         self.output.info("Testing CMake_find_package_multi")
         shutil.copy("qt.conf", "bin")
         self.run(os.path.join("bin", "test_package"), run_environment=True)

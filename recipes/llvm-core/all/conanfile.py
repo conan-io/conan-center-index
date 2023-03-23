@@ -196,7 +196,6 @@ class LLVMCoreConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-            del self.options.with_zlib
             del self.options.with_xml2
 
     def requirements(self):

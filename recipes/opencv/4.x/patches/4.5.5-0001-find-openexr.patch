@@ -1,0 +1,32 @@
+--- a/cmake/OpenCVFindOpenEXR.cmake
++++ b/cmake/OpenCVFindOpenEXR.cmake
+@@ -9,21 +9,15 @@
+ # OPENEXR_LIBRARIES = libraries that are needed to use OpenEXR.
+ #
+ 
+-if(NOT OPENCV_SKIP_OPENEXR_FIND_PACKAGE)
+-  find_package(OpenEXR 3 QUIET)
+-  #ocv_cmake_dump_vars(EXR)
+-  if(OpenEXR_FOUND)
+-    if(TARGET OpenEXR::OpenEXR)  # OpenEXR 3+
+-      set(OPENEXR_LIBRARIES OpenEXR::OpenEXR)
+-      set(OPENEXR_INCLUDE_PATHS "")
+-      set(OPENEXR_VERSION "${OpenEXR_VERSION}")
+-      set(OPENEXR_FOUND 1)
+-      return()
+-    else()
+-      message(STATUS "Unsupported find_package(OpenEXR) - missing OpenEXR::OpenEXR target (version ${OpenEXR_VERSION})")
+-    endif()
+-  endif()
++find_package(OpenEXR REQUIRED)
++if(TARGET OpenEXR::OpenEXR)
++    set(OPENEXR_LIBRARIES OpenEXR::OpenEXR)
++else()
++    set(OPENEXR_LIBRARIES openexr::openexr)
+ endif()
++set(OPENEXR_FOUND TRUE)
++set(OPENEXR_VERSION ${OpenEXR_VERSION})
++return()
+ 
+ SET(OPENEXR_LIBRARIES "")
+ SET(OPENEXR_LIBSEARCH_SUFFIXES "")

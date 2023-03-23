@@ -1,4 +1,10 @@
 sources:
+  "1.3.239.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.239.0.tar.gz"
+    sha256: "fa2078408793b2173f174173a8784de56b6bbfbcb5fb958a07e46ef126c7eada"
+  "1.3.236.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "157d2230b50bb5be3ef9b9467aa90d1c109d5f188a49b11f741246d7ca583bf3"
   "1.3.231.1":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.231.1.tar.gz"
     sha256: "5226fbc6a90e4405200c8cfdd5733d5e0c6a64e64dcc614c485ea06e03d66578"
@@ -48,17 +54,20 @@ sources:
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.154.0.tar.gz"
     sha256: "418017d7bab907e72291476df231dd0e7dc7fe20b97e55389c975bcfc48d6433"
 patches:
+  "1.3.236.0":
+    - patch_file: "patches/1.3.236.0-0001-cmake-minimum-required-3.10.patch"
+      patch_description: "Do not use features of CMake 3.16, back to 3.10 as min version"
+      patch_type: "portability"
+      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1102"
   "1.3.231.1":
     - patch_file: "patches/1.3.231.1-0001-no-find-package-wayland.patch"
       patch_description: "CMake: remove attempt to find Wayland"
       patch_type: "portability"
       patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1020"
-      sha256: "f08b35f57884624fea618405affff17215cd747740bbce11af53a69911b48452"
   "1.2.182":
     - patch_file: "patches/1.2.182-0001-fix-mingw.patch"
       patch_description: "Fix MinGW"
       patch_type: "portability"
-      sha256: "a05375c60b7f4a91f48df2278518be27e578e38190034bfcc887e5ceaa289c25"
   "1.2.154.0":
     - patch_file: "patches/1.2.154.0-0001-fix-mingw.patch"
       patch_description: "Fix MinGW"
@@ -67,4 +76,3 @@ patches:
         - "https://github.com/KhronosGroup/Vulkan-Loader/pull/475"
         - "https://github.com/KhronosGroup/Vulkan-Loader/pull/495"
         - "https://github.com/KhronosGroup/Vulkan-Loader/pull/523"
-      sha256: "034e4252276fde22f14630d36404338dc3fa08ebf8fe7d5affe9065e0239f165"

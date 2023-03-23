@@ -9,7 +9,7 @@ index c4f9b5b..7e2279d 100644
  message(STATUS "Using CURL_LIBRARIES: ${CURL_LIBRARIES}.")
 -target_link_libraries(${CPR_LIBRARIES}
 -    ${CURL_LIBRARIES})
-+target_link_libraries(cpr PUBLIC CURL::CURL)
++target_link_libraries(cpr PUBLIC CURL::libcurl)
 
  include(GNUInstallDirs)
  install(TARGETS cpr

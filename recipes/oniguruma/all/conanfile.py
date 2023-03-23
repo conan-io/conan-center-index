@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class OnigurumaConan(ConanFile):
@@ -15,6 +15,7 @@ class OnigurumaConan(ConanFile):
     homepage = "https://github.com/kkos/oniguruma"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,22 +34,15 @@ class OnigurumaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -57,8 +51,6 @@ class OnigurumaConan(ConanFile):
         if Version(self.version) >= "6.9.8":
             tc.variables["INSTALL_DOCUMENTATION"] = False
             tc.variables["INSTALL_EXAMPLES"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):

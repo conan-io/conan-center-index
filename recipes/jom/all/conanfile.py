@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, download
+from conan.tools.files import copy, download, get
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -10,12 +10,10 @@ class JomInstallerConan(ConanFile):
     description = "jom is a clone of nmake to support the execution of multiple independent commands in parallel"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://wiki.qt.io/Jom"
-    license = "GPL-3.0"
-    topics = ("build", "makefile", "make")
-
+    license = "GPL-3.0-only"
+    topics = ("build", "make", "makefile", "nmake")
     settings = "os", "arch", "compiler", "build_type"
 
-    # not needed but supress warning message from conan commands
     def layout(self):
         pass
 
@@ -24,16 +22,19 @@ class JomInstallerConan(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("Only Windows supported")
+        if self.info.settings.os != "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Windows")
 
     def source(self):
+        pass
+
+    def build(self):
         get(self, **self.conan_data["sources"][self.version])
-        download(self, f'https://code.qt.io/cgit/qt-labs/jom.git/plain/LICENSE.GPL?h=v{self.version}', filename='LICENSE.GPL')
+        download(self, f"https://code.qt.io/cgit/qt-labs/jom.git/plain/LICENSE.GPL?h=v{self.version}", filename="LICENSE.GPL")
 
     def package(self):
-        self.copy("LICENSE.GPL", dst= 'licenses', src='')
-        self.copy("*.exe", dst="bin", src="")
+        copy(self, "LICENSE.GPL", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.exe", self.build_folder, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
@@ -41,10 +42,6 @@ class JomInstallerConan(ConanFile):
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
-        bin_folder = os.path.join(self.package_folder, "bin")
-        # In case need to find packaged tools when building a package
-        self.buildenv_info.append("PATH", bin_folder)
-        # In case need to find packaged tools at runtime
-        self.runenv_info.append("PATH", bin_folder)
         # TODO: Legacy, to be removed on Conan 2.0
+        bin_folder = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_folder)

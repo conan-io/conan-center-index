@@ -36,8 +36,22 @@ sources:
       sha256: "f41f6a32b1177c094c3ef97423916713c902d0ac26cbee30ec70b1e8ab0e6fba"
 patches:
   "8.7.0":
-    - patch_file: "patches/0001-fix-msvc-arm64-8.7.0.patch"
+    - patch_file: "patches/8.7.0-0001-fix-msvc-arm64.patch"
   "8.6.0":
-    - patch_file: "patches/0001-fix-cmake-8.6.0.patch"
+    - patch_file: "patches/8.6.0-0001-fix-cmake.patch"
+    - patch_file: "patches/8.6.0-0002-relocatable-macos.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "conan"
+  "8.5.0":
+    - patch_file: "patches/8.4.0-0001-relocatable-macos.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "conan"
+  "8.4.0":
+    - patch_file: "patches/8.4.0-0001-relocatable-macos.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "conan"
   "8.2.0":
-    - patch_file: "patches/0001-fix-cmake-8.2.0.patch"
+    - patch_file: "patches/8.2.0-0001-fix-cmake.patch"
+    - patch_file: "patches/8.2.0-0002-relocatable-macos.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "conan"

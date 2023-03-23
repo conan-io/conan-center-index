@@ -1,4 +1,10 @@
 versions:
+  "1.89.4":
+    folder: all
+  "1.89.3":
+    folder: all
+  "1.89.2":
+    folder: all
   "1.89.1":
     folder: all
   "1.88":
@@ -13,6 +19,8 @@ versions:
   # These versions belong to the docking branch in ImGUI repository. This branch is declared stable and production ready, and
   # it is synced with `master` regularly. These versions are taken from that branch using the commit where `master` was synced
   # after a regular release
+  "cci.20230105+1.89.2.docking":
+    folder: all
   "cci.20220621+1.88.docking":
     folder: all
   "cci.20220207+1.87.docking":

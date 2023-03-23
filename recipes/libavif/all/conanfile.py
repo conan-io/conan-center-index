@@ -4,16 +4,16 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibAVIFConan(ConanFile):
     name = "libavif"
     description = "Library for encoding and decoding .avif files"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AOMediaCodec/libavif"
-    topics = "avif"
-    license = "BSD-2-Clause"
+    topics = ("avif")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,18 +35,9 @@ class LibAVIFConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -56,8 +47,8 @@ class LibAVIFConan(ConanFile):
         return self.options.with_decoder == "dav1d"
 
     def requirements(self):
-        self.requires("libaom-av1/3.4.0")
-        self.requires("libyuv/1841")
+        self.requires("libaom-av1/3.5.0")
+        self.requires("libyuv/1854")
         if self._has_dav1d:
             self.requires("dav1d/1.0.0")
 
@@ -143,3 +134,4 @@ class LibAVIFConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._alias_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = \
             [self._alias_path]
+

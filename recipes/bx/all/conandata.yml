@@ -1,7 +1,4 @@
 sources:
-  "20200504":
-    url: "https://github.com/bkaradzic/bx/archive/b6ab66b099044220b8a047e58c41c288a939388c.zip"
-    sha256: "2074387565d9ace107e7a1dc734ee2e72a9763170574f22b0e70d70072449663"
-  "20200716":
-    url: "https://github.com/bkaradzic/bx/archive/c5b9b64c2d7c270494f6ad89cbb4090f8e3e7b64.zip"
-    sha256: "8c006f0df6ed0ac19fad8e9110451a71d729554aad13d7dcd8239aa0abbc1537"
+  "cci.20221116":
+    url: "https://github.com/bkaradzic/bx/archive/aed1086c48884b1b4f1c2f9af34c5198624263f6.tar.gz"
+    sha256: "6867CF7ABD2BB53A1A92C7B70CBC7F424B97D3AE3A8183F284C6A6507EFE4517"

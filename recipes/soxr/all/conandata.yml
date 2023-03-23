@@ -1,10 +1,15 @@
 sources:
   "0.1.3":
-    url: https://sourceforge.net/projects/soxr/files/soxr-0.1.3-Source.tar.xz
+    url: "https://sourceforge.net/projects/soxr/files/soxr-0.1.3-Source.tar.xz"
     sha256: "b111c15fdc8c029989330ff559184198c161100a59312f5dc19ddeb9b5a15889"
 patches:
   "0.1.3":
-    - base_path: source_subfolder
-      patch_file: "patches/findpackage-openmp.patch"
-    - base_path: source_subfolder
-      patch_file: "patches/cmake-source-dir.patch"
+    - patch_file: "patches/0.1.3-0001-findpackage-openmp.patch"
+      patch_description: "make OpenMP required to fail when not found"
+      patch_type: "conan"
+    - patch_file: "patches/0.1.3-0002-cmake-source-dir.patch"
+      patch_description: "point to the right source dir"
+      patch_type: "conan"
+    - patch_file: "patches/0.1.3-0003-relocatable-macos.patch"
+      patch_description: "Relocatable shared libs on macOS"
+      patch_type: "conan"

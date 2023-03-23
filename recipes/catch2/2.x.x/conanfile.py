@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 class Catch2Conan(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
-    topics = ("catch2", "header-only", "unit-test", "tdd", "bdd")
+    topics = ("header-only", "unit-test", "tdd", "bdd")
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
@@ -45,21 +45,21 @@ class Catch2Conan(ConanFile):
             self.options.rm_safe("fPIC")
             self.options.rm_safe("with_benchmark")
 
-    def package_id(self):
-        if not self.options.with_main:
-            self.info.clear()
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        if not self.info.options.with_main:
+            self.info.clear()
 
     def validate(self):
         if Version(self.version) < "2.13.1" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARMv8 is not supported by versions < 2.13.1+")
-        if self.info.options.get_safe("with_main") and Version(self.version) < "2.13.4":
+        if self.options.get_safe("with_main") and Version(self.version) < "2.13.4":
             raise ConanInvalidConfiguration("Option with_main not supported by versions < 2.13.4")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
