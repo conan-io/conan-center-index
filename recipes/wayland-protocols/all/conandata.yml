@@ -5,7 +5,7 @@ sources:
   "1.27":
     url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.27/wayland-protocols-1.27.tar.bz2"
     sha256: "5d3705c11ac6a43730a3a553a3b5be34b001fe6c531c7ba02659179fa4cc3520"
- "1.26":
+  "1.26":
     url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.26/wayland-protocols-1.26.tar.bz2"
     sha256: "0426ae92841cad054dac8565a90c282deabb60c46a3752c37788b8a322ad12a2"
   "1.25":
