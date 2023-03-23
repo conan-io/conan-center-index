@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import glob
 import os
 
@@ -65,6 +67,12 @@ class Openmvgconan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
+
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can' be built by gcc < 7 due to usage of some ceres-solver templated code "
+                "which hits a bug in gcc < 7: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
