@@ -98,7 +98,7 @@ class OpenCVConan(ConanFile):
             # opencv 3.x doesn't support onetbb >= 2021
             self.requires("onetbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
         if self.options.contrib:
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
