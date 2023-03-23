@@ -5,6 +5,7 @@ from conan.tools.files import export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+import os
 
 required_conan_version = ">=1.59"
 
@@ -86,7 +87,7 @@ class SeadexEssentialsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.md", self.source_folder, self.package_folder)
+        copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses") )
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
