@@ -34,7 +34,7 @@ class SeadexEssentialsConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
+            "gcc": "8",
             "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "16",
@@ -52,6 +52,10 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.settings.compiler == "gcc" and self.settings.compiler.version < "9.1":
+            self.options["*"].append("stdc++fs")
+        elif self.settings.compiler == "clang" and self.settings.compiler.version < "9.0":
+            self.options["*"].append("c++fs")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
