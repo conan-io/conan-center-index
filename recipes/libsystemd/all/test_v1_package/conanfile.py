@@ -1,16 +1,13 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conan import ConanFile
-from conan.tools.build import can_run
-from conans import CMake
 
-
-class LibsystemdTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "pkg_config"
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.7.4")
+        self.build_requires("pkgconf/1.9.3")
 
     def build(self):
         cmake = CMake(self)
@@ -18,6 +15,6 @@ class LibsystemdTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
-            bin_path = os.path.join("bin", "example")
+        if not tools.cross_building(self):
+            bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
