@@ -53,8 +53,13 @@ class SeadexEssentialsConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
+            if not self.cpp_info:
+                self.cpp_info = ConanFile().cpp_info
             self.cpp_info.libs.append("stdc++fs")
+            
         elif self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9.0":
+            if not self.cpp_info:
+                self.cpp_info = ConanFile().cpp_info
             self.cpp_info.libs.append("c++fs")
 
     def layout(self):
