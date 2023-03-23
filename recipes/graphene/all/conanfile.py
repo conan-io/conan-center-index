@@ -73,6 +73,10 @@ class GrapheneConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
             self.tool_requires("pkgconf/1.9.3")
+        if self.options.with_glib:
+            # Same Tool as for requirements to find the glib compiler
+            # This is required for dual-profil and cross builds.
+            self.tool_requires("glib/2.75.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
