@@ -2,7 +2,9 @@
 
 Before you can contribute any code changes, you'll need to make sure you are familiar with the Conan client and have an environment that is conducive to developing recipes.
 
-This file is intended to provide all the commands you need to run in order to be an expert ConanCenter contributor.
+This file is intended to provide all the commands you need to run in order to be an expert ConanCenterIndex contributor.
+
+> **Note**: If you are working with Conan 2.0, the [instructions are below](#using-conan-20)
 
 <!-- toc -->
 ## Contents
@@ -32,13 +34,15 @@ This file is intended to provide all the commands you need to run in order to be
 ## Setup your environment
 
 1. Install a C++ development toolchain - ConanCenter's [build images](#testing-more-environments) are available
-2. [Install the Conan client](https://docs.conan.io/en/latest/installation.html) - make sure to keep it up to date!
+2. [Install the Conan client](https://docs.conan.io/1/installation.html) - make sure to keep it up to date!
 3. Install CMake - this is the only tool which is assumed to be present
    [see FAQ](faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default) for details.
 
 > **Note**: It's recommended to use a dedicated Python virtualenv when installing with `pip`.
 
 ### Installing the ConanCenter Hooks
+
+> **Warning**: This is not yet supported with Conan 2.0
 
 The system will use the [conan-center hooks](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hooks by running:
 
@@ -102,6 +106,8 @@ It's not uncommon to [patch build scripts](adding_packages/sources_and_patches.m
 [patch policy](adding_packages/sources_and_patches.md#policy-about-patching). You are encouraged to submit pull requests upstream.
 
 ## Running the Python Linters
+
+> **Warning**: This is not yet supported with Conan 2.0
 
 Linters are always executed by GitHub Actions to validate parts of your recipe, for instance, if it uses migrated Conan tools imports.
 
@@ -218,13 +224,13 @@ docker run -e CONAN_SYSREQUIRES_MODE=enabled conanio/gcc11-ubuntu16.04 conan ins
 ## Using Conan 2.0
 
 Everything you need to know about the methods, commands line, outputs can be found in the
-[Conan 2.0 Migrations](https://docs.conan.io/en/latest/conan_v2.html) docs.
+[Conan 2.0 Migrations](https://docs.conan.io/1/conan_v2.html) docs.
 
 This should be non-intrusive. Conan 2.0 by default has a different `CONAN_USER_HOME` location, which means that it has separate caches, profiles, and settings.
 This will leave your Conan 1.0 setup completely intact when using Conan 2.0.
 
 > **Note**: There are substantial changes to the CLI so very few of the commands will remain the same.
-> The new [Unified Command Pattern](https://docs.conan.io/en/latest/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments),
+> The new [Unified Command Pattern](https://docs.conan.io/1/migrating_to_2.0/commands.html#unified-patterns-in-command-arguments),
 > as an example, changes how settings and options are passed.
 
 ### Installing Conan 2.0 beta
