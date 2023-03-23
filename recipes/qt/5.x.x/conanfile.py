@@ -336,7 +336,7 @@ class QtConan(ConanFile):
             from six import StringIO  # Python 2 and 3 compatible
             mybuf = StringIO()
             cmd_v = f"\"{python_exe}\" --version"
-            self.run(cmd_v, stdout=mybuf)
+            self.run(cmd_v, mybuf)
             verstr = mybuf.getvalue().strip().split("Python ")[1]
             if verstr.endswith("+"):
                 verstr = verstr[:-1]
