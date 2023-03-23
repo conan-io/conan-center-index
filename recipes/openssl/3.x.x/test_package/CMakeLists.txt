@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package C)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES C)
 
-option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
+option(OPENSSL_WITH_LEGACY "OpenSSL with support for the legacy provider" ON)
+option(OPENSSL_WITH_MD4 "OpenSSL with MD4 support (needs legacy provider)" ON)
+option(OPENSSL_WITH_RIPEMD160 "OpenSSL with RIPEMD16 support (needs legacy provider)" ON)
 
 set(OpenSSL_DEBUG 1)
 find_package(OpenSSL REQUIRED)
@@ -26,6 +28,17 @@ foreach(_custom_var ${_custom_vars})
     endif()
 endforeach()
 
-add_executable(${PROJECT_NAME} digest.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<BOOL:${OPENSSL_WITH_ZLIB}>:WITH_ZLIB>)
+add_executable(test_package test_package.c digest.c)
+target_link_libraries(test_package PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+
+if(OPENSSL_WITH_LEGACY)
+    target_sources(test_package PRIVATE digest_legacy.c)
+    # do now show deperecation warnings
+    target_compile_definitions(test_package PRIVATE OPENSSL_SUPPRESS_DEPRECATED TEST_OPENSSL_LEGACY)
+    if(OPENSSL_WITH_MD4)
+      target_compile_definitions(test_package PRIVATE OPENSSL_WITH_MD4)
+    endif()
+    if(OPENSSL_WITH_RIPEMD160)
+      target_compile_definitions(test_package PRIVATE OPENSSL_WITH_RIPEMD160)
+    endif()
+endif()
