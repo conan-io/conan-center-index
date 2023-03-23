@@ -117,7 +117,6 @@ class QtConan(ConanFile):
         "config": None,
         "multiconfiguration": False
     }
-    default_options.update({module: False for module in _submodules})
 
     no_copy_source = True
     short_paths = True
@@ -287,6 +286,10 @@ class QtConan(ConanFile):
         for module in self._submodules:
             if self.options.get_safe(module):
                 _enablemodule(module)
+
+        for module in self._submodules:
+            if module in self.options and not self.options.get_safe(module):
+                setattr(self.options, module, False)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
