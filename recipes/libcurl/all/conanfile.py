@@ -12,6 +12,7 @@ from conan.tools.scm import Version
 
 import os
 import re
+import shutil
 
 required_conan_version = ">=1.54.0"
 
@@ -222,7 +223,17 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        download(self, "https://curl.se/ca/cacert-2023-01-10.pem", "cacert.pem", verify=True, sha256="fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0")
+        
+        return 
+
+        #data = { "url":
+        #             [
+        #                 "https://curl.se/ca/cacert-2023-01-10.pem"
+        #             ],
+        #         "sha256": "fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0"
+        #        }
+        #
+        #download(self, filename="cacert.pem", **data)
 
     def generate(self):
         env = VirtualBuildEnv(self)
