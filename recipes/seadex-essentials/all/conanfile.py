@@ -52,6 +52,8 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.settings.compiler == "clang":
+            self.settings.compiler.cppstd = self._min_cppstd
 
     def layout(self):
         cmake_layout(self, src_folder="src")
