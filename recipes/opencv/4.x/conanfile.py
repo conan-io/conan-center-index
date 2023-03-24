@@ -36,6 +36,7 @@ class OpenCVConan(ConanFile):
         "with_tiff": [True, False],
         "with_jpeg2000": [False, "jasper", "openjpeg"],
         "with_openexr": [True, False],
+        "with_opengl": [True, False],
         "with_eigen": [True, False],
         "with_webp": [True, False],
         "with_gtk": [True, False],
@@ -72,6 +73,7 @@ class OpenCVConan(ConanFile):
         "with_tiff": True,
         "with_jpeg2000": "jasper",
         "with_openexr": True,
+        "with_opengl": False,
         "with_eigen": True,
         "with_webp": True,
         "with_gtk": True,
@@ -396,7 +398,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_OPENCLAMDBLAS"] = False
         tc.variables["WITH_OPENCLAMDFFT"] = False
         tc.variables["WITH_OPENCL_SVM"] = False
-        tc.variables["WITH_OPENGL"] = False
+        tc.variables["WITH_OPENGL"] = self.options.get_safe("with_opengl", False)
         tc.variables["WITH_OPENMP"] = False
         tc.variables["WITH_OPENNI"] = False
         tc.variables["WITH_OPENNI2"] = False
