@@ -62,10 +62,10 @@ class SeadexEssentialsConan(ConanFile):
         self.requires("spdlog/1.11.0")
         self.requires("fmt/9.1.0")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
-            self.require("libstdc++/11.1.0")
+            self.requires("libstdc++/11.1.0")
         elif self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9.0":
-            self.require("libc++/12.0.1")
-            self.require("libc++fs/12.0.1")
+            self.requires("libc++/12.0.1")
+            self.requires("libc++fs/12.0.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
