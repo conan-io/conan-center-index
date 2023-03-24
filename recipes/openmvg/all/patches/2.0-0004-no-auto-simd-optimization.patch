@@ -1,0 +1,11 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -109,8 +109,6 @@ endif()
+ # ==============================================================================
+ set(CMAKE_MODULE_PATH
+   ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmakeFindModules)
+-include(OptimizeForArchitecture)
+-OptimizeForArchitecture()
+ 
+ if (UNIX AND NOT OpenMVG_BUILD_COVERAGE)
+   set(CMAKE_C_FLAGS_RELEASE "-O3")
