@@ -21,3 +21,15 @@ index 6e15e5f..63be1e1 100644
  
  if(LUAU_BUILD_CLI)
      add_executable(Luau.Repl.CLI)
+diff --git a/Sources.cmake b/Sources.cmake
+index 6e0a32e..53d77c6 100644
+--- a/Sources.cmake
++++ b/Sources.cmake
+@@ -84,6 +84,7 @@ target_sources(Luau.CodeGen PRIVATE
+     CodeGen/src/CodeBlockUnwind.cpp
+     CodeGen/src/CodeGen.cpp
+     CodeGen/src/CodeGenUtils.cpp
++    CodeGen/src/CodeGenA64.cpp
+     CodeGen/src/CodeGenX64.cpp
+     CodeGen/src/EmitBuiltinsX64.cpp
+     CodeGen/src/EmitCommonX64.cpp
