@@ -1,59 +1,58 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.54.0"
 
 
-class Log4cxxConan(ConanFile):
+class Log4cxx(ConanFile):
     name = "log4cxx"
     description = "Logging framework for C++ patterned after Apache log4j"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     homepage = "https://logging.apache.org/log4cxx"
-    topics = ("logging", "log")
+    topics = ("logging")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_networking": [True, False],
+        "with_wchar_t": [True, False],
+        "with_multiprocess_rolling_file_appender": [True, False],
+        "with_qt": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_networking": True,
+        "with_wchar_t": False,
+        "with_multiprocess_rolling_file_appender": False,
+        "with_qt": False,
     }
 
-    generators = "cmake", "cmake_find_package", "pkg_config"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("apr/1.7.0")
-        self.requires("apr-util/1.6.1")
-        self.requires("expat/2.4.2")
+        self.requires("apr/[>=1.6]")
+        self.requires("apr-util/[>=1.6]")
+        self.requires("expat/[>=2.4]")
         if self.settings.os != "Windows":
-            self.requires("odbc/2.3.9")
+            self.requires("odbc/[>=2.3]")
+        if self.options.get_safe("with_qt"):
+            self.requires("qt/[>=5.15]")
 
     @property
     def _compilers_minimum_version(self):
@@ -65,85 +64,64 @@ class Log4cxxConan(ConanFile):
         }
 
     def validate(self):
-        # TODO: if compiler doesn't support C++17, boost can be used instead
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("log4cxx requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("log4cxx requires a compiler that supports at least C++17")
+        if self.options.with_multiprocess_rolling_file_appender:
+            # TODO: if compiler doesn't support C++17, boost can be used instead
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, "17")
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if not minimum_version:
+                self.output.warn("multiprocess rolling file appender requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            elif tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("multiprocess rolling file appender requires a compiler that supports at least C++17")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.build_requires("pkgconf/1.7.4")
+            self.tool_requires("pkgconf/1.7.4")
+
+    def layout(self):
+        cmake_layout(self)
 
     def source(self):
-        #OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect:
-        #'source_subfolder\\src\\test\\resources\\output\\xyz\\:'
-        pattern = "*[!:]"
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True,
-                  pattern=pattern)
+       get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_TESTING"] = False
-            if self.settings.os == "Windows":
-                self._cmake.definitions["LOG4CXX_INSTALL_PDB"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
+        tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
+        tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
+        tc.variables["LOG4CXX_QT_SUPPORT"] = self.options.with_qt
+        if self.settings.os == "Windows":
+            tc.variables["LOG4CXX_INSTALL_PDB"] = False
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("NOTICE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst="licenses")
+        copy(self, "NOTICE", src=self.source_folder, dst="licenses")
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"log4cxx": "log4cxx::log4cxx"}
-        )
-
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "log4cxx")
         self.cpp_info.set_property("cmake_target_name", "log4cxx")
         self.cpp_info.set_property("pkg_config_name", "liblog4cxx")
+        self.cpp_info.libs = ["log4cxx"]
         if not self.options.shared:
             self.cpp_info.defines = ["LOG4CXX_STATIC"]
-        self.cpp_info.libs = ["log4cxx"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["odbc32"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "liblog4cxx"
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
