@@ -34,11 +34,11 @@ class SeadexEssentialsConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "8.3",
             "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "16",
-            "msvc": "192",
+            "msvc": "192"
         }
 
     def export_sources(self):
@@ -52,8 +52,6 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
-            self.options["libstdc++"].cxx_abi = "11"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,11 +59,6 @@ class SeadexEssentialsConan(ConanFile):
     def requirements(self):
         self.requires("spdlog/1.11.0")
         self.requires("fmt/9.1.0")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
-            self.requires("libstdc++/11.1.0")
-        elif self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9.0":
-            self.requires("libc++/12.0.1")
-            self.requires("libc++fs/12.0.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -104,7 +97,3 @@ class SeadexEssentialsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["essentials"]
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
-            self.cpp_info.system_libs.append("stdc++fs")
-        elif self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9.0":
-            self.cpp_info.system_libs.append("c++fs")
