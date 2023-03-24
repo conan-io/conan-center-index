@@ -186,8 +186,8 @@ class MpdecimalConan(ConanFile):
             copy(self, "*.h", src=distfolder, dst= pkg_dir/ "include")
             if self.options.cxx:
                 copy(self, "*.hh", src=distfolder, dst=pkg_dir / "include")
-            self.copy(self, "*.lib", src=distfolder, dst=pkg_dir / "lib")
-            self.copy(self, "*.dll", src=distfolder, dst=pkg_dir / "bin")
+            copy(self, "*.lib", src=distfolder, dst=pkg_dir / "lib")
+            copy(self, "*.dll", src=distfolder, dst=pkg_dir / "bin")
         else:
             src_dir = pathlib.Path(self._source_subfolder)
             mpdecdir = src_dir /  "libmpdec"
