@@ -26,7 +26,7 @@ class CppcheckConan(ConanFile):
 
     def configure(self):
         if self.options.get_safe("with_z3") != "deprecated":
-            self.output.warning("with_z3 option is deprecated, do not use anymore.")
+            self.output.warning("Option \"with_z3\" is deprecated, do not use anymore.")
 
     def requirements(self):
         if self.options.get_safe("have_rules"):
