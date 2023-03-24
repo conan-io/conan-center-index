@@ -2,6 +2,9 @@
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
+#if defined(WITH_ZLIB)
+#include <zlib.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +32,7 @@ void SHA3_hash(const EVP_MD *type, const unsigned char *message, size_t message_
     EVP_MD_CTX_destroy(mdctx);
 }
 
-void digest()
+int main()
 {
     unsigned int digest_len;
     unsigned char sha256_digest[SHA256_DIGEST_LENGTH],
@@ -61,5 +64,10 @@ void digest()
     printf("sha512 digest: %s\n", sha512_string);
     printf("sha3 256 digest: %s\n", sha3_256_string);
     printf("sha3 512 digest: %s\n", sha3_512_string);
+    printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
+#if defined(WITH_ZLIB)
+    printf("ZLIB version: %s\n", ZLIB_VERSION);
+#endif
 
+    return 0;
 }
