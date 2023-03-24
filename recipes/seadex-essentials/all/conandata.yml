@@ -1,5 +1,5 @@
 sources:
-  "2.1.0":
+  "2.1.1":
     url:
-      - "https://github.com/SeadexGmbH/essentials/archive/refs/tags/2.1.0.tar.gz"
-    sha256: "e00417010c1e6d11a67b2b09abfe602205d7462e5af376793b6b015319a3f321"
+      - "https://github.com/SeadexGmbH/essentials/archive/refs/tags/2.1.1.tar.gz"
+    sha256: "87a9425694211a5a1f07e0dfe186cbe02e06b401b87e63802d78bd8dfbd7bf2b"

@@ -97,6 +97,5 @@ class SeadexEssentialsConan(ConanFile):
         self.cpp_info.libs = ["essentials"]
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
             self.cpp_info.libs.append("stdc++fs")
-            
         elif self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9.0":
-            self.cpp_info.libs.append("c++fs")            
+            self.cpp_info.libs.append("c++fs")
