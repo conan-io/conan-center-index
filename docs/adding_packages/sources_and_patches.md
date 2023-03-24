@@ -107,7 +107,7 @@ It's ideal to minimize the number of files in a package to exactly what's requir
 versions with differing patches, it's strongly encouraged to only export the patches used for that given recipe.
 
 Make sure the `export_sources` attribute is replaced by
-[`conan.tools.files.export_conandata_patches`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html?highlight=export_conandata_patches)
+[`conan.tools.files.export_conandata_patches`](https://docs.conan.io/1/reference/conanfile/tools/files/patches.html?highlight=export_conandata_patches)
 helper.
 
 ```py
@@ -118,7 +118,7 @@ def export_sources(self):
 ### Applying Patches
 
 Patches can be applied in a separate method, the pattern name is `_patch_sources`. When applying patch files,
-using [`conan.tools.files.apply_conandata_patches`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html?highlight=apply_conandata_patches)
+using [`conan.tools.files.apply_conandata_patches`](https://docs.conan.io/1/reference/conanfile/tools/files/patches.html?highlight=apply_conandata_patches)
 is the best option.
 
 ```py
@@ -127,8 +127,8 @@ def build(self):
 ```
 
 For more complicated cases,
-[`conan.tools.files.rm`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-rm)
-or [`conan.tools.files.replace_in_file`](https://docs.conan.io/en/latest/reference/conanfile/tools/files/basic.html#conan-tools-files-replace-in-file)
+[`conan.tools.files.rm`](https://docs.conan.io/1/reference/conanfile/tools/files/basic.html#conan-tools-files-rm)
+or [`conan.tools.files.replace_in_file`](https://docs.conan.io/1/reference/conanfile/tools/files/basic.html#conan-tools-files-replace-in-file)
 are good choices.
 
 ```py
