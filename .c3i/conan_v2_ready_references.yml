@@ -26,7 +26,9 @@ required_for_references:
 - clhep
 - cli11
 - cmake
+- coin-osi
 - coin-utils
+- concurrencpp
 - cpp-httplib
 - cpp-jwt
 - cppcodec
@@ -58,6 +60,7 @@ required_for_references:
 - flex
 - fmt
 - fontconfig
+- freeglut
 - freetype
 - ftxui
 - fxdiv
@@ -169,14 +172,17 @@ required_for_references:
 - onetbb
 - openal-soft
 - opencl-headers
+- opencl-icd-loader
 - openexr
 - opengl
 - openh264
+- openjdk
 - openjpeg
 - openssl
 - opus
 - osqp
 - out_ptr
+- paho-mqtt-c
 - pcre
 - pcre2
 - picobench
@@ -224,6 +230,7 @@ required_for_references:
 - vk-bootstrap
 - vorbis
 - vulkan-headers
+- vulkan-loader
 - wayland
 - wayland-protocols
 - websocketpp
