@@ -40,17 +40,12 @@ class SevenZipConan(ConanFile):
 
     def source(self):
         from six.moves.urllib.parse import urlparse
-        url = self.conan_data["sources"][self.version]["url"]
-
-        first_url = url[0] if isinstance(url, list) else url
-        # Allow the urls to be a list either.
-
-        filename = os.path.basename(urlparse(first_url).path)
-
-        sha256 = self.conan_data["sources"][self.version]["sha256"]
-        download(self, url, filename, sha256)
-        self._uncompress_7z(filename)
-        os.unlink(filename)
+        item = self.conan_data["sources"][self.version]
+        if "filename" not in item:  # check that the filename is in conandata
+            item["filename"] = "7z-source.7z"
+        download(self, **item)
+        self._uncompress_7z(item["filename"])
+        os.unlink(item["filename"])
 
     @property
     def _msvc_platform(self):
