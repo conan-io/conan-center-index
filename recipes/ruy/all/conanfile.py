@@ -31,6 +31,7 @@ class RuyConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191", 
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "5.1",
@@ -42,7 +43,7 @@ class RuyConan(ConanFile):
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+            self.output.warning("Compiler is unknown. Assuming it supports C++14.")
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
