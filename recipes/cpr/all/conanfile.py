@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -22,19 +22,38 @@ class CprConan(ConanFile):
     homepage = "https://docs.libcpr.org/"
     topics = ("requests", "web", "curl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": ["openssl", "darwinssl", "winssl", _AUTO_SSL, _NO_SSL],
         "signal": [True, False],
+        "verbose_logging": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": _AUTO_SSL,
         "signal": True,
+        "verbose_logging": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "1.10.0" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                "gcc": "9",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     @property
     def _supports_openssl(self):
@@ -51,7 +70,7 @@ class CprConan(ConanFile):
     @property
     def _supports_darwinssl(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return Version(self.version) >= "1.6.1" and is_apple_os(self.settings.os)
+        return Version(self.version) >= "1.6.1" and is_apple_os(self)
 
     @property
     def _can_auto_ssl(self):
@@ -59,7 +78,7 @@ class CprConan(ConanFile):
         return not self._uses_old_cmake_options and not (
            #  https://github.com/libcpr/cpr/issues/546
             Version(self.version) in ["1.6.0", "1.6.1"]
-            and is_apple_os(self.settings.os)
+            and is_apple_os(self)
         )
 
     @property
@@ -93,6 +112,9 @@ class CprConan(ConanFile):
                 self.output.info("Auto SSL is not available below version 1.6.0 (or below 1.6.2 on macOS), and openssl not supported. Disabling SSL")
                 self.options.with_ssl = CprConan._NO_SSL
 
+        if Version(self.version) < "1.10.0":
+            del self.options.verbose_logging
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -101,7 +123,7 @@ class CprConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.86.0")
+        self.requires("libcurl/7.87.0", transitive_headers=True, transitive_libs=True)
 
     # Check if the system supports the given ssl library
     def _supports_ssl_library(self, library):
@@ -121,6 +143,14 @@ class CprConan(ConanFile):
         return validators[library]
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         SSL_FAILURE_MESSAGES = {
             "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
             "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
@@ -139,12 +169,12 @@ class CprConan(ConanFile):
                 else f"Invalid value of ssl option, {ssl_library}"
             )
 
-        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
+        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.dependencies["libcurl"].options.with_ssl:
             raise ConanInvalidConfiguration(
                 f"{self.ref}:with_ssl={self.options.with_ssl} requires libcurl:with_ssl={self.options.with_ssl}"
             )
 
-        if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
+        if ssl_library == "winssl" and self.dependencies["libcurl"].options.with_ssl != "schannel":
             raise ConanInvalidConfiguration(
                 f"{self.ref}:with_ssl=winssl requires libcurl:with_ssl=schannel"
             )
@@ -156,8 +186,7 @@ class CprConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _get_cmake_option(self, option):
         CPR_1_6_CMAKE_OPTIONS_TO_OLD = {
@@ -173,8 +202,14 @@ class CprConan(ConanFile):
         if self._uses_old_cmake_options:
             # Get the translated option if we can, or the original if one isn't defined.
             return CPR_1_6_CMAKE_OPTIONS_TO_OLD.get(option, option)
-        else:
-            return option
+
+        CPR_1_6_CMAKE_OPTIONS_TO_1_10 = {
+            "CPR_FORCE_USE_SYSTEM_CURL": "CPR_USE_SYSTEM_CURL"
+        }
+
+        if Version(self.version) >= "1.10.0":
+            return CPR_1_6_CMAKE_OPTIONS_TO_1_10.get(option, option)
+        return option
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -195,6 +230,9 @@ class CprConan(ConanFile):
         # If we are on a version where disabling SSL requires a cmake option, disable it
         if not self._uses_old_cmake_options and str(self.options.get_safe("with_ssl")) == CprConan._NO_SSL:
             tc.variables["CPR_ENABLE_SSL"] = False
+
+        if self.options.get_safe("verbose_logging", False):
+            tc.variables["CURL_VERBOSE_LOGGING"] = True
         if cross_building(self, skip_x64_x86=True):
             tc.variables["THREAD_SANITIZER_AVAILABLE_EXITCODE"] = 1
             tc.variables["THREAD_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1

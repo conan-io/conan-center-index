@@ -6,7 +6,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.meson import Meson, MesonToolchain, MesonDeps
+from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
@@ -29,6 +29,8 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
+    # package_type should usually be "library" (if there is shared option)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -113,9 +115,6 @@ class PackageConan(ConanFile):
         tc.generate()
         # In case there are dependencies listed on requirements, PkgConfigDeps should be used
         tc = PkgConfigDeps(self)
-        tc.generate()
-        # Sometimes, when PkgConfigDeps is not enough to find requirements, MesonDeps should solve it
-        tc = MesonDeps(self)
         tc.generate()
         # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
         tc = VirtualBuildEnv(self)
