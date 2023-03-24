@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 3.3)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+project(test_package)
 
 find_package(Doxygen REQUIRED)
 

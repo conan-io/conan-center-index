@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -37,10 +36,6 @@ class LibpqConan(ConanFile):
     }
 
     @property
-    def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
     def _is_clang8_x86(self):
         return self.settings.os == "Linux" and \
                self.settings.compiler == "clang" and \
@@ -58,9 +53,6 @@ class LibpqConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
             self.options.rm_safe("disable_rpath")
-        if self._is_mingw:
-            # TODO: back to static by default once mingw static fixed
-            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
@@ -73,12 +65,7 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
-
-    def validate(self):
-        if self._is_mingw and not self.options.shared:
-            # FIXME: Seems like static lib is not created or is overridden at build time by import lib of dll
-            raise ConanInvalidConfiguration("static mingw build is not possible")
+            self.requires("openssl/1.1.1t")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -131,10 +118,15 @@ class LibpqConan(ConanFile):
                 replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "MKvcbuild.pm"),
                                       "$libpq = $solution->AddProject('libpq', 'dll', 'interfaces',",
                                       "$libpq = $solution->AddProject('libpq', 'lib', 'interfaces',")
-            system_libs = ", ".join(["'{}.lib'".format(lib) for lib in self.deps_cpp_info.system_libs])
+            host_deps = [dep for _, dep in self.dependencies.host.items()]
+            system_libs = []
+            for dep in host_deps:
+                system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
+
+            linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   "libraries             => [],",
-                                  "libraries             => [{}],".format(system_libs))
+                                  "libraries             => [{}],".format(linked_system_libs))
             runtime = {
                 "MT": "MultiThreaded",
                 "MTd": "MultiThreadedDebug",
@@ -155,14 +147,20 @@ class LibpqConan(ConanFile):
                 for ssl in ["VC\\libssl32", "VC\\libssl64", "libssl"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % ssl,
-                                          "%s.lib" % openssl.libs[0])
+                                          "%s.lib" % openssl.cpp_info.components["ssl"].libs[0])
                 for crypto in ["VC\\libcrypto32", "VC\\libcrypto64", "libcrypto"]:
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
-                                          "%s.lib" % openssl.libs[1])
+                                          "%s.lib" % openssl.cpp_info.components["crypto"].libs[0])
                 replace_in_file(self,config_default_pl,
                                       "openssl   => undef",
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
+        elif self.settings.os == "Windows":
+            if self.settings.get_safe("compiler.threads") == "posix":
+                # Use MinGW pthread library
+                replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                "ifeq ($(enable_thread_safety), yes)\nOBJS += pthread-win32.o\nendif",
+                "")
 
     def build(self):
         apply_conandata_patches(self)
@@ -196,10 +194,11 @@ class LibpqConan(ConanFile):
         rm(self, "*.dll", lib_folder)
         if self.options.shared:
             for lib in glob.glob(os.path.join(lib_folder, "*.a")):
-                if not (self.settings.os == "Windows" and os.path.basename(lib) == "libpq.a"):
+                if not (self.settings.os == "Windows" and os.path.basename(lib) == "libpq.dll.a"):
                     os.remove(lib)
         else:
             rm(self, "*.dll", bin_folder)
+            rm(self, "*.dll.a", lib_folder)
             rm(self, "*.so*", lib_folder)
             rm(self, "*.dylib", lib_folder)
 
@@ -270,6 +269,8 @@ class LibpqConan(ConanFile):
                 if Version(self.version) >= "12":
                     self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
                     self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
+                    if self.settings.os == "Windows":
+                        self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
                     self.cpp_info.components["pgcommon"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:

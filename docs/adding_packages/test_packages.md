@@ -1,7 +1,7 @@
 # Test Packages
 
 This is the main way that ConanCenter is able to validate the contents of a package are valid.
-It is required to provide a [`test_package/`](https://docs.conan.io/en/latest/reference/commands/creator/create.html?highlight=test_package)
+It is required to provide a [`test_package/`](https://docs.conan.io/1/reference/commands/creator/create.html?highlight=test_package)
 sub-directory with every recipe. These are expected to work regardless of the options or settings used as this is what consumer will encounter when doing a `conan create`
 themselves. It's possible to have ConanCenter run `conan test` on more then one `test folder` by using the `test_` prefix.
 
@@ -19,7 +19,7 @@ themselves. It's possible to have ConanCenter run `conan test` on more then one 
 
 See the [recipe files and structures](README.md#recipe-files-structure) for a visual.
 
-All ConanCenterIndex recipe should have a two [test_folders](https://docs.conan.io/en/latest/reference/commands/creator/create.html?highlight=test_folder)
+All ConanCenterIndex recipe should have a two [test_folders](https://docs.conan.io/1/reference/commands/creator/create.html?highlight=test_folder)
 One for the current CMake generator in `test_package/` and on for the deprecated generators in `test_v1_package/`.
 
 Please refer to the [Package Templates](../package_templates/) for the current practices about which files and what their content should be.
@@ -27,7 +27,7 @@ Please refer to the [Package Templates](../package_templates/) for the current p
 ### CMake targets
 
 When using CMake to test a package, the information should be consumed using the
-[`CMakeDeps` generator](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html?highlight=cmakedeps).
+[`CMakeDeps` generator](https://docs.conan.io/1/reference/conanfile/tools/cmake/cmakedeps.html?highlight=cmakedeps).
 
 This typically will look like a `CMakeLists.txt` which contain lines similar to
 
@@ -102,7 +102,7 @@ You can find the output of all of them together in the testing logs. Only the en
 
 Remember that the `test_<package>` recipes should **test the package configuration that has just been generated** for the _host_ context, otherwise
 it will fail in cross-building scenarios; before running executables, recipes should check
-[`conan.tools.build.can_run`](https://docs.conan.io/en/latest/reference/conanfile/tools/build.html?highlight=can_run#conan-tools-build-can-run)
+[`conan.tools.build.can_run`](https://docs.conan.io/1/reference/conanfile/tools/build.html?highlight=can_run#conan-tools-build-can-run)
 
 ### Minimalist Source Code
 

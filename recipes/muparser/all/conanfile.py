@@ -1,12 +1,11 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class MuParserConan(ConanFile):
@@ -17,6 +16,7 @@ class MuParserConan(ConanFile):
     topics = ("math", "parser",)
     description = "Fast Math Parser Library"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -41,21 +41,16 @@ class MuParserConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.info.options.with_openmp:
-            self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_SAMPLES"] = False
         tc.variables["ENABLE_OPENMP"] = self.options.with_openmp
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -78,6 +73,8 @@ class MuParserConan(ConanFile):
         self.cpp_info.libs = ["muparser"]
         if not self.options.shared:
             self.cpp_info.defines = ["MUPARSER_STATIC=1"]
-            libcxx = tools_legacy.stdcpp_library(self)
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
