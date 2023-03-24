@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.files import copy, get, save
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import os
 import textwrap
 
@@ -17,6 +19,10 @@ class ArduinojsonConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    def validate(self):
+        if Version(self.version) >= "6.21.0":
+            check_min_cppstd(self, 11)
+
     def package_id(self):
         self.info.clear()
 
@@ -24,8 +30,9 @@ class ArduinojsonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
+        has_arduinojson_root=Version(self.version) < "6.18.2"
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=has_arduinojson_root)
 
     def build(self):
         pass
