@@ -83,7 +83,7 @@ class TensorflowLiteConan(ConanFile):
         self.tool_requires("cmake/3.25.3")
 
     def layout(self):
-        cmake_layout(self, build_folder=f"build_folder/{self.settings.build_type}")
+        cmake_layout(self, src_folder="src", build_folder=f"build_folder/{self.settings.build_type}")
 
     def generate(self):
         tc = CMakeToolchain(self)
