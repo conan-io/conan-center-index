@@ -4,6 +4,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import download, rmdir
 
 
+required_conan_version = ">=1.47.0"
+
 class MingwConan(ConanFile):
     name = "mingw-builds"
     description = "MinGW is a contraction of Minimalist GNU for Windows"
