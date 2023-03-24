@@ -52,6 +52,8 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
+            self.options["libstdc++"].cxx_abi = "11"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -59,6 +61,11 @@ class SeadexEssentialsConan(ConanFile):
     def requirements(self):
         self.requires("spdlog/1.11.0")
         self.requires("fmt/9.1.0")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.1":
+            self.require("libstdc++/11.1.0")
+        elif self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9.0":
+            self.require("libc++/12.0.1")
+            self.require("libc++fs/12.0.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
