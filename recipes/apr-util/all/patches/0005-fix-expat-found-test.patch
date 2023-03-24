@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,7 +21,7 @@ PROJECT(APR-Util C)
+ 
+ FIND_PACKAGE(OpenSSL)
+ 
+-FIND_PACKAGE(expat)
++FIND_PACKAGE(EXPAT MODULE)
+ 
+ OPTION(APU_HAVE_CRYPTO      "Crypto support"                            OFF)
+ OPTION(APU_HAVE_ODBC        "Build ODBC DBD driver"                     ON)
