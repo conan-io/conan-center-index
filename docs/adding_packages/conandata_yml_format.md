@@ -1,6 +1,6 @@
 # conandata.yml
 
-[conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
+[conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
 file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
 1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
@@ -114,7 +114,7 @@ sources:
         sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
 ```
 
-This approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
+This approach requires a special code within [build](https://docs.conan.io/1/reference/conanfile/methods.html#build) method to handle.
 
 ### Sources fields
 
@@ -240,4 +240,4 @@ For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 
 _Optional_
 
-Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
+Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/1/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
