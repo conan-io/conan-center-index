@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
@@ -34,7 +34,7 @@ class SentryNativeConan(ConanFile):
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "with_breakpad": ["google", "sentry"],
-        "performance": [True, False],
+        "wer" : [True, False],
     }
     default_options = {
         "shared": False,
@@ -44,7 +44,7 @@ class SentryNativeConan(ConanFile):
         "qt": False,
         "with_crashpad": "sentry",
         "with_breakpad": "sentry",
-        "performance": False,
+        "wer": False
     }
 
     @property
@@ -60,6 +60,9 @@ class SentryNativeConan(ConanFile):
             "clang": "3.4",
             "apple-clang": "5.1",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -125,12 +128,6 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
-        if self.options.backend == "crashpad" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
-
-        if self.options.performance:
-            if Version(self.version) < "0.4.14" or Version(self.version) > "0.4.15":
-                raise ConanInvalidConfiguration("Performance monitoring is only valid in 0.4.14 and 0.4.15")
 
     def _cmake_new_enough(self, required_version):
         try:
@@ -163,13 +160,14 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_TRANSPORT"] = self.options.transport
         tc.variables["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
-        tc.variables["SENTRY_PERFORMANCE_MONITORING"] = self.options.performance
+        tc.variables["CRASHPAD_WER_ENABLED"] = self.options.wer
         tc.generate()
         CMakeDeps(self).generate()
         if self.options.backend == "breakpad":
             PkgConfigDeps(self).generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
