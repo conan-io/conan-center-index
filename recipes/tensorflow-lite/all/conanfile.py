@@ -72,14 +72,15 @@ class TensorflowLiteConan(ConanFile):
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20220628")
+        if self.options.with_ruy:
+            self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.24.0")
+        self.tool_requires("cmake/3.25.3")
 
     def layout(self):
         cmake_layout(self, build_folder=f"build_folder/{self.settings.build_type}")
@@ -109,7 +110,7 @@ class TensorflowLiteConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if not minimum_version:
-            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            self.output.warning(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
         elif Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
 
