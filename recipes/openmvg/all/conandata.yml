@@ -17,6 +17,6 @@ patches:
     - patch_file: "patches/2.0-0004-no-auto-simd-optimization.patch"
       patch_description: "No fragile babysitting of optimization flags"
       patch_type: "conan"
-    - patch_file: "patches/2.0-0005-multiview-msvc-bigobj.patch"
+    - patch_file: "patches/2.0-0005-msvc-bigobj.patch"
       patch_description: "Add /bigobj for openMVG_multiview compilation"
       patch_type: "portability"
