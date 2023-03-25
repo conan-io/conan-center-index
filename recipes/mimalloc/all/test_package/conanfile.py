@@ -1,7 +1,8 @@
 from conan import ConanFile
-from conan.tools.build import can_run
+from conan.tools.build import build_jobs, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
+from conan.tools.files import chdir
 import os
 import functools
 
@@ -68,14 +69,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not can_run(self):
-            return
-
-        for file in self._test_files():
-            test_package = os.path.join(self.cpp.build.bindirs[0], file)
-            self.output.info(f"test: {test_package}")
-            self.run(test_package, env="conanrun")
-
-            test_package_cpp = os.path.join(self.cpp.build.bindirs[0], f"{file}_cpp")
-            self.output.info(f"test: {test_package_cpp}")
-            self.run(test_package_cpp, env="conanrun")
+        if can_run(self):
+            with chdir(self, self.build_folder):
+                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")

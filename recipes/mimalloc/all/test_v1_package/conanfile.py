@@ -66,15 +66,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if tools.cross_building(self):
             return
-
-        self.output.info(f"Environment append: {self._environment}")
-
         with tools.environment_append(self._environment):
-            for file in self._test_files:
-                test_package = os.path.join("bin", file)
-                self.output.info(f"test: {test_package}")
-                self.run(test_package, run_environment=True)
-
-                test_package_cpp = os.path.join("bin", f"{file}_cpp")
-                self.output.info(f"test: {test_package_cpp}")
-                self.run(test_package_cpp, run_environment=True)
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {tools.cpu_count()}", run_environment=True)
