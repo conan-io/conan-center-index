@@ -77,8 +77,8 @@ class TestPackageConan(ConanFile):
         for file in test_files:
             test_package = os.path.join(self.cpp.build.bindirs[0], file)
             self.output.info(f"test: {test_package}")
-            self.run(test_package, run_environment=True)
+            self.run(test_package, env="conanrun")
 
             test_package_cpp = os.path.join(self.cpp.build.bindirs[0], f"{file}_cpp")
             self.output.info(f"test: {test_package_cpp}")
-            self.run(test_package_cpp, run_environment=True)
+            self.run(test_package_cpp, env="conanrun")
