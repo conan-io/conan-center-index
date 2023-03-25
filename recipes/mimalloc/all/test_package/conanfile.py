@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import build_jobs, can_run
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 from conan.tools.files import chdir
 import os
@@ -9,6 +9,7 @@ import functools
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -48,9 +49,6 @@ class TestPackageConan(ConanFile):
         tc.variables["BUILD_INCLUDE_OVERRIDE"] = "include_override" in self._test_files()
         tc.variables["BUILD_MI_API"] = "mi_api" in self._test_files()
         tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
         env = Environment()
         env.define("MIMALLOC_VERBOSE", "1")
