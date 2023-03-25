@@ -7,3 +7,4 @@ patches:
     - patch_file: "patches/1.13-fix-template-compile-issue.patch"
       patch_description: "Fix compilation issue: call to function 'print_declaration_node' that is neither visible in the template definition nor found by argument-dependent lookup"
       patch_type: "portability"
+      patch_source: "https://sourceforge.net/p/rapidxml/bugs/16/"
