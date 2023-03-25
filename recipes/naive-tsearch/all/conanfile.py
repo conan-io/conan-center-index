@@ -46,6 +46,7 @@ class NaiveTsearchConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["NAIVE_TSEARCH_INSTALL"] = True
+        tc.variables["NAIVE_TSEARCH_TESTS"] = False
         tc.generate()
 
     def build(self):
