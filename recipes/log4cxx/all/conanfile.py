@@ -72,14 +72,15 @@ class Log4cxx(ConanFile):
     def validate(self):
         if self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
-            if self.settings.compiler.get_safe("cppstd"):
-                self.output.warning("multiprocess rolling file appender requires C++17.")
-                check_min_cppstd(self, "17")
+            self.output.warning("multiprocess rolling file appender requires C++17.")
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            compiler_version = Version(self.settings.compiler.version)
             if not minimum_version:
-                self.output.warning("multiprocess rolling file appender requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-            elif Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("multiprocess rolling file appender requires a compiler that supports at least C++17")
+                self.output.warning("Your compiler is unknown. Assuming it supports C++17.")
+            elif compiler_version < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.settings.compiler} {compiler_version} does not support C++17: Requies {minimum_version}")
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, "17")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
