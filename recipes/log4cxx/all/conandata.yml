@@ -17,6 +17,9 @@ patches:
     - patch_file: "patches/0002-find-apr.patch"
       patch_type: "conan"
       patch_description: "Use conan generated apr, apr-util target names"
+    - patch_file: "patches/0002-fix-static-library-compilation.patch"
+      patch_type: "bugfix"
+      patch_description: "https://github.com/apache/logging-log4cxx/commit/09b5b723a1a210c28bf8b05b0676bb2b104359ba"
   "1.0.0":
     - patch_file: "patches/0003-find-apr.patch"
       patch_type: "conan"
