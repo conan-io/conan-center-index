@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, patch, copy
+from conan.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=2.0"
 
 
 class ImaglConan(ConanFile):
@@ -24,17 +29,8 @@ class ImaglConan(ConanFile):
         "with_png": True,
         "with_jpeg": True,
     }
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = "patches/**"
     _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _compilers_minimum_version(self):
@@ -45,24 +41,27 @@ class ImaglConan(ConanFile):
                 "clang": "10",
                 "apple-clang": "11"
         }
-        if tools.Version(self.version) <= "0.1.1" or tools.Version(self.version) == "0.2.0":
+        if Version(self.version) <= "0.1.1" or Version(self.version) == "0.2.0":
             minimum_versions["Visual Studio"] = "16.5"
             minimum_versions["msvc"] = "19.25"
         return minimum_versions
 
     @property
     def _supports_jpeg(self):
-        return tools.Version(self.version) >= "0.2.0"
+        return Version(self.version) >= "0.2.0"
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self._supports_jpeg:
-            del self.options.with_jpeg
+            self.options.rm_safe("with_jpeg")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
         if self.options.with_png:
@@ -71,9 +70,10 @@ class ImaglConan(ConanFile):
             self.requires("libjpeg/9d")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 20)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 20)
 
+    def validate_build(self):
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -81,10 +81,10 @@ class ImaglConan(ConanFile):
             return lv1[:min_length] < lv2[:min_length]
 
         #Special check for clang that can only be linked to libc++
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+        if self.settings.compiler == "clang" and self.settings.get_safe("compiler.libcxx") != "libc++":
             raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
 
-        compiler_version = str(self.settings.compiler.version)
+        compiler_version = str(self.settings.get_safe("compiler.version"))
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
@@ -95,8 +95,13 @@ class ImaglConan(ConanFile):
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def _configure_cmake(self):
         if self._cmake:
@@ -104,21 +109,23 @@ class ImaglConan(ConanFile):
 
         self._cmake = CMake(self)
 
-        self._cmake.definitions["STATIC_LIB"] = not self.options.shared
-        self._cmake.definitions["SUPPORT_PNG"] = self.options.with_png
+        cmake_options = {
+            "STATIC_LIB": not self.options.shared,
+            "SUPPORT_PNG": self.options.with_png
+        }
         if self._supports_jpeg:
-            self._cmake.definitions["SUPPORT_JPEG"] = self.options.with_jpeg
-        self._cmake.configure(build_folder=self._build_subfolder)
+            cmake_options["SUPPORT_JPEG"] = self.options.with_jpeg
+        self._cmake.configure(variables=cmake_options)
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **it)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
 
