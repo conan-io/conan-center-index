@@ -43,8 +43,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
     > Please open an issue in case it needs to be updated.
 - Compilers: Visual Studio:
   
-  - 2017 (19.16.27048)
-  - 2019 (19.29.30147)
+  - 2017 (19.16.27049)
+  - 2019 (19.29.30148)
   
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64
