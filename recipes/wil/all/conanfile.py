@@ -46,8 +46,7 @@ class WilConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        # src_folder must use the same source folder name than the project
-        basic_layout(self, src_folder="include/wil")
+        basic_layout(self, src_folder="src")
 
     # same package ID for any package
     def package_id(self):
