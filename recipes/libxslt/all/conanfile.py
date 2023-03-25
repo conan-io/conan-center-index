@@ -19,7 +19,6 @@ class LibxsltConan(ConanFile):
     topics = ("xslt", "processor")
     homepage = "https://xmlsoft.org"
     license = "MIT"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -60,7 +59,7 @@ class LibxsltConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.10.3")
+        self.requires("libxml2/2.10.3", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.plugins and not self.options.shared:
