@@ -39,6 +39,8 @@ class Openmvgconan(ConanFile):
         "programs": True,
     }
 
+    short_paths = True
+
     def export_sources(self):
         export_conandata_patches(self)
 
