@@ -28,6 +28,10 @@ class WilConan(ConanFile):
     no_copy_source = True
 
     @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
