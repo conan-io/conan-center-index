@@ -42,12 +42,10 @@ class TestPackageConan(ConanFile):
         return name
 
     def generate(self):
-        test_files = self._test_files()
-
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_NO_CHANGES"] = "no_changes" in test_files
-        tc.variables["BUILD_INCLUDE_OVERRIDE"] = "include_override" in test_files
-        tc.variables["BUILD_MI_API"] = "mi_api" in test_files
+        tc.variables["BUILD_NO_CHANGES"] = "no_changes" in self._test_files()
+        tc.variables["BUILD_INCLUDE_OVERRIDE"] = "include_override" in self._test_files()
+        tc.variables["BUILD_MI_API"] = "mi_api" in self._test_files()
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -73,8 +71,7 @@ class TestPackageConan(ConanFile):
         if not can_run(self):
             return
 
-        test_files = self._test_files()
-        for file in test_files:
+        for file in self._test_files():
             test_package = os.path.join(self.cpp.build.bindirs[0], file)
             self.output.info(f"test: {test_package}")
             self.run(test_package, env="conanrun")
