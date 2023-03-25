@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
@@ -40,6 +42,9 @@ class Log4cxx(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "1.0.0":
+            self.options.rm_safe("with_multiprocess_rolling_file_appender")
+            self.options.rm_safe("with_networking")
 
     def configure(self):
         if self.options.shared:
@@ -59,19 +64,21 @@ class Log4cxx(ConanFile):
         return {
             "gcc": "7",
             "Visual Studio": "15",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
 
     def validate(self):
-        if self.options.with_multiprocess_rolling_file_appender:
+        if self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
             if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, "17")
+                self.output.warning("multiprocess rolling file appender requires C++17.")
+                check_min_cppstd(self, "17")
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if not minimum_version:
-                self.output.warn("multiprocess rolling file appender requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-            elif tools.Version(self.settings.compiler.version) < minimum_version:
+                self.output.warning("multiprocess rolling file appender requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            elif Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("multiprocess rolling file appender requires a compiler that supports at least C++17")
 
     def build_requirements(self):
@@ -90,8 +97,9 @@ class Log4cxx(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
-        tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
+        if Version(self.version) >= "1.0.0":
+            tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
+            tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
         tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
         tc.variables["LOG4CXX_QT_SUPPORT"] = self.options.with_qt
         if self.settings.os == "Windows":
