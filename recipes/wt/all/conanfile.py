@@ -84,7 +84,7 @@ class WtConan(ConanFile):
     def _strict_options_requirements(self):
         self.options["boost"].header_only = False
         for boost_comp in self._required_boost_components:
-            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
+            setattr(self.options["boost"], f"without_{boost_comp}", False)
 
     @property
     def _required_boost_components(self):
@@ -100,28 +100,32 @@ class WtConan(ConanFile):
         if self.options.connector_http:
             self.requires("zlib/1.2.13")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.40.1")
+            self.requires("sqlite3/3.41.1")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.30", transitive_headers=True, transitive_libs=True)
+            self.requires("libmysqlclient/8.0.31", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.5", transitive_headers=True, transitive_libs=True)
+            self.requires("libpq/14.7", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.6.2")
 
     def validate(self):
-        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
-        if self.options["boost"].header_only or miss_boost_required_comp:
-            raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
+        miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
+                                       for boost_comp in self._required_boost_components)
+        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires non header-only boost with these components: "
+                f"{', '.join(self._required_boost_components)}"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _get_library_extension(self, dep):
-        if self.options[dep].shared:
+        if self.dependencies[dep].options.shared:
             if self.settings.os == "Windows" :
                 if is_msvc(self):
                     return ".lib"
@@ -145,15 +149,16 @@ class WtConan(ConanFile):
         return ";".join(paths).replace("\\", "/")
 
     def _find_library(self, libname, dep):
-        for path in self.deps_cpp_info[dep].lib_paths:
+        for path in self.dependencies[dep].cpp_info.aggregated_components().libdirs:
             lib_fullpath = os.path.join(path, self._get_library_prefix + libname + self._get_library_extension(dep))
             self.output.info("_find_library : " + str(lib_fullpath))
             if os.path.isfile(lib_fullpath):
                 return lib_fullpath
-        raise ConanException("Library {} not found".format(lib_fullpath))
+        raise ConanException(f"Library {lib_fullpath} not found")
 
     def _find_libraries(self, dep):
-        return [self._find_library(lib, dep) for lib in self.deps_cpp_info[dep].libs]
+
+        return [self._find_library(lib, dep) for lib in self.dependencies[dep].cpp_info.aggregated_components().libs]
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -181,37 +186,38 @@ class WtConan(ConanFile):
         tc.variables["USE_SYSTEM_SQLITE3"] = True
         tc.variables["DEBUG"] = self.settings.build_type == "Debug"
         tc.variables["CONNECTOR_HTTP"] = self.options.connector_http
-        tc.variables["BOOST_DYNAMIC"] = self.options["boost"].shared
+        tc.variables["BOOST_DYNAMIC"] = self.dependencies["boost"].options.get_safe("shared", False)
 
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
-        tc.variables["BOOST_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["boost"].rootpath)
+        tc.variables["BOOST_PREFIX"] = self._cmakify_path_list(self.dependencies["boost"].package_folder)
         if self.options.connector_http:
-            tc.variables["ZLIB_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["zlib"].rootpath)
+            tc.variables["ZLIB_PREFIX"] = self._cmakify_path_list(self.dependencies["zlib"].package_folder)
         if self.options.with_ssl:
-            tc.variables["SSL_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["openssl"].rootpath)
+            tc.variables["SSL_PREFIX"] = self._cmakify_path_list(self.dependencies["openssl"].package_folder)
             tc.variables["OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
-            tc.variables["OPENSSL_INCLUDE_DIR"] = self._cmakify_path_list(self.deps_cpp_info["openssl"].include_paths)
+            tc.variables["OPENSSL_INCLUDE_DIR"] = self._cmakify_path_list(self.dependencies["openssl"].cpp_info.aggregated_components().includedirs)
             tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
-            tc.variables["SQLITE3_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["sqlite3"].rootpath)
+            tc.variables["SQLITE3_PREFIX"] = self._cmakify_path_list(self.dependencies["sqlite3"].package_folder)
         if self.options.get_safe("with_mysql"):
             tc.variables["MYSQL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmysqlclient"))
-            tc.variables["MYSQL_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["libmysqlclient"].include_paths)
-            tc.variables["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
+            libmysqlclient_cppinfo = self.dependencies["libmysqlclient"].cpp_info.aggregated_components()
+            tc.variables["MYSQL_INCLUDE"] = self._cmakify_path_list(libmysqlclient_cppinfo.includedirs)
+            tc.variables["MYSQL_DEFINITIONS"] = ";".join(f"-D{d}" for d in libmysqlclient_cppinfo.defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["libpq"].rootpath)
+            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list(self.dependencies["libpq"].package_folder)
             tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
-            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["libpq"].include_paths)
+            tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.dependencies["libpq"].cpp_info.aggregated_components().includedirs)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            tc.variables["ODBC_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["odbc"].rootpath)
+            tc.variables["ODBC_PREFIX"] = self._cmakify_path_list(self.dependencies["odbc"].package_folder)
             tc.variables["ODBC_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("odbc"))
-            tc.variables["ODBC_INCLUDE"] = self._cmakify_path_list(self.deps_cpp_info["odbc"].include_paths)
+            tc.variables["ODBC_INCLUDE"] = self._cmakify_path_list(self.dependencies["odbc"].cpp_info.aggregated_components().includedirs)
             tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
-            tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list(self.deps_cpp_info["libunwind"].rootpath)
+            tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list(self.dependencies["libunwind"].package_folder)
         if self.settings.os == "Windows":
             tc.variables["CONNECTOR_FCGI"] = False
             tc.variables["CONNECTOR_ISAPI"] = self.options.connector_isapi
@@ -235,7 +241,7 @@ class WtConan(ConanFile):
             replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
 
         # Do not pollute rpath of shared libs of the install tree on macOS please
-        replace_in_file(self, 
+        replace_in_file(self,
             cmakelists,
             "IF(APPLE)\n  SET(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/lib\")",
             "if(0)",
