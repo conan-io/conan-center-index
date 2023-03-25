@@ -51,12 +51,14 @@ required_for_references:
 - elfio
 - embree3
 - enum-flags
+- etl
 - expat
 - fakeit
 - fast_float
 - fftw
 - flac
 - flann
+- flatbuffers
 - flex
 - fmt
 - fontconfig
@@ -68,6 +70,7 @@ required_for_references:
 - geos
 - getopt-for-visual-studio
 - ghc-filesystem
+- giflib
 - glad
 - glib
 - glu
@@ -138,6 +141,7 @@ required_for_references:
 - libusb
 - libuuid
 - libuv
+- libvpx
 - libwebp
 - libxls
 - libxml2
@@ -200,6 +204,7 @@ required_for_references:
 - re2
 - readerwriterqueue
 - rttr
+- scnlib
 - semimap
 - serd
 - simdjson
@@ -208,6 +213,7 @@ required_for_references:
 - span-lite
 - spdlog
 - spirv-headers
+- spirv-tools
 - sqlite3
 - sqlitecpp
 - stb
@@ -228,6 +234,7 @@ required_for_references:
 - vdpau
 - veque
 - vk-bootstrap
+- volk
 - vorbis
 - vulkan-headers
 - vulkan-loader
@@ -235,6 +242,7 @@ required_for_references:
 - wayland-protocols
 - websocketpp
 - wslay
+- wt
 - xapian-core
 - xkbcommon
 - xkeyboard-config
