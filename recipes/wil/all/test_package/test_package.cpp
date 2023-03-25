@@ -4,7 +4,7 @@
 
 
 int main(void) {
-    std::cout << "wil/resource.h included correctly" std::endl;"
+    std::cout << "wil/resource.h included correctly" << std::endl;
 
     return EXIT_SUCCESS;
 }
