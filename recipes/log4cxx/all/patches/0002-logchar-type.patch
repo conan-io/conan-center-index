@@ -1,0 +1,21 @@
+--- a/src/main/include/CMakeLists.txt
++++ b/src/main/include/CMakeLists.txt
+@@ -22,9 +22,18 @@ endif()
+ 
+ if(${LOG4CXX_CHAR} STREQUAL "unichar")
+   set(LOGCHAR_IS_UNICHAR 1)
++  set(LOGCHAR_IS_WCHAR 0)
++  set(LOGCHAR_IS_UTF8 0)
+ elseif(${LOG4CXX_CHAR} STREQUAL "wchar_t")
+   set(LOGCHAR_IS_WCHAR 1)
++  set(LOGCHAR_IS_UNICHAR 0)
++  set(LOGCHAR_IS_UTF8 0)
++elseif(${LOG4CXX_CHAR} STREQUAL "utf-8")
++    set(LOGCHAR_IS_UNICHAR 0)
++    set(LOGCHAR_IS_WCHAR 0)
++    set(LOGCHAR_IS_UTF8 1)
+ endif()
++
+ option(LOG4CXX_WCHAR_T "Enable wchar_t API methods" ON)
+ option(LOG4CXX_UNICHAR "Enable UniChar API methods" OFF)
+ set(INIT_IOS_BASE 0)
