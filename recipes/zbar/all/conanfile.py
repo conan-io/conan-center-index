@@ -7,7 +7,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.53.0"
 
 
 class ZbarConan(ConanFile):
@@ -60,7 +60,7 @@ class ZbarConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_jpeg:
