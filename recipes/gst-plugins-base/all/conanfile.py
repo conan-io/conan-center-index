@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building, can_run
 import glob
 import os
 import shutil
@@ -99,7 +100,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.12")
-        self.requires("glib/2.72.0")
+        self.requires("glib/2.72.4")
         self.requires("gstreamer/1.19.2")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
@@ -145,6 +146,8 @@ class GStPluginsBaseConan(ConanFile):
             self.build_requires("flex/2.6.4")
         if self.options.with_introspection:
             self.build_requires("gobject-introspection/1.70.0")
+        if cross_building(self):
+            self.build_requires("2.72.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
