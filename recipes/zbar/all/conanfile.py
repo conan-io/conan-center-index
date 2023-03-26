@@ -2,12 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.files import get, copy, chdir, rmdir, rm, collect_libs
+from conan.tools.files import get, copy, rmdir, rm, collect_libs
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
-import shutil
 
 required_conan_version = ">=1.36.0"
 
