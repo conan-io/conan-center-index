@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import  copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -92,13 +92,10 @@ class RuyConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        rm(self, "*.pdb", self.package_folder, recursive=True ) # TODO double check cmake.install() brings this in
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # TODO; double check if components are needed
         self.cpp_info.libs = ["ruy_frontend",
                             "ruy_context",
                             "ruy_trmul",
