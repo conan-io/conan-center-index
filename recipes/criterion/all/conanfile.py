@@ -29,7 +29,7 @@ class CriterionConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         tc = MesonToolchain(self)
