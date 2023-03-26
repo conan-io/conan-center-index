@@ -1,0 +1,12 @@
+diff --git a/Rea/rea.h b/Rea/rea.h
+index 2cc0a25..8cf57cc 100644
+--- a/Rea/rea.h
++++ b/Rea/rea.h
+@@ -30,6 +30,7 @@ SOFTWARE.
+ #include <utility>
+ #include <memory>
+ #include <algorithm>
++#include <limits>
+ 
+ 
+ namespace rea {
