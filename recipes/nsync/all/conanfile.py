@@ -106,3 +106,5 @@ class NsyncConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             component.system_libs = ["pthread"]
+            if name == "nsync_cpp":
+                component.system_libs.append("m")
