@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import can_run, cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -51,6 +52,7 @@ class GrapheneConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
+            # leave run=can_run(self) on requires for compatibility reasons.
             self.requires("glib/2.75.2")
 
     def validate(self):
@@ -73,7 +75,8 @@ class GrapheneConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
             self.tool_requires("pkgconf/1.9.3")
-        if self.options.with_glib:
+        # if self.options.with_glib and cross_building(self):
+        if self.options.with_glib and not can_run(self):
             # Same Tool as for requirements to find the glib compiler
             # This is required for dual-profile and cross builds.
             self.tool_requires("glib/2.75.2")
@@ -84,6 +87,11 @@ class GrapheneConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        # in case we can run it in cross-building 
+        if self.options.with_glib and can_run(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         deps = PkgConfigDeps(self)
         deps.generate()
