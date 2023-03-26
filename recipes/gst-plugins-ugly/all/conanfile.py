@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.build import cross_building
 import glob
 import os
 import shutil
@@ -63,7 +64,7 @@ class GStPluginsUglyConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("glib/2.70.1")
+        self.requires("glib/2.72.4")
         self.requires("gstreamer/1.19.1")
         self.requires("gst-plugins-base/1.19.1")
 
@@ -78,6 +79,8 @@ class GStPluginsUglyConan(ConanFile):
             self.build_requires("flex/2.6.4")
         if self.options.with_introspection:
             self.build_requires("gobject-introspection/1.68.0")
+        if cross_building(self):
+            self.build_requires("glib/2.72.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
