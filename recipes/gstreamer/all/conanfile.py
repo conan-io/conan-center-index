@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building, can_run
 import glob
 import os
 import shutil
@@ -36,7 +37,7 @@ class GStreamerConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("glib/2.72.0")
+        self.requires("glib/2.72.4")
 
     @property
     def _is_msvc(self):
@@ -67,6 +68,8 @@ class GStreamerConan(ConanFile):
         else:
             self.build_requires("bison/3.7.6")
             self.build_requires("flex/2.6.4")
+        if cross_building(self):
+            self.build_requires("glib/2.72.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
