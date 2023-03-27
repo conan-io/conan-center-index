@@ -120,8 +120,12 @@ class BrotliConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Brotli"
         self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
         self.cpp_info.components["brotlicommon"].names["pkg_config"] = "libbrotlicommon"
+        self.cpp_info.components["brotlicommon"].set_property("cmake_target_name", "Brotli::brotlicommon")
         self.cpp_info.components["brotlidec"].names["pkg_config"] = "libbrotlidec"
+        self.cpp_info.components["brotlidec"].set_property("cmake_target_name", "Brotli::brotlidec")
         self.cpp_info.components["brotlienc"].names["pkg_config"] = "libbrotlienc"
+        self.cpp_info.components["brotlienc"].set_property("cmake_target_name", "Brotli::brotlienc")
+
 
     def _get_decorated_lib(self, name):
         libname = name
