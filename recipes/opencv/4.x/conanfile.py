@@ -404,6 +404,12 @@ class OpenCVConan(ConanFile):
         def opencv_imgcodecs():
             return ["opencv_imgcodecs"] if self.options.imgcodecs else []
 
+        def opencv_imgproc():
+            return ["opencv_imgproc"] if self.options.imgproc else []
+
+        def opencv_objdetect():
+            return ["opencv_objdetect"] if self.options.objdetect else []
+
         def opencv_video():
             return ["opencv_video"] if self.options.video else []
 
@@ -553,7 +559,7 @@ class OpenCVConan(ConanFile):
             "cudaarithm": {
                 "is_built": self.options.cudaarithm,
                 "mandatory_options": ["with_cuda"],
-                "requires": ["opencv_core"] + ipp(),
+                "requires": ["opencv_core", "opencv_cudev"] + ipp(),
             },
             "cudabgsegm": {
                 "is_built": self.options.cudabgsegm,
@@ -563,7 +569,7 @@ class OpenCVConan(ConanFile):
             "cudacodec": {
                 "is_built": self.options.cudacodec,
                 "mandatory_options": ["with_cuda", "videoio"],
-                "requires": ["opencv_core", "opencv_videio"] + ipp(),
+                "requires": ["opencv_core", "opencv_videio", "opencv_cudev"] + ipp(),
             },
             "cudafeatures2d": {
                 "is_built": self.options.cudafeatures2d,
@@ -578,33 +584,34 @@ class OpenCVConan(ConanFile):
             "cudaimgproc": {
                 "is_built": self.options.cudaimgproc,
                 "mandatory_options": ["with_cuda", "imgproc"],
-                "requires": ["opencv_imgproc"] + ipp(),
+                "requires": ["opencv_imgproc", "opencv_cudev"] + opencv_cudaarithm() + opencv_cudafilters() + ipp(),
             },
             "cudalegacy": {
                 "is_built": self.options.cudalegacy,
                 "mandatory_options": ["with_cuda", "video"],
-                "requires": ["opencv_core", "opencv_video"] + ipp(),
+                "requires": ["opencv_core", "opencv_video"] + opencv_calib3d() + opencv_imgproc() + opencv_objdetect() +
+                            opencv_cudaarithm() + opencv_cudafilters() + opencv_cudaimgproc() + ipp(),
             },
             "cudaobjdetect": {
                 "is_built": self.options.cudaobjdetect,
                 "mandatory_options": ["with_cuda", "objdetect", "cudaarithm", "cudawarping"],
-                "requires": ["opencv_objdetect", "opencv_cudaarithm", "opencv_cudawarping"] + ipp(),
+                "requires": ["opencv_objdetect", "opencv_cudaarithm", "opencv_cudawarping"] + opencv_cudalegacy() + ipp(),
             },
             "cudaoptflow": {
                 "is_built": self.options.cudaoptflow,
                 "mandatory_options": ["with_cuda", "video", "cudaarithm", "cudaimgproc", "cudawarping", "optflow"],
                 "requires": ["opencv_video", "opencv_cudaarithm", "cudaimgproc", "opencv_cudawarping",
-                             "opencv_optflow"] + ipp(),
+                             "opencv_optflow"] + opencv_cudalegacy() + ipp(),
             },
             "cudastereo": {
                 "is_built": self.options.cudastereo,
                 "mandatory_options": ["with_cuda", "calib3d"],
-                "requires": ["opencv_calib3d"] + ipp(),
+                "requires": ["opencv_calib3d", "opencv_cudev"] + ipp(),
             },
             "cudawarping": {
                 "is_built": self.options.cudawarping,
                 "mandatory_options": ["with_cuda", "imgproc"],
-                "requires": ["opencv_core", "opencv_imgproc"] + ipp(),
+                "requires": ["opencv_core", "opencv_imgproc", "opencv_cudev"] + ipp(),
             },
             "cudev": {
                 "is_built": self.options.with_cuda,
