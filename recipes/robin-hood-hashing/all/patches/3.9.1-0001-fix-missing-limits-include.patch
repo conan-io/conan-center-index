@@ -1,5 +1,3 @@
-diff --git a/src/include/robin_hood.h b/src/include/robin_hood.h
-index d023731..8a8c056 100644
 --- a/src/include/robin_hood.h
 +++ b/src/include/robin_hood.h
 @@ -42,6 +42,7 @@

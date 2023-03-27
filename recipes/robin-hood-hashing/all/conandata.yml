@@ -22,18 +22,18 @@ sources:
     sha256: "1c4a107865becbabc0da337f9cf06f3aa6112f733efcbed0703238362a25b330"
 patches:
   "3.11.1":
-    - patch_file: "patches/0001-fix-missing-limits-include-3.11.1.patch"
+    - patch_file: "patches/3.11.1-0001-fix-missing-limits-include.patch"
       patch_description: "Add missing limits include"
-      patch_type: "bugfix"
+      patch_type: "portability"
   "3.9.1":
-    - patch_file: "patches/0001-fix-missing-limits-include-3.9.1.patch"
+    - patch_file: "patches/3.9.1-0001-fix-missing-limits-include.patch"
       patch_description: "Add missing limits include"
-      patch_type: "bugfix"
+      patch_type: "portability"
   "3.8.0":
-    - patch_file: "patches/0001-fix-missing-limits-include-3.8.0.patch"
+    - patch_file: "patches/3.8.0-0001-fix-missing-limits-include.patch"
       patch_description: "Add missing limits include"
-      patch_type: "bugfix"
+      patch_type: "portability"
   "3.7.0":
-    - patch_file: "patches/0001-fix-missing-limits-include-3.7.0.patch"
+    - patch_file: "patches/3.7.0-0001-fix-missing-limits-include.patch"
       patch_description: "Add missing limits include"
-      patch_type: "bugfix"
+      patch_type: "portability"
