@@ -16,7 +16,7 @@ class DawHeaderLibrariesConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/header_libraries"
-    topics = ("algorithms", "helpers", "data-structures",)
+    topics = ("algorithms", "helpers", "data-structures")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -47,7 +47,6 @@ class DawHeaderLibrariesConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
-
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
