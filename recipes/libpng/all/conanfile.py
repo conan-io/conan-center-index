@@ -38,6 +38,11 @@ class LibpngConan(ConanFile):
     }
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
     def _has_neon_support(self):
         return "arm" in self.settings.arch
 
@@ -52,6 +57,14 @@ class LibpngConan(ConanFile):
     @property
     def _has_vsx_support(self):
         return "ppc" in self.settings.arch
+
+    @property
+    def _neon_msa_sse_vsx_mapping(self):
+        return {
+            "True": "on",
+            "False": "off",
+            "check": "check",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -87,14 +100,6 @@ class LibpngConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _neon_msa_sse_vsx_mapping(self):
-        return {
-            "True": "on",
-            "False": "off",
-            "check": "check",
-        }
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["PNG_TESTS"] = False
@@ -129,7 +134,7 @@ class LibpngConan(ConanFile):
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                     'OUTPUT_NAME "${PNG_LIB_NAME}_static',
                                     'OUTPUT_NAME "${PNG_LIB_NAME}')
-            if not is_msvc(self):
+            if not (is_msvc(self) or self._is_clang_cl):
                 if Version(self.version) < "1.6.38":
                     src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
                 else:
@@ -168,7 +173,7 @@ class LibpngConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libpng")
         self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
-        prefix = "lib" if is_msvc(self) else ""
+        prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         suffix = major_min_version if self.settings.os == "Windows" else ""
         suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
