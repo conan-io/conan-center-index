@@ -131,7 +131,7 @@ pull-requests need to work with v1 and v2 to be merged.
 
 ### Conan v2 remote
 
-TBD. Packages built using Conan v2 will become available for users
+Packages built using Conan v2 are available for users on ``conancenter`` remote.
 
 ### Webpage with v2 information
 
@@ -142,3 +142,8 @@ packages and, eventually, v2 information will be the only available.
 
 After this process in completed, we will consider the deprecation and
 decommission of the infrastructure to generate v1 packages.
+
+### CI running Conan v1 dropping configuration support
+
+The change should occur by steps, less used configurations, like older compiler versions, will be dropped first.
+Any changed will notified before to occur, so users can be prepared.
