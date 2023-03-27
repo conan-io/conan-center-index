@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
-import textwrap
 
 required_conan_version = ">=1.54.0"
 
@@ -57,7 +56,7 @@ class Log4cxx(ConanFile):
         if self.settings.os != "Windows":
             self.requires("odbc/[>=2.3]")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/[>=5.15]")
+            self.requires("qt/[>=5.15 <6]")
 
     @property
     def _compilers_minimum_version(self):
@@ -87,10 +86,10 @@ class Log4cxx(ConanFile):
             self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder=".")
 
     def source(self):
-       get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
