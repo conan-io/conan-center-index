@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, patch, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, patch, copy
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -50,6 +50,9 @@ class ImaglConan(ConanFile):
     def _supports_jpeg(self):
         return Version(self.version) >= "0.2.0"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -95,38 +98,27 @@ class ImaglConan(ConanFile):
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.variables["STATIC_LIB"] = not self.options.shared
+        tc.variables["SUPPORT_PNG"] = self.options.with_png
+        if self._supports_jpeg:
+            tc.variables["SUPPORT_JPEG"] = self.options.with_jpeg
         tc.generate()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-
-        cmake_options = {
-            "STATIC_LIB": not self.options.shared,
-            "SUPPORT_PNG": self.options.with_png
-        }
-        if self._supports_jpeg:
-            cmake_options["SUPPORT_JPEG"] = self.options.with_jpeg
-        self._cmake.configure(variables=cmake_options)
-        return self._cmake
-
     def build(self):
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **it)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
