@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
-from conan.tools.microsoft import is_msvc
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -16,9 +16,11 @@ class LibVertoConan(ConanFile):
     name = "libverto"
     description = "An async event loop abstraction library."
     homepage = "https://github.com/latchset/libverto"
-    topics = ("libverto", "async", "eventloop")
+    topics = ("async", "eventloop")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -39,9 +41,6 @@ class LibVertoConan(ConanFile):
         "with_tevent": False,
         "default": "libevent",
     }
-    settings = "os", "arch", "compiler", "build_type"
-
-   
 
     @property
     def _settings_build(self):
@@ -56,8 +55,8 @@ class LibVertoConan(ConanFile):
             "tevent": self.options.with_tevent,
         }
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,9 +66,23 @@ class LibVertoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.with_glib:
+            self.requires("glib/2.76.0")
+        if self.options.with_libevent:
+            self.requires("libevent/2.1.12")
+        if self.options.with_libev:
+            self.requires("libev/4.33")
+
+    def package_id(self):
+        del self.info.options.default
 
     def validate(self):
         if is_msvc(self):
@@ -78,7 +91,7 @@ class LibVertoConan(ConanFile):
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
 
         if not self._backend_dict[str(self.options.default)]:
-            raise ConanInvalidConfiguration("Default backend({}) must be available".format(self.options.default))
+            raise ConanInvalidConfiguration(f"Default backend({self.options.default}) must be available")
 
         count = lambda iterable: sum(1 if it else 0 for it in iterable)
         count_builtins = count(str(opt) == "builtin" for opt in self._backend_dict.values())
@@ -90,20 +103,6 @@ class LibVertoConan(ConanFile):
                 raise ConanInvalidConfiguration("Cannot have an external backend when building a static libverto")
         if count_builtins > 0 and count_externals > 0:
             raise ConanInvalidConfiguration("Cannot combine builtin and external backends")
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def requirements(self):
-        if self.options.with_glib:
-            self.requires("glib/2.75.2")
-        if self.options.with_libevent:
-            self.requires("libevent/2.1.12")
-        if self.options.with_libev:
-            self.requires("libev/4.33")
         if self.options.with_tevent:
             # FIXME: missing tevent recipe
             raise ConanInvalidConfiguration("tevent is not (yet) available on conan-center")
@@ -116,6 +115,9 @@ class LibVertoConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -150,12 +152,9 @@ class LibVertoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
 
-    def package_id(self):
-        del self.info.options.default
-
     def package_info(self):
+        self.cpp_info.components["verto"].set_property("pkg_config_name", "libverto")
         self.cpp_info.components["verto"].libs = ["verto"]
-        self.cpp_info.components["verto"].names["pkg_config"] = "libverto"
         if self.settings.os == "Linux":
             self.cpp_info.components["verto"].system_libs.append("dl")
             if self.options.pthread:
@@ -164,27 +163,25 @@ class LibVertoConan(ConanFile):
         if self.options.with_glib == "builtin":
             self.cpp_info.components["verto"].requires.append("glib::glib")
         elif self.options.with_glib:
+            self.cpp_info.components["verto-glib"].set_property("pkg_config_name", "libverto-glib")
             self.cpp_info.components["verto-glib"].libs = ["verto-glib"]
-            self.cpp_info.components["verto-glib"].names["pkg_config"] = "libverto-glib"
             self.cpp_info.components["verto-glib"].requires = ["verto", "glib::glib"]
 
         if self.options.with_libev == "builtin":
             self.cpp_info.components["verto"].requires.append("libev::libev")
         elif self.options.with_libev:
+            self.cpp_info.components["verto-libev"].set_property("pkg_config_name", "libverto-libev")
             self.cpp_info.components["verto-libev"].libs = ["verto-libev"]
-            self.cpp_info.components["verto-libev"].names["pkg_config"] = "libverto-libev"
             self.cpp_info.components["verto-libev"].requires = ["verto", "libev::libev"]
 
         if self.options.with_libevent == "builtin":
             self.cpp_info.components["verto"].requires.append("libevent::libevent")
         elif self.options.with_libevent:
+            self.cpp_info.components["verto-libevent"].set_property("pkg_config_name", "libverto-libevent")
             self.cpp_info.components["verto-libevent"].libs = ["verto-libevent"]
-            self.cpp_info.components["verto-libevent"].names["pkg_config"] = "libverto-libevent"
             self.cpp_info.components["verto-libevent"].requires = ["verto", "libevent::libevent"]
 
         if self.options.with_tevent:
+            self.cpp_info.components["verto-tevent"].set_property("pkg_config_name", "libverto-tevent")
             self.cpp_info.components["verto-tevent"].libs = ["verto-tevent"]
-            self.cpp_info.components["verto-tevent"].names["pkg_config"] = "libverto-tevent"
             self.cpp_info.components["verto-tevent"].requires = ["verto", "tevent::tevent"]
-
-        self.user_info.backends = ",".join(tuple(backend for backend, opt in self._backend_dict.items() if opt != False))
