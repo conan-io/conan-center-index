@@ -36,7 +36,6 @@ class SeadexEssentialsConan(ConanFile):
         return {
             "gcc": "8.3",
             "clang": "12",
-            #"apple-clang": "10",
             "Visual Studio": "16",
             "msvc": "192"
         }
@@ -50,11 +49,14 @@ class SeadexEssentialsConan(ConanFile):
             self.options.shared = False
 
     def configure(self):
+        if self.settings.os != "Windows" and self.settings.os != "Linux":
+           raise Exception("This package only build in unix or Windows systems!")
+
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
         if self.settings.compiler == "clang":
             self.settings.compiler.cppstd = self._min_cppstd
-            #self.settings.compiler.libcxx = "libc++"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
