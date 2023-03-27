@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class RobinHoodHashingConan(ConanFile):
@@ -14,16 +14,14 @@ class RobinHoodHashingConan(ConanFile):
     homepage = "https://github.com/martinus/robin-hood-hashing"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    no_copy_source = True
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
-
     def export_sources(self):
         export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
