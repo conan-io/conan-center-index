@@ -145,7 +145,7 @@ class LibxsltConan(ConanFile):
         makefile_msvc = os.path.join(self.source_folder, "win32", "Makefile.msvc")
         replace_in_file(self, makefile_msvc, "libxml2.lib", format_libs("libxml2"))
         replace_in_file(self, makefile_msvc, "libxml2_a.lib", format_libs("libxml2"))
-        if "icu" in self.dependencies:
+        if self.dependencies["libxml2"].options.get_safe("icu"):
             replace_in_file(self, makefile_msvc, "LIBS = wsock32.lib", f"LIBS = {format_libs('icu')}")
 
         # Avoid to indirectly build both static & shared when we build utils
