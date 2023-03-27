@@ -19,6 +19,8 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
+    # package_type should usually be "library" (if there is shared option)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
