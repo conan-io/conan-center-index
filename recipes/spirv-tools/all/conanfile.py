@@ -21,6 +21,7 @@ class SpirvtoolsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -104,7 +105,7 @@ class SpirvtoolsConan(ConanFile):
             import re
             from io import StringIO
             output = StringIO()
-            self.run("cmake --version", output=output)
+            self.run("cmake --version", output)
             m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
             return Version(m.group(1)) >= required_version
         except:
@@ -114,7 +115,7 @@ class SpirvtoolsConan(ConanFile):
         if (Version(self.version) >= "1.3.239" and Version(self.version) < "2016.6") or \
            Version(self.version) >= "2023.1":
             if not self._cmake_new_enough("3.17.2"):
-                self.tool_requires("cmake/3.25.1")
+                self.tool_requires("cmake/3.25.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
