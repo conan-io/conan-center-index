@@ -1,14 +1,14 @@
 import os
 import textwrap
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd
+from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class Hdf5Conan(ConanFile):
@@ -46,10 +46,10 @@ class Hdf5Conan(ConanFile):
     }
 
     @property
-    def _min_cpp_standard(self):
+    def _min_cppstd(self):
         if Version(self.version) < "1.14.0":
-            return 98
-        return 11
+            return "98"
+        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -72,7 +72,7 @@ class Hdf5Conan(ConanFile):
                 not self.dependencies["szip"].options.enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
     def configure(self):
         if self.options.shared:
@@ -110,28 +110,26 @@ class Hdf5Conan(ConanFile):
         except:
             return False
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.14.0" and not self._cmake_new_enough("3.18"):
+            self.tool_requires("cmake/3.25.3")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
     def _inject_stdlib_flag(self, tc):
         if self.settings.os == "Linux" and self.settings.compiler == "clang":
             cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
             tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
-
         return tc
-
-
-    def build_requirements(self):
-        if Version(self.version) >= "1.14.0" and not self._cmake_new_enough("3.18"):
-            self.tool_requires("cmake/3.25.0")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         cmakedeps = CMakeDeps(self)
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if self.settings.get_safe("compiler.cppstd"):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cpp_standard
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         if self.settings.get_safe("compiler.libcxx"):
             tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
@@ -165,8 +163,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
         tc.variables["BUILD_TESTING"] = False
 
-        # FIXME is there no built-in way of doing the replace?
-        tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf5").replace("\\", "/")
+        tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
         tc.variables["HDF5_BUILD_TOOLS"] = False
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
@@ -175,11 +172,8 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if Version(self.version) >= "1.10.0":
             tc.variables["HDF5_BUILD_JAVA"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
-
 
     def build(self):
         apply_conandata_patches(self)
@@ -211,12 +205,12 @@ class Hdf5Conan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                    if(TARGET {aliased} AND NOT TARGET {alias})
-                        add_library({alias} INTERFACE IMPORTED)
-                        set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                    endif()
-                """.format(alias=alias, aliased=aliased))
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
 
         # add the additional hdf5_hl_cxx target when both CXX and HL components are specified
         content += textwrap.dedent("""\
@@ -283,11 +277,11 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.components[component_name].requires = requirements
             self.cpp_info.components[component_name].includedirs.append(os.path.join("include", "hdf5"))
 
-            if conan_version.major == "1":
-                self.cpp_info.components[component_name].names["cmake_find_package"] = component
-                self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
-                self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
-                self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+            self.cpp_info.components[component_name].names["cmake_find_package"] = component
+            self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "HDF5")
@@ -312,6 +306,6 @@ class Hdf5Conan(ConanFile):
             if self.options.get_safe("enable_cxx"):
                 add_component("hdf5_hl_cpp", **components["hdf5_hl_cpp"])
 
-        if conan_version.major == "1":
-            self.cpp_info.names["cmake_find_package"] = "HDF5"
-            self.cpp_info.names["cmake_find_package_multi"] = "HDF5"
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "HDF5"
+        self.cpp_info.names["cmake_find_package_multi"] = "HDF5"
