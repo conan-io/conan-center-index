@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 00cf414..79cec68 100644
+index 90fffec..b774b0c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -251,7 +251,7 @@ endif()
+@@ -246,7 +246,7 @@ target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PRIVATE $<$<CONFIG:Debug>:TI
  if(MSVC)
  else()
      target_compile_options(${BEHAVIOR_TREE_LIBRARY} PRIVATE

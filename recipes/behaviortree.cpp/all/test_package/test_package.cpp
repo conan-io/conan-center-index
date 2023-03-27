@@ -75,6 +75,7 @@ public:
     }
 };
 
+#if BEHAVIORTREE_CPP_VERSION < 4
 static const char* xml_text = R"(
  <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
@@ -87,7 +88,20 @@ static const char* xml_text = R"(
      </BehaviorTree>
  </root>
  )";
-
+#else
+static const char* xml_text = R"(
+ <root BTCPP_format="4" >
+     <BehaviorTree ID="MainTree">
+        <Sequence name="root">
+            <CalculateGoal   goal="{GoalPosition}" />
+            <PrintTarget     target="{GoalPosition}" />
+            <Script          code="OtherGoal='-1;3'" />
+            <PrintTarget     target="{OtherGoal}" />
+        </Sequence>
+     </BehaviorTree>
+ </root>
+ )";
+#endif
 
 int main() {
     using namespace BT;
