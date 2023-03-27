@@ -86,7 +86,7 @@ class Log4cxx(ConanFile):
             self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
-        cmake_layout(self, src_folder=".")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
