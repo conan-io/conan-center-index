@@ -1,11 +1,12 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -4,7 +4,7 @@
+@@ -3,8 +3,8 @@
+ # Suppress warning about WIN32 no longer being defined on Cygwin:
  SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
  
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
  PROJECT(CFITSIO)
 -CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
-+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
  
  # Allow @rpath token in target install name on Macs.
  # See "cmake --help-policy CMP0042" for more information.
@@ -26,7 +27,7 @@
  
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
  set (LIB_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
-@@ -55,11 +57,18 @@ IF (BUILD_SHARED_LIBS)
+@@ -55,12 +57,19 @@ IF (BUILD_SHARED_LIBS)
  ENDIF (BUILD_SHARED_LIBS)
  
  
@@ -37,17 +38,19 @@
  IF (USE_PTHREADS)
 -    FIND_PACKAGE(pthreads REQUIRED)
 -    INCLUDE_DIRECTORIES(${PTHREADS_INCLUDE_DIR})
+-    ADD_DEFINITIONS(-D_REENTRANT)
 +    SET(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 +    SET(THREADS_PREFER_PTHREAD_FLAG TRUE)
 +    FIND_PACKAGE(Threads REQUIRED)
 +    IF(CMAKE_USE_PTHREADS_INIT)
 +        LIST(APPEND LINK_LIBS "Threads::Threads")
 +    ELSE()
-+        LIST(APPEND LINK_LIBS "CONAN_PKG::pthreads4w")
++        find_package(pthreads4w REQUIRED CONFIG)
++        LIST(APPEND LINK_LIBS "pthreads4w::pthreads4w")
 +    ENDIF()
-     ADD_DEFINITIONS(-D_REENTRANT)
  ENDIF()
  
+ # Math library (not available in MSVC or MINGW)
 @@ -71,35 +80,36 @@ ELSE()
  ENDIF()
  
@@ -99,7 +102,7 @@
      editcol.c edithdu.c eval_f.c eval_l.c eval_y.c
      f77_wrap1.c f77_wrap2.c f77_wrap3.c f77_wrap4.c
      fits_hcompress.c fits_hdecompress.c fitscore.c
-@@ -123,27 +133,105 @@ SET(SRC_FILES
+@@ -123,27 +133,99 @@ SET(SRC_FILES
  
  # Only include zlib source files if we are building a shared library.
  # Users will need to link their executable with zlib independently.
@@ -134,13 +137,11 @@
 +    ENDIF()
 +ENDIF()
 +
-+IF(NOT WIN32)
-+    OPTION(CFITSIO_USE_BZIP2 "Enable bzip2 support" OFF)
-+    IF(CFITSIO_USE_BZIP2)
-+        FIND_PACKAGE(BZip2 REQUIRED)
-+        LIST(APPEND LINK_LIBS "BZip2::BZip2")
-+        ADD_DEFINITIONS(-DHAVE_BZIP2=1)
-+    ENDIF()
++OPTION(CFITSIO_USE_BZIP2 "Enable bzip2 support" OFF)
++IF(CFITSIO_USE_BZIP2)
++    FIND_PACKAGE(BZip2 REQUIRED)
++    LIST(APPEND LINK_LIBS "BZip2::BZip2")
++    ADD_DEFINITIONS(-DHAVE_BZIP2=1)
 +ENDIF()
 +
 +# Test for the unix ftruncate function
@@ -187,10 +188,6 @@
 +    IF(HAVE_UNION_SEMUN)
 +        ADD_DEFINITIONS(-DHAVE_UNION_SEMUN)
 +    ENDIF()
-+ENDIF()
-+
-+IF(WIN32 AND BUILD_SHARED_LIBS)
-+    ADD_DEFINITIONS(-Dcfitsio_EXPORTS)
  ENDIF()
  
  ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${H_FILES} ${SRC_FILES})
@@ -215,7 +212,7 @@
  
      ENABLE_TESTING()
  
-@@ -173,7 +261,7 @@ IF (BUILD_SHARED_LIBS)
+@@ -173,7 +255,7 @@ IF (BUILD_SHARED_LIBS)
        set_target_properties(FPack Funpack PROPERTIES LINK_FLAGS "setargv.obj")
      endif(MSVC)
  
