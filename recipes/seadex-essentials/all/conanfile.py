@@ -35,8 +35,8 @@ class SeadexEssentialsConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "8.3",
-            "clang": "7",
-            "apple-clang": "10",
+            #"clang": "7",
+            #"apple-clang": "10",
             "Visual Studio": "16",
             "msvc": "192"
         }
