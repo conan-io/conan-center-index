@@ -1,28 +1,20 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
-from conan.tools.microsoft import is_msvc
+from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.33.0"
 
 
 class AprUtilConan(ConanFile):
     name = "apr-util"
-    description = (
-        "The Apache Portable Runtime (APR) provides a predictable and consistent "
-        "interface to underlying platform-specific implementations"
-    )
+    description = "The Apache Portable Runtime (APR) provides a predictable and consistent interface to underlying platform-specific implementations"
     license = "Apache-2.0"
     topics = ("apr-util", "apache", "platform", "library")
     homepage = "https://apr.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,29 +45,37 @@ class AprUtilConan(ConanFile):
         "with_ldap": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    _autotools = None
+    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
-             self.options.rm_safe("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+            del self.options.fPIC
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
 
         if not self.options.with_expat:
             raise ConanInvalidConfiguration("expat cannot be disabled (at this time) (check back later)")
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def requirements(self):
-        self.requires("apr/[>=1.7]")
+        self.requires("apr/1.7.0")
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
-            self.requires("libiconv/[>=1.16]")
+            self.requires("libiconv/1.16")
         if self.options.with_openssl:
-            self.requires("openssl/[>=1.1]")
+            self.requires("openssl/1.1.1k")
         if self.options.with_nss:
             # self.requires("nss/x.y.z")
             raise ConanInvalidConfiguration("CCI has no nss recipe (yet)")
@@ -98,80 +98,90 @@ class AprUtilConan(ConanFile):
             # self.requires("ldap/x.y.z")
             raise ConanInvalidConfiguration("CCI has no ldap recipe (yet)")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/[>=8.0]")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/[>=3.35]")
+            self.requires("sqlite3/3.35.5")
         if self.options.with_expat:
-            self.requires("expat/[>=2.4]")
+            self.requires("expat/2.4.1")
         if self.options.with_postgresql:
-            self.requires("libpq/[>=13.2]")
+            self.requires("libpq/13.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
-        if self.options.shared != self.dependencies["apr"].options.shared:
+        if self.options.shared != self.options["apr"].shared:
             raise ConanInvalidConfiguration("apr-util must be built with same shared option as apr")
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["APR_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["apr"].include_paths)
+        self._cmake.definitions["INSTALL_PDB"] = False
+        self._cmake.definitions["APU_HAVE_CRYPTO"] = self._with_crypto
+        self._cmake.definitions["APR_HAS_LDAP"] = self.options.with_ldap
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     @property
     def _with_crypto(self):
         return self.options.with_openssl or self.options.with_nss or self.options.with_commoncrypto
 
-    def generate(self):
-        if is_msvc(self):
-            tc = CMakeToolchain(self)
-            tc.variables["INSTALL_PDB"] = False
-            tc.variables["APR_INCLUDE_DIR"] = ";".join(self.dependencies["apr"].cpp_info.includedirs).replace("\\", "/")
-            tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
-            tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
-            tc.generate()
-            cmake_deps = CMakeDeps(self)
-            cmake_deps.generate()
-        else:
-            env = VirtualBuildEnv(self)
-            env.generate()
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--with-installbuilddir=${prefix}/res/build-1")
-            tc.configure_args.append("--with-apr={}".format(self.dependencies["apr"].package_folder))
-            tc.configure_args.append("--with-crypto" if self._with_crypto else "--without-crypto")
-            tc.configure_args.append("--with-iconv={}".format(self.dependencies["libiconv"].package_folder))
-            tc.configure_args.append("--with-openssl={}".format(self.dependencies["openssl"].package_folder) if self.options.with_openssl else "--without-openssl")
-            tc.configure_args.append("--with-expat={}".format(self.dependencies["expat"].package_folder) if self.options.with_expat else "--without-expat")
-            tc.configure_args.append("--with-mysql={}".format(self.dependencies["libmysqlclient"].package_folder) if self.options.with_mysql else "--without-mysql")
-            tc.configure_args.append("--with-pgsql={}".format(self.dependencies["libpq"].package_folder) if self.options.with_postgresql else "--without-pgsql")
-            tc.configure_args.append("--with-sqlite3={}".format(self.dependencies["sqlite3"].package_folder) if self.options.with_sqlite3 else "--without-sqlite3")
-            tc.configure_args.append("--with-ldap={}".format(self.dependencies["ldap"].package_folder) if self.options.with_ldap else "--without-ldap")
-            tc.configure_args.append("--with-berkeley-db={}".format(self.dependencies["libdb"].package_folder) if self.options.dbm == "db" else "--without-berkeley-db")
-            tc.configure_args.append("--with-gdbm={}".format(self.dependencies["gdbm"].package_folder) if self.options.dbm == "gdbm" else "--without-gdbm")
-            tc.configure_args.append("--with-ndbm={}".format(self.dependencies["ndbm"].package_folder) if self.options.dbm == "ndbm" else "--without-ndbm")
-            if self.options.dbm:
-                tc.configure_args.append("--with-dbm={}".format(self.options.dbm))
-            if cross_building(self):
-                tc.configure_args.append("apr_cv_mutex_robust_shared=yes")
-            tc.generate()
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
+        self._autotools.include_paths = []
+        if self._with_crypto:
+            if self.settings.os == "Linux":
+                self._autotools.libs.append("dl")
+        conf_args = [
+            "--with-apr={}".format(tools.unix_path(self.deps_cpp_info["apr"].rootpath)),
+            "--with-crypto" if self._with_crypto else "--without-crypto",
+            "--with-iconv={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)),
+            "--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)) if self.options.with_openssl else "--without-openssl",
+            "--with-expat={}".format(tools.unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
+            "--with-mysql={}".format(tools.unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
+            "--with-pgsql={}".format(tools.unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_postgresql else "--without-pgsql",
+            "--with-sqlite3={}".format(tools.unix_path(self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
+            "--with-ldap={}".format(tools.unix_path(self.deps_cpp_info["ldap"].rootpath)) if self.options.with_ldap else "--without-ldap",
+            "--with-berkeley-db={}".format(tools.unix_path(self.deps_cpp_info["libdb"].rootpath)) if self.options.dbm == "db" else "--without-berkeley-db",
+            "--with-gdbm={}".format(tools.unix_path(self.deps_cpp_info["gdbm"].rootpath)) if self.options.dbm == "gdbm" else "--without-gdbm",
+            "--with-ndbm={}".format(tools.unix_path(self.deps_cpp_info["ndbm"].rootpath)) if self.options.dbm == "ndbm" else "--without-ndbm",
+        ]
+        if self.options.dbm:
+            conf_args.append("--with-dbm={}".format(self.options.dbm))
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return self._autotools
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         if self.settings.os == "Windows":
-            cmake = CMake(self)
-            cmake.configure()
+            cmake = self._configure_cmake()
             cmake.build()
         else:
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.os == "Windows":
-            cmake = CMake(self)
+            cmake = self._configure_cmake()
             cmake.install()
         else:
-            autotools = Autotools(self)
+            autotools = self._configure_autotools()
             autotools.install()
-            rm(self, "*.la", os.path.join(self.package_folder, "apr-util-1", "lib"))
-            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "apr-util-1"), "*.la")
+            os.unlink(os.path.join(self.package_folder, "lib", "libaprutil-1.la"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "apr-util-1"
@@ -184,14 +194,13 @@ class AprUtilConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
-        # TODO: to remove in conan v2
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var : {}".format(binpath))
         self.env_info.PATH.append(binpath)
 
-        apr_util_root = self.package_folder
+        apr_util_root = tools.unix_path(self.package_folder)
         self.output.info("Settings APR_UTIL_ROOT environment var: {}".format(apr_util_root))
         self.env_info.APR_UTIL_ROOT = apr_util_root
 
-        if self.settings.compiler != "msvc":
-            self.env_info.APRUTIL_LDFLAGS = " ".join("-L{}".format(l) for l in self.deps_cpp_info.lib_paths)
+        if self.settings.compiler != "Visual Studio":
+            self.env_info.APRUTIL_LDFLAGS = " ".join(tools.unix_path("-L{}".format(l)) for l in self.deps_cpp_info.lib_paths)

@@ -4,20 +4,11 @@ sources:
     url:
       - "https://archive.apache.org/dist/apr/apr-util-1.6.1.tar.gz"
       - "https://downloads.apache.org/apr/apr-util-1.6.1.tar.gz"
-  "1.6.3":
-    sha256: "a41076e3710746326c3945042994ad9a4fcac0ce0277dd8fea076fec3c9772b5"
-    url:
-      - "https://archive.apache.org/dist/apr/apr-util-1.6.3.tar.gz"
-      - "https://downloads.apache.org/apr/apr-util-1.6.3.tar.gz"
 patches:
   "1.6.1":
-    - patch_file: "patches/0001-cmake-build-only-shared-static.patch"
-    - patch_file: "patches/0002-apu-config-prefix-env.patch"
-    - patch_file: "patches/0003-disable-check-APR_LIBRARIES.patch"
-    - patch_file: "patches/0004-set-min-cmake-version-first.patch"
-    - patch_file: "patches/0005-fix-expat-found-test.patch"
-  "1.6.3":
-    - patch_file: "patches/0001-cmake-build-only-shared-static.patch"
-    - patch_file: "patches/0002-apu-config-prefix-env.patch"
-    - patch_file: "patches/0003-disable-check-APR_LIBRARIES.patch"
-    - patch_file: "patches/0004-set-min-cmake-version-first.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmake-build-only-shared-static.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-apu-config-prefix-env.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-disable-check-APR_LIBRARIES.patch"
