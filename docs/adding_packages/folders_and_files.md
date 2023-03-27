@@ -145,7 +145,7 @@ When a package needs other packages those can be include with the `requirements(
 
 For more information see the [Dependencies](dependencies.md) documentation.
 
-For compiled libraries, the `build()` method is used along side the [build helpers](https://docs.conan.io/en/latest/reference/build_helpers.html).
+For compiled libraries, the `build()` method is used along side the [build helpers](https://docs.conan.io/1/reference/build_helpers.html).
 This allows you to use the official build script from a project, see [build and package](build_and_package.md) instructions.
 
 ```python
@@ -176,7 +176,7 @@ Here's an example for a header only library:
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its
 corresponding `conanfile.py` and a minimal project to test the package is strictly required. You can read about it in the
-[Conan documentation](https://docs.conan.io/en/latest/creating_packages/getting_started.html) and learn about ConanCenterIndex
+[Conan documentation](https://docs.conan.io/1/creating_packages/getting_started.html) and learn about ConanCenterIndex
 specific conventions in [test package](test_packages.md) section.
 
 The goal for the test package is to make sure the
