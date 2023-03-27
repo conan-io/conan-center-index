@@ -49,9 +49,6 @@ class SeadexEssentialsConan(ConanFile):
             self.options.shared = False
 
     def configure(self):
-        if self.settings.os != "Windows" and self.settings.os != "Linux":
-           raise Exception("This package only build in unix or Windows systems!")
-
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -66,6 +63,8 @@ class SeadexEssentialsConan(ConanFile):
         self.requires("fmt/9.1.0")
 
     def validate(self):
+        if self.settings.os not in ["Linux", "Windows"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and Windows!")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
