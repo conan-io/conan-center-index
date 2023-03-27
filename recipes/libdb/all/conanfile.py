@@ -1,8 +1,9 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
+from conan import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, MSBuild
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -73,15 +74,15 @@ class LibdbConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
-            if tools.Version(self.settings.compiler.version) == "16":
+            if tools.scm.Version(self.settings.compiler.version) == "16":
                 raise ConanInvalidConfiguration("Visual Studio 2019 not supported.")
 
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang":
-                if tools.Version(self.settings.compiler.version) <= "5":
+                if tools.scm.Version(self.settings.compiler.version) <= "5":
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
             if self.settings.compiler == "apple-clang":
-                if tools.Version(self.settings.compiler.version) < "10":
+                if tools.scm.Version(self.settings.compiler.version) < "10":
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
 
     def build_requirements(self):
@@ -91,7 +92,7 @@ class LibdbConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.files.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
@@ -127,7 +128,7 @@ class LibdbConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler in ["apple-clang", "clang"] and tools.Version(self.settings.compiler.version) >= "12":
+        if self.settings.compiler in ["apple-clang", "clang"] and tools.scm.Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
@@ -232,9 +233,9 @@ class LibdbConan(ConanFile):
                             os.remove(os.path.join(bindir, fn))
 
                 if not os.listdir(bindir):
-                    tools.rmdir(bindir)
+                    tools.files.rmdir(bindir)
 
-            tools.rmdir(os.path.join(self.package_folder, "docs"))
+            tools.files.rmdir(os.path.join(self.package_folder, "docs"))
             tools.remove_files_by_mask(libdir, "*.la")
             if not self.options.shared:
                 # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
@@ -265,4 +266,3 @@ class LibdbConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         elif self.settings.os == "Windows" :
             self.cpp_info.system_libs.append("ws2_32")
-
