@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 import os
 
@@ -21,6 +21,10 @@ class RobinHoodHashingConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def package_id(self):
         self.info.clear()
 
@@ -32,7 +36,7 @@ class RobinHoodHashingConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
