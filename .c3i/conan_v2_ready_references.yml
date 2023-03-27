@@ -2,6 +2,7 @@ required_for_references:
 - aaplus
 - abseil
 - android-ndk
+- antlr4-cppruntime
 - arduinojson
 - asio
 - async_simple
@@ -21,6 +22,7 @@ required_for_references:
 - celero
 - cereal
 - ceres-solver
+- cfitsio
 - charls
 - civetweb
 - clhep
@@ -55,6 +57,7 @@ required_for_references:
 - expat
 - fakeit
 - fast_float
+- fast-cdr
 - fftw
 - flac
 - flann
@@ -66,6 +69,7 @@ required_for_references:
 - freetype
 - ftxui
 - fxdiv
+- g3log
 - gamma
 - geos
 - getopt-for-visual-studio
@@ -78,7 +82,10 @@ required_for_references:
 - gnu-config
 - gperf
 - gtest
+- harfbuzz
+- highway
 - icu
+- iir1
 - im95able-rea
 - imake
 - imath
@@ -91,6 +98,7 @@ required_for_references:
 - json-c
 - jsoncpp
 - jwt-cpp
+- kangaru
 - kuba-zip
 - lcms
 - lerc
@@ -104,7 +112,9 @@ required_for_references:
 - libconfuse
 - libcurl
 - libdeflate
+- libdisasm
 - libelf
+- libepoxy
 - libev
 - libevent
 - libffi
@@ -141,6 +151,7 @@ required_for_references:
 - libusb
 - libuuid
 - libuv
+- libverto
 - libvpx
 - libwebp
 - libxls
@@ -171,9 +182,11 @@ required_for_references:
 - nettle
 - ninja
 - nlohmann_json
+- nuraft
 - odbc
 - ogg
 - onetbb
+- onnx
 - openal-soft
 - opencl-headers
 - opencl-icd-loader
@@ -201,6 +214,7 @@ required_for_references:
 - rabbitmq-c
 - range-v3
 - rapidjson
+- rapidxml
 - re2
 - readerwriterqueue
 - rttr
@@ -225,7 +239,9 @@ required_for_references:
 - tinyxml2
 - tlx
 - toml11
+- trantor
 - univalue
+- unordered_dense
 - unqlite
 - uriparser
 - utf8proc
