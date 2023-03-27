@@ -58,15 +58,6 @@ class CubicInterpolationConan(ConanFile):
         self.requires("eigen/3.3.9")
 
     @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
-
-    @property
     def _required_boost_components(self):
         return ["filesystem", "math", "serialization"]
 
@@ -81,6 +72,9 @@ class CubicInterpolationConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "14")
+
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe")
 
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("cubicinterpolation shared is not supported with Visual Studio")
