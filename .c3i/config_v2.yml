@@ -98,7 +98,7 @@ configurations:
               compiler.version: [ "192" ]
               build_type:
                 - "Release":
-                    compiler.runtime: [ "static", "dynamic" ]
+                    compiler.runtime: ["dynamic"]
                     compiler.runtime_type: [ "Release" ]
 
 cppstd:
