@@ -1,64 +1,67 @@
-from os.path import join
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, apply_conandata_patches
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
+
 
 class NuRaftConan(ConanFile):
     name = "nuraft"
     homepage = "https://github.corp.ebay.com/sds/NuRaft"
     description = """Cornerstone based RAFT library."""
-    topics = ("raft")
+    topics = ("raft",)
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
 
-    settings = "os", "compiler", "arch", "build_type"
-
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "asio": ["boost", "standalone"],
-        "shared": ['True', 'False'],
-        "fPIC": ['True', 'False'],
     }
     default_options = {
-        "asio": "boost",
         "shared": False,
         "fPIC": True,
+        "asio": "boost",
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
-
-    def requirements(self):
-        if self.options.asio == "boost":
-            self.requires("boost/1.79.0")
-        else:
-            self.requires("asio/1.24.0")
-        self.requires("openssl/1.1.1s")
-
-    def validate(self):
-        if self.info.settings.os in ["Windows"]:
-            raise ConanInvalidConfiguration("{} Builds are unsupported".format(self.info.settings.os))
-        if self.info.settings.os in ["Macos"] and self.options.shared:
-            raise ConanInvalidConfiguration("Building Shared Object for {} unsupported".format(self.info.settings.os))
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("openssl/1.1.1t")
+        if self.options.asio == "boost":
+            self.requires("boost/1.81.0")
+        else:
+            self.requires("asio/1.24.0")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows")
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported for Macos")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-        cmake = CMakeDeps(self)
-        cmake.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -67,12 +70,11 @@ class NuRaftConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["nuraft"]
-        self.cpp_info.system_libs = ["m"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.system_libs.extend(["m", "pthread"])
