@@ -101,6 +101,11 @@ class CoinCglConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+        if self._settings_build.os == "Windows":
+            # TODO: Something to fix in conan client or pkgconf recipe?
+            # This is a weird workaround when build machine is Windows. Here we have to inject regular
+            # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
         deps = PkgConfigDeps(self)
