@@ -19,6 +19,6 @@ sources:
     sha256: "0ed1983654fdd8268e051274904128709c3d9df8234acf7916e9015199b0b247"
 patches:
   "1.3.2":
-    - patch_file: "patches/0002-remove-explicit-stdlib-setting.patch"
+    - patch_file: "patches/1.3.2-0001-remove-explicit-stdlib-setting.patch"
       patch_description: "fix compilation and link errors on Linux"
       patch_type: "portability"
