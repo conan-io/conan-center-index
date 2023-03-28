@@ -18,6 +18,7 @@ class SentryBreakpadConan(ConanFile):
     license = "Apache-2.0"
     topics = ("breakpad", "error-reporting", "crash-reporting")
     provides = "breakpad"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
