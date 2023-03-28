@@ -79,7 +79,7 @@ class GrapheneConan(ConanFile):
         if self.options.with_glib and not can_run(self):
             # Same Tool as for requirements to find the glib compiler
             # This is required for dual-profile and cross builds.
-            self.tool_requires("glib/2.75.2")
+            self.tool_requires("glib/2.76.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
