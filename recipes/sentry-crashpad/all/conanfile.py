@@ -95,8 +95,9 @@ class SentryCrashpadConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
-        replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"),
-                        "find_package(OpenSSL)", openssl_repl)
+        if Version(self.version) < "0.6.1":
+            replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"),
+                            "find_package(OpenSSL)", openssl_repl)
         cmake = CMake(self)
         cmake.configure(build_script_folder="external/crashpad")
         cmake.build()
