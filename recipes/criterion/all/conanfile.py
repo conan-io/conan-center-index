@@ -8,6 +8,7 @@ class CriterionConan(ConanFile):
     name = "criterion"
     version = "2.4.1"
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Snaipe/Criterion"
     topics = ("testing")
     description = "A cross-platform C and C++ unit testing framework for the 21st century"
