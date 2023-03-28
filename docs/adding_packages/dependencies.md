@@ -20,8 +20,8 @@ from handling "vendored" dependencies to what versions should be used.
 
 ## List Dependencies
 
-Since all ConanCenterIndex recipes are to build and/or package projects they are exclusively done in [`conanfile.py`](https://docs.conan.io/en/latest/reference/conanfile.html). This offers a few
-ways to add requirements. The most common way is [requirements](https://docs.conan.io/en/latest/reference/conanfile/methods.html#requirements):
+Since all ConanCenterIndex recipes are to build and/or package projects they are exclusively done in [`conanfile.py`](https://docs.conan.io/1/reference/conanfile.html). This offers a few
+ways to add requirements. The most common way is [requirements](https://docs.conan.io/1/reference/conanfile/methods.html#requirements):
 
 ```py
     def requirements(self):
@@ -53,14 +53,14 @@ class ExampleConan(ConanFile):
             self.requires("zlib/1.2.13")
 ```
 
-If a dependency was added (or removed) with a release, then the `if` condition could check [`self.version`](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#version). Another common case is
+If a dependency was added (or removed) with a release, then the `if` condition could check [`self.version`](https://docs.conan.io/1/reference/conanfile/attributes.html#version). Another common case is
 `self.settings.os` dependant requirements which need to be added for certain plaforms.
 
 ### Build Requirements
 
 In ConanCenter we only assume
 [CMake is available](../faqs.md#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default).
-If a project requires any other specific tool, those can be added as well. We like to do this with [build_requirements](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build-requirements):
+If a project requires any other specific tool, those can be added as well. We like to do this with [build_requirements](https://docs.conan.io/1/reference/conanfile/methods.html#build-requirements):
 
 ```py
     def build_requirements(self):
@@ -69,13 +69,13 @@ If a project requires any other specific tool, those can be added as well. We li
 
 ## Accessing Dependencies
 
-It's fairly common to need to pass information from a dependency to the project. This is the job of the [`generate()`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#generate) method. This
-is generally covered by the built-in generators like [`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html)
-However the [`self.dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html?highlight=generate) are available.
+It's fairly common to need to pass information from a dependency to the project. This is the job of the [`generate()`](https://docs.conan.io/1/reference/conanfile/methods.html#generate) method. This
+is generally covered by the built-in generators like [`CMakeDeps`](https://docs.conan.io/1/reference/conanfile/tools/cmake/cmakedeps.html)
+However the [`self.dependencies`](https://docs.conan.io/1/reference/conanfile/dependencies.html?highlight=generate) are available.
 
 Alternatively, a project may depend on a specific versions or configuration of a dependency. This use case is again covered by the
-[`self.dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html?highlight=validate) within the
-[`validate()`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#validate) method. Additionally it's possible to suggest the option's values while the graph is built through [`configure()`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#configure-config-options)
+[`self.dependencies`](https://docs.conan.io/1/reference/conanfile/dependencies.html?highlight=validate) within the
+[`validate()`](https://docs.conan.io/1/reference/conanfile/methods.html#validate) method. Additionally it's possible to suggest the option's values while the graph is built through [`configure()`](https://docs.conan.io/1/reference/conanfile/methods.html#configure-config-options)
 this is not guaranteed and not a common practice.
 
 ### Handling Requirement's Options
@@ -84,10 +84,10 @@ Forcing options of dependencies inside a ConanCenter should be avoided, except i
 Our general belief is the users input should be the most important; it's unexpected for command line arguments to be over ruled
 by specifc recipes.
 
-You need to use the [`validate()`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#validate) method in order to ensure they check after the Conan graph is completely built.
+You need to use the [`validate()`](https://docs.conan.io/1/reference/conanfile/methods.html#validate) method in order to ensure they check after the Conan graph is completely built.
 
 Certain projects are dependent on the configuration (also known as options) of a dependency. This can be enforced in a recipe by
-accessing the [`options`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html?highlight=options) field of
+accessing the [`options`](https://docs.conan.io/1/reference/conanfile/dependencies.html?highlight=options) field of
 the dependency.
 
 ```py
@@ -111,10 +111,10 @@ def validate(self):
 
 ### Passing Requirement's info to `build()`
 
-The [`self.dependencies`](https://docs.conan.io/en/latest/reference/conanfile/dependencies.html) are limited to [`generate()`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#generate) and [`validate()`](https://docs.conan.io/en/latest/reference/conanfile/methods.html#validate). This means configuring a projects build scripts
+The [`self.dependencies`](https://docs.conan.io/1/reference/conanfile/dependencies.html) are limited to [`generate()`](https://docs.conan.io/1/reference/conanfile/methods.html#generate) and [`validate()`](https://docs.conan.io/1/reference/conanfile/methods.html#validate). This means configuring a projects build scripts
 is a touch more complicated when working with unsupported build scripts.
 
-In general, with [CMake](https://cmake.org/) project, this can be very simple with the [`CMakeToolchain`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmaketoolchain.html), such as:
+In general, with [CMake](https://cmake.org/) project, this can be very simple with the [`CMakeToolchain`](https://docs.conan.io/1/reference/conanfile/tools/cmake/cmaketoolchain.html), such as:
 
 ```py
     def generate(self):
@@ -127,7 +127,7 @@ In general, with [CMake](https://cmake.org/) project, this can be very simple wi
 This pattern can be recreated for less common build system by, generating a script to call configure or capture the
 required values in a YAML files for example.
 
-> **Note**: This needs to be saved to disk because the [`conan install`](https://docs.conan.io/en/latest/reference/commands/consumer/install.html) and [`conan build`](https://docs.conan.io/en/latest/reference/commands/development/build.html) commands can be separated when
+> **Note**: This needs to be saved to disk because the [`conan install`](https://docs.conan.io/1/reference/commands/consumer/install.html) and [`conan build`](https://docs.conan.io/1/reference/commands/development/build.html) commands can be separated when
 > developing packages so for this reason the `class` may not persists the information. This is a very common workflow,
 > even used in ConanCenter in other areas such as testing.
 
@@ -168,14 +168,14 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 
 > **Note**: These are very specific to the ConanCenter being the default remote and may not be relevant to your specifc use case.
 
-* [Version ranges](https://docs.conan.io/en/latest/versioning/version_ranges.html) are not allowed.
-* Specify explicit [RREV](https://docs.conan.io/en/latest/versioning/revisions.html) (recipe revision) of dependencies is not allowed.
+* [Version ranges](https://docs.conan.io/1/versioning/version_ranges.html) are not allowed.
+* Specify explicit [RREV](https://docs.conan.io/1/versioning/revisions.html) (recipe revision) of dependencies is not allowed.
 * Only ConanCenter recipes are allowed in `requires`/`requirements()` and `build_requires`/`build_requirements()`.
-* [`python_requires`](https://docs.conan.io/en/latest/reference/conanfile/other.html#python-requires) are not allowed.
+* [`python_requires`](https://docs.conan.io/1/reference/conanfile/other.html#python-requires) are not allowed.
 
 ### Version Ranges
 
-Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/en/latest/versioning/version_ranges.html). However,
+Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/1/versioning/version_ranges.html). However,
 in the context of ConanCenter they pose a few key challenges when being used generally to consume packages, most notably:
 
 * Non-Deterministic `package-id`: With version ranges the newest compatible package may yield a different `package_id` than the one built

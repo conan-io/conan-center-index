@@ -13,15 +13,15 @@ patches:
   "1.4.1":
     - patch_file: "patches/llvm-clang-macos.patch"
       patch_type: "portability"
-      patch_source: https://gitlab.com/AOMediaCodec/SVT-AV1/-/merge_requests/2070
+      patch_source: https://gitlab.com/AOMediaCodec/SVT-AV1/-/merge_requests/2087
       patch_description: "Allow statically compiling on macos with llvm-clang"
   "1.3.0":
     - patch_file: "patches/llvm-clang-macos.patch"
       patch_type: "portability"
-      patch_source: https://gitlab.com/AOMediaCodec/SVT-AV1/-/merge_requests/2070
+      patch_source: https://gitlab.com/AOMediaCodec/SVT-AV1/-/merge_requests/2087
       patch_description: "Allow statically compiling on macos with llvm-clang"
   "1.2.1":
     - patch_file: "patches/llvm-clang-macos.patch"
       patch_type: "portability"
-      patch_source: https://gitlab.com/AOMediaCodec/SVT-AV1/-/merge_requests/2070
+      patch_source: https://gitlab.com/AOMediaCodec/SVT-AV1/-/merge_requests/2087
       patch_description: "Allow statically compiling on macos with llvm-clang"
