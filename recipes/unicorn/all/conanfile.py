@@ -2,8 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import stat
 import textwrap
@@ -149,11 +150,14 @@ class UnicornConan(ConanFile):
             copy(self, lic, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if Version(self.version) >= "2.0.0" and self.options.shared:
+            rm(self, "*unicorn.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*unicorn.lib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["unicorn"]
         self.cpp_info.set_property("pkg_config_name", "unicorn")
+        suffix = "-import" if Version(self.version) >= "2.0.0" and is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"unicorn{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m", "pthread"]
