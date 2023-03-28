@@ -15,7 +15,9 @@ if(FLATBUFFERS_HEADER_ONLY)
 endif()
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
-if(NOT (CMAKE_CROSSCOMPILING AND FLATBUFFERS_HEADER_ONLY)) # due to missing package id of build requirement if header_only
+# Testing this block in case of cross-build would require to add flatbuffers to build requirements of test package
+# But due to c3i limitations, package id of build requirement if header_only is not available while building in c3i
+if(NOT CMAKE_CROSSCOMPILING)
     add_executable(sample_binary sample_binary.cpp)
     target_link_libraries(sample_binary PRIVATE ${FLATBUFFERS_TARGET})
     target_compile_features(sample_binary PRIVATE cxx_std_11)
