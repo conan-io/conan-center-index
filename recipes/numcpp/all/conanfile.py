@@ -76,6 +76,14 @@ class NumCppConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
+        # since 2.10.0, numcpp requires filesystem
+        if Version(self.version) >= "2.10.0" and \
+            self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "12" and \
+            self.settings.compiler.libcxx == "libstdc++11":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support clang<12 with libstdc++11 due to filesystem library.",
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
