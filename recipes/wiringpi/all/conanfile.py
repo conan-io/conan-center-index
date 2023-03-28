@@ -47,7 +47,6 @@ class WiringpiConan(ConanFile):
         tc.generate()
 
     def build(self):
-        print("FOLDEEEER", self.folders.root)
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.folders.root)
         cmake.build()
