@@ -29,9 +29,9 @@ class NodejsConan(ConanFile):
         return str(self.settings.arch)
 
     def validate(self):
-        if (not (self.version in self.conan_data["sources"]) or
-            not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
-            not (self._nodejs_arch in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
+        if not self.version in self.conan_data["sources"] or \
+           not str(self.settings.os) in self.conan_data["sources"][self.version] or \
+           not self._nodejs_arch in self.conan_data["sources"][self.version][str(self.settings.os)]:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
     def build(self):
