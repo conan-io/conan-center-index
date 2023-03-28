@@ -54,8 +54,8 @@ class SigslotConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(self, pattern="LICENSE", src=self.source_folder, dst="licenses")
-        copy(self, pattern="signal.hpp", src=os.path.join(self.source_folder, "include", "sigslot"), dst=os.path.join("include", "sigslot"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="signal.hpp", src=os.path.join(self.source_folder, "include", "sigslot"), dst=os.path.join(self.package_folder, "include", "sigslot"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
