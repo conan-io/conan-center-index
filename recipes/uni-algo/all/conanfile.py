@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir
-from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
@@ -140,8 +139,13 @@ class UniAlgoConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
                 self.cpp_info.system_libs.append("dl")
 
+        # see https://github.com/uni-algo/uni-algo/blob/v0.7.1/CMakeLists.txt#L75-L109
+        self.cpp_info.set_property("cmake_file_name", f"{self.name}")
+        self.cpp_info.set_property("cmake_target_name", f"{self.name}::{self.name}")
+        self.cpp_info.set_property("pkg_config_name", f"{self.name}")
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = f"{self.name}".upper()
+        self.cpp_info.filenames["cmake_find_package"] = f"{self.name}"
         self.cpp_info.filenames["cmake_find_package_multi"] = f"{self.name}"
-        self.cpp_info.names["cmake_find_package"] = f"{self.name}".upper()
+        self.cpp_info.names["cmake_find_package"] = f"{self.name}"
         self.cpp_info.names["cmake_find_package_multi"] = f"{self.name}"
