@@ -39,10 +39,14 @@ class NodejsConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
-        self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
+        if self.version.as_list[0] < 18:
+            self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
+            self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
+            self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
+            self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
+        else:
+            self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin", symlinks=True, keep_path=True)
+            self.copy(pattern="*", src=os.path.join(self._source_subfolder, "lib"), dst="lib", symlinks=True, keep_path=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
