@@ -32,7 +32,7 @@ class arg_routerRecipe(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def build(self):
         cmake = CMake(self)
