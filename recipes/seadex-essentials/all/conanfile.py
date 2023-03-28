@@ -36,9 +36,9 @@ class SeadexEssentialsConan(ConanFile):
         return {
             "gcc": "8.3",
             "clang": "12",
-            "apple-clang": "10",
             "Visual Studio": "16",
-            "msvc": "192"
+            "msvc": "192",
+            "apple-clang": "10"
         }
 
     def export_sources(self):
@@ -65,7 +65,7 @@ class SeadexEssentialsConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["Linux", "Windows", "Macos"]:
-            raise ConanInvalidConfiguration("This recipe supports only Linux and Windows!")
+            raise ConanInvalidConfiguration("This recipe supports only Linux, Windows and macOS!")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
