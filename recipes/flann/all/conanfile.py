@@ -42,6 +42,7 @@ class FlannConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # see https://github.com/conan-io/conan-center-index/pull/16355#discussion_r1150197550
         self.requires("lz4/1.9.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
