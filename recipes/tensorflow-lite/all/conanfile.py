@@ -64,11 +64,11 @@ class TensorflowLiteConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("abseil/20220623.0")
+        self.requires("abseil/20230125.1")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/2.0.6")
+        self.requires("flatbuffers/23.1.21")
         self.requires("gemmlowp/cci.20210928")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
