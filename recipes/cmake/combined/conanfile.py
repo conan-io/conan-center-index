@@ -15,11 +15,26 @@ class CMakeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
+
+    options = {
+        "with_openssl": [True, False],
+        "from_sources": [True, False],
+    }
+    default_options = {
+        "with_openssl": True,
+        "from_sources": False,
+    }
 
     def set_name(self):
         self.name = os.environ.get('CMAKE_RECIPE_NAME', 'cmake')
         print(self.name)
+
+    def config_options(self):
+        if self.settings.os not in ["Macos", "Windows", "Linux"]:
+            self.options.from_sources = True
+        if self.settings.os == "Windows" and self.options.from_sources:
+            self.options.with_openssl = False
 
     def validate(self):
         if self.settings.arch not in ["x86_64", "armv8"]:
@@ -36,6 +51,12 @@ class CMakeConan(ConanFile):
     def package_id(self):
         if self.info.settings.os == "Macos":
             del self.info.settings.arch
+        del self.info.settings.compiler
+        # The compatibility() method is not compatible with package_id() deleting values from info,
+        # so make the packages compatible despite sources or openssl, by deleting those settings.
+        # See: https://github.com/conan-io/conan/issues/12476
+        del self.info.options.from_sources
+        del self.info.options.with_openssl
 
     def package(self):
         copy(self, "*", src=self.build_folder, dst=self.package_folder)
@@ -58,7 +79,7 @@ class CMakeConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
-        if self.settings.os == "Macos":
+        if self.settings.os == "Macos" and not self.options.from_sources:
             bindir = os.path.join(self.package_folder, "CMake.app", "Contents", "bin")
             self.cpp_info.bindirs = [bindir]
         else:
