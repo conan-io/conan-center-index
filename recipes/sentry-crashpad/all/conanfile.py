@@ -139,7 +139,8 @@ class SentryCrashpadConan(ConanFile):
         # util
         self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
         self.cpp_info.components["crashpad_util"].libs = ["crashpad_util"]
-        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
+        # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
+        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib", "libcurl::libcurl"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
