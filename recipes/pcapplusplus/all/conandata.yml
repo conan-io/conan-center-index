@@ -16,46 +16,33 @@ patches:
     - patch_file: "patches/0001-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       patch_description: Pass CXXFLAGS and CPPFLAGS when-compiling 3rd party source
       patch_type: conan
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-Use-pthreads4w.patch"
       patch_description: Use pthreads4w from conan center
       patch_type: conan
-      base_path: "source_subfolder"
     - patch_file: patches/0004-Fix-md5-include.patch
       patch_description: Fix md5 include configuration
       patch_type: conan
-      base_path: source_subfolder
-
   "21.11":
     - patch_file: "patches/0001-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       patch_description: Pass CXXFLAGS and CPPFLAGS when-compiling 3rd party source
       patch_type: conan
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-Use-pthreads4w.patch"
       patch_description: Use pthreads4w from conan center
       patch_type: conan
-      base_path: "source_subfolder"
     - patch_file: patches/0005-Fix-md5-include.patch
       patch_description: Fix md5 include configuration
       patch_type: conan
-      base_path: source_subfolder
-
   "22.05":
     - patch_file: "patches/0002-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       patch_description: Pass CXXFLAGS and CPPFLAGS when-compiling 3rd party source
       patch_type: conan
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-Use-pthreads4w.patch"
       patch_description: Use pthreads4w from conan center
       patch_type: conan
-      base_path: "source_subfolder"
     - patch_file: patches/0006-Fix-md5-include.patch
       patch_description: Fix md5 include configuration
       patch_type: conan
-      base_path: source_subfolder
-
   "22.11":
     - patch_file: "patches/0002-Pass-CXXFLAGS-CPPFLAGS-when-compiling-3rd-party-sour.patch"
       patch_description: Pass CXXFLAGS and CPPFLAGS when-compiling 3rd party source
       patch_type: conan
-      base_path: "source_subfolder"
