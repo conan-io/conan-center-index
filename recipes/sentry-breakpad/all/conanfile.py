@@ -53,7 +53,7 @@ class SentryBreakpadConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.requires("linux-syscall-support/cci.20200813")
+            self.requires("linux-syscall-support/cci.20200813", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
