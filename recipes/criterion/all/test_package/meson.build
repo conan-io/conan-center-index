@@ -1,3 +1,3 @@
-project('TestCriterion', 'cpp')
+project('TestCriterion', 'c')
 criterion = dependency('criterion', version : '>=2.4.1')
-executable('example', 'src/example.cpp', dependencies: criterion)
+executable('example', 'src/example.c', dependencies: criterion)
