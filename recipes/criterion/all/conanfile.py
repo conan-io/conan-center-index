@@ -3,14 +3,12 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Git
 from conan.tools.gnu import PkgConfigDeps
-from conans import tools
 
 class CriterionConan(ConanFile):
     name = "criterion"
     version = "2.4.1"
     license = "MIT"
-    url = "https://github.com/Snaipe/Criterion"
-    homepage = "https://criterion.readthedocs.io/en/master/"
+    homepage = "https://github.com/Snaipe/Criterion"
     topics = ("testing")
     description = "A cross-platform C and C++ unit testing framework for the 21st century"
 
