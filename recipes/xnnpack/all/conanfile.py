@@ -63,7 +63,8 @@ class XnnpackConan(ConanFile):
     def requirements(self):
         self.requires("cpuinfo/cci.20220228")
         self.requires("fp16/cci.20210320")
-        self.requires("pthreadpool/cci.20210218")
+        self.requires("pthreadpool/cci.20210218", transitive_headers=True)
+        self.requires("fxdiv/cci.20200417")
 
     def validate(self):
         check_min_vs(self, 192)
