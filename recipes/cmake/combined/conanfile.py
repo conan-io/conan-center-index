@@ -9,7 +9,6 @@ from conan.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.51.0"
 
 class CMakeConan(ConanFile):
-    name = "cmake"
     package_type = "application"
     description = "CMake, the cross-platform, open-source build system."
     topics = ("build", "installer")
@@ -17,6 +16,10 @@ class CMakeConan(ConanFile):
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
     settings = "os", "arch"
+
+    def set_name(self):
+        self.name = os.environ.get('CMAKE_RECIPE_NAME', 'cmake')
+        print(self.name)
 
     def validate(self):
         if self.settings.arch not in ["x86_64", "armv8"]:
