@@ -53,7 +53,7 @@ class SeadexEssentialsConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        if self.settings.compiler == "clang":
+        if self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
             self.settings.compiler.cppstd = self._min_cppstd
 
     def layout(self):
