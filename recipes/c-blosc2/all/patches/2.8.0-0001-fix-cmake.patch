@@ -88,7 +88,7 @@ index 365de33..74ed32e 100644
 -if(LZ4_FOUND)
 -    set(LIBS ${LIBS} ${LZ4_LIBRARY})
 +if(lz4_FOUND)
-+    set(LIBS ${LIBS} ${lz4_LIBRARY})
++    set(LIBS ${LIBS} ${lz4_LIBRARIES})
  else()
      file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
      set(SOURCES ${SOURCES} ${LZ4_FILES})
