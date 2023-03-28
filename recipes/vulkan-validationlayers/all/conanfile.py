@@ -102,7 +102,7 @@ class VulkanValidationLayersConan(ConanFile):
             self.requires(self._require("spirv-tools"), private=not hasattr(self, "settings_build"))
         else:
             self.requires(self._require("spirv-tools"))
-        self.requires(self._require("vulkan-headers"))
+        self.requires(self._require("vulkan-headers"), transitive_headers=True)
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self._needs_wayland_for_build:
