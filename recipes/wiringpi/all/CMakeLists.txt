@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(wiringPi C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
 FILE(GLOB SRC_FILES source_subfolder/wiringPi/*.c)
 message(STATUS "SRC_FILES: ${SRC_FILES}")
 if(NOT WITH_WPI_EXTENSIONS)

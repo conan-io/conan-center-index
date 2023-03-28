@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -20,47 +22,40 @@ class WiringpiConan(ConanFile):
                        "wpi_extensions": False,
                        "with_devlib": True}
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="source_subfolder", build_folder="build_folder")
+        self.folders.root = ".."
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_WPI_EXTENSIONS"] = self.options.wpi_extensions
-        self._cmake.definitions["WITH_DEV_LIB"] = self.options.with_devlib
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITH_WPI_EXTENSIONS"] = self.options.wpi_extensions
+        tc.variables["WITH_DEV_LIB"] = self.options.with_devlib
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        print("FOLDEEEER", self.folders.root)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.folders.root)
         cmake.build()
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        self.copy("COPYING*", src=self.folders.source, dst="licenses")
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.folders.root)
         cmake.install()
 
     def package_info(self):
