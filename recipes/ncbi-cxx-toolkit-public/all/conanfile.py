@@ -45,10 +45,6 @@ class NcbiCxxToolkit(ConanFile):
         return 17
 
     @property
-    def _source_subfolder(self):
-        return "src"
-
-    @property
     def _dependencies_folder(self):
         return "dependencies"
 
@@ -118,7 +114,7 @@ class NcbiCxxToolkit(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder = self._source_subfolder)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         _alltargets = self._parse_option(self.options.with_targets)
