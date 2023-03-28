@@ -311,7 +311,9 @@ The CMake definition [CMAKE_VERBOSE_MAKEFILE](https://cmake.org/cmake/help/lates
 
 #### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
 
-The file test_package/CMakeLists.txt should require CMake 3.1 by default: [cmake_minimum_required(VERSION 3.1)](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html). The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if [CMAKE_CXX_STANDARD](https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html) or [CXX_STANDARD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html#prop_tgt:CXX_STANDARD) is explicit, CMake 3.1 is mandatory.
+> **Warning**: This is a legacy Conan 1.x details from the deprecated generators
+
+The file test_package/CMakeLists.txt should require CMake 3.15 by default: [cmake_minimum_required(VERSION 3.15)](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html). The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if [CMAKE_CXX_STANDARD](https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html) or [CXX_STANDARD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html#prop_tgt:CXX_STANDARD) is explicit, CMake 3.1 is mandatory.
 
 #### **<a name="KB-H049">#KB-H049</a>: "CMAKE WINDOWS EXPORT ALL SYMBOLS"**
 
