@@ -1,7 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.files import get, copy
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.scm import Version
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
-from conan import tools
 import os
 import yaml
 required_conan_version = ">=1.53.0"
@@ -51,19 +54,20 @@ class NcbiCxxToolkit(ConanFile):
 
     @property
     def _dependencies_filename(self):
-        return "dependencies-{}.{}.yml".format(tools.scm.Version(self.version).major, tools.scm.Version(self.version).minor)
+        return f"dependencies-{Version(self.version).major}.{Version(self.version).minor}.yml"
 
     @property
     def _requirements_filename(self):
-        return "requirements-{}.{}.yml".format(tools.scm.Version(self.version).major, tools.scm.Version(self.version).minor)
+        return f"requirements-{Version(self.version).major}.{Version(self.version).minor}.yml"
 
     @property
     def _tk_dependencies(self):
         if self.tk_dependencies is None:
             dependencies_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._dependencies_filename)
             if not os.path.isfile(dependencies_filepath):
-                raise ConanException("Cannot find {}".format(dependencies_filepath))
-            self.tk_dependencies = yaml.safe_load(open(dependencies_filepath))
+                raise ConanException(f"Cannot find {dependencies_filepath}")
+            with open(dependencies_filepath, "r", encoding="utf-8") as f:
+                self.tk_dependencies = yaml.safe_load(f)
         return self.tk_dependencies
 
     @property
@@ -71,8 +75,9 @@ class NcbiCxxToolkit(ConanFile):
         if self.tk_requirements is None:
             requirements_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._requirements_filename)
             if not os.path.isfile(requirements_filepath):
-                raise ConanException("Cannot find {}".format(requirements_filepath))
-            self.tk_requirements = yaml.safe_load(open(requirements_filepath))
+                raise ConanException(f"Cannot find {requirements_filepath}")
+            with open(requirements_filepath, "r", encoding="utf-8") as f:
+                self.tk_requirements = yaml.safe_load(f)
         return self.tk_requirements
 
     def _translate_req(self, key):
@@ -97,10 +102,10 @@ class NcbiCxxToolkit(ConanFile):
         return _res
 
     def export(self):
-        tools.files.copy(self, self._dependencies_filename,
+        copy(self, self._dependencies_filename,
             os.path.join(self.recipe_folder, self._dependencies_folder),
             os.path.join(self.export_folder, self._dependencies_folder))
-        tools.files.copy(self, self._requirements_filename,
+        copy(self, self._requirements_filename,
             os.path.join(self.recipe_folder, self._dependencies_folder),
             os.path.join(self.export_folder, self._dependencies_folder))
 
@@ -113,8 +118,7 @@ class NcbiCxxToolkit(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-       cmake_layout(self)
-       self.folders.source = self._source_subfolder
+        cmake_layout(self, src_folder = self._source_subfolder)
 
     def requirements(self):
         _alltargets = self._parse_option(self.options.with_targets)
@@ -167,21 +171,21 @@ class NcbiCxxToolkit(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
+        if self.settings.os not in ["Linux", "Macos", "Windows"]:
             raise ConanInvalidConfiguration("This operating system is not supported")
-        if tools.microsoft.is_msvc(self):
-            tools.microsoft.check_min_vs(self, "190")
-            if self.options.shared and tools.microsoft.is_msvc_static_runtime(self):
+        if is_msvc(self):
+            check_min_vs(self, "190")
+            if self.options.shared and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and tools.scm.Version(self.settings.compiler.version) < "7":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("This version of GCC is not supported")
-        if tools.build.cross_building(self):
+        if cross_building(self):
             raise ConanInvalidConfiguration("Cross compilation is not supported")
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         root = os.path.join(os.getcwd(), "CMakeLists.txt")
-        with open(root, "w") as f:
+        with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
             f.write("project(ncbi-cpp)\n")
             f.write("include(src/build-system/cmake/CMake.NCBItoolkit.cmake)\n")
@@ -197,7 +201,7 @@ class NcbiCxxToolkit(ConanFile):
             tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
         if len(self.tk_componenttargets) != 0:
             tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self.tk_componenttargets)
-        if tools.microsoft.is_msvc(self):
+        if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.generate()
         cmdep = CMakeDeps(self)
@@ -207,7 +211,7 @@ class NcbiCxxToolkit(ConanFile):
         cmake = CMake(self)
         cmake.configure()
 # Visual Studio sometimes runs "out of heap space"
-        if tools.microsoft.is_msvc(self):
+        if is_msvc(self):
             cmake.parallel = False
         cmake.build()
 
@@ -217,7 +221,8 @@ class NcbiCxxToolkit(ConanFile):
 
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
-        allexports = set(open(impfile).read().split())
+        with open(impfile, "r", encoding="utf-8") as f:
+            allexports = set(f.read().split())
         absent = []
         for component in self._tk_dependencies["components"]:
             c_libs = []
@@ -225,7 +230,7 @@ class NcbiCxxToolkit(ConanFile):
             for lib in libraries:
                 if lib in allexports:
                     c_libs.append(lib)
-            if len(c_libs) == 0 and not len(libraries) == 0:
+            if len(c_libs) == 0 and len(libraries) != 0:
                 absent.append(component)
         for component in self._tk_dependencies["components"]:
             c_libs = []
@@ -249,7 +254,7 @@ class NcbiCxxToolkit(ConanFile):
                         pkg = pkg[:pkg.find("/")]
                         ref = pkg + "::" + pkg
                         c_reqs.append(ref)
-            if not len(c_libs) == 0 or (len(libraries) == 0 and not len(c_reqs) == 0):
+            if len(c_libs) != 0 or (len(libraries) == 0 and len(c_reqs) != 0):
                 self.cpp_info.components[component].libs = c_libs
                 self.cpp_info.components[component].requires = c_reqs
 
