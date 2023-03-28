@@ -1,8 +1,9 @@
+from os import path
 from conan import ConanFile
-from conan.tools.meson import MesonToolchain, Meson
-from conan.tools.layout import basic_layout
-from conan.tools.scm import Git
+from conan.tools.files import get
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import MesonToolchain, Meson
 
 class CriterionConan(ConanFile):
     name = "criterion"
@@ -18,12 +19,22 @@ class CriterionConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    requires = ("libgit2/[~1.4]", "libffi/[~3.4]")
+    requires = ("libgit2/[>=1.0]", "libffi/[~3.4]")
 
     def source(self):
-        git = Git(self)
-        git.clone("https://github.com/Snaipe/Criterion.git", target=".", 
-                  args=['--recurse-submodules', '--depth', '1', '--branch', f'v{self.version}'])
+        print(path.join(self.source_folder, 'dependencies', 'debugbreak'))
+        get(self, url=self.conan_data["sources"][self.version]['url'], sha256=self.conan_data["sources"][self.version]['sha256'], strip_root=True)
+
+        # We need to get dependencies for building, they are git submodules!
+        get(self, self.conan_data["sources"][self.version]['debugbreak_url'], 
+            sha256=self.conan_data["sources"][self.version]['debugbreak_sha256'], 
+            destination=path.join(self.source_folder, 'dependencies', 'debugbreak'),
+            strip_root=True)
+        
+        get(self, self.conan_data["sources"][self.version]['klib_url'], 
+            sha256=self.conan_data["sources"][self.version]['klib_sha256'], 
+            destination=path.join(self.source_folder, 'dependencies', 'klib'),
+            strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
