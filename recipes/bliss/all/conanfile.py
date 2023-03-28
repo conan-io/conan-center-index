@@ -44,6 +44,7 @@ class BlissConan(ConanFile):
 
     def requirements(self):
         if self.options.with_exact_int == "gmp":
+            # gmp is fully transitive through bignum.hh public header of bliss
             self.requires("gmp/6.2.1", transitive_headers=True, transitive_libs=True)
         elif self.options.with_exact_int == "mpir":
             self.requires("mpir/3.0.0", transitive_headers=True, transitive_libs=True)
