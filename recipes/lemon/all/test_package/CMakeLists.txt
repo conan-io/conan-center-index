@@ -1,13 +1,12 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.2)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_program(LEMON_PROGRAM NAMES lemon)
 
-add_custom_command(OUTPUT gram.c gram.h
-    COMMAND lemon -s "${PROJECT_SOURCE_DIR}/gram.y" -d"${PROJECT_BINARY_DIR}"
+add_custom_command(
+    OUTPUT gram.c gram.h
+    COMMAND ${LEMON_PROGRAM} -s "${PROJECT_SOURCE_DIR}/gram.y" -d"${PROJECT_BINARY_DIR}"
     BYPRODUCTS gram.out
 )
 
 add_executable(${PROJECT_NAME} gram.c)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
