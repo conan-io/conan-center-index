@@ -86,15 +86,15 @@ class MpdecimalConan(ConanFile):
                         tc.extra_cxxflags.append("-DLIBMPDECXX_DLL")
             tc.generate()
         else:
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
-            tc.generate()
-
             deps = AutotoolsDeps(self)
             if is_apple_os(self) and self.settings.arch == "armv8":
                 deps.environment.append("LDFLAGS", ["-arch arm64"])
                 deps.environment.append("LDXXFLAGS", ["-arch arm64"])
             deps.generate()
+
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
+            tc.generate()
 
     def _build_msvc(self):
         source_dir = pathlib.Path(self.source_folder)
@@ -160,11 +160,14 @@ class MpdecimalConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.configure()
-            self.output.info(load(self, pathlib.Path("libmpdec", "Makefile")))
+            # self.output.info(load(self, pathlib.Path("libmpdec", "Makefile")))
             libmpdec, libmpdecpp = self._target_names
+            copy(self, "*", pathlib.Path(self.source_folder, "libmpdec"), pathlib.Path(self.build_folder, "libmpdec"))
             with chdir(self, "libmpdec"):
                 autotools.make(target=libmpdec)
             if self.options.cxx:
+                copy(self, "*", pathlib.Path(self.source_folder, "libmpdec++"),
+                     pathlib.Path(self.build_folder, "libmpdec++"))
                 with chdir(self, "libmpdec++"):
                     autotools.make(target=libmpdecpp)
 
@@ -182,9 +185,9 @@ class MpdecimalConan(ConanFile):
             copy(self, "*.lib", src=distfolder, dst=pkg_dir / "lib")
             copy(self, "*.dll", src=distfolder, dst=pkg_dir / "bin")
         else:
-            src_dir = pathlib.Path(self.source_folder)
-            mpdecdir = src_dir / "libmpdec"
-            mpdecppdir = src_dir / "libmpdec++"
+            build_dir = pathlib.Path(self.build_folder)
+            mpdecdir = build_dir / "libmpdec"
+            mpdecppdir = build_dir / "libmpdec++"
             copy(self, "mpdecimal.h", src=mpdecdir, dst=pkg_dir / "include")
             if self.options.cxx:
                 copy(self, "decimal.hh", src=mpdecppdir, dst=pkg_dir / "include")
