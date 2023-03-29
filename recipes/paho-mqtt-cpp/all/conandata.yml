@@ -11,13 +11,8 @@ sources:
 patches:
   "1.1":
     - patch_file: "patches/1.1/0001-deadlock_and_remlog-for-1-1.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.1/0002-ios_fix.patch"
-      base_path: "source_subfolder"
   "1.0.1":
     - patch_file: "patches/1.0.1/0001-fix-cmake-module-path.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.0.1/0002-fix-cmake-find-paho-mqtt-c-static.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.0.1/0003-fix-paho-mqtt-cpp-config-cmake.patch"
-      base_path: "source_subfolder"
