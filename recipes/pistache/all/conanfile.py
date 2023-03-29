@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs
 from conan.tools.build import check_min_cppstd
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -34,6 +33,17 @@ class PistacheConan(ConanFile):
         "with_ssl": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return "14" if self.version == "cci.20201127" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "6",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -59,29 +69,25 @@ class PistacheConan(ConanFile):
             self.requires("date/3.0.1")
 
     def validate(self):
-        compilers = {
-            "gcc": "7",
-            "clang": "6",
-        }
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
 
         if self.settings.compiler == "clang":
             raise ConanInvalidConfiguration("Clang support is broken. See pistacheio/pistache#835.")
 
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-        minimum_compiler = compilers.get(str(self.settings.compiler))
-        if minimum_compiler:
-            if Version(self.settings.compiler.version) < minimum_compiler:
-                raise ConanInvalidConfiguration(f"{self.ref} requires c++17, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def build_requirements(self):
         if self.version != "cci.20201127":
             self.tool_requires("meson/1.0.0")
-            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
@@ -99,6 +105,9 @@ class PistacheConan(ConanFile):
             tc = CMakeDeps(self)
             tc.generate()
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+
             tc = MesonToolchain(self)
             tc.project_options["PISTACHE_USE_SSL"] = self.options.with_ssl
             tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
@@ -108,9 +117,6 @@ class PistacheConan(ConanFile):
 
             tc = PkgConfigDeps(self)
             tc.generate()
-
-            env = VirtualBuildEnv(self)
-            env.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
@@ -133,14 +139,11 @@ class PistacheConan(ConanFile):
         if self.version == "cci.20201127":
             cmake = CMake(self)
             cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             meson = Meson(self)
             meson.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        fix_apple_shared_install_name(self)
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         # TODO: Pistache does not use namespace
