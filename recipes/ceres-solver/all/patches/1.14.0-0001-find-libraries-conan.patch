@@ -1,114 +1,148 @@
---- cmake/FindEigen.cmake
-+++ cmake/FindEigen.cmake
-@@ -180,12 +180,12 @@
- if (NOT EIGEN_FOUND)
-   # Search user-installed locations first, so that we prefer user installs
-   # to system installs where both exist.
--  list(APPEND EIGEN_CHECK_INCLUDE_DIRS
--    /usr/local/include
--    /usr/local/homebrew/include # Mac OS X
--    /opt/local/var/macports/software # Mac OS X.
--    /opt/local/include
--    /usr/include)
-+  list(APPEND EIGEN_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
-+    #/usr/local/include
-+    #/usr/local/homebrew/include # Mac OS X
-+    #/opt/local/var/macports/software # Mac OS X.
-+    #/opt/local/include
-+    #/usr/include)
-   # Additional suffixes to try appending to each search path.
-   list(APPEND EIGEN_CHECK_PATH_SUFFIXES
-     eigen3 # Default root directory for Eigen.
---- cmake/FindGflags.cmake
-+++ cmake/FindGflags.cmake
-@@ -434,21 +434,21 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,40 +209,40 @@ endif (IOS)
+ unset(CERES_COMPILE_OPTIONS)
  
-   # Search user-installed locations first, so that we prefer user installs
-   # to system installs where both exist.
--  list(APPEND GFLAGS_CHECK_INCLUDE_DIRS
--    /usr/local/include
--    /usr/local/homebrew/include # Mac OS X
--    /opt/local/var/macports/software # Mac OS X.
--    /opt/local/include
--    /usr/include)
-+  list(APPEND GFLAGS_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
-+    #/usr/local/include
-+    #/usr/local/homebrew/include # Mac OS X
-+    #/opt/local/var/macports/software # Mac OS X.
-+    #/opt/local/include
-+    #/usr/include)
-   list(APPEND GFLAGS_CHECK_PATH_SUFFIXES
-     gflags/include # Windows (for C:/Program Files prefix).
-     gflags/Include ) # Windows (for C:/Program Files prefix).
+ # Eigen.
+-find_package(Eigen REQUIRED)
+-if (EIGEN_FOUND)
+-  message("-- Found Eigen version ${EIGEN_VERSION}: ${EIGEN_INCLUDE_DIRS}")
+-  if (EIGEN_VERSION VERSION_LESS 3.1.0)
++find_package(Eigen3 REQUIRED CONFIG)
++if (1)
++  message("-- Found Eigen version ${Eigen3_VERSION}: ${Eigen3_INCLUDE_DIRS}")
++  if (Eigen3_VERSION VERSION_LESS 3.1.0)
+     message(FATAL_ERROR "-- Ceres requires Eigen version >= 3.1.0 in order "
+       "that Eigen/SparseCore be available, detected version of Eigen is: "
+-      "${EIGEN_VERSION}")
+-  endif (EIGEN_VERSION VERSION_LESS 3.1.0)
++      "${Eigen3_VERSION}")
++  endif ()
  
--  list(APPEND GFLAGS_CHECK_LIBRARY_DIRS
--    /usr/local/lib
--    /usr/local/homebrew/lib # Mac OS X.
--    /opt/local/lib
--    /usr/lib)
-+  list(APPEND GFLAGS_CHECK_LIBRARY_DIRS ${CMAKE_LIB_PATH})
-+    #/usr/local/lib
-+    #/usr/local/homebrew/lib # Mac OS X.
-+    #/opt/local/lib
-+    #/usr/lib)
-   list(APPEND GFLAGS_CHECK_LIBRARY_SUFFIXES
-     gflags/lib # Windows (for C:/Program Files prefix).
-     gflags/Lib ) # Windows (for C:/Program Files prefix).
-@@ -467,7 +467,7 @@
-   endif (NOT GFLAGS_INCLUDE_DIR OR
-     NOT EXISTS ${GFLAGS_INCLUDE_DIR})
+   if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*)" AND
+-      EIGEN_VERSION VERSION_LESS 3.3.4)
++      Eigen3_VERSION VERSION_LESS 3.3.4)
+     # As per issue #289: https://github.com/ceres-solver/ceres-solver/issues/289
+     # the bundle_adjustment_test will fail for Eigen < 3.3.4 on aarch64.
+     message(FATAL_ERROR "-- Ceres requires Eigen version >= 3.3.4 on aarch64. "
+-      "Detected version of Eigen is: ${EIGEN_VERSION}.")
++      "Detected version of Eigen is: ${Eigen3_VERSION}.")
+   endif()
  
--  find_library(GFLAGS_LIBRARY NAMES gflags
-+  find_library(GFLAGS_LIBRARY NAMES gflags gflags_static
-     HINTS ${GFLAGS_LIBRARY_DIR_HINTS}
-     PATHS ${GFLAGS_CHECK_LIBRARY_DIRS}
-     PATH_SUFFIXES ${GFLAGS_CHECK_LIBRARY_SUFFIXES})
---- cmake/FindGlog.cmake
-+++ cmake/FindGlog.cmake
-@@ -228,12 +228,12 @@
+   if (EIGENSPARSE)
+     message("-- Enabling use of Eigen as a sparse linear algebra library.")
+     list(APPEND CERES_COMPILE_OPTIONS CERES_USE_EIGEN_SPARSE)
+-    if (EIGEN_VERSION VERSION_LESS 3.2.2)
++    if (Eigen3_VERSION VERSION_LESS 3.2.2)
+       message("   WARNING:")
+       message("")
+-      message("   Your version of Eigen (${EIGEN_VERSION}) is older than ")
++      message("   Your version of Eigen (${Eigen3_VERSION}) is older than ")
+       message("   version 3.2.2.  The performance of SPARSE_NORMAL_CHOLESKY ")
+       message("   and SPARSE_SCHUR linear solvers will suffer.")
+-    endif (EIGEN_VERSION VERSION_LESS 3.2.2)
++    endif ()
+   else (EIGENSPARSE)
+     message("-- Disabling use of Eigen as a sparse linear algebra library.")
+     message("   This does not affect the covariance estimation algorithm ")
+     message("   which can still use the EIGEN_SPARSE_QR algorithm.")
+     add_definitions(-DEIGEN_MPL2_ONLY)
+   endif (EIGENSPARSE)
+-endif (EIGEN_FOUND)
++endif ()
  
-   # Search user-installed locations first, so that we prefer user installs
-   # to system installs where both exist.
--  list(APPEND GLOG_CHECK_INCLUDE_DIRS
--    /usr/local/include
--    /usr/local/homebrew/include # Mac OS X
--    /opt/local/var/macports/software # Mac OS X.
--    /opt/local/include
--    /usr/include)
-+  list(APPEND GLOG_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
-+    #/usr/local/include
-+    #/usr/local/homebrew/include # Mac OS X
-+    #/opt/local/var/macports/software # Mac OS X.
-+    #/opt/local/include
-+    #/usr/include)
-   # Windows (for C:/Program Files prefix).
-   list(APPEND GLOG_CHECK_PATH_SUFFIXES
-     glog/include
-@@ -243,11 +243,11 @@
-     google-glog/include # CMake installs with project name prefix.
-     google-glog/Include)
+ if (LAPACK)
+   find_package(LAPACK QUIET)
+@@ -376,13 +376,14 @@ else (MINIGLOG)
+   unset(MINIGLOG_MAX_LOG_LEVEL CACHE)
+   # Don't search with REQUIRED so that configuration continues if not found and
+   # we can output an error messages explaining MINIGLOG option.
+-  find_package(Glog)
+-  if (NOT GLOG_FOUND)
++  find_package(glog REQUIRED CONFIG)
++  if (0)
+     message(FATAL_ERROR "Can't find Google Log (glog). Please set either: "
+       "glog_DIR (newer CMake built versions of glog) or GLOG_INCLUDE_DIR & "
+       "GLOG_LIBRARY or enable MINIGLOG option to use minimal glog "
+       "implementation.")
+-  endif(NOT GLOG_FOUND)
++  endif()
++  if(0)
+   # By default, assume gflags was found, updating the message if it was not.
+   set(GLOG_GFLAGS_DEPENDENCY_MESSAGE
+     " Assuming glog was built with gflags support as gflags was found. "
+@@ -395,7 +396,8 @@ else (MINIGLOG)
+       "Otherwise, Ceres may fail to link due to missing gflags symbols.")
+   endif(NOT GFLAGS_FOUND)
+   message("-- Found Google Log (glog)." ${GLOG_GFLAGS_DEPENDENCY_MESSAGE})
+-endif (MINIGLOG)
++  endif()
++endif ()
  
--  list(APPEND GLOG_CHECK_LIBRARY_DIRS
--    /usr/local/lib
--    /usr/local/homebrew/lib # Mac OS X.
--    /opt/local/lib
--    /usr/lib)
-+  list(APPEND GLOG_CHECK_LIBRARY_DIRS ${CMAKE_LIB_PATH})
-+    #/usr/local/lib
-+    #/usr/local/homebrew/lib # Mac OS X.
-+    #/opt/local/lib
-+    #/usr/lib)
-   # Windows (for C:/Program Files prefix).
-   list(APPEND GLOG_CHECK_LIBRARY_SUFFIXES
-     glog/lib
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -336,7 +336,7 @@
- # GFlags.
- if (GFLAGS)
-   # Don't search with REQUIRED as we can continue without gflags.
--  find_package(Gflags)
-+  find_package(Gflags REQUIRED)
-   if (GFLAGS_FOUND)
-     message("-- Found Google Flags header in: ${GFLAGS_INCLUDE_DIRS}, "
-       "in namespace: ${GFLAGS_NAMESPACE}")
+ if (NOT SCHUR_SPECIALIZATIONS)
+   list(APPEND CERES_COMPILE_OPTIONS CERES_RESTRICT_SCHUR_SPECIALIZATION)
+@@ -526,7 +528,7 @@ if (CXX11 AND (TBB OR CXX11_THREADS))
+ endif()
+ 
+ if (CXX11 AND TBB)
+-  find_package(TBB QUIET)
++  find_package(TBB REQUIRED CONFIG)
+   if (TBB_FOUND)
+     message("-- Building with TBB (version: ${TBB_VERSION}).")
+     list(APPEND CERES_COMPILE_OPTIONS CERES_USE_TBB)
+--- a/internal/ceres/CMakeLists.txt
++++ b/internal/ceres/CMakeLists.txt
+@@ -152,9 +152,10 @@ else (SCHUR_SPECIALIZATIONS)
+ endif (SCHUR_SPECIALIZATIONS)
+ 
+ # Build the list of dependencies for Ceres based on the current configuration.
+-if (NOT MINIGLOG AND GLOG_FOUND)
+-  list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES ${GLOG_LIBRARIES})
+-  if (GFLAGS_FOUND)
++list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES Eigen3::Eigen)
++if (NOT MINIGLOG)
++  list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES glog::glog)
++  if (0)
+     # If glog & gflags are both found, we assume that glog was built with
+     # gflags, as it is awkward to perform a try_compile() to verify this
+     # when gflags is an imported target (as it is in newer versions).
+@@ -162,7 +163,7 @@ if (NOT MINIGLOG AND GLOG_FOUND)
+     # gflags, it is thus a public dependency for Ceres in this case.
+     list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES ${GFLAGS_LIBRARIES})
+   endif()
+-endif (NOT MINIGLOG AND GLOG_FOUND)
++endif ()
+ 
+ if (SUITESPARSE AND SUITESPARSE_FOUND)
+   # Define version information for use in Solver::FullReport.
+@@ -191,7 +192,7 @@ if (OPENMP_FOUND)
+ endif (OPENMP_FOUND)
+ 
+ if (TBB_FOUND)
+-  list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES ${TBB_LIBRARIES})
++  list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES TBB::tbb)
+   if (NOT MSVC)
+     list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES ${CMAKE_THREAD_LIBS_INIT})
+   endif (NOT MSVC)
+@@ -241,8 +242,8 @@ if (BUILD_SHARED_LIBS)
+   # When building a shared library, mark all external libraries as
+   # PRIVATE so they don't show up as a dependency.
+   target_link_libraries(ceres
+-        LINK_PUBLIC ${CERES_LIBRARY_PUBLIC_DEPENDENCIES}
+-        LINK_PRIVATE ${CERES_LIBRARY_PRIVATE_DEPENDENCIES})
++        PUBLIC ${CERES_LIBRARY_PUBLIC_DEPENDENCIES}
++        PRIVATE ${CERES_LIBRARY_PRIVATE_DEPENDENCIES})
+ else (BUILD_SHARED_LIBS)
+   # When building a static library, all external libraries are
+   # PUBLIC(default) since the user needs to link to them.
+@@ -250,7 +251,9 @@ else (BUILD_SHARED_LIBS)
+   set(CERES_LIBRARY_DEPENDENCIES
+         ${CERES_LIBRARY_PUBLIC_DEPENDENCIES}
+         ${CERES_LIBRARY_PRIVATE_DEPENDENCIES})
+-  target_link_libraries(ceres ${CERES_LIBRARY_DEPENDENCIES})
++  target_link_libraries(ceres
++        PUBLIC ${CERES_LIBRARY_PUBLIC_DEPENDENCIES}
++        PRIVATE ${CERES_LIBRARY_PRIVATE_DEPENDENCIES})
+ endif (BUILD_SHARED_LIBS)
+ 
+ install(TARGETS ceres

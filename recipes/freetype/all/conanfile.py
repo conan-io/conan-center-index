@@ -19,7 +19,7 @@ class FreetypeConan(ConanFile):
     homepage = "https://www.freetype.org"
     license = "FTL"
     topics = ("freetype", "fonts")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,7 +37,7 @@ class FreetypeConan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "with_brotli": True,
-        "subpixel": False
+        "subpixel": False,
     }
 
     @property
@@ -203,17 +203,15 @@ class FreetypeConan(ConanFile):
         )
 
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             set(FREETYPE_FOUND TRUE)
             if(DEFINED Freetype_INCLUDE_DIRS)
-                set(FREETYPE_INCLUDE_DIRS ${Freetype_INCLUDE_DIRS})
+                set(FREETYPE_INCLUDE_DIRS ${{Freetype_INCLUDE_DIRS}})
             endif()
             if(DEFINED Freetype_LIBRARIES)
-                set(FREETYPE_LIBRARIES ${Freetype_LIBRARIES})
+                set(FREETYPE_LIBRARIES ${{Freetype_LIBRARIES}})
             endif()
-            if(DEFINED Freetype_VERSION)
-                set(FREETYPE_VERSION_STRING ${Freetype_VERSION})
-            endif()
+            set(FREETYPE_VERSION_STRING "{self.version}")
         """)
         save(self, module_file, content)
 
@@ -238,7 +236,7 @@ class FreetypeConan(ConanFile):
 
     @staticmethod
     def _chmod_plus_x(filename):
-        if os.name == "posix":
+        if os.name == "posix" and (os.stat(filename).st_mode & 0o111) != 0o111:
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):

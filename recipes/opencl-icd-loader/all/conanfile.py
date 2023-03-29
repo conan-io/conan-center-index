@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class OpenclIcdLoaderConan(ConanFile):
@@ -14,7 +14,7 @@ class OpenclIcdLoaderConan(ConanFile):
     topics = ("opencl", "khronos", "parallel", "icd-loader")
     homepage = "https://github.com/KhronosGroup/OpenCL-ICD-Loader"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,18 +38,9 @@ class OpenclIcdLoaderConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,20 +49,18 @@ class OpenclIcdLoaderConan(ConanFile):
         self.requires(f"opencl-headers/{self.version}", transitive_headers=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["OPENCL_ICD_LOADER_HEADERS_DIR"] = ";".join(self.deps_cpp_info["opencl-headers"].include_paths)
+        opencl_headers_includedirs = self.dependencies["opencl-headers"].cpp_info.aggregated_components().includedirs
+        tc.cache_variables["OPENCL_ICD_LOADER_HEADERS_DIR"] = ";".join(opencl_headers_includedirs)
         if is_msvc(self):
             tc.variables["USE_DYNAMIC_VCXX_RUNTIME"] = not is_msvc_static_runtime(self)
         tc.variables["OPENCL_ICD_LOADER_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["OPENCL_ICD_LOADER_BUILD_TESTING"] = False
         if self.settings.os == "Windows":
             tc.variables["OPENCL_ICD_LOADER_DISABLE_OPENCLON12"] = self.options.disable_openclon12
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
