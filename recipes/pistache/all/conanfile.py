@@ -147,7 +147,7 @@ class PistacheConan(ConanFile):
         else:
             meson = Meson(self)
             meson.install()
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once legacy generators removed
         self._create_cmake_module_alias_targets(
