@@ -1,6 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    replace_in_file, rmdir, save
+)
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -10,6 +13,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 
 import os
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -145,28 +149,45 @@ class PistacheConan(ConanFile):
             meson.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-    def package_info(self):
-        # TODO: Pistache does not use namespace
-        # TODO: Pistache variables are CamelCase e.g Pistache_BUILD_DIRS
-        self.cpp_info.set_property("cmake_file_name", "Pistache")
-        self.cpp_info.set_property("cmake_target_name", "Pistache::Pistache")
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "libpistache")
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {self._cmake_target: "Pistache::Pistache"}
+        )
 
-        self.cpp_info.components["libpistache"].libs = collect_libs(self)
-        self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
+    @property
+    def _cmake_target(self):
+        return "pistache_shared" if self.options.shared else "pistache_static"
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Pistache")
+        self.cpp_info.set_property("cmake_target_name", self._cmake_target)
+        # not official but avoid to break previous target name expectations of this recipe
+        self.cpp_info.set_property("cmake_target_aliases", ["Pistache::Pistache"])
+        self.cpp_info.set_property("pkg_config_name", "libpistache")
+        self.cpp_info.libs = collect_libs(self)
         if self.options.with_ssl:
-            self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
-            self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
+            self.cpp_info.defines = ["PISTACHE_USE_SSL=1"]
         if self.settings.os == "Linux":
             self.cpp_info.components["libpistache"].system_libs = ["pthread"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Pistache"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Pistache"
         self.cpp_info.names["cmake_find_package"] = "Pistache"
         self.cpp_info.names["cmake_find_package_multi"] = "Pistache"
-        self.cpp_info.names["pkg_config"] = "libpistache"
-        suffix = "_{}".format("shared" if self.options.shared else "static")
-        self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
-        self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
