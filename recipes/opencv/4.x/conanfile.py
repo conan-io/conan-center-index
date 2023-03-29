@@ -138,7 +138,8 @@ class OpenCVConan(ConanFile):
             # Following the packager choice, ffmpeg is enabled by default when
             # supported, except on Android. See
             # https://github.com/opencv/opencv/blob/39c3334147ec02761b117f180c9c4518be18d1fa/CMakeLists.txt#L266-L268
-            self.options.with_ffmpeg = self.settings.os != "Android"
+            self.options.with_ffmpeg = False # self.settings.os != "Android"
+            # Currently blocking v2 migration
         else:
             del self.options.with_ffmpeg
 
