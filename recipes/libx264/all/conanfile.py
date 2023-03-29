@@ -82,12 +82,11 @@ class LibX264Conan(ConanFile):
             "--sbindir": None,          # Not understood by configure
             "--oldincludedir": None     # Not understood by configure
         }
+        args["--disable-shared"] = None # --disable-shared is not understood
         if self.options.shared:
             args["--enable-shared"] = ""
-            args["--disable-static"] = None # --disable-static is not understood
         else:
             args["--enable-static"] = ""
-            args["--disable-shared"] = None # --disable-shared is not understood
         if self.options.get_safe("fPIC", self.settings.os != "Windows"):
             args["--enable-pic"] = ""
         if self.settings.build_type == "Debug":
@@ -116,8 +115,14 @@ class LibX264Conan(ConanFile):
             if self.settings.os == "Android":
                 # the as of ndk does not work well for building libx264
                 env = Environment()
-                env.define("AS", os.environ["CC"])
-                ndk_root = unix_path(self, os.environ["NDK_ROOT"])
+
+                compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+                buildenv_vars = VirtualBuildEnv(self).vars()
+                cc = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl"))
+                env.define("AS", cc)
+
+                ndk_root = self.conf.get("tools.android:ndk_path")
+
                 arch = {
                     "armv7": "arm",
                     "armv8": "aarch64",
