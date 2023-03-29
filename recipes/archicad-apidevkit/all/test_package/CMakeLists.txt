@@ -31,14 +31,8 @@ if(WIN32)
         "${AC_API_DEVKIT_DIR}/Modules/GSRoot/Win/GSRootImp.lib"
     )
 else()
-    find_library(
-        GSROOT_FRAMEWORK GSRoot
-        PATHS "${AC_API_DEVKIT_DIR}/Frameworks"
+    target_link_libraries(
+        test_package PRIVATE
+        "${AC_API_DEVKIT_DIR}/Frameworks/GSRoot.framework"
     )
-
-    if(NOT GSROOT_FRAMEWORK)
-        message(FATAL_ERROR "GSRoot not found: ${GSROOT_FRAMEWORK}")
-    endif()
-
-    target_link_libraries(test_package PRIVATE "${GSROOT_FRAMEWORK}")
 endif()
