@@ -15,6 +15,7 @@ class LibZipppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ctabin/libzippp"
     topics = ("zip", "zlib", "libzip", "zip-archives", "zip-editing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
