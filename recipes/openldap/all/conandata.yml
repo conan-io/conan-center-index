@@ -4,5 +4,5 @@ sources:
     sha256: 9d576ea6962d7db8a2e2808574e8c257c15aef55f403a1fb5a0faf35de70e6f3
 patches:
   "2.6.1":
-    - base_path: source_subfolder
+    - base_path: .
       patch_file: patches/configure-2.6.1.patch
