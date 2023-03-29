@@ -2,12 +2,13 @@ from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.layout import basic_layout
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.microsoft import VCVars, is_msvc, NMakeDeps, NMakeToolchain
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import pathlib
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -63,9 +64,13 @@ class MpdecimalConan(ConanFile):
 
     def build_requirements(self):
         if is_msvc(self):
-            self.build_requires("automake/1.16.4")
-            if self._settings_build.os == "Windows" and not os.environ.get("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+            self.tool_requires("automake/1.16.4")
+        else:
+            # required to suppport windows as a build machine
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,15 +91,24 @@ class MpdecimalConan(ConanFile):
                         tc.extra_cxxflags.append("-DLIBMPDECXX_DLL")
             tc.generate()
         else:
+            # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
+            env = VirtualBuildEnv(self)
+            env.generate()
+            # inject requires env vars in build scope
+            # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
+            tc.generate()
+
             deps = AutotoolsDeps(self)
             if is_apple_os(self) and self.settings.arch == "armv8":
                 deps.environment.append("LDFLAGS", ["-arch arm64"])
                 deps.environment.append("LDXXFLAGS", ["-arch arm64"])
             deps.generate()
-
-            tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
-            tc.generate()
 
     def _build_msvc(self):
         source_dir = pathlib.Path(self.source_folder)
@@ -118,7 +132,7 @@ class MpdecimalConan(ConanFile):
 
         for build_dir, target in builds:
             with chdir(self, build_dir):
-                self.run("""nmake /f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
+                self.run("""nmake -f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
                     target=target,
                     machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],
                     # FIXME: else, use ansi32 and ansi64
