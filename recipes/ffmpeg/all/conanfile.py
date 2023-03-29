@@ -11,7 +11,6 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
-from conans.tools import get_gnu_triplet
 import os
 import glob
 import shutil
@@ -336,30 +335,23 @@ class FFMpegConan(ConanFile):
 
     @property
     def _target_arch(self):
-        triplet = get_gnu_triplet(
-            "Macos" if is_apple_os(self) else str(self.settings.os),
-            str(self.settings.arch),
-            str(self.settings.compiler) if self.settings.os == "Windows" else None,
-        )
-        target_arch = triplet.split("-")[0]
-        return target_arch
+        # Taken from acceptable values https://github.com/FFmpeg/FFmpeg/blob/0684e58886881a998f1a7b510d73600ff1df2b90/configure#L5010
+        # All the values Conan's deffault setting support are already handled
+        return str(self.settings.arch)
 
     @property
     def _target_os(self):
         if is_msvc(self):
             return "win32"
-        else:
-            triplet = get_gnu_triplet(
-                "Macos" if is_apple_os(self) else str(self.settings.os),
-                str(self.settings.arch),
-                str(self.settings.compiler) if self.settings.os == "Windows" else None,
-            )
-            target_os = triplet.split("-")[2]
-            if target_os in ["gnueabihf", "gnueabi"]:
-                target_os = "gnu" # could also be "linux"
-            if target_os.startswith("android"):
-                target_os = "android"
-            return target_os
+        if is_apple_os(self):
+            return "darwin"
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            return "mingw32"
+
+        # Taken from https://github.com/FFmpeg/FFmpeg/blob/0684e58886881a998f1a7b510d73600ff1df2b90/configure#L5485
+        # This is the map of Conan OS settings to FFmpeg accecptable values
+        triplet_os = {"AIX": "aix", "Android": "android", "FreeBSD": "freebsd", "SunOS": "sunos", "Linux": "linux", "Emscripten": "none"}
+        return triplet_os[str(self.settings.os)]
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -558,13 +550,10 @@ class FFMpegConan(ConanFile):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.extra_defines.append("inline=__inline")
         if cross_building(self):
-            if self._target_os == "emscripten":
-                args.append("--target-os=none")
-            else:
-                args.append(f"--target-os={self._target_os}")
-            if is_apple_os(self):
-                if self.options.with_audiotoolbox:
-                    args.append("--disable-outdev=audiotoolbox")
+            args.append(f"--target-os={self._target_os}")
+            if is_apple_os(self) and self.options.with_audiotoolbox:
+                args.append("--disable-outdev=audiotoolbox")
+
         args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
         args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
         tc.configure_args.extend(args)
