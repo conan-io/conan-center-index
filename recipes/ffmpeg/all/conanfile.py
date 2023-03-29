@@ -622,6 +622,8 @@ class FFMpegConan(ConanFile):
                         rename(self, lib, lib[3:-2] + ".lib")
 
     def _read_component_version(self, component_name):
+        # This seems to have broke with the 5.1 release, see https://github.com/conan-io/conan-center-index/pull/15819#issuecomment-1489461029
+        # for more information
         version_file_name = os.path.join(self.package_folder, "include", f"lib{component_name}", "version.h")
         version_file = open(version_file_name, "r")
         pattern = f"define LIB{component_name.upper()}_VERSION_(MAJOR|MINOR|MICRO)[ \t]+(\\d+)"
@@ -635,6 +637,10 @@ class FFMpegConan(ConanFile):
         return None
 
     def _set_component_version(self, component_name):
+        # FIXME: Support the new files adding starting in 5.1
+        if Version(self.version) >= "5.1":
+            pass
+
         version = self._read_component_version(component_name)
         if version is not None:
             self.cpp_info.components[component_name].set_property("component_version", version)
