@@ -30,7 +30,7 @@ class Stlab(ConanFile):
 
     default_options = {
         "with_boost": False,
-        "no_std_coroutines": True,          #TODO: how to make checks similar to what are made in Cmake https://github.com/stlab/libraries/blob/main/cmake/StlabUtil.cmake#L35
+        "no_std_coroutines": True,
         "future_coroutines": False,
         "task_system": "auto",
         "thread_system": "auto",
