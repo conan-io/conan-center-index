@@ -22,21 +22,25 @@ class GflagsConan(ConanFile):
         "fPIC": [True, False],
         "nothreads": [True, False],
         "namespace": ["ANY"],
+        "visiblity": ["default", "hidden", "protected", "internal"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "nothreads": True,
         "namespace": "gflags",
+        "visiblity": "default",
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.visiblity
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+            self.options.rm_safe("visibility")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,6 +62,14 @@ class GflagsConan(ConanFile):
         tc.variables["REGISTER_BUILD_DIR"] = False
         tc.variables["REGISTER_INSTALL_PREFIX"] = False
         tc.variables["GFLAGS_NAMESPACE"] = self.options.namespace
+
+        # Code Visibility to the GCC/CC compiler.
+        visibility = self.options.get_safe("visibility")
+        if visibility not in ["default", "", None]:
+            cflags, cxxflags = os.environ.get("CFLAGS", ""), os.environ.get("CXXFLAGS", "")
+            tc.variables["CMAKE_C_FLAGS"] = f"{cflags} -fvisibility={visibility}"
+            tc.variables["CMAKE_CXX_FLAGS"] = f"{cxxflags} -fvisibility={visibility}"
+
         tc.generate()
 
     def build(self):
