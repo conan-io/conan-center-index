@@ -68,8 +68,8 @@ class AprConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks")
+        if cross_building(self):
 
     def build_requirements(self):
         if not is_msvc(self):
