@@ -21,21 +21,6 @@ class CriterionConan(ConanFile):
 
     requires = ("libgit2/[>=1.0]", "libffi/[~3.4]")
 
-    def source(self):
-        print(path.join(self.source_folder, 'dependencies', 'debugbreak'))
-        get(self, url=self.conan_data["sources"][self.version]['url'], sha256=self.conan_data["sources"][self.version]['sha256'], strip_root=True)
-
-        # We need to get dependencies for building, they are git submodules!
-        get(self, self.conan_data["sources"][self.version]['debugbreak_url'], 
-            sha256=self.conan_data["sources"][self.version]['debugbreak_sha256'], 
-            destination=path.join(self.source_folder, 'dependencies', 'debugbreak'),
-            strip_root=True)
-        
-        get(self, self.conan_data["sources"][self.version]['klib_url'], 
-            sha256=self.conan_data["sources"][self.version]['klib_sha256'], 
-            destination=path.join(self.source_folder, 'dependencies', 'klib'),
-            strip_root=True)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -60,7 +45,20 @@ class CriterionConan(ConanFile):
         
         tc.generate()
 
+    def _download_sources(self):
+        get(self, **self.conan_data['sources'][self.version]['source'], 
+            strip_root=True, destination=self.source_folder)
+
+        # Apply submodule dependencies
+        get(self, **self.conan_data['sources'][self.version]['dependencies']['debugbreak'], strip_root=True, 
+            destination=path.join(self.source_folder, 'dependencies', 'debugbreak'))
+        
+        get(self, **self.conan_data['sources'][self.version]['dependencies']['klib'], strip_root=True, 
+            destination=path.join(self.source_folder, 'dependencies', 'klib'))
+
     def build(self):
+        self._download_sources()
+
         meson = Meson(self)
 
         meson.configure()
