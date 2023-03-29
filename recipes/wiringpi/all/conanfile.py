@@ -52,7 +52,7 @@ class WiringpiConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("COPYING*", src=self.folders.source, dst="licenses")
+        self.copy("COPYING*", src=self.source_folder, dst="licenses")
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.folders.root)
         cmake.install()
