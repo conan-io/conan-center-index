@@ -1,6 +1,6 @@
 from os import path
 from conan import ConanFile
-from conan.tools.files import get
+from conan.tools.files import get, copy, rmdir, replace_in_file, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -38,6 +38,7 @@ class CriterionConan(ConanFile):
 
         tc = MesonToolchain(self)
         tc.project_options['force_fallback_for'] = ['boxfort']
+        tc.project_options['default_library'] = 'shared' if self.options['shared'] else 'static'
         
         # We don't need tests or samples
         tc.project_options['tests'] = False
@@ -59,14 +60,19 @@ class CriterionConan(ConanFile):
     def build(self):
         self._download_sources()
 
-        meson = Meson(self)
+        # Criterion forces both libraries, we need only one type
+        replace_in_file(self, path.join(self.source_folder, 'src', 'meson.build'), 'both_libraries', 'library')
 
+        meson = Meson(self)
         meson.configure()
         meson.build()
 
     def package(self):
         meson = Meson(self)
         meson.install()
+
+        copy(self, "LICENSE", src=self.source_folder, dst=path.join(self.package_folder, 'licenses'))
+        rmdir(self, path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["criterion"]
