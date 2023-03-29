@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
-from conan.tools.files import get, chdir, load, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
+from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, is_msvc, NMakeDeps, NMakeToolchain
 from conan.tools.apple import is_apple_os
