@@ -24,12 +24,16 @@ class BehaviorTreeCPPConan(ConanFile):
         "fPIC": [True, False],
         "with_tools": [True, False],
         "with_coroutines": [True, False],
+        "with_groot_interface": [True, False],
+        "with_sqlite_logging": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tools": False,
         "with_coroutines": False,
+        "with_groot_interface": False,
+        "with_sqlite_logging": False,
     }
 
     @property
@@ -72,23 +76,20 @@ class BehaviorTreeCPPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_coroutines:
-            self.requires("boost/1.81.0")
 
         self.requires("zeromq/4.3.4")
         
+        if Version(self.version) > "4.1.0" and self.options.with_sqlite_logging:
+            self.requires("sqlite3/3.40.1")
+        
         if Version(self.version) < "4.1.0":
             self.requires("ncurses/6.3")
+            if self.options.with_coroutines:
+                self.requires("boost/1.81.0")
 
         if Version(self.version) < "3.6.0":
-            self.requires("cppzmq/4.9.0")
             self.requires("boost/1.81.0")
         
-        if Version(self.version) < "4.0.1":
-            self.requires("foonathan-lexy/2022.12.1")
-        
-        if Version(self.version) < "3.8.0":
-            self.requires("tinyxml2/9.0.0")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -155,20 +156,16 @@ class BehaviorTreeCPPConan(ConanFile):
         self.cpp_info.components[libname].requires = ["zeromq::zeromq"]
         
         if Version(self.version) < "3.6.0":
-            self.cpp_info.components[libname].requires.extend(["cppzmq::cppzmq"])
             self.cpp_info.components[libname].requires.append("boost::coroutine")
 
         if Version(self.version) < "4.1.0":
             self.cpp_info.components[libname].requires.extend(["ncurses::ncurses"])
+            if self.options.with_coroutines:
+                self.cpp_info.components[libname].requires.append("boost::coroutine")
 
-        if Version(self.version) < "4.0.1":
-            self.cpp_info.components[libname].requires.extend(["foonathan-lexy::foonathan-lexy"])
+        if Version(self.version) > "4.1.0" and self.options.with_sqlite_logging:
+                self.cpp_info.components[libname].requires.append("sqlite3::sqlite3")
 
-        if Version(self.version) < "3.8.0":
-            self.cpp_info.components[libname].requires.extend(["tinyxml2::tinyxml2"])
-
-        if self.options.with_coroutines:
-            self.cpp_info.components[libname].requires.append("boost::coroutine")
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components[libname].system_libs.append("pthread")
         if Version(self.version) >= "4.0" and \
