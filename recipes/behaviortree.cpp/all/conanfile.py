@@ -121,6 +121,9 @@ class BehaviorTreeCPPConan(ConanFile):
             tc.variables["BTCPP_UNIT_TESTS"] = False
             tc.variables["BTCPP_BUILD_TOOLS"] = self.options.with_tools
             tc.variables["BTCPP_ENABLE_COROUTINES"] = self.options.with_coroutines
+            tc.variables["BTCPP_GROOT_INTERFACE"] = self.options.with_groot_interface
+            tc.variables["BTCPP_SQLITE_LOGGING"] = self.options.with_sqlite_logging
+            
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
