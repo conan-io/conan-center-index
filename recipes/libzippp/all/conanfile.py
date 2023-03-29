@@ -98,6 +98,8 @@ class LibZipppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libzippp")
+        self.cpp_info.set_property("cmake_target_name", "libzippp::libzippp")
         prefix = "lib" if self.settings.os == "Windows" else ""
         postfix = "" if self.options.shared else "_static"
         self.cpp_info.libs = [f"{prefix}zippp{postfix}"]
@@ -105,8 +107,5 @@ class LibZipppConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        self.cpp_info.names["cmake_find_package"] = "libzippp"
-        self.cpp_info.names["cmake_find_package_multi"] = "libzippp"
-        self.cpp_info.set_property("cmake_file_name", "libzippp")
         if self.options.with_encryption:
             self.cpp_info.defines.append("LIBZIPPP_WITH_ENCRYPTION")
