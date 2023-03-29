@@ -24,7 +24,7 @@ class PistacheConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("http", "rest", "framework", "networking")
     description = "Pistache is a modern and elegant HTTP and REST framework for C++"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
