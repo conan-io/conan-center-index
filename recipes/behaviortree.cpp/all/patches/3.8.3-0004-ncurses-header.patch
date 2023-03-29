@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c05de7c..46d7f61 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -217,8 +217,6 @@ endif()
+ if(CURSES_FOUND)
+     target_link_libraries(${BEHAVIOR_TREE_LIBRARY} PRIVATE
+         ${CURSES_LIBRARIES} )
+-    target_include_directories(${BEHAVIOR_TREE_LIBRARY} PRIVATE
+-        ${CURSES_INCLUDE_DIRS} )
+     target_compile_definitions(${BEHAVIOR_TREE_LIBRARY} PRIVATE NCURSES_FOUND)
+ endif()
+ 

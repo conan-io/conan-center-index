@@ -74,15 +74,21 @@ class BehaviorTreeCPPConan(ConanFile):
     def requirements(self):
         if self.options.with_coroutines:
             self.requires("boost/1.81.0")
+
         self.requires("zeromq/4.3.4")
-        self.requires("cppzmq/4.9.0")
+        
         if Version(self.version) < "4.1.0":
-            self.requires("ncurses/6.4")
-        if Version(self.version) >= "4.0.0":
+            self.requires("ncurses/6.3")
+
+        if Version(self.version) < "3.6.0":
+            self.requires("cppzmq/4.9.0")
+            self.requires("boost/1.81.0")
+        
+        if Version(self.version) < "4.0.1":
             self.requires("foonathan-lexy/2022.12.1")
+        
+        if Version(self.version) < "3.8.0":
             self.requires("tinyxml2/9.0.0")
-        if Version(self.version) >= "4.0.2":
-            self.requires("minitrace/cci.20210321")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -146,14 +152,20 @@ class BehaviorTreeCPPConan(ConanFile):
         postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components[libname].libs = [f"{libname}{postfix}"]
-        self.cpp_info.components[libname].requires = ["zeromq::zeromq", "cppzmq::cppzmq"]
+        self.cpp_info.components[libname].requires = ["zeromq::zeromq"]
+        
+        if Version(self.version) < "3.6.0":
+            self.cpp_info.components[libname].requires.extend(["cppzmq::cppzmq"])
+            self.cpp_info.components[libname].requires.append("boost::coroutine")
 
         if Version(self.version) < "4.1.0":
             self.cpp_info.components[libname].requires.extend(["ncurses::ncurses"])
-        if Version(self.version) >= "4.0.0":
-            self.cpp_info.components[libname].requires.extend(["foonathan-lexy::foonathan-lexy", "tinyxml2::tinyxml2"])
-        if Version(self.version) >= "4.0.2":
-            self.cpp_info.components[libname].requires.append("minitrace::minitrace")
+
+        if Version(self.version) < "4.0.1":
+            self.cpp_info.components[libname].requires.extend(["foonathan-lexy::foonathan-lexy"])
+
+        if Version(self.version) < "3.8.0":
+            self.cpp_info.components[libname].requires.extend(["tinyxml2::tinyxml2"])
 
         if self.options.with_coroutines:
             self.cpp_info.components[libname].requires.append("boost::coroutine")

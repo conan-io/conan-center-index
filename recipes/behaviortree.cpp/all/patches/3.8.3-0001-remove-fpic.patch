@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 95b2663..af7a570 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,7 +15,6 @@ else()
+     add_definitions(-Wpedantic)
+ endif()
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ #---- project configuration ----
+ option(BUILD_EXAMPLES   "Build tutorials and examples" ON)
