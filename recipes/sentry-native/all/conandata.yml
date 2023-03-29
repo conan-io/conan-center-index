@@ -8,3 +8,9 @@ sources:
   "0.4.18":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.18/sentry-native.zip"
     sha256: "41fdf6499cd8576142beb03104badcc9e0b80b8ef27080ca71cd4408cc1d7ece"
+patches:
+  "0.6.0":
+    - patch_file: "patches/sentry-native-903c17a.patch"
+      patch_description: "Make it possible to build with support for the crashpad WER module while using the sentry-crashpad package"
+      patch_type: "official"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/816"
