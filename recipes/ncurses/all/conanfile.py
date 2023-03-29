@@ -57,8 +57,7 @@ class NCursesConan(ConanFile):
             settings = self.settings
         if options.with_ticlib == "auto":
             return settings.os != "Windows"
-        else:
-            return options.with_ticlib
+        return options.with_ticlib
 
     def _with_tinfo(self, options=None, settings=None):
         if options is None:
@@ -67,8 +66,7 @@ class NCursesConan(ConanFile):
             settings = self.settings
         if options.with_tinfo == "auto":
             return settings.os != "Windows"
-        else:
-            return options.with_tinfo
+        return options.with_tinfo
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -126,20 +124,24 @@ class NCursesConan(ConanFile):
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v):
+            if v:
+                return "yes"
+            return "no"
         tc.configure_args.extend([
-            "--with-shared={}".format(yes_no(self.options.shared)),
-            "--with-cxx-shared={}".format(yes_no(self.options.shared)),
-            "--with-normal={}".format(yes_no(not self.options.shared)),
-            "--enable-widec={}".format(yes_no(self.options.with_widec)),
-            "--enable-ext-colors={}".format(yes_no(self.options.get_safe("with_extended_colors", False))),
-            "--enable-reentrant={}".format(yes_no(self.options.with_reentrant)),
-            "--with-pcre2={}".format(yes_no(self.options.with_pcre2)),
-            "--with-cxx-binding={}".format(yes_no(self.options.with_cxx)),
-            "--with-progs={}".format(yes_no(self.options.with_progs)),
-            "--with-termlib={}".format(yes_no(self._with_tinfo())),
-            "--with-ticlib={}".format(yes_no(self._with_ticlib())),
+            f"--with-shared={yes_no(self.options.shared)}",
+            f"--with-cxx-shared={yes_no(self.options.shared)}"
+            f"--with-normal={yes_no(not self.options.shared)}",
+            f"--enable-widec={yes_no(self.options.with_widec)}",
+            f"--enable-ext-colors={yes_no(self.options.get_safe('with_extended_colors', False))}",
+            f"--enable-reentrant={yes_no(self.options.with_reentrant)}",
+            f"--with-pcre2={yes_no(self.options.with_pcre2)}",
+            f"--with-cxx-binding={yes_no(self.options.with_cxx)}",
+            f"--with-progs={yes_no(self.options.with_progs)}",
+            f"--with-termlib={yes_no(self._with_tinfo())}",
+            f"--with-ticlib={yes_no(self._with_ticlib())}",
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -163,7 +165,7 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if is_msvc(self):
-            build = host = "{}-w64-mingw32-msvc".format(self.settings.arch)
+            build = host = f"{self.settings.arch}-w64-mingw32-msvc"
             tc.configure_args.extend([
                 "ac_cv_func_getopt=yes",
                 "ac_cv_func_setvbuf_reversed=no",
@@ -192,7 +194,7 @@ class NCursesConan(ConanFile):
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"lib -nologo")
+            env.define("AR", "lib -nologo")
             env.define("NM", "dumpbin -symbols")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
@@ -264,15 +266,9 @@ class NCursesConan(ConanFile):
 
     @property
     def _module_file(self):
-        return "conan-official-{}-targets.cmake".format(self.name)
+        return f"conan-official-{self.name}-targets.cmake"
 
-    def package_info(self):
-        self.cpp_info.set_property("cmake_module_file_name", "Curses")
-        self.cpp_info.set_property("cmake_find_mode", "module")
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Curses"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
-
+    def _package_info_for_components(self):
         if self._with_tinfo():
             self.cpp_info.components["tinfo"].libs = [f"tinfo{self._lib_suffix}"]
             self.cpp_info.components["tinfo"].names["pkg_config"] = f"tinfo{self._lib_suffix}"
@@ -326,6 +322,16 @@ class NCursesConan(ConanFile):
             self.cpp_info.components["ticlib"].libs = [f"tic{self._lib_suffix}"]
             self.cpp_info.components["ticlib"].set_property("pkg_config_name", f"tic{self._lib_suffix}")
             self.cpp_info.components["ticlib"].requires = ["libcurses"]
+
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_module_file_name", "Curses")
+        self.cpp_info.set_property("cmake_find_mode", "module")
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Curses"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
+
+        self._package_info_for_components()
 
         if self.options.with_progs:
             bin_path = os.path.join(self.package_folder, "bin")
