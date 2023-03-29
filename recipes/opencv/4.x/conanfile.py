@@ -83,7 +83,7 @@ class OpenCVConan(ConanFile):
         "with_cufft": False,
         "with_cudnn": False,
         "with_v4l": False,
-        "with_ffmpeg": True,
+        "with_ffmpeg": False, # Currently Blocking Conan 2.0 migration https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1487662909
         "with_imgcodec_hdr": False,
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
