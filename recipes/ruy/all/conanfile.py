@@ -78,13 +78,26 @@ class RuyConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        patches = {
+            #Remove the invocation after project(), see https://github.com/google/ruy/issues/328
+            "cmake_minimum_required(VERSION 3.13)": "",
+            # Ensure `cmake_minimum_required` is called first 
+            "# Copyright 2021 Google LLC": "# Copyright 2021 Google LLC\ncmake_minimum_required(VERSION 3.13)", 
+        }
+
+        for pattern, patch in patches.items():
+            replace_in_file(self, cmakelists, pattern, patch)
+
         # 1. Allow Shared builds
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "ruy_cc_library.cmake"),
                               "add_library(${_NAME} STATIC",
                               "add_library(${_NAME}"
                               )
 
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
