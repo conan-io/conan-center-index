@@ -38,7 +38,7 @@ class Tabulate(ConanFile):
             "Visual Studio": "16",
             "gcc": "7.3",
             "clang": "6",
-            "AppleClang": "10.0"
+            "apple-clang": "10.0"
         }
 
         if compiler not in minimal_version:
