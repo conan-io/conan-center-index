@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.files import copy, get, load, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, save
 from conan.tools.layout import basic_layout
 import os
 
@@ -22,6 +22,9 @@ class GnuConfigConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -46,6 +49,7 @@ class GnuConfigConan(ConanFile):
         return "\n".join(txt_lines[start_index:end_index])
 
     def package(self):
+        apply_conandata_patches(self)
         save(self, os.path.join(self.package_folder, "licenses", "COPYING"), self._extract_license())
         copy(self, "config.guess", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
         copy(self, "config.sub", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
