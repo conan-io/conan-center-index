@@ -48,7 +48,7 @@ class OpenApiGeneratorConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="openapi-generator.jar", dst=os.path.join(self.package_folder, "res"), src=self.source_folder)
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             save(self,
                  path=os.path.join(self.package_folder, "bin", "openapi-generator.bat"),
                  content="""\
