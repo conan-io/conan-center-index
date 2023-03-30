@@ -1,0 +1,4 @@
+sources:
+  "5.2.1":
+    url: "http://git.savannah.gnu.org/cgit/gawk.git/snapshot/gawk-5.2.1.tar.gz"
+    sha256: "ee6faf7506746c2cc102211e03ca1fc5a79fec1a51076b6460bfdb984a97704d"
