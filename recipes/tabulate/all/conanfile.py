@@ -26,7 +26,7 @@ class Tabulate(ConanFile):
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
-        print("debug", compiler, compiler_version, self.settings.compiler.cppstd, self.settings, self.settings.compiler)
+        self.output.info("debug", compiler, compiler_version, self.settings.compiler.cppstd, self.settings, self.settings.compiler)
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
@@ -38,7 +38,7 @@ class Tabulate(ConanFile):
             "Visual Studio": "16",
             "gcc": "7.3",
             "clang": "6",
-            "apple-clang": "10.0"
+            "AppleClang": "10.0"
         }
 
         if compiler not in minimal_version:
