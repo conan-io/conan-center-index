@@ -44,7 +44,7 @@ class PthreadpoolConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fxdiv/cci.20200417", transitive_headers=True)
+        self.requires("fxdiv/cci.20200417")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
