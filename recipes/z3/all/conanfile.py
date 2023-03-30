@@ -61,10 +61,6 @@ class Z3Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     @property
     def _compilers_minimum_version(self):
         return {
@@ -98,7 +94,7 @@ class Z3Conan(ConanFile):
         apply_conandata_patches(self)
 
         if self.options.multiprecision == "mpir":
-            save(self, os.path.join(self._build_subfolder, "gmp.h"), textwrap.dedent("""\
+            save(self, os.path.join(self.build_folder, "gmp.h"), textwrap.dedent("""\
                 #pragma once
                 #include <mpir.h>
                 """))
@@ -107,8 +103,8 @@ class Z3Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        self.copy("LICENSE.txt", src=self.source_folder, dst="licenses")
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
