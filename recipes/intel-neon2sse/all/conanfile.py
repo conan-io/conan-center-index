@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.cmake import cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from os import path
 
@@ -52,9 +51,14 @@ class IntelNeon2sseConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
+        self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "NEON_2_SSE")
         self.cpp_info.set_property("cmake_target_name", "NEON_2_SSE::NEON_2_SSE")        
         if self.options.SSE4:
             self.cpp_info.defines.append("USE_SSE4")
         if self.options.disable_performance_warnings:
             self.cpp_info.defines.append("NEON2SSE_DISABLE_PERFORMANCE_WARNING")
+
+        # TODO: remove once generators for legacy generators is no longer needed
+        self.cpp_info.names["cmake_find_package"] = "NEON_2_SSE"
+        self.cpp_info.names["cmake_find_package_multi"] = "NEON_2_SSE"
