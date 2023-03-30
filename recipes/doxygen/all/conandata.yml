@@ -21,7 +21,7 @@ patches:
   "1.9.4":
     - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
       patch_description: "Enable modern compilers"
-      patch_type: "bugfix"
+      patch_type: "portability"
   "1.9.2":
     - patch_file: "patches/1.9.2-0001-imported-target.patch"
       patch_description: "Fix includes"
