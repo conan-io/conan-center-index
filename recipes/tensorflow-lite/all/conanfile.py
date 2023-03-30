@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 from os.path import join
 import textwrap
@@ -70,10 +70,9 @@ class TensorflowLiteConan(ConanFile):
         self.requires("fft/cci.20061228")
         self.requires("flatbuffers/23.1.21")
         self.requires("gemmlowp/cci.20210928")
+        self.requires("ruy/cci.20220628")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        if self.options.with_ruy:
-            self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
