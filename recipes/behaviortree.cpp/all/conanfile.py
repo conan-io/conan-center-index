@@ -31,9 +31,9 @@ class BehaviorTreeCPPConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_tools": False,
-        "with_coroutines": False,
-        "with_groot_interface": False,
-        "with_sqlite_logging": False,
+        "with_coroutines": True,
+        "with_groot_interface": True,
+        "with_sqlite_logging": True,
     }
 
     @property
@@ -67,8 +67,8 @@ class BehaviorTreeCPPConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if conan_version >= Version("2.0.0") and Version(self.version) < "4.1.0":
-            raise Exception("Conan >=v2.0.0 is not compatible with behaviortree.cpp < 4.1.0")
+        if conan_version >= Version("2.0.0") and Version(self.version) < "4.0.1":
+            raise Exception("Conan >=v2.0.0 is not compatible with behaviortree.cpp < 4.0.1")
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -83,9 +83,12 @@ class BehaviorTreeCPPConan(ConanFile):
             self.requires("sqlite3/3.40.1")
         
         if Version(self.version) < "4.1.0":
-            self.requires("ncurses/6.3")
             if self.options.with_coroutines:
                 self.requires("boost/1.81.0")
+
+        
+        if Version(self.version) < "4.0.1":
+            self.requires("ncurses/6.3")
 
         if Version(self.version) < "3.6.0":
             self.requires("boost/1.81.0")
@@ -123,7 +126,10 @@ class BehaviorTreeCPPConan(ConanFile):
             tc.variables["BTCPP_ENABLE_COROUTINES"] = self.options.with_coroutines
             tc.variables["BTCPP_GROOT_INTERFACE"] = self.options.with_groot_interface
             tc.variables["BTCPP_SQLITE_LOGGING"] = self.options.with_sqlite_logging
-            
+
+            if Version(self.version) == "4.0.1" or Version(self.version) == "4.0.2":
+                tc.variables["BTCPP_MANUAL_SELECTOR"] = False
+
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -162,10 +168,12 @@ class BehaviorTreeCPPConan(ConanFile):
             self.cpp_info.components[libname].requires.append("boost::coroutine")
 
         if Version(self.version) < "4.1.0":
-            self.cpp_info.components[libname].requires.extend(["ncurses::ncurses"])
             if self.options.with_coroutines:
                 self.cpp_info.components[libname].requires.append("boost::coroutine")
 
+        if Version(self.version) < "4.0.1":
+            self.cpp_info.components[libname].requires.extend(["ncurses::ncurses"])
+        
         if Version(self.version) > "4.1.0" and self.options.with_sqlite_logging:
                 self.cpp_info.components[libname].requires.append("sqlite3::sqlite3")
 
