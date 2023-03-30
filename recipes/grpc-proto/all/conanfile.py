@@ -37,11 +37,11 @@ class GRPCProto(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
             self.options["googleapis"].shared = True
 
@@ -49,7 +49,7 @@ class GRPCProto(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
-        if self.options.shared and (not self.options["protobuf"].shared or not self.options["googleapis"].shared):
+        if self.options.shared and (not self.dependencies["protobuf"].options.shared or not self.dependencies["googleapis"].options.shared):
             raise ConanInvalidConfiguration("If built as shared, protobuf and googleapis must be shared as well. Please, use `protobuf:shared=True` and `googleapis:shared=True`")
 
     def generate(self):
