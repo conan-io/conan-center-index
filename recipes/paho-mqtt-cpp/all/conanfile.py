@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, rmdir, get, patch
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, rmdir, get
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
@@ -54,13 +54,13 @@ class PahoMqttCppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, _min_cppstd)
+            check_min_cppstd(self, self._min_cppstd)
         if self.dependencies["paho-mqtt-c"].options.shared != self.options.shared:
-            raise ConanInvalidConfiguration("{} requires paho-mqtt-c to have a matching 'shared' option.".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.name} requires paho-mqtt-c to have a matching 'shared' option.")
         if self.dependencies["paho-mqtt-c"].options.ssl != self.options.ssl:
-            raise ConanInvalidConfiguration("{} requires paho-mqtt-c to have a matching 'ssl' option.".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.name} requires paho-mqtt-c to have a matching 'ssl' option.")
         if Version(self.version) < "1.2.0" and Version(self.dependencies["paho-mqtt-c"].ref.version) >= "1.3.2":
-            raise ConanInvalidConfiguration("{}/{} requires paho-mqtt-c =< 1.3.1".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} requires paho-mqtt-c =< 1.3.1")
 
     def requirements(self):
         if Version(self.version) >= "1.2.0":
