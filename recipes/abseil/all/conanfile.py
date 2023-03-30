@@ -145,6 +145,9 @@ class AbseilConan(ConanFile):
 
         abs_target_content = load(self, absl_target_file_path)
 
+        if self.settings.os == "Windows":
+            abs_target_content = abs_target_content.replace("\r\n", "\n")
+        
         cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", abs_target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
             cmake_function_args = re.split(r"[\s|\n]+", cmake_function_args, maxsplit=2)
