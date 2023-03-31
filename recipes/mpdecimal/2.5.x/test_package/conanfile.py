@@ -17,10 +17,8 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
-        build_type = self.settings.build_type.value
         tc = CMakeToolchain(self)
         tc.variables["MPDECIMAL_CXX"] = self.dependencies["mpdecimal"].options.cxx
-        tc.variables[f"CMAKE_RUNTIME_OUTPUT_DIRECTORY_{build_type.upper()}"] = "bin"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -33,8 +31,10 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = pathlib.Path(self.cpp.build.bindirs[0], "bin", "test_package")
+            bin_ext = ".exe" if self.settings.os == "Windows" else ""
+            bin_path = pathlib.Path(self.cpp.build.bindirs[0], f"test_package{bin_ext}")
             self.run("{} 13 100".format(bin_path), env="conanrun")
-            if self.options["mpdecimal"].cxx:
-                bin_path = pathlib.Path(self.cpp.build.bindirs[0], "bin", "test_package_cpp")
+            if self.dependencies["mpdecimal"].options.cxx:
+                bin_ext = ".exe" if self.settings.os == "Windows" else ""
+                bin_path = pathlib.Path(self.cpp.build.bindirs[0], f"test_package_cpp{bin_ext}")
                 self.run("{} 13 100".format(bin_path), env="conanrun")

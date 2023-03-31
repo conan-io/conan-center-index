@@ -56,7 +56,8 @@ class MpdecimalConan(ConanFile):
 
     def validate(self):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("Arch is unsupported")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} currently does not supported {self.settings.arch}. Contributions are welcomed")
         if self.options.cxx:
             if self.options.shared and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration(
