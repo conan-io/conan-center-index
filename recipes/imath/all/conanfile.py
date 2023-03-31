@@ -49,6 +49,8 @@ class ImathConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.settings.compiler == "msvc" and self.settings.compiler.cppstd == "20":
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"        
         tc.generate()
 
     def build(self):
