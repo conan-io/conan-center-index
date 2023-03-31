@@ -6,7 +6,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, apply_conandata_patches, export_conandata_patches
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
+
 
 class opengvConan(ConanFile):
     name = "opengv"
@@ -15,8 +16,8 @@ class opengvConan(ConanFile):
     homepage = "https://github.com/laurentkneip/opengv"
     license = "BSD-3-Clause"
     topics = ("computer", "vision", "geometric", "pose", "triangulation", "point-cloud")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -37,12 +38,15 @@ class opengvConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("eigen/3.4.0")
         if self.options.with_python_bindings:
-            self.requires("pybind11/2.10.0")
+            self.requires("pybind11/2.10.1")
 
     def validate(self):
         # Disable windows builds since they error out.
@@ -52,11 +56,8 @@ class opengvConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.version == 12:
             raise ConanInvalidConfiguration("Clang 12 builds fail on Conan CI.")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,17 +90,17 @@ class opengvConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "opengv")
