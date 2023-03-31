@@ -73,7 +73,7 @@ class SentryCrashpadConan(ConanFile):
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+            self.output.warning("Compiler is unknown. Assuming it supports C++14.")
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"Build requires support for C++14. Minimum version for {self.settings.compiler} is {minimum_version}")
 
