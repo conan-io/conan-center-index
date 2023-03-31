@@ -16,4 +16,4 @@ class ConanRmluiTestV1Conan(ConanFile):
         if not cross_building(self):
             cmake = CMake(self)
             cmake.configure()
-            cmake.test()
+            cmake.test(output_on_failure=True)
