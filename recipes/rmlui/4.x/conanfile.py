@@ -172,6 +172,10 @@ if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )
 
         if not self.options.enable_rtti_and_exceptions:
             self.cpp_info.defines.append("RMLUI_USE_CUSTOM_RTTI")
+            if self.settings.compiler == "gcc" or self.settings.compiler == "clang":
+                self.cpp_info.cxxflags.append("-fno-rtti -fno-exceptions")
+            elif self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc":
+                self.cpp_info.cxxflags.append("-D_HAS_EXCEPTIONS=0 /GR-")
 
         if not self.options.shared:
             self.cpp_info.defines.append("RMLUI_STATIC_LIB")
