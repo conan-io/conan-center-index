@@ -470,6 +470,6 @@ Also, when having a similar situation, do not hesitate in opening an issue expla
 
 No, as they download source code the expectations is that it should not require development - which is the purpose of editable mode. 
 
-Recipes by default should support this however many use components to model upstream build system configuration files (see able why those are not allowed) as a result there is little support within ConanCenterIndex.
+Recipes by default should support this however, many use components to model upstream build system configuration files (see above why those are not allowed) as a result there is little support within ConanCenterIndex.
 
-Small modifications (less than 5 lines) to enable support for this feature are more the welcome.
+Small modifications (less than 5 lines) to enable support for this feature are more then welcomed.
