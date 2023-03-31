@@ -17,6 +17,7 @@ class GurkenlaeuferConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/paulelsner/gurkenlaeufer"
     topics = ("testing", "header-only", "cucumber", "gherkin")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
