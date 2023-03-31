@@ -2,19 +2,20 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, replace_in_file
+from conan.tools.files import get, replace_in_file, copy
 import os
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 class RmluiConan(ConanFile):
     name = "rmlui"
     description = "RmlUi - The HTML/CSS User Interface Library Evolved"
-    homepage = "https://github.com/mikke89/RmlUi"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mikke89/RmlUi"
     topics = ("css", "gui", "html", "lua", "rmlui")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "enable_rtti_and_exceptions": [True, False],
@@ -34,8 +35,6 @@ class RmluiConan(ConanFile):
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
-    build_requires = ["cmake/3.23.2"]
-    exports_sources = ["CMakeLists.txt"]
 
     @property
     def _minimum_compilers_version(self):
@@ -59,7 +58,7 @@ class RmluiConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -87,7 +86,7 @@ class RmluiConan(ConanFile):
             self.requires("lua/5.3.5")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.11.3")
+            self.requires("robin-hood-hashing/3.11.3", headers=True, transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -100,8 +99,6 @@ class RmluiConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
         tc.cache_variables["BUILD_SAMPLES"] = False
-        tc.cache_variables["CUSTOM_CONFIGURATION"] = True
-        tc.cache_variables["CUSTOM_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["robin-hood-hashing"].include_paths)
         tc.cache_variables["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
         tc.cache_variables["ENABLE_PRECOMPILED_HEADERS"] = True
         tc.cache_variables["ENABLE_TRACY_PROFILING"] = False
@@ -114,6 +111,7 @@ class RmluiConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+
         # Since we have switched to CMakeDeps, the targets are named differently, so we need to patch
         # the CMakeLists.txt to use the new names
         replace_mapping = {
@@ -130,6 +128,21 @@ class RmluiConan(ConanFile):
             # disables the built-in generation of package configuration files
             "if(PkgHelpers_AVAILABLE)": "if(FALSE)"
         }
+
+        if self.version >= "4.4":
+            inject_robinhood_dep = """
+find_package(robin_hood REQUIRED)
+target_link_libraries(RmlCore PUBLIC robin_hood::robin_hood)
+if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )
+"""
+        else:
+            inject_robinhood_dep = """
+find_package(robin_hood REQUIRED)
+target_link_libraries(RmlCore robin_hood::robin_hood)
+if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )
+"""
+        if self.options.with_thirdparty_containers:
+            replace_mapping['if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )'] = inject_robinhood_dep
 
         cmakelists_path = os.path.join(
             self.source_folder, "CMakeLists.txt")
@@ -149,9 +162,9 @@ class RmluiConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, pattern="*LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, excludes=("Samples/*", "Tests/*"))
         cmake = CMake(self)
         cmake.install()
-        self.copy("*LICENSE.txt", dst="licenses", src=self.source_folder, excludes=("Samples/*", "Tests/*"))
 
     def package_info(self):
         if self.options.matrix_mode == "row_major":
