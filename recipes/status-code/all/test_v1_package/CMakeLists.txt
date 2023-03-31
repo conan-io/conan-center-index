@@ -5,7 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 # Just a workaround to not supprt the deprecated generators while passing the 1.x hooks
-find_package(status-code REQUIRE CONFIG)
+find_package(status-code CONFIG REQUIRED)
 add_library(status-code::hl ALIAS status-code::status-code)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
