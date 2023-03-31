@@ -76,11 +76,6 @@ class LibMysqlClientCConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
 
-        # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
-        # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
-        if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
-
     def validate(self):
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -96,6 +91,11 @@ class LibMysqlClientCConan(ConanFile):
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
         if self.settings.compiler == "apple-clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared library")
+        
+        # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
+        # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
+        if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
     def _cmake_new_enough(self, required_version):
         try:
