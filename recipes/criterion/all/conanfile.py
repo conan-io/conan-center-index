@@ -1,6 +1,6 @@
 from os import path
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir, replace_in_file, rename
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -19,7 +19,10 @@ class CriterionConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    requires = ("libgit2/[>=1.0]", "libffi/[~3.4]")
+    requires = ("libgit2/1.5.0", "libffi/3.4.3")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,7 +40,7 @@ class CriterionConan(ConanFile):
         pc.generate()
 
         tc = MesonToolchain(self)
-        tc.project_options['force_fallback_for'] = ['boxfort']
+        tc.project_options['force_fallback_for'] = ['boxfort', 'debugbreak', 'klib']
         tc.project_options['default_library'] = 'shared' if self.options['shared'] else 'static'
         
         # We don't need tests or samples
@@ -46,23 +49,11 @@ class CriterionConan(ConanFile):
         
         tc.generate()
 
-    def _download_sources(self):
-        get(self, **self.conan_data['sources'][self.version]['source'], 
-            strip_root=True, destination=self.source_folder)
-
-        # Apply submodule dependencies
-        get(self, **self.conan_data['sources'][self.version]['dependencies']['debugbreak'], strip_root=True, 
-            destination=path.join(self.source_folder, 'dependencies', 'debugbreak'))
-        
-        get(self, **self.conan_data['sources'][self.version]['dependencies']['klib'], strip_root=True, 
-            destination=path.join(self.source_folder, 'dependencies', 'klib'))
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        self._download_sources()
-
-        # Criterion forces both libraries, we need only one type
-        replace_in_file(self, path.join(self.source_folder, 'src', 'meson.build'), 'both_libraries', 'library')
-
+        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -79,4 +70,4 @@ class CriterionConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("pkgconf/[~1.9.3]")
-        self.tool_requires("meson/[>=0.51.2]")
+        self.tool_requires("meson/1.0.0")

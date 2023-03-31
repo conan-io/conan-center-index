@@ -1,0 +1,104 @@
+diff --git a/meson.build b/meson.build
+index 932607c..16f875b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,5 +1,5 @@
+ project('criterion', 'c',
+-		meson_version   : '>= 0.51.0',
++		meson_version   : '>= 0.55.0',
+ 		license         : 'MIT',
+ 		version         : '2.4.1',
+ 		default_options : ['c_std=c11', 'cpp_std=c++11', 'warning_level=2'])
+@@ -128,8 +128,6 @@ if get_option('dev')
+ endif
+ 
+ criterion_includedir = include_directories(
+-	'dependencies/debugbreak',
+-	'dependencies/klib',
+ 	'dependencies/valgrind/include',
+ 
+ 	'include',
+@@ -140,6 +138,10 @@ deps = []
+ 
+ cmake = import('cmake')
+ 
++debugbreak = dependency('debugbreak')
++
++klib = dependency('klib')
++
+ threads = dependency('threads')
+ 
+ nanomsg = dependency('nanomsg', required: false)
+@@ -229,6 +231,8 @@ else
+ endif
+ 
+ deps += [
++        debugbreak,
++        klib,
+ 	threads,
+ 	boxfort,
+ 	libffi,
+diff --git a/src/meson.build b/src/meson.build
+index 7b44f2c..d889515 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -85,7 +85,7 @@ configure_file(input         : 'config.h.in',
+                output        : 'config.h',
+                configuration : config)
+ 
+-libcriterion = both_libraries('criterion', sources,
++libcriterion = library('criterion', sources,
+ 	include_directories: [criterion_includedir],
+ 	# extra args that we don't want to pass to tests, samples, etc
+ 	c_args: [
+diff --git a/subprojects/debugbreak.wrap b/subprojects/debugbreak.wrap
+new file mode 100644
+index 0000000..e8fd6cc
+--- /dev/null
++++ b/subprojects/debugbreak.wrap
+@@ -0,0 +1,8 @@
++[wrap-git]
++url = https://github.com/MrAnno/debugbreak.git
++revision = 83bf7e933311b88613cbaadeced9c2e2c811054a
++directory = debugbreak
++patch_directory = debugbreak 
++
++[provide]
++debugbreak = debugbreak_dep
+diff --git a/subprojects/klib.wrap b/subprojects/klib.wrap
+new file mode 100644
+index 0000000..1a729bb
+--- /dev/null
++++ b/subprojects/klib.wrap
+@@ -0,0 +1,8 @@
++[wrap-git]
++url = https://github.com/attractivechaos/klib.git
++revision = cdb7e9236dc47abf8da7ebd702cc6f7f21f0c502
++directory = klib
++patch_directory = klib
++
++[provide]
++klib = klib_dep
+\ No newline at end of file
+diff --git a/subprojects/packagefiles/debugbreak/meson.build b/subprojects/packagefiles/debugbreak/meson.build
+new file mode 100644
+index 0000000..90a4a33
+--- /dev/null
++++ b/subprojects/packagefiles/debugbreak/meson.build
+@@ -0,0 +1,5 @@
++project('debugbreak', 'c')
++
++debugbreak_dep = declare_dependency(
++    include_directories: '.'
++)
+diff --git a/subprojects/packagefiles/klib/meson.build b/subprojects/packagefiles/klib/meson.build
+new file mode 100644
+index 0000000..03a6fd7
+--- /dev/null
++++ b/subprojects/packagefiles/klib/meson.build
+@@ -0,0 +1,5 @@
++project('klib', 'c')
++
++klib_dep = declare_dependency(
++    include_directories: '.'
++)

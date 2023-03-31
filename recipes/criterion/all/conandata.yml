@@ -1,12 +1,8 @@
 sources:
-  "2.4.1":
-    "source":
-      url: "https://github.com/Snaipe/Criterion/archive/refs/tags/v2.4.1.zip"
-      sha256: "033c3ac4d9b7cc1bc64ca0cfa352a90b7f33aa8ae077193944457f15eda691be"
-    "dependencies":
-      "debugbreak":
-        url: "https://github.com/MrAnno/debugbreak/archive/83bf7e933311b88613cbaadeced9c2e2c811054a.zip"
-        sha256: "a977b15fb4e45403ab8f9e19b3a63a30ebf35dbe756ec460f7c7e79943e2fbf7"
-      "klib":
-        url: "https://github.com/attractivechaos/klib/archive/cdb7e9236dc47abf8da7ebd702cc6f7f21f0c502.zip"
-        sha256: "93183d074dee843bd6fb571270093c277bf2f7fd6b4ce4c20acf3d5256112acd"
+  2.4.1:
+    url: "https://github.com/Snaipe/Criterion/archive/refs/tags/v2.4.1.zip"
+    sha256: "033c3ac4d9b7cc1bc64ca0cfa352a90b7f33aa8ae077193944457f15eda691be"
+patches:
+  2.4.1:
+    - patch_file: "patches/2.4.1-001-dependencies.patch"
+      patch_description: "Allow klib and debugbreak as external dependencies"
