@@ -209,7 +209,7 @@ class NcbiCxxToolkit(ConanFile):
 # Visual Studio sometimes runs "out of heap space"
         if is_msvc(self):
             cmake.parallel = False
-        cmake.build()
+        cmake.build(cli_args=["-v"])
 
     def package(self):
         cmake = CMake(self)
