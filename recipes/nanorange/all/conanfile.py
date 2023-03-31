@@ -60,6 +60,9 @@ class NanorangeConan(ConanFile):
         )
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         # https://github.com/tcbrindle/NanoRange/blob/bf32251d65673fe170d602777c087786c529ead8/CMakeLists.txt#L216
         self.cpp_info.set_property("cmake_file_name", "nanorange")
         self.cpp_info.set_property("cmake_target_name", "nanorange::nanorange")
