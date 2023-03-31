@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
@@ -105,6 +105,9 @@ class NcbiCxxToolkit(ConanFile):
             os.path.join(self.recipe_folder, self._dependencies_folder),
             os.path.join(self.export_folder, self._dependencies_folder))
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -180,6 +183,7 @@ class NcbiCxxToolkit(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
         root = os.path.join(os.getcwd(), "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
@@ -209,7 +213,7 @@ class NcbiCxxToolkit(ConanFile):
 # Visual Studio sometimes runs "out of heap space"
         if is_msvc(self):
             cmake.parallel = False
-        cmake.build(cli_args=["-v"])
+        cmake.build()
 
     def package(self):
         cmake = CMake(self)

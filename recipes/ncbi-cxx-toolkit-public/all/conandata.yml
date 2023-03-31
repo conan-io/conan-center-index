@@ -2,3 +2,7 @@ sources:
   "27.0.0":
     url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-27.0.0.tar.gz"
     sha256: "c8fb3f99c6fce4f170b381f3a7789c76a2ff1c23c094c9852e2e3de1fdc57277"
+
+patches:
+  "27.0.0":
+    - patch_file: "patches/27.0.0-compiler.patch"
