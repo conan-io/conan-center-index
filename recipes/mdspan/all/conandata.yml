@@ -1,4 +1,7 @@
 sources:
-  "0.1.0":
-    url: https://github.com/kokkos/mdspan/archive/refs/tags/mdspan-0.1.0.tar.gz
-    sha256: 24c1e4be4870436c6c5e80d38870721b0b6252185b8288d00d8f3491dfba754b
+  "0.5.0":
+    url: "https://github.com/kokkos/mdspan/archive/refs/tags/mdspan-0.5.0.tar.gz"
+    sha256: "ffa73e5e0dcd78e5279cd3b51a4d983a1fbef696e630fd1287ce32d93d6642d1"
+  "0.4.0":
+    url: https://github.com/kokkos/mdspan/archive/refs/tags/mdspan-0.4.0.tar.gz
+    sha256: 7b89db3c7a9c206c8447499456fdea9c9c1b3a34f58fd0b4c4dd87176b3fe20b

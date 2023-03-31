@@ -1,5 +1,12 @@
 # Changelog
 
+
+### 24-March-2023 - 12:00 CET
+
+- [feature] Install Conan command extensions for Conan v2
+- [feature] Reduce Github requests number to execute Automatic Merge CI job
+- [hotfix] Improve Promote Package CI job logging for better debug
+
 ### 10-March-2023 - 19:55 CET
 
 - [feature] Add priority to pull requests

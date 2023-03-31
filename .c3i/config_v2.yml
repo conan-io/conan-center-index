@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.0
+  version: 2.0.2
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -103,11 +103,11 @@ configurations:
 
 cppstd:
   apple-clang:
-    "13": ["gnu17"]
+    "13": ["17", "gnu17", "20", "gnu20"]
   gcc:
-    "11": ["gnu17"]
+    "11": ["17", "gnu17", "20", "gnu20"]
   msvc:
-    "192": ["14"]
+    "192": ["14", "17", "20"]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"

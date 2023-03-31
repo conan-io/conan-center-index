@@ -47,10 +47,18 @@ int main(int argc, char* argv[])
 			std::cout << "qux:" << result["qux"].as<std::string>() << std::endl;
 		}
 	#endif
-	} catch (const cxxopts::OptionException& e) {
+	}
+	#ifdef CXXOPTS_OLD_EXCEPTIONS
+	catch (const cxxopts::OptionException& e) {
 		std::cout << "error parsing options: " << e.what() << std::endl;
 		return 1;
 	}
+	#else
+	catch (const cxxopts::exceptions::exception& e) {
+		std::cout << "error parsing options: " << e.what() << std::endl;
+		return 1;
+	}
+	#endif
 
 	return 0;
 }
