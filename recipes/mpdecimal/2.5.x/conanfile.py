@@ -231,13 +231,15 @@ class MpdecimalConan(ConanFile):
                     self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMAL_DLL"]
                 else:
                     self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
-        else:
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
 
         if self.options.cxx:
             self.cpp_info.components["libmpdecimal++"].libs = ["{}mpdec++{}".format(*lib_pre_suf)]
             self.cpp_info.components["libmpdecimal++"].requires = ["libmpdecimal"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libmpdecimal++"].system_libs = ["pthread"]
             if self.options.shared:
                 if Version(self.version) >= "2.5.1":
                     self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]
