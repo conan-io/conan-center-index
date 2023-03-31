@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
@@ -74,6 +75,7 @@ class ZmarokSemverConan(ConanFile):
         copy(self, "*.so", self.build_folder, lib_dir, keep_path=False)
         copy(self, "*.dylib", self.build_folder, lib_dir, keep_path=False)
         copy(self, "*.dll*", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["semver"]
