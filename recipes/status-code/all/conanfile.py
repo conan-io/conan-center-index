@@ -14,6 +14,7 @@ class StatusCodeConan(ConanFile):
     homepage = "https://github.com/ned14/status-code"
     description = "Proposed SG14 status_code for the C++ standard"
     topics = ("header-only", "proposal", "status", "return code")
+    package_type = "header-library"
     settings = "os", "arch", "build_type", "compiler"
 
     @property
