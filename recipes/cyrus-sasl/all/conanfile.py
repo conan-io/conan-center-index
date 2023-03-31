@@ -1,14 +1,15 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class CyrusSaslConan(ConanFile):
@@ -23,6 +24,7 @@ class CyrusSaslConan(ConanFile):
     )
     topics = ("sasl", "authentication", "authorization")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -76,16 +78,16 @@ class CyrusSaslConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.with_postgresql:
             self.requires("libpq/14.5")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.39.4")
+            self.requires("sqlite3/3.40.1")
 
     def validate(self):
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
             )
@@ -102,12 +104,14 @@ class CyrusSaslConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
@@ -138,9 +142,6 @@ class CyrusSaslConan(ConanFile):
 
         deps = AutotoolsDeps(self)
         deps.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
     def _patch_sources(self):
         for gnu_config in [
@@ -151,8 +152,6 @@ class CyrusSaslConan(ConanFile):
                 copy(self, os.path.basename(gnu_config),
                            src=os.path.dirname(gnu_config),
                            dst=os.path.join(self.source_folder, "config"))
-        # relocatable executable & shared libs on macOS
-        replace_in_file(self, os.path.join(self.source_folder, "configure"), "-install_name \\$rpath/", "-install_name @rpath/")
 
     def build(self):
         self._patch_sources()
@@ -163,17 +162,15 @@ class CyrusSaslConan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libsasl2")
         self.cpp_info.libs = ["sasl2"]
 
         # TODO: to remove in conan v2
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bindir}")
-        self.env_info.PATH.append(bindir)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

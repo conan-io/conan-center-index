@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 68bd3f9..32ef1ea 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,6 +28,11 @@ add_library(picobench INTERFACE)
+ add_library(picobench::picobench ALIAS picobench)
+ target_include_directories(picobench INTERFACE include)
+ 
++include(GNUInstallDirs)
++
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/picobench
++    DESTINATION include/)
++
+ if(PICOBENCH_BUILD_TOOLS)
+     add_subdirectory(tools)
+ endif()
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index cb7f584..cfefe5c 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -10,3 +10,7 @@ add_executable(picobench-cli picobench.cpp)
+ target_link_libraries(picobench-cli picobench)
+ set_target_properties(picobench-cli PROPERTIES OUTPUT_NAME picobench)
+ set_target_properties(picobench-cli PROPERTIES FOLDER tools)
++
++install(TARGETS picobench-cli
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
