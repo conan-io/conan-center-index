@@ -136,7 +136,7 @@ Only the namespace `conans` has been replaced by `conan`.
 
 ### E9011 - conan-import-tools: Importing conan.tools or conan.tools.xxx.zzz.yyy should be considered as private
 
-Documented on [conanfile.tools](https://docs.conan.io/en/latest/reference/conanfile/tools.html):
+Documented on [conanfile.tools](https://docs.conan.io/1/reference/conanfile/tools.html):
 It's not allowed to use `tools.xxx` directly:
 
 ```python

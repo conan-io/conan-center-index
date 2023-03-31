@@ -82,7 +82,7 @@ General patterns about how they can be used for OSS in ConanCenterIndex can be f
 ### Header Only
 
 If you are looking for header-only projects, you can take a look on [header-only template](../package_templates/header_only).
-Also, Conan Docs have a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
+Also, Conan Docs have a section about [how to package header-only libraries](https://docs.conan.io/1/howtos/header_only.html).
 
 ### CMake
 
@@ -106,7 +106,7 @@ For cases where a project only offers source files, but not a build script, you 
 
 > **Note**: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](../faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
 
-The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
+The [SystemPackageTool](https://docs.conan.io/1/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
 pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
 
 As example there is [xorg](https://github.com/conan-io/conan-center-index/blob/master/recipes/xorg/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.

@@ -22,6 +22,7 @@ class CprConan(ConanFile):
     homepage = "https://docs.libcpr.org/"
     topics = ("requests", "web", "curl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,19 +41,19 @@ class CprConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if Version(self.version) < "1.10.0" else 17
+        return "11" if Version(self.version) < "1.10.0" else "17"
 
     @property
     def _compilers_minimum_version(self):
-        if self._min_cppstd == 11:
-            return {}
         return {
-            "gcc": "9",
-            "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
+            "17": {
+                "gcc": "9",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     @property
     def _supports_openssl(self):
@@ -69,7 +70,7 @@ class CprConan(ConanFile):
     @property
     def _supports_darwinssl(self):
         # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return Version(self.version) >= "1.6.1" and is_apple_os(self.settings.os)
+        return Version(self.version) >= "1.6.1" and is_apple_os(self)
 
     @property
     def _can_auto_ssl(self):
@@ -77,7 +78,7 @@ class CprConan(ConanFile):
         return not self._uses_old_cmake_options and not (
            #  https://github.com/libcpr/cpr/issues/546
             Version(self.version) in ["1.6.0", "1.6.1"]
-            and is_apple_os(self.settings.os)
+            and is_apple_os(self)
         )
 
     @property
@@ -122,7 +123,7 @@ class CprConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.87.0")
+        self.requires("libcurl/7.87.0", transitive_headers=True, transitive_libs=True)
 
     # Check if the system supports the given ssl library
     def _supports_ssl_library(self, library):
@@ -142,7 +143,7 @@ class CprConan(ConanFile):
         return validators[library]
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -168,12 +169,12 @@ class CprConan(ConanFile):
                 else f"Invalid value of ssl option, {ssl_library}"
             )
 
-        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
+        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.dependencies["libcurl"].options.with_ssl:
             raise ConanInvalidConfiguration(
                 f"{self.ref}:with_ssl={self.options.with_ssl} requires libcurl:with_ssl={self.options.with_ssl}"
             )
 
-        if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
+        if ssl_library == "winssl" and self.dependencies["libcurl"].options.with_ssl != "schannel":
             raise ConanInvalidConfiguration(
                 f"{self.ref}:with_ssl=winssl requires libcurl:with_ssl=schannel"
             )
@@ -185,8 +186,7 @@ class CprConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _get_cmake_option(self, option):
         CPR_1_6_CMAKE_OPTIONS_TO_OLD = {
