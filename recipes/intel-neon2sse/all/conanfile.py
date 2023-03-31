@@ -1,9 +1,8 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-import os
-
-
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from os import path
 
 class IntelNeon2sseConan(ConanFile):
     name = "intel-neon2sse"
@@ -13,8 +12,6 @@ class IntelNeon2sseConan(ConanFile):
     license = "BSD-2-Clause"
     topics = "neon", "sse", "port", "translation", "intrinsics"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt"
     options = {
         "SSE4": [True, False],
         "disable_performance_warnings": [True, False],
@@ -24,45 +21,44 @@ class IntelNeon2sseConan(ConanFile):
         "disable_performance_warnings": False,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
-
     def validate(self):
         if self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("neon2sse only supports arch={x86,x86_64}")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        copy(self, "LICENSE", dst=path.join(self.package_folder, "licenses"), src=self.source_folder)
+        rmdir(self, path.join(self.package_folder, "lib"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def package_info(self):
         self.cpp_info.libdirs = []
-        self.cpp_info.names["cmake_find_package"] = "NEON_2_SSE"
-        self.cpp_info.names["cmake_find_package_multi"] = "NEON_2_SSE"
+        self.cpp_info.set_property("cmake_file_name", "NEON_2_SSE")
+        self.cpp_info.set_property("cmake_target_name", "NEON_2_SSE::NEON_2_SSE")        
         if self.options.SSE4:
             self.cpp_info.defines.append("USE_SSE4")
         if self.options.disable_performance_warnings:
             self.cpp_info.defines.append("NEON2SSE_DISABLE_PERFORMANCE_WARNING")
+
+        # TODO: remove once generators for legacy generators is no longer needed
+        self.cpp_info.names["cmake_find_package"] = "NEON_2_SSE"
+        self.cpp_info.names["cmake_find_package_multi"] = "NEON_2_SSE"
