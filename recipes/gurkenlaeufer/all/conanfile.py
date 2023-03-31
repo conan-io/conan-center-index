@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import get, copy, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -34,9 +34,6 @@ class GurkenlaeuferConan(ConanFile):
             "apple-clang": "5.1",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -60,7 +57,7 @@ class GurkenlaeuferConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "gtest"))
 
     def build(self):
-        apply_conandata_patches(self)
+        pass
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder,"licenses"))
