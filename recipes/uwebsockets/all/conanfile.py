@@ -15,6 +15,7 @@ class UwebsocketsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/uNetworking/uWebSockets"
     topics = ("websocket", "network", "server", "header-only")
+    package_type = "header-library
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_zlib": [True, False],
@@ -75,11 +76,11 @@ class UwebsocketsConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
-            raise ConanInvalidConfiguration("{} needs recent libstdc++ with charconv.".format(self.name))
+        if Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings.compiler.libcxx) == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
