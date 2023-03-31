@@ -31,7 +31,7 @@ class Function2Conan(ConanFile):
             "clang": "3.4",
             "apple-clang": "10",
             "Visual Studio": "14",
-            "msvc": "14",
+            "msvc": "190",
         }
 
     def layout(self):
