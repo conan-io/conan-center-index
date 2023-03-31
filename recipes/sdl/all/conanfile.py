@@ -10,7 +10,7 @@ from conan.tools.env import Environment
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class SDLConan(ConanFile):
@@ -20,11 +20,8 @@ class SDLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
     license = "Zlib"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
-    generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -83,6 +80,7 @@ class SDLConan(ConanFile):
         "vulkan": True,
         "libunwind": True,
     }
+    generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -92,10 +90,6 @@ class SDLConan(ConanFile):
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
         env = Environment()
         env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-
-        # FIXME: remove and raise required_conan_version to 1.55 once it's on c3i
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-
         env = env.vars(self, scope="build")
         env.save_script("sdl_env")
 
@@ -161,7 +155,7 @@ class SDLConan(ConanFile):
 
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
         if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
-            raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.ref} requires xcode 12 or higher")
 
         if self.settings.os == "Linux":
             if self.options.sndio:
@@ -178,21 +172,13 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and cross_building(self):
-            # Workaround for CMake bug with error message:
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.build_requires("cmake/3.22.0")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
             self.build_requires("wayland/1.20.0")  # Provides wayland-scanner
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
