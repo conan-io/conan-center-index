@@ -26,8 +26,6 @@ class Tabulate(ConanFile):
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
-        self.output.info("debug %s %s %s %s %s" % (compiler, compiler_version, self.settings.compiler.cppstd, self.settings, self.settings.compiler))
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
         else:
