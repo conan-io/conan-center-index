@@ -97,3 +97,5 @@ class CityhashConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["cityhash"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
