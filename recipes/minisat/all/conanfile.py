@@ -69,6 +69,8 @@ class MiniSatConan(ConanFile):
         cmake.build(target=self._determine_lib_name())
 
     def package(self):
+         # Manually copy since install does both static and shared 
+         # https://github.com/conan-io/conan-center-index/pull/16071#discussion_r1149458542
         copy(self, pattern="LICENSE", src=self.source_folder, dst=join(self.package_folder, "licenses"))
         copy(self, pattern="*.h", src=join(self.source_folder, "minisat"), dst=join(self.package_folder, "include", "minisat"))
         if self.options.shared:
