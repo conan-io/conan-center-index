@@ -25,7 +25,7 @@ class Function2Conan(ConanFile):
         return "14"
 
     @property
-    def _compiler_minimal_version(self):
+    def _compilers_minimum_version(self):
         return {
             "gcc": "5",
             "clang": "3.4",
