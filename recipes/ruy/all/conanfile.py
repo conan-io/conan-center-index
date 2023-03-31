@@ -73,6 +73,9 @@ class RuyConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["RUY_MINIMAL_BUILD"] = True
         tc.cache_variables["RUY_FIND_CPUINFO"] = True
+        # Ruy public headers don't have API decorators,
+        # export everything to support shared libraries on Windows
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
