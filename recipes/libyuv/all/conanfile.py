@@ -86,6 +86,8 @@ class LibyuvConan(ConanFile):
             self.cpp_info.requires.append("libjpeg-turbo::jpeg")
         elif self.options.with_jpeg == "mozjpeg":
             self.cpp_info.requires.append("mozjpeg::libjpeg")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
