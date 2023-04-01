@@ -336,22 +336,29 @@ class FFMpegConan(ConanFile):
     @property
     def _target_arch(self):
         # Taken from acceptable values https://github.com/FFmpeg/FFmpeg/blob/0684e58886881a998f1a7b510d73600ff1df2b90/configure#L5010
-        # All the values Conan's deffault setting support are already handled
+        if str(self.settings.arch).startswith("armv8"):
+            return "aarch64"
+        elif self.settings.arch == "x86":
+            return "i686"
         return str(self.settings.arch)
 
     @property
     def _target_os(self):
-        if is_msvc(self):
-            return "win32"
-        if is_apple_os(self):
+        if self.settings.os == "Windows":
+            return "mingw32" if self.settings.compiler == "gcc" else "win32"
+        elif is_apple_os(self):
             return "darwin"
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            return "mingw32"
 
         # Taken from https://github.com/FFmpeg/FFmpeg/blob/0684e58886881a998f1a7b510d73600ff1df2b90/configure#L5485
-        # This is the map of Conan OS settings to FFmpeg accecptable values
-        triplet_os = {"AIX": "aix", "Android": "android", "FreeBSD": "freebsd", "SunOS": "sunos", "Linux": "linux", "Emscripten": "none"}
-        return triplet_os[str(self.settings.os)]
+        # This is the map of Conan OS settings to FFmpeg acceptable values
+        return {
+            "AIX": "aix",
+            "Android": "android",
+            "FreeBSD": "freebsd",
+            "Linux": "linux",
+            "Neutrino": "qnx",
+            "SunOS": "sunos",
+        }.get(str(self.settings.os), "none")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
