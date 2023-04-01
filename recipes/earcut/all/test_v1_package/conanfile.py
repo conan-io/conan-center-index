@@ -1,8 +1,9 @@
-from conans import ConanFile, CMake, tools
 import os
 
+from conans import ConanFile, CMake, tools
 
-class TestPackageV1Conan(ConanFile):
+
+class EarcutTestConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
