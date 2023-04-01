@@ -554,8 +554,10 @@ class FFMpegConan(ConanFile):
             if is_apple_os(self) and self.options.with_audiotoolbox:
                 args.append("--disable-outdev=audiotoolbox")
 
-        args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
-        args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
+        if tc.cflags:
+            args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
+        if tc.ldflags:
+            args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
         tc.configure_args.extend(args)
         # Custom configure script of ffmpeg understands:
         # --prefix, --bindir, --datadir, --docdir, --incdir, --libdir, --mandir
