@@ -86,25 +86,21 @@ class NsyncConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.components["nsync_c"].libs = ["nsync"]
+        self.cpp_info.components["nsync_cpp"].libs = ["nsync_cpp"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["nsync_c"].system_libs.append("pthread")
+            self.cpp_info.components["nsync_cpp"].system_libs.extend(["m", "pthread"])
+
         self.cpp_info.filenames["cmake_find_package"] = "nsync"
         self.cpp_info.filenames["cmake_find_package_multi"] = "nsync"
         self.cpp_info.names["cmake_find_package"] = "nsync"
         self.cpp_info.names["cmake_find_package_multi"] = "nsync"
 
-        self._def_compoment("nsync_c", "nsync")
-        self._def_compoment("nsync_cpp")
+        self.cpp_info.components["nsync_c"].names["cmake_find_package"] = "nsync_c"
+        self.cpp_info.components["nsync_c"].names["cmake_find_package_multi"] = "nsync_c"
+        self.cpp_info.components["nsync_c"].names["pkg_config"] = "nsync"
 
-    def _def_compoment(self, name, lib=None):
-        lib = lib if lib else name
-
-        component = self.cpp_info.components[name]
-        component.name = name
-        component.libs = [lib]
-        component.names["cmake_find_package"] = name
-        component.names["cmake_find_package_multi"] = name
-        component.names["pkg_config"] = lib
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            component.system_libs = ["pthread"]
-            if name == "nsync_cpp":
-                component.system_libs.append("m")
+        self.cpp_info.components["nsync_cpp"].names["cmake_find_package"] = "nsync_cpp"
+        self.cpp_info.components["nsync_cpp"].names["cmake_find_package_multi"] = "nsync_cpp"
+        self.cpp_info.components["nsync_cpp"].names["pkg_config"] = "nsync_cpp"
