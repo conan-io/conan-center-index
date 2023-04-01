@@ -6,7 +6,7 @@ from conan.tools.cmake import cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.59.0"
 
 class LAConan(ConanFile):
     name = "wg21-linear_algebra"
