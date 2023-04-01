@@ -14,8 +14,5 @@ class ConanRmluiTestV1Conan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            cmake = CMake(self)
-            cmake.configure()
-            env_run = RunEnvironment(self)
-            with tools.environment_append(env_run.vars):
-                cmake.test(output_on_failure=True)
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
