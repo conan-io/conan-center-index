@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -47,6 +49,11 @@ class LibyuvConan(ConanFile):
             self.requires("libjpeg-turbo/2.1.4")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            # Injecting CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS is not sufficient since there are global symbols
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported for msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
