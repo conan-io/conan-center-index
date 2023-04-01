@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.12)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
-find_package(protobuf CONFIG REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
+find_package(protobuf CONFIG REQUIRED QUIET)
+find_package(gRPC CONFIG REQUIRED QUIET)
+
+message("DYLD_LIBRARY_PATH from CMake: $ENV{DYLD_LIBRARY_PATH}")
 
 add_executable(${PROJECT_NAME} test_package.cpp helloworld.proto)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)  # grpc 1.47.0 requires c++14

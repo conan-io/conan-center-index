@@ -19,7 +19,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "docs/*/*"
-          reviewers: "@prince-chrismc @MartinDelille"
+          reviewers: "@prince-chrismc @MartinDelille @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -64,7 +64,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/boost/*/*"
-          reviewers: "@Hopobcn @jwillikers"
+          reviewers: "@grafikrobot @Hopobcn @jwillikers"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -174,7 +174,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/gtk/*/*"
-          reviewers: "@ericLemanissier"
+          reviewers: ""
 
       - uses: ./.github/actions/alert-community
         with:
