@@ -91,16 +91,3 @@ class NsyncConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["nsync_c"].system_libs.append("pthread")
             self.cpp_info.components["nsync_cpp"].system_libs.extend(["m", "pthread"])
-
-        self.cpp_info.filenames["cmake_find_package"] = "nsync"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "nsync"
-        self.cpp_info.names["cmake_find_package"] = "nsync"
-        self.cpp_info.names["cmake_find_package_multi"] = "nsync"
-
-        self.cpp_info.components["nsync_c"].names["cmake_find_package"] = "nsync_c"
-        self.cpp_info.components["nsync_c"].names["cmake_find_package_multi"] = "nsync_c"
-        self.cpp_info.components["nsync_c"].names["pkg_config"] = "nsync"
-
-        self.cpp_info.components["nsync_cpp"].names["cmake_find_package"] = "nsync_cpp"
-        self.cpp_info.components["nsync_cpp"].names["cmake_find_package_multi"] = "nsync_cpp"
-        self.cpp_info.components["nsync_cpp"].names["pkg_config"] = "nsync_cpp"
