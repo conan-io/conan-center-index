@@ -1,4 +1,7 @@
 sources:
+  "10.0.1":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-10.0.1/apache-arrow-10.0.1.tar.gz?action=download"
+    sha256: "c814e0670112a22c1a6ec03ab420a52ae236a9a42e9e438c3cbd37f37e658fb3"
   "10.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-10.0.0/apache-arrow-10.0.0.tar.gz?action=download"
     sha256: "5b46fa4c54f53e5df0019fe0f9d421e93fc906b625ebe8e89eed010d561f1f12"

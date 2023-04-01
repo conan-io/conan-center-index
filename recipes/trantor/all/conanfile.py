@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class TrantorConan(ConanFile):
     name = "trantor"
@@ -38,6 +38,7 @@ class TrantorConan(ConanFile):
         return {
             "gcc": "5",
             "Visual Studio": "15.0",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -48,10 +49,7 @@ class TrantorConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -59,7 +57,7 @@ class TrantorConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1s")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.18.1")
+            self.requires("c-ares/1.19.0")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):

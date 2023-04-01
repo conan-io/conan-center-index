@@ -54,19 +54,19 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "1.0":
-            self.requires("fast_float/3.8.1")
+            self.requires("fast_float/3.10.1")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192 if Version(self.version) >= "1.0" else 191)
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if self.options.header_only:
@@ -97,13 +97,14 @@ class ScnlibConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
             copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+            src_folder = os.path.join(self.source_folder, "src")
             if Version(self.version) >= "1.0":
-                self.copy("reader_*.cpp", dst=os.path.join(self.package_folder, "include", "scn", "reader"), src=os.path.join(self.source_folder, "src"))
-                self.copy("vscan.cpp", dst=os.path.join(self.package_folder, "include", "scn", "scan"), src=os.path.join(self.source_folder, "src"))
-                self.copy("locale.cpp", dst=os.path.join(self.package_folder, "include", "scn", "detail"), src=os.path.join(self.source_folder, "src"))
-                self.copy("file.cpp", dst=os.path.join(self.package_folder, "include", "scn", "detail"), src=os.path.join(self.source_folder, "src"))
+                copy(self, "reader_*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "reader"))
+                copy(self, "vscan.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "scan"))
+                copy(self, "locale.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
+                copy(self, "file.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
             else:
-                self.copy("*.cpp", dst=os.path.join(self.package_folder, "include", "scn", "detail"), src=os.path.join(self.source_folder, "src"))
+                copy(self, "*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
         else:
             cmake = CMake(self)
             cmake.install()
@@ -117,7 +118,7 @@ class ScnlibConan(ConanFile):
     def package_info(self):
         target = "scn-header-only" if self.options.header_only else "scn"
         self.cpp_info.set_property("cmake_file_name", "scn")
-        self.cpp_info.set_property("cmake_target_name", "scn::{}".format(target))
+        self.cpp_info.set_property("cmake_target_name", f"scn::{target}")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.header_only:
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=1"]
@@ -135,4 +136,4 @@ class ScnlibConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "scn"
         self.cpp_info.components["_scnlib"].names["cmake_find_package"] = target
         self.cpp_info.components["_scnlib"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["_scnlib"].set_property("cmake_target_name", "scn::{}".format(target))
+        self.cpp_info.components["_scnlib"].set_property("cmake_target_name", f"scn::{target}")

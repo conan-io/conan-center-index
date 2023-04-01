@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class C4CoreConan(ConanFile):
     name = "c4core"
@@ -18,6 +18,7 @@ class C4CoreConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/c4core"
     topics = ("utilities", "low-latency", )
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,17 +40,14 @@ class C4CoreConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_fast_float:
-            self.requires("fast_float/3.8.1")
+            self.requires("fast_float/3.10.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -57,13 +55,12 @@ class C4CoreConan(ConanFile):
 
         ## clang with libc++ is not supported. It is already fixed since 0.1.9.
         if Version(self.version) <= "0.1.8":
-            if self.info.settings.compiler in ["clang", "apple-clang"] and \
-                self.info.settings.compiler.get_safe("libcxx") == "libc++":
+            if self.settings.compiler in ["clang", "apple-clang"] and \
+                self.settings.compiler.get_safe("libcxx") == "libc++":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang with libc++")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

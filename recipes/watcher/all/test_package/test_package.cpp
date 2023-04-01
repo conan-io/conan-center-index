@@ -2,7 +2,11 @@
 #include <chrono>
 #include <thread>
 
-#include "watcher/watcher.hpp"
+#ifdef WATCHER_WATCH_OBJECT
+#  include "wtr/watcher.hpp"
+#else
+#  include "watcher/watcher.hpp"
+#endif
 
 int main(int argc, char** argv) {
   std::cout << R"({
@@ -17,13 +21,20 @@ int main(int argc, char** argv) {
     std::cout << "\n";
   };
 
-  std::thread([&]() { WATCHER_NAMESPACE::watcher::watch(".", show_event_json); }).detach();
   auto const time_until_death = std::chrono::seconds(3);
+
+#ifdef WATCHER_WATCH_OBJECT
+  auto lifetime = wtr::watch(".", show_event_json);
   std::this_thread::sleep_for(time_until_death);
-#ifdef WATCHER_DIE_WITH_PATH
-  auto const is_watch_dead = WATCHER_NAMESPACE::watcher::die(".", show_event_json);
+  auto const is_watch_dead = lifetime.close();
 #else
+  std::thread([&]() { WATCHER_NAMESPACE::watcher::watch(".", show_event_json); }).detach();
+  std::this_thread::sleep_for(time_until_death);
+#  ifdef WATCHER_DIE_WITH_PATH
+  auto const is_watch_dead = WATCHER_NAMESPACE::watcher::die(".", show_event_json);
+#  else
   auto const is_watch_dead = WATCHER_NAMESPACE::watcher::die(show_event_json);
+#  endif
 #endif
 
   std::cout << "  },\n"

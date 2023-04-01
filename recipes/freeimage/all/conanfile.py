@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class FreeImageConan(ConanFile):
@@ -14,13 +14,14 @@ class FreeImageConan(ConanFile):
     homepage = "https://freeimage.sourceforge.io"
     url = "https://github.com/conan-io/conan-center-index"
     license = "FreeImage", "GPL-3.0-or-later", "GPL-2.0-or-later"
-    topics = ("freeimage", "image", "decoding", "graphics")
+    topics = ("image", "decoding", "graphics")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_jpeg2000": [True, False],
@@ -48,8 +49,7 @@ class FreeImageConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,28 +57,34 @@ class FreeImageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        self.output.warn("G3 plugin and JPEGTransform are disabled.")
+            self.options.rm_safe("fPIC")
+        self.output.warning("G3 plugin and JPEGTransform are disabled.")
         if bool(self.options.with_jpeg):
             if self.options.with_tiff:
                 self.options["libtiff"].jpeg = self.options.with_jpeg
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.with_jpeg2000:
             self.requires("openjpeg/2.5.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
         if self.options.with_tiff or self.options.with_openexr:
             # can't upgrade to openexr/3.x.x because plugin tiff requires openexr/2.x.x header files
             self.requires("openexr/2.5.7")
         if self.options.with_raw:
+            # can't upgrade to libraw >= 0.21 (error: no member named 'shot_select' in 'libraw_output_params_t')
             self.requires("libraw/0.20.2")
         if self.options.with_jxr:
             self.requires("jxrlib/cci.20170615")
@@ -86,20 +92,16 @@ class FreeImageConan(ConanFile):
             self.requires("libtiff/4.4.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["FREEIMAGE_FOLDER"] = self.source_folder.replace("\\", "/")
-        tc.variables["FREEIMAGE_WITH_JPEG"] = self.options.with_jpeg != False
+        tc.variables["FREEIMAGE_WITH_JPEG"] = bool(self.options.with_jpeg)
         tc.variables["FREEIMAGE_WITH_OPENJPEG"] = self.options.with_jpeg2000
         tc.variables["FREEIMAGE_WITH_PNG"] = self.options.with_png
         tc.variables["FREEIMAGE_WITH_WEBP"] = self.options.with_webp
@@ -137,8 +139,12 @@ class FreeImageConan(ConanFile):
         def imageformats_deps():
             components = []
             components.append("zlib::zlib")
-            if self.options.with_jpeg:
-                components.append("{0}::{0}".format(self.options.with_jpeg))
+            if self.options.with_jpeg == "libjpeg":
+                components.append("libjpeg::libjpeg")
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                components.append("libjpeg-turbo::jpeg")
+            elif self.options.with_jpeg == "mozjpeg":
+                components.append("mozjpeg::libjpeg")
             if self.options.with_jpeg2000:
                 components.append("openjpeg::openjpeg")
             if self.options.with_png:

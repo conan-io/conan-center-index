@@ -1,10 +1,10 @@
 sources:
   "4.2.1":
-    url: "https://github.com/zeromq/czmq/archive/v4.2.1.tar.gz"
-    sha256: "83457cd32a2c2615b8d7ebcf91b198cb0d8df383a2072b96835ab250164d8a83"
+    url: "https://github.com/zeromq/czmq/releases/download/v4.2.1/czmq-4.2.1.tar.gz"
+    sha256: "5d720a204c2a58645d6f7643af15d563a712dad98c9d32c1ed913377daa6ac39"
   "4.2.0":
-    url: "https://github.com/zeromq/czmq/archive/v4.2.0.tar.gz"
-    sha256: "31185090b500b64855003be2450ced00efa6b58544639acfc68aa13c9ec249f8"
+    url: "https://github.com/zeromq/czmq/releases/download/v4.2.0/czmq-4.2.0.tar.gz"
+    sha256: "cfab29c2b3cc8a845749758a51e1dd5f5160c1ef57e2a41ea96e4c2dcc8feceb"
 patches:
   "4.2.1":
     - patch_file: patches/4.2.1-0001-fix-cmake.patch

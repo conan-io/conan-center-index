@@ -47,11 +47,11 @@ class MiniaudioConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if self.options.header_only:
@@ -113,4 +113,3 @@ class MiniaudioConan(ConanFile):
             self.cpp_info.libs = ["miniaudio"]
             if self.options.shared:
                 self.cpp_info.defines.append("MA_DLL")
-

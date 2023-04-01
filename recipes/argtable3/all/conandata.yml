@@ -1,4 +1,7 @@
 sources:
+  "3.2.2":
+    url: "https://github.com/argtable/argtable3/archive/refs/tags/v3.2.2.f25c624.tar.gz"
+    sha256: "a5c66d819fa0be0435f37ed2fb3f23e371091722ff74219de97b65f6b9914e51"
   "3.2.1":
     url: "https://github.com/argtable/argtable3/releases/download/v3.2.1.52f24e5/argtable-v3.2.1.52f24e5.tar.gz"
     sha256: "bf02394a21378fdca95937fc4e3aeff8af63a2bfed7e3f87b1c1eda8bf9227dc"
@@ -11,7 +14,9 @@ sources:
 patches:
   "3.2.0":
     - patch_file: "patches/3.2.0-0001-cmake-fixes.patch"
-      base_path: "source_subfolder"
+      patch_description: "disable example build, make shared/static build separated"
+      patch_type: "conan"
   "3.1.5":
     - patch_file: "patches/3.1.5-0001-cmake-fixes.patch"
-      base_path: "source_subfolder"
+      patch_description: "disable example build, make shared/static build separated"
+      patch_type: "conan"

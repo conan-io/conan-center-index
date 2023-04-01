@@ -1,4 +1,6 @@
 versions:
+  "3.1.31":
+    folder: all
   "3.1.30":
     folder: all
   "3.1.29":

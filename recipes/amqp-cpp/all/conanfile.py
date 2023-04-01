@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class AmqpcppConan(ConanFile):
@@ -25,21 +27,8 @@ class AmqpcppConan(ConanFile):
         "linux_tcp_module": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,41 +37,40 @@ class AmqpcppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["AMQP-CPP_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["AMQP-CPP_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["AMQP-CPP_LINUX_TCP"] = self.options.get_safe("linux_tcp_module") or False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["AMQP-CPP_BUILD_SHARED"] = self.options.shared
+        tc.variables["AMQP-CPP_BUILD_EXAMPLES"] = False
+        tc.variables["AMQP-CPP_LINUX_TCP"] = self.options.get_safe("linux_tcp_module", False)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
-        cmake.install()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -90,21 +78,20 @@ class AmqpcppConan(ConanFile):
             {"amqpcpp": "amqpcpp::amqpcpp"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "amqpcpp")
@@ -112,7 +99,9 @@ class AmqpcppConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "amqpcpp")
         self.cpp_info.libs = ["amqpcpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "pthread"]
+            self.cpp_info.system_libs = ["dl", "m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["pkg_config"] = "amqpcpp"

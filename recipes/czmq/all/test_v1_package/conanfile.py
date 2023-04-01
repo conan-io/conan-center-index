@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_LIBSODIUM"] = self.options["zeromq"].encryption == "libsodium"
         cmake.configure()
         cmake.build()
 

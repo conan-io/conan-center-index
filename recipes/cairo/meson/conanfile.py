@@ -3,7 +3,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
@@ -61,7 +61,7 @@ class CairoConan(ConanFile):
         "with_png": True,
         "with_opengl": "desktop",
         "with_symbol_lookup": False,
-        "tee": True,
+        "tee": False,
     }
     short_paths = True
 
@@ -69,15 +69,10 @@ class CairoConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os != "Linux":
@@ -95,6 +90,9 @@ class CairoConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.with_glib and self.options.shared:
             self.options["glib"].shared = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("pixman/0.40.0")
@@ -124,9 +122,9 @@ class CairoConan(ConanFile):
         if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
 
-    def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
-        self.tool_requires("pkgconf/1.9.3")
+    def package_id(self):
+        if self.info.options.with_glib and not self.dependencies["glib"].options.shared:
+            self.info.requires["glib"].full_package_mode()
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
@@ -142,9 +140,20 @@ class CairoConan(ConanFile):
                     "Linking a shared library against static glib can cause unexpected behaviour."
                 )
 
+    def build_requirements(self):
+        self.tool_requires("meson/1.0.0")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
     def generate(self):
         def is_enabled(value):
             return "enabled" if value else "disabled"
+
+        env = VirtualBuildEnv(self)
+        env.generate()
 
         pkg_deps = PkgConfigDeps(self)
         pkg_deps.generate()
@@ -158,7 +167,6 @@ class CairoConan(ConanFile):
         if self.settings.os == "Linux":
             options["xcb"] = is_enabled(self.options.with_xcb)
             options["xlib"] = is_enabled(self.options.with_xlib)
-            options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
         else:
             options["xcb"] = "disabled"
             options["xlib"] = "disabled"
@@ -177,11 +185,17 @@ class CairoConan(ConanFile):
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
-        options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
-        options["directfb"] = "disabled"
-        options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
-        options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
-        options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+
+        version = Version(self.version)
+        if version < "1.17.6":
+            options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
+            options["directfb"] = "disabled"
+            options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
+            options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
+            options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
+            if self.settings.os == "Linux":
+                options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
+
         options["gtk2-utils"] = "disabled"
         options["spectre"] = "disabled"  # https://www.freedesktop.org/wiki/Software/libspectre/
 
@@ -197,12 +211,6 @@ class CairoConan(ConanFile):
 
         meson.generate()
 
-        env = VirtualBuildEnv(self)
-        env.generate()
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
     def build(self):
         apply_conandata_patches(self)
 
@@ -210,7 +218,7 @@ class CairoConan(ConanFile):
         if self.options.with_freetype:
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                                   "freetype_required_version = '>= 9.7.3'",
-                                  f"freetype_required_version = '>= {self.deps_cpp_info['freetype'].version}'")
+                                  f"freetype_required_version = '>= {self.dependencies['freetype'].ref.version}'")
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -229,6 +237,7 @@ class CairoConan(ConanFile):
         copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         base_requirements = {"pixman::pixman"}
@@ -236,7 +245,6 @@ class CairoConan(ConanFile):
 
         def add_component_and_base_requirements(component, requirements, system_libs=None):
             self.cpp_info.components[component].set_property("pkg_config_name", component)
-            self.cpp_info.components[component].names["pkg_config"] = component
             self.cpp_info.components[component].requires += ["cairo_"] + requirements
             base_requirements.update(set(requirements))
             if system_libs is not None:
@@ -244,10 +252,8 @@ class CairoConan(ConanFile):
                 base_system_libs.update(set(system_libs))
 
         self.cpp_info.set_property("pkg_config_name", "cairo-all-do-no-use")
-        self.cpp_info.names["pkg_config"] = "cairo-all-do-no-use"
 
         self.cpp_info.components["cairo_"].set_property("pkg_config_name", "cairo")
-        self.cpp_info.components["cairo_"].names["pkg_config"] = "cairo"
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
 
@@ -289,26 +295,21 @@ class CairoConan(ConanFile):
 
         if is_apple_os(self):
             self.cpp_info.components["cairo-quartz"].set_property("pkg_config_name", "cairo-quartz")
-            self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
             self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
 
             self.cpp_info.components["cairo-quartz-image"].set_property("pkg_config_name", "cairo-quartz-image")
-            self.cpp_info.components["cairo-quartz-image"].names["pkg_config"] = "cairo-quartz-image"
             self.cpp_info.components["cairo-quartz-image"].requires = ["cairo_"]
 
             self.cpp_info.components["cairo-quartz-font"].set_property("pkg_config_name", "cairo-quartz-font")
-            self.cpp_info.components["cairo-quartz-font"].names["pkg_config"] = "cairo-quartz-font"
             self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]
 
             self.cpp_info.components["cairo_"].frameworks += ["ApplicationServices", "CoreFoundation", "CoreGraphics"]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["cairo-win32"].set_property("pkg_config_name", "cairo-win32")
-            self.cpp_info.components["cairo-win32"].names["pkg_config"] = "cairo-win32"
             self.cpp_info.components["cairo-win32"].requires = ["cairo_"]
 
             self.cpp_info.components["cairo-win32-font"].set_property("pkg_config_name", "cairo-win32-font")
-            self.cpp_info.components["cairo-win32-font"].names["pkg_config"] = "cairo-win32-font"
             self.cpp_info.components["cairo-win32-font"].requires = ["cairo_"]
 
             self.cpp_info.components["cairo_"].system_libs.extend(["gdi32", "msimg32", "user32"])
@@ -338,7 +339,6 @@ class CairoConan(ConanFile):
             add_component_and_base_requirements("cairo-ps", ["zlib::zlib"])
             add_component_and_base_requirements("cairo-pdf", ["zlib::zlib"])
             self.cpp_info.components["cairo-script-interpreter"].set_property("pkg_config_name", "cairo-script-interpreter")
-            self.cpp_info.components["cairo-script-interpreter"].names["pkg_config"] = "cairo-script-interpreter"
             self.cpp_info.components["cairo-script-interpreter"].libs = ["cairo-script-interpreter"]
             self.cpp_info.components["cairo-script-interpreter"].requires = ["cairo_"]
 
@@ -348,19 +348,13 @@ class CairoConan(ConanFile):
 
         if self.options.tee:
             self.cpp_info.components["cairo-tee"].set_property("pkg_config_name", "cairo-tee")
-            self.cpp_info.components["cairo-tee"].names["pkg_config"] = "cairo-tee"
             self.cpp_info.components["cairo-tee"].requires = ["cairo_"]
 
         # util directory
         if self.options.with_glib:
             self.cpp_info.components["cairo-gobject"].set_property("pkg_config_name", "cairo-gobject")
-            self.cpp_info.components["cairo-gobject"].names["pkg_config"] = "cairo-gobject"
             self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
             self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
 
         self.cpp_info.components["cairo_"].requires += list(base_requirements)
         self.cpp_info.components["cairo_"].system_libs += list(base_system_libs)
-
-    def package_id(self):
-        if self.options.get_safe("with_glib") and not self.options["glib"].shared:
-            self.info.requires["glib"].full_package_mode()

@@ -1,17 +1,8 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.1)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(oatpp REQUIRED CONFIG)
-
-if ("${oatpp_VERSION}" VERSION_GREATER_EQUAL "1.3.0")
-    add_executable(${PROJECT_NAME} ../test_package/test_package.cpp ../test_package/DeserializerTest_1_3_0.cpp)
-elseif("${oatpp_VERSION}" VERSION_GREATER_EQUAL "1.1.0")
-    add_executable(${PROJECT_NAME} ../test_package/test_package.cpp ../test_package/DeserializerTest_1_1_0.cpp)
-else()
-    add_executable(${PROJECT_NAME} ../test_package/test_package.cpp ../test_package/DeserializerTest_1_0_0.cpp)
-endif()
-target_link_libraries(${PROJECT_NAME} PRIVATE oatpp::oatpp oatpp::oatpp-test)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package)

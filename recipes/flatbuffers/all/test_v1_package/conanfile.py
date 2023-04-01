@@ -10,11 +10,6 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and \
-           not self.options["flatbuffers"].header_only: # due to missing package id of build requirement if header_only
-            self.build_requires(self.tested_reference_str)
-
     def build(self):
         cmake = CMake(self)
         cmake.definitions["FLATBUFFERS_HEADER_ONLY"] = self.options["flatbuffers"].header_only

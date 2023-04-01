@@ -30,7 +30,7 @@ class CppcheckConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_z3", default=False):
-            self.requires("z3/4.8.8")
+            self.requires("z3/4.10.2")
         if self.options.have_rules:
             self.requires("pcre/8.45")
 

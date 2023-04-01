@@ -1,9 +1,14 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibtorrentConan(ConanFile):
@@ -12,11 +17,12 @@ class LibtorrentConan(ConanFile):
         "libtorrent is a feature complete C++ bittorrent implementation "
         "focusing on efficiency and scalability"
     )
-    topics = ("libtorrent", "p2p", "network", "mesh")
+    topics = ("p2p", "network", "mesh")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://libtorrent.org"
     license = ("BSD-3-clause", "ZLIB", "BSL-1.0")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,21 +51,24 @@ class LibtorrentConan(ConanFile):
         "enable_mutable_torrents": True,
     }
 
-    generators = "cmake"
-    _cmake = None
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "2.0.0" else "14"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "5" if Version(self.version) < "2.0.8" else "6",
+                "clang": "5",
+                "apple-clang": "5",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,104 +76,111 @@ class LibtorrentConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-    def _check_compiler_supports_cxx14(self):
-        min_compiler_version = {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5",
-        }.get(str(self.settings.compiler))
-        if min_compiler_version is None:
-            self.output.warn("Unknown compiler. Assuming it is supporting c++14")
-        if tools.Version(self.settings.compiler.version) < min_compiler_version:
-            raise ConanInvalidConfiguration("This compiler (version) does not support c++ 14.")
-        return True, None
-
-    def validate(self):
-        if tools.Version(self.version) < "2.0":
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 11)
-        else:
-            self._check_compiler_supports_cxx14()
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if tools.Version(self.version) < "2.0.0":
-            self.requires("boost/1.79.0")
+        # libtorrent 2.0.x [x<=6] have issue for recent boost https://github.com/arvidn/libtorrent/discussions/6757
+        if Version(self.version) < "2.0.0" or Version(self.version) >= "2.0.7":
+            self.requires("boost/1.81.0", transitive_headers=True)
         else:
-            self.requires("boost/1.76.0")
+            self.requires("boost/1.76.0", transitive_headers=True)
         if self.options.enable_encryption:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1t", transitive_headers=True, transitive_libs=True)
         if self.options.enable_iconv:
             self.requires("libiconv/1.17")
 
-    def _validate_dependency_graph(self):
-        if tools.Version(self.deps_cpp_info["boost"].version) < "1.69.0" and \
-           (self.options["boost"].header_only or self.options["boost"].without_system):
-            raise ConanInvalidConfiguration("libtorrent requires boost with system, which is non-header only in boost < 1.69.0")
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if Version(self.dependencies["boost"].ref.version) < "1.69.0" and \
+           (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_system):
+            raise ConanInvalidConfiguration(f"{self.ref} requires boost with system, which is non-header only in boost < 1.69.0")
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.4" and not self._cmake_new_enough("3.16.0"):
+            self.tool_requires("cmake/3.25.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
-        self._cmake.definitions["deprecated-functions"] = self.options.enable_deprecated_functions
-        self._cmake.definitions["dht"] = self.options.enable_dht
-        self._cmake.definitions["encryption"] = self.options.enable_encryption
-        self._cmake.definitions["exceptions"] = self.options.enable_exceptions
-        self._cmake.definitions["i2p"] = self.options.enable_i2p
-        self._cmake.definitions["logging"] = self.options.enable_logging
-        self._cmake.definitions["mutable-torrents"] = self.options.enable_mutable_torrents
-        self._cmake.definitions["build_tests"] = False
-        self._cmake.definitions["build_examples"] = False
-        self._cmake.definitions["build_tools"] = False
-        self._cmake.definitions["python-bindings"] = False
-        self._cmake.definitions["python-bindings"] = False
-        if self._is_msvc:
-            self._cmake.definitions["static_runtime"] = "MT" in msvc_runtime_flag(self)
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        tc = CMakeToolchain(self)
+        tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.get_safe("shared", False)
+        tc.variables["deprecated-functions"] = self.options.enable_deprecated_functions
+        tc.variables["dht"] = self.options.enable_dht
+        tc.variables["encryption"] = self.options.enable_encryption
+        tc.variables["exceptions"] = self.options.enable_exceptions
+        tc.variables["i2p"] = self.options.enable_i2p
+        tc.variables["logging"] = self.options.enable_logging
+        tc.variables["mutable-torrents"] = self.options.enable_mutable_torrents
+        tc.variables["build_tests"] = False
+        tc.variables["build_examples"] = False
+        tc.variables["build_tools"] = False
+        tc.variables["python-bindings"] = False
+        tc.variables["python-bindings"] = False
+        if is_msvc(self):
+            tc.variables["static_runtime"] = is_msvc_static_runtime(self)
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch_data)
+        apply_conandata_patches(self)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
-        if tools.Version(self.version) < "2.0":
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/W4", "")
+        if Version(self.version) < "2.0":
             if self.options.enable_iconv:
                 replace = "find_public_dependency(Iconv REQUIRED)"
             else:
                 replace = "set(Iconv_FOUND OFF)"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "find_public_dependency(Iconv)",
                                   replace)
             if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
                 # https://github.com/arvidn/libtorrent/issues/3557
-                tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
+                replace_in_file(self, os.path.join(self.source_folder, "include", "libtorrent", "file_storage.hpp"),
                                       "file_entry& operator=(file_entry&&) & noexcept = default;",
                                       "file_entry& operator=(file_entry&&) & = default;")
 
     def build(self):
-        self._validate_dependency_graph()
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LibtorrentRasterbar")
@@ -175,7 +191,7 @@ class LibtorrentConan(ConanFile):
         self.cpp_info.components["libtorrent-rasterbar"].includedirs = ["include", os.path.join("include", "libtorrent")]
         self.cpp_info.components["libtorrent-rasterbar"].libs = ["torrent-rasterbar"]
 
-        self.cpp_info.components["libtorrent-rasterbar"].requires = ["boost::boost"]
+        self.cpp_info.components["libtorrent-rasterbar"].requires = ["boost::headers", "boost::system"]
         if self.options.enable_encryption:
             self.cpp_info.components["libtorrent-rasterbar"].requires.append("openssl::openssl")
         if self.options.enable_iconv:

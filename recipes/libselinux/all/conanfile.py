@@ -21,6 +21,7 @@ class LibSELinuxConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SELinuxProject/selinux"
     license = "Unlicense"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,11 +41,14 @@ class LibSELinuxConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("pcre2/10.40")
+        self.requires("pcre2/10.42")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
@@ -52,12 +56,9 @@ class LibSELinuxConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
         for download in self.conan_data["sources"][self.version]:
-            get(self, **download, destination=self.source_folder)
+            get(self, **download)
 
     @property
     def _sepol_soversion(self):
@@ -115,12 +116,10 @@ class LibSELinuxConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["selinux"].set_property("pkg_config_name", "libselinux")
-        self.cpp_info.components["selinux"].names["pkg_config"] = "libselinux"
         self.cpp_info.components["selinux"].libs = ["selinux"]
         self.cpp_info.components["selinux"].requires = ["sepol", "pcre2::pcre2"]
         if self.options.shared:
             self.cpp_info.components["selinux"].system_libs = ["dl"]
 
         self.cpp_info.components["sepol"].set_property("pkg_config_name", "libsepol")
-        self.cpp_info.components["sepol"].names["pkg_config"] = "libsepol"
         self.cpp_info.components["sepol"].libs = ["sepol"]
