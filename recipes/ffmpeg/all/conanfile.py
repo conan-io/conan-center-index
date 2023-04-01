@@ -539,15 +539,30 @@ class FFMpegConan(ConanFile):
         # since ffmpeg"s build system ignores CC and CXX
         compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         buildenv_vars = VirtualBuildEnv(self).vars()
+        nm = buildenv_vars.get("NM")
+        if nm:
+            args.append(f"--nm={unix_path(self, nm)}")
+        ar = buildenv_vars.get("AR")
+        if ar:
+            args.append(f"--ar={unix_path(self, ar)}")
         asm = compilers_from_conf.get("asm", buildenv_vars.get("AS"))
         if asm:
             args.append(f"--as={unix_path(self, asm)}")
+        strip = buildenv_vars.get("STRIP")
+        if strip:
+            args.append(f"--strip={unix_path(self, strip)}")
         cc = compilers_from_conf.get("c", buildenv_vars.get("CC"))
         if cc:
             args.append(f"--cc={unix_path(self, cc)}")
-        cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CC"))
+        cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX"))
         if cxx:
             args.append(f"--cxx={unix_path(self, cxx)}")
+        ld = buildenv_vars.get("LD")
+        if ld:
+            args.append(f"--ld={unix_path(self, ld)}")
+        ranlib = buildenv_vars.get("RANLIB")
+        if ranlib:
+            args.append(f"--ranlib={unix_path(self, ranlib)}")
         pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
         if pkg_config:
             args.append(f"--pkg-config={unix_path(self, pkg_config)}")
