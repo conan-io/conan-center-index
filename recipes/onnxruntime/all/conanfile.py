@@ -15,33 +15,22 @@ required_conan_version = ">=1.53.0"
 
 class ONNXRuntimeConan(ConanFile):
     name = "onnxruntime"
-    homepage = "https://onnxruntime.ai"
-    description = "Cross-platform machine-learning model accelerator"
+    description = "ONNX Runtime accelerates machine learning across a " \
+                  "wide range of frameworks, operating systems, and " \
+                  "hardware platforms."
     url = "https://github.com/conan-io/conan-center-index"
-    license = "MIT"
-    exports_sources = ["patches/**"]
-    requires = (
-        "abseil/20230125.1",
-        "cpuinfo/cci.20220228",
-        "protobuf/3.21.9",
-        "re2/20230201",
-        ("cxxopts/3.0.0", "private"),
-        ("date/3.0.1", "private"),
-        ("dlpack/0.4", "private"),
-        ("eigen/3.4.0", "private"),
-        ("flatbuffers/1.12.0", "private"),
-        ("fp16/cci.20210320", "private"),
-        ("fxdiv/cci.20200417", "private"),
-        ("ms-gsl/4.0.0", "private"),
-        ("nlohmann_json/3.11.2", "private"),
-        ("psimd/cci.20200517", "private"),
-        ("pthreadpool/cci.20210218", "private"),
-        ("pybind11/2.10.1", "private"),
-        ("safeint/3.24", "private"),
-        ("xnnpack/cci.20220801", "private"),
-        # onnx requirement needs source
-        # "onnx/1.11.0",
+    topics = (
+        "deep-learning",
+        "onnx",
+        "neural-networks",
+        "machine-learning",
+        "ai-framework",
+        "hardware-acceleration"
     )
+    license = "MIT"
+    homepage = "https://onnxruntime.ai"
+
+    exports_sources = ["patches/**"]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -80,6 +69,26 @@ class ONNXRuntimeConan(ConanFile):
     def requirements(self):
         if self.settings.os != "Windows":
             self.requires("nsync/1.25.0")
+        self.requires("abseil/20230125.1")
+        self.requires("cpuinfo/cci.20220228")
+        self.requires("protobuf/3.21.9")
+        self.requires("re2/20230201")
+        self.requires("cxxopts/3.0.0", private=True)
+        self.requires("date/3.0.1", private=True)
+        self.requires("dlpack/0.4", private=True)
+        self.requires("eigen/3.4.0", private=True)
+        self.requires("flatbuffers/1.12.0", private=True)
+        self.requires("fp16/cci.20210320", private=True)
+        self.requires("fxdiv/cci.20200417", private=True)
+        self.requires("ms-gsl/4.0.0", private=True)
+        self.requires("nlohmann_json/3.11.2", private=True)
+        self.requires("psimd/cci.20200517", private=True)
+        self.requires("pthreadpool/cci.20210218", private=True)
+        self.requires("pybind11/2.10.1", private=True)
+        self.requires("safeint/3.24", private=True)
+        self.requires("xnnpack/cci.20220801", private=True)
+        # onnx requirement needs source
+        # self.requires("onnx/1.11.0")
 
     def build_requirements(self):
         self.tool_requires("protobuf/3.21.9")

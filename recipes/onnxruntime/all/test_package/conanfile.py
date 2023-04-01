@@ -20,11 +20,6 @@ class ONNXRuntimeTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
