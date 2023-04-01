@@ -31,7 +31,7 @@ class ImplotConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+        return os.path.join(self.source_folder, "src")
 
     def config_options(self):
         if self.settings.os == "Windows":
