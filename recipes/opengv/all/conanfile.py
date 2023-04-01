@@ -44,7 +44,7 @@ class opengvConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
+        self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_python_bindings:
             self.requires("pybind11/2.10.1")
 
