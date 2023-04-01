@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, collect_libs
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
@@ -38,8 +37,9 @@ class GawkConan(ConanFile):
         #self.requires("mpfr/4.1.0")
         self.requires("gmp/6.2.1")
 
-        if self.settings.os == "Macos":
-            self.requires("readline/8.1.2")
+        # Removed pending readline conan 2.0 compatibility
+        # if self.settings.os == "Macos":
+        #     self.requires("readline/8.1.2")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -60,8 +60,9 @@ class GawkConan(ConanFile):
         #tc.configure_args.append(f"--with-mpc={self.dependencies['mpc'].package_folder}")
         #tc.configure_args.append(f"--with-mpfr={self.dependencies['mpfr'].package_folder}")
 
-        if self.settings.os == "Macos":
-            tc.configure_args.append(f"--with-readline={self.dependencies['readline'].package_folder}")
+        # Removed pending readline conan 2.0 compatibility
+        # if self.settings.os == "Macos":
+        #     tc.configure_args.append(f"--with-readline={self.dependencies['readline'].package_folder}")
 
         tc.generate()
 

@@ -1,6 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException
-import os
 
 
 class TestPackageConan(ConanFile):
