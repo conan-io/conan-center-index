@@ -3,9 +3,6 @@ project(implot CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 set(SOURCE_DIR source_subfolder)
@@ -14,7 +11,10 @@ file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CONAN_LIBS})
+
+find_package(imgui CONFIG REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
 
 include(GNUInstallDirs)
 
