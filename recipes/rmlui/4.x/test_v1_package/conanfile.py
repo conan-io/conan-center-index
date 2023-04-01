@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, RunEnvironment, tools
 from conan.tools.build import cross_building
 import os
 
@@ -16,4 +16,6 @@ class ConanRmluiTestV1Conan(ConanFile):
         if not cross_building(self):
             cmake = CMake(self)
             cmake.configure()
-            cmake.test(output_on_failure=True)
+            env_run = RunEnvironment(self)
+            with tools.environment_append(env_run.vars):
+                cmake.test(output_on_failure=True)
