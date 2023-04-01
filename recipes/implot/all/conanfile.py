@@ -48,7 +48,7 @@ class ImplotConan(ConanFile):
             self.requires("imgui/1.86", transitive_headers=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
