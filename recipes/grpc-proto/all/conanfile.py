@@ -54,7 +54,7 @@ class GRPCProto(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/3.21.4", transitive_headers=True, run=can_run(self))
+        self.requires("protobuf/3.21.9", transitive_headers=True, run=can_run(self))
         self.requires("googleapis/cci.20221108")
 
     def validate(self):
@@ -70,7 +70,7 @@ class GRPCProto(ConanFile):
 
     def build_requirements(self):
         if not can_run(self):
-            self.tool_requires("protobuf/3.21.4")
+            self.tool_requires("protobuf/3.21.9")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
