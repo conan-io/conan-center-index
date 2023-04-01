@@ -61,6 +61,8 @@ class SentryCrashpadConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.13")
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.requires("libcurl/7.87.0")
         if self.options.get_safe("with_tls"):
             self.requires("openssl/1.1.1t")
 
@@ -142,6 +144,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["crashpad_util"].requires.extend(["CURL::libcurl"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["crashpad_util"].system_libs.append("winhttp")
         elif self.settings.os == "Macos":
