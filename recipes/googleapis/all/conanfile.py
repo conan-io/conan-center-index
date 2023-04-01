@@ -58,7 +58,7 @@ class GoogleAPIS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"protobuf/{self._protobuf_version}", transitive_headers=True, run=can_run(self))
+        self.requires(f"protobuf/{self._protobuf_version}", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
