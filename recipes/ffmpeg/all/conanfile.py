@@ -362,7 +362,7 @@ class FFMpegConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if is_msvc(self) and self.options.with_libx264 and not self.dependencies["libx264"].options.shared:
+        if Version(self.version) < "5.1":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
