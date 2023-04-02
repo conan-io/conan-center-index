@@ -378,6 +378,16 @@ class FFMpegConan(ConanFile):
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
+    @property
+    def _default_compilers(self):
+        if self.settings.compiler == "gcc":
+            return {"cc": "gcc", "cxx": "g++"}
+        elif self.settings.compiler in ["clang", "apple-clang"]:
+            return {"cc": "clang", "cxx": "clang++"}
+        elif is_msvc(self):
+            return {"cc": "cl.exe", "cxx": "cl.exe"}
+        return {}
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -551,10 +561,10 @@ class FFMpegConan(ConanFile):
         strip = buildenv_vars.get("STRIP")
         if strip:
             args.append(f"--strip={unix_path(self, strip)}")
-        cc = compilers_from_conf.get("c", buildenv_vars.get("CC"))
+        cc = compilers_from_conf.get("c", buildenv_vars.get("CC", self._default_compilers.get("cc")))
         if cc:
             args.append(f"--cc={unix_path(self, cc)}")
-        cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX"))
+        cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX", self._default_compilers.get("cxx")))
         if cxx:
             args.append(f"--cxx={unix_path(self, cxx)}")
         ld = buildenv_vars.get("LD")
