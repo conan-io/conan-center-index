@@ -656,28 +656,28 @@ class FFMpegConan(ConanFile):
                         rename(self, lib, lib[3:-2] + ".lib")
 
     def _read_component_version(self, component_name):
-        # This seems to have broke with the 5.1 release, see https://github.com/conan-io/conan-center-index/pull/15819#issuecomment-1489461029
-        # for more information
-        version_file_name = os.path.join(self.package_folder, "include", f"lib{component_name}", "version.h")
-        version_file = open(version_file_name, "r")
+        # since 5.1, major version may be defined in version_major.h instead of version.h
+        component_folder = os.path.join(self.package_folder, "include", f"lib{component_name}")
+        version_file_name = os.path.join(component_folder, "version.h")
+        version_major_file_name = os.path.join(component_folder, "version_major.h")
         pattern = f"define LIB{component_name.upper()}_VERSION_(MAJOR|MINOR|MICRO)[ \t]+(\\d+)"
         version = dict()
-        for line in version_file:
-            match = re.search(pattern, line)
-            if match:
-                version[match[1]] = match[2]
+        for file in (version_file_name, version_major_file_name):
+            if os.path.isfile(file):
+                with open(file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        match = re.search(pattern, line)
+                        if match:
+                            version[match[1]] = match[2]
         if "MAJOR" in version and "MINOR" in version and "MICRO" in version:
             return f"{version['MAJOR']}.{version['MINOR']}.{version['MICRO']}"
         return None
 
     def _set_component_version(self, component_name):
-        # FIXME: Support the new files adding starting in 5.1
-        if Version(self.version) >= "5.1":
-            pass
-
         version = self._read_component_version(component_name)
         if version is not None:
             self.cpp_info.components[component_name].set_property("component_version", version)
+            # TODO: to remove once support of conan v1 dropped
             self.cpp_info.components[component_name].version = version
         else:
             self.output.warning(f"cannot determine version of lib{component_name} packaged with ffmpeg!")
