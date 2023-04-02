@@ -72,8 +72,9 @@ class CriterionConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.system_libs = ['anl']
         self.cpp_info.resdirs = ["res"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ['anl']
 
     def build_requirements(self):
         self.tool_requires("pkgconf/[~1.9.3]")
