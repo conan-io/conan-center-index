@@ -24,7 +24,7 @@ class WilConan(ConanFile):
     package_type = "header-library"
     # only arch is aplicable, windows library
     settings = "os", "arch", "compiler", "build_type" 
-    # Do not copy sources to build folder for header only projects, unless you need to apply patches
+    
     no_copy_source = True
 
     @property
