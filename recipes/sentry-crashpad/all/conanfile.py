@@ -60,9 +60,8 @@ class SentryCrashpadConan(ConanFile):
             self.tool_requires("jwasm/2.13")
 
     def requirements(self):
+        self.requires("libcurl/7.87.0")
         self.requires("zlib/1.2.13")
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.requires("libcurl/7.87.0")
         if self.options.get_safe("with_tls"):
             self.requires("openssl/1.1.1t")
 
