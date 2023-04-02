@@ -166,7 +166,7 @@ class CppLibP2P(ConanFile):
             # src/crypto/rsa_provider/CMakeLists.txt
             ("p2p_rsa_provider", ["p2p_sha", "p2p_crypto_error", "OpenSSL::Crypto"]),
             # src/crypto/secp256k1_provider/CMakeLists.txt
-            ("p2p_secp256k1_provider", ["p2p_sha", "p2p_crypto_error", "p2p_crypto_common", "OpenSSL::Crypto"])
+            ("p2p_secp256k1_provider", ["p2p_sha", "p2p_crypto_error", "p2p_crypto_common", "OpenSSL::Crypto"]),
             # master/src/crypto/sha/CMakeLists.txt
             ("p2p_sha", ["p2p_crypto_error", "OpenSSL::SSL", "OpenSSL::Crypto"]),
             # src/crypto/x25519_provider/CMakeLists.txt
