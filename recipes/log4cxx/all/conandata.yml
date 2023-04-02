@@ -10,6 +10,9 @@ sources:
     url: "https://archive.apache.org/dist/logging/log4cxx/1.0.0/apache-log4cxx-1.0.0.tar.gz"
 patches:
   "0.12.1":
+    - patch_file: "patches/0001-make-odbc-optional.patch"
+      patch_type: "conan"
+      patch_description: "Prevent 'odbc/2.3.11' requires 'libiconv/1.17' while 'apr-util/1.6.1' requires 'libiconv/1.16'"
     - patch_file: "patches/0001-find-apr.patch"
       patch_type: "conan"
       patch_description: "Use conan generated apr, apr-util target names"
@@ -37,6 +40,9 @@ patches:
       patch_type: "bugfix"
       patch_description: "Prevent build failure when compiler.cppstd=14"
       patch_source: "https://github.com/apache/logging-log4cxx/commit/0b83584592290cb539f90ab79fc542d60cc3ba23"
+    - patch_file: "patches/0003-make-odbc-optional.patch"
+      patch_type: "conan"
+      patch_description: "Prevent 'odbc/2.3.11' requires 'libiconv/1.17' while 'apr-util/1.6.1' requires 'libiconv/1.16'"
     - patch_file: "patches/0003-find-apr.patch"
       patch_type: "conan"
       patch_description: "Use conan generated apr, apr-util target names"
