@@ -334,10 +334,11 @@ class OpenCVConan(ConanFile):
 
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
-                return [
-                    "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat",
-                    "ffmpeg::avutil", "ffmpeg::swscale",
-                ]
+                components = []
+                for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale", "avresample"]:
+                    if self.dependencies["ffmpeg"].options.get_safe(component):
+                        components.append(f"ffmpeg::{component}")
+                return components
             return []
 
         def freetype():
@@ -1244,10 +1245,13 @@ class OpenCVConan(ConanFile):
             # libavcodec;libavformat;libavutil;libswscale modules
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
-            tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avdevice;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale"]:
-                ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
-                tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
+            ffmpeg_libraries = []
+            for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale", "avresample"]:
+                if self.dependencies["ffmpeg"].options.get_safe(component):
+                    ffmpeg_libraries.append(f"ffmpeg::{component}")
+                    ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
+                    tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
+            tc.variables["FFMPEG_LIBRARIES"] = ";".join(ffmpeg_libraries)
 
         tc.variables["WITH_GSTREAMER"] = False
         tc.variables["WITH_HALIDE"] = False
