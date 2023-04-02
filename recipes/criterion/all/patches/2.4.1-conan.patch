@@ -1,14 +1,7 @@
 diff --git a/meson.build b/meson.build
-index 932607c..16f875b 100644
+index 176da0b..d43e8f8 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -1,5 +1,5 @@
- project('criterion', 'c',
--		meson_version   : '>= 0.51.0',
-+		meson_version   : '>= 0.55.0',
- 		license         : 'MIT',
- 		version         : '2.4.1',
- 		default_options : ['c_std=c11', 'cpp_std=c++11', 'warning_level=2'])
 @@ -128,8 +128,6 @@ if get_option('dev')
  endif
  
@@ -33,13 +26,13 @@ index 932607c..16f875b 100644
  endif
  
  deps += [
-+        debugbreak,
-+        klib,
++	debugbreak,
++	klib,
  	threads,
  	boxfort,
  	libffi,
 diff --git a/src/meson.build b/src/meson.build
-index 7b44f2c..d889515 100644
+index 7b44f2c..2eee80b 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -85,7 +85,7 @@ configure_file(input         : 'config.h.in',
@@ -67,7 +60,7 @@ index 0000000..e8fd6cc
 +debugbreak = debugbreak_dep
 diff --git a/subprojects/klib.wrap b/subprojects/klib.wrap
 new file mode 100644
-index 0000000..1a729bb
+index 0000000..9c9cc7a
 --- /dev/null
 +++ b/subprojects/klib.wrap
 @@ -0,0 +1,8 @@
@@ -79,7 +72,6 @@ index 0000000..1a729bb
 +
 +[provide]
 +klib = klib_dep
-\ No newline at end of file
 diff --git a/subprojects/packagefiles/debugbreak/meson.build b/subprojects/packagefiles/debugbreak/meson.build
 new file mode 100644
 index 0000000..90a4a33

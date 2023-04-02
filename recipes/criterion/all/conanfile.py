@@ -1,9 +1,10 @@
 from os import path
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.files import get, apply_conandata_patches, export_conandata_patches, rmdir, copy, collect_libs
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import PkgConfigDeps
+
 
 class CriterionConan(ConanFile):
     name = "criterion"
@@ -31,6 +32,7 @@ class CriterionConan(ConanFile):
     def configure(self):        
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        del self.settings.compiler.libcxx
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -46,6 +48,7 @@ class CriterionConan(ConanFile):
         # We don't need tests or samples
         tc.project_options['tests'] = False
         tc.project_options['samples'] = False
+        tc.project_options['localedir'] = 'res/locale'
         
         tc.generate()
 
@@ -66,7 +69,8 @@ class CriterionConan(ConanFile):
         rmdir(self, path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["criterion"]
+        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.resdir = "res"
 
     def build_requirements(self):
         self.tool_requires("pkgconf/[~1.9.3]")

@@ -4,5 +4,6 @@ sources:
     sha256: "033c3ac4d9b7cc1bc64ca0cfa352a90b7f33aa8ae077193944457f15eda691be"
 patches:
   2.4.1:
-    - patch_file: "patches/2.4.1-001-dependencies.patch"
-      patch_description: "Allow klib and debugbreak as external dependencies"
+    - patch_file: "patches/2.4.1-conan.patch"
+      patch_type: conan
+      patch_description: "Allow build package in Conan"
