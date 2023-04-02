@@ -20,7 +20,7 @@ class LAConan(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        self.requires("mdspan/0.1.0")
+        self.requires("mdspan/0.5.0")
 
     @property
     def _minimum_cpp_standard(self):
@@ -46,7 +46,7 @@ class LAConan(ConanFile):
         else:
             return compiler.version
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -61,7 +61,7 @@ class LAConan(ConanFile):
                     f"The current compiler {self._full_compiler_version} does not support it.")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="source")
 
     def package_id(self):
         self.info.clear()
