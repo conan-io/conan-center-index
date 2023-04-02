@@ -70,7 +70,7 @@ class CriterionConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.resdir = "res"
+        self.cpp_info.resdirs = ["res"]
 
     def build_requirements(self):
         self.tool_requires("pkgconf/[~1.9.3]")
