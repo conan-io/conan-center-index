@@ -1,5 +1,6 @@
 from os import path
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.files import get, apply_conandata_patches, export_conandata_patches, rmdir, copy, collect_libs
 from conan.tools.layout import basic_layout
@@ -66,6 +67,8 @@ class CriterionConan(ConanFile):
 
         copy(self, "LICENSE", src=self.source_folder, dst=path.join(self.package_folder, 'licenses'))
         rmdir(self, path.join(self.package_folder, "lib", "pkgconfig"))
+
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
