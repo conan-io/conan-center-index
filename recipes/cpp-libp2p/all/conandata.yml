@@ -1,0 +1,5 @@
+sources:
+  # Newer versions at the top
+  "0.1.10":
+    url: "https://github.com/libp2p/cpp-libp2p/archive/refs/tags/v0.1.10.tar.gz"
+    sha256: "bc438b1b3c2875ffebcac147d7703f3236f3313f5f788884d4d3925f5895501b"
