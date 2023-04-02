@@ -41,8 +41,7 @@ class LAConan(ConanFile):
         if compiler == "msvc":
             if compiler.update:
                 return int(f"{compiler.version}{compiler.update}")
-            else:
-                return int(f"{compiler.version}0")
+            return int(f"{compiler.version}0")
         else:
             return compiler.version
 
