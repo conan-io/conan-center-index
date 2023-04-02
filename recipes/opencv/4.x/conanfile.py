@@ -335,8 +335,8 @@ class OpenCVConan(ConanFile):
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
                 return [
-                    "ffmpeg::avcodec", "ffmpeg::avfilter", "ffmpeg::avformat",
-                    "ffmpeg::avutil", "ffmpeg::swresample", "ffmpeg::swscale",
+                    "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat",
+                    "ffmpeg::avutil", "ffmpeg::swscale",
                 ]
             return []
 
@@ -1244,8 +1244,8 @@ class OpenCVConan(ConanFile):
             # libavcodec;libavformat;libavutil;libswscale modules
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
-            tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avformat", "avutil", "swscale", "swresample"]:
+            tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avdevice;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
+            for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale"]:
                 ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
                 tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
 
