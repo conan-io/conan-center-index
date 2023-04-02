@@ -334,11 +334,10 @@ class OpenCVConan(ConanFile):
 
         def ffmpeg():
             if self.options.get_safe("with_ffmpeg"):
-                components = []
-                for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale", "avresample"]:
-                    if self.dependencies["ffmpeg"].options.get_safe(component):
-                        components.append(f"ffmpeg::{component}")
-                return components
+                return [
+                    "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat",
+                    "ffmpeg::avutil", "ffmpeg::swscale",
+                ]
             return []
 
         def freetype():
