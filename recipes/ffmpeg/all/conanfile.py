@@ -563,10 +563,10 @@ class FFMpegConan(ConanFile):
         ranlib = buildenv_vars.get("RANLIB")
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
-        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
-        if pkg_config:
-            args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
+            pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
+            if pkg_config:
+                args.append(f"--pkg-config={unix_path(self, pkg_config)}")
             args.append("--toolchain=msvc")
             if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
