@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set(SOURCE_DIR source_subfolder)
+set(SOURCE_DIR src)
 file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.cpp)
 file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
 
@@ -15,6 +15,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
 find_package(imgui CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 
 include(GNUInstallDirs)
 
