@@ -64,7 +64,7 @@ class GDCMConan(ConanFile):
         if self.options.with_json:
             self.requires("json-c/0.16")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

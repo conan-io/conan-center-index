@@ -22,11 +22,13 @@ class QuillConan(ConanFile):
         "fPIC": [True, False],
         "with_bounded_queue": [True, False],
         "with_no_exceptions": [True, False],
+        "with_x86_arch": [True, False],
     }
     default_options = {
         "fPIC": True,
         "with_bounded_queue": False,
         "with_no_exceptions": False,
+        "with_x86_arch": False,
     }
 
     @property
@@ -89,6 +91,8 @@ class QuillConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def is_quilll_x86_arch(self):
+        if not self.options.with_x86_arch:
+            return False
         if Version(self.version) < "2.7.0":
             return False
         if self.settings.arch not in ("x86", "x86_64"):

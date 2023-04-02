@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
 import os
 
@@ -29,11 +29,6 @@ class TestPackageConan(ConanFile):
             deps = CMakeDeps(self)
             deps.generate()
         else:
-            # todo Remove the following workaround after https://github.com/conan-io/conan/issues/11962 is fixed.
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            envvars = env.vars(self)
-            envvars.save_script("pkg_config")
             virtual_build_env = VirtualBuildEnv(self)
             virtual_build_env.generate()
             pkg_config_deps = PkgConfigDeps(self)
