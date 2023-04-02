@@ -34,7 +34,7 @@ class LAConan(ConanFile):
             "clang": "8",
             "apple-clang": "11"
         }
-    
+
     @property
     def _full_compiler_version(self):
         compiler = self.settings.compiler
