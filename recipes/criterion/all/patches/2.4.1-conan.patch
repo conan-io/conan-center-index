@@ -1,7 +1,14 @@
 diff --git a/meson.build b/meson.build
-index 176da0b..d43e8f8 100644
+index 176da0b..c3fc87b 100644
 --- a/meson.build
 +++ b/meson.build
+@@ -1,5 +1,5 @@
+ project('criterion', 'c',
+-		meson_version   : '>= 0.51.0',
++		meson_version   : '>= 0.56.0',
+ 		license         : 'MIT',
+ 		version         : '2.4.1',
+ 		default_options : ['c_std=c11', 'cpp_std=c++11', 'warning_level=2'])
 @@ -128,8 +128,6 @@ if get_option('dev')
  endif
  
