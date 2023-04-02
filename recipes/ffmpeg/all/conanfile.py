@@ -555,9 +555,10 @@ class FFMpegConan(ConanFile):
         ar = buildenv_vars.get("AR")
         if ar:
             args.append(f"--ar={unix_path(self, ar)}")
-        asm = compilers_from_conf.get("asm", buildenv_vars.get("AS"))
-        if asm:
-            args.append(f"--as={unix_path(self, asm)}")
+        if self.options.with_asm:
+            asm = compilers_from_conf.get("asm", buildenv_vars.get("AS"))
+            if asm:
+                args.append(f"--as={unix_path(self, asm)}")
         strip = buildenv_vars.get("STRIP")
         if strip:
             args.append(f"--strip={unix_path(self, strip)}")
