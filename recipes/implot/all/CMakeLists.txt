@@ -5,12 +5,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set(SOURCE_DIR src)
-file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.cpp)
-file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
+file(GLOB SOURCE_FILES ${IMPLOT_SRC_DIR}/*.cpp)
+file(GLOB HEADER_FILES ${IMPLOT_SRC_DIR}/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${IMPLOT_SRC_DIR})
 
 find_package(imgui CONFIG REQUIRED)
 

@@ -17,8 +17,6 @@ class ImplotConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = ["CMakeLists.txt"]
-
     options = {
         "shared": [True, False],
          "fPIC": [True, False]
@@ -28,9 +26,8 @@ class ImplotConan(ConanFile):
         "fPIC": True
     }
 
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "src")
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,24 +41,25 @@ class ImplotConan(ConanFile):
         self.requires("imgui/1.89.4", transitive_headers=True)
 
     def layout(self):
-        cmake_layout(self, src_folder=self.source_folder)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["IMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
