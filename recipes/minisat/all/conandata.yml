@@ -1,0 +1,9 @@
+sources:
+  "2.2.0":
+    url: "https://github.com/stp/minisat/archive/3db58943b6ffe855d3b8c9a959300d9a148ab554.zip"
+    sha256: "b17090cf4fdec179b545bdc371ba0760ad85cacfb855f0a89d827d87fd85ce63"
+patches:
+  "2.2.0":
+    - patch_file: "patches/0001-space-before-user-literal-2.2.0.patch"
+      patch_description: "Add spaces before user literals"
+      patch_type: portability
