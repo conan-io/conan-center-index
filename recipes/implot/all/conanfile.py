@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.59"
@@ -38,7 +39,11 @@ class ImplotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("imgui/1.89.4", transitive_headers=True)
+        if Version(self.version) >= "0.14":
+            self.requires("imgui/1.89.4", transitive_headers=True)
+        else:
+            # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
+            self.requires("imgui/1.88", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
