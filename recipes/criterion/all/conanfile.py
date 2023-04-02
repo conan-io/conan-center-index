@@ -8,7 +8,6 @@ from conan.tools.gnu import PkgConfigDeps
 
 class CriterionConan(ConanFile):
     name = "criterion"
-    version = "2.4.1"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Snaipe/Criterion"
