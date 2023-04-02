@@ -101,3 +101,19 @@ sources:
       x86_64:
         url: "https://cmake.org/files/v3.20/cmake-3.20.6-windows-x86_64.zip"
         sha256: "f240a38c964712aac474644b3ba21bdc2b4e8d5e31179f67bd2e6f45fa349419"
+  "3.19.8":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.19/cmake-3.19.8-Linux-aarch64.tar.gz"
+        sha256: "807f5afb2a560e00af9640e496d5673afefc2888bf0ed076412884a5ebb547a1"
+      x86_64:
+        url: "https://cmake.org/files/v3.19/cmake-3.19.8-Linux-x86_64.tar.gz"
+        sha256: "db0d7d225150dd6e08ce54995e671f9b4801b8e93e22df1eef52339f6bbbecd9"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.19/cmake-3.19.8-macos10.10-universal.tar.gz"
+        sha256: "ea82f1a7c77d4d2a09ae6c80cbb5e419560bfe371f40b605d13ff1a861d7d6e1"
+    Windows:
+      x86_64:
+        url: "https://cmake.org/files/v3.19/cmake-3.19.8-win64-x64.zip"
+        sha256: "2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380"
