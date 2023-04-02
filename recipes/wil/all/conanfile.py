@@ -85,11 +85,6 @@ class WilConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        # Set these to the appropriate values if the package has an official FindPACKAGE.cmake
-        # listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
-        # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
-        self.cpp_info.set_property("cmake_module_file_name", "WIL")
-        self.cpp_info.set_property("cmake_module_target_name", "WIL::WIL")
         # Set these to the appropriate values if package provides a CMake config file
         # (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "wil")
@@ -99,7 +94,7 @@ class WilConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "wil")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "WIL"
+        self.cpp_info.filenames["cmake_find_package"] = "wil"
         self.cpp_info.filenames["cmake_find_package_multi"] = "wil"
-        self.cpp_info.names["cmake_find_package"] = "WIL"
-        self.cpp_info.names["cmake_find_package_multi"] = "WIL"
+        self.cpp_info.names["cmake_find_package"] = "wil"
+        self.cpp_info.names["cmake_find_package_multi"] = "wil"
