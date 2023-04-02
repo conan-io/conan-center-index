@@ -1245,10 +1245,8 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                # FIXME: use self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
-                # once fixed in ffmpeg recipe.
-                ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
+            for component in ["avcodec", "avformat", "avutil", "swscale", "swresample"]:
+                ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
                 tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
 
         tc.variables["WITH_GSTREAMER"] = False
