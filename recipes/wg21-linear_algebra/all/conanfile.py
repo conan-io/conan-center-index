@@ -42,8 +42,7 @@ class LAConan(ConanFile):
             if compiler.update:
                 return int(f"{compiler.version}{compiler.update}")
             return int(f"{compiler.version}0")
-        else:
-            return compiler.version
+        return compiler.version
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -60,7 +59,7 @@ class LAConan(ConanFile):
                     f"The current compiler {self._full_compiler_version} does not support it.")
 
     def layout(self):
-        cmake_layout(self, src_folder="source")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
