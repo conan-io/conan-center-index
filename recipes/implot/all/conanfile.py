@@ -42,10 +42,7 @@ class ImplotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if Version(self.version) >= "0.13":
-            self.requires("imgui/1.87", transitive_headers=True)
-        else:
-            self.requires("imgui/1.86", transitive_headers=True)
+        self.requires("imgui/1.89.4", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
