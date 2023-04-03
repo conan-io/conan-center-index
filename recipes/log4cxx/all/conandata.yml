@@ -46,3 +46,6 @@ patches:
     - patch_file: "patches/0003-find-apr.patch"
       patch_type: "conan"
       patch_description: "Use conan generated apr, apr-util target names"
+    - patch_file: "patches/0004-gcc5-compiler-error.patch"
+      patch_type: "bugfix"
+      patch_description: "Prevent build failure when compiling  with gcc5"
