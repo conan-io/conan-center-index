@@ -76,7 +76,7 @@ class AprUtilConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/1.7.0")
+        self.requires("apr/1.7.0", transitive_headers=True)
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
             self.requires("libiconv/1.17")
