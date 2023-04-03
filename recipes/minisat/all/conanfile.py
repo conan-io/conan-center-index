@@ -25,6 +25,7 @@ class MiniSatConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    package_type = "library"
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
