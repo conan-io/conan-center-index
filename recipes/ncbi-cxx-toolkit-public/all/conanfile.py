@@ -45,6 +45,14 @@ class NcbiCxxToolkit(ConanFile):
         return 17
 
     @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
+
+    @property
     def _dependencies_folder(self):
         return "dependencies"
 
@@ -173,11 +181,13 @@ class NcbiCxxToolkit(ConanFile):
         if self.settings.os not in ["Linux", "Macos", "Windows"]:
             raise ConanInvalidConfiguration("This operating system is not supported")
         if is_msvc(self):
-            check_min_vs(self, "190")
+            check_min_vs(self, 192)
             if self.options.shared and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("This version of GCC is not supported")
+        else:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"This version of {self.settings.compiler} is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross compilation is not supported")
 
