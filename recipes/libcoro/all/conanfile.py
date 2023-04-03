@@ -59,7 +59,7 @@ class LibcoroConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
         if self.settings.compiler != "gcc":
             raise ConanInvalidConfiguration("gcc is the only compiler supported by concurrencpp")
