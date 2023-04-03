@@ -33,9 +33,6 @@ class MiniSatConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -63,7 +60,6 @@ class MiniSatConan(ConanFile):
         return f"minisat-lib-{'shared' if self.options.shared else 'static'}"
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target=self._determine_lib_name())
