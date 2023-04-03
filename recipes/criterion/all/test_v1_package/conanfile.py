@@ -30,4 +30,5 @@ class CriterionTestConan(ConanFile):
             self.run(cmd, env="conanrun")
 
     def build_requirements(self):
-        self.tool_requires("meson/[1.0.0]")
+        self.tool_requires("meson/1.0.0")
+        self.tool_requires("pkgconf/1.9.3")

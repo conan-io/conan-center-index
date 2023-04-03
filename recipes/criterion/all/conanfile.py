@@ -77,5 +77,5 @@ class CriterionConan(ConanFile):
             self.cpp_info.system_libs = ['anl']
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/[~1.9.3]")
+        self.tool_requires("pkgconf/1.9.3")
         self.tool_requires("meson/1.0.0")
