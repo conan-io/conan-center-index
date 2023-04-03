@@ -13,6 +13,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            config_xml_name = os.path.join(self.source_folder, "log4cxx_config.xml")
+            config_xml_name = os.path.join(self.source_folder, "..", "test_package", "log4cxx_config.xml")
             bin_path = os.path.join("bin", "test_package")
             self.run("{} {}".format(bin_path, config_xml_name), run_environment=True)
