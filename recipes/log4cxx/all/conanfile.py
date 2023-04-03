@@ -23,6 +23,7 @@ class Log4cxx(ConanFile):
         "fPIC": [True, False],
         "with_networking": [True, False],
         "with_wchar_t": [True, False],
+        "with_fmt_layout": [True, False],
         "with_odbc_appender": [True, False],
         "with_multiprocess_rolling_file_appender": [True, False],
         "with_smtp_appender": [True, False],
@@ -33,6 +34,7 @@ class Log4cxx(ConanFile):
         "fPIC": True,
         "with_networking": True,
         "with_wchar_t": False,
+        "with_fmt_layout": False,
         "with_odbc_appender": False,
         "with_multiprocess_rolling_file_appender": False,
         "with_smtp_appender": False,
@@ -49,6 +51,7 @@ class Log4cxx(ConanFile):
             self.options.rm_safe("with_multiprocess_rolling_file_appender")
             self.options.rm_safe("with_smtp_appender")
             self.options.rm_safe("with_networking")
+            self.options.rm_safe("with_fmt_layout")
 
     def configure(self):
         if self.options.shared:
@@ -62,6 +65,8 @@ class Log4cxx(ConanFile):
             self.requires("odbc/[>=2.3]")
         if self.options.get_safe("with_smtp_appender"):
             self.requires("libesmtp/[>=1.0]")
+        if self.options.get_safe("with_fmt_layout"):
+            self.requires("fmt/[>=9.0]")
         if self.options.get_safe("with_qt"):
             self.requires("qt/[>=5.15 <6]")
 
@@ -111,6 +116,7 @@ class Log4cxx(ConanFile):
             tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
             tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
             tc.variables["LOG4CXX_ENABLE_ESMTP"] = self.options.with_smtp_appender
+            tc.variables["ENABLE_FMT_LAYOUT"] = self.options.with_fmt_layout
         tc.variables["LOG4CXX_ENABLE_ODBC"] = self.options.with_odbc_appender
         tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
         tc.variables["LOG4CXX_QT_SUPPORT"] = self.options.with_qt
