@@ -48,7 +48,7 @@ class MiniSatConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["MINISATE_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["MINISAT_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
