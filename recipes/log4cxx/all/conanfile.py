@@ -125,7 +125,7 @@ class Log4cxx(ConanFile):
         cmake.install()
         if self.settings.os != "Windows":
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "log4cxx")
