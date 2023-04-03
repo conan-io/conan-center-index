@@ -11,7 +11,7 @@ class AggConan(ConanFile):
     name = 'agg'
     description = 'AGG Anti-Grain Geometry Library'
     topics = ('graphics')
-    url = 'https://github.com/aggeom/agg-2.6'
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = 'https://github.com/aggeom'
     license = 'BSD-3-Clause'
 
