@@ -79,7 +79,7 @@ class DrogonConan(ConanFile):
                 "clang": "5",
                 "apple-clang": "10",
             }
-        else:       
+        else:
             return {
                 "Visual Studio": "16",
                 "msvc": "192",
@@ -100,8 +100,8 @@ class DrogonConan(ConanFile):
             self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
     def requirements(self):
-        self.requires("trantor/1.5.8")
-        self.requires("jsoncpp/1.9.5")
+        self.requires("trantor/1.5.11", transitive_headers=True)
+        self.requires("jsoncpp/1.9.5", transitive_headers=True)
         self.requires("openssl/1.1.1s")
         self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
@@ -113,11 +113,11 @@ class DrogonConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.40.0")
+            self.requires("sqlite3/3.41.1")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.1.0")
 
@@ -141,6 +141,8 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        if Version(self.version) >= "1.8.4":
+            tc.variables["USE_SUBMODULE"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
