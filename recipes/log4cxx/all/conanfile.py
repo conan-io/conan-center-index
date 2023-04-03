@@ -23,7 +23,7 @@ class Log4cxx(ConanFile):
         "fPIC": [True, False],
         "with_networking": [True, False],
         "with_wchar_t": [True, False],
-        "with_odbc": [True, False],
+        "with_odbc_appender": [True, False],
         "with_multiprocess_rolling_file_appender": [True, False],
         "with_smtp_appender": [True, False],
         "with_qt": [True, False],
@@ -33,7 +33,7 @@ class Log4cxx(ConanFile):
         "fPIC": True,
         "with_networking": True,
         "with_wchar_t": False,
-        "with_odbc": False,
+        "with_odbc_appender": False,
         "with_multiprocess_rolling_file_appender": False,
         "with_smtp_appender": False,
         "with_qt": False,
@@ -58,7 +58,7 @@ class Log4cxx(ConanFile):
         self.requires("apr/[>=1.6]")
         self.requires("apr-util/[>=1.6]")
         self.requires("expat/[>=2.4]")
-        if self.options.get_safe("with_odbc") and self.settings.os != "Windows":
+        if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.requires("odbc/[>=2.3]")
         if self.options.get_safe("with_smtp_appender"):
             self.requires("libesmtp/[>=1.0]")
@@ -78,7 +78,10 @@ class Log4cxx(ConanFile):
     def validate(self):
         if Version(self.version) < "1.0.0" or self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
-            self.output.warning("multiprocess rolling file appender requires C++17.")
+            if Version(self.version) < "1.0.0":
+                self.output.warning(f"Version {self.version} requires C++17. Use log4cxx version 1.0.0 or set compiler.cppstd=17.")
+            else:
+                self.output.warning("multiprocess rolling file appender requires C++17.")
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             compiler_version = Version(self.settings.compiler.version)
             if not minimum_version:
@@ -108,7 +111,7 @@ class Log4cxx(ConanFile):
             tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
             tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
             tc.variables["LOG4CXX_ENABLE_ESMTP"] = self.options.with_smtp_appender
-        tc.variables["LOG4CXX_ENABLE_ODBC"] = self.options.with_odbc
+        tc.variables["LOG4CXX_ENABLE_ODBC"] = self.options.with_odbc_appender
         tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
         tc.variables["LOG4CXX_QT_SUPPORT"] = self.options.with_qt
         if self.settings.os == "Windows":
