@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -11,5 +11,5 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not cross_building(self, skip_x64_x86=True):
+        if can_run(self):
             self.run("patchelf --version")
