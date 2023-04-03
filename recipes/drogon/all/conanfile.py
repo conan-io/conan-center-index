@@ -102,7 +102,7 @@ class DrogonConan(ConanFile):
     def requirements(self):
         self.requires("trantor/1.5.11", transitive_headers=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True)
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/1.1.1t")
         self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
