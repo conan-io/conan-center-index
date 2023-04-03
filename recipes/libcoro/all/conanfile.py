@@ -11,7 +11,6 @@ required_conan_version = ">=1.53.0"
 
 class LibcoroConan(ConanFile):
     name = "libcoro"
-    version = "0.7"
     description = "C++20 coroutine library"
     homepage = "https://github.com/jbaldwin/libcoro"
     topics = ("coroutines", "concurrency", "tasks", "executors", "networking")
