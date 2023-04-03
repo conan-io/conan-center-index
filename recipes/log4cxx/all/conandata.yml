@@ -24,6 +24,10 @@ patches:
       patch_description: "Prevent compilation errors when with_wchar_t=False"
       patch_source: "https://github.com/apache/logging-log4cxx/commit/5109466a844d1e5fb8b455a23077765a30325a24"
   "0.13.0":
+    - patch_file: "patches/0001-shared-mutex-not-required.patch"
+      patch_type: "bugfix"
+      patch_description: "Prevent build failure when compiler.cppstd=14"
+      patch_source: "https://github.com/apache/logging-log4cxx/commit/09b5b723a1a210c28bf8b05b0676bb2b104359ba"
     - patch_file: "patches/0002-find-apr.patch"
       patch_type: "conan"
       patch_description: "Use conan generated apr, apr-util target names"
