@@ -1,0 +1,282 @@
+diff --git a/minisat/core/Dimacs.h b/minisat/core/Dimacs.h
+index a05e900..3c77e75 100644
+--- a/minisat/core/Dimacs.h
++++ b/minisat/core/Dimacs.h
+@@ -23,8 +23,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ 
+ #include <stdio.h>
+ 
+-#include "utils/ParseUtils.h"
+-#include "core/SolverTypes.h"
++#include "minisat/utils/ParseUtils.h"
++#include "minisat/core/SolverTypes.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/core/Solver.cc b/minisat/core/Solver.cc
+index 7da7f18..d63dcab 100644
+--- a/minisat/core/Solver.cc
++++ b/minisat/core/Solver.cc
+@@ -20,8 +20,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ 
+ #include <math.h>
+ 
+-#include "mtl/Sort.h"
+-#include "core/Solver.h"
++#include "minisat/mtl/Sort.h"
++#include "minisat/core/Solver.h"
+ 
+ using namespace Minisat;
+ 
+diff --git a/minisat/core/Solver.h b/minisat/core/Solver.h
+index 90119e5..d4bb7d8 100644
+--- a/minisat/core/Solver.h
++++ b/minisat/core/Solver.h
+@@ -21,11 +21,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Solver_h
+ #define Minisat_Solver_h
+ 
+-#include "mtl/Vec.h"
+-#include "mtl/Heap.h"
+-#include "mtl/Alg.h"
+-#include "utils/Options.h"
+-#include "core/SolverTypes.h"
++#include "minisat/mtl/Vec.h"
++#include "minisat/mtl/Heap.h"
++#include "minisat/mtl/Alg.h"
++#include "minisat/utils/Options.h"
++#include "minisat/core/SolverTypes.h"
+ 
+ 
+ namespace Minisat {
+diff --git a/minisat/core/SolverTypes.h b/minisat/core/SolverTypes.h
+index 1ebcc73..b895ef7 100644
+--- a/minisat/core/SolverTypes.h
++++ b/minisat/core/SolverTypes.h
+@@ -24,11 +24,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ 
+ #include <assert.h>
+ 
+-#include "mtl/IntTypes.h"
+-#include "mtl/Alg.h"
+-#include "mtl/Vec.h"
+-#include "mtl/Map.h"
+-#include "mtl/Alloc.h"
++#include "minisat/mtl/IntTypes.h"
++#include "minisat/mtl/Alg.h"
++#include "minisat/mtl/Vec.h"
++#include "minisat/mtl/Map.h"
++#include "minisat/mtl/Alloc.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/mtl/Alg.h b/minisat/mtl/Alg.h
+index bb1ee5a..8a3b6ee 100644
+--- a/minisat/mtl/Alg.h
++++ b/minisat/mtl/Alg.h
+@@ -21,7 +21,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Alg_h
+ #define Minisat_Alg_h
+ 
+-#include "mtl/Vec.h"
++#include "minisat/mtl/Vec.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/mtl/Alloc.h b/minisat/mtl/Alloc.h
+index 76322b8..8230f24 100644
+--- a/minisat/mtl/Alloc.h
++++ b/minisat/mtl/Alloc.h
+@@ -21,8 +21,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Alloc_h
+ #define Minisat_Alloc_h
+ 
+-#include "mtl/XAlloc.h"
+-#include "mtl/Vec.h"
++#include "minisat/mtl/XAlloc.h"
++#include "minisat/mtl/Vec.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/mtl/Heap.h b/minisat/mtl/Heap.h
+index 226407e..eb38bc6 100644
+--- a/minisat/mtl/Heap.h
++++ b/minisat/mtl/Heap.h
+@@ -21,7 +21,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Heap_h
+ #define Minisat_Heap_h
+ 
+-#include "mtl/Vec.h"
++#include "minisat/mtl/Vec.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/mtl/Map.h b/minisat/mtl/Map.h
+index 8a82d0e..8ac2686 100644
+--- a/minisat/mtl/Map.h
++++ b/minisat/mtl/Map.h
+@@ -20,8 +20,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Map_h
+ #define Minisat_Map_h
+ 
+-#include "mtl/IntTypes.h"
+-#include "mtl/Vec.h"
++#include "minisat/mtl/IntTypes.h"
++#include "minisat/mtl/Vec.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/mtl/Queue.h b/minisat/mtl/Queue.h
+index 17567d6..1e4e072 100644
+--- a/minisat/mtl/Queue.h
++++ b/minisat/mtl/Queue.h
+@@ -21,7 +21,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Queue_h
+ #define Minisat_Queue_h
+ 
+-#include "mtl/Vec.h"
++#include "minisat/mtl/Vec.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/mtl/Sort.h b/minisat/mtl/Sort.h
+index e9313ef..2279343 100644
+--- a/minisat/mtl/Sort.h
++++ b/minisat/mtl/Sort.h
+@@ -21,7 +21,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_Sort_h
+ #define Minisat_Sort_h
+ 
+-#include "mtl/Vec.h"
++#include "minisat/mtl/Vec.h"
+ 
+ //=================================================================================================
+ // Some sorting algorithms for vec's
+diff --git a/minisat/mtl/Vec.h b/minisat/mtl/Vec.h
+index 9e22085..31555fc 100644
+--- a/minisat/mtl/Vec.h
++++ b/minisat/mtl/Vec.h
+@@ -24,8 +24,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #include <assert.h>
+ #include <new>
+ 
+-#include "mtl/IntTypes.h"
+-#include "mtl/XAlloc.h"
++#include "minisat/mtl/IntTypes.h"
++#include "minisat/mtl/XAlloc.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/simp/Main.cc b/minisat/simp/Main.cc
+index e59d73b..ff1b4ca 100644
+--- a/minisat/simp/Main.cc
++++ b/minisat/simp/Main.cc
+@@ -24,11 +24,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #include <zlib.h>
+ #include <sys/resource.h>
+ 
+-#include "utils/System.h"
+-#include "utils/ParseUtils.h"
+-#include "utils/Options.h"
+-#include "core/Dimacs.h"
+-#include "simp/SimpSolver.h"
++#include "minisat/utils/System.h"
++#include "minisat/utils/ParseUtils.h"
++#include "minisat/utils/Options.h"
++#include "minisat/core/Dimacs.h"
++#include "minisat/simp/SimpSolver.h"
+ 
+ using namespace Minisat;
+ 
+diff --git a/minisat/simp/SimpSolver.cc b/minisat/simp/SimpSolver.cc
+index a1dc16d..e2b2910 100644
+--- a/minisat/simp/SimpSolver.cc
++++ b/minisat/simp/SimpSolver.cc
+@@ -18,9 +18,9 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
+-#include "mtl/Sort.h"
+-#include "simp/SimpSolver.h"
+-#include "utils/System.h"
++#include "minisat/mtl/Sort.h"
++#include "minisat/simp/SimpSolver.h"
++#include "minisat/utils/System.h"
+ 
+ using namespace Minisat;
+ 
+diff --git a/minisat/simp/SimpSolver.h b/minisat/simp/SimpSolver.h
+index 4909018..07190af 100644
+--- a/minisat/simp/SimpSolver.h
++++ b/minisat/simp/SimpSolver.h
+@@ -21,8 +21,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #ifndef Minisat_SimpSolver_h
+ #define Minisat_SimpSolver_h
+ 
+-#include "mtl/Queue.h"
+-#include "core/Solver.h"
++#include "minisat/mtl/Queue.h"
++#include "minisat/core/Solver.h"
+ 
+ 
+ namespace Minisat {
+diff --git a/minisat/utils/Options.cc b/minisat/utils/Options.cc
+index ec5a6e9..6df1f18 100644
+--- a/minisat/utils/Options.cc
++++ b/minisat/utils/Options.cc
+@@ -17,9 +17,9 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
+-#include "mtl/Sort.h"
+-#include "utils/Options.h"
+-#include "utils/ParseUtils.h"
++#include "minisat/mtl/Sort.h"
++#include "minisat/utils/Options.h"
++#include "minisat/utils/ParseUtils.h"
+ 
+ using namespace Minisat;
+ 
+diff --git a/minisat/utils/Options.h b/minisat/utils/Options.h
+index 9c1f406..2dba10f 100644
+--- a/minisat/utils/Options.h
++++ b/minisat/utils/Options.h
+@@ -25,9 +25,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #include <math.h>
+ #include <string.h>
+ 
+-#include "mtl/IntTypes.h"
+-#include "mtl/Vec.h"
+-#include "utils/ParseUtils.h"
++#include "minisat/mtl/IntTypes.h"
++#include "minisat/mtl/Vec.h"
++#include "minisat/utils/ParseUtils.h"
+ 
+ namespace Minisat {
+ 
+diff --git a/minisat/utils/System.cc b/minisat/utils/System.cc
+index a7cf53f..da44bbc 100644
+--- a/minisat/utils/System.cc
++++ b/minisat/utils/System.cc
+@@ -18,7 +18,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
+-#include "utils/System.h"
++#include "minisat/utils/System.h"
+ 
+ #if defined(__linux__)
+ 
+diff --git a/minisat/utils/System.h b/minisat/utils/System.h
+index 1758192..9cbbc51 100644
+--- a/minisat/utils/System.h
++++ b/minisat/utils/System.h
+@@ -25,7 +25,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #include <fpu_control.h>
+ #endif
+ 
+-#include "mtl/IntTypes.h"
++#include "minisat/mtl/IntTypes.h"
+ 
+ //-------------------------------------------------------------------------------------------------
+ 
