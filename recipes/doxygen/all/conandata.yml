@@ -21,6 +21,11 @@ sources:
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
     sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
 patches:
+  "1.9.6":
+    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
+      patch_description: "Enable moxdern compilers"
+      patch_type: "portability"
+      patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
   "1.9.4":
     - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
       patch_description: "Enable modern compilers"
