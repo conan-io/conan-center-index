@@ -128,8 +128,8 @@ class Log4cxx(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst="licenses")
-        copy(self, "NOTICE", src=self.source_folder, dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         if self.settings.os != "Windows":
