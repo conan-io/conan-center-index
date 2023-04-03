@@ -138,6 +138,8 @@ class Log4cxx(ConanFile):
         copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        if Version(self.version) < "1.0.0":
+            rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os != "Windows":
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
