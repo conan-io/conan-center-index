@@ -236,7 +236,7 @@ class FreetypeConan(ConanFile):
 
     @staticmethod
     def _chmod_plus_x(filename):
-        if os.name == "posix":
+        if os.name == "posix" and (os.stat(filename).st_mode & 0o111) != 0o111:
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):

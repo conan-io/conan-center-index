@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class QhullConan(ConanFile):
@@ -14,10 +14,11 @@ class QhullConan(ConanFile):
                   "furthest-site Delaunay triangulation, and furthest-site " \
                   "Voronoi diagram."
     license = "Qhull"
-    topics = ("qhull", "geometry", "convex", "triangulation", "intersection")
+    topics = ("geometry", "convex", "triangulation", "intersection")
     homepage = "http://www.qhull.org"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,8 +32,7 @@ class QhullConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,25 +40,18 @@ class QhullConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def package_id(self):
-        del self.info.options.reentrant
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def package_id(self):
+        del self.info.options.reentrant
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -92,10 +85,6 @@ class QhullConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "Qhull"
         self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
@@ -105,6 +94,7 @@ class QhullConan(ConanFile):
         self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
         self.cpp_info.components["libqhull"].set_property("cmake_target_name", f"Qhull::{self._qhull_cmake_name}")
         self.cpp_info.components["libqhull"].set_property("pkg_config_name", self._qhull_pkgconfig_name)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
     @property
     def _qhull_cmake_name(self):

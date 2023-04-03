@@ -41,10 +41,10 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared or self.options.header_only:
+        if self.options.get_safe("shared") or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
-            del self.options.shared
+            self.options.rm_safe("shared")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

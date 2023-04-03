@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, get, load, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class GetoptForVisualStudioConan(ConanFile):
@@ -15,11 +15,14 @@ class GetoptForVisualStudioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skandhurkat/Getopt-for-Visual-Studio"
     license = "MIT", "BSD-2-Clause"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -28,12 +31,8 @@ class GetoptForVisualStudioConan(ConanFile):
         if not is_msvc(self):
             raise ConanInvalidConfiguration("getopt-for-visual-studio is only supported for Visual Studio")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -50,4 +49,3 @@ class GetoptForVisualStudioConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

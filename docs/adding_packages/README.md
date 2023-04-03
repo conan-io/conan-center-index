@@ -68,7 +68,7 @@ In ConanCenter, our belief is recipes should always match upstream, in other wor
 
 Where dependencies are involved, there's no shortcuts, inspect the upstream's build scripts for how they are usually consumed. Pick the Conan
 generator that matches. The most common example is CMake's `find_package` that can be satisfied by Conan's
-[`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html) generator. There are a few
+[`CMakeDeps`](https://docs.conan.io/1/reference/conanfile/tools/cmake/cmakedeps.html) generator. There are a few
 things to be cautious about, many projects like to "vendor" other projects within them. This can be files checked into the repository or
 downloaded during the build process. These should be removed, see the [Dependencies section](dependencies.md#handling-internal-dependencies)
 for more information.

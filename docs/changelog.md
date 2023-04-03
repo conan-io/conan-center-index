@@ -1,5 +1,18 @@
 # Changelog
 
+### 03-April-2023 - 10:26 CEST
+
+- [fix] Remove options usage from build profile.
+- [fix] Fix promotion of recipe/packages when artifacts already exist in target repo.
+- [feature] Make master branch promotion job wait for sibling jobs (to avoid recipe promotion race condition).
+- [feature] Improve request of reviews and remove timeout.
+
+### 24-March-2023 - 12:00 CET
+
+- [feature] Install Conan command extensions for Conan v2
+- [feature] Reduce Github requests number to execute Automatic Merge CI job
+- [hotfix] Improve Promote Package CI job logging for better debug
+
 ### 10-March-2023 - 19:55 CET
 
 - [feature] Add priority to pull requests
