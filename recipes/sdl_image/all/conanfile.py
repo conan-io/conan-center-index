@@ -119,11 +119,6 @@ class SDLImageConan(ConanFile):
         tc.variables["XCF"] = self.options.xcf
         tc.variables["XPM"] = self.options.xpm
         tc.variables["XV"] = self.options.xv
-        # TODO: https://github.com/bincrafters/community/pull/1317#pullrequestreview-584847138
-        tc.variables["TIF_DYNAMIC"] = self.dependencies["libtiff"].options.shared if self.options.with_libtiff else False
-        tc.variables["JPG_DYNAMIC"] = self.dependencies["libjpeg"].options.shared if self.options.with_libjpeg else False
-        tc.variables["PNG_DYNAMIC"] = self.dependencies["libpng"].options.shared if self.options.with_libpng else False
-        tc.variables["WEBP_DYNAMIC"] = self.dependencies["libwebp"].options.shared if self.options.with_libwebp else False
         tc.variables["SDL_IS_SHARED"] = self.dependencies["sdl"].options.shared
         tc.generate()
         cd = CMakeDeps(self)

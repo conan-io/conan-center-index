@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.50.0"
 
 
 class JfalcouEveConan(ConanFile):
@@ -32,14 +32,13 @@ class JfalcouEveConan(ConanFile):
         return {
             "gcc": "11",
             "Visual Studio": "16.9",
-            "msvc": "1928",
+            "msvc": "192",
             "clang": "13",
             "apple-clang": "14",
         }
 
     def configure(self):
-        version = Version(self.version.strip("v"))
-        if version.major < 2022 or (version.major == 2022 and version.minor < 9):
+        if Version(self.version.strip("v")) < "2022.09.0":
             self.license = "MIT"
         else:
             self.license = "BSL-1.0"
@@ -53,20 +52,21 @@ class JfalcouEveConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if is_msvc(self) and Version(self.version) != "v2023.02.15":
-            raise ConanInvalidConfiguration("EVE does not support MSVC yet (https://github.com/jfalcou/eve/issues/1022).")
 
-        def lazy_lt_semver(v1, v2):
+        if is_msvc(self) and Version(self.version.strip("v")) < "2023.02.15":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC. See https://github.com/jfalcou/eve/issues/1022")
+
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
