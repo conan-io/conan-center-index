@@ -67,7 +67,7 @@ class MiniSatConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", src=self.source_folder, dst=join(self.package_folder, "licenses"))
+        copy(self, pattern="LICENSE", src=join(self.source_folder, "minisat"), dst=join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         fix_apple_shared_install_name(self)
