@@ -9,7 +9,6 @@ required_conan_version = ">=1.52.0"
 
 class AggConan(ConanFile):
     name = 'agg'
-    version = '2.6.0'
     description = 'AGG Anti-Grain Geometry Library'
     topics = ('graphics')
     url = 'https://github.com/aggeom/agg-2.6'
@@ -40,9 +39,9 @@ class AggConan(ConanFile):
     }
 
     def validate(self):
-        if self.settings.os != "Windows" or self.settings.os != "Linux":
+        if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Unsupported os")
-        if self.settings.options.shared:
+        if self.options.shared:
             raise ConanInvalidConfiguration("Invalid configuration")
 
     def source(self):
@@ -53,7 +52,7 @@ class AggConan(ConanFile):
             del self.options.fPIC
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_freetype:
