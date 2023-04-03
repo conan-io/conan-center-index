@@ -43,6 +43,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/armadillo/*/*"
+          reviewers: "@samuel-emrys"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/avahi/*/*"
           reviewers: "@jwillikers"
 
@@ -145,6 +150,16 @@ jobs:
         with:
           files: "recipes/g3log/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/gcc/*/*"
+          reviewers: "@samuel-emrys"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/geotrans/*/*"
+          reviewers: "@samuel-emrys"
 
       - uses: ./.github/actions/alert-community
         with:
