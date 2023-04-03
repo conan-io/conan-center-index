@@ -1,0 +1,4 @@
+sources:
+  "2.6.0":
+    url: "https://github.com/aggeom/agg-2.6/archive/3ee3b4bdb68fabfa0dbfb62a8adc3953c507e4e2.tar.gz"
+    sha256: a1b360925a9de2af3f31f6025bd6c1b3bcb7ab3bcf58f6082cb3897441b2f679
