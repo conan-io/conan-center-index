@@ -1,7 +1,7 @@
 diff --git a/core/SolverTypes.h b/core/SolverTypes.h
 index 1ebcc73..7b1d16a 100644
---- a/minisat/core/SolverTypes.h
-+++ b/minisat/core/SolverTypes.h
+--- a/core/SolverTypes.h
++++ b/core/SolverTypes.h
 @@ -47,7 +47,7 @@ struct Lit {
      int     x;
  

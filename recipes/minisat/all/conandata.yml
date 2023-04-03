@@ -4,15 +4,11 @@ sources:
     sha256: "3ed44da999744c0a1be269df23c3ed8731cdb83c44a4f3aa29b3d6859bb2a4da"
 patches:
   "2.2.0":
-    - patch_file: "patches/0001-rename-folder-2.2.0.patch"
-      patch_description: "changes the include dirs to reflect that files have moved into the minisat directory"
-      patch_type: portability
-      patch_source: "https://github.com/niklasso/minisat/commit/1328a8db4b68460c4d88850121c318fc56b423d6"
-    - patch_file: "patches/0002-drop-default-arg-in-friend-declaration-2.2.0.patch"
+    - patch_file: "patches/0001-drop-default-arg-in-friend-declaration-2.2.0.patch"
       patch_description: "drop default argument in friend declaration"
       patch_type: portability
       patch_source: "https://github.com/niklasso/minisat/commit/9256ff36d29cee13fc806dec212ba4309d1cb0d4"
-    - patch_file: "patches/0003-suffix-literal-2.2.0.patch"
+    - patch_file: "patches/0002-suffix-literal-2.2.0.patch"
       patch_description: "add spaces before user literals"
       patch_type: portability
       patch_source: "https://github.com/conp-solutions/mergesat/commit/18e138e0b9130833549070dcff9de64ca6ae1f7a"
