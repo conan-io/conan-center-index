@@ -12,3 +12,7 @@ patches:
       patch_description: "drop default argument in friend declaration"
       patch_type: portability
       patch_source: "https://github.com/niklasso/minisat/commit/9256ff36d29cee13fc806dec212ba4309d1cb0d4"
+    - patch_file: "patches/0003-suffix-literal-2.2.0.patch"
+      patch_description: "add spaces before user literals"
+      patch_type: portability
+      patch_source: "https://github.com/conp-solutions/mergesat/commit/18e138e0b9130833549070dcff9de64ca6ae1f7a"
