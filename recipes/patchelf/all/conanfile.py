@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, download, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -33,9 +33,7 @@ class PatchElfConan(ConanFile):
             raise ConanInvalidConfiguration("PatchELF is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
-        # The library sources do not contain a license file, so download it from elsewhere
-        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
