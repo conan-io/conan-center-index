@@ -85,7 +85,7 @@ class AggConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, src=self.source_folder, pattern='LICENSE', dst='licenses')
+        copy(self, src=self.source_folder, pattern='copying', dst='licenses')
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
