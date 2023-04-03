@@ -11,12 +11,14 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
+        if hasattr(self, "settings_build"):
+            self.build_requires(self.tested_reference_str)
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        with tools.no_op() if hasattr(self, "settings_build") else tools.run_environment(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):

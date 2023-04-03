@@ -81,3 +81,6 @@ reviewers:
   - user: "StellaSmith"
     type: "community"
     request_reviews: false
+  - user: "davidsanfal"
+    type: "team"
+    request_reviews: false

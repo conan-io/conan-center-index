@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
@@ -34,6 +34,7 @@ class SentryNativeConan(ConanFile):
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
         "with_breakpad": ["google", "sentry"],
+        "wer" : [True, False],
     }
     default_options = {
         "shared": False,
@@ -43,6 +44,7 @@ class SentryNativeConan(ConanFile):
         "qt": False,
         "with_crashpad": "sentry",
         "with_breakpad": "sentry",
+        "wer": False
     }
 
     @property
@@ -59,9 +61,15 @@ class SentryNativeConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        if self.settings.os != "Windows" or Version(self.version) < "0.6.0":
+            del self.options.wer
 
         # Configure default transport
         if self.settings.os == "Windows":
@@ -155,12 +163,15 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_TRANSPORT"] = self.options.transport
         tc.variables["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
+        if self.options.get_safe("wer", False):
+            tc.variables["CRASHPAD_WER_ENABLED"] = True
         tc.generate()
         CMakeDeps(self).generate()
         if self.options.backend == "breakpad":
             PkgConfigDeps(self).generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
