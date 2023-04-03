@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
     generators = "qt", "cmake", "cmake_find_package_multi", "cmake_find_package", "pkg_config", "qmake"
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.0")
+        self.tool_requires("cmake/3.25.3")
         if self._meson_supported():
             self.tool_requires("meson/0.60.2")
 
