@@ -105,7 +105,7 @@ class AggConan(ConanFile):
             self.cpp_info.components["fontfreetype"].set_property("cmake_target_name", "agg::fontfreetype")
             self.cpp_info.components["fontfreetype"].libs = ["aggfontfreetype" + lib_suffix]
             self.cpp_info.components["fontfreetype"].includedirs = [os.path.join("include", "agg","fontfreetype")]
-            self.cpp_info.components["2d"].requires = ["agg"]
+            self.cpp_info.components["fontfreetype"].requires = ["agg", "freetype::freetype"]
             
         if self.options.with_gpc:
             self.cpp_info.components["gpc"].set_property("cmake_target_name", "agg::gpc")
