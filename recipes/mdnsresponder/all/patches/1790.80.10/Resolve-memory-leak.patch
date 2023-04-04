@@ -1,0 +1,182 @@
+diff --git a/mDNSCore/mDNSEmbeddedAPI.h b/mDNSCore/mDNSEmbeddedAPI.h
+index ab82617..7c88720 100644
+--- a/mDNSCore/mDNSEmbeddedAPI.h
++++ b/mDNSCore/mDNSEmbeddedAPI.h
+@@ -3037,6 +3037,7 @@ extern void mDNS_SetPrimaryInterfaceInfo(mDNS *m, const mDNSAddr *v4addr,  const
+ extern DNSServer *mDNS_AddDNSServer(mDNS *const m, const domainname *d, const mDNSInterfaceID interface, mDNSs32 serviceID, const mDNSAddr *addr,
+                                     const mDNSIPPort port, ScopeType scopeType, mDNSu32 timeout, mDNSBool cellIntf, mDNSBool isExpensive, mDNSBool isConstrained, mDNSBool isCLAT46,
+                                     mDNSu32 resGroupID, mDNSBool reqA, mDNSBool reqAAAA, mDNSBool reqDO);
++extern void mDNS_ClearDNSServers(mDNS *const m);
+ extern void PenalizeDNSServer(mDNS *const m, DNSQuestion *q, mDNSOpaque16 responseFlags);
+ #endif
+ extern void mDNS_AddSearchDomain(const domainname *const domain, mDNSInterfaceID InterfaceID);
+diff --git a/mDNSCore/uDNS.c b/mDNSCore/uDNS.c
+index 5611517..b2554d7 100644
+--- a/mDNSCore/uDNS.c
++++ b/mDNSCore/uDNS.c
+@@ -234,6 +234,20 @@ mDNSexport DNSServer *mDNS_AddDNSServer(mDNS *const m, const domainname *domain,
+     return(server);
+ }
+ 
++void mDNS_ClearDNSServers(mDNS *const m)
++{
++    mDNS_CheckLock(m);
++    DNSServer *p = m->DNSServers;
++    DNSServer *next = mDNSNULL;
++    while (p)
++    {
++        next = p->next;
++        mDNSPlatformMemFree(p);
++        p = next;
++    }
++    m->DNSServers = mDNSNULL;
++}
++
+ // PenalizeDNSServer is called when the number of queries to the unicast
+ // DNS server exceeds MAX_UCAST_UNANSWERED_QUERIES or when we receive an
+ // error e.g., SERV_FAIL from DNS server.
+@@ -7300,6 +7314,11 @@ mDNSexport DNSServer *mDNS_AddDNSServer(mDNS *const m, const domainname *d, cons
+     return mDNSNULL;
+ }
+ 
++void mDNS_ClearDNSServers(mDNS *const m)
++{
++    (void) m;
++}
++
+ mDNSexport void uDNS_SetupWABQueries(mDNS *const m)
+ {
+     (void) m;
+diff --git a/mDNSPosix/Responder.c b/mDNSPosix/Responder.c
+index 119c498..211b13a 100644
+--- a/mDNSPosix/Responder.c
++++ b/mDNSPosix/Responder.c
+@@ -632,18 +632,21 @@ static mStatus RegisterOurServices(void)
+ static void DeregisterOurServices(void)
+ {
+     PosixService *thisServ;
++    int thisServID;
+ 
+     while (gServiceList != NULL) {
+         thisServ = gServiceList;
+         gServiceList = thisServ->next;
+ 
++        thisServID = thisServ->serviceID;
++
+         mDNS_DeregisterService(&mDNSStorage, &thisServ->coreServ);
+ 
+         if (gMDNSPlatformPosixVerboseLevel > 0) {
+             fprintf(stderr,
+                     "%s: Deregistered service %d\n",
+                     gProgramName,
+-                    thisServ->serviceID);
++                    thisServID);
+         }
+     }
+ }
+diff --git a/mDNSPosix/mDNSPosix.c b/mDNSPosix/mDNSPosix.c
+index 5605f03..2efe575 100644
+--- a/mDNSPosix/mDNSPosix.c
++++ b/mDNSPosix/mDNSPosix.c
+@@ -1620,9 +1620,14 @@ mDNSlocal mStatus OpenIfNotifySocket(int *pFD)
+     snl.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR;
+     ret = bind(sock, (struct sockaddr *) &snl, sizeof snl);
+     if (0 == ret)
++    {
+         *pFD = sock;
++    }
+     else
++    {
+         err = errno;
++        close(sock);
++    }
+ 
+     return err;
+ }
+@@ -1812,15 +1817,33 @@ mDNSlocal mStatus WatchForInterfaceChange(mDNS *const m)
+         return mStatus_NoMemoryErr;
+ 
+     pChgRec->mDNS = m;
++    pChgRec->NotifySD = -1;
+     err = OpenIfNotifySocket(&pChgRec->NotifySD);
+-    if (err == 0)
+-        err = mDNSPosixAddFDToEventLoop(pChgRec->NotifySD, InterfaceChangeCallback, pChgRec);
++    if (err == 0 && 0 == (err = mDNSPosixAddFDToEventLoop(pChgRec->NotifySD, InterfaceChangeCallback, pChgRec)))
++    	m->p->intfChg = pChgRec;
+     if (err)
++    {
++        if (pChgRec->NotifySD >= 0)
++        {
++             close(pChgRec->NotifySD);
++        }
+         mDNSPlatformMemFree(pChgRec);
++    }
+ 
+     return err;
+ }
+ 
++mDNSlocal void UnwatchForInterfaceChange(mDNS *const m)
++{
++    IfChangeRec *pChgRec = m->p->intfChg;
++    if (pChgRec != NULL)
++    {
++        mDNSPosixRemoveFDFromEventLoop(pChgRec->NotifySD);
++        close(pChgRec->NotifySD);
++        mDNSPlatformMemFree(pChgRec);
++    }
++}
++
+ // Test to see if we're the first client running on UDP port 5353, by trying to bind to 5353 without using SO_REUSEPORT.
+ // If we fail, someone else got here first. That's not a big problem; we can share the port for multicast responses --
+ // we just need to be aware that we shouldn't expect to successfully receive unicast UDP responses.
+@@ -1875,9 +1898,13 @@ mDNSexport mStatus mDNSPlatformInit(mDNS *const m)
+     if (err == mStatus_NoError) err = SetupInterfaceList(m);
+ 
+     // Tell mDNS core about DNS Servers
++#ifndef UNICAST_DISABLED
+     mDNS_Lock(m);
+     if (err == mStatus_NoError) ParseDNSServers(m, uDNS_SERVERS_FILE);
+     mDNS_Unlock(m);
++#endif //UNICAST_DISABLED
++
++    m->p->intfChg = NULL;
+ 
+     if (err == mStatus_NoError)
+     {
+@@ -1910,6 +1937,12 @@ mDNSexport void mDNSPlatformClose(mDNS *const m)
+ {
+     int rv;
+     assert(m != NULL);
++#ifndef UNICAST_DISABLED
++    mDNS_Lock(m);
++    mDNS_ClearDNSServers(m);
++    mDNS_Unlock(m);
++#endif //UNICAST_DISABLED
++    UnwatchForInterfaceChange(m);
+     ClearInterfaceList(m);
+     if (m->p->unicastSocket4 != -1)
+     {
+diff --git a/mDNSPosix/mDNSPosix.h b/mDNSPosix/mDNSPosix.h
+index 9675591..fc2005d 100644
+--- a/mDNSPosix/mDNSPosix.h
++++ b/mDNSPosix/mDNSPosix.h
+@@ -51,6 +51,7 @@ extern int gMDNSPlatformPosixVerboseLevel;
+ 
+ struct mDNS_PlatformSupport_struct
+ {
++    void* intfChg;
+     int unicastSocket4;
+ #if HAVE_IPV6
+     int unicastSocket6;
+diff --git a/mDNSShared/dnsextd.c b/mDNSShared/dnsextd.c
+index 30e9043..50407fa 100644
+--- a/mDNSShared/dnsextd.c
++++ b/mDNSShared/dnsextd.c
+@@ -3101,6 +3101,7 @@ DNSServer *mDNS_AddDNSServer(mDNS *const m, const domainname *d, const mDNSInter
+                              mDNSu32 scopedType, mDNSu32 timeout, mDNSBool isCell, mDNSBool isExpensive, mDNSBool isConstrained,  mDNSBool isCLAT46, mDNSu32 resGroupID, mDNSBool reqA, mDNSBool reqAAAA, mDNSBool reqDO)
+ { ( void ) m; ( void ) d; ( void ) interface; ( void ) serviceID; ( void ) addr; ( void ) port; ( void ) scopedType; ( void ) timeout; (void) isCell; (void) isExpensive; (void) isConstrained; (void) isCLAT46;
+     (void) resGroupID; (void) reqA; (void) reqAAAA; (void) reqDO; return(NULL); }
++void mDNS_ClearDNSServers(mDNS *const m) { (void) m;}
+ void mDNS_AddSearchDomain(const domainname *const domain, mDNSInterfaceID InterfaceID) { (void)domain; (void) InterfaceID;}
+ void mDNS_AddDynDNSHostName(mDNS *m, const domainname *fqdn, mDNSRecordCallback *StatusCallback, const void *StatusContext)
+ { ( void ) m; ( void ) fqdn; ( void ) StatusCallback; ( void ) StatusContext; }

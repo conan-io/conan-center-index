@@ -35,6 +35,8 @@ patches:
       patch_file: "patches/1790.80.10/Resolve-services-cannot-discovered-after-interface-restart.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/1790.80.10/Support-cross-building.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1790.80.10/Resolve-memory-leak.patch"
   "1790.80.10-opt":
     - base_path: "source_subfolder"
       patch_file: "patches/1790.80.10/opt/Add-uds-server-path-env.patch"
