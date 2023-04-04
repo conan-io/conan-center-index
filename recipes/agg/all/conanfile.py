@@ -49,8 +49,10 @@ class AggConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
+        try:
             del self.options.fPIC
+        except Exception:
+            pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
