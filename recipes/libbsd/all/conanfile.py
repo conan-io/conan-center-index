@@ -1,5 +1,4 @@
 import os
-import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -7,7 +6,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualRunEnv
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, chdir, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.cmake import cmake_layout
 
 class LibBsdConan(ConanFile):
@@ -56,7 +55,7 @@ class LibBsdConan(ConanFile):
         deps.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
     
     def validate(self):
         if not is_apple_os(self) and self.settings.os != "Linux":
