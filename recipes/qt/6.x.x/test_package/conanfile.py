@@ -5,6 +5,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.files import mkdir, chdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 from conans import tools, Meson, RunEnvironment, CMake
 from conan.errors import ConanException
@@ -91,7 +92,7 @@ class TestPackageConan(ConanFile):
         with tools.environment_append(env_build.vars):
             cmake = CMake(self, set_cmake_flags=True)
             if self.settings.os == "Macos":
-                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
+                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.15' if Version(self.deps_cpp_info["qt"].version) >= "6.5.0" else "10.14"
 
             cmake.configure()
             cmake.build()

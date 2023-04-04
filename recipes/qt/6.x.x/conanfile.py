@@ -214,7 +214,7 @@ class QtConan(ConanFile):
             "Visual Studio": "16",
             "gcc": "8",
             "clang": "9",
-            "apple-clang": "11"
+            "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
         }
 
     def configure(self):
