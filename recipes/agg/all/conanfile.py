@@ -39,8 +39,8 @@ class AggConan(ConanFile):
     }
 
     def validate(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Unsupported os")
+        if self.settings.os not in ("Windows", "Linux"):
+            raise ConanInvalidConfiguration("OS is not supported")
         if self.options.shared:
             raise ConanInvalidConfiguration("Invalid configuration")
 
@@ -95,27 +95,25 @@ class AggConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "agg")
 
-        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
-
         self.cpp_info.components["agg"].set_property("cmake_target_name", "agg::agg")
-        self.cpp_info.components["agg"].libs = ["agg" + lib_suffix]
+        self.cpp_info.components["agg"].libs = ["agg"]
         self.cpp_info.components["agg"].includedirs = [os.path.join("include", "agg")]
 
         if self.options.with_freetype:
             self.cpp_info.components["fontfreetype"].set_property("cmake_target_name", "agg::fontfreetype")
-            self.cpp_info.components["fontfreetype"].libs = ["aggfontfreetype" + lib_suffix]
+            self.cpp_info.components["fontfreetype"].libs = ["aggfontfreetype"]
             self.cpp_info.components["fontfreetype"].includedirs = [os.path.join("include", "agg","fontfreetype")]
             self.cpp_info.components["fontfreetype"].requires = ["agg", "freetype::freetype"]
             
         if self.options.with_gpc:
             self.cpp_info.components["gpc"].set_property("cmake_target_name", "agg::gpc")
-            self.cpp_info.components["gpc"].libs = [ "agggpc" + lib_suffix]
+            self.cpp_info.components["gpc"].libs = [ "agggpc"]
             self.cpp_info.components["gpc"].includedirs = [os.path.join("include", "agg","gpc")]
 
 
         if self.options.with_agg2d:
             self.cpp_info.components["2d"].set_property("cmake_target_name", "agg::2d")
-            self.cpp_info.components["2d"].libs = ["agg2d" + lib_suffix]
+            self.cpp_info.components["2d"].libs = ["agg2d"]
             self.cpp_info.components["2d"].includedirs = [os.path.join("include", "agg","2d")]
             self.cpp_info.components["2d"].requires = ["agg"]
             if self.options.with_agg2d_freetype:
@@ -124,13 +122,13 @@ class AggConan(ConanFile):
         if self.options.with_platform:
             
             self.cpp_info.components["platform"].set_property("cmake_target_name", "agg::platform")
-            self.cpp_info.components["platform"].libs = ["aggplatform" + lib_suffix]
+            self.cpp_info.components["platform"].libs = ["aggplatform"]
             self.cpp_info.components["platform"].includedirs = [os.path.join("include", "agg","platform")]
             if self.settings.os in ["Linux"]:
                 self.cpp_info.components["platform"].requires = ["xorg::xorg", "agg"]
 
         if self.options.with_controls:
             self.cpp_info.components["controls"].set_property("cmake_target_name", "agg::controls")
-            self.cpp_info.components["controls"].libs = ["aggctrl" + lib_suffix]
+            self.cpp_info.components["controls"].libs = ["aggctrl"]
             self.cpp_info.components["controls"].includedirs = [os.path.join("include", "agg","ctrl")]
             self.cpp_info.components["controls"].requires = ["agg"]
