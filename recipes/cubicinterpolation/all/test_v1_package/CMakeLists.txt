@@ -4,8 +4,5 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(CubicInterpolation REQUIRED CONFIG)
-
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CubicInterpolation::CubicInterpolation)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
