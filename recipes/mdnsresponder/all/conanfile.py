@@ -19,11 +19,13 @@ class MdnsResponderConan(ConanFile):
         "with_opt_patches": [True, False],
         "use_tls": [True, False],
         "build_debug": [True, False],
+        "unicast_disabled": [True, False],
     }
     default_options = {
         "with_opt_patches": False,
         "use_tls": True,
         "build_debug": False,
+        "unicast_disabled": False,
     }
     exports_sources = ["patches/**"]
 
@@ -76,6 +78,8 @@ class MdnsResponderConan(ConanFile):
             build_args.append("tls=no")
         if self.options.build_debug:
             build_args.append("DEBUG=1")
+        if self.options.unicast_disabled:
+            build_args.append("unicast_disabled=y")
 
         return build_args
 

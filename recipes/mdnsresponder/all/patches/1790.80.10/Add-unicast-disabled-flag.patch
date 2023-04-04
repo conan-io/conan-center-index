@@ -1,0 +1,28 @@
+diff --git a/mDNSCore/uDNS.c b/mDNSCore/uDNS.c
+index b2554d7..27319a9 100644
+--- a/mDNSCore/uDNS.c
++++ b/mDNSCore/uDNS.c
+@@ -7257,7 +7257,7 @@ mDNSexport mStatus mDNS_SetSecretForDomain(mDNS *m, DomainAuthInfo *info, const
+     return mStatus_UnsupportedErr;
+ }
+ 
+-mDNSexport domainname  *uDNS_GetNextSearchDomain(mDNSInterfaceID InterfaceID, mDNSs8 *searchIndex, mDNSBool ignoreDotLocal)
++mDNSexport domainname  *uDNS_GetNextSearchDomain(mDNSInterfaceID InterfaceID, int *searchIndex, mDNSBool ignoreDotLocal)
+ {
+     (void) InterfaceID;
+     (void) searchIndex;
+diff --git a/mDNSPosix/Makefile b/mDNSPosix/Makefile
+index 440b4b2..3a3eb47 100755
+--- a/mDNSPosix/Makefile
++++ b/mDNSPosix/Makefile
+@@ -81,6 +81,10 @@ LINKOPTS_PTHREAD = -lpthread
+ LDSUFFIX = so
+ JAVACFLAGS_OS = -fPIC -shared -ldns_sd
+ 
++ifeq ($(unicast_disabled), y)
++CFLAGS_COMMON += -DUNICAST_DISABLED
++endif
++
+ # Set up diverging paths for debug vs. prod builds
+ ifeq "$(DEBUG)" "1"
+ CFLAGS_DEBUGGING = -g -DMDNS_DEBUGMSGS=2
