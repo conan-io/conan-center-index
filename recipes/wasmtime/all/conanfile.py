@@ -49,8 +49,8 @@ class WasmtimeConan(ConanFile):
         return str(self.settings.os)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def package_id(self):
         del self.info.settings.compiler.version
