@@ -852,7 +852,8 @@ class BoostConan(ConanFile):
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)
         if self.settings.os == "Android":
-            # force versionless soname
+            # force versionless soname from boostorg/boost#206 
+            # this can be applied to all versions and it's easier with a replace
             replace_in_file(self, os.path.join(self.source_folder, "boostcpp.jam"),
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix &&",
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix android &&",
