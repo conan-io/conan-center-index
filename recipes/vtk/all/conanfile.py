@@ -990,6 +990,13 @@ class VtkConan(ConanFile):
                                   'project(VTK)\nlink_directories("{}")\n'.format(python_lib_folder)
                                   )
 
+        # fix detecting glew shared status
+        replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "glew", "CMakeLists.txt"),
+         'set(VTK_GLEW_SHARED "${vtkglew_is_shared}")', 
+         f'set(VTK_GLEW_SHARED "{ "ON" if str(self.dependencies["glew"].options.shared) else "OFF"}")'
+        )
+
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
