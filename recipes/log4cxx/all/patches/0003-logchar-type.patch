@@ -2,7 +2,7 @@ diff --git a/src/main/cpp/threadutility.cpp b/src/main/cpp/threadutility.cpp
 index c14c12fd..057ecd86 100644
 --- a/src/main/cpp/threadutility.cpp
 +++ b/src/main/cpp/threadutility.cpp
-@@ -116,11 +116,13 @@ void ThreadUtility::threadStartedNameThread(LogString threadName,
+@@ -113,11 +113,13 @@ void ThreadUtility::threadStartedNameThread(LogString threadName,
  							 std::thread::id /*threadId*/,
  							 std::thread::native_handle_type nativeHandle){
  #if LOG4CXX_HAS_PTHREAD_SETNAME

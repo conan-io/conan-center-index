@@ -1,0 +1,10 @@
+--- a/src/main/cpp/threadutility.cpp
++++ b/src/main/cpp/threadutility.cpp
+@@ -28,6 +28,7 @@
+ #endif
+ 
+ using log4cxx::helpers::ThreadUtility;
++using log4cxx::helpers::ThreadConfigurationType;
+ 
+ struct ThreadUtility::priv_data{
+ 	priv_data(){
