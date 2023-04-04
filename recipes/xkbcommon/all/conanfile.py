@@ -85,7 +85,7 @@ class XkbcommonConan(ConanFile):
             self.tool_requires("wayland-protocols/1.31")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, verify=False)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
