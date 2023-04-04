@@ -1,6 +1,6 @@
 from conan import ConanFile, __version__ as conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -138,6 +138,20 @@ class BehaviorTreeCPPConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        ver = Version(self.version)
+
+        path_bt_factory = ''
+        if ver < "4.0":
+            path_bt_factory = os.path.join(self.source_folder, "include", "behaviortree_cpp_v3", "bt_factory.h")
+        else:
+            path_bt_factory = os.path.join(self.source_folder, "include", "behaviortree_cpp", "bt_factory.h")
+
+        # add version tag
+        replace_in_file(self,
+            path_bt_factory,
+            "#define BT_FACTORY_H",
+            "#define BT_FACTORY_H\n#define BEHAVIORTREE_VERSION 0x%02d%02d%03d" % (int(str(ver.major)), int(str(ver.minor)), int(str(ver.patch))))
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -179,6 +193,7 @@ class BehaviorTreeCPPConan(ConanFile):
 
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components[libname].system_libs.append("pthread")
+            self.cpp_info.components[libname].system_libs.append("dl")
         if Version(self.version) >= "4.0" and \
             self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.components[libname].system_libs.append("stdc++fs")

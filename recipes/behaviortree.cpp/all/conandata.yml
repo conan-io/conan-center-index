@@ -18,13 +18,19 @@ sources:
     url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/3.5.6.tar.gz"
     sha256: "543c428602b5acb7c5666aee34feb532e18ce7200870a79b23ff9aed17ee84c4"
 patches:
+  "4.0.1":
+    - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
+      patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.1-0002-use-cci.patch"
+      patch_description: "use zeromq cci package"
+      patch_type: "conan"
   "4.0.2":
     - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
       patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
       patch_type: "conan"
-  "4.0.1":
-    - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
-      patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
+    - patch_file: "patches/4.0.2-0002-use-cci.patch"
+      patch_description: "use zeromq cci package"
       patch_type: "conan"
   "3.8.3":
     - patch_file: "patches/3.8.3-0001-remove-fpic.patch"
@@ -33,11 +39,20 @@ patches:
     - patch_file: "patches/3.8.3-0002-ncurses-header.patch"
       patch_description: "remove wrong ncurses headers"
       patch_type: "conan"
+    - patch_file: "patches/3.8.3-0003-find-zmq.patch"
+      patch_description: "use zeromq cci package"
+      patch_type: "conan"
   "3.7.0":
     - patch_file: "patches/3.7.0-0001-remove-fpic.patch"
       patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
       patch_type: "conan"
+    - patch_file: "patches/3.7.0-0002-find-zmq.patch"
+      patch_description: "use zeromq cci package"
+      patch_type: "conan"
   "3.5.6":
     - patch_file: "patches/3.5.6-0001-remove-fpic.patch"
       patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
+      patch_type: "conan"
+    - patch_file: "patches/3.5.6-0002-find-zmq.patch"
+      patch_description: "use zeromq cci package"
       patch_type: "conan"
