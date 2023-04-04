@@ -152,6 +152,9 @@ class DataFrameConan(ConanFile):
             if Version(self.version) < "1.20.0" and not self.options.shared:
                 # weird but required in those versions of dataframe
                 self.cpp_info.defines.append("LIBRARY_EXPORTS")
+            if Version(self.version) >= "2.0.0" and not self.options.shared:
+                # weird but required in those versions of dataframe
+                self.cpp_info.defines.append("DataFrame_EXPORTS")
         if Version(self.version) >= "1.20.0" and self.options.shared:
             self.cpp_info.defines.append("HMDF_SHARED")
 
