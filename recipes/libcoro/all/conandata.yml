@@ -4,6 +4,9 @@ sources:
     sha256: "ce1f3f1c4fa21b53d1cd195a29bd5a2313e53aa35637b402db04207d02316e51"
 patches:
   "0.7":
+    - patch_file: "patches/allow-shared-lib.patch"
+      patch_type: "conan"
+      patch_description: "Allow to build the library as a shared library"
     - patch_file: "patches/disable-git-config.patch"
       patch_type: "conan"
       patch_description: "Comment out invocation of git config command"
