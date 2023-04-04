@@ -44,12 +44,16 @@ class AggConan(ConanFile):
         if self.options.shared:
             raise ConanInvalidConfiguration("Invalid configuration")
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
