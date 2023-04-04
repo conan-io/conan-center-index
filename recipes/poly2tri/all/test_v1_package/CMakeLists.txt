@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package LANGUAGES CXX)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(poly2tri REQUIRED CONFIG)
-
-add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE poly2tri::poly2tri)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package)

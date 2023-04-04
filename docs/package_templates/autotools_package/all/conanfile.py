@@ -10,7 +10,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 #
 # INFO: Please, remove all comments before pushing your PR!
@@ -27,6 +27,8 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
+    # package_type should usually be "library" (if there is shared option)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,10 +44,6 @@ class PackageConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     # no exports_sources attribute, but export_sources(self) method instead
     # this allows finer grain exportation of patches per version
@@ -77,7 +75,7 @@ class PackageConan(ConanFile):
         # validate the minimum cpp standard supported. Only for C++ projects
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
@@ -85,14 +83,15 @@ class PackageConan(ConanFile):
         # only if we have to call autoreconf
         self.tool_requires("libtool/x.y.z")
         # only if upstream configure.ac relies on PKG_CHECK_MODULES macro
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/x.y.z")
         # required to suppport windows as a build machine
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         # for msvc support to get compile & ar-lib scripts (may be avoided if shipped in source code of the library)
+        # not needed if libtool already in build requirements
         if is_msvc(self):
             self.tool_requires("automake/x.y.z")
 
@@ -132,8 +131,9 @@ class PackageConan(ConanFile):
             # get compile & ar-lib from automake (or eventually lib source code if available)
             # it's not always required to wrap CC, CXX & AR with these scripts, it depends on how much love was put in
             # upstream build files
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
@@ -157,8 +157,7 @@ class PackageConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once Conan 1.54 is available in CCI
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))

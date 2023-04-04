@@ -99,7 +99,6 @@ class SDLConan(ConanFile):
         env = env.vars(self, scope="build")
         env.save_script("sdl_env")
 
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -186,8 +185,8 @@ class SDLConan(ConanFile):
             # or because CMake's platform configuration is corrupt.
             # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
             self.build_requires("cmake/3.22.0")
-        if self.settings.os == "Linux":
-            self.build_requires("pkgconf/1.7.4")
+        if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
             self.build_requires("wayland/1.20.0")  # Provides wayland-scanner
 
@@ -206,10 +205,10 @@ class SDLConan(ConanFile):
         if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
             wayland_bin_path = " ".join("\"{}\"".format(path) for path in self.deps_env_info["wayland"].PATH)
             replace_in_file(self,
-                os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
-                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
-                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS {} NO_DEFAULT_PATH)".format(wayland_bin_path),
-            )
+                            os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
+                            "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
+                            "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS {} NO_DEFAULT_PATH)".format(wayland_bin_path),
+                            )
 
     def define_toolchain(self):
         tc = CMakeToolchain(self)
@@ -386,7 +385,6 @@ class SDLConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-
     def package(self):
         cmake = CMake(self)
         if self.version >= "2.0.16":
@@ -488,6 +486,12 @@ class SDLConan(ConanFile):
             self.cpp_info.components["libsdl2"].system_libs = ["user32", "gdi32", "winmm", "imm32", "ole32", "oleaut32", "version", "uuid", "advapi32", "setupapi", "shell32"]
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["libsdl2"].system_libs.append("mingw32")
+        elif self.settings.os == "Android" and not self.options.shared:
+            self.cpp_info.components["libsdl2"].system_libs.extend(["android", "dl", "log"])
+            if self.options.opengles:
+                self.cpp_info.components["libsdl2"].system_libs.extend(["GLESv1_CM", "GLESv2"])
+            if Version(self.version) >= "2.0.16":
+                self.cpp_info.components["libsdl2"].system_libs.append("OpenSLES")
 
         # SDL2main
         if self.options.sdl2main:

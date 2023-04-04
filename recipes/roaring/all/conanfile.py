@@ -16,6 +16,7 @@ class RoaringConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/RoaringBitmap/CRoaring"
     topics = ("bitset", "compression", "index", "format")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,16 +49,15 @@ class RoaringConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
-        if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "11":
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11":
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least apple-clang 11 to support runtime dispatching.",
                 )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

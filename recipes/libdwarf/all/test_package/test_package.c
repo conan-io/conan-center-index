@@ -3,8 +3,12 @@
 #include <string.h>
 #include <fcntl.h>
 
-#include "dwarf.h"
-#include "libdwarf.h"
+#ifndef LIBDWARF_NEW_STRUCTURE
+    #include "dwarf.h"
+    #include "libdwarf.h"
+#else
+    #include "libdwarf/libdwarf.h"
+#endif
 
 void example1(Dwarf_Die somedie) {
     Dwarf_Debug dbg = 0;

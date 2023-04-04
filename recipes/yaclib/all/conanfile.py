@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.scm import Version
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, save
 from conan.tools.layout import cmake_layout
 from conan.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -39,20 +40,32 @@ class YACLibConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 20 if self.options.coro else 17
+
+    @property
     def _compilers_minimum_version(self):
+        if self._min_cppstd == 17:
+            return {
+                "gcc": "7",
+                "Visual Studio": "14.20",
+                "msvc": "192",
+                "clang": "8",
+                "apple-clang": "12",
+            }
         return {
-            "gcc": "7",
-            "Visual Studio": "14.20",
+            "gcc": "12",
+            "Visual Studio": "16",
             "msvc": "192",
-            "clang": "8",
-            "apple-clang": "12",
+            "clang": "13",
+            "apple-clang": "13",
         }
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -64,7 +77,6 @@ class YACLibConan(ConanFile):
         for flag in self._yaclib_flags:
             if self.options.get_safe(flag):
                 flags.append(flag.upper())
-
         if flags:
             tc.variables["YACLIB_FLAGS"] = ";".join(flags)
 
@@ -75,20 +87,23 @@ class YACLibConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        required_cpp_standard = 20 if self.options.coro else 17
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, required_cpp_standard)
-        else:
-            if self._compilers_minimum_version.get(str(self.settings.compiler)):
-                if Version(self.settings.compiler.version) < self._compilers_minimum_version.get(str(self.settings.compiler)):
-                    raise ConanInvalidConfiguration(
-                        f"yaclib requires a compiler supporting c++{required_cpp_standard}")
-            else:
-                self.output.warn(
-                    f"yaclib recipe does not recognize the compiler. yaclib requires a compiler supporting c++{required_cpp_standard}. Assuming it does.")
+            check_min_cppstd(self, self._min_cppstd)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -96,10 +111,31 @@ class YACLibConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"yaclib": "yaclib::yaclib"}
+        )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yaclib")
@@ -112,3 +148,10 @@ class YACLibConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "yaclib"
+        self.cpp_info.names["cmake_find_package_multi"] = "yaclib"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "yaclib"

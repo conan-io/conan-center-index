@@ -1,28 +1,28 @@
 sources:
   "1.3.0":
-    url: "https://github.com/webmproject/libwebp/archive/v1.3.0.tar.gz"
-    sha256: "dc9860d3fe06013266c237959e1416b71c63b36f343aae1d65ea9c94832630e1"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.0.tar.gz"
+    sha256: "64ac4614db292ae8c5aa26de0295bf1623dbb3985054cb656c55e67431def17c"
   "1.2.4":
-    url: "https://github.com/webmproject/libwebp/archive/v1.2.4.tar.gz"
-    sha256: "dfe7bff3390cd4958da11e760b65318f0a48c32913e4d5bc5e8d55abaaa2d32e"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.4.tar.gz"
+    sha256: "7bf5a8a28cc69bcfa8cb214f2c3095703c6b73ac5fba4d5480c205331d9494df"
   "1.2.3":
-    url: "https://github.com/webmproject/libwebp/archive/v1.2.3.tar.gz"
-    sha256: "021169407825d7ad918ff4554c6af885e7cf116d9b641cfd7f04c1173ffb9eb0"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.3.tar.gz"
+    sha256: "f5d7ab2390b06b8a934a4fc35784291b3885b557780d099bd32f09241f9d83f9"
   "1.2.2":
-    url: "https://github.com/webmproject/libwebp/archive/v1.2.2.tar.gz"
-    sha256: "51e9297aadb7d9eb99129fe0050f53a11fcce38a0848fb2b0389e385ad93695e"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.2.tar.gz"
+    sha256: "7656532f837af5f4cec3ff6bafe552c044dc39bf453587bd5b77450802f4aee6"
   "1.2.1":
-    url: "https://github.com/webmproject/libwebp/archive/v1.2.1.tar.gz"
-    sha256: "01bcde6a40a602294994050b81df379d71c40b7e39c819c024d079b3c56307f4"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.1.tar.gz"
+    sha256: "808b98d2f5b84e9b27fdef6c5372dac769c3bda4502febbfa5031bd3c4d7d018"
   "1.2.0":
-    url: "https://github.com/webmproject/libwebp/archive/v1.2.0.tar.gz"
-    sha256: "d60608c45682fa1e5d41c3c26c199be5d0184084cd8a971a6fc54035f76487d3"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.0.tar.gz"
+    sha256: "2fc8bbde9f97f2ab403c0224fb9ca62b2e6852cbc519e91ceaa7c153ffd88a0c"
   "1.1.0":
-    url: "https://github.com/webmproject/libwebp/archive/v1.1.0.tar.gz"
-    sha256: "424faab60a14cb92c2a062733b6977b4cc1e875a6398887c5911b3a1a6c56c51"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.1.0.tar.gz"
+    sha256: "98a052268cc4d5ece27f76572a7f50293f439c17a98e67c4ea0c7ed6f50ef043"
   "1.0.3":
-    url: "https://github.com/webmproject/libwebp/archive/v1.0.3.tar.gz"
-    sha256: "082d114bcb18a0e2aafc3148d43367c39304f86bf18ba0b2e766447e111a4a91"
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.0.3.tar.gz"
+    sha256: "e20a07865c8697bba00aebccc6f54912d6bc333bb4d604e6b07491c1a226b34f"
 patches:
   "1.3.0":
     - patch_file: "patches/1.3.0-0001-fix-cmake.patch"

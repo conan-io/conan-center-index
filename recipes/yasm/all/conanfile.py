@@ -4,14 +4,15 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class YASMConan(ConanFile):
     name = "yasm"
+    package_type = "application"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yasm/yasm"
     description = "Yasm is a complete rewrite of the NASM assembler under the 'new' BSD License"
@@ -27,14 +28,8 @@ class YASMConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         if is_msvc(self):
@@ -48,7 +43,7 @@ class YASMConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
@@ -104,8 +99,7 @@ class YASMConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib"))
         else:
             autotools = Autotools(self)
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib"))
 

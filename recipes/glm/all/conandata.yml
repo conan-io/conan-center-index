@@ -1,4 +1,7 @@
 sources:
+  "cci.20230113":
+    url: "https://github.com/g-truc/glm/archive/efec5db081e3aad807d0731e172ac597f6a39447.zip"
+    sha256: "e7a1abc208278cc3f0dba59c5170d83863b3375f98136d588b8beb74825e503c"
   "cci.20220420":
     url: "https://github.com/g-truc/glm/archive/cc98465e3508535ba8c7f6208df934c156a018dc.zip"
     sha256: "06d48e336857777d2d1f7da9ccd59e4b9d79720dbd70886d48837d19cda997bb"

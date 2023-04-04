@@ -19,7 +19,7 @@ class XpackConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
-    
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -50,7 +50,7 @@ class XpackConan(ConanFile):
             pattern="*.h",
             dst=os.path.join(self.package_folder, "include", "xpack"),
             src=self.source_folder,
-            excludes=["example", "gtest", "thirdparty"], 
+            excludes=["example", "gtest", "thirdparty"],
         )
 
     def package_info(self):
