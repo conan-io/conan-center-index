@@ -61,7 +61,7 @@ class QtConan(ConanFile):
                    "qtmultimedia", "qtlocation", "qtsensors", "qtconnectivity", "qtserialbus",
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
-                   "qtspeech", "qthttpserver", "qtquick3dphysics"]
+                   "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -516,8 +516,10 @@ class QtConan(ConanFile):
             tc.variables["HAVE_openssl"] = "ON"
             if self.options["openssl"].shared:
                 tc.variables["INPUT_openssl"] = "runtime"
+                tc.variables["QT_FEATURE_openssl_runtime"] = "ON"
             else:
                 tc.variables["INPUT_openssl"] = "linked"
+                tc.variables["QT_FEATURE_openssl_linked"] = "ON"
 
         if self.options.with_dbus:
             tc.variables["INPUT_dbus"] = "linked"
