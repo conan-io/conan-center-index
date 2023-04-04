@@ -8,9 +8,11 @@ required_conan_version = ">=1.47.0"
 
 class TestPackage(ConanFile):
     test_type = "explicit"
+    settings = "os", "arch"
+    generators = "VirtualRunEnv"
 
-    def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         pass  # nothing to build, but tests should not warn
@@ -18,8 +20,8 @@ class TestPackage(ConanFile):
     def test(self):
         if can_run(self):
             output = StringIO()
-            self.run("java --version", output=output, run_environment=True)
-            print(output.getvalue)
+            self.run("java --version", output, env="conanrun")
+            self.output.info(f"Java version output: {output.getvalue()}")
             version_info = output.getvalue()
             if "openjdk" in version_info:
                 pass
