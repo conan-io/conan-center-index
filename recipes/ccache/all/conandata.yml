@@ -8,3 +8,8 @@ sources:
   "4.5.1":
     url: "https://github.com/ccache/ccache/releases/download/v4.5.1/ccache-4.5.1.tar.xz"
     sha256: "51186ebe0326365f4e6131e1caa8911de7da4aa6718efc00680322d63a759517"
+patches:
+  "4.7.4":
+    - patch_file: "patches/4.7.4-cmake-msvc-runtime.patch"
+      patch_description: "fixup MSVC runtime"
+      patch_type: "conan"
