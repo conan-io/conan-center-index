@@ -30,6 +30,7 @@ class LAConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "8",
             "clang": "8",
             "apple-clang": "11"
@@ -65,7 +66,7 @@ class LAConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
