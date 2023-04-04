@@ -58,22 +58,6 @@ class Hdf5Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if not can_run(self):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
-        if self.options.parallel and not self.options.enable_unsupported:
-            if self.options.enable_cxx:
-                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
-            if self.options.get_safe("threadsafe", False):
-                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive, forcefully allow with enable_unsupported=True")
-        if self.options.szip_support == "with_szip" and \
-                self.options.szip_encoding and \
-                not self.dependencies["szip"].options.enable_encoding:
-            raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -98,6 +82,22 @@ class Hdf5Conan(ConanFile):
             self.requires("szip/2.1.1")
         if self.options.parallel:
             self.requires("openmpi/4.1.0")
+
+    def validate(self):
+        if not can_run(self):
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
+        if self.options.parallel and not self.options.enable_unsupported:
+            if self.options.enable_cxx:
+                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
+            if self.options.get_safe("threadsafe", False):
+                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive, forcefully allow with enable_unsupported=True")
+        if self.options.szip_support == "with_szip" and \
+                self.options.szip_encoding and \
+                not self.dependencies["szip"].options.enable_encoding:
+            raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def _cmake_new_enough(self, required_version):
         try:

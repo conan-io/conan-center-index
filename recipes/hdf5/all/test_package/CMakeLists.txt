@@ -12,7 +12,7 @@ find_package(HDF5 COMPONENTS ${HDF5_COMPONENTS})
 
 add_executable(${PROJECT_NAME} test_package.c)
 if(HDF5_CXX)
-  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 endif()
 
 if (TARGET hdf5::hdf5_cpp)
