@@ -6,3 +6,4 @@ sources:
 patches:
   "27.0.0":
     - patch_file: "patches/27.0.0-compiler.patch"
+    - patch_file: "patches/27.0.0-install.patch"
