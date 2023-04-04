@@ -1,8 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+import re
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.apple import is_apple_os
+from conan.tools.env import VirtualRunEnv
+from conan.tools.build import cross_building
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, chdir, rmdir
+from conan.tools.cmake import cmake_layout
 
 class LibBsdConan(ConanFile):
     name = "libbsd"
@@ -21,7 +27,6 @@ class LibBsdConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -32,25 +37,40 @@ class LibBsdConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
     
+    def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self)
+    
     def validate(self):
-        if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
+        if not is_apple_os(self) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if tools.is_apple_os(self.settings.os):
+        self._autotools = Autotools(self)
+        if is_apple_os(self):
             self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
         ]
@@ -58,25 +78,22 @@ class LibBsdConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=conf_args, build_script_folder=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv")
+        apply_conandata_patches(self)
         autotools = self._configure_autotools()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        copy(self, "COPYING", src=self._source_subfolder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["bsd"].libs = ["bsd"]
