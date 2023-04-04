@@ -28,8 +28,8 @@ class SoPlexConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_boost": False,
-        "with_gmp": False
+        "with_boost": True,
+        "with_gmp": True
     }
 
     @property
