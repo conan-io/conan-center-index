@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
-from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
 
@@ -28,10 +27,8 @@ class ReaderWriterQueue(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "atomicops.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "readerwriterqueue"))
-        copy(self, "readerwriterqueue.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "readerwriterqueue"))
-        if Version(self.version) >= "1.0.5":
-            copy(self, "readerwritercircularbuffer.h", src=self.source_folder, dst=os.path.join("include", "readerwriterqueue"))
+        copy(self, "*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "readerwriterqueue"),
+             excludes=["benchmarks", "tests"])
 
     def package_id(self):
         self.info.clear()

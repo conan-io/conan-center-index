@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-import os
 
 
 class TestPackageConan(ConanFile):
@@ -8,12 +7,13 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["LIBVERTO_WITH_GLIB"] = bool(self.options["libverto"].with_glib)
+        cmake.definitions["LIBVERTO_WITH_LIBEV"] = bool(self.options["libverto"].with_libev)
+        cmake.definitions["LIBVERTO_WITH_LIBEVENT"] = bool(self.options["libverto"].with_libevent)
+        cmake.definitions["LIBVERTO_WITH_TEVENT"] = bool(self.options["libverto"].with_tevent)
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-
-            for impl in self.deps_user_info["libverto"].backends.split(","):
-                self.run("{} {}".format(bin_path, impl), run_environment=True)
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {tools.cpu_count()}", run_environment=True)

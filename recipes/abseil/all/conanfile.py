@@ -21,6 +21,7 @@ class AbseilConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

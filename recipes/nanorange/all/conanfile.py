@@ -1,7 +1,12 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+
+required_conan_version = ">=1.50.0"
 
 
 class NanorangeConan(ConanFile):
@@ -11,50 +16,55 @@ class NanorangeConan(ConanFile):
     homepage = "https://github.com/tcbrindle/NanoRange"
     description = "NanoRange is a C++17 implementation of the C++20 Ranges proposals (formerly the Ranges TS)."
     topics = ("ranges", "C++17", "Ranges TS")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings = "compiler"
-    options = {"deprecation_warnings": [True, False], "std_forward_declarations": [True, False]}
-    default_options = {"deprecation_warnings": True, "std_forward_declarations": True}
 
     @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+    def _min_cppstd(self):
+        return 17
 
-    def configure(self):
-        version = Version( self.settings.compiler.version )
-        compiler = self.settings.compiler
-        if self.settings.compiler.cppstd and \
-           not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
-            raise ConanInvalidConfiguration("nanoRange requires at least c++17")
-        elif compiler == "Visual Studio":
-            if version < "16":
-                raise ConanInvalidConfiguration("NanoRange requires at least Visual Studio version 15.9, please use 16")
-            if not any([self.settings.compiler.cppstd == std for std in ["17", "20"]]):
-                raise ConanInvalidConfiguration("nanoRange requires at least c++17")
-        else:
-            if ( compiler == "gcc" and version < "7" ) or ( compiler == "clang" and version < "5" ):
-                raise ConanInvalidConfiguration("NanoRange requires a compiler that supports at least C++17")
-            elif compiler == "apple-clang":
-                self.output.warn("NanoRange is not tested with apple-clang")
-                if version < "10":
-                    raise ConanInvalidConfiguration("NanoRange requires a compiler that supports at least C++17")
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        commit = url[url.rfind("/")+1:url.find(".tar.gz")]
-        extracted_folder = "NanoRange-" + commit
-        os.rename(extracted_folder, self._source_subfolder)
-
-    def package(self):
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
-        self.copy("LICENSE_1_0.txt", src=self._source_subfolder, dst="licenses")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, pattern="LICENSE_1_0.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.hpp",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
 
     def package_info(self):
-        if not self.options.deprecation_warnings:
-            self.cpp_info.defines.append("NANORANGE_NO_DEPRECATION_WARNINGS")
-        if not self.options.std_forward_declarations:
-            self.cpp_info.defines.append("NANORANGE_NO_STD_FORWARD_DECLARATIONS")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        # https://github.com/tcbrindle/NanoRange/blob/bf32251d65673fe170d602777c087786c529ead8/CMakeLists.txt#L216
+        self.cpp_info.set_property("cmake_file_name", "nanorange")
+        self.cpp_info.set_property("cmake_target_name", "nanorange::nanorange")
