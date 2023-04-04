@@ -81,9 +81,9 @@ class SoPlexConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13", transitive_headers=True)
         if self.options.with_gmp:
-            self.requires("gmp/6.2.1")
+            self.requires("gmp/6.2.1", transitive_headers=True)
         if self.options.with_boost:
-            self.requires("boost/1.81.0")  # also update Boost_VERSION_MACRO below!
+            self.requires("boost/1.81.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
 
     def layout(self):
         cmake_layout(self, src_folder="src")
