@@ -22,14 +22,14 @@ class SoPlexConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "BOOST": [True, False],
-        "GMP": [True, False],
+        "with_boost": [True, False],
+        "with_gmp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "BOOST": False,
-        "GMP": False
+        "with_boost": False,
+        "with_gmp": False
     }
 
     @property
@@ -80,9 +80,9 @@ class SoPlexConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.13", transitive_headers=True)
-        if self.options.GMP:
+        if self.options.with_gmp:
             self.requires("gmp/6.2.1")
-        if self.options.BOOST:
+        if self.options.with_boost:
             self.requires("boost/1.81.0")  # also update Boost_VERSION_MACRO below!
 
     def layout(self):
@@ -90,8 +90,8 @@ class SoPlexConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GMP"] = self.options.GMP
-        tc.variables["BOOST"] = self.options.BOOST
+        tc.variables["GMP"] = self.options.with_gmp
+        tc.variables["BOOST"] = self.options.with_boost
         tc.variables["Boost_VERSION_MACRO"] = "108100"
         tc.generate()
         tc = CMakeDeps(self)
