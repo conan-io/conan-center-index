@@ -45,7 +45,7 @@ class CubicInterpolationConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # TODO: update boost dependency as soon as issue #11207 is fixed
+        # TODO: update boost dependency as soon as we deprecate conan1.x (see discussion in #11207)
         self.requires("boost/1.75.0")
         self.requires("eigen/3.3.9")
 
