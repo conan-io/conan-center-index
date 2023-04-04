@@ -68,7 +68,7 @@ class FollyConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.78.0", transitive_headers=True)
         self.requires("bzip2/1.0.8")
-        self.requires("double-conversion/3.2.0", transitive_headers=True)
+        self.requires("double-conversion/3.2.1", transitive_headers=True)
         self.requires("gflags/2.2.2", transitive_headers=True)
         self.requires("glog/0.4.0", transitive_headers=True)
         self.requires("libevent/2.1.12", transitive_headers=True)
