@@ -95,7 +95,7 @@ class AggConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "agg")
 
-        lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
+        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
         self.cpp_info.components["agg"].set_property("cmake_target_name", "agg::agg")
         self.cpp_info.components["agg"].libs = ["agg" + lib_suffix]
