@@ -15,6 +15,7 @@ required_conan_version = ">=1.53.0"
 
 class XkbcommonConan(ConanFile):
     name = "xkbcommon"
+    package_type = "library"
     description = "keymap handling library for toolkits and window systems"
     topics = ("keyboard", "wayland", "x11", "xkb")
     url = "https://github.com/conan-io/conan-center-index"
@@ -84,7 +85,7 @@ class XkbcommonConan(ConanFile):
             self.tool_requires("wayland-protocols/1.31")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, verify=False)
 
     def generate(self):
         env = VirtualBuildEnv(self)
