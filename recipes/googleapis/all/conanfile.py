@@ -46,14 +46,14 @@ class GoogleAPIS(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
 
     def validate(self):
@@ -64,7 +64,7 @@ class GoogleAPIS(ConanFile):
 
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("Source code generated from protos is missing some export macro")
-        if self.options.shared and not self.options["protobuf"].shared:
+        if self.options.shared and not self.dependencies["protobuf"].options.shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
     @property

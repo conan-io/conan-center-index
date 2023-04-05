@@ -53,7 +53,7 @@ class GlogConan(ConanFile):
 
     def requirements(self):
         if self.options.with_gflags:
-            self.requires("gflags/2.2.2")
+            self.requires("gflags/2.2.2", transitive_headers=True, transitive_libs=True)
         # 0.4.0 requires libunwind unconditionally
         if self.options.get_safe("with_unwind") or (Version(self.version) < "0.5.0" and self.settings.os in ["Linux", "FreeBSD"]):
             self.requires("libunwind/1.6.2")
@@ -63,7 +63,7 @@ class GlogConan(ConanFile):
             import re
             from io import StringIO
             output = StringIO()
-            self.run("cmake --version", output=output)
+            self.run("cmake --version", output)
             m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
             return Version(m.group(1)) >= required_version
         except:
