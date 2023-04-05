@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
-from conan.tools.files import get, copy, rm
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -16,6 +16,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/phmkopp/vtu11"
     topics = ("vtu", "c++11")
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
     options = {
         "with_zlib": [True, False],
     }
@@ -26,6 +27,9 @@ class PackageConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -44,11 +48,9 @@ class PackageConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
-
     def build(self):
-        self._patch_sources()
+        if valid_min_cppstd(self, 17):
+            apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
