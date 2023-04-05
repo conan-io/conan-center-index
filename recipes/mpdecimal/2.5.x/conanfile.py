@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import pathlib
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.55.0"
 
 
 class MpdecimalConan(ConanFile):
@@ -47,7 +47,6 @@ class MpdecimalConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if not self.options.cxx:
-            # for plain C projects only
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
 
@@ -225,12 +224,11 @@ class MpdecimalConan(ConanFile):
                 lib_pre_suf = ("", ".dll")
 
         self.cpp_info.components["libmpdecimal"].libs = ["{}mpdec{}".format(*lib_pre_suf)]
-        if self.options.shared:
-            if is_msvc(self):
-                if Version(self.version) >= "2.5.1":
-                    self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMAL_DLL"]
-                else:
-                    self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
+        if self.options.shared and is_msvc(self):
+            if Version(self.version) >= "2.5.1":
+                self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMAL_DLL"]
+            else:
+                self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
@@ -240,6 +238,5 @@ class MpdecimalConan(ConanFile):
             self.cpp_info.components["libmpdecimal++"].requires = ["libmpdecimal"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libmpdecimal++"].system_libs = ["pthread"]
-            if self.options.shared:
-                if Version(self.version) >= "2.5.1":
-                    self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]
+            if self.options.shared and Version(self.version) >= "2.5.1":
+                self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]
