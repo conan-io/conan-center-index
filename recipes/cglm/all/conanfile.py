@@ -33,8 +33,8 @@ class CglmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        del self.settings.compiler.rm_safe("libcxx")
-        del self.settings.compiler.rm_safe("cppstd")
+        self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("cppstd")
 
     def package_id(self):
         if self.info.options.header_only:
