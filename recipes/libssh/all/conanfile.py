@@ -63,6 +63,7 @@ class LibSSHRecipe(ConanFile):
         tc.variables["WITH_GSSAPI"] = False
         tc.variables["WITH_MBEDTLS"] = False
         tc.variables["WITH_NACL"] = False
+        tc.variables["WITH_SYMBOL_VERSIONING"] = False
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
@@ -87,7 +88,7 @@ class LibSSHRecipe(ConanFile):
         self.cpp_info.libs = ["ssh"]
 
         self.cpp_info.set_property("cmake_file_name", "libssh")
-        self.cpp_info.set_property("cmake_target_name", "libssh::libssh")
+        self.cpp_info.set_property("cmake_target_name", "ssh")
         self.cpp_info.set_property("pkg_config_name", "libssh")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
