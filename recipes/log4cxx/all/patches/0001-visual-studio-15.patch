@@ -1,10 +1,97 @@
+diff --git a/src/main/cpp/threadutility.cpp b/src/main/cpp/threadutility.cpp
+index 877b06ea..0467d172 100644
 --- a/src/main/cpp/threadutility.cpp
 +++ b/src/main/cpp/threadutility.cpp
-@@ -31,6 +31,7 @@
+@@ -21,16 +21,20 @@
+ #endif
+ #include "log4cxx/private/log4cxx_private.h"
+ #include "log4cxx/helpers/loglog.h"
++#include "log4cxx/helpers/transcoder.h"
+ 
+ #include <signal.h>
+ #include <mutex>
+ 
+-#if LOG4CXX_HAS_SETTHREADDESCRIPTION
++#if WIN32
+ 	#include <windows.h>
+ 	#include <processthreadsapi.h>
  #endif
  
- using log4cxx::helpers::ThreadUtility;
-+using log4cxx::helpers::ThreadConfigurationType;
+-using log4cxx::helpers::ThreadUtility;
++namespace log4cxx
++{
++namespace helpers
++{
  
  struct ThreadUtility::priv_data
  {
+@@ -41,9 +45,9 @@ struct ThreadUtility::priv_data
+ 		start_post = nullptr;
+ 	}
+ 
+-	log4cxx::helpers::ThreadStartPre start_pre;
+-	log4cxx::helpers::ThreadStarted started;
+-	log4cxx::helpers::ThreadStartPost start_post;
++	ThreadStartPre start_pre;
++	ThreadStarted started;
++	ThreadStartPost start_post;
+ };
+ 
+ #if LOG4CXX_HAS_PTHREAD_SIGMASK
+@@ -139,13 +143,26 @@ void ThreadUtility::threadStartedNameThread(LogString threadName,
+ 	if (pthread_setname_np(static_cast<pthread_t>(nativeHandle), sthreadName.c_str()) < 0) {
+ 		LOGLOG_ERROR(LOG4CXX_STR("unable to set thread name"));
+ 	}
+-#elif LOG4CXX_HAS_SETTHREADDESCRIPTION
+-	LOG4CXX_ENCODE_WCHAR(wthreadName, threadName);
+-	HRESULT hr = SetThreadDescription(static_cast<HANDLE>(nativeHandle), wthreadName.c_str());
+-	if(FAILED(hr)){
+-		LOGLOG_ERROR( LOG4CXX_STR("unable to set thread name") );
++#elif WIN32
++	typedef HRESULT (WINAPI *TSetThreadDescription)(HANDLE, PCWSTR);
++	static struct initialiser
++	{
++		HMODULE hKernelBase;
++		TSetThreadDescription SetThreadDescription;
++		initialiser()
++			: hKernelBase(GetModuleHandleA("KernelBase.dll"))
++			, SetThreadDescription(nullptr)
++		{
++			if (hKernelBase)
++				SetThreadDescription = reinterpret_cast<TSetThreadDescription>(GetProcAddress(hKernelBase, "SetThreadDescription"));
++		}
++	} win32Func;
++	if (win32Func.SetThreadDescription)
++	{
++		LOG4CXX_ENCODE_WCHAR(wthreadName, threadName);
++		if(FAILED(win32Func.SetThreadDescription(static_cast<HANDLE>(nativeHandle), wthreadName.c_str())))
++			LOGLOG_ERROR( LOG4CXX_STR("unable to set thread name") );
+ 	}
+-
+ #endif
+ }
+ 
+@@ -166,17 +183,20 @@ void ThreadUtility::postThreadUnblockSignals()
+ }
+ 
+ 
+-log4cxx::helpers::ThreadStartPre ThreadUtility::preStartFunction()
++ThreadStartPre ThreadUtility::preStartFunction()
+ {
+ 	return m_priv->start_pre;
+ }
+ 
+-log4cxx::helpers::ThreadStarted ThreadUtility::threadStartedFunction()
++ThreadStarted ThreadUtility::threadStartedFunction()
+ {
+ 	return m_priv->started;
+ }
+ 
+-log4cxx::helpers::ThreadStartPost ThreadUtility::postStartFunction()
++ThreadStartPost ThreadUtility::postStartFunction()
+ {
+ 	return m_priv->start_post;
+ }
++
++} //namespace helpers
++} //namespace log4cxx

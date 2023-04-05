@@ -1,10 +1,52 @@
+diff --git a/src/main/cpp/threadutility.cpp b/src/main/cpp/threadutility.cpp
+index b57ab66..ef48704 100644
 --- a/src/main/cpp/threadutility.cpp
 +++ b/src/main/cpp/threadutility.cpp
-@@ -28,6 +28,7 @@
+@@ -27,7 +27,11 @@
+ #include <processthreadsapi.h>
  #endif
  
- using log4cxx::helpers::ThreadUtility;
-+using log4cxx::helpers::ThreadConfigurationType;
+-using log4cxx::helpers::ThreadUtility;
++namespace log4cxx
++{
++namespace helpers
++{
++
  
  struct ThreadUtility::priv_data{
  	priv_data(){
+@@ -36,9 +40,9 @@ struct ThreadUtility::priv_data{
+ 		start_post = nullptr;
+ 	}
+ 
+-	log4cxx::helpers::ThreadStartPre start_pre;
+-	log4cxx::helpers::ThreadStarted started;
+-	log4cxx::helpers::ThreadStartPost start_post;
++	ThreadStartPre start_pre;
++	ThreadStarted started;
++	ThreadStartPost start_post;
+ };
+ 
+ #if LOG4CXX_HAS_PTHREAD_SIGMASK
+@@ -138,14 +142,18 @@ void ThreadUtility::postThreadUnblockSignals(){
+ }
+ 
+ 
+-log4cxx::helpers::ThreadStartPre ThreadUtility::preStartFunction(){
++ThreadStartPre ThreadUtility::preStartFunction(){
+ 	return m_priv->start_pre;
+ }
+ 
+-log4cxx::helpers::ThreadStarted ThreadUtility::threadStartedFunction(){
++ThreadStarted ThreadUtility::threadStartedFunction(){
+ 	return m_priv->started;
+ }
+ 
+-log4cxx::helpers::ThreadStartPost ThreadUtility::postStartFunction(){
++ThreadStartPost ThreadUtility::postStartFunction(){
+ 	return m_priv->start_post;
+ }
++
++} //namespace helpers
++} //namespace log4cxx
++
