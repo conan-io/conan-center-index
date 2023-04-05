@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 import os
 
@@ -72,7 +72,13 @@ class LibSSHRecipe(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        # work-around conan-io/conan-center-index#16900
+        replace_in_file(self, os.path.join(self.source_folder, "ConfigureChecks.cmake"), "${OPENSSL_CRYPTO_LIBRARIES}", "OpenSSL::Crypto")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${OPENSSL_CRYPTO_LIBRARIES}", "OpenSSL::Crypto")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
