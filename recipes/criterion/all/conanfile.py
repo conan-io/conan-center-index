@@ -15,7 +15,7 @@ class CriterionConan(ConanFile):
     topics = ("testing")
     description = "A cross-platform C and C++ unit testing framework for the 21st century"
 
-    # Binary configuration
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -32,7 +32,7 @@ class CriterionConan(ConanFile):
     def configure(self):        
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        del self.settings.compiler.libcxx
+       self.settings.compiler.rm_safe("libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
