@@ -22,7 +22,7 @@ import itertools # for autoinit header generation
 # Enable to keep VTK-generated cmake files, to check contents
 _debug_packaging = False
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.59.0"
 
 
 # for self.options.group_* and self.options.
@@ -585,7 +585,7 @@ class VtkConan(ConanFile):
         return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
 
     def build_requirements(self):
-        self.tool_requires("sqlite3/3.40.1")
+        self.tool_requires("sqlite3/3.41.1")
 
     def source(self):
         if self.options.use_source_from_git:
@@ -606,24 +606,24 @@ class VtkConan(ConanFile):
         parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: package/version to require
-                "cli11":             "cli11/2.3.1",
+                "cli11":             "cli11/2.3.2",
                 "double-conversion": "double-conversion/3.2.1",
                 "eigen":             "eigen/3.4.0",
                 "expat":             "expat/2.5.0",
-                "exprtk":            "exprtk/0.0.1",
-                "fmt":               "fmt/8.1.1",      # 9.1.0 release docs mention a PR - confirmed merged 8.1.0
-                "freetype":          "freetype/2.12.1",
+                "exprtk":            "exprtk/0.0.1",   # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                "fmt":               "fmt/8.1.1",      # VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0
+                "freetype":          "freetype/2.13.0",
                 "glew":              "glew/2.2.0",
                 "jsoncpp":           "jsoncpp/1.9.5",
                 "libharu":           "libharu/2.4.3",
                 "kissfft":           "kissfft/131.1.0",
                 "lz4":               "lz4/1.9.4",
                 "libpng":            "libpng/1.6.39",
-                "proj":              "proj/9.0.1", # if MAJOR version changes, update ThirdParty/libproj/CMakeLists.txt
+                "proj":              "proj/9.1.1",
                 "pugixml":           "pugixml/1.13",
-                "sqlite3":           "sqlite3/3.40.1",
-                "utfcpp":            "utfcpp/3.2.2",
-                "xz_utils":          "xz_utils/5.2.5", # note: VTK calls this lzma
+                "sqlite3":           "sqlite3/3.41.1",
+                "utfcpp":            "utfcpp/3.2.3",
+                "xz_utils":          "xz_utils/5.4.0", # note: VTK calls this lzma
                 "zlib":              "zlib/1.2.13",
                 "TIFF":              "libtiff/4.4.0",
                 }
@@ -634,10 +634,10 @@ class VtkConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             parties["jpeg"] = "libjpeg/9e"
         elif self.options.with_jpeg == "libjpeg-turbo":
-            parties["jpeg"] = "libjpeg-turbo/2.1.4"
+            parties["jpeg"] = "libjpeg-turbo/2.1.5"
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
-            parties["hdf5"]    = "hdf5/1.13.1"
+            parties["hdf5"]    = "hdf5/1.14.0"
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
             parties["netcdf"]  = "netcdf/4.8.1"
@@ -648,12 +648,15 @@ class VtkConan(ConanFile):
         # parties["zfp"]     = "zfp/0.5.5"
 
         if self.options.build_all_modules:
-            parties["boost"]  = "boost/1.80.0"
+            parties["boost"]  = "boost/1.81.0"
             parties["openvr"] = "openvr/1.16.8"
             parties["odbc"]   = "odbc/2.3.11"
 
         if self._is_any_Qt_enabled:
-            parties["qt"] = "qt/6.4.1"
+            if self.options.qt_version == "5":
+                parties["qt"] = "qt/5.15.8"
+            else:
+                parties["qt"] = "qt/6.4.2"
 
         return parties
 
