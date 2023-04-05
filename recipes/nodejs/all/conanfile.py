@@ -1,8 +1,9 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class NodejsConan(ConanFile):
@@ -35,17 +36,17 @@ class NodejsConan(ConanFile):
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
-        self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
+        copy(self, pattern="LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, pattern="node.exe", src=self._source_subfolder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, pattern="npm", src=self._source_subfolder, dst=os.path.join(self.package_folder, "bin"))
+        copy(self, pattern="npx", src=self._source_subfolder, dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.includedirs = []
         bin_dir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
-        self.env_info.PATH.append(bin_dir)
+        self.runenv_info.prepend_path("PATH", bin_dir)
