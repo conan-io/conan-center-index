@@ -1,0 +1,23 @@
+diff --git a/src/main/cpp-qt/configuration.cpp b/src/main/cpp-qt/configuration.cpp
+index 516acef4..ef8589fe 100644
+--- a/src/main/cpp-qt/configuration.cpp
++++ b/src/main/cpp-qt/configuration.cpp
+@@ -25,7 +25,10 @@
+ #include <memory>
+ #include <QDebug>
+ 
+-using log4cxx::qt::Configuration;
++namespace log4cxx
++{
++namespace qt
++{
+ using log4cxx::helpers::LogLog;
+ 
+ static std::unique_ptr<QFileSystemWatcher> watcher;
+@@ -120,3 +123,6 @@ Configuration::configureFromFileAndWatch(const QVector<QString>& directories,
+ 
+ 	return {log4cxx::spi::ConfigurationStatus::NotConfigured, QString()};
+ }
++
++} //namespace helpers
++} //namespace log4cxx

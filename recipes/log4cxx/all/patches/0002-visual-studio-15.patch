@@ -1,26 +1,3 @@
-diff --git a/src/main/cpp-qt/configuration.cpp b/src/main/cpp-qt/configuration.cpp
-index 516acef4..166de640 100644
---- a/src/main/cpp-qt/configuration.cpp
-+++ b/src/main/cpp-qt/configuration.cpp
-@@ -26,7 +26,10 @@
- #include <QDebug>
- 
- using log4cxx::qt::Configuration;
--using log4cxx::helpers::LogLog;
-+namespace log4cxx
-+{
-+namespace helpers
-+{
- 
- static std::unique_ptr<QFileSystemWatcher> watcher;
- static QString configFilename;
-@@ -120,3 +123,6 @@ Configuration::configureFromFileAndWatch(const QVector<QString>& directories,
- 
- 	return {log4cxx::spi::ConfigurationStatus::NotConfigured, QString()};
- }
-+
-+} //namespace helpers
-+} //namespace log4cxx
 diff --git a/src/main/cpp/aprdatagramsocket.cpp b/src/main/cpp/aprdatagramsocket.cpp
 index f337736f..55852386 100644
 --- a/src/main/cpp/aprdatagramsocket.cpp
