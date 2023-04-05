@@ -4,5 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
-                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
+find_package(libssh CONFIG REQUIRED)
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE libssh::libssh)
