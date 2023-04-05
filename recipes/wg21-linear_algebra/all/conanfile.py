@@ -31,8 +31,8 @@ class LAConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "8",
-            "clang": "8",
+            "gcc": "10",
+            "clang": "11",
             "apple-clang": "11"
         }
 
