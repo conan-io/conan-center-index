@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
-from conan.tools.files import export_conandata_patches, get, copy, rm
+from conan.tools.files import get, copy, rm
 from conan.tools.layout import basic_layout
 import os
 
@@ -27,9 +27,6 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -48,8 +45,7 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        if valid_min_cppstd(self, 17):
-            rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
+        rm(self, "filesystem.hpp", os.path.join(self.source_folder, "vtu11", "inc"))
 
     def build(self):
         self._patch_sources()
@@ -66,9 +62,6 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        if not valid_min_cppstd(self, 17):
-            self.cpp_info.cxxflags = ["-std=c++11"]
 
         if self.options.with_zlib:
             self.cpp_info.defines = ["VTU11_ENABLE_ZLIB"]

@@ -1,5 +1,5 @@
 sources:
-  "1.2.0":
+  "1.2":
     url:
       - "https://github.com/phmkopp/vtu11/archive/refs/tags/v1.2.tar.gz"
     sha256: "c2b560d397c1a86c10e13f029b4ef08621f70ca4c897c44c19e7d025f11baec3"
