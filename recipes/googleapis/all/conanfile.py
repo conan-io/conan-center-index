@@ -58,6 +58,7 @@ class GoogleAPIS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # https://github.com/conan-io/conan-center-index/pull/15601#issuecomment-1493086506
         self.requires(f"protobuf/{self._protobuf_version}", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
     def validate(self):
