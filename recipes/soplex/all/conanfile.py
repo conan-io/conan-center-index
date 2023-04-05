@@ -120,5 +120,7 @@ class SoPlexConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        # https://github.com/conan-io/conan-center-index/pull/16017#discussion_r1156484737
+        self.cpp_info.set_property("cmake_target_name", "soplex")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
