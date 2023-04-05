@@ -10,12 +10,12 @@ sources:
     sha256: "3151d99ecbbddd4e57605ff1919bdf234d08336b47d369b9dc562acff780aaf7"
 patches:
   "0.1.4":
-    - patch_file: "patches/patch_conanbuildinfo.txt"
+    - patch_file: "patches/patch_conanbuildinfo.diff"
       patch_type: "conan"
-    - patch_file: "patches/patch_conan_basic_setup.txt"
+    - patch_file: "patches/rm_conan_basic_setup.diff"
       patch_type: "conan"
   "0.1.3":
-    - patch_file: "patches/patch_conanbuildinfo.txt"
+    - patch_file: "patches/patch_conanbuildinfo.diff"
       patch_type: "conan"
-    - patch_file: "patches/patch_conan_basic_setup.txt"
+    - patch_file: "patches/rm_conan_basic_setup.diff"
       patch_type: "conan"
