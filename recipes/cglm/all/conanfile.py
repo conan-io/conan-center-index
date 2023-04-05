@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get, patch, rmdir, copy
 import os
 
-required_conan_version = ">=1.58.0"
+required_conan_version = ">=1.50.0"
 
 
 class CglmConan(ConanFile):
@@ -26,60 +26,43 @@ class CglmConan(ConanFile):
         "header_only": False,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
-
-    @property
-    def _build_subfolder(self):
-        return self.build_folder
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.options.header_only:
-            del self.settings.arch
-            del self.settings.build_type
-            del self.settings.compiler
-            del self.settings.os
+            self.options.rm_safe("fPIC")
+        del self.settings.compiler.rm_safe("libcxx")
+        del self.settings.compiler.rm_safe("cppstd")
 
-    def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
-
-        tc = CMakeToolchain(self)
-        tc.cache_variables["CGLM_STATIC"] = not self.options.shared
-        tc.cache_variables["CGLM_SHARED"] = self.options.shared
-        tc.cache_variables["CGLM_USE_TEST"] = False
-        tc.generate()
+    def package_id(self):
+        if self.info.options.header_only:
+            self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if not self.options.header_only:
+            tc = CMakeToolchain(self)
+            tc.cache_variables["CGLM_STATIC"] = not self.options.shared
+            tc.cache_variables["CGLM_SHARED"] = self.options.shared
+            tc.cache_variables["CGLM_USE_TEST"] = False
+            tc.generate()
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
-        for patch_args in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch_args)
-
         if not self.options.header_only:
             cmake = CMake(self)
-            cmake.configure(build_script_folder=self._source_subfolder)
+            cmake.configure()
             cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self._source_subfolder, os.path.join(self.package_folder, "licenses"))
-
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
-            copy(self, "*", os.path.join(self._source_subfolder, "include"), os.path.join(self.package_folder, "include"))
-
+            copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         else:
             cmake = CMake(self)
             cmake.install()
@@ -98,6 +81,6 @@ class CglmConan(ConanFile):
                 self.cpp_info.system_libs.append("m")
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
-        #self.cpp_info.names["pkg_config"] = "cglm"
-        #self.cpp_info.names["cmake_find_package"] = "cglm"
-        #self.cpp_info.names["cmake_find_package_multi"] = "cglm"
+        self.cpp_info.names["pkg_config"] = "cglm"
+        self.cpp_info.names["cmake_find_package"] = "cglm"
+        self.cpp_info.names["cmake_find_package_multi"] = "cglm"
