@@ -39,7 +39,7 @@ class DirEntConan(ConanFile):
             self,
             pattern="*.h",
             dst=os.path.join(self.package_folder, "include"),
-            src=self.source_folder,
+            src=os.path.join(self.source_folder, "include"),
         )
 
     def package_info(self):
