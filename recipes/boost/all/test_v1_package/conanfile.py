@@ -23,8 +23,8 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
             if not self.options["boost"].without_python:
                 pyversion = tools.Version(self.options["boost"].python_version)
-                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = f"{pyversion.major}.{pyversion.minor}"
-                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = f"{pyversion.major}.{pyversion.minor}"
+                cmake.definitions["PYTHON_VERSION_TO_SEARCH"] = pyversion
+                cmake.definitions["Python_EXECUTABLE"] = self.options["boost"].python_executable
             cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random
             cmake.definitions["WITH_REGEX"] = not self.options["boost"].without_regex
             cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
@@ -37,6 +37,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_STACKTRACE"] = not self.options["boost"].without_stacktrace
             cmake.definitions["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
             cmake.definitions["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
+            cmake.definitions["WITH_URL"] = not self._boost_option("without_url", True)
             if self.options["boost"].namespace != 'boost' and not self.options["boost"].namespace_alias:
                 cmake.definitions['BOOST_NAMESPACE'] = self.options["boost"].namespace
             cmake.configure()
@@ -47,43 +48,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if tools.cross_building(self):
             return
-        self.run(os.path.join("bin", "lambda_exe"), run_environment=True)
-        if self.options["boost"].header_only:
-            return
-        if not self.options["boost"].without_random:
-            self.run(os.path.join("bin", "random_exe"), run_environment=True)
-        if not self.options["boost"].without_regex:
-            self.run(os.path.join("bin", "regex_exe"), run_environment=True)
-        if not self.options["boost"].without_test:
-            self.run(os.path.join("bin", "test_exe"), run_environment=True)
-        if not self.options["boost"].without_coroutine:
-            self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
-        if not self.options["boost"].without_chrono:
-            self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
-        if not self.options["boost"].without_fiber:
-            self.run(os.path.join("bin", "fiber_exe"), run_environment=True)
-        if not self.options["boost"].without_locale:
-            self.run(os.path.join("bin", "locale_exe"), run_environment=True)
-        if not self._boost_option("without_nowide", True):
-            bin_nowide = os.path.join("bin", "nowide_exe")
-            conanfile = os.path.join(self.source_folder, "conanfile.py")
-            self.run(f"{bin_nowide} {conanfile}", run_environment=True)
-        if not self._boost_option("without_json", True):
-            self.run(os.path.join("bin", "json_exe"), run_environment=True)
-        if not self.options["boost"].without_python:
-            with tools.environment_append({"PYTHONPATH": "bin:lib"}):
-                python_executable = self.options["boost"].python_executable
-                python_script = os.path.join(self.source_folder, os.pardir, "test_package", "python.py")
-                self.run(f"{python_executable} {python_script}", run_environment=True)
-            self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
-        if not self.options["boost"].without_stacktrace:
-            self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
-            if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
-                self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
-            if self.settings.os == "Windows":
-                self.run(os.path.join("bin", "stacktrace_windbg_exe"), run_environment=True)
-                self.run(os.path.join("bin", "stacktrace_windbg_cached_exe"), run_environment=True)
-            else:
-                self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
-            if self._boost_option("with_stacktrace_backtrace", False):
-                self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)
+        self.run(f"ctest --output-on-failure -C {self.settings.build_type}", run_environment=True)
+    

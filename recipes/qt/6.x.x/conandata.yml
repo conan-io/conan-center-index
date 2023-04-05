@@ -1,4 +1,12 @@
 sources:
+  "6.4.2":
+    url:
+      - "https://download.qt.io/archive/qt/6.4/6.4.2/single/qt-everywhere-src-6.4.2.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.4/6.4.2/single/qt-everywhere-src-6.4.2.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.4/6.4.2/single/qt-everywhere-src-6.4.2.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.4/6.4.2/single/qt-everywhere-src-6.4.2.tar.xz"
+      - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.4/6.4.2/single/qt-everywhere-src-6.4.2.tar.xz"
+    sha256: "689f53e6652da82fccf7c2ab58066787487339f28d1ec66a8765ad357f4976be"
   "6.4.1":
     url:
       - "https://download.qt.io/archive/qt/6.4/6.4.1/single/qt-everywhere-src-6.4.1.tar.xz"
@@ -24,6 +32,16 @@ sources:
       - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.2/6.2.4/single/qt-everywhere-src-6.2.4.tar.xz"
     sha256: "cfe41905b6bde3712c65b102ea3d46fc80a44c9d1487669f14e4a6ee82ebb8fd"
 patches:
+  "6.4.2":
+    - base_path: "qtbase/cmake"
+      patch_file: "patches/qt6-pri-helpers-fix.diff"
+    - patch_file: "patches/c72097e.diff"
+      base_path: "qtwebengine"
+    - patch_file: "patches/d13958d.diff"
+      base_path: "qtbase"
+      patch_description: "Fix PCRE2 detection"
+      patch_type: "bugfix"
+      patch_source: "https://codereview.qt-project.org/c/qt/qtbase/+/445885"
   "6.4.1":
     - base_path: "qtbase/cmake"
       patch_file: "patches/qt6-pri-helpers-fix.diff"

@@ -1,0 +1,13 @@
+sources:
+  "v7":
+    url: https://github.com/rollbear/strong_type/archive/refs/tags/v7.tar.gz
+    sha256: 854365b28dfaaee5c2047dd4d2e746c809b76035191b22a4ce24f4cac49d0891
+  "v8":
+    url: https://github.com/rollbear/strong_type/archive/refs/tags/v8.tar.gz
+    sha256: 31ee68e097fec2ce65dbf2ed683911c5ee6a7a37808b28d84479ef7e17990fad
+  "v9":
+    url: https://github.com/rollbear/strong_type/archive/refs/tags/v9.tar.gz
+    sha256: 9d71ee02256b99c7f0189295514dd683cc1be8886444d5c04623fd491cf5aa40
+  "v10":
+    url: https://github.com/rollbear/strong_type/archive/refs/tags/v10.tar.gz
+    sha256: 154e4ceda6cf8fe734deb7eafdf58df5052822d04425dc7c22711ef54cdaeefa

@@ -1,4 +1,7 @@
 sources:
+  "0.18.1":
+    url: "https://github.com/objectbox/objectbox-c/archive/v0.18.1.tar.gz"
+    sha256: "108ac7fac843f2962374a12b361bb57b4d114013d16f7716cfedbc7df52feb2e"
   "0.18.0":
     url: "https://github.com/objectbox/objectbox-c/archive/v0.18.0.tar.gz"
     sha256: "e86e921d59c6c36a4a0c0ddc5a2b641789bfa012e0824506c285feb4e9285ae7"
@@ -7,9 +10,15 @@ sources:
     sha256: "3b936b3352ae0c8ea3706cc0a1790d2714a415cdce16007c2caca367ead5af8d"
 
 patches:
+  "0.18.1":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "add sync option, disable tests/examples, support max length of windows path"
+      patch_type: "conan"
   "0.18.0":
     - patch_file: "patches/0001-fix-cmake.patch"
-      base_path: "source_subfolder"
+      patch_description: "add sync option, disable tests/examples, support max length of windows path"
+      patch_type: "conan"
   "0.17.0":
     - patch_file: "patches/0001-fix-cmake.patch"
-      base_path: "source_subfolder"
+      patch_description: "add sync option, disable tests/examples, support max length of windows path"
+      patch_type: "conan"

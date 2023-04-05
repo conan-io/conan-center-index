@@ -7,6 +7,8 @@
 
 using namespace Platform::Interfaces;
 
+#if not defined (PLATFORM_INTERFACES_0_2_0_LATER)
+
 void print(IEnumerable auto&& enumerable)
 {
     auto size = std::ranges::size(enumerable);
@@ -41,6 +43,45 @@ void add(Collection& collection, const std::same_as<Item> auto& item)
         collection.insert(item);
     }
 }
+
+#else
+
+void print(CEnumerable auto&& enumerable)
+{
+    auto size = std::ranges::size(enumerable);
+
+    std::cout << '[';
+    for (int i = 0; auto&& item : enumerable)
+    {
+        std::cout << item;
+        if (i < size - 1)
+        {
+            std::cout << ", ";
+        }
+
+        i++;
+    }
+    std::cout << ']' << std::endl;
+}
+
+template<CEnumerable Collection, typename Item = typename Enumerable<Collection>::Item>
+requires
+    CList<Collection> ||
+    CSet<Collection> ||
+    CDictionary<Collection>
+void add(Collection& collection, const std::same_as<Item> auto& item)
+{
+    if constexpr (CList<Collection>)
+    {
+        collection.push_back(item);
+    }
+    else
+    {
+        collection.insert(item);
+    }
+}
+
+#endif
 
 int main()
 {

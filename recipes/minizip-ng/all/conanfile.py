@@ -19,6 +19,7 @@ class MinizipNgConan(ConanFile):
     homepage = "https://github.com/zlib-ng/minizip-ng"
     license = "Zlib"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -85,11 +86,11 @@ class MinizipNgConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.settings.os != "Windows":
             if self.options.get_safe("with_iconv"):
                 self.requires("libiconv/1.17")
@@ -99,8 +100,7 @@ class MinizipNgConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if self._needs_pkg_config:
@@ -187,5 +187,7 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].requires.append("zstd::zstd")
         if self.options.with_openssl:
             self.cpp_info.components["minizip"].requires.append("openssl::openssl")
+        elif is_apple_os(self):
+            self.cpp_info.components["minizip"].frameworks.extend(["CoreFoundation", "Security"])
         if self.settings.os != "Windows" and self.options.with_iconv:
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")

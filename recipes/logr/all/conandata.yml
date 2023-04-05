@@ -14,3 +14,6 @@ sources:
   "0.5.1":
     url: "https://github.com/ngrodzitski/logr/archive/v0.5.1.tar.gz"
     sha256: "674be6a53d5b3f40273b1b5710ac9e32d870827032b5008c41621db47f4b3b0e"
+  "0.6.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.6.0.tar.gz"
+    sha256: "2ecb40396add33f2120a79957633533381f3df13cb3b53278eb9dec3a1230eb2"

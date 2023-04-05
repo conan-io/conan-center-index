@@ -1,7 +1,16 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import (
+    apply_conandata_patches,
+    collect_libs,
+    copy,
+    get,
+    rm,
+    rmdir,
+)
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class SymengineConan(ConanFile):
@@ -12,7 +21,6 @@ class SymengineConan(ConanFile):
     homepage = "https://symengine.org/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -26,38 +34,19 @@ class SymengineConan(ConanFile):
     }
     short_paths = True
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def requirements(self):
         if self.options.integer_class == "boostmp":
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.81.0")
         else:
-            self.requires("gmp/6.2.1")
+            self.requires("gmp/6.2.1", transitive_headers=True, transitive_libs=True)
 
     def source(self):
-        tools.get(
+        get(
+            self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            destination=self._source_subfolder,
+            destination=self.source_folder,
         )
-
-    def _configure_cmake(self):
-        if self._cmake is None:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_TESTS"] = False
-            self._cmake.definitions["BUILD_BENCHMARKS"] = False
-            self._cmake.definitions["INTEGER_CLASS"] = self.options.integer_class
-            self._cmake.definitions["MSVC_USE_MT"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,27 +54,42 @@ class SymengineConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_BENCHMARKS"] = False
+        tc.variables["INTEGER_CLASS"] = self.options.integer_class
+        tc.variables["MSVC_USE_MT"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        cmake = CMake(self)
         cmake.install()
         # [CMAKE-MODULES-CONFIG-FILES (KB-H016)]
-        tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        rm(self, "*.cmake", self.package_folder, recursive=True)
         # [DEFAULT PACKAGE LAYOUT (KB-H013)]
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.libs = ["symengine"]
-        if any("teuchos" in v for v in tools.collect_libs(self)):
+        if any("teuchos" in v for v in collect_libs(self)):
             self.cpp_info.libs.append("teuchos")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.names["cmake_find_package"] = "symengine"
         # FIXME: symengine exports a non-namespaced `symengine` target.
         self.cpp_info.names["cmake_find_package_multi"] = "symengine"

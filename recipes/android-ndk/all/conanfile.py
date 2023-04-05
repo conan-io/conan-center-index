@@ -23,13 +23,15 @@ class AndroidNDKConan(ConanFile):
     short_paths = True
     exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
 
-    @property
-    def _is_universal2(self):
-        return self.version in ["r23b", "r23c", "r24", "r25"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+    def _is_universal2(self, info=False):
+        settings = self.info.settings if info else self.settings
+        major, minor = self._ndk_major_minor
+        return ((major == 23 and minor >= "b") or major >= 24) and \
+               settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
-        return "x86_64" if self._is_universal2 else self.settings.arch
+        return "x86_64" if self._is_universal2() else self.settings.arch
 
     @property
     def _settings_os_supported(self):
@@ -43,7 +45,7 @@ class AndroidNDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        if self._is_universal2:
+        if self._is_universal2(info=True):
             self.info.settings.arch = "universal:armv8/x86_64"
         del self.info.settings.compiler
         del self.info.settings.build_type
@@ -58,7 +60,8 @@ class AndroidNDKConan(ConanFile):
         pass
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
+        major, _ = self._ndk_major_minor
+        if major >= 23:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             self._unzip_fix_symlinks(url=data["url"], target_folder=self.source_folder, sha256=data["sha256"])
         else:
@@ -262,7 +265,7 @@ class AndroidNDKConan(ConanFile):
 
         # And if we are not building for Android, why bother at all
         if not self.settings_target.os == "Android":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
+            self.output.warning(f"You've added {self.ref} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
         self.cpp_info.bindirs.append(os.path.join(self._ndk_root_rel_path, "bin"))
@@ -326,7 +329,7 @@ class AndroidNDKConan(ConanFile):
             if cmake_system_processor:
                 self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
             else:
-                self.output.warn("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
+                self.output.warning("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
             self.env_info.NDK_ROOT = self._ndk_root
             self.env_info.CHOST = self._llvm_triplet
             self.env_info.CONAN_CMAKE_FIND_ROOT_PATH = ndk_sysroot

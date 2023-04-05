@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.54.0"
 
 
 class OpenEXRConan(ConanFile):
@@ -36,7 +35,7 @@ class OpenEXRConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
@@ -217,7 +216,7 @@ class OpenEXRConan(ConanFile):
             self.cpp_info.components["ilmbase_ilmbaseconfig"].defines.append("OPENEXR_DLL")
 
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["openexr_ilmimfconfig"].system_libs.append(libcxx)
                 self.cpp_info.components["ilmbase_ilmbaseconfig"].system_libs.append(libcxx)

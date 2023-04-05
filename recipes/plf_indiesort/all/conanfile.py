@@ -13,7 +13,7 @@ class PlfindiesortConan(ConanFile):
         "access containers, and increased performance for the sorting of large types."
     )
     license = "Zlib"
-    topics = ("plf_indiesort", "algorithm", "sort")
+    topics = ("algorithm", "sort", "header-only")
     homepage = "https://plflib.org/indiesort.htm"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"

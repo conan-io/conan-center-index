@@ -1,9 +1,11 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir
+from conans import tools, AutoToolsBuildEnvironment
 import contextlib
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 class LibxshmfenceConan(ConanFile):
     name = "libxshmfence"
@@ -38,31 +40,35 @@ class LibxshmfenceConan(ConanFile):
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-    
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        # for plain C projects only
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
     
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported by libxshmfence recipe. Contributions are welcome")
 
     def build_requirements(self):
-        self.build_requires("automake/1.16.4")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("automake/1.16.5")
+        self.build_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
-        self.requires("xorg-proto/2021.4")
+        self.requires("xorg-proto/2022.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], 
+        get(self, **self.conan_data["sources"][self.version], 
                   destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
@@ -91,8 +97,7 @@ class LibxshmfenceConan(ConanFile):
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -102,9 +107,10 @@ class LibxshmfenceConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["xshmfence"]
         self.cpp_info.names["pkg_config"] = "xshmfence"
+        self.cpp_info.set_property("pkg_config_name", "xshmfence")

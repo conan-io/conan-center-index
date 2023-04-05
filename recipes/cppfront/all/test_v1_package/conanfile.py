@@ -1,20 +1,20 @@
-from conans import ConanFile, tools
+from conans import ConanFile
 import os
 import shutil
 
+
 class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
 
-    @property
-    def _cppfront_input_path(self):
-        return os.path.join(self.build_folder, "pure2-hello.cpp2")
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
 
     def build(self):
-        if not tools.cross_building(self):
-            shutil.copy2(src=os.path.join(self.source_folder, "..", "test_package", "pure2-hello.cpp2"), dst=os.path.join(self.build_folder, "pure2-hello.cpp2"))
-            self.run("cppfront {}".format(os.path.join(self.build_folder, "pure2-hello.cpp2")), run_environment=True)
+        shutil.copy2(src=os.path.join(self.source_folder, os.pardir, "test_package", "pure2-hello.cpp2"),
+                     dst=os.path.join(self.build_folder, "pure2-hello.cpp2"))
+        self.run("cppfront {}".format(os.path.join(self.build_folder, "pure2-hello.cpp2")))
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run("cppfront -h", run_environment=True)
-            assert os.path.isfile(os.path.join(self.build_folder, "pure2-hello.cpp"))
+        self.run("cppfront -h")
+        assert os.path.isfile(os.path.join(self.build_folder, "pure2-hello.cpp"))

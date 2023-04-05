@@ -32,5 +32,5 @@ class TestPackageConan(ConanFile):
         self.run(f"m4 -R {self.source_folder}/frozen.m4f {self.source_folder}/test.m4")
 
         output = StringIO()
-        self.run(f"m4 -P {self._m4_input_path}", output=output)
+        self.run(f"m4 -P {self._m4_input_path}", output)
         assert "Harry, Jr. met Sally" in output.getvalue()

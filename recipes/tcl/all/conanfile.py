@@ -1,6 +1,8 @@
+from conans import AutoToolsBuildEnvironment, tools
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools import files
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 import functools
 import os
 
@@ -48,7 +50,7 @@ class TclConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
@@ -59,15 +61,15 @@ class TclConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        files.get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _get_default_build_system_subdir(self):
-            return {
-                "Macos": "macosx",
-                "Linux": "unix",
-                "Windows": "win",
-            }[str(self.settings.os)]
+        return {
+            "Macos": "macosx",
+            "Linux": "unix",
+            "Windows": "win",
+        }[str(self.settings.os)]
 
     def _get_configure_dir(self, build_system_subdir=None):
         if build_system_subdir is None:
@@ -137,7 +139,8 @@ class TclConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v):
+            return "yes" if v else "no"
         conf_args = [
             "--enable-threads",
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -147,8 +150,8 @@ class TclConan(ConanFile):
         autotools.configure(configure_dir=self._get_configure_dir(), args=conf_args, vars={"PKG_CFG_ARGS": " ".join(conf_args)})
 
         # https://core.tcl.tk/tcl/tktview/840660e5a1
-        for root, _, files in os.walk(self.build_folder):
-            if "Makefile" in files:
+        for root, _, list_of_files in os.walk(self.build_folder):
+            if "Makefile" in list_of_files:
                 tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
         return autotools
 
@@ -169,9 +172,9 @@ class TclConan(ConanFile):
             autotools.install()
             autotools.make(target="install-private-headers")
 
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "man"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            files.rmdir(self, os.path.join(self.package_folder, "man"))
+            files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
         package_path = self.package_folder

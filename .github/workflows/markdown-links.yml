@@ -1,12 +1,9 @@
-name: Check Markdown links
+name: "[linter] Markdown links"
 
 on:
   pull_request:
     paths:
       - '**.md'
-
-env:
-  PYVER: "3.8"
 
 jobs:
   markdown-link-check-pr:

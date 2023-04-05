@@ -1,22 +1,23 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.files import replace_in_file, apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
-class PackageConan(ConanFile):
+
+class QpdfConan(ConanFile):
     name = "qpdf"
     description = "QPDF is a command-line tool and C++ library that performs content-preserving transformations on PDF files."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/qpdf/qpdf"
-    topics = ("pdf")
+    topics = ("pdf",)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,8 +33,8 @@ class PackageConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 14
+    def _min_cppstd(self):
+        return "14"
 
     @property
     def _compilers_minimum_version(self):
@@ -41,6 +42,8 @@ class PackageConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "10",
+            "Visual Studio": "14",
+            "msvc": "190",
         }
 
     def export_sources(self):
@@ -52,10 +55,7 @@ class PackageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,36 +64,49 @@ class PackageConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.13")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1t")
         elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
 
-
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        if is_msvc(self):
-            check_min_vs(self, "150")
-        else:
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.24.1")
-        self.tool_requires("pkgconf/1.9.3")
+        if not self._cmake_new_enough("3.16"):
+            self.tool_requires("cmake/3.25.3")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         # https://qpdf.readthedocs.io/en/latest/installation.html#build-time-crypto-selection
@@ -118,8 +131,6 @@ class PackageConan(ConanFile):
         # At the moment, even with the linked work-around, the linkage is mixed-up
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -159,13 +170,17 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "qpdf")
-
+        self.cpp_info.set_property("cmake_target_name", "qpdf::libqpdf")
+        self.cpp_info.set_property("pkg_config_name", "libqpdf")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libqpdf"].libs = ["qpdf"]
-        self.cpp_info.components["libqpdf"].set_property("pkg_config_name", "libqpdf")
-        self.cpp_info.components["libqpdf"].set_property("cmake_target_name", "qpdf::libqpdf")
         self.cpp_info.components["libqpdf"].requires.append("zlib::zlib")
-        self.cpp_info.components["libqpdf"].requires.append(f"{self.options.with_jpeg}::{self.options.with_jpeg}")
-
+        if self.options.with_jpeg == "libjpeg":
+            self.cpp_info.components["libqpdf"].requires.append("libjpeg::libjpeg")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.cpp_info.components["libqpdf"].requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.cpp_info.components["libqpdf"].requires.append("mozjpeg::libjpeg")
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["libqpdf"].requires.append("openssl::openssl")
 
@@ -173,9 +188,9 @@ class PackageConan(ConanFile):
             self.cpp_info.components["libqpdf"].system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "qpdf"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "qpdf"
         self.cpp_info.names["cmake_find_package"] = "qpdf"
         self.cpp_info.names["cmake_find_package_multi"] = "qpdf"
         self.cpp_info.components["libqpdf"].names["cmake_find_package"] = "libqpdf"
         self.cpp_info.components["libqpdf"].names["cmake_find_package_multi"] = "libqpdf"
+        self.cpp_info.components["libqpdf"].set_property("pkg_config_name", "libqpdf")
+        self.cpp_info.components["libqpdf"].set_property("cmake_target_name", "qpdf::libqpdf")

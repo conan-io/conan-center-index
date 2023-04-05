@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag, VCVars
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -48,6 +48,7 @@ class MimallocConan(ConanFile):
         return {
             "gcc": "7",
             "Visual Studio": "15",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -111,13 +112,11 @@ class MimallocConan(ConanFile):
 
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -140,7 +139,7 @@ class MimallocConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if is_msvc(self) and self.settings.arch == "x86":
+        if is_msvc(self) and self.settings.arch == "x86" and self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "mimalloc-redirect.lib",
                             "mimalloc-redirect32.lib")

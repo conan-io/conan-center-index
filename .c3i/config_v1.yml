@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.54.0
+  version: 1.59.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -16,16 +16,6 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
-  check_runs:
-    - "Lint changed files (YAML files)"
-    - "Lint changed conanfile.py (v2 migration)"
-
-# Requirements to merge a given pull-request:
-# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-# * check_runs refers to notifications from GH actions
-status_checks:
-  - "license/cla"
-  - "continuous-integration/jenkins/pr-merge"
 
 slack:
   credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
@@ -33,13 +23,37 @@ slack:
 
 # Things related to Jenkins jobs
 tasks:
-  conan_v2_run_export: true
-  write_comments: true
-  detailed_status_checks: true
-  update_labels: true
+  access_request:
+    request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
+    max_inactivity_days: 0
   automatic_merge:
     reviews_required_total: 2  # Reviews that a PR needs so it can be merged
     reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
+    branches:  # PRs from automations that have these as base-branches will be merged automatically
+      - "conan-io:action-doc-toc"
+    # Requirements to merge a given pull-request:
+    # * check_runs refers to notifications from GH actions
+    # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+    check_runs:
+      - name: "Lint changed files (YAML files)"
+      - name: "Lint changed conanfile.py (v2 migration)"
+    status_checks:
+      - name: "license/cla"
+      - name: "continuous-integration/jenkins/pr-merge"
+      - name: "c3i/conan-v2/pr-merge"
+        required_for_references: "conan_v2_ready_references.yml"
+  cci:
+    conan_v2_run_export: false
+    write_comments: true
+    detailed_status_checks: true
+    update_labels: true
+    wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
+      job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
+      timeout_seconds: 600  # Maximum time to wait for the multibranch job
+      merge_messages: true  # Merge messages from the multibranch job waited for
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
+    report_issue_append: false
 
 # Profile configurations to build packages
 configurations:
@@ -184,7 +198,7 @@ pod_size:
   large:
     - "pcl"
     - "duckdb"
-    - "cppfront"
+    - "ceres-solver"
   xlarge:
     - "llvm"
     - "opengv"

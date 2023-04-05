@@ -1,4 +1,16 @@
 sources:
+  "3.11.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.11.0.tar.gz"
+    sha256: "accb9d1ae94bdb5c50b5a7c3723c0e2e128853f8d8f007068fec2b58887db05d"
+  "3.10.1":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.10.1.tar.gz"
+    sha256: "d162c21c1dc538dbc6b3bb6d1317a7808f2eccef78638445630533f5bed902ee"
+  "3.10.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.10.0.tar.gz"
+    sha256: "9167ad938f29464ca2312fe32565646a61328249e16f84b2a23969c627cc93f5"
+  "3.9.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v3.9.0.tar.gz"
+    sha256: "a10443e13748291709b422b2da49fc6753a1a43bf24205d4600595dfe3d811bb"
   "3.8.1":
     url: "https://github.com/fastfloat/fast_float/archive/v3.8.1.tar.gz"
     sha256: "823d7f8df7fadc3ed24738eb0cf4a40f0450068edd92805698916be40966d87a"
@@ -17,27 +29,12 @@ sources:
   "3.4.0":
     url: "https://github.com/fastfloat/fast_float/archive/v3.4.0.tar.gz"
     sha256: "a242877d2fae81ca412033f5ebf5dbc43cb029c56b4af78e33106b9a69f8f58e"
-  "3.2.0":
-    url: "https://github.com/fastfloat/fast_float/archive/v3.2.0.tar.gz"
-    sha256: "c26d78b2b76704b117c416292bc47fa3e4bb69a131e82debe0e8fd5c7afdf18e"
-  "3.1.0":
-    url: "https://github.com/fastfloat/fast_float/archive/v3.1.0.tar.gz"
-    sha256: "755ee0bdde8ee0cc10ae16e1f283c2833d9cfa7ea114950ab807dc7ee108f722"
   "2.0.0":
     url: "https://github.com/fastfloat/fast_float/archive/v2.0.0.tar.gz"
     sha256: "5d528ec20811577c5f2b2873528c085c500fdcd2b2c0901450509a71de5f1fa4"
   "1.1.2":
     url: "https://github.com/fastfloat/fast_float/archive/v1.1.2.tar.gz"
     sha256: "580655a9ad2aeac7507de4433dcf985d8699ae8128b97c2cabc0962aa5beb513"
-  "1.1.1":
-    url: "https://github.com/fastfloat/fast_float/archive/refs/tags/v1.1.1.tar.gz"
-    sha256: "d17eb86f597e9f4972a1d5f81c42c7dee041aaae2e826b80685ed90dad5b3593"
-  "1.0.0":
-    url: "https://github.com/fastfloat/fast_float/archive/v1.0.0.tar.gz"
-    sha256: "694e87e6f5e08d4a5f22efcc8fb1977e30f3d63bfc7995a6a7a7288c3d581d75"
   "0.9.0":
     url: "https://github.com/fastfloat/fast_float/archive/v0.9.0.tar.gz"
     sha256: "1e40982107e03559a98323a0b97fc2110d73b0743818fe2cdc09abe77c4c5af8"
-  "0.8.0":
-    url: "https://github.com/fastfloat/fast_float/archive/v0.8.0.tar.gz"
-    sha256: "0c10d6b476504f601a380846f51939d3e1ae483888e025ad12d6d36a4b441346"

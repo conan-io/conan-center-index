@@ -16,6 +16,7 @@ class LibarchiveConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD-2-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -75,6 +76,9 @@ class LibarchiveConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
@@ -91,7 +95,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_nettle:
             self.requires("nettle/3.8.1")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/3.0.8")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -99,25 +103,21 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.get_safe("with_mbedtls"):
             self.requires("mbedtls/3.2.1")
 
     def validate(self):
-        if self.info.settings.os != "Windows" and self.info.options.with_cng:
+        if self.settings.os != "Windows" and self.options.with_cng:
             # TODO: add cng when available in CCI
             raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
-        if self.info.options.with_expat and self.info.options.with_libxml2:
+        if self.options.with_expat and self.options.with_libxml2:
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         cmake_deps = CMakeDeps(self)

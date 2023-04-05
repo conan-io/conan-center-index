@@ -2,10 +2,13 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 from conans import MSBuild, AutoToolsBuildEnvironment
+from conans.tools import vcvars, environment_append, unix_path, get_env
 
 import os
+import contextlib
 
 required_conan_version = ">=1.52.0"
 
@@ -61,6 +64,10 @@ class UsocketsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -114,14 +121,20 @@ class UsocketsConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1s")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.3.0")
+            self.requires("wolfssl/5.5.1")
 
         if self.options.eventloop == "libuv":
             self.requires("libuv/1.44.2")
         elif self.options.eventloop == "gcd":
             self.requires("libdispatch/5.3.2")
         elif self.options.eventloop == "boost":
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -134,11 +147,34 @@ class UsocketsConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        if is_msvc(self):
+            with vcvars(self):
+                env = {
+                    "CC": "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile)),
+                    "CFLAGS": "-{}".format(self.settings.compiler.runtime),
+                    "LD": "link",
+                    "NM": "dumpbin -symbols",
+                    "STRIP": ":",
+                    "AR": "{} lib".format(unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "RANLIB": ":",
+                }
+
+                if self.options.eventloop == "libuv":
+                    env["CPPFLAGS"] = "-I" + unix_path(self.deps_cpp_info["libuv"].include_paths[0]) + " "
+
+                with environment_append(env):
+                    yield
+        else:
+            yield
+
     def _build_configure(self):
         autotools = AutoToolsBuildEnvironment(self)
         autotools.fpic = self.options.get_safe("fPIC", False)
         with chdir(self, self._source_subfolder):
-            args = []
+            args = ["WITH_LTO=0"]
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
             elif self.options.with_ssl == "wolfssl":
@@ -156,16 +192,17 @@ class UsocketsConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
+        if Version(self.version) < "0.8.3" and is_msvc(self):
             self._build_msvc()
         else:
-            self._build_configure()
+            with self._build_context():
+                self._build_configure()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self._source_subfolder, "src"), keep_path=True)
-        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self._source_subfolder, keep_path=False)
-        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self._source_subfolder, keep_path=False)
+        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
         # drop internal headers
         rmdir(self, os.path.join(self.package_folder, "include", "internal"))
 

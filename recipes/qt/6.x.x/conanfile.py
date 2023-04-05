@@ -8,9 +8,9 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.build import cross_building, check_min_cppstd, build_jobs
+from conan.tools.build import cross_building, check_min_cppstd, build_jobs, default_cppstd
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
@@ -18,7 +18,7 @@ from conan.errors import ConanInvalidConfiguration
 from conans import RunEnvironment, tools
 from conans.model import Generator
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.55.0"
 
 
 class qt(Generator):
@@ -65,10 +65,10 @@ class QtConan(ConanFile):
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
-    topics = ("qt", "ui")
+    topics = ("framework", "ui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
-    license = "LGPL-3.0"
+    license = "LGPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -98,6 +98,7 @@ class QtConan(ConanFile):
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
+        "with_x11": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -140,6 +141,7 @@ class QtConan(ConanFile):
         "with_pulseaudio": False,
         "with_gssapi": False,
         "with_md4c": True,
+        "with_x11": True,
 
         "gui": True,
         "widgets": True,
@@ -185,7 +187,7 @@ class QtConan(ConanFile):
         export_conandata_patches(self)
 
     def export(self):
-        self.copy("qtmodules%s.conf" % self.version)
+        copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -193,6 +195,7 @@ class QtConan(ConanFile):
             del self.options.with_fontconfig
             self.options.with_glib = False
             del self.options.with_libalsa
+            del self.options.with_x11
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
@@ -224,6 +227,7 @@ class QtConan(ConanFile):
             del self.options.with_libjpeg
             del self.options.with_libpng
             del self.options.with_md4c
+            del self.options.with_x11
 
         if not self.options.get_safe("qtmultimedia"):
             del self.options.with_libalsa
@@ -279,6 +283,8 @@ class QtConan(ConanFile):
 
             if not (self.options.gui and self.options.qtdeclarative and self.options.qtwebchannel):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
+            if not self.options.with_dbus and self.settings.os == "Linux":
+                raise ConanInvalidConfiguration("option qt:webengine requires also qt:with_dbus on Linux")
 
             if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
@@ -342,11 +348,16 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
 
+        if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
+            raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
+        if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
+            raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
+
         if cross_building(self):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
     def layout(self):
-        cmake_layout(self, src_folder="qt6")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
@@ -359,7 +370,7 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.0")
         if self.options.with_glib:
-            self.requires("glib/2.75.0")
+            self.requires("glib/2.75.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.1")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -391,14 +402,15 @@ class QtConan(ConanFile):
             self.requires("openal/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
-        if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
+        if self.options.get_safe("with_x11", False):
             self.requires("xkbcommon/1.4.1")
+            self.requires("xorg/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.qtwayland:
+            self.requires("xkbcommon/1.4.1")
             self.requires("wayland/1.21.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
@@ -408,7 +420,7 @@ class QtConan(ConanFile):
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.85")
-            self.requires("libdrm/2.4.109")
+            self.requires("libdrm/2.4.114")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
@@ -421,24 +433,25 @@ class QtConan(ConanFile):
             self.requires("md4c/0.4.8")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.25.0")
-        self.build_requires("ninja/1.11.1")
-        self.build_requires("pkgconf/1.9.3")
+        self.tool_requires("cmake/3.25.2")
+        self.tool_requires("ninja/1.11.1")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if self.settings.os == "Windows":
-            self.build_requires('strawberryperl/5.32.1.1')
+            self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
-            self.build_requires("nodejs/16.3.0")
-            self.build_requires("gperf/3.1")
+            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
-                self.build_requires("bison/3.8.2")
-                self.build_requires("flex/2.6.4")
+                self.tool_requires("bison/3.8.2")
+                self.tool_requires("flex/2.6.4")
             else:
-                self.build_requires("winflexbison/2.5.24")
+                self.tool_requires("winflexbison/2.5.24")
 
         if self.options.qtwayland:
-            self.build_requires("wayland/1.21.0")
+            self.tool_requires("wayland/1.21.0")
         if cross_building(self):
             self.tool_requires(f"qt/{self.version}")
 
@@ -447,6 +460,13 @@ class QtConan(ConanFile):
         ms.generate()
 
         tc = CMakeDeps(self)
+        tc.set_property("libdrm", "cmake_file_name", "Libdrm")
+        tc.set_property("libdrm::libdrm_libdrm", "cmake_target_name", "Libdrm::Libdrm")
+        tc.set_property("wayland", "cmake_file_name", "Wayland")
+        tc.set_property("wayland::wayland-client", "cmake_target_name", "Wayland::Client")
+        tc.set_property("wayland::wayland-server", "cmake_target_name", "Wayland::Server")
+        tc.set_property("wayland::wayland-cursor", "cmake_target_name", "Wayland::Cursor")
+        tc.set_property("wayland::wayland-egl", "cmake_target_name", "Wayland::Egl")
         tc.generate()
 
         for f in glob.glob("*.cmake"):
@@ -591,6 +611,17 @@ class QtConan(ConanFile):
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
+
+        current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
+        current_cpp_std = str(current_cpp_std).replace("gnu", "")
+        cpp_std_map = {
+            "20": "FEATURE_cxx20"
+            }
+        if Version(self.version) >= "6.5.0":
+            cpp_std_map["23"] = "FEATURE_cxx2b"
+
+        tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
+
         tc.generate()
 
     def source(self):
@@ -779,7 +810,7 @@ class QtConan(ConanFile):
             cmake = CMake(self)
             cmake.install()
         save(self, os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
-        self.copy("*LICENSE*", src=self.source_folder, dst="licenses")
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
@@ -933,7 +964,7 @@ class QtConan(ConanFile):
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
+            if is_msvc(self):
                 libsuffix = "d"
             if is_apple_os(self):
                 libsuffix = "_debug"
@@ -1011,6 +1042,8 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
         if Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         if self.options.gui:
             gui_reqs = []
             if self.options.with_dbus:
@@ -1022,7 +1055,10 @@ class QtConan(ConanFile):
             if self.options.get_safe("with_fontconfig", False):
                 gui_reqs.append("fontconfig::fontconfig")
             if self.settings.os in ["Linux", "FreeBSD"]:
-                gui_reqs.extend(["xorg::xorg", "xkbcommon::xkbcommon"])
+                if self.options.qtwayland or self.options.get_safe("with_x11", False):
+                    gui_reqs.append("xkbcommon::xkbcommon")
+                if self.options.get_safe("with_x11", False):
+                    gui_reqs.append("xorg::xorg")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -1063,7 +1099,7 @@ class QtConan(ConanFile):
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
             elif self.settings.os == "Emscripten":
                 _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
-            elif self.settings.os in ["Linux", "FreeBSD"]:
+            elif self.options.get_safe("with_x11", False):
                 _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"], has_include_dir=False)
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
@@ -1103,8 +1139,6 @@ class QtConan(ConanFile):
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
-        if self.options.with_dbus:
-            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
@@ -1140,6 +1174,9 @@ class QtConan(ConanFile):
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
+        if self.options.qtshadertools and self.options.gui:
+            _create_module("ShaderTools", ["Gui"])
+
         if self.options.qtquick3d and qt_quick_enabled:
             _create_module("Quick3DUtils", ["Gui"])
             _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
@@ -1150,9 +1187,6 @@ class QtConan(ConanFile):
             (self.options.qtdeclarative and Version(self.version) >= "6.2.0")) and qt_quick_enabled:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
-
-        if self.options.qtshadertools and self.options.gui:
-            _create_module("ShaderTools", ["Gui"])
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
@@ -1277,7 +1311,7 @@ class QtConan(ConanFile):
             _create_module("SerialPort")
 
         if self.options.get_safe("qtserialbus"):
-            _create_module("SerialBus", ["SerialPort"])
+            _create_module("SerialBus", ["SerialPort"] if self.options.get_safe("qtserialport") else [])
             _create_plugin("PassThruCanBusPlugin", "qtpassthrucanbus", "canbus", [])
             _create_plugin("PeakCanBusPlugin", "qtpeakcanbus", "canbus", [])
             _create_plugin("SocketCanBusPlugin", "qtsocketcanbus", "canbus", [])

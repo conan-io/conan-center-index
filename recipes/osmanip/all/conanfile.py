@@ -39,7 +39,7 @@ class OsmanipConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
+        self.requires("boost/1.81.0")
         if Version(self.version) < "4.2.0":
             self.requires("arsenalgear/1.2.2")
         else:

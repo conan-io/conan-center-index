@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class PolylineencoderConan(ConanFile):
@@ -25,8 +25,7 @@ class PolylineencoderConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,25 +33,26 @@ class PolylineencoderConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def package_id(self):
-        if Version(self.version) >= "1.1.2":
-            self.info.clear()
-
-    def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.variables["BUILD_TESTING"] = False
-        if self.settings.os == "Windows" and self.options.shared:
-            toolchain.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
-        toolchain.generate()
+            self.options.rm_safe("fPIC")
+        if Version(self.version) >= "1.1.1":
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def package_id(self):
+        if Version(self.version) >= "1.1.1":
+            self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -66,7 +66,10 @@ class PolylineencoderConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        if Version(self.version) == "1.0.0":
-            self.cpp_info.libs.append("polylineencoder")
+        if Version(self.version) < "1.1.1":
+            self.cpp_info.libs = ["polylineencoder"]
             if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
                 self.cpp_info.system_libs.append("m")
+        else:
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []

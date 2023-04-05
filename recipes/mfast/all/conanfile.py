@@ -1,10 +1,16 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir,
+    rename, rm, rmdir, save
+)
+from conan.tools.scm import Version
 import os
-import shutil
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.54.0"
 
 
 class mFASTConan(ConanFile):
@@ -16,7 +22,7 @@ class mFASTConan(ConanFile):
         "mFAST is a high performance C++ encoding/decoding library for FAST "
         "(FIX Adapted for STreaming) protocol"
     )
-    topics = ("mfast", "fast", "fix", "fix-adapted-for-streaming",
+    topics = ("fast", "fix", "fix-adapted-for-streaming",
               "financial-information-exchange", "libraries", "cpp")
 
     settings = "os", "arch", "compiler", "build_type"
@@ -32,30 +38,26 @@ class mFASTConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _min_cppstd(self):
+        return "14" if Version(self.version) >= "1.2.2" else "98"
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "Visual Studio": "14",
-            "clang": "3.4",
-            "apple-clang": "5.1",
-        }
+        if Version(self.version) >= "1.2.2":
+            return {
+                "gcc": "6",
+                "Visual Studio": "14",
+                "msvc": "190",
+                "clang": "3.4",
+                "apple-clang": "5.1",
+            }
+        else:
+            return {}
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,68 +65,66 @@ class mFASTConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.75.0")
         self.requires("tinyxml2/9.0.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.37.2")
+            self.requires("sqlite3/3.40.1")
 
     def validate(self):
-        if tools.Version(self.version) >= "1.2.2":
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-            def lazy_lt_semver(v1, v2):
-                lv1 = [int(v) for v in v1.split(".")]
-                lv2 = [int(v) for v in v2.split(".")]
-                min_length = min(len(lv1), len(lv2))
-                return lv1[:min_length] < lv2[:min_length]
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
 
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-                raise ConanInvalidConfiguration(
-                    "mfast {} requires C++14, which your compiler does not support.".format(self.version)
-                )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_TESTS"] = False
-            self._cmake.definitions["BUILD_EXAMPLES"] = False
-            self._cmake.definitions["BUILD_PACKAGES"] = False
-            self._cmake.definitions["BUILD_SQLITE3"] = self.options.with_sqlite3
-            if tools.Version(self.version) >= "1.2.2" and not tools.valid_min_cppstd(self, 14):
-                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_PACKAGES"] = False
+        tc.variables["BUILD_SQLITE3"] = self.options.with_sqlite3
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "licence.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
-
-        tools.mkdir(os.path.join(self.package_folder, self._new_mfast_config_dir))
+        mkdir(self, os.path.join(self.package_folder, self._new_mfast_config_dir))
         self._extract_fasttypegentarget_macro()
-
-        tools.rmdir(os.path.join(self.package_folder, self._old_mfast_config_dir))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, self._old_mfast_config_dir))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         if self.options.shared:
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "lib"),
-                "*_static*" if self.settings.os == "Windows" else "*.a"
-            )
+            rm(self, "*_static*" if self.settings.os == "Windows" else "*.a", os.path.join(self.package_folder, "lib"))
 
         # TODO: several CMake variables should also be emulated (casing issues):
         #       [ ] MFAST_INCLUDE_DIR         - include directories for mFAST
@@ -154,17 +154,15 @@ class mFASTConan(ConanFile):
         return os.path.join(self._new_mfast_config_dir, "FastTypeGenTarget.cmake")
 
     def _extract_fasttypegentarget_macro(self):
-        if tools.Version(self.version) < "1.2.2":
-            config_file_content = tools.load(os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
+        if Version(self.version) < "1.2.2":
+            config_file_content = load(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
             begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
             end = config_file_content.find("endmacro()", begin) + len("endmacro()")
             macro_str = config_file_content[begin:end]
-            tools.save(os.path.join(self.package_folder, self._fast_type_gen_target_file), macro_str)
+            save(self, os.path.join(self.package_folder, self._fast_type_gen_target_file), macro_str)
         else:
-            shutil.move(
-                os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
-                os.path.join(self.package_folder, self._fast_type_gen_target_file)
-            )
+            rename(self, os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
+                         os.path.join(self.package_folder, self._fast_type_gen_target_file))
 
     def _prepend_exec_target_in_fasttypegentarget(self):
         extension = ".exe" if self.settings.os == "Windows" else ""
@@ -184,26 +182,24 @@ class mFASTConan(ConanFile):
             endif()
         """.format(fast_type_rel_path=fast_type_rel_path))
         module_abs_path = os.path.join(self.package_folder, self._fast_type_gen_target_file)
-        old_content = tools.load(module_abs_path)
+        old_content = load(self, module_abs_path)
         new_content = exec_target_content + old_content
-        tools.save(module_abs_path, new_content)
+        save(self, module_abs_path, new_content)
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _lib_targets_module_file(self):
-        return os.path.join(self._new_mfast_config_dir,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join(self._new_mfast_config_dir, f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _mfast_lib_components(self):
@@ -255,10 +251,12 @@ class mFASTConan(ConanFile):
             comp = values["comp"]
             lib = values["lib"]
             requires = values["requires"]
-            self.cpp_info.components[conan_comp].set_property("cmake_file_name", target)
+            self.cpp_info.components[conan_comp].set_property("cmake_target_name", target)
             if comp != target:
                 # Also provide alias component for find_package(mFAST COMPONENTS ...) if static
                 self.cpp_info.components[conan_comp].set_property("cmake_target_aliases", [comp])
+            if self.settings.os in ("FreeBSD", "Linux"):
+                self.cpp_info.components[conan_comp].system_libs.append("m")
             self.cpp_info.components[conan_comp].libs = [lib]
             self.cpp_info.components[conan_comp].requires = requires
             if self.options.shared:
@@ -278,9 +276,7 @@ class mFASTConan(ConanFile):
                 self.cpp_info.components[conan_comp_alias].requires = [conan_comp]
                 self.cpp_info.components[conan_comp_alias].includedirs = []
                 self.cpp_info.components[conan_comp_alias].libdirs = []
-                self.cpp_info.components[conan_comp_alias].resdirs = []
                 self.cpp_info.components[conan_comp_alias].bindirs = []
-                self.cpp_info.components[conan_comp_alias].frameworkdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "mFAST"

@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class LiefConan(ConanFile):
     name = "lief"
@@ -60,10 +60,7 @@ class LiefConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -82,13 +79,6 @@ class LiefConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("rang/3.2")
-        self.requires("mbedtls/3.2.1")
-        if self.options.with_json:
-            self.requires("nlohmann_json/3.11.2")
-        if self.options.with_frozen:
-            self.requires("frozen/1.1.1")
-
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         self.requires("mbedtls/3.2.1")
@@ -97,9 +87,10 @@ class LiefConan(ConanFile):
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
         if Version(self.version) >= "0.12.2":
-            self.requires("utfcpp/3.2.1")
+            self.requires("utfcpp/3.2.2")
+            # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
             self.requires("spdlog/1.10.0")
-            self.requires("boost/1.80.0")
+            self.requires("boost/1.81.0")
             self.requires("tcb-span/cci.20220616")
 
     def source(self):

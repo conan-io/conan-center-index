@@ -1,0 +1,4 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/MikeLankamp/fpm/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "e34941b4cd1d1f1fbe9ecf39b740cb20b9c272a832f63be27fa24eddf400e51b"

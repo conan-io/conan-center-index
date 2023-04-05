@@ -8,7 +8,5 @@ sources:
 patches:
   "3.0.7":
     - patch_file: "patches/3.0.7-0001-libsigcpp.patch"
-      base_path: "source_subfolder"
   "3.0.0":
     - patch_file: "patches/3.0.0-0001-libsigcpp.patch"
-      base_path: "source_subfolder"

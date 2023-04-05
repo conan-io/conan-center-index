@@ -1,0 +1,32 @@
+diff --git a/src/Wt/Dbo/backend/CMakeLists.txt b/src/Wt/Dbo/backend/CMakeLists.txt
+index 827abf3..5324034 100644
+--- a/src/Wt/Dbo/backend/CMakeLists.txt
++++ b/src/Wt/Dbo/backend/CMakeLists.txt
+@@ -127,11 +127,12 @@ IF(ENABLE_POSTGRES AND POSTGRES_FOUND)
+   SET_PROPERTY(TARGET wtdbopostgres PROPERTY CXX_VISIBILITY_PRESET hidden)
+   SET_PROPERTY(TARGET wtdbopostgres PROPERTY VISIBILITY_INLINES_HIDDEN YES)
+ 
++  find_package(PostgreSQL REQUIRED CONFIG)
+   TARGET_LINK_LIBRARIES(wtdbopostgres
+     PUBLIC
+       wtdbo
+     PRIVATE
+-      ${POSTGRES_LIBRARIES}
++      PostgreSQL::PostgreSQL
+   )
+ 
+   IF(TARGET Boost::headers)
+@@ -291,11 +292,12 @@ IF(ENABLE_MYSQL AND MYSQL_FOUND)
+   SET_PROPERTY(TARGET wtdbomysql PROPERTY CXX_VISIBILITY_PRESET hidden)
+   SET_PROPERTY(TARGET wtdbomysql PROPERTY VISIBILITY_INLINES_HIDDEN YES)
+ 
++  find_package(libmysqlclient REQUIRED CONFIG)
+   TARGET_LINK_LIBRARIES(wtdbomysql
+     PUBLIC
+       wtdbo
+     PRIVATE
+-      ${MYSQL_LIBRARIES}
++      libmysqlclient::libmysqlclient
+   )
+ 
+   INCLUDE_DIRECTORIES(${MYSQL_INCLUDE})

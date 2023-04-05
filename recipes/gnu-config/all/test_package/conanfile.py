@@ -1,6 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanException
-from conans import tools as tools_legacy
 
 
 class TestPackageConan(ConanFile):
@@ -20,8 +18,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         self.run("config.guess")
-        try:
-            triplet = tools_legacy.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler))
-            self.run(f"config.sub {triplet}")
-        except ConanException:
-            self.output.info("Current configuration is not supported by GNU config.\nIgnoring...")
+        self.run("config.sub --version")

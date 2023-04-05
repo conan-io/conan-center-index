@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class Dav1dConan(ConanFile):
@@ -48,31 +48,27 @@ class Dav1dConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if not self.options.assembly:
-            del self.options.with_avx512
-
-    def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
-        if self.options.assembly:
-            self.tool_requires("nasm/2.15.05")
+            self.options.rm_safe("with_avx512")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("meson/1.0.0")
+        if self.options.assembly:
+            self.tool_requires("nasm/2.15.05")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = MesonToolchain(self)
         tc.project_options["enable_tests"] = False
         tc.project_options["enable_asm"] = self.options.assembly
@@ -83,13 +79,7 @@ class Dav1dConan(ConanFile):
             tc.project_options["bitdepths"] = "8,16"
         else:
             tc.project_options["bitdepths"] = str(self.options.bit_depth)
-        # TODO: fixed in conan 1.51.0?
-        tc.project_options["bindir"] = "bin"
-        tc.project_options["libdir"] = "lib"
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate(scope="build")
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
@@ -117,16 +107,15 @@ class Dav1dConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
 
+        # TODO: to remove in conan v2
         if self.options.with_tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
-    """remove lib prefix & change extension to .lib"""
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
     from conan.tools.files import rename
     import glob
-    if not is_msvc(conanfile):
+    if not conanfile.settings.get_safe("compiler.runtime"):
         return
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:

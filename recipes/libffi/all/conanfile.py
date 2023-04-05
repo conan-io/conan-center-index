@@ -4,13 +4,13 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
 import glob
 import os
 import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibffiConan(ConanFile):
@@ -44,18 +44,9 @@ class LibffiConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -101,13 +92,13 @@ class LibffiConan(ConanFile):
                 "x86_64" if self.settings.arch == "x86_64" else "i686",
                 "pc" if self.settings.arch == "x86" else "win64",
                 "mingw64")
-            tc.configure_args.extend([
-                f"--build={build}",
-                f"--host={host}",
-            ])
+            tc.update_configure_args({
+                "--build": build,
+                "--host": host
+                })
 
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
+                # https://github.com/conan-io/conan/issues/6514
                 tc.extra_cflags.append("-FS")
 
             if is_msvc_static_runtime(self):
@@ -127,11 +118,8 @@ class LibffiConan(ConanFile):
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             if architecture_flag:
                 compile_wrapper = f"{compile_wrapper} {architecture_flag}"
-            # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
-            # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
-            [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
-            automake_version = f"{version_major}.{version_minor}"
-            ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
+
+            ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
             env.define("CC", f"{compile_wrapper}")
             env.define("CXX", f"{compile_wrapper}")
             env.define("LD", "link -nologo")

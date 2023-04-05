@@ -1,15 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir, save
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.53.0"
 
 
 class OnnxConan(ConanFile):
@@ -20,6 +21,7 @@ class OnnxConan(ConanFile):
     homepage = "https://github.com/onnx/onnx"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,13 +33,18 @@ class OnnxConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "1.13.0" and is_msvc(self):
+            return 17
+        return 11
+
+    @property
     def _protobuf_version(self):
         # onnx < 1.9.0 doesn't support protobuf >= 3.18
-        return "3.21.4" if Version(self.version) >= "1.9.0" else "3.17.1"
+        return "3.21.9" if Version(self.version) >= "1.9.0" else "3.17.1"
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,49 +52,52 @@ class OnnxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires(f"protobuf/{self._protobuf_version}")
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if is_msvc(self) and self.info.options.shared:
-            raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
-
-    def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires(f"protobuf/{self._protobuf_version}", run=not cross_building(self), transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            self.tool_requires(f"protobuf/{self._protobuf_version}")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = CMakeToolchain(self)
         tc.variables["ONNX_BUILD_BENCHMARKS"] = False
-        tc.variables["ONNX_USE_PROTOBUF_SHARED_LIBS"] = self.options["protobuf"].shared
+        tc.variables["ONNX_USE_PROTOBUF_SHARED_LIBS"] = self.dependencies.host["protobuf"].options.shared
         tc.variables["BUILD_ONNX_PYTHON"] = False
         tc.variables["ONNX_GEN_PB_TYPE_STUBS"] = False
         tc.variables["ONNX_WERROR"] = False
         tc.variables["ONNX_COVERAGE"] = False
         tc.variables["ONNX_BUILD_TESTS"] = False
         tc.variables["ONNX_USE_LITE_PROTO"] = False
-        tc.variables["ONNXIFI_ENABLE_EXT"] = False
         tc.variables["ONNX_ML"] = True
-        tc.variables["ONNXIFI_DUMMY_BACKEND"] = False
+        if Version(self.version) < "1.13.0":
+            tc.variables["ONNXIFI_ENABLE_EXT"] = False
+            tc.variables["ONNXIFI_DUMMY_BACKEND"] = False
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -100,6 +110,7 @@ class OnnxConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        fix_apple_shared_install_name(self)
 
         # TODO: to remove in conan v2 once legacy generators removed
         self._create_cmake_module_alias_targets(
@@ -136,24 +147,30 @@ class OnnxConan(ConanFile):
                 "libs": ["onnx_proto"],
                 "defines": ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"],
                 "requires": ["protobuf::libprotobuf"]
-            },
-            "onnxifi": {
-                "target": "onnxifi"
-            },
-            "onnxifi_dummy": {
-                "target": "onnxifi_dummy",
-                "libs": ["onnxifi_dummy"],
-                "requires": ["onnxifi"]
-            },
-            "onnxifi_loader": {
-                "target": "onnxifi_loader",
-                "libs": ["onnxifi_loader"],
-                "requires": ["onnxifi"]
-            },
-            "onnxifi_wrapper": {
-                "target": "onnxifi_wrapper"
             }
         }
+        if Version(self.version) < "1.13.0":
+            components.update(
+                {
+                    "onnxifi": {
+                        "target": "onnxifi",
+                        "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["dl"])],
+                    },
+                    "onnxifi_dummy": {
+                        "target": "onnxifi_dummy",
+                        "libs": ["onnxifi_dummy"],
+                        "requires": ["onnxifi"]
+                    },
+                    "onnxifi_loader": {
+                        "target": "onnxifi_loader",
+                        "libs": ["onnxifi_loader"],
+                        "requires": ["onnxifi"]
+                    },
+                    "onnxifi_wrapper": {
+                        "target": "onnxifi_wrapper"
+                    }
+                }
+            )
         if Version(self.version) >= "1.11.0":
             components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
         return components
@@ -167,10 +184,12 @@ class OnnxConan(ConanFile):
                 libs = comp_values.get("libs", [])
                 defines = comp_values.get("defines", [])
                 requires = comp_values.get("requires", [])
+                system_libs = [l for cond, sys_libs in comp_values.get("system_libs", []) if cond for l in sys_libs]
                 self.cpp_info.components[comp_name].set_property("cmake_target_name", target)
                 self.cpp_info.components[comp_name].libs = libs
                 self.cpp_info.components[comp_name].defines = defines
                 self.cpp_info.components[comp_name].requires = requires
+                self.cpp_info.components[comp_name].system_libs = system_libs
 
                 # TODO: to remove in conan v2 once cmake_find_package_* generators removed
                 self.cpp_info.components[comp_name].names["cmake_find_package"] = target

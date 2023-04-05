@@ -5,4 +5,8 @@ sources:
 patches:
   "2.4.13.7":
     - patch_file: "patches/0001-jasper.patch"
-      base_path: "src"
+      patch_description: "Compatibility with recent jasper versions"
+      patch_type: "portability"
+    - patch_file: "patches/0002-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"

@@ -13,7 +13,7 @@ required_conan_version = ">=1.50.0"
 class WaylandProtocolsConan(ConanFile):
     name = "wayland-protocols"
     description = "Wayland is a project to define a protocol for a compositor to talk to its clients as well as a library implementation of the protocol"
-    topics = "wayland"
+    topics = ("wayland",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/wayland/wayland-protocols"
     license = "MIT"
@@ -27,7 +27,7 @@ class WaylandProtocolsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/0.64.1")
+        self.tool_requires("meson/1.0.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")

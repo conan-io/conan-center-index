@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
@@ -20,7 +19,7 @@ class CppcheckConan(ConanFile):
     default_options = {"with_z3": True, "have_rules": True}
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -31,7 +30,7 @@ class CppcheckConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_z3", default=False):
-            self.requires("z3/4.8.8")
+            self.requires("z3/4.10.2")
         if self.options.have_rules:
             self.requires("pcre/8.45")
 
@@ -45,8 +44,7 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.have_rules
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
-        if is_apple_os(self):
-            tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin", "cfg")
+        tc.variables["FILESDIR"] = os.path.join(self.package_folder, "bin").replace('\\', '/')
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -60,7 +58,6 @@ class CppcheckConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder))
-        copy(self, "*", dst=os.path.join(self.package_folder, "bin", "cfg"), src=os.path.join(self.source_folder, "cfg"))
         copy(self, "cppcheck-htmlreport", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.source_folder, "htmlreport"))
         cmake = CMake(self)
         cmake.install()
@@ -71,7 +68,7 @@ class CppcheckConan(ConanFile):
         self.cpp_info.libdirs = []
 
         bin_folder = os.path.join(self.package_folder, "bin")
-        self.output.info("Append %s to environment variable PATH" % bin_folder)
+        self.output.info(f"Append {bin_folder} to environment variable PATH")
         self.env_info.PATH.append(bin_folder)
         cppcheck_htmlreport = os.path.join(bin_folder, "cppcheck-htmlreport")
         self.env_info.CPPCHECK_HTMLREPORT = cppcheck_htmlreport

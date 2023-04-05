@@ -1,4 +1,13 @@
 sources:
+  "0.568":
+    url: "https://github.com/Roblox/luau/archive/0.568.tar.gz"
+    sha256: "8218f1943b53439b9cc076bcb6d6223c089093659cc75dda6e2695ee9b370a8c"
+  "0.563":
+    url: "https://github.com/Roblox/luau/archive/0.563.tar.gz"
+    sha256: "717c1b3e03d20829d75eb484e0699fc824b651b8f394164bc4ab8194482890b2"
+  "0.558":
+    url: "https://github.com/Roblox/luau/archive/0.558.tar.gz"
+    sha256: "3484adddb18872700e033f5917af44d90c266f9e0fff2fac21aec1061f472a06"
   "0.556":
     url: "https://github.com/Roblox/luau/archive/0.556.tar.gz"
     sha256: "dc72f91f4e866a2b25f7608e062c91c84e92a2e5611026e9789f127c3caf39f6"
@@ -17,17 +26,26 @@ sources:
   "0.540":
     url: "https://github.com/Roblox/luau/archive/0.540.tar.gz"
     sha256: "84b3e52b3b0ccf4d5bc0e0c04055f3a9b2f045c1281e203a858335a6fe76b0ff"
-  "0.539":
-    url: "https://github.com/Roblox/luau/archive/0.539.tar.gz"
-    sha256: "d0a33bbafc88d6d89f23e43229e523b117cd761f1fdbd86977800b5725cc647f"
-  "0.538":
-    url: "https://github.com/Roblox/luau/archive/0.538.tar.gz"
-    sha256: "8a1240e02a7daacf1e5cff249040a3298c013157fc496c66adce6dcb21cc30be"
-  "0.537":
-    url: "https://github.com/Roblox/luau/archive/0.537.tar.gz"
-    sha256: "24122d3192083b2133de47d8039fb744b8007c6667fc1b6f254a2a8d72e15d53"
 
 patches:
+  "0.568":
+    - patch_file: "patches/0.568-0001-fix-cmake.patch"
+      patch_description: "enable shared build"
+      patch_type: "portability"
+  "0.563":
+    - patch_file: "patches/0.552-0001-fix-cmake.patch"
+      patch_description: "enable shared build"
+      patch_type: "portability"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      patch_description: "rename lerp function to avoid name conflict"
+      patch_type: "portability"
+  "0.558":
+    - patch_file: "patches/0.552-0001-fix-cmake.patch"
+      patch_description: "enable shared build"
+      patch_type: "portability"
+    - patch_file: "patches/0.536-0002-rename-lerp.patch"
+      patch_description: "rename lerp function to avoid name conflict"
+      patch_type: "portability"
   "0.556":
     - patch_file: "patches/0.552-0001-fix-cmake.patch"
       patch_description: "enable shared build"
@@ -64,27 +82,6 @@ patches:
       patch_description: "rename lerp function to avoid name conflict"
       patch_type: "portability"
   "0.540":
-    - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      patch_description: "enable shared build"
-      patch_type: "portability"
-    - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      patch_description: "rename lerp function to avoid name conflict"
-      patch_type: "portability"
-  "0.539":
-    - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      patch_description: "enable shared build"
-      patch_type: "portability"
-    - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      patch_description: "rename lerp function to avoid name conflict"
-      patch_type: "portability"
-  "0.538":
-    - patch_file: "patches/0.536-0001-fix-cmake.patch"
-      patch_description: "enable shared build"
-      patch_type: "portability"
-    - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      patch_description: "rename lerp function to avoid name conflict"
-      patch_type: "portability"
-  "0.537":
     - patch_file: "patches/0.536-0001-fix-cmake.patch"
       patch_description: "enable shared build"
       patch_type: "portability"

@@ -1,9 +1,15 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
-from fnmatch import fnmatch
 import os
+import shutil
 import tarfile
+from fnmatch import fnmatch
+
+from conan import ConanFile, Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get
+
+required_conan_version = ">=1.53.0"
 
 
 class FruitConan(ConanFile):
@@ -12,36 +18,45 @@ class FruitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/fruit"
     license = "Apache-2.0"
-    topics = ("conan", "fruit", "injection")
+    topics = ("injection", "framework")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "use_boost": [True, False],
+               "use_boost": [True, False, "deprecated"],
+               "with_boost": [True, False],
                "fPIC": [True, False]}
-    default_options = {"shared": False, "use_boost": True, "fPIC": True}
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    _cmake = None
+    default_options = {
+        "shared": False,
+        "use_boost": "deprecated",
+        "with_boost": True,
+        "fPIC": True}
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def build_requirements(self):
-        if self.options.use_boost:
-            self.build_requires("boost/1.72.0")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def package_id(self):
+        del self.info.options.use_boost
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        if self.options.use_boost != "deprecated":
+            self.output.warn("use_boost option is deprecated, use the option with_boost instead.")
+            self.options.with_boost = self.options.use_boost
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.with_boost:
+            self.requires("boost/1.80.0")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, "11")
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
@@ -54,21 +69,15 @@ class FruitConan(ConanFile):
 
         if compiler in minimal_version and \
            compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++11. %s %s is not"
-                                            " supported." % (self.name, compiler, compiler_version))
+            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports"
+                                            " at least C++11. {compiler} {compiler_version} is not"
+                                            " supported.")
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
-
-    @property
-    def _extracted_dir(self):
-        return self.name + "-" + self.version
-
-    def _get_source(self):
+    def source(self):
         if Version(self.version) == "3.4.0":
             filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
-            tools.download(filename=filename, **self.conan_data["sources"][self.version])
+            download(self, filename=filename, **self.conan_data["sources"][self.version])
+            extracted_dir = self.name + "-" + self.version
 
             with tarfile.TarFile.open(filename, 'r:*') as tarredgzippedFile:
                 # NOTE: In fruit v3.4.0, The archive file contains the file names
@@ -76,47 +85,40 @@ class FruitConan(ConanFile):
                 # Extraction fails on a case-insensitive file system due to file
                 # name conflicts.
                 # Exclude build as a workaround.
-                exclude_pattern = "%s/extras/bazel_root/third_party/fruit/build" % (self._extracted_dir,)
+                exclude_pattern = f"{extracted_dir}/extras/bazel_root/third_party/fruit/build"
                 members = list(filter(lambda m: not fnmatch(m.name, exclude_pattern),
                                     tarredgzippedFile.getmembers()))
-                tarredgzippedFile.extractall(".", members=members)
+                tarredgzippedFile.extractall(path=self.source_folder, members=members)
+            allfiles = os.listdir(os.path.join(self.source_folder, extracted_dir))
+            for file_name in allfiles:
+                shutil.move(os.path.join(self.source_folder, extracted_dir, file_name), self.source_folder)
         else:
-            tools.get(**self.conan_data["sources"][self.version])
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def source(self):
-        self._get_source()
-
-        os.rename(self._extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["FRUIT_USES_BOOST"] = self.options.use_boost
-            self._cmake.definitions["FRUIT_ENABLE_COVERAGE"] = False
-            self._cmake.definitions["RUN_TESTS_UNDER_VALGRIND"] = False
-            self._cmake.definitions["FRUIT_ENABLE_CLANG_TIDY"] = False
-
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_files(self):
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["FRUIT_USES_BOOST"] = self.options.with_boost
+        tc.variables["FRUIT_ENABLE_COVERAGE"] = False
+        tc.variables["RUN_TESTS_UNDER_VALGRIND"] = False
+        tc.variables["CMAKE_CXX_STANDARD"] = 11
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        self._patch_files()
-
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["fruit"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]

@@ -1,4 +1,7 @@
 sources:
+  "cci.20230103":
+    url: "https://github.com/hsutter/cppfront/archive/808db2bd6ae92f869166827dfda66cfa42dde0ab.zip"
+    sha256: "479252c99d66db477c4cd98a6e1707a8929a70afdf000c75589841d944c539f4"
   "cci.20221024":
     url: "https://github.com/hsutter/cppfront/archive/b1754dbd53a496a9104b43ecde6064c9980246bd.zip"
     sha256: "8668bddbd7fc06d4975c867521c005f898eca8f83f018e7c28b54dbcf9aa3ab9"

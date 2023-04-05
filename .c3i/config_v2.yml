@@ -1,13 +1,13 @@
 ---
-# Configuration for `https://github.com/conan-io/conan-center-index-staging` repository (using Conan v2)
-id: 'conan-io/conan-center-index-staging-v2'
+# Configuration for `https://github.com/conan-io/conan-center-index` repository (using Conan v2)
+id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.0-pre
+  version: 2.0.2
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
-  main_repo: "conan-center-v2"
+  main_repo: "conan-center"
   pull-request_repo_prefix: "c3i_PR-v2"
   pull-request_permission: "c3i-pr"
   logs_repo: "misc-v2"
@@ -17,29 +17,36 @@ github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
 
-# Requirements to merge a given pull-request:
-# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-# * check_runs refers to notifications from GH actions
-#status_checks:
-#  - "license/cla"
-#  - "continuous-integration/jenkins/pr-merge"
-
 #slack:
 #  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
 #  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
 
 # Things related to Jenkins jobs:
 tasks:
-  write_comments: false
-  detailed_status_checks: false
-  update_labels: false
   automatic_merge:
     reviews_required_total: 1000  # AutomaticMerge shouldn't run with this file, but just in case
     reviews_required_team: 1000  # AutomaticMerge shouldn't run with this file, but just in case
+  access_request:
+      request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
+      max_inactivity_days: 0
+  cci:
+    conan_v2_run_export: false
+    detailed_status_checks: false
+    write_comments: false
+    update_labels: false
+    user_feedback:
+      title: "Conan v2 pipeline (informative, not required for merge)"
+      description: "> **Note**: Conan v2 builds are informative and they are not required for the PR to be merged."
+      text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
+      collapse_on_success: false
+      collapse_on_failure: true
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
+    report_issue_append: false
 
 configurations:
   - id: linux-gcc
-    epochs: [20220628]
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "Linux, GCC"
     build_profile:
       os: "Linux"
@@ -52,7 +59,7 @@ configurations:
               compiler.version: ["11"]
               build_type: ["Release"]
   - id: configs/macos-clang
-    epochs: [20220628]
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "macOS, Clang"
     build_profile:
       os: "Macos"
@@ -61,11 +68,25 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "apple-clang":
+              compiler.version: [ "13" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release"]
+  - id: configs/macos-m1-clang
+    epochs: [0, 20211221, 20220120, 20220628]
+    hrname: "macOS M1, Clang"
+    build_profile:
+      os: "Macos"
+      arch: "x86_64"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "armv8" ]
+        compiler:
+          - "apple-clang":
               compiler.version: ["13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: configs/windows-msvc
-    epochs: [20220628]
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "Windows, MSVC"
     build_profile:
       os: "Windows"
@@ -79,6 +100,14 @@ configurations:
                 - "Release":
                     compiler.runtime: [ "static", "dynamic" ]
                     compiler.runtime_type: [ "Release" ]
+
+cppstd:
+  apple-clang:
+    "13": ["gnu17"]
+  gcc:
+    "11": ["gnu17"]
+  msvc:
+    "192": ["14"]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"

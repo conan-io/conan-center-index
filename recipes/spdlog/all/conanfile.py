@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
@@ -12,10 +12,11 @@ required_conan_version = ">=1.53.0"
 
 class SpdlogConan(ConanFile):
     name = "spdlog"
+    package_type = "library"
     description = "Fast C++ logging library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gabime/spdlog"
-    topics = ("logging", "log-filtering", "header-only")
+    topics = ("logger", "logging", "log-filtering", "file sink", "header-only")
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -40,47 +41,43 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared or self.options.header_only:
+        if self.options.get_safe("shared") or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
-            del self.options.shared
+            self.options.rm_safe("shared")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.11.0":
-            self.requires("fmt/9.1.0", transitive_headers=True)
-        elif Version(self.version) >= "1.10.0":
-            self.requires("fmt/8.1.1", transitive_headers=True)
-        elif Version(self.version) >= "1.9.0":
-            self.requires("fmt/8.0.1", transitive_headers=True)
-        elif Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.1.3", transitive_headers=True)
-        elif Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.1", transitive_headers=True)
-        else:
-            self.requires("fmt/6.0.0", transitive_headers=True)
+        self_version = Version(self.version)
+        fmt_version = "7.1.3"
+
+        if self_version >= "1.11.0":
+            fmt_version = "9.1.0"
+        elif self_version >= "1.10.0":
+            fmt_version = "8.1.1"
+        elif self_version >= "1.9.0":
+            fmt_version = "8.0.1"
+        elif self_version >= "1.7.0":
+            fmt_version = "7.1.3"
+
+        self.requires(f"fmt/{fmt_version}", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.clear()
 
-    @property
-    def _info(self):
-        # FIXME: Conan 1.x is not able to parse self.info.xxx as Conan 2.x when is header-only
-        return self if Version(conan_version).major < 2 else self.info
-
     def validate(self):
-        if self._info.settings.compiler.get_safe("cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
-        if self._info.settings.os != "Windows" and (self._info.options.wchar_support or self._info.options.wchar_filenames):
+        if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
-        if self._info.options.get_safe("shared") and is_msvc_static_runtime(self):
+        if self.options.get_safe("shared") and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if not self.options.header_only:
@@ -152,8 +149,7 @@ class SpdlogConan(ConanFile):
         if self.options.header_only and self.settings.os in ("iOS", "tvOS", "watchOS"):
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_NO_TLS")
 
-        if Version(conan_version).major < 2:
-            self.cpp_info.names["cmake_find_package"] = "spdlog"
-            self.cpp_info.names["cmake_find_package_multi"] = "spdlog"
-            self.cpp_info.components["libspdlog"].names["cmake_find_package"] = target
-            self.cpp_info.components["libspdlog"].names["cmake_find_package_multi"] = target
+        self.cpp_info.names["cmake_find_package"] = "spdlog"
+        self.cpp_info.names["cmake_find_package_multi"] = "spdlog"
+        self.cpp_info.components["libspdlog"].names["cmake_find_package"] = target
+        self.cpp_info.components["libspdlog"].names["cmake_find_package_multi"] = target

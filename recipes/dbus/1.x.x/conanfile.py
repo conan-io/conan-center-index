@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm, rmdir, save
@@ -21,6 +21,7 @@ class DbusConan(ConanFile):
     homepage = "https://www.freedesktop.org/wiki/Software/dbus"
     description = "D-Bus is a simple system for interprocess communication and coordination."
     topics = "bus", "interprocess", "message"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     options = {
@@ -65,17 +66,12 @@ class DbusConan(ConanFile):
         else:
             cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        if self._meson_available:
-            self.tool_requires("meson/0.64.1")
-            self.tool_requires("pkgconf/1.9.3")
-
     def requirements(self):
         self.requires("expat/2.5.0")
         if self.options.with_glib:
-            self.requires("glib/2.75.0")
+            self.requires("glib/2.76.0")
         if self.options.get_safe("with_systemd"):
-            self.requires("libsystemd/251.4")
+            self.requires("libsystemd/252.4")
         if self.options.with_selinux:
             self.requires("libselinux/3.3")
         if self.options.get_safe("with_x11"):
@@ -83,17 +79,25 @@ class DbusConan(ConanFile):
 
     def validate(self):
         if Version(self.version) >= "1.14.0":
-            if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
                 raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
 
-        if not self._meson_available and self.info.settings.os == "Windows":
+        if not self._meson_available and self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows. Contributions welcome.")
 
+    def build_requirements(self):
+        if self._meson_available:
+            self.tool_requires("meson/1.0.0")
+        if self._meson_available or self.options.get_safe("with_systemd"):
+            if not self.conf.get("tools.gnu:pkg_config",check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if self._meson_available:
             tc = MesonToolchain(self)
             tc.project_options["asserts"] = not is_apple_os(self)
@@ -111,8 +115,8 @@ class DbusConan(ConanFile):
             tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
             tc.project_options["xml_docs"] = "disabled"
             tc.generate()
-            env = VirtualBuildEnv(self)
-            env.generate(scope="build")
+            deps = PkgConfigDeps(self)
+            deps.generate()
         else:
             tc = CMakeToolchain(self)
             tc.variables["DBUS_BUILD_TESTS"] = False
@@ -135,8 +139,9 @@ class DbusConan(ConanFile):
             tc.generate()
             cmake_deps = CMakeDeps(self)
             cmake_deps.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
+            if self.options.get_safe("with_systemd"):
+                deps = PkgConfigDeps(self)
+                deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -170,6 +175,7 @@ class DbusConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
+        fix_apple_shared_install_name(self)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(

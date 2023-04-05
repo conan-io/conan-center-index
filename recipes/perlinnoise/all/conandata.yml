@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/Reputeless/PerlinNoise/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "1fea1e7ebeb3c66b79d60c2c398aa83ccfadcef343bd396c0f0a684380e827fc"
