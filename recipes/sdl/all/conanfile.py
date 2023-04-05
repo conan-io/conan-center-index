@@ -20,11 +20,8 @@ class SDLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
     license = "Zlib"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
-    generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -83,7 +80,8 @@ class SDLConan(ConanFile):
         "vulkan": True,
         "libunwind": True,
     }
-
+    generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
+    
     def layout(self):
         cmake_layout(self, src_folder="src")
 
