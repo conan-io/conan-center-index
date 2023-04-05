@@ -6,7 +6,6 @@ from conan.tools.cmake import CMake, cmake_layout
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
-    requires = "spdlog/1.9.2" # TODO: not sure why this is explicitly necessary, but it fails without it
 
     def requirements(self):
         self.requires(self.tested_reference_str)

@@ -5,8 +5,9 @@ from conan.tools.files import get, rmdir, copy
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class PROPOSALConan(ConanFile):
@@ -14,6 +15,7 @@ class PROPOSALConan(ConanFile):
     homepage = "https://github.com/tudo-astroparticlephysics/PROPOSAL"
     license = "LGPL-3.0"
     exports_sources = "CMakeLists.txt"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     description = "monte Carlo based lepton and photon propagator"
     topics = ("propagator", "lepton", "photon", "stochastic")
@@ -36,21 +38,18 @@ class PROPOSALConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("cubicinterpolation/0.1.4")
-        self.requires("spdlog/1.9.2")
+        #TODO: Add note why transitive_headers are necessary
+        self.requires("spdlog/1.9.2", transitive_headers=True)
         self.requires("nlohmann_json/3.10.5")
         if self.options.with_python:
             self.requires("pybind11/2.9.1")
@@ -60,7 +59,7 @@ class PROPOSALConan(ConanFile):
         return {"Visual Studio": "15", "gcc": "5", "clang": "5", "apple-clang": "5"}
 
     def validate(self):
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Can not build shared library on Visual Studio."
             )
