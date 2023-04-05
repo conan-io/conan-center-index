@@ -85,16 +85,12 @@ class WilConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        # Set these to the appropriate values if package provides a CMake config file
-        # (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
-        self.cpp_info.set_property("cmake_file_name", "wil")
-        self.cpp_info.set_property("cmake_target_name", "wil::wil")
-        # Set this to the appropriate value if the package provides a pkgconfig file
-        # (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "wil")
+        # https://github.com/microsoft/wil/blob/56e3e5aa79234f8de3ceeeaf05b715b823bc2cca/CMakeLists.txt#L53
+        self.cpp_info.set_property("cmake_file_name", "WIL")
+        self.cpp_info.set_property("cmake_target_name", "WIL::WILL")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "wil"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "wil"
-        self.cpp_info.names["cmake_find_package"] = "wil"
-        self.cpp_info.names["cmake_find_package_multi"] = "wil"
+        self.cpp_info.filenames["cmake_find_package"] = "WIL"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "WIL"
+        self.cpp_info.names["cmake_find_package"] = "WIL"
+        self.cpp_info.names["cmake_find_package_multi"] = "WIL"
