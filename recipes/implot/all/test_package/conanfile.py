@@ -7,7 +7,7 @@ from conan.tools.build import can_run
 
 class ImplotTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
