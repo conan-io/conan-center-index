@@ -32,7 +32,7 @@ class CriterionConan(ConanFile):
     def configure(self):        
         if self.options.shared:
             self.options.rm_safe("fPIC")
-       self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
