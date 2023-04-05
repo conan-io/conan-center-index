@@ -105,12 +105,12 @@ class LibdbConan(ConanFile):
                 os.path.join("lang", "sql", "odbc"),
                 os.path.join("lang", "sql", "sqlite"),
             ]:
-            for gnu_config in [
-                self.conf.get("user.gnu-config:config_guess", check_type=str),
-                self.conf.get("user.gnu-config:config_sub", check_type=str),
-            ]:
-                if gnu_config:
-                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+                for gnu_config in [
+                    self.conf.get("user.gnu-config:config_guess", check_type=str),
+                    self.conf.get("user.gnu-config:config_sub", check_type=str),
+                ]:
+                    if gnu_config:
+                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
             replace_in_file(self, file,
