@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files imports apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rename, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rename, rm
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 # FIXME: Needs to be migrted to Conan v2
