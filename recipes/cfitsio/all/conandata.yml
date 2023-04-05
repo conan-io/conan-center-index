@@ -17,26 +17,16 @@ sources:
 patches:
   "4.1.0":
     - patch_file: "patches/windows-use-strtok_s.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-cmake-4.1.0.patch"
-      base_path: "source_subfolder"
   "4.0.0":
     - patch_file: "patches/windows-use-strtok_s.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-cmake-4.0.0.patch"
-      base_path: "source_subfolder"
   "3.490":
     - patch_file: "patches/windows-use-strtok_s.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-cmake-3.490.patch"
-      base_path: "source_subfolder"
   "3.480":
     - patch_file: "patches/windows-use-strtok_s.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-cmake-3.470.patch"
-      base_path: "source_subfolder"
   "3.470":
     - patch_file: "patches/windows-use-strtok_s.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-cmake-3.470.patch"
-      base_path: "source_subfolder"

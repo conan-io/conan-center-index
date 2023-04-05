@@ -17,7 +17,8 @@
     * [CI running v2 is reported (and required)](#ci-running-v2-is-reported-and-required)
     * [Conan v2 remote](#conan-v2-remote)
     * [Webpage with v2 information](#webpage-with-v2-information)
-  * [Future](#future)<!-- endToc -->
+  * [Future](#future)
+    * [CI running Conan v1 dropping configuration support](#ci-running-conan-v1-dropping-configuration-support)<!-- endToc -->
 
 > **Note** This document is not a [guide about how to migrate recipes to Conan v2](v2_migration.md).
 
