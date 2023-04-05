@@ -84,9 +84,9 @@ class Log4cxx(ConanFile):
         if Version(self.version) < "1.0.0" or self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
             if Version(self.version) < "1.0.0":
-                self.output.warning(f"Version {self.version} requires C++17. Use log4cxx version 1.0.0 or set compiler.cppstd=17.")
+                self.output.info(f"Version {self.version} requires C++17. log4cxx version 1.0.0 does not.")
             else:
-                self.output.warning("multiprocess rolling file appender requires C++17.")
+                self.output.info("multiprocess rolling file appender requires C++17.")
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             compiler_version = Version(self.settings.compiler.version)
             if not minimum_version:

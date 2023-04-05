@@ -14,7 +14,7 @@ int main(int argc, const char* argv[])
         return -1;
     }
     DOMConfigurator::configure(argv[1]);
-    LOG4CXX_INFO(logger, "App started!");
-    LOG4CXX_ERROR(logger, "Some error!");
+    LOG4CXX_INFO(logger, "App started");
+    LOG4CXX_ERROR(logger, "Information message");
     return 0;
 }
