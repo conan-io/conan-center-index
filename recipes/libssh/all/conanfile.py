@@ -76,6 +76,8 @@ class LibSSHRecipe(ConanFile):
         # work-around conan-io/conan-center-index#16900
         replace_in_file(self, os.path.join(self.source_folder, "ConfigureChecks.cmake"), "${OPENSSL_CRYPTO_LIBRARIES}", "OpenSSL::Crypto")
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${OPENSSL_CRYPTO_LIBRARIES}", "OpenSSL::Crypto")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${ZLIB_INCLUDE_DIR}", "${ZLIB_INCLUDE_DIRS}")
 
     def build(self):
         self._patch_sources()
