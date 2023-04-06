@@ -5,6 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get
 
+
 class Tabulate(ConanFile):
     name = "tabulate"
     url = "https://github.com/conan-io/conan-center-index"
