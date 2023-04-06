@@ -43,7 +43,7 @@ class OpenvrConan(ConanFile):
                                                                                          self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("jsoncpp/1.9.4")
+        self.requires("jsoncpp/1.9.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
