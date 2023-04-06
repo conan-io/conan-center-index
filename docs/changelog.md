@@ -1,5 +1,11 @@
 # Changelog
 
+### 03-April-2023 - 10:26 CEST
+
+- [fix] Remove options usage from build profile.
+- [fix] Fix promotion of recipe/packages when artifacts already exist in target repo.
+- [feature] Make master branch promotion job wait for sibling jobs (to avoid recipe promotion race condition).
+- [feature] Improve request of reviews and remove timeout.
 
 ### 24-March-2023 - 12:00 CET
 
