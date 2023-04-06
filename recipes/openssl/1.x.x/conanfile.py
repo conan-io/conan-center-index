@@ -273,10 +273,8 @@ class OpenSSLConan(ConanFile):
         gen_info["CXXFLAGS"] = tc.cxxflags
         gen_info["DEFINES"] = tc.defines
         gen_info["LDFLAGS"] = tc.ldflags
-        # Support for self.dependencies in build() method is currently restricted to `generate()` and `validate()`
-        # See https://github.com/conan-io/conan/issues/12411 for more details
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
-            zlib_cpp_info = self.dependencies["zlib"].cpp_info
+            zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
             gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
             if self.settings.os == "Windows":
                 gen_info["zlib_lib_path"] = f"{zlib_cpp_info.libdirs[0]}/{zlib_cpp_info.libs[0]}.lib"
@@ -573,16 +571,10 @@ class OpenSSLConan(ConanFile):
                 include_path = self._adjust_path(include_path)
                 lib_path     = self._adjust_path(lib_path)
 
-                if Version(conan_version).major <2 :
-                    if self.options["zlib"].shared:
-                        args.append("zlib-dynamic")
-                    else:
-                        args.append("zlib")
+                if self.dependencies["zlib"].options.shared:
+                    args.append("zlib-dynamic")
                 else:
-                    if self.dependencies["zlib"].options.shared:
-                        args.append("zlib-dynamic")
-                    else:
-                        args.append("zlib")
+                    args.append("zlib")
 
                 args.extend(['--with-zlib-include="%s"' % include_path,
                              '--with-zlib-lib="%s"' % lib_path])
@@ -657,6 +649,10 @@ class OpenSSLConan(ConanFile):
             if self.options.get_safe("fPIC", True):
                 shared_cflag='shared_cflag => "-fPIC",'
 
+        if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+            cflags.append("-fembed-bitcode")
+            cxxflags.append("-fembed-bitcode")
+        
         config = config_template.format(targets=targets,
                                         target=self._target,
                                         ancestor=ancestor,
@@ -681,12 +677,7 @@ class OpenSSLConan(ConanFile):
     @property
     def _perl(self):
         if self._use_nmake:
-            # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
-            build_deps = (dependency.ref.name for require, dependency in self.dependencies.build.items())
-            if "strawberryperl" in build_deps:
-                return os.path.join(self.dependencies.build["strawberryperl"].package_folder, "bin", "perl.exe")
-            if hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
-                return self.user_info_build["strawberryperl"].perl
+            return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
 
     @property
@@ -763,7 +754,7 @@ class OpenSSLConan(ConanFile):
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
             new_str = '-install_name @rpath/'
             makefile = "Makefile" if self._full_version >= "1.1.1" else "Makefile.shared"
-            replace_in_file(self, makefile, old_str, new_str, strict=self.in_local_cache)
+            replace_in_file(self, makefile, old_str, new_str)
         if self._use_nmake:
             # NMAKE interprets trailing backslash as line continuation
             if self._full_version >= "1.1.0":

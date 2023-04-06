@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, save
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class FftConan(ConanFile):
@@ -16,8 +16,9 @@ class FftConan(ConanFile):
         "This is a package to calculate Discrete Fourier/Cosine/Sine "
         "Transforms of 2,3-dimensional sequences of length 2^N."
     )
-    topics = ("fft", "fft2d", "fft3d", "dct", "dst", "dft")
+    topics = ("fft2d", "fft3d", "dct", "dst", "dft")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,37 +43,30 @@ class FftConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if not self.options.threads:
             del self.options.max_threads
             del self.options.threads_begin_n
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         def _is_power_of_two(n):
             return (n != 0) and (n & (n-1) == 0)
 
-        if self.info.options.threads:
-            if not self.info.options.max_threads.isdigit():
+        if self.options.threads:
+            if not self.options.max_threads.isdigit():
                 raise ConanInvalidConfiguration("max_threads must be an integer")
-            if not self.info.options.threads_begin_n.isdigit():
+            if not self.options.threads_begin_n.isdigit():
                 raise ConanInvalidConfiguration("threads_begin_n must be an integer")
-            if not _is_power_of_two(int(self.info.options.max_threads)):
+            if not _is_power_of_two(int(self.options.max_threads)):
                 raise ConanInvalidConfiguration("max_threads must be a power of 2")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

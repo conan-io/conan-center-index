@@ -33,11 +33,11 @@ class AutoconfConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def requirements(self):
-        self.requires("m4/1.4.19")
-
     def package_id(self):
         self.info.clear()
+
+    def requirements(self):
+        self.requires("m4/1.4.19") # Needed at runtime by downstream clients as well
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
@@ -80,6 +80,10 @@ class AutoconfConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"),
                         "M4 = /usr/bin/env m4", "#M4 = /usr/bin/env m4")
+        if self._settings_build.os == "Windows":
+            # Handle vagaries of Windows line endings
+            replace_in_file(self, os.path.join(self.source_folder, "bin", "autom4te.in"),
+                            "$result =~ s/^\\n//mg;", "$result =~ s/^\\R//mg;")
 
     def build(self):
         self._patch_sources()
@@ -102,7 +106,6 @@ class AutoconfConan(ConanFile):
 
         # TODO: These variables can be removed since the scripts now locate the resources
         #       relative to themselves.
-
         dataroot_path = os.path.join(self.package_folder, "res", "autoconf")
         self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
         self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)

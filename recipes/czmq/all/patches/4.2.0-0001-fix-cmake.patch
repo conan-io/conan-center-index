@@ -1,8 +1,6 @@
-diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
-index de4e150..93a0727 100644
---- a/a/CMakeLists.txt
-+++ b/b/CMakeLists.txt
-@@ -120,25 +120,26 @@ set(OPTIONAL_LIBRARIES_STATIC)
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -120,27 +120,25 @@ set(OPTIONAL_LIBRARIES_STATIC)
  ########################################################################
  # LIBZMQ dependency
  ########################################################################
@@ -10,10 +8,9 @@ index de4e150..93a0727 100644
 -IF (LIBZMQ_FOUND)
 -    include_directories(${LIBZMQ_INCLUDE_DIRS})
 -    list(APPEND MORE_LIBRARIES ${LIBZMQ_LIBRARIES})
-+find_package(ZeroMQ REQUIRED)
-+IF (ZeroMQ_FOUND)
-+    include_directories(${ZeroMQ_INCLUDE_DIRS})
-+    list(APPEND MORE_LIBRARIES ${ZeroMQ_LIBRARIES})
++IF (1)
++    find_package(ZeroMQ REQUIRED CONFIG)
++    list(APPEND MORE_LIBRARIES $<IF:$<TARGET_EXISTS:libzmq>,libzmq,libzmq-static>)
    IF (PC_LIBZMQ_FOUND)
        set(pkg_config_names_private "${pkg_config_names_private} libzmq")
        list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_LIBZMQ_STATIC_LDFLAGS})
@@ -21,99 +18,130 @@ index de4e150..93a0727 100644
        set(pkg_config_libs_private "${pkg_config_libs_private} -lzmq")
    ENDIF (PC_LIBZMQ_FOUND)
 -ELSE (LIBZMQ_FOUND)
-+ELSE (ZeroMQ_FOUND)
++ELSE ()
      message( FATAL_ERROR "libzmq not found." )
 -ENDIF (LIBZMQ_FOUND)
-+ENDIF (ZeroMQ_FOUND)
++ENDIF ()
  
  ########################################################################
  # UUID dependency
  ########################################################################
- find_package(uuid)
+-find_package(uuid)
 -IF (UUID_FOUND)
-+option(CZMQ_WITH_UUID "Build czmq with uuid" ${UUID_FOUND})
-+IF (CZMQ_WITH_UUID AND UUID_FOUND)
-     include_directories(${UUID_INCLUDE_DIRS})
-     list(APPEND MORE_LIBRARIES ${UUID_LIBRARIES})
+-    include_directories(${UUID_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${UUID_LIBRARIES})
++IF (CZMQ_WITH_UUID)
++    find_package(libuuid REQUIRED CONFIG)
++    list(APPEND MORE_LIBRARIES libuuid::libuuid)
    IF (PC_UUID_FOUND)
-@@ -149,13 +150,14 @@ IF (UUID_FOUND)
+       set(pkg_config_names_private "${pkg_config_names_private} uuid")
+       list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_UUID_STATIC_LDFLAGS})
+@@ -148,16 +146,14 @@ IF (UUID_FOUND)
+       set(pkg_config_libs_private "${pkg_config_libs_private} -luuid")
    ENDIF (PC_UUID_FOUND)
      add_definitions(-DHAVE_UUID)
-     list(APPEND OPTIONAL_LIBRARIES ${UUID_LIBRARIES})
+-    list(APPEND OPTIONAL_LIBRARIES ${UUID_LIBRARIES})
 -ENDIF (UUID_FOUND)
-+ENDIF (CZMQ_WITH_UUID AND UUID_FOUND)
++ENDIF ()
  
  ########################################################################
  # SYSTEMD dependency
  ########################################################################
- find_package(systemd)
+-find_package(systemd)
 -IF (SYSTEMD_FOUND)
-+option(CZMQ_WITH_SYSTEMD "Build czmq with systemd" ${SYSTEMD_FOUND})
-+IF (CZMQ_WITH_SYSTEMD AND SYSTEMD_FOUND)
-     include_directories(${SYSTEMD_INCLUDE_DIRS})
-     list(APPEND MORE_LIBRARIES ${SYSTEMD_LIBRARIES})
+-    include_directories(${SYSTEMD_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${SYSTEMD_LIBRARIES})
++IF (CZMQ_WITH_SYSTEMD)
++    find_package(libsystemd REQUIRED CONFIG)
++    list(APPEND MORE_LIBRARIES libsystemd::libsystemd)
    IF (PC_SYSTEMD_FOUND)
-@@ -166,13 +168,14 @@ IF (SYSTEMD_FOUND)
+       set(pkg_config_names_private "${pkg_config_names_private} libsystemd >= 200.0.0")
+       list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_SYSTEMD_STATIC_LDFLAGS})
+@@ -165,16 +161,14 @@ IF (SYSTEMD_FOUND)
+       set(pkg_config_libs_private "${pkg_config_libs_private} -lsystemd")
    ENDIF (PC_SYSTEMD_FOUND)
      add_definitions(-DHAVE_LIBSYSTEMD)
-     list(APPEND OPTIONAL_LIBRARIES ${SYSTEMD_LIBRARIES})
+-    list(APPEND OPTIONAL_LIBRARIES ${SYSTEMD_LIBRARIES})
 -ENDIF (SYSTEMD_FOUND)
-+ENDIF (CZMQ_WITH_SYSTEMD AND SYSTEMD_FOUND)
++ENDIF ()
  
  ########################################################################
  # LZ4 dependency
  ########################################################################
- find_package(lz4)
+-find_package(lz4)
 -IF (LZ4_FOUND)
-+option(CZMQ_WITH_LZ4 "Build czmq with lz4" ${LZ4_FOUND})
-+IF (CZMQ_WITH_LZ4 AND LZ4_FOUND)
-     include_directories(${LZ4_INCLUDE_DIRS})
-     list(APPEND MORE_LIBRARIES ${LZ4_LIBRARIES})
+-    include_directories(${LZ4_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${LZ4_LIBRARIES})
++IF (CZMQ_WITH_LZ4)
++    find_package(lz4 REQUIRED CONFIG)
++    list(APPEND MORE_LIBRARIES $<IF:$<TARGET_EXISTS:LZ4::lz4_shared>,LZ4::lz4_shared,LZ4::lz4_static>)
    IF (PC_LZ4_FOUND)
-@@ -183,13 +186,14 @@ IF (LZ4_FOUND)
+       set(pkg_config_names_private "${pkg_config_names_private} liblz4")
+       list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_LZ4_STATIC_LDFLAGS})
+@@ -182,16 +176,14 @@ IF (LZ4_FOUND)
+       set(pkg_config_libs_private "${pkg_config_libs_private} -llz4")
    ENDIF (PC_LZ4_FOUND)
      add_definitions(-DHAVE_LIBLZ4)
-     list(APPEND OPTIONAL_LIBRARIES ${LZ4_LIBRARIES})
+-    list(APPEND OPTIONAL_LIBRARIES ${LZ4_LIBRARIES})
 -ENDIF (LZ4_FOUND)
-+ENDIF (CZMQ_WITH_LZ4 AND LZ4_FOUND)
++ENDIF ()
  
  ########################################################################
  # LIBCURL dependency
  ########################################################################
- find_package(libcurl)
+-find_package(libcurl)
 -IF (LIBCURL_FOUND)
-+option(CZMQ_WITH_LIBCURL "Build czmq with libcurl" ${LIBCURL_FOUND})
-+IF (CZMQ_WITH_LIBCURL AND LIBCURL_FOUND)
-     include_directories(${LIBCURL_INCLUDE_DIRS})
-     list(APPEND MORE_LIBRARIES ${LIBCURL_LIBRARIES})
+-    include_directories(${LIBCURL_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${LIBCURL_LIBRARIES})
++IF (CZMQ_WITH_LIBCURL)
++    find_package(CURL REQUIRED)
++    list(APPEND MORE_LIBRARIES CURL::libcurl)
    IF (PC_LIBCURL_FOUND)
-@@ -200,13 +204,14 @@ IF (LIBCURL_FOUND)
+       set(pkg_config_names_private "${pkg_config_names_private} libcurl >= 7.28.0")
+       list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_LIBCURL_STATIC_LDFLAGS})
+@@ -199,16 +191,14 @@ IF (LIBCURL_FOUND)
+       set(pkg_config_libs_private "${pkg_config_libs_private} -lcurl")
    ENDIF (PC_LIBCURL_FOUND)
      add_definitions(-DHAVE_LIBCURL)
-     list(APPEND OPTIONAL_LIBRARIES ${LIBCURL_LIBRARIES})
+-    list(APPEND OPTIONAL_LIBRARIES ${LIBCURL_LIBRARIES})
 -ENDIF (LIBCURL_FOUND)
-+ENDIF (CZMQ_WITH_LIBCURL AND LIBCURL_FOUND)
++ENDIF ()
  
  ########################################################################
  # LIBMICROHTTPD dependency
  ########################################################################
- find_package(libmicrohttpd)
+-find_package(libmicrohttpd)
 -IF (LIBMICROHTTPD_FOUND)
-+option(CZMQ_WITH_LIBMICROHTTPD "Build czmq with libmicrohttpd" ${LIBMICROHTTPD_FOUND})
-+IF (CZMQ_WITH_LIBMICROHTTPD AND LIBMICROHTTPD_FOUND)
-     include_directories(${LIBMICROHTTPD_INCLUDE_DIRS})
-     list(APPEND MORE_LIBRARIES ${LIBMICROHTTPD_LIBRARIES})
+-    include_directories(${LIBMICROHTTPD_INCLUDE_DIRS})
+-    list(APPEND MORE_LIBRARIES ${LIBMICROHTTPD_LIBRARIES})
++IF (CZMQ_WITH_LIBMICROHTTPD)
++    find_package(libmicrohttpd REQUIRED CONFIG)
++    list(APPEND MORE_LIBRARIES libmicrohttpd::libmicrohttpd)
    IF (PC_LIBMICROHTTPD_FOUND)
-@@ -217,7 +222,7 @@ IF (LIBMICROHTTPD_FOUND)
+       set(pkg_config_names_private "${pkg_config_names_private} libmicrohttpd")
+       list(APPEND OPTIONAL_LIBRARIES_STATIC ${PC_LIBMICROHTTPD_STATIC_LDFLAGS})
+@@ -216,8 +206,7 @@ IF (LIBMICROHTTPD_FOUND)
+       set(pkg_config_libs_private "${pkg_config_libs_private} -lmicrohttpd")
    ENDIF (PC_LIBMICROHTTPD_FOUND)
      add_definitions(-DHAVE_LIBMICROHTTPD)
-     list(APPEND OPTIONAL_LIBRARIES ${LIBMICROHTTPD_LIBRARIES})
+-    list(APPEND OPTIONAL_LIBRARIES ${LIBMICROHTTPD_LIBRARIES})
 -ENDIF (LIBMICROHTTPD_FOUND)
-+ENDIF (CZMQ_WITH_LIBMICROHTTPD AND LIBMICROHTTPD_FOUND)
++ENDIF ()
  
  ########################################################################
  # version
-@@ -380,6 +385,7 @@ if (CZMQ_BUILD_SHARED)
+@@ -368,7 +357,10 @@ IF (NOT MSVC)
+   # avoid building everything twice for shared + static
+   # only on *nix, as Windows needs different preprocessor defines in static builds
+   add_library (czmq_objects OBJECT ${czmq_sources})
++  target_link_libraries(czmq_objects PUBLIC ${MORE_LIBRARIES})
++  if(CZMQ_BUILD_SHARED)
+   set_property(TARGET czmq_objects PROPERTY POSITION_INDEPENDENT_CODE ON)
++  endif()
+ ENDIF (NOT MSVC)
+ 
+ # shared
+@@ -380,6 +372,7 @@ if (CZMQ_BUILD_SHARED)
    ENDIF (MSVC)
  
    set_target_properties (czmq PROPERTIES
@@ -121,32 +149,19 @@ index de4e150..93a0727 100644
      PUBLIC_HEADER "${public_headers}"
      DEFINE_SYMBOL "CZMQ_EXPORTS"
      SOVERSION "4"
-@@ -501,6 +507,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/czmqConfig.cmake
+@@ -501,6 +494,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/czmqConfig.cmake
  ########################################################################
  # executables
  ########################################################################
-+if(0) # disable executables
++if(0)
  add_executable(
      zmakecert
      "${SOURCE_DIR}/src/zmakecert.c"
-@@ -588,10 +595,12 @@ target_link_libraries(
-     ${OPTIONAL_LIBRARIES_STATIC}
+@@ -720,6 +714,7 @@ add_custom_command(
  )
- endif()
-+endif() # disable executables
+ 
+ include(ClangFormat OPTIONAL)
++endif()
  
  ########################################################################
- # tests
- ########################################################################
-+if(0) # disable tests
- set(CLASSTEST_TIMEOUT 60 CACHE STRING "Timeout of the selftest of a class")
- set(TOTAL_TIMEOUT 600 CACHE STRING "Timout of the total testsuite")
- 
-@@ -687,6 +696,7 @@ foreach(TEST_CLASS ${TEST_CLASSES})
- endforeach(TEST_CLASS)
- 
- include(CTest)
-+endif() # disable tests
- 
- ########################################################################
- # cleanup
+ # summary

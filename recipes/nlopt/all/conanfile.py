@@ -1,10 +1,10 @@
 from conan import ConanFile
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class NloptConan(ConanFile):
@@ -13,10 +13,11 @@ class NloptConan(ConanFile):
                   "algorithms for global and local, constrained or " \
                   "unconstrained, optimization."
     license = ["LGPL-2.1-or-later", "MIT"]
-    topics = ("nlopt", "optimization", "nonlinear")
+    topics = ("optimization", "nonlinear")
     homepage = "https://github.com/stevengj/nlopt"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,23 +36,16 @@ class NloptConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.enable_cxx_routines:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -64,8 +58,6 @@ class NloptConan(ConanFile):
         tc.variables["NLOPT_SWIG"] = False
         tc.variables["NLOPT_TESTS"] = False
         tc.variables["WITH_THREADLOCAL"] = True
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
@@ -120,7 +112,7 @@ class NloptConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["nloptlib"].system_libs.append("m")
         if not self.options.shared and self.options.enable_cxx_routines:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["nloptlib"].system_libs.append(libcxx)
         if self.settings.os == "Windows" and self.options.shared:

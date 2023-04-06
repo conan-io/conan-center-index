@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import shutil
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54.0"
 
 
 class MongoCxxConan(ConanFile):
@@ -42,6 +42,9 @@ class MongoCxxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("mongo-c-driver/1.23.2")
@@ -89,33 +92,29 @@ class MongoCxxConan(ConanFile):
             )
 
     def validate(self):
-        if self.info.options.with_ssl and not bool(self.dependencies["mongo-c-driver"].options.with_ssl):
+        if self.options.with_ssl and not bool(self.dependencies["mongo-c-driver"].options.with_ssl):
             raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
 
-        if self.info.options.polyfill == "mnmlstc":
+        if self.options.polyfill == "mnmlstc":
             # TODO: add mnmlstc polyfill support
             # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
             raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
 
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimal_std_version)
 
-        compiler = str(self.info.settings.compiler)
-        if self.info.options.polyfill == "experimental" and compiler == "apple-clang":
+        compiler = str(self.settings.compiler)
+        if self.options.polyfill == "experimental" and compiler == "apple-clang":
             raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
 
-        version = Version(self.info.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if compiler in self._compilers_minimum_version and version < self._compilers_minimum_version[compiler]:
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires a compiler that supports at least C++{self._minimal_std_version}",
             )
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -130,8 +129,6 @@ class MongoCxxConan(ConanFile):
         if not valid_min_cppstd(self, self._minimal_std_version):
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimal_std_version
         tc.variables["ENABLE_TESTS"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)

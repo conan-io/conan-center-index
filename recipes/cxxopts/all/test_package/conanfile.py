@@ -1,13 +1,12 @@
 from conan import ConanFile
-from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
-from io import StringIO
-import os
+from conan.tools.build import build_jobs, can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -16,6 +15,11 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITH_UNICODE"] = self.dependencies["cxxopts"].options.unicode
+        tc.generate()
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -23,14 +27,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            output = StringIO()
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            option_string = "-f 41 --bar baria --baz"
-            if self.options["cxxopts"].unicode:
-                option_string += " -q quxis"
-            self.run(f"{bin_path} {option_string}", env="conanrun", output=output)
-            output_lines = set(output.getvalue().splitlines())
-            expected_lines = {"foo:41", "bar:baria", "baz:1"}
-            if self.options["cxxopts"].unicode:
-                expected_lines.add("qux:quxis")
-            assert(expected_lines.issubset(output_lines))
+            with chdir(self, self.build_folder):
+                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")

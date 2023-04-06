@@ -1,17 +1,15 @@
 versions:
   "3.19.8":
-    folder: "3.x.x"
+    folder: "binary"
   "3.20.6":
-    folder: "3.x.x"
+    folder: "binary"
   "3.21.7":
-    folder: "3.x.x"
+    folder: "binary"
   "3.22.6":
-    folder: "3.x.x"
+    folder: "binary"
   "3.23.5":
-    folder: "3.x.x"
-  "3.24.3":
-    folder: "3.x.x"
-  "3.25.0":
-    folder: "3.x.x"
-  "3.25.1":
-    folder: "3.x.x"
+    folder: "binary"
+  "3.24.4":
+    folder: "binary"
+  "3.25.3":
+    folder: "binary"

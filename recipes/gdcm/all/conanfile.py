@@ -64,7 +64,7 @@ class GDCMConan(ConanFile):
         if self.options.with_json:
             self.requires("json-c/0.16")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -73,8 +73,7 @@ class GDCMConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

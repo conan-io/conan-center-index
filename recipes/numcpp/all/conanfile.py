@@ -31,16 +31,24 @@ class NumCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        return 14 if Version(self.version) < "2.9.0" else 17
 
     @property
     def _compilers_minimum_version(self):
+        if self._min_cppstd == 14:
+            return {
+                "gcc": "5",
+                "clang": "3.4",
+                "apple-clang": "10",
+                "Visual Studio": "14",
+                "msvc": "190",
+            }
         return {
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "10",
-            "Visual Studio": "14",
-            "msvc": "190",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def config_options(self):
@@ -61,7 +69,6 @@ class NumCppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -69,8 +76,7 @@ class NumCppConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

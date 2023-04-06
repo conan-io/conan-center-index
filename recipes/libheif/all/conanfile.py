@@ -1,22 +1,21 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
-from conan.tools.scm import Version
-from conans import tools as tools_legacy
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibheifConan(ConanFile):
     name = "libheif"
     description = "libheif is an HEIF and AVIF file format decoder and encoder."
-    topics = ("libheif", "heif", "codec", "video")
+    topics = ("heif", "codec", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/strukturag/libheif"
     license = ("LGPL-3.0-only", "GPL-3.0-or-later", "MIT")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,8 +35,7 @@ class LibheifConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,28 +43,27 @@ class LibheifConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        if self.options.with_libde265:
-            self.requires("libde265/1.0.8")
-        if self.options.with_x265:
-            self.requires("libx265/3.4")
-        if self.options.with_libaomav1:
-            self.requires("libaom-av1/3.3.0")
-        if self.options.with_dav1d:
-            self.requires("dav1d/1.0.0")
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.with_libde265:
+            self.requires("libde265/1.0.9")
+        if self.options.with_x265:
+            self.requires("libx265/3.4")
+        if self.options.with_libaomav1:
+            self.requires("libaom-av1/3.5.0")
+        if self.options.with_dav1d:
+            self.requires("dav1d/1.0.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -76,9 +73,6 @@ class LibheifConan(ConanFile):
         tc.variables["WITH_RAV1E"] = False
         tc.variables["WITH_DAV1D"] = self.options.with_dav1d
         tc.variables["WITH_EXAMPLES"] = False
-        if Version(self.version) < "1.11.0":
-            # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -107,7 +101,7 @@ class LibheifConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["heif"].system_libs.extend(["m", "pthread"])
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["heif"].system_libs.append(libcxx)
 

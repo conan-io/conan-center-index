@@ -18,6 +18,7 @@ class SentryBreakpadConan(ConanFile):
     license = "Apache-2.0"
     topics = ("breakpad", "error-reporting", "crash-reporting")
     provides = "breakpad"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -25,6 +26,20 @@ class SentryBreakpadConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11 if Version(self.version) < "0.5.4" else 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {} if Version(self.version) < "0.5.4" else {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -38,18 +53,18 @@ class SentryBreakpadConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.requires("linux-syscall-support/cci.20200813")
+            # linux-syscal-support is a public dependency
+            # see https://github.com/conan-io/conan-center-index/pull/16752#issuecomment-1487241864 
+            self.requires("linux-syscall-support/cci.20200813", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
-
-        if Version(self.version) <= "0.4.1":
-            if self.settings.os == "Android" or is_apple_os(self):
-                raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
-        if Version(self.version) <= "0.2.6":
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
