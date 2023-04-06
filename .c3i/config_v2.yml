@@ -103,11 +103,11 @@ configurations:
 
 cppstd:
   apple-clang:
-    "13": ["17", "gnu17", "20", "gnu20"]
+    "13": ["gnu17"]
   gcc:
-    "11": ["17", "gnu17", "20", "gnu20"]
+    "11": ["gnu17"]
   msvc:
-    "192": ["14", "17", "20"]
+    "192": ["14"]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"
