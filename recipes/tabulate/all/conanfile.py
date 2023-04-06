@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get
+from conan.tools.files import get, copy
 
 
 class Tabulate(ConanFile):
@@ -53,8 +53,8 @@ class Tabulate(ConanFile):
                                             " supported." % (self.name, compiler, Version(self.settings.compiler.version)))
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "*.hpp", os.path.join(self._source_subfolder, "include"), "include")
+        copy(self, "LICENSE", self._source_subfolder, "licenses")
 
     def package_id(self):
         self.info.clear()
