@@ -9,8 +9,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
 
-    tool_requires = "cmake/3.25.3"
-
     def requirements(self):
         self.requires(self.tested_reference_str)
 

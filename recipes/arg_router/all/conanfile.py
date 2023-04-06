@@ -14,13 +14,11 @@ class arg_routerRecipe(ConanFile):
     description = "C++ command line argument parsing and routing."
     topics = ("cpp", "command-line", "argument-parser", "header-only")
 
-    # CMake >= 3.18 is required but the recipe for it is not compatible with Conan v2, so just use
-    # the latest at the time of writing
+    # CMake >= 3.18 is required https://github.com/cmannett85/arg_router/blob/449567723d6c0e9db0a4c89277066c9a53b299fa/CMakeLists.txt#L5
     tool_requires = "cmake/3.25.3"
-    requires = "boost/1.74.0", "span-lite/0.10.3"
+    requires = "boost/1.81.0", "span-lite/0.10.3"
 
     settings = "os", "arch", "compiler", "build_type"
-    default_options = {"boost/*:header_only": True}
     package_type = "header-library"
     generators = "CMakeDeps", "CMakeToolchain"
     no_copy_source = True
