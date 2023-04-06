@@ -1,6 +1,5 @@
 import os
 from conan import ConanFile
-from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 
@@ -20,9 +19,6 @@ class NodejsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
-
-    def layout(self):
-        basic_layout(self)
 
     @property
     def _nodejs_arch(self):
