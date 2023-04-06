@@ -14,4 +14,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {tools.cpu_count()}", run_environment=True)
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {tools.cpu_count()}",
+                     run_environment=True)

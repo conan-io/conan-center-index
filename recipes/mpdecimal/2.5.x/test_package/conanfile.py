@@ -1,8 +1,6 @@
-import os
-import pathlib
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.build import can_run, build_jobs
 
 
 class TestPackageConan(ConanFile):
@@ -17,7 +15,6 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
-
         tc = CMakeToolchain(self)
         tc.variables["MPDECIMAL_CXX"] = self.dependencies["mpdecimal"].options.cxx
         tc.generate()
@@ -29,5 +26,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            with chdir(self, self.build_folder):
-                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")
