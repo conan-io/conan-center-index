@@ -392,7 +392,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.41.1")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
             self.requires("libpq/14.5")
         if self.options.with_odbc:
