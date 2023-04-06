@@ -6,3 +6,7 @@ patches:
   "4.4.3":
     - patch_file: "patches/0001-ebrefile-wrong-include.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/002-cross-compile-failed.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-check-for-zlib.patch"
+      base_path: "source_subfolder"

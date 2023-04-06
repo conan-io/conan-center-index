@@ -67,20 +67,17 @@ class LibebConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("gettext/0.21")
-        self.build_requires("libtool/2.4.6")
+        self.build_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("libiconv/1.17")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
-            self.run("automake -acf")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -89,6 +86,8 @@ class LibebConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
         self._autotools = AutoToolsBuildEnvironment(
             self, win_bash=self._settings_build.os == "Windows")
         self._autotools.libs = []
@@ -103,6 +102,18 @@ class LibebConan(ConanFile):
             "--enable-ebnet={}".format(yes_no(self.options.enable_ebnet)),
             "--enable-ipv6={}".format(yes_no(self.options.enable_ipv6)),
             "--enable-samples=no",
+            "--with-zlib-includes={}".format(tools.unix_path(os.path.join(
+                self.dependencies["zlib"].package_folder, "include"))),
+            "--with-zlib-libraries={}".format(tools.unix_path(os.path.join(
+                self.dependencies["zlib"].package_folder, "lib"))),
+            # "--with-gettext-includes={}".format(tools.unix_path(os.path.join(
+            #     self.build_requires["gettext"].package_folder, "include"))),
+            # "--with-gettext-libraries={}".format(tools.unix_path(os.path.join(
+            #     self.build_requires["gettext"].package_folder, "lib"))),
+            "--with-iconv-includes={}".format(tools.unix_path(os.path.join(
+                self.dependencies["libiconv"].package_folder, "include"))),
+            "--with-iconv-libraries={}".format(tools.unix_path(os.path.join(
+                self.dependencies["libiconv"].package_folder, "lib"))),
         ]
         self._autotools.configure(
             args=args, configure_dir=self._source_subfolder)

@@ -1,0 +1,22 @@
+diff --git a/m4/largefile.m4 b/m4/largefile.m4
+index 7d98cae..f033367 100644
+--- a/m4/largefile.m4
++++ b/m4/largefile.m4
+@@ -32,7 +32,7 @@ dnl *
+ AC_DEFUN([eb_SYS_LARGEFILE], [dnl
+ AC_REQUIRE([AC_SYS_LARGEFILE])
+ AC_CACHE_CHECK([for ll modifier of printf], ac_cv_func_printf_ll,
+-[AC_RUN_IFELSE([
++[AC_COMPILE_IFELSE([
+     #include <stdio.h>
+     #include <string.h>
+     #include <limits.h>
+@@ -43,7 +43,7 @@ AC_CACHE_CHECK([for ll modifier of printf], ac_cv_func_printf_ll,
+     }
+ ], [ac_cv_func_printf_ll=yes], [ac_cv_func_printf_ll=no])])
+ AC_CACHE_CHECK([for I64 modifier of printf], ac_cv_func_printf_i64,
+-[AC_RUN_IFELSE([
++[AC_COMPILE_IFELSE([
+     #include <stdio.h>
+     #include <string.h>
+     #include <limits.h>

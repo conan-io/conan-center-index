@@ -1,0 +1,25 @@
+diff --git a/configure.ac b/configure.ac
+index b7e49b3..03926db 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -182,6 +182,20 @@ AC_MSG_CHECKING(for zlib)
+ save_CPPFLAGS=$CPPFLAGS
+ save_LIBS=$LIBS
+ CPPFLAGS="$CPPFLAGS $ZLIBINCS"
++AC_SEARCH_LIBS(inflate, z, [], try_zlib=no)
++if test $try_zlib = no; then
++    AC_SEARCH_LIBS(inflate, zlib, [], try_zlib=no)
++fi
++if test $try_zlib = no; then
++    AC_SEARCH_LIBS(inflate, zdll, [], try_zlib=no)
++fi
++CPPFLAGS=$save_CPPFLAGS
++LIBS="$save_LIBS $try_zlib"
++AC_MSG_RESULT($try_zlib)
++if test $try_zlib = no; then
++    AC_MSG_ERROR(zlib not found)
++fi
++ZLIBLIBS="$try_zlib"
+ LIBS="$LIBS $ZLIBLIBS"
+ AC_LINK_IFELSE([
+ #include <zlib.h>
