@@ -6,7 +6,7 @@ from conan.tools.build import cross_building
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    generators = "CMakeToolchain"
 
     def build(self):
         cmake = CMake(self)
