@@ -59,6 +59,7 @@ class LibxsltConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
         self.requires("libxml2/2.10.3", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
