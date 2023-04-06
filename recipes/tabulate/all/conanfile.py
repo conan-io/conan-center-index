@@ -1,7 +1,9 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get
 
 class Tabulate(ConanFile):
     name = "tabulate"
@@ -18,16 +20,16 @@ class Tabulate(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
         compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = Version(self.settings.compiler.version)
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
                              " standard version support" % (self.name, compiler))
