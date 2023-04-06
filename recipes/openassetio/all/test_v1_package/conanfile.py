@@ -12,10 +12,9 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.1")
+        self.tool_requires("cmake/3.25.3")
 
     def requirements(self):
-        self.requires("openssl/1.1.1s")
         self.requires(self.tested_reference_str)
 
         if "with_python" in self.options["openassetio"] and not self.options["openassetio"].with_python:
