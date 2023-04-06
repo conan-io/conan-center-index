@@ -17,15 +17,8 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-        if "with_python" in self.options["openassetio"] and not self.options["openassetio"].with_python:
-            python_version = None
-        elif "python_version" in self.options["openassetio"]:
-            python_version = self.options['openassetio'].python_version
-        else:
-            python_version = "3.9.7"
-
-        if python_version is not None:
-            self.requires(f"cpython/{python_version}")
+        if "with_python" not in self.options["openassetio"] or self.options["openassetio"].with_python:
+            self.requires("cpython/3.9.7")
 
     def layout(self):
         cmake_layout(self)

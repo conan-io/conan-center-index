@@ -27,12 +27,10 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "with_python": [True, False],
-        "python_version": ["3.7.12", "3.8.12", "3.9.7", "3.10.0"]
     }
     default_options = {
         "shared": False,
         "with_python": True,
-        "python_version": "3.9.7"
     }
     short_paths = True
 
@@ -53,8 +51,6 @@ class PackageConan(ConanFile):
             if is_msvc(self):
                 # Required to create import .lib for building extension module.
                 self.options["cpython"].shared = True
-        else:
-            self.options.rm_safe("python_version")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,7 +60,7 @@ class PackageConan(ConanFile):
         if self.options.with_python:
             # TODO: cpython requires ncurses/6.2 but no pre-built package exists.
             self.requires("ncurses/6.3")
-            self.requires(f"cpython/{self.options.python_version}")
+            self.requires("cpython/3.9.7")
             self.requires("pybind11/2.10.1")
 
     def validate(self):
