@@ -586,6 +586,7 @@ class VtkConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("sqlite3/3.40.0")
+        self.tool_requires("openssl/1.1.1s")    # TODO override for C3I build, remove hack
 
     def source(self):
         if self.options.use_source_from_git:
