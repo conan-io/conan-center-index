@@ -57,6 +57,8 @@ class HidapiConan(ConanFile):
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libusb/1.0.26")
+        if self.settings.os == "Linux":
+            self.requires("libudev/system")
 
     def validate(self):
         if is_msvc(self) and not self.options.shared:
@@ -143,6 +145,8 @@ class HidapiConan(ConanFile):
 
             self.cpp_info.components["hidraw"].set_property("pkg_config_name", "hidapi-hidraw")
             self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["hidraw"].requires = ["libudev::libudev"]
             self.cpp_info.components["hidraw"].system_libs = ["pthread", "dl"]
         else:
             self.cpp_info.libs = ["hidapi"]
