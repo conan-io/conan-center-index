@@ -585,8 +585,7 @@ class VtkConan(ConanFile):
         return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
 
     def build_requirements(self):
-        self.tool_requires("sqlite3/3.40.0")
-        self.tool_requires("openssl/1.1.1s")    # TODO override for C3I build, remove hack
+        self.tool_requires("sqlite3/3.41.1")
 
     def source(self):
         if self.options.use_source_from_git:
@@ -613,16 +612,16 @@ class VtkConan(ConanFile):
                 "expat":             "expat/2.5.0",
                 "exprtk":            "exprtk/0.0.1",   # TODO upgrade to 0.0.2 (there was a problem with first attempt)
                 "fmt":               "fmt/8.1.1",      # VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0
-                "freetype":          "freetype/2.12.1",
+                "freetype":          "freetype/2.13.0",
                 "glew":              "glew/2.2.0",
-                "jsoncpp":           "jsoncpp/1.9.4",
+                "jsoncpp":           "jsoncpp/1.9.5",
                 "libharu":           "libharu/2.4.3",
                 "kissfft":           "kissfft/131.1.0",
                 "lz4":               "lz4/1.9.4",
                 "libpng":            "libpng/1.6.39",
                 "proj":              "proj/9.1.1",
                 "pugixml":           "pugixml/1.13",
-                "sqlite3":           "sqlite3/3.40.0",
+                "sqlite3":           "sqlite3/3.41.1",
                 "utfcpp":            "utfcpp/3.2.3",
                 "xz_utils":          "xz_utils/5.4.0", # note: VTK calls this lzma
                 "zlib":              "zlib/1.2.13",
@@ -638,7 +637,7 @@ class VtkConan(ConanFile):
             parties["jpeg"] = "libjpeg-turbo/2.1.5"
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
-            parties["hdf5"]    = "hdf5/1.13.1"
+            parties["hdf5"]    = "hdf5/1.14.0"
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
             parties["netcdf"]  = "netcdf/4.8.1"
@@ -669,9 +668,6 @@ class VtkConan(ConanFile):
                 self.requires("xorg/system")
         for pack in self._third_party().values():
             self.requires(pack)
-
-        # TODO remove: hack for building on C3I, override libcurl to align with QT's requirement
-        self.requires("openssl/1.1.1s")
 
     def validate(self):
         if self.settings.compiler.cppstd:
