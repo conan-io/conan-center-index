@@ -1,6 +1,7 @@
 import os
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
@@ -19,6 +20,9 @@ class NodejsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
+
+    def layout(self):
+        basic_layout(self)
 
     @property
     def _nodejs_arch(self):
@@ -49,4 +53,5 @@ class NodejsConan(ConanFile):
         self.cpp_info.includedirs = []
         bin_dir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
+        self.buildenv_info.prepend_path("PATH", bin_dir)
         self.runenv_info.prepend_path("PATH", bin_dir)

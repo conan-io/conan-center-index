@@ -12,4 +12,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not cross_building(self):
             self.output.info("Node version:")
-            self.run("node --version", env="conanrun")
+            self.run("node --version", env="conanbuild")
