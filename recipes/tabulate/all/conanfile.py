@@ -21,7 +21,7 @@ class Tabulate(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
