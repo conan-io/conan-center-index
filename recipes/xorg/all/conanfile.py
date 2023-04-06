@@ -8,6 +8,7 @@ required_conan_version = ">=1.50.0"
 
 class XorgConan(ConanFile):
     name = "xorg"
+    package_type = "shared-library"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
