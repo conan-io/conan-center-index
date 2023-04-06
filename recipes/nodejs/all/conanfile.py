@@ -49,5 +49,7 @@ class NodejsConan(ConanFile):
         self.cpp_info.includedirs = []
         bin_dir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
-        self.buildenv_info.prepend_path("PATH", bin_dir)
         self.runenv_info.prepend_path("PATH", bin_dir)
+
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.env_info.PATH.append(bin_dir)
