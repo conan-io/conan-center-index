@@ -138,8 +138,12 @@ class CMakeConan(ConanFile):
                 f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
 
     def _from_sources_validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
+        if self.settings.os == "Macos" and self.options.from_sources:
+            # On macOS, the downloaded binary is universal, but there's no good way to build a universal
+            # binary from sources. Since the settings.arch is deleted from the package_id(), to prevent
+            # confusion, only allow downloads.
+            raise ConanInvalidConfiguration(
+                "This recipe only supports universal binary CMake on macOS, not building from sources")
 
     def layout(self):
         if not self.options.from_sources:
