@@ -1,13 +1,15 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import stat
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class UnicornConan(ConanFile):
@@ -17,6 +19,7 @@ class UnicornConan(ConanFile):
     homepage = "https://www.unicorn-engine.org/"
     url = "https://github.com/conan-io/conan-center-index"
     license = ("GPL-2-or-later", "LGPL-2-or-later")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,25 +40,13 @@ class UnicornConan(ConanFile):
         """
         return sorted(["aarch64", "arm", "m68k", "mips", "sparc", "x86"])
 
-    @property
-    def _supported_archs(self):
+    def _supported_archs(self, info=False):
         """
         Get supported architectures of the current build/package (depends on self.options.supported_archs)
         :return: sorted list of strings
         """
-        return sorted(set(str(self.options.supported_archs).split(",")))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        self.options.supported_archs = ",".join(self._all_supported_archs)
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        options = self.info.options if info else self.options
+        return sorted(set(str(options.supported_archs).split(",")))
 
     @property
     def _needs_jwasm(self):
@@ -64,35 +55,68 @@ class UnicornConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        self.options.supported_archs = ",".join(self._all_supported_archs)
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        # normalize the supported_archs option (sorted+comma separated)
+        self.info.options.supported_archs = ",".join(self._supported_archs(info=True))
+
+    def validate(self):
+        unsupported_archs = [arch for arch in self._supported_archs() if arch not in self._all_supported_archs]
+        if unsupported_archs:
+            raise ConanInvalidConfiguration(
+                f"Invalid arch(s) in supported_archs option: {unsupported_archs}\n"
+                f"Valid supported architectures are: {self._all_supported_archs}"
+            )
+        if "arm" in self.settings.arch:
+            # FIXME: will/should be fixed with unicorn 2 (https://github.com/unicorn-engine/unicorn/issues/1379)
+            raise ConanInvalidConfiguration("arm builds of unicorn are currently unsupported")
 
     def build_requirements(self):
         if self._needs_jwasm:
             self.tool_requires("jwasm/2.13")
 
-    def package_id(self):
-        # normalize the supported_archs option (sorted+comma separated)
-        self.info.options.supported_archs = ",".join(self._supported_archs)
-
-    def validate(self):
-        unsupported_archs = [arch for arch in self._supported_archs if arch not in self._all_supported_archs]
-        if unsupported_archs:
-            self.output.info(f"Valid supported architectures are: {self._all_supported_archs}")
-            raise ConanInvalidConfiguration(f"Invalid arch(s) in supported_archs option: {unsupported_archs}")
-        if "arm" in self.settings.arch:
-            # FIXME: will/should be fixed with unicorn 2 (https://github.com/unicorn-engine/unicorn/issues/1379)
-            raise ConanInvalidConfiguration("arm builds of unicorn are currently unsupported")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _jwasm_wrapper(self):
         return os.path.join(self.build_folder, "jwasm_wrapper.py")
 
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        tc = CMakeToolchain(self)
+        tc.variables["UNICORN_INSTALL"] = True
+        tc.variables["UNICORN_BUILD_SAMPLES"] = False
+        tc.cache_variables["UNICORN_ARCH"] = ";".join(self._supported_archs())
+        if self._needs_jwasm:
+            tc.variables["CMAKE_ASM_MASM_COMPILER"] = self._jwasm_wrapper
+            if self.settings.arch == "x86_64":
+                tc.variables["CMAKE_ASM_MASM_FLAGS"] = {
+                    "x86_64": "-win64",
+                    "x86": "-coff",
+                }[str(self.settings.arch)]
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if self._needs_jwasm:
             save(self, self._jwasm_wrapper, textwrap.dedent("""\
                 #!/usr/bin/env python
@@ -115,28 +139,7 @@ class UnicornConan(ConanFile):
             """))
             os.chmod(self._jwasm_wrapper, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["UNICORN_INSTALL"] = True
-        tc.variables["UNICORN_BUILD_SAMPLES"] = False
-        tc.cache_variables["UNICORN_ARCH"] = ";".join(self._supported_archs)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
-        if self._needs_jwasm:
-            tc.variables["CMAKE_ASM_MASM_COMPILER"] = self._jwasm_wrapper
-            if self.settings.arch == "x86_64":
-                tc.variables["CMAKE_ASM_MASM_FLAGS"] = {
-                    "x86_64": "-win64",
-                    "x86": "-coff",
-                }[str(self.settings.arch)]
-
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
@@ -147,11 +150,14 @@ class UnicornConan(ConanFile):
             copy(self, lic, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if Version(self.version) >= "2.0.0" and self.options.shared:
+            rm(self, "*unicorn.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*unicorn.lib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["unicorn"]
         self.cpp_info.set_property("pkg_config_name", "unicorn")
+        suffix = "-import" if Version(self.version) >= "2.0.0" and is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"unicorn{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m", "pthread"]
