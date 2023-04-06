@@ -164,7 +164,7 @@ class BinutilsConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.configure()
+        autotools.configure(args=["--sysconfdir=${prefix}/bin/etc"])
         autotools.make()
 
     def package(self):
@@ -206,6 +206,8 @@ class BinutilsConan(ConanFile):
         # Don't use this property in production code. It's unsupported.
         self.user_info.recipe_path = os.path.realpath(__file__)
 
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["dl", "rt"]
 
 class _ArchOs:
     def __init__(self, arch: str, os: str, extra: typing.Optional[typing.Dict[str, str]] = None):

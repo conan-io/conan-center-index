@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.layout import basic_layout
 
 
 class TestPackageConan(ConanFile):
@@ -20,6 +21,9 @@ class TestPackageConan(ConanFile):
     @property
     def _has_ld(self):
         return self._settings_build.os not in ("Macos",)
+
+    def layout(self):
+        basic_layout(self)
 
     def test(self):
         binaries = ["ar", "nm", "objcopy", "objdump", "ranlib", "readelf", "strip"]
