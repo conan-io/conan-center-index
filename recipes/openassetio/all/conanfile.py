@@ -110,7 +110,7 @@ class PackageConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     @property
     def _python_exe(self):
