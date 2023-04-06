@@ -1,0 +1,22 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,6 +31,8 @@
+ 
+ add_definitions( -DVR_API_PUBLIC )
+ 
++find_package(jsoncpp CONFIG REQUIRED)
++
+ # Check if 32 or 64 bit system.
+ set(SIZEOF_VOIDP ${CMAKE_SIZEOF_VOID_P})
+ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -98,7 +98,8 @@
+ 	set(EXTRA_LIBS ${EXTRA_LIBS} c++ c++abi)
+ endif()
+ 
+ target_link_libraries(${LIBNAME} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
++target_link_libraries(${LIBNAME} PUBLIC JsonCpp::JsonCpp)
+ target_include_directories(${LIBNAME} PUBLIC ${OPENVR_HEADER_DIR})
+ 
+ install(TARGETS ${LIBNAME} DESTINATION lib)

@@ -11,4 +11,17 @@ sources:
 patches:
   "1.16.8":
     - patch_file: "patches/fix-includes-and-assert-1.16.8.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix compilaton errors due to wrong headers folder and usage of missing assert.h"
+      patch_type: "backport"
+      patch_source: "https://github.com/ValveSoftware/openvr/pull/1524 https://github.com/ValveSoftware/openvr/pull/1542"
+    - patch_file: "patches/1.16.8-fix-jsoncpp.patch"
+      patch_description: "Fix jsoncpp inclusion"
+      patch_type: "conan"
+  "1.14.15":
+    - patch_file: "patches/1.16.8-fix-jsoncpp.patch"
+      patch_description: "Fix jsoncpp inclusion"
+      patch_type: "conan"
+  "1.12.5":
+    - patch_file: "patches/1.16.8-fix-jsoncpp.patch"
+      patch_description: "Fix jsoncpp inclusion"
+      patch_type: "conan"
