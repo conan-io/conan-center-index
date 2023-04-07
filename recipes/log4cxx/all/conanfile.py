@@ -60,7 +60,6 @@ class Log4cxx(ConanFile):
     def requirements(self):
         self.requires("apr/[>=1.6]")
         self.requires("apr-util/[>=1.6]")
-        self.requires("expat/[>=2.4]")
         if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.requires("odbc/[>=2.3]")
         if self.options.get_safe("with_smtp_appender"):
