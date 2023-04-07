@@ -103,7 +103,7 @@ class RmluiConan(ConanFile):
         tc.cache_variables["ENABLE_PRECOMPILED_HEADERS"] = True
         tc.cache_variables["ENABLE_TRACY_PROFILING"] = False
         tc.cache_variables["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
-        tc.cache_variables["NO_FONT_INTERFACE_DEFAULT"] = self.options.font_interface is None
+        tc.cache_variables["NO_FONT_INTERFACE_DEFAULT"] = not self.options.font_interface
         tc.cache_variables["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
         tc.generate()
 
