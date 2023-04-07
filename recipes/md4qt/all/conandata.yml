@@ -1,4 +1,7 @@
 sources:
+  "2.0.8":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.0.8.tar.gz"
+    sha256: "50a47d407acf1ca6a5b96af0386da74f7cfb66322ec7453cbb543f4f66251683"
   "2.0.7":
     url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.0.7.tar.gz"
     sha256: "2852ac88f95051ce0ce112e5d99695307d8748f47553b101edebecce03ee3eae"
