@@ -198,6 +198,8 @@ pod_size:
   large:
     - "pcl"
     - "duckdb"
+    - "ceres-solver"
+    - "gstreamer"
   xlarge:
     - "llvm"
     - "opengv"

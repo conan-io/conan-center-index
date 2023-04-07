@@ -16,10 +16,11 @@ class LibsamplerateConan(ConanFile):
         "performing sample rate conversion of audio data."
     )
     license = "BSD-2-Clause"
-    topics = ("libsamplerate", "audio", "resample-audio-files")
+    topics = ("audio", "resample-audio-files")
     homepage = "https://github.com/libsndfile/libsamplerate"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,7 +49,7 @@ class LibsamplerateConan(ConanFile):
             import re
             from io import StringIO
             output = StringIO()
-            self.run("cmake --version", output=output)
+            self.run("cmake --version", output)
             m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
             return Version(m.group(1)) >= required_version
         except:
@@ -58,7 +59,7 @@ class LibsamplerateConan(ConanFile):
         if is_apple_os(self) and self.options.shared and Version(self.version) >= "0.2.2":
             # see https://github.com/libsndfile/libsamplerate/blob/0.2.2/src/CMakeLists.txt#L110-L119
             if not self._cmake_new_enough("3.17"):
-                self.tool_requires("cmake/3.25.1")
+                self.tool_requires("cmake/3.25.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
