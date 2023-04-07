@@ -11,3 +11,5 @@ versions:
     folder: "4.x"
   "4.4":
     folder: "4.x"
+  "5.1":
+    folder: "4.x"
