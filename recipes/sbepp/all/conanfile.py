@@ -101,6 +101,7 @@ class PackageConan(ConanFile):
         copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         copy(self, "sbeppcTargets.cmake",
             src=os.path.join(self.source_folder, os.pardir, "cmake"),
             dst=os.path.join(self.package_folder, self._module_path))
