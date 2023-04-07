@@ -15,6 +15,7 @@ class CpphttplibConan(ConanFile):
     homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("http", "https", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
@@ -34,7 +35,7 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.get_safe("with_brotli"):
