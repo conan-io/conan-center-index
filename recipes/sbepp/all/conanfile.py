@@ -55,7 +55,7 @@ class PackageConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         if not self.info.options.with_sbeppc:
@@ -102,7 +102,7 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "sbeppcTargets.cmake",
-            src=os.path.join(self.source_folder, "cmake"),
+            src=os.path.join(self.source_folder, os.pardir, "cmake"),
             dst=os.path.join(self.package_folder, self._module_path))
     
     @property
