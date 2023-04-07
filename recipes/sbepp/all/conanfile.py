@@ -108,7 +108,7 @@ class PackageConan(ConanFile):
     
     @property
     def _module_path(self):
-        return os.path.join("lib", "cmake", "sbepp")
+        return os.path.join("lib", "cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sbepp")

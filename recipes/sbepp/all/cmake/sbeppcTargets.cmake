@@ -9,7 +9,7 @@ if(NOT TARGET sbepp::sbeppc)
     else()
         find_program(SBEPP_SBEPPC_EXECUTABLE
             NAMES sbeppc
-            PATHS "${CMAKE_CURRENT_LIST_DIR}/../../../bin/"
+            PATHS "${CMAKE_CURRENT_LIST_DIR}/../../bin/"
             NO_DEFAULT_PATH
         )
     endif()
@@ -19,7 +19,7 @@ if(NOT TARGET sbepp::sbeppc)
     # if(NOT SBEPP_SBEPPC_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING)
     #     find_program(SBEPP_SBEPPC_EXECUTABLE
     #         NAMES flatc
-    #         PATHS "${CMAKE_CURRENT_LIST_DIR}/../../../bin/"
+    #         PATHS "${CMAKE_CURRENT_LIST_DIR}/../../bin/"
     #         NO_DEFAULT_PATH
     #     )
     # endif()
