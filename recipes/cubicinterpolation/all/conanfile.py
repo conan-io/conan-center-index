@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy, rmdir, patch, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc, check_min_vs
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class CubicInterpolationConan(ConanFile):
@@ -69,7 +68,7 @@ class CubicInterpolationConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} currently Visual Studio < 2019 not yet supported in this recipe. Contributions are welcome")
 
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("cubicinterpolation shared is not supported with Visual Studio")
+            raise ConanInvalidConfiguration(f"{self.ref} shared is not supported with Visual Studio")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
