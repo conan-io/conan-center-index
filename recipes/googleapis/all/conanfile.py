@@ -82,7 +82,8 @@ class GoogleAPIS(ConanFile):
             return True
 
     def requirements(self):
-        self.requires('protobuf/3.21.9', transitive_headers=True)
+        # Protobuf symbols are exposed https://github.com/conan-io/conan-center-index/pull/16034#issuecomment-1499509499
+        self.requires('protobuf/3.21.9', transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.build_requires('protobuf/3.21.9')
