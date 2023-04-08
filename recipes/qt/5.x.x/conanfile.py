@@ -158,6 +158,7 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.tool_requires("glib/2.75.3")
 
+    def validate_build(self):
         if self.options.qtwebengine:
             # Check if a valid python2 is available in PATH or it will failflex
             # Start by checking if python2 can be found
