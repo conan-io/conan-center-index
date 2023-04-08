@@ -35,10 +35,7 @@ class WilConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "14.1",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
+            "msvc": "14.1"
         }
 
     # About compiler version: https://github.com/microsoft/wil/issues/207#issuecomment-991722592 
