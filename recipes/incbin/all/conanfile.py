@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -21,7 +22,7 @@ class IncbinConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler == "msvc":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("Currently incbin recipe is not supported for Visual Studio because it requires external command 'incbin'.")
 
     def source(self):
