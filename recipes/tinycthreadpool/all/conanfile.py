@@ -5,7 +5,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class TinyCThreadPoolConan(ConanFile):
