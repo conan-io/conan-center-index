@@ -70,7 +70,7 @@ class PROPOSALConan(ConanFile):
             str(self.settings.compiler), False
         )
         if not minimum_version:
-            self.output.warn(
+            self.output.warning(
                 "PROPOSAL requires C++14. Your compiler is unknown. Assuming it supports C++14."
             )
         elif Version(self.settings.compiler.version) < minimum_version:
