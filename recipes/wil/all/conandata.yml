@@ -7,4 +7,4 @@ patches:
     - patch_file: "patches/1.0.230202.1-0001-fix-type-conversion.patch"
       patch_description: "Explicitly writing the type instead of using decltype"
       patch_source: "https://github.com/microsoft/wil/issues/302#issuecomment-1482117200"
-      patch_type: "issue"
+      patch_type: bugfix
