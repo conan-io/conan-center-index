@@ -69,7 +69,7 @@ class LibvipsConan(ConanFile):
         "introspection": False,
         "vapi": False,
         "with_cfitsio": False,
-        "with_cgif": False,
+        "with_cgif": True,
         "with_exif": False,
         "with_fftw": True,
         "with_fontconfig": False,
@@ -120,6 +120,8 @@ class LibvipsConan(ConanFile):
         self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.1.0")
+        if self.options.with_cgif:
+            self.requires("cgif/0.3.0")
         if self.options.with_exif:
             self.requires("libexif/0.6.24")
         if self.options.with_fftw:
@@ -180,8 +182,6 @@ class LibvipsConan(ConanFile):
                 f"{self.ref} static with MT runtime not supported if glib shared due to conancenter CI limitations"
             )
 
-        if self.options.with_cgif:
-            raise ConanInvalidConfiguration("cgif recipe not available in conancenter yet")
         if self.options.with_gsf:
             raise ConanInvalidConfiguration("libgsf recipe not available in conancenter yet")
         if self.options.with_imagequant:
@@ -303,6 +303,8 @@ class LibvipsConan(ConanFile):
         ]
         if self.options.with_cfitsio:
             self.cpp_info.components["vips"].requires.append("cfitsio::cfitsio")
+        if self.options.with_cgif:
+            self.cpp_info.components["vips"].requires.append("cgif::cgif")
         if self.options.with_exif:
             self.cpp_info.components["vips"].requires.append("libexif::libexif")
         if self.options.with_fftw:
