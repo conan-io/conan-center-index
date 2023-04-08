@@ -69,7 +69,7 @@ class LibvipsConan(ConanFile):
         "introspection": False,
         "vapi": False,
         "with_cfitsio": False,
-        "with_cgif": True,
+        "with_cgif": False,
         "with_exif": False,
         "with_fftw": True,
         "with_fontconfig": False,
@@ -172,6 +172,8 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref}:with_pangocairo=True requires pango/*:with_cairo=True")
         if self.options.with_pdfium and self.options.with_poppler:
             raise ConanInvalidConfiguration("pdf support is enabled either with pdfium or poppler")
+        if self.options.with_cgif and not (self.options.with_imagequant or self.options.with_quantizr):
+            raise ConanInvalidConfiguration("with_cgif requires either with_imagequant or with_quantizr")
 
         # Visual Studio < 2019 doesn't seem to like pointer restrict of pointer restrict in libnsgif
         check_min_vs(self, "192")
