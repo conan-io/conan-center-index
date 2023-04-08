@@ -86,6 +86,7 @@ class GoogleAPIS(ConanFile):
     def build_requirements(self):
         if not can_run(self):
             self.tool_requires(f"protobuf/{self._protobuf_version}")
+
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
         if not self._cmake_new_enough("3.20"):
             self.tool_requires("cmake/3.25.3")
@@ -137,8 +138,9 @@ class GoogleAPIS(ConanFile):
                 all_dict[key].is_used = False
         #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs: GID_MAX
         #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
-        #    as of 3.21.4 issue still exist
-        if Version(self.dependencies["protobuf"].ref.version) <= "3.21.5" and self.settings.os == "Macos" or \
+        #    https://github.com/conan-io/conan-center-index/pull/16034/files#r1159042324
+        #    This was fixed in the v22 release which starts at 4.22 for the C++ library
+        if Version(self.dependencies["protobuf"].ref.version) <= "3.21.9" and self.settings.os == "Macos" or \
             self.settings.os == "Android":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
             deactivate_library("//google/storagetransfer/v1:storagetransfer_cc_proto")
