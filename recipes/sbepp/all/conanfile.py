@@ -118,6 +118,7 @@ class PackageConan(ConanFile):
         build_modules = [
             os.path.join(self._module_path, "sbeppcTargets.cmake")
         ]
+        self.cpp_info.builddirs.append(self._module_path)
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
