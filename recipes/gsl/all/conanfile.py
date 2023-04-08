@@ -1,13 +1,13 @@
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class GslConan(ConanFile):
@@ -18,6 +18,7 @@ class GslConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,10 +33,6 @@ class GslConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,8 +58,7 @@ class GslConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -75,21 +71,19 @@ class GslConan(ConanFile):
                 tc.extra_defines.append("GSL_DLL")
         if self.settings.os == "Linux" and "x86" in self.settings.arch:
             tc.extra_defines.append("HAVE_GNUX86_IEEE_INTERFACE")
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
-            tc.extra_cflags.append("-FS")
         if is_msvc(self):
             tc.configure_args.extend([
                 "ac_cv_func_memcpy=yes",
                 "ac_cv_func_memmove=yes",
                 "ac_cv_c_c99inline=no",
             ])
-        tc.generate()
-
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
@@ -98,29 +92,25 @@ class GslConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_gsl_msvc")
+        tc.generate(env)
 
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.autoreconf()
-        # TODO: use fix_apple_shared_install_name() (requires conan >=1.54.0, see https://github.com/conan-io/conan/pull/12249)
-        replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                              "-install_name \\$rpath/",
-                              "-install_name @rpath/")
         autotools.configure()
         autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.c", os.path.join(self.package_folder, "include", "gsl"))
         rm(self, "gsl-config", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
         if is_msvc(self) and self.options.shared:
             pjoin = lambda p: os.path.join(self.package_folder, "lib", p)
             rename(self, pjoin("gsl.dll.lib"), pjoin("gsl.lib"))
