@@ -4,7 +4,9 @@
 
 
 int main(void) {
-    std::cout << "wil/resource.h included correctly" << std::endl;
-
+    SetLastError(42);
+    // check for simple function call:
+    auto error42 = wil::last_error_context();
+    
     return EXIT_SUCCESS;
 }
