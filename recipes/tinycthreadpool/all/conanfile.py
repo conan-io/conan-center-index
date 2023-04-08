@@ -61,15 +61,6 @@ class TinyCThreadPoolConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "tinycthreadpool")
-        self.cpp_info.set_property("cmake_target_name", "tinycthreadpool::tinycthreadpool")
-        self.cpp_info.set_property("pkg_config_name", "tinycthreadpool")
-
         self.cpp_info.libs = ["tinycthreadpool"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "tinycthreadpool"
-        self.cpp_info.names["cmake_find_package_multi"] = "tinycthreadpool"
-
