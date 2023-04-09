@@ -2,17 +2,17 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, patch, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.59"
+required_conan_version = ">=1.53.0"
 
 
 class ImaglConan(ConanFile):
     name = "imagl"
-    license = "GPL-3.0-or-later"
-    homepage = "https://github.com/Woazim/imaGL"
+    license = "lgpl-3.0-only"
+    homepage = "https://gitlab-lepuy.iut.uca.fr/opengl/imagl"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A lightweight library to load image for OpenGL application."
     topics = ("opengl", "texture", "image")
@@ -29,7 +29,6 @@ class ImaglConan(ConanFile):
         "with_png": True,
         "with_jpeg": True,
     }
-    exports_sources = "patches/**"
     _cmake = None
 
     @property
@@ -96,7 +95,7 @@ class ImaglConan(ConanFile):
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)

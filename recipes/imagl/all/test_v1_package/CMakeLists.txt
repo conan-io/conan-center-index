@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.15)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(example ../test_package/example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-set_target_properties(example PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
