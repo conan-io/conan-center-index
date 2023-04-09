@@ -28,7 +28,7 @@ class GlazeConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
             "gcc": "12",
-            "clang": "12" if "0.0.7" < Version(self.version) < "0.2.4" else "13",
+            "clang": "12" if Version(self.version) > "1.0.0" else "13",
             "apple-clang": "13.1",
         }
 
@@ -44,7 +44,7 @@ class GlazeConan(ConanFile):
             self.requires("frozen/1.1.1")
             self.requires("nanorange/cci.20200706")
         if Version(self.version) < "0.2.3":
-            self.requires("fast_float/3.11.0")
+            self.requires("fast_float/4.0.0")
         if "0.1.5" <= Version(self.version) < "0.2.3":
             self.requires("dragonbox/1.1.3")
 
