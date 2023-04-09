@@ -72,7 +72,6 @@ class SDLConan(ConanFile):
         "xvm": True,
         "wayland": True,
         "directfb": False,
-        "iconv": True,
         "video_rpi": False,
         "sdl2main": True,
         "opengl": True,
@@ -101,6 +100,12 @@ class SDLConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
+        # Don't depend on iconv on macOS by default
+        # SDL2 depends on many system freamworks,
+        # which depend on the system-provided iconv
+        # and can conflict with the Conan provided one
+        self.options.iconv = self.settings.os != "Macos"
+
         if self.settings.os == "Windows":
             del self.options.fPIC
             if is_msvc(self):
@@ -154,9 +159,6 @@ class SDLConan(ConanFile):
                 self.requires("libunwind/1.6.2")
 
     def validate(self):
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
         if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
@@ -195,7 +197,15 @@ class SDLConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        if self.settings.os == "Macos" and not self.options.iconv:
+            # Avoid falling back to system provided libiconv
+            replace_in_file(self, cmakelists,
+                            "check_library_exists(iconv",
+                            "#check_library_exists(iconv")
+
+        # TODO: a comment is needed clarifying the motivation for this
+        replace_in_file(self, cmakelists,
                         'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
                         '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
