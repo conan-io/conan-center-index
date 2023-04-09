@@ -87,3 +87,6 @@ class LexborConan(ConanFile):
 
         self.cpp_info.components["_lexbor"].libs = [target]
         self.cpp_info.components["_lexbor"].defines = ["LEXBOR_BUILD_SHARED" if self.options.shared else "LEXBOR_BUILD_STATIC"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_lexbor"].system_libs.append("m")
+
