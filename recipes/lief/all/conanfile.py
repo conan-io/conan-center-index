@@ -67,19 +67,19 @@ class LiefConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("mbedtls/3.2.1")
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
-        self.requires("mbedtls/3.2.1")
+        else:
+            self.requires("utfcpp/3.2.3")
+            # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
+            self.requires("spdlog/1.10.0")
+            self.requires("boost/1.81.0", transitive_headers=True)
+            self.requires("tcb-span/cci.20220616", transitive_headers=True)
         if self.options.with_json:
             self.requires("nlohmann_json/3.11.2")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
-        if Version(self.version) >= "0.12.2":
-            self.requires("utfcpp/3.2.3")
-            # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
-            self.requires("spdlog/1.10.0")
-            self.requires("boost/1.81.0")
-            self.requires("tcb-span/cci.20220616")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
