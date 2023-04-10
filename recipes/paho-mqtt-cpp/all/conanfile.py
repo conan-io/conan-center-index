@@ -67,10 +67,10 @@ class PahoMqttCppConan(ConanFile):
             self.requires("paho-mqtt-c/1.3.9", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True) # https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
-        # our cmakefiles reference openssl directly with ssl enabled, so we
+        # upstream's cmakefiles reference openssl directly with ssl enabled, so we
         # should directly depend, not just transitively.
         if self.options.ssl:
-            self.requires("openssl/1.1.1t", direct=False)
+            self.requires("openssl/1.1.1t")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
