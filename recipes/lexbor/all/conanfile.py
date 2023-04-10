@@ -76,17 +76,22 @@ class LexborConan(ConanFile):
 
     def package_info(self):
         target = "lexbor" if self.options.shared else "lexbor_static"
-        self.cpp_info.set_property("cmake_file_name", "lexbor")
-        self.cpp_info.set_property("cmake_target_name", f"lexbor::{target}")
         self.cpp_info.names["cmake_find_package"] = "lexbor"
         self.cpp_info.names["cmake_find_package_multi"] = "lexbor"
 
         self.cpp_info.components["_lexbor"].set_property("cmake_target_name", f"lexbor::{target}")
-        self.cpp_info.components["_lexbor"].names["cmake_find_package"] = target
-        self.cpp_info.components["_lexbor"].names["cmake_find_package_multi"] = target
 
         self.cpp_info.components["_lexbor"].libs = [target]
         self.cpp_info.components["_lexbor"].defines = ["LEXBOR_BUILD_SHARED" if self.options.shared else "LEXBOR_BUILD_STATIC"]
+
+        if not self.options.shared:
+            self.cpp_info.components["_lexbor"].defines.append("LEXBOR_STATIC")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_lexbor"].system_libs.append("m")
 
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.set_property("cmake_file_name", "lexbor")
+        self.cpp_info.set_property("cmake_target_name", f"lexbor::{target}")
+        self.cpp_info.components["_lexbor"].names["cmake_find_package"] = target
+        self.cpp_info.components["_lexbor"].names["cmake_find_package_multi"] = target
