@@ -1,7 +1,7 @@
 sources:
-  "4.5.0":
-    url: "https://github.com/JustWhit3/osmanip/archive/v4.5.0.tar.gz"
-    sha256: "7bf3c13472105feed72bd95c3c9b57fd451308563a1b04e794258f0d70a370b6"
+  "4.5.1":
+    url: "https://github.com/JustWhit3/osmanip/archive/v4.5.1.tar.gz"
+    sha256: "4b475e556c662fe0eb86b7533ee93b0cbee0b661945fc436e9f4b98c49b7a613"
   "4.4.0":
     url: "https://github.com/JustWhit3/osmanip/archive/v4.4.0.tar.gz"
     sha256: "61c08255afe4fa8694771ed139d9d8a4d5edfba56ffbd25997019a41f6923314"

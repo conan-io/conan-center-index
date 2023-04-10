@@ -16,31 +16,23 @@ class OsmanipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JustWhit3/osmanip"
     topics = ("manipulator", "iostream", "output-stream", "iomanip")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        if Version(self.version) < "4.5.0":
+            copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "4.5.0":
-            del self.options.shared
-            self.package_type = "static-library"
-
-    def configure(self):
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/1.81.0")
@@ -78,8 +70,7 @@ class OsmanipConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -100,7 +91,6 @@ class OsmanipConan(ConanFile):
             cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         else:
             cmake.configure()
-            
         cmake.build()
 
     def package(self):
