@@ -3,7 +3,7 @@
 #include "ada.h"
 
 int main() {
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://www.google.com");
     if(not url) {
         return 1;
     }

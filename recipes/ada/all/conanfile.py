@@ -19,11 +19,9 @@ class AdaConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "with_icu": [True, False],
     }
     default_options = {
         "fPIC": True,
-        "with_icu": False,
     }
 
     @property
@@ -46,10 +44,6 @@ class AdaConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def requirements(self):
-        if self.options.with_icu:
-            self.requires("icu/72.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -85,7 +79,6 @@ class AdaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ADA_USE_ICU"] = self.options.with_icu
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
@@ -106,8 +99,3 @@ class AdaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ada"]
-        if self.options.with_icu:
-            self.cpp_info.requires = [
-                "icu::icu-uc",
-                "icu::icu-i18n",
-            ]
