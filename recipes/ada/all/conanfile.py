@@ -60,6 +60,11 @@ class AdaConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "12.0.0" and self.settings.compiler.libcxx != "libc++":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires <charconv>, please use libc++ or upgrade compiler."
+            )
+
     def _cmake_new_enough(self, required_version):
         try:
             import re
@@ -84,8 +89,8 @@ class AdaConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
