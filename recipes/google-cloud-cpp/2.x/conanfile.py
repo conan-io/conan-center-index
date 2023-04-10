@@ -44,7 +44,7 @@ class GoogleCloudCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-           self.options.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
             self.options["googleapis"].shared = True
             self.options["grpc-proto"].shared = True
