@@ -4,7 +4,7 @@
 
 int main() {
     ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://www.google.com");
-    if(not url) {
+    if(!url) {
         return 1;
     }
 
