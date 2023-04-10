@@ -1,7 +1,14 @@
 import os
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, replace_in_file, rmdir, copy
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
+from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
 class ReadLineConan(ConanFile):
     name = "readline"
@@ -22,12 +29,6 @@ class ReadLineConan(ConanFile):
         "with_library": "termcap",
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    _autotools = None
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -40,56 +41,50 @@ class ReadLineConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("readline does not support Visual Studio")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        configure_args = [
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             "--with-curses={}".format("yes" if self.options.with_library == "curses" else "no"),
-        ]
-        if self.options.shared:
-            configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            configure_args.extend(["--enable-static", "--disable-shared"])
-        if tools.cross_building(self.settings):
-            configure_args.append("bash_cv_wcwidth_broken=yes")
-
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # this should be really done automatically by the AutoToolsBuildEnvironment helper,
-            # but very unlikely old helper will be fixed any time soon
-            self._autotools.link_flags.extend(["-arch", "arm64"])
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        ])
+        if cross_building(self):
+            tc.configure_args.append("bash_cv_wcwidth_broken=yes")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
+        replace_in_file(self, os.path.join(self.source_folder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
                               "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS) -ltermcap")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
+        replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
 
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["history", "readline"]
