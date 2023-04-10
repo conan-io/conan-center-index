@@ -1,13 +1,15 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 import os
 import glob
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
+
 
 class CBlosc2Conan(ConanFile):
     name = "c-blosc2"
@@ -16,6 +18,7 @@ class CBlosc2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Blosc/c-blosc2"
     topics = ("c-blosc", "blosc", "compression")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -47,18 +50,9 @@ class CBlosc2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
         # c-blosc2 uses zlib-ng with zlib compat options.
         if self.options.with_zlib == "zlib-ng-compat":
@@ -77,14 +71,14 @@ class CBlosc2Conan(ConanFile):
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.13")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
 
     def _cmake_new_enough(self, required_version):
         try:
             import re
             from io import StringIO
             output = StringIO()
-            self.run("cmake --version", output=output)
+            self.run("cmake --version", output)
             m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
             return Version(m.group(1)) >= required_version
         except:
@@ -92,13 +86,15 @@ class CBlosc2Conan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.4.1" and not self._cmake_new_enough("3.16.3"):
-            self.tool_requires("cmake/3.25.0")
+            self.tool_requires("cmake/3.25.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
         tc.cache_variables["BLOSC_IS_SUBPROJECT"] = False
         tc.cache_variables["BLOSC_INSTALL"] = True
@@ -156,9 +152,6 @@ class CBlosc2Conan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "blosc2")
 
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
-        self.cpp_info.libs = ["{}blosc2".format(prefix)]
+        self.cpp_info.libs = [f"{prefix}blosc2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
-
-        # TODO: to remove in conan v2 once pkg_config generator removed
-        self.cpp_info.names["pkg_config"] = "blosc2"
