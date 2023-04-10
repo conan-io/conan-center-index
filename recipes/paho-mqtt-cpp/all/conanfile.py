@@ -114,7 +114,6 @@ class PahoMqttCppConan(ConanFile):
         self.cpp_info.components["paho-mqttpp"].set_property("cmake_target_name", f"PahoMqttCpp::{target}")
         self.cpp_info.components["paho-mqttpp"].names["cmake_find_package"] = target
         self.cpp_info.components["paho-mqttpp"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["paho-mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
         if self.settings.os == "Windows":
             self.cpp_info.components["paho-mqttpp"].libs = [target]
         else:
