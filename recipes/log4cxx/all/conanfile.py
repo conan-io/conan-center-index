@@ -94,9 +94,11 @@ class Log4cxx(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.settings.compiler} {compiler_version} does not support C++17: {minimum_version} required.")
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, "17")
+        elif self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "11")
 
     def build_requirements(self):
-        if self.settings.os != "Windows":
+        if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.tool_requires("pkgconf/1.7.4")
 
     def layout(self):
