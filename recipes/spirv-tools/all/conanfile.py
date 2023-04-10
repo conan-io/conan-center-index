@@ -33,6 +33,10 @@ class SpirvtoolsConan(ConanFile):
 
     short_paths = True
 
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "1.3.243" else "17"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,7 +53,7 @@ class SpirvtoolsConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
 
     def _cmake_new_enough(self, required_version):
         try:
