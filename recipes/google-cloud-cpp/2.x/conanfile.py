@@ -44,7 +44,7 @@ class GoogleCloudCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+           self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
             self.options["googleapis"].shared = True
             self.options["grpc-proto"].shared = True
@@ -86,13 +86,13 @@ class GoogleCloudCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("protobuf/3.21.4")
+        self.requires("protobuf/3.21.9")
         self.requires("grpc/1.50.1")
         self.requires("nlohmann_json/3.10.0")
         self.requires("crc32c/1.1.1")
         self.requires("abseil/20220623.0")
         self.requires("libcurl/7.88.1")
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/1.1.1t")
         self.requires("zlib/1.2.13")
         # `google-cloud-cpp` contains code generated from the proto files.
         # Working with older versions of these protos almost always will fail, as
