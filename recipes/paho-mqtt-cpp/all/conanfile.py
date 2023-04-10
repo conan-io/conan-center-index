@@ -108,9 +108,11 @@ class PahoMqttCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
-        self.cpp_info.set_property("cmake_file_name", "PahoMqttCpp")
-
+        
         target = "paho-mqttpp3" if self.options.shared else "paho-mqttpp3-static"
+        self.cpp_info.set_property("cmake_file_name", "PahoMqttCpp")
+        self.cpp_info.set_property("cmake_target_name", f"PahoMqttCpp::{target}")
+
         self.cpp_info.components["paho-mqttpp"].set_property("cmake_target_name", f"PahoMqttCpp::{target}")
         self.cpp_info.components["paho-mqttpp"].names["cmake_find_package"] = target
         self.cpp_info.components["paho-mqttpp"].names["cmake_find_package_multi"] = target
