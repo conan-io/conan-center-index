@@ -56,7 +56,8 @@ class PahoMqttcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1t")
+            # Headers are exposed https://github.com/eclipse/paho.mqtt.c/blob/f7799da95e347bbc930b201b52a1173ebbad45a7/src/SSLSocket.h#L29
+            self.requires("openssl/1.1.1t", transitive_headers=True)
 
     def validate(self):
         if not self.options.shared and Version(self.version) < "1.3.4":
