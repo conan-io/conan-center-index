@@ -851,6 +851,13 @@ class BoostConan(ConanFile):
                               "    <conditional>@numa",
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)
+        if self.settings.os == "Android":
+            # force versionless soname from boostorg/boost#206 
+            # this can be applied to all versions and it's easier with a replace
+            replace_in_file(self, os.path.join(self.source_folder, "boostcpp.jam"),
+                            "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix &&",
+                            "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix android &&",
+                            strict=False)
 
         if self.options.header_only:
             self.output.warning("Header only package, skipping build")

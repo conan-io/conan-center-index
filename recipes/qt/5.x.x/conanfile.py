@@ -158,6 +158,43 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.tool_requires("glib/2.76.1")
 
+    def validate_build(self):
+        if self.options.qtwebengine:
+            # Check if a valid python2 is available in PATH or it will failflex
+            # Start by checking if python2 can be found
+            python_exe = shutil.which("python2")
+            if not python_exe:
+                # Fall back on regular python
+                python_exe = shutil.which("python")
+
+            if not python_exe:
+                msg = ("Python2 must be available in PATH "
+                       "in order to build Qt WebEngine")
+                raise ConanInvalidConfiguration(msg)
+
+            # In any case, check its actual version for compatibility
+            from six import StringIO  # Python 2 and 3 compatible
+            mybuf = StringIO()
+            cmd_v = f"\"{python_exe}\" --version"
+            self.run(cmd_v, mybuf)
+            verstr = mybuf.getvalue().strip().split("Python ")[1]
+            if verstr.endswith("+"):
+                verstr = verstr[:-1]
+            version = Version(verstr)
+            # >= 2.7.5 & < 3
+            v_min = "2.7.5"
+            v_max = "3.0.0"
+            if (version >= v_min) and (version < v_max):
+                msg = ("Found valid Python 2 required for QtWebengine:"
+                       f" version={mybuf.getvalue()}, path={python_exe}")
+                self.output.success(msg)
+            else:
+                msg = (f"Found Python 2 in path, but with invalid version {verstr}"
+                       f" (QtWebEngine requires >= {v_min} & < {v_max})\n"
+                       "If you have both Python 2 and 3 installed, copy the python 2 executable to"
+                       "python2(.exe)")
+                raise ConanInvalidConfiguration(msg)
+
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
@@ -318,42 +355,6 @@ class QtConan(ConanFile):
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
-
-        if self.options.qtwebengine:
-            # Check if a valid python2 is available in PATH or it will failflex
-            # Start by checking if python2 can be found
-            python_exe = shutil.which("python2")
-            if not python_exe:
-                # Fall back on regular python
-                python_exe = shutil.which("python")
-
-            if not python_exe:
-                msg = ("Python2 must be available in PATH "
-                       "in order to build Qt WebEngine")
-                raise ConanInvalidConfiguration(msg)
-
-            # In any case, check its actual version for compatibility
-            from six import StringIO  # Python 2 and 3 compatible
-            mybuf = StringIO()
-            cmd_v = f"\"{python_exe}\" --version"
-            self.run(cmd_v, mybuf)
-            verstr = mybuf.getvalue().strip().split("Python ")[1]
-            if verstr.endswith("+"):
-                verstr = verstr[:-1]
-            version = Version(verstr)
-            # >= 2.7.5 & < 3
-            v_min = "2.7.5"
-            v_max = "3.0.0"
-            if (version >= v_min) and (version < v_max):
-                msg = ("Found valid Python 2 required for QtWebengine:"
-                       f" version={mybuf.getvalue()}, path={python_exe}")
-                self.output.success(msg)
-            else:
-                msg = (f"Found Python 2 in path, but with invalid version {verstr}"
-                       f" (QtWebEngine requires >= {v_min} & < {v_max})\n"
-                       "If you have both Python 2 and 3 installed, copy the python 2 executable to"
-                       "python2(.exe)")
-                raise ConanInvalidConfiguration(msg)
 
     def requirements(self):
         self.requires("zlib/1.2.13")
