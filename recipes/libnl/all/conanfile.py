@@ -51,7 +51,7 @@ class LibNlConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib", "libnl", "cli", "cls"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib", "libnl", "cli", "qdisk"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib", "libnl", "cli", "qdisc"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -69,5 +69,7 @@ class LibNlConan(ConanFile):
         self.cpp_info.components["nl-nf"].requires = ["nl-route"]
         self.cpp_info.components["nl-cli"].libs = ["nl-cli-3"]
         self.cpp_info.components["nl-cli"].requires = ["nl-nf", "nl-genl"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["nl-cli"].system_libs = ["dl"]
         self.cpp_info.components["nl-idiag"].libs = ["nl-idiag-3"]
         self.cpp_info.components["nl-idiag"].requires = ["nl"]
