@@ -6,5 +6,7 @@ patches:
   "1.0.230202.1":
     - patch_file: "patches/1.0.230202.1-0001-fix-type-conversion.patch"
       patch_description: "Explicitly writing the type instead of using decltype"
-      patch_source: "https://github.com/microsoft/wil/issues/302#issuecomment-1482117200"
-      patch_type: bugfix
+      patch_source: |
+          https://github.com/microsoft/wil/issues/302#issuecomment-1482117200
+          https://github.com/microsoft/wil/pull/316
+      patch_type: portability
