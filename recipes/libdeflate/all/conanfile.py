@@ -62,8 +62,9 @@ class LibdeflateConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libdeflate")
-        target_suffix = "" if self.options.shared else "_static"
+        target_suffix = "_shared" if self.options.shared else "_static"
         self.cpp_info.set_property("cmake_target_name", f"libdeflate::libdeflate{target_suffix}")
+        self.cpp_info.set_property("cmake_target_aliases", ["libdeflate::libdeflate"]) # not official, avoid to break users
         self.cpp_info.set_property("pkg_config_name", "libdeflate")
         # TODO: back to global scope in conan v2
         self.cpp_info.components["_libdeflate"].libs = collect_libs(self)
