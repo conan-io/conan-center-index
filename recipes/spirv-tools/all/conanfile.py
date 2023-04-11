@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -37,6 +38,18 @@ class SpirvtoolsConan(ConanFile):
     def _min_cppstd(self):
         return "11" if Version(self.version) < "1.3.243" else "17"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                "apple-clang": "10",
+                "clang": "5",
+                "gcc": "7",
+                "msvc": "191",
+                "Visual Studio": "15",
+            }
+        }.get(self._min_cppstd, {})
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,6 +67,12 @@ class SpirvtoolsConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def _cmake_new_enough(self, required_version):
         try:
