@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rename, rm
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rename, rm, rmdir
+from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 from conan.tools.scm import Version
 # FIXME: Needs to be migrted to Conan v2
 from conans import AutoToolsBuildEnvironment, MSBuild
+from conans import tools as legacy_tools
 
 import glob
 import os
-import shutil
 
 required_conan_version = ">=1.55.0"
 
@@ -82,9 +82,9 @@ class LibdbConan(ConanFile):
 
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
-                    raise ConanInvalidConfiguration(f"{self.ref} does no support clang<6 with_cxx=True")
+                raise ConanInvalidConfiguration(f"{self.ref} does no support clang<6 with_cxx=True")
             if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10":
-                    raise ConanInvalidConfiguration(f"{self.ref} does no support apple-clang<10 with_cxx=True")
+                raise ConanInvalidConfiguration(f"{self.ref} does no support apple-clang<10 with_cxx=True")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -110,7 +110,7 @@ class LibdbConan(ConanFile):
                     self.conf.get("user.gnu-config:config_sub", check_type=str),
                 ]:
                     if gnu_config:
-                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self._source_subfolder)
+                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self.source_folder, self._source_subfolder, subdir))
 
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
             replace_in_file(self, file,
@@ -128,7 +128,7 @@ class LibdbConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=legacy_tools.os_info.is_windows)
         if self.settings.compiler in ["apple-clang", "clang"] and Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
@@ -147,13 +147,13 @@ class LibdbConan(ConanFile):
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
         if self.options.with_tcl:
-            conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
+            conf_args.append("--with-tcl={}".format(unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder, "dist"), args=conf_args)
         if self.settings.os == "Windows" and self.options.shared:
-            tools.replace_in_file(os.path.join(self.build_folder, "libtool"),
+            replace_in_file(self, os.path.join(self.build_folder, "libtool"),
                                   "\ndeplibs_check_method=",
                                   "\ndeplibs_check_method=pass_all\n#deplibs_check_method=")
-            tools.replace_in_file(os.path.join(self.build_folder, "Makefile"),
+            replace_in_file(self, os.path.join(self.build_folder, "Makefile"),
                                   ".a",
                                   ".dll.a")
         return self._autotools
