@@ -1,0 +1,8 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 434ed7b..dd31f56 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,2 +1,2 @@
+-cmake_minimum_required(VERSION 3.16.3) # version on Ubuntu Focal
++cmake_minimum_required(VERSION 3.15.7)
+ project(behaviortree_cpp)

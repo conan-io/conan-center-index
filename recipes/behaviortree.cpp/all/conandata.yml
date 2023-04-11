@@ -18,18 +18,22 @@ sources:
     url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/3.5.6.tar.gz"
     sha256: "543c428602b5acb7c5666aee34feb532e18ce7200870a79b23ff9aed17ee84c4"
 patches:
-  "4.0.1":
-    - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
-      patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.1-0002-use-cci.patch"
-      patch_description: "use zeromq cci package"
+  "4.1.1":
+    - patch_file: "patches/4.1.1-0001-cmake-version.patch"
+      patch_description: "change minimum cmake version to 3.15.7"
       patch_type: "conan"
   "4.0.2":
     - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
       patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
       patch_type: "conan"
     - patch_file: "patches/4.0.2-0002-use-cci.patch"
+      patch_description: "use zeromq cci package"
+      patch_type: "conan"
+  "4.0.1":
+    - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
+      patch_description: "remove CMAKE_POSITION_INDEPENDENT_CODE definition"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.1-0002-use-cci.patch"
       patch_description: "use zeromq cci package"
       patch_type: "conan"
   "3.8.3":
