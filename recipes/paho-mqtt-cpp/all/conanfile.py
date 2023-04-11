@@ -56,18 +56,19 @@ class PahoMqttCppConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.dependencies["paho-mqtt-c"].options.shared != self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.name} requires paho-mqtt-c to have a matching 'shared' option.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires paho-mqtt-c to have a matching 'shared' option.")
         if self.dependencies["paho-mqtt-c"].options.ssl != self.options.ssl:
-            raise ConanInvalidConfiguration(f"{self.name} requires paho-mqtt-c to have a matching 'ssl' option.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires paho-mqtt-c to have a matching 'ssl' option.")
         if Version(self.version) < "1.2.0" and Version(self.dependencies["paho-mqtt-c"].ref.version) >= "1.3.2":
-            raise ConanInvalidConfiguration(f"{self.name}/{self.version} requires paho-mqtt-c =< 1.3.1")
+            raise ConanInvalidConfiguration(f"{self.ref} requires paho-mqtt-c =< 1.3.1")
 
     def requirements(self):
         if Version(self.version) >= "1.2.0":
-            self.requires("paho-mqtt-c/1.3.9", transitive_headers=True, transitive_libs=True)
+            # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16760#issuecomment-1502420549
+            self.requires("paho-mqtt-c/1.3.9", transitive_headers=True)
         else:
              # This is the "official tested" version https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
-            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True)
+            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True)
 
         # upstream's CMakeLists.txt references openssl directly with ssl enabled, so we
         # should directly depend, not just transitively.

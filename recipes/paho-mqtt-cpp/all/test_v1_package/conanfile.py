@@ -10,6 +10,8 @@ class TestPackageV1Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["PAHO_MQTT_CPP_SHARED"] = self.options["paho-mqtt-cpp"].shared
+        cmake.definitions["TEST_SSL_OPTION"] = self.options["paho-mqtt-cpp"].ssl
         cmake.configure()
         cmake.build()
 
