@@ -49,12 +49,12 @@ class PahoMqttCppConan(ConanFile):
         self.options["paho-mqtt-c/*"].ssl = self.options.ssl
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+
         if self.dependencies["paho-mqtt-c"].options.shared != self.options.shared:
             raise ConanInvalidConfiguration(f"{self.name} requires paho-mqtt-c to have a matching 'shared' option.")
         if self.dependencies["paho-mqtt-c"].options.ssl != self.options.ssl:
@@ -66,8 +66,10 @@ class PahoMqttCppConan(ConanFile):
         if Version(self.version) >= "1.2.0":
             self.requires("paho-mqtt-c/1.3.9", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True) # https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
-        # upstream's cmakefiles reference openssl directly with ssl enabled, so we
+             # This is the "official tested" version https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
+            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True)
+
+        # upstream's CMakeLists.txt references openssl directly with ssl enabled, so we
         # should directly depend, not just transitively.
         if self.options.ssl:
             self.requires("openssl/1.1.1t")
@@ -108,7 +110,7 @@ class PahoMqttCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
-        
+
         target = "paho-mqttpp3" if self.options.shared else "paho-mqttpp3-static"
         self.cpp_info.set_property("cmake_file_name", "PahoMqttCpp")
         self.cpp_info.set_property("cmake_target_name", f"PahoMqttCpp::{target}")
@@ -120,3 +122,6 @@ class PahoMqttCppConan(ConanFile):
             self.cpp_info.components["paho-mqttpp"].libs = [target]
         else:
             self.cpp_info.components["paho-mqttpp"].libs = ["paho-mqttpp3"]
+        self.cpp_info.components["paho-mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
+        if self.options.ssl:
+            self.cpp_info.components["paho-mqttpp"].requires.extend(["openssl::openssl"])
