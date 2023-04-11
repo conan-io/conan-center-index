@@ -15,6 +15,7 @@ class SqliteOrmConan(ConanFile):
     topics = ("sqlite", "sql", "database", "orm")
     homepage = "https://github.com/fnc12/sqlite_orm"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
