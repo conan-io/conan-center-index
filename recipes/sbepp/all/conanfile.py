@@ -38,9 +38,9 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         if self.options.with_sbeppc:
             return {
-                "gcc": "7.1",
-                "clang": "5",
-                "apple-clang": "5"
+                "gcc": "8.1",
+                "clang": "7",
+                "apple-clang": "11"
             }
         else:
             return {
