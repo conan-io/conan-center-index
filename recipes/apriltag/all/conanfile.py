@@ -14,7 +14,7 @@ class ApriltagConan(ConanFile):
     description = ("AprilTag is a visual fiducial system, useful for a wide variety of tasks \
                     including augmented reality, robotics, and camera calibration")
     homepage = "https://april.eecs.umich.edu/software/apriltag"
-    topics = ("robotics")
+    topics = ("robotics",)
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
