@@ -32,7 +32,6 @@ class GnuConfigConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        pass
 
     def _extract_license(self):
         txt_lines = load(self, os.path.join(self.source_folder, "config.guess")).splitlines()
