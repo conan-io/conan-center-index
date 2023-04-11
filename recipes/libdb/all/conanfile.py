@@ -110,7 +110,7 @@ class LibdbConan(ConanFile):
                     self.conf.get("user.gnu-config:config_sub", check_type=str),
                 ]:
                     if gnu_config:
-                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self._source_subfolder)
 
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
             replace_in_file(self, file,
@@ -129,7 +129,7 @@ class LibdbConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler in ["apple-clang", "clang"] and tools.scm.Version(self.settings.compiler.version) >= "12":
+        if self.settings.compiler in ["apple-clang", "clang"] and Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
