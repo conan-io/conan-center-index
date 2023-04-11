@@ -32,7 +32,7 @@ class LAConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
             "gcc": "10",
-            "clang": "11",
+            "clang": "12", # Should be 11 but https://github.com/conan-io/conan-docker-tools/issues/251
             "apple-clang": "11"
         }
 
