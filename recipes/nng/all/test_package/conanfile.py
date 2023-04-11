@@ -16,10 +16,6 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def build(self):
-        cache = os.path.join(self.build_folder, "CMakeCache.txt")
-        if os.path.exists(cache):
-            self.output.info(f"Removing {cache}")
-            os.remove(cache)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
