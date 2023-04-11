@@ -95,7 +95,7 @@ class PackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(cli_args="--verbose")
+        cmake.build(cli_args=["--verbose"])
 
     def package(self):
         copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
