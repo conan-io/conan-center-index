@@ -16,6 +16,7 @@ class LibdeflateConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ebiggers/libdeflate"
     topics = ("compression", "decompression", "deflate", "zlib", "gzip")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
