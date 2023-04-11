@@ -34,10 +34,14 @@ class MdnsResponderConan(ConanFile):
 
     _autotools = None
 
+    def configure(self):
+        if self.options.use_tls:
+            #The target(libdns_sd) is a shared lib, so mbedtls enable 'shared' option
+            self.options['mbedtls'].shared = True
+
     def requirements(self):
         if self.options.use_tls:
             self.requires("mbedtls/[>=2.23.0 <3.0.0]")
-            self.options['mbedtls'].shared = True
 
     @property
     def _source_subfolder(self):
@@ -148,7 +152,9 @@ class MdnsResponderConan(ConanFile):
             replace_in_file(self, rc, "afxres.h", "winres.h")
 
         msbuild = MSBuild(self)
-        msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)
+        # use Win32 instead of the default value when building x86
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
+        msbuild.build(sln, targets=self._msvc_targets)#TODO How to add _msvc_definitions to msbuild.build
 
     def generate(self):
         if self.settings.os == "Linux":
