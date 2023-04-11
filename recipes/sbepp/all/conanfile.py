@@ -21,10 +21,12 @@ class PackageConan(ConanFile):
     topics = ("trading", "fix", "sbe")
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_sbeppc": [True, False]
+        "with_sbeppc": [True, False],
+        "allow_clang_11": [None, True, False]
     }
     default_options = {
-        "with_sbeppc": True
+        "with_sbeppc": True,
+        "allow_clang_11": None
     }
 
     @property
@@ -38,8 +40,8 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         if self.options.with_sbeppc:
             return {
-                "gcc": "8.1",
-                "clang": "7",
+                "gcc": "9",
+                "clang": "9",
                 "apple-clang": "11"
             }
         else:
@@ -48,6 +50,12 @@ class PackageConan(ConanFile):
                 "clang": "3.3",
                 "apple-clang": "9.4"
             }
+
+    def config_options(self):
+        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
+            del self.options.allow_clang_11
+        else:
+            self.output.warn("allow_clang_11 option will be removed in the future when CCI will support clang 11.")
 
     def export_sources(self):
         copy(self, os.path.join("cmake", "sbeppcTargets.cmake"),
@@ -77,6 +85,9 @@ class PackageConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
+        # CCI Clang 11 image is broken because it provides very old libstdc++ which doesn't have <filesystem>
+        if self.options.with_sbeppc and str(self.settings.compiler) == "clang" and compiler_version == "11" and not self.options.allow_clang_11:
+            raise ConanInvalidConfiguration("Clang 11 is not currently supported by CCI, set it manually to enable Clang 11 build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,7 +106,7 @@ class PackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(cli_args=["--verbose"])
+        cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
