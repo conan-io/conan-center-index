@@ -13,14 +13,14 @@ index 59982cf..5f6c123 100644
 +    if(WIN32)
 +            CHECK_INCLUDE_FILES(sqlext.h HAS_ODBC)
 +    else()
-+            include(FindPkgConfig)
++            find_package(ODBC)
 +
-+            pkg_check_modules( odbc odbc )
-+            if(${odbc_FOUND})
++            
++            if(${ODBC_FOUND})
 +                    set(HAS_ODBC 1)
 +            else()
 +                    set(HAS_ODBC 0)
-+            endif(${odbc_FOUND})
++            endif(${ODBC_FOUND})
 +    endif(WIN32)
 +
 +    if(NOT ${HAS_ODBC})

@@ -97,10 +97,6 @@ class Log4cxx(ConanFile):
         elif self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
 
-    def build_requirements(self):
-        if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
-            self.tool_requires("pkgconf/1.7.4")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
