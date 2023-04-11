@@ -132,7 +132,7 @@ class NCursesConan(ConanFile):
             return "no"
         tc.configure_args.extend([
             f"--with-shared={yes_no(self.options.shared)}",
-            f"--with-cxx-shared={yes_no(self.options.shared)}"
+            f"--with-cxx-shared={yes_no(self.options.shared)}",
             f"--with-normal={yes_no(not self.options.shared)}",
             f"--enable-widec={yes_no(self.options.with_widec)}",
             f"--enable-ext-colors={yes_no(self.options.get_safe('with_extended_colors', False))}",
