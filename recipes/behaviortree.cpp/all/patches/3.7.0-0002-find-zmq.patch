@@ -66,3 +66,4 @@ index 2ad33b3..2dc969d 100644
      install(TARGETS bt3_recorder
              DESTINATION ${BEHAVIOR_TREE_BIN_DESTINATION} )
  endif()
+ 
