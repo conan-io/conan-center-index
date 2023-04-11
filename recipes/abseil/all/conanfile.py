@@ -144,7 +144,8 @@ class AbseilConan(ConanFile):
         components = {}
 
         abs_target_content = load(self, absl_target_file_path)
-
+        
+        # Replace the line endings to support building with MSys2 on Windows
         abs_target_content = abs_target_content.replace("\r\n", "\n")
         
         cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", abs_target_content)
