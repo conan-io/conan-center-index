@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.files import copy, get, load, save
+from conan.tools.files import copy, get, load, save, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -17,6 +17,9 @@ class GnuConfigConan(ConanFile):
     os = "arch", "compiler", "build_type", "arch"
     no_copy_source = True
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -28,6 +31,7 @@ class GnuConfigConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def build(self):
+        apply_conandata_patches(self)
         pass
 
     def _extract_license(self):
