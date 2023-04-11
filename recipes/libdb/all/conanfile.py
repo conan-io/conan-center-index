@@ -110,7 +110,7 @@ class LibdbConan(ConanFile):
                     self.conf.get("user.gnu-config:config_sub", check_type=str),
                 ]:
                     if gnu_config:
-                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self.source_folder, self._source_subfolder, subdir))
+                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self._source_subfolder, subdir))
 
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
             replace_in_file(self, file,
