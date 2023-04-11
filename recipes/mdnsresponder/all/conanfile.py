@@ -63,7 +63,7 @@ class MdnsResponderConan(ConanFile):
                 raise ConanInvalidConfiguration("Only Clang 6 or higher is supported for this package.")
         # FIXME: Migration of the project files fails with VS 2017 on c3i (conan-center-index's infrastructure)
         # though works OK with VS 2015 and VS 2019, and works with VS 2017 in my local environment
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) == "15":
+        if str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) == "15":
             raise ConanInvalidConfiguration("Visual Studio 2017 is not supported in CCI (yet).")
 
     def source(self):
