@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 
@@ -86,7 +85,7 @@ class PackageConan(ConanFile):
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
         # CCI Clang 11 image is broken because it provides very old libstdc++ which doesn't have <filesystem>
-        if self.options.with_sbeppc and str(self.settings.compiler) == "clang" and compiler_version == "11" and not self.options.allow_clang_11:
+        if self.options.with_sbeppc and str(self.settings.compiler) == "clang" and str(self.settings.compiler.version) == "11" and not self.options.allow_clang_11:
             raise ConanInvalidConfiguration("Clang 11 is not currently supported by CCI, set it manually to enable Clang 11 build")
 
     def source(self):
@@ -116,7 +115,7 @@ class PackageConan(ConanFile):
         copy(self, "sbeppcTargets.cmake",
             src=os.path.join(self.source_folder, os.pardir, "cmake"),
             dst=os.path.join(self.package_folder, self._module_path))
-    
+
     @property
     def _module_path(self):
         return os.path.join("lib", "cmake")
