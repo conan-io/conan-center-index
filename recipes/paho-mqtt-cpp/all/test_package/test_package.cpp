@@ -17,7 +17,8 @@ int main(int argc, char* argv[])
 
 #ifdef TEST_SSL_OPTION
     // Build the connect options, including SSL and a LWT message.
-	auto sslopts = mqtt::ssl_options_builder();
+	// auto sslopts = mqtt::ssl_options_builder(); // This was added in v1.2.0
+    auto sslopts = mqtt::ssl_options();
 #endif
 
     return 0;
