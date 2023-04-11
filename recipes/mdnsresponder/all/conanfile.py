@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import symlinks, rmdir, get, replace_in_file, rename, chdir, patch, mkdir
 from conan.tools.scm import Version
-from conans import tools, AutoToolsBuildEnvironment, MSBuild
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.microsoft import MSBuild
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.47.0"
 
 
 class MdnsResponderConan(ConanFile):
@@ -105,9 +106,7 @@ class MdnsResponderConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        # fix for error: 'for' loop initial declarations are only allowed in C99 or C11 mode
-        self._autotools.flags.append("-std=gnu99")
+        self._autotools = Autotools(self)
         return self._autotools
 
     def _build_make(self):
@@ -150,6 +149,13 @@ class MdnsResponderConan(ConanFile):
 
         msbuild = MSBuild(self)
         msbuild.build(sln, targets=self._msvc_targets, platforms=self._msvc_platforms, definitions=self._msvc_definitions)
+
+    def generate(self):
+        if self.settings.os == "Linux":
+            tc = AutotoolsToolchain(self)
+            # fix for error: 'for' loop initial declarations are only allowed in C99 or C11 mode
+            tc.extra_cflags.append("-std=gnu99")
+            tc.generate()
 
     def build(self):
         for patchfile in self.conan_data.get("patches", {}).get(self.version, []):
