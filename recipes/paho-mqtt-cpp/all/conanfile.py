@@ -65,10 +65,11 @@ class PahoMqttCppConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "1.2.0":
             # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16760#issuecomment-1502420549
-            self.requires("paho-mqtt-c/1.3.9", transitive_headers=True)
+            # Symbols are exposed   "_MQTTProperties_free", referenced from: mqtt::connect_options::~connect_options() in test_package.cpp.o
+            self.requires("paho-mqtt-c/1.3.9", transitive_headers=True, transitive_libs=True)
         else:
              # This is the "official tested" version https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
-            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True)
+            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True)
 
         # upstream's CMakeLists.txt references openssl directly with ssl enabled, so we
         # should directly depend, not just transitively.
