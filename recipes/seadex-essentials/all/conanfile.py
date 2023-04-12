@@ -83,6 +83,7 @@ class SeadexEssentialsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["ESS_BUILD_UNIT_TESTS"] = False
         if self.options.shared:
             tc.variables["BUILD_SHARED_LIBS"] = "ON"
         tc.generate()
