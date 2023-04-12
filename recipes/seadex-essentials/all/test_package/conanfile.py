@@ -13,8 +13,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("spdlog/1.11.0")
-        self.requires("fmt/9.1.0")
 
     def generate(self):
         tc = CMakeToolchain(self)

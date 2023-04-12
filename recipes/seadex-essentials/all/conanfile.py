@@ -23,8 +23,7 @@ class SeadexEssentialsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "spdlog/*:header_only": True
+        "fPIC": True
     }
 
     @property
@@ -52,16 +51,14 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
-        if self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
-            self.settings.compiler.cppstd = self._min_cppstd
+        self.options["spdlog/1.11.0"].header_only = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("spdlog/1.11.0")
-        self.requires("fmt/9.1.0")
+        self.requires("spdlog/1.11.0", transitive_headers=True)
+        self.requires("fmt/9.1.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.os not in ["Linux", "Windows", "Macos"]:
@@ -73,10 +70,13 @@ class SeadexEssentialsConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                    f"{self.ref} requires at least {self.settings.compiler} {minimum_version}."
                 )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if not self.dependencies["spdlog/1.11.0"].options.header_only:
+            raise ConanInvalidConfiguration(f"{self.ref} requires spdlog/*:header_only=True.")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

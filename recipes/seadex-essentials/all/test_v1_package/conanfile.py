@@ -8,10 +8,6 @@ class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
-    default_options = {
-        "spdlog/1.11.0:header_only": True
-    }
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
