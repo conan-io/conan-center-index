@@ -51,6 +51,7 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["fmt/*"].header_only = True
         self.options["spdlog/*"].header_only = True
 
     def layout(self):
