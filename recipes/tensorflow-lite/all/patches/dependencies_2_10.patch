@@ -29,8 +29,8 @@ index 663f07ab31c..9f05de4ebec 100644
  # Additional library dependencies based upon enabled features.
  set(TFLITE_TARGET_DEPENDENCIES "")
 +if (NOT CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86")
-+        find_package(intel-neon2sse REQUIRED)
-+        list(APPEND TFLITE_TARGET_DEPENDENCIES intel-neon2sse::intel-neon2sse)
++        find_package(NEON_2_SSE REQUIRED)
++        list(APPEND TFLITE_TARGET_DEPENDENCIES NEON_2_SSE::NEON_2_SSE)
 +endif()
  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
    # TFLite uses deprecated methods in neon2sse which generates a huge number of
