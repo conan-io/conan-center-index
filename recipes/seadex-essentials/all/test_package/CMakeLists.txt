@@ -3,5 +3,5 @@ project(test_package LANGUAGES CXX)
 
 find_package(seadex-essentials REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC seadex-essentials::seadex-essentials)
+target_link_libraries(${PROJECT_NAME} PRIVATE seadex-essentials::seadex-essentials)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
