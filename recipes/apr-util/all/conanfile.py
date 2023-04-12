@@ -79,7 +79,8 @@ class AprUtilConan(ConanFile):
         self.requires("apr/1.7.0", transitive_headers=True)
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
-            self.requires("libiconv/1.17")
+            # https://github.com/conan-io/conan-center-index/pull/16142#issuecomment-1494282164
+            self.requires("libiconv/1.17", transitive_libs=True)
         if self.options.with_openssl:
             self.requires("openssl/1.1.1t")
         if self.options.with_mysql:
