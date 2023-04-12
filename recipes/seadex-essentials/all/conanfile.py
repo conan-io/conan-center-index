@@ -23,8 +23,7 @@ class SeadexEssentialsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "spdlog/*:header_only": True
+        "fPIC": True
     }
 
     @property
@@ -50,6 +49,7 @@ class SeadexEssentialsConan(ConanFile):
             self.options.shared = False
 
     def configure(self):
+        self.options["spdlog/*"].header_only = True
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -57,8 +57,8 @@ class SeadexEssentialsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("spdlog/1.11.0", transitive_headers=True)
-        self.requires("fmt/9.1.0", transitive_headers=True)
+        self.requires("spdlog/1.11.0", headers=True, transitive_headers=True)
+        self.requires("fmt/9.1.0", headers=True, transitive_headers=True)
 
     def validate(self):
         if self.settings.os not in ["Linux", "Windows", "Macos"]:
