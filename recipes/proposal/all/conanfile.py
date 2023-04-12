@@ -47,10 +47,10 @@ class PROPOSALConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("cubicinterpolation/0.1.4")
         #TODO: Add note why transitive_headers are necessary
+        self.requires("cubicinterpolation/0.1.4", transitive_headers=True)
         self.requires("spdlog/1.9.2", transitive_headers=True)
-        # transitive_headers due to usage of json_fwd.hpp
+        # transitive_headers probably due to usage of json_fwd.hpp
         self.requires("nlohmann_json/3.10.5", transitive_headers=True)
         if self.options.with_python:
             self.requires("pybind11/2.9.1")
