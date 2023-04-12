@@ -13,9 +13,9 @@ int main(int argc, char** argv) {
   "water.watcher.stream":{
 )";
 
-  auto const show_event_json = [](const WATCHER_NAMESPACE::watcher::event::event& this_event) {
+  auto const show_event_json = [](const WATCHER_EVENT_NAMESPACE::event& this_event) {
     std::cout << "    " << this_event;
-    if (this_event.kind != WATCHER_NAMESPACE::watcher::event::kind::watcher) {
+    if (this_event.kind != WATCHER_NAMESPACE::event::kind::watcher) {
       std::cout << ",";
     }
     std::cout << "\n";
