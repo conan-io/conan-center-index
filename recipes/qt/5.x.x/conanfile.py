@@ -154,9 +154,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.tool_requires("pcre2/10.42")
         if self.options.with_zstd:
-            self.tool_requires("zstd/1.5.4")
+            self.tool_requires("zstd/1.5.5")
         if self.options.with_glib:
-            self.tool_requires("glib/2.75.3")
+            self.tool_requires("glib/2.76.1")
 
     def validate_build(self):
         if self.options.qtwebengine:
@@ -363,36 +363,36 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.224.0")
+            self.requires("vulkan-loader/1.3.239.0")
             if is_apple_os(self):
-                self.requires("moltenvk/1.1.10")
+                self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.75.3")
+            self.requires("glib/2.76.1")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.1")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/72.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/5.3.1")
+            self.requires("harfbuzz/6.0.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.4")
+                self.requires("libjpeg-turbo/2.1.5")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.39.4")
+            self.requires("sqlite3/3.41.1")
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
@@ -406,7 +406,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.5.0")
             self.requires("opus/1.3.1")
@@ -428,7 +428,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.46.0")
+            self.requires("at-spi2-core/2.47.1")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
