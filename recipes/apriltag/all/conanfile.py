@@ -46,7 +46,7 @@ class ApriltagConan(ConanFile):
 
     def requirements(self):
         if is_msvc(self):
-            self.requires("pthreads4w/3.0.0")
+            self.requires("pthreads4w/3.0.0", transitive_headers=True)
 
     def validate(self):
         if is_msvc(self) and self.settings.build_type == "Debug":
