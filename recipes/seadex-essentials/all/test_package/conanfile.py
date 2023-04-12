@@ -8,9 +8,8 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
 
-    default_options = {
-        "spdlog/*:header_only": True
-    }
+    def configure(self):
+        self.options["spdlog/1.11.0"].header_only = True
 
     def layout(self):
         cmake_layout(self)
