@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
   auto const show_event_json = [](const WATCHER_EVENT_NAMESPACE::event& this_event) {
     std::cout << "    " << this_event;
-    if (this_event.kind != WATCHER_NAMESPACE::event::kind::watcher) {
+    if (this_event.kind != WATCHER_EVENT_KIND_NAMESPACE::kind::watcher) {
       std::cout << ",";
     }
     std::cout << "\n";
