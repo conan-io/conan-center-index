@@ -7,7 +7,7 @@ index 802a13d..440b4b2 100755
  #############################################################################
  
 -LIBVERS = 1
-+include ../../conanbuildinfo.mak
++
 +
 +LIB_MAJOR_VER = 1
 +LIB_MINOR_VER = 0
@@ -42,7 +42,7 @@ index 802a13d..440b4b2 100755
  CFLAGS_COMMON = -I$(COREDIR) -I$(SHAREDDIR) -I$(UTILDIR) -I$(DSODIR) -I$(SERVICEREGISTRATIONDIR) -I$(OBJDIR) -fwrapv -W -Wall -DPOSIX_BUILD -DPID_FILE=\"/var/run/mdnsd.pid\" -DMDNS_UDS_SERVERPATH=\"/var/run/mdnsd\"
  CFLAGS_PTHREAD =
 -LINKOPTS =
-+LINKOPTS += ${LDFLAGS} $(addprefix -L, $(CONAN_LIB_DIRS)) -Wl,--as-needed $(addprefix -l, $(CONAN_LIBS))
++LINKOPTS += ${LDFLAGS} -Wl,--as-needed $(LIBS)
  LINKOPTS_PTHREAD = -lpthread
  LDSUFFIX = so
  JAVACFLAGS_OS = -fPIC -shared -ldns_sd
@@ -113,7 +113,7 @@ index 802a13d..440b4b2 100755
  endif
  
 -MDNSCFLAGS = $(CFLAGS) $(CFLAGS_COMMON) $(CFLAGS_OS) $(CFLAGS_DEBUGGING)
-+MDNSCFLAGS = $(CFLAGS) $(CFLAGS_COMMON) $(CFLAGS_OS) $(CFLAGS_DEBUGGING) $(CONAN_CFLAGS) $(addprefix -I, $(CONAN_INCLUDE_DIRS)) $(addprefix -D, $(CONAN_DEFINES))
++MDNSCFLAGS = $(CFLAGS) $(CFLAGS_COMMON) $(CFLAGS_OS) $(CFLAGS_DEBUGGING) $(CPPFLAGS) $(CXXFLAGS)
  
  #############################################################################
  

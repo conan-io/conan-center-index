@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import symlinks, rmdir, get, replace_in_file, rename, chdir, patch, mkdir
 from conan.tools.scm import Version
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import MSBuild
 import os
 
@@ -17,7 +17,7 @@ class MdnsResponderConan(ConanFile):
     homepage = "https://opensource.apple.com/tarballs/mDNSResponder/"
     license = "Apache-2.0", "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "make"
+    generators = "AutotoolsDeps"
     options = {
         "with_opt_patches": [True, False],
         "use_tls": [True, False],
