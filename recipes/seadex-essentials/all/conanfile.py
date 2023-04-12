@@ -23,7 +23,8 @@ class SeadexEssentialsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "spdlog/*:header_only": True
     }
 
     @property
@@ -47,8 +48,6 @@ class SeadexEssentialsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.shared = False
-        self.options["fmt/*"].header_only = True
-        self.options["spdlog/*"].header_only = True
 
     def configure(self):
         if self.options.shared:
