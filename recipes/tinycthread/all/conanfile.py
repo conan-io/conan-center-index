@@ -1,7 +1,8 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, load, save
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-import functools
 import os
 
 required_conan_version = ">=1.54.0"
@@ -38,13 +39,13 @@ class TinycthreadConan(ConanFile):
         cmake.build()
 
     def _extract_license(self):
-        file = os.path.join(self.source_folder, self._source_subfolder, "source", "tinycthread.h")
-        file_content = tools.load(file)
+        file = os.path.join(self.source_folder, "source", "tinycthread.h")
+        file_content = load(self, file)
 
         license_start = file_content.find("Copyright")
         license_end = file_content.find("*/")
         license_contents = file_content[license_start:license_end]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self._extract_license()
