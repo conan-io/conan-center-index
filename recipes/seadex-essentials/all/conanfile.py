@@ -15,7 +15,7 @@ class SeadexEssentialsConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://essentials.seadex.de/"
-    topics = ("utility", "C++", "library")
+    topics = ("utility", "C++")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
