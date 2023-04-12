@@ -47,11 +47,12 @@ class SeadexEssentialsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.shared = False
-        self.options["spdlog"].header_only = True
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["fmt/*"].header_only = True
+        self.options["spdlog/*"].header_only = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
