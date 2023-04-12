@@ -10,14 +10,14 @@ required_conan_version = ">=1.50.0"
 
 class IncbinConan(ConanFile):
     name = "incbin"
+    description = "Include binary files in C/C++"
     license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Include binary files in C/C++"
-    topics = ("include", "binary", "preprocess", "header-only")
     homepage = "https://github.com/graphitemaster/incbin/"
-    no_copy_source = True
+    topics = ("include", "binary", "preprocess", "header-only")
+    package_type = "header-library"
     settings = "compiler"
-package_type = "header-library"
+    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
