@@ -17,6 +17,7 @@ class IncbinConan(ConanFile):
     homepage = "https://github.com/graphitemaster/incbin/"
     no_copy_source = True
     settings = "compiler"
+package_type = "header-library"
 
     def layout(self):
         basic_layout(self, src_folder="src")
