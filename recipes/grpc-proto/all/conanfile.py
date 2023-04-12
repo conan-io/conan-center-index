@@ -59,7 +59,7 @@ class GRPCProto(ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires('protobuf/3.21.9', transitive_headers=True)
+        self.requires('protobuf/3.21.9', transitive_headers=True, transitive_libs=True)
         self.requires('googleapis/cci.20221108')
 
     def build_requirements(self):
