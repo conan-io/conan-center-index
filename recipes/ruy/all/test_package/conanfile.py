@@ -14,13 +14,6 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        if not self.settings.compiler.get_safe("cppstd"):
-            # Conan 1.x profiles that may not have cppstd defined
-            tc.variables['CMAKE_CXX_STANDARD'] = "11"
-        tc.generate()
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
