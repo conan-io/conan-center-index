@@ -74,9 +74,6 @@ class SeadexEssentialsConan(ConanFile):
                 )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
-        if not self.dependencies["spdlog/1.11.0"].options.header_only:
-            raise ConanInvalidConfiguration(f"{self.ref} requires spdlog/*:header_only=True.")
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
