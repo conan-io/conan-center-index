@@ -40,6 +40,9 @@ tasks:
       text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
       collapse_on_success: false
       collapse_on_failure: true
+  list_packages:
+    update_yaml_list_path: ".c3i/conan_v2_ready_references"
+    update_yaml_list_key: "required_for_references"
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
     report_issue_append: false
