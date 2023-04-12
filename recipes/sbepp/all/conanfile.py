@@ -86,7 +86,7 @@ class PackageConan(ConanFile):
                 )
         # CCI Clang 11 image is broken because it provides very old libstdc++ which doesn't have <filesystem>
         if self.options.with_sbeppc and str(self.settings.compiler) == "clang" and str(self.settings.compiler.version) == "11" and not self.options.allow_clang_11:
-            raise ConanInvalidConfiguration("Clang 11 is not currently supported by CCI, set it manually to enable Clang 11 build")
+            raise ConanInvalidConfiguration("Clang 11 is not currently supported by CCI, set `allow_clang_11` to `True` to enable it")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
