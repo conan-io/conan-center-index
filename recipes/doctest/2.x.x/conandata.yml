@@ -1,40 +1,40 @@
 sources:
-  "2.3.5":
-    url: "https://github.com/doctest/doctest/archive/2.3.5.tar.gz"
-    sha256: "71d1ca0916bfea8f4550de196b66f2226f2fdb5fd4a2885a3b4c2dd8f035a8c9"
-  "2.3.6":
-    url: "https://github.com/doctest/doctest/archive/2.3.6.tar.gz"
-    sha256: "f63c3c01021ba3fb35a0702127abfaa6fc44aaefd309e2c246e62a083deffa1f"
-  "2.3.7":
-    url: "https://github.com/doctest/doctest/archive/2.3.7.tar.gz"
-    sha256: "a70cd25875029879e577b08cfaa57a76c7bea62c473ca94d85ec87ea53af7177"
-  "2.3.8":
-    url: "https://github.com/doctest/doctest/archive/2.3.8.tar.gz"
-    sha256: "d7232437eceb46ad5de03cacdee770c80f2e53e7b8efc1c8a8ed29539f64efa5"
-  "2.4.0":
-    url: "https://github.com/doctest/doctest/archive/2.4.0.tar.gz"
-    sha256: "f689f48e92c088928d88d8481e769c8e804f0a608b484ab8ef3d6ab6045b5444"
-  "2.4.1":
-    url: "https://github.com/doctest/doctest/archive/2.4.1.tar.gz"
-    sha256: "0a0f0be21ee23e36ff6b8b9d63c06a7792e04cce342e1df3dee0e40d1e21b9f0"
-  "2.4.3":
-    url: "https://github.com/doctest/doctest/archive/2.4.3.tar.gz"
-    sha256: "18c0f87f526bf34bb595c2841a2f0f33b28ab8c817d7c71ed1ba4665815d9ef6"
-  "2.4.4":
-    url: "https://github.com/doctest/doctest/archive/2.4.4.tar.gz"
-    sha256: "3bcb62ad316bf4230873a336fcc6eb6292116568a6e19ab8cdd37a1610773d70"
-  "2.4.5":
-    url: "https://github.com/doctest/doctest/archive/2.4.5.tar.gz"
-    sha256: "b76ece19f0e473e3afa5c545dbdce2dd70bfef98ed0f383443b2f9fd9f86d5b4"
-  "2.4.6":
-    url: "https://github.com/doctest/doctest/archive/2.4.6.tar.gz"
-    sha256: "39110778e6baf373ef04342d7cb3fe35da104cb40769103e8a2f0035f5a5f1cb"
-  "2.4.8":
-    url: "https://github.com/doctest/doctest/archive/v2.4.8.tar.gz"
-    sha256: "f52763630aa17bd9772b54e14b6cdd632c87adf0169455a86a49bd94abf2cd83"
-  "2.4.9":
-    url: "https://github.com/doctest/doctest/archive/v2.4.9.tar.gz"
-    sha256: "19b2df757f2f3703a5e63cee553d85596875f06d91a3333acd80a969ef210856"
   "2.4.10":
-    url: "https://github.com/doctest/doctest/archive/v2.4.10.tar.gz"
+    url: "https://github.com/doctest/doctest/archive/refs/tags/v2.4.10.tar.gz"
     sha256: "d23213c415152d7aa4de99bb7c817fa29c0c03bd1a89972748579a7217fdbb8f"
+  "2.4.9":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/v2.4.9.tar.gz"
+    sha256: "19b2df757f2f3703a5e63cee553d85596875f06d91a3333acd80a969ef210856"
+  "2.4.8":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/v2.4.8.tar.gz"
+    sha256: "f52763630aa17bd9772b54e14b6cdd632c87adf0169455a86a49bd94abf2cd83"
+  "2.4.6":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.4.6.tar.gz"
+    sha256: "39110778e6baf373ef04342d7cb3fe35da104cb40769103e8a2f0035f5a5f1cb"
+  "2.4.5":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.4.5.tar.gz"
+    sha256: "b76ece19f0e473e3afa5c545dbdce2dd70bfef98ed0f383443b2f9fd9f86d5b4"
+  "2.4.4":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.4.4.tar.gz"
+    sha256: "3bcb62ad316bf4230873a336fcc6eb6292116568a6e19ab8cdd37a1610773d70"
+  "2.4.3":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.4.3.tar.gz"
+    sha256: "18c0f87f526bf34bb595c2841a2f0f33b28ab8c817d7c71ed1ba4665815d9ef6"
+  "2.4.1":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.4.1.tar.gz"
+    sha256: "0a0f0be21ee23e36ff6b8b9d63c06a7792e04cce342e1df3dee0e40d1e21b9f0"
+  "2.4.0":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.4.0.tar.gz"
+    sha256: "f689f48e92c088928d88d8481e769c8e804f0a608b484ab8ef3d6ab6045b5444"
+  "2.3.8":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.3.8.tar.gz"
+    sha256: "d7232437eceb46ad5de03cacdee770c80f2e53e7b8efc1c8a8ed29539f64efa5"
+  "2.3.7":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.3.7.tar.gz"
+    sha256: "a70cd25875029879e577b08cfaa57a76c7bea62c473ca94d85ec87ea53af7177"
+  "2.3.6":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.3.6.tar.gz"
+    sha256: "f63c3c01021ba3fb35a0702127abfaa6fc44aaefd309e2c246e62a083deffa1f"
+  "2.3.5":
+    url: "https://github.com/doctest/doctest/archive/refs/tags/2.3.5.tar.gz"
+    sha256: "71d1ca0916bfea8f4550de196b66f2226f2fdb5fd4a2885a3b4c2dd8f035a8c9"
