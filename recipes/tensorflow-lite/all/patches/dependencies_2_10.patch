@@ -1,14 +1,6 @@
-commit fcb02f001504c4060f83233cedc9b8f197fcc607
-Author: talyz <kim.lindberger@gmail.com>
-Date:   Wed Aug 24 19:09:53 2022 +0200
-
-    Conan deps
-
-diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
-index 663f07ab31c..9f05de4ebec 100644
---- a/tensorflow/lite/CMakeLists.txt
-+++ b/tensorflow/lite/CMakeLists.txt
-@@ -138,12 +138,11 @@ macro(populate_tf_source_vars RELATIVE_DIR SOURCES_VAR)
+--- a/tensorflow/lite/CMakeLists.txt	2023-04-12 18:04:31
++++ b/tensorflow/lite/CMakeLists.txt	2023-04-12 17:53:22
+@@ -138,12 +138,11 @@
  endmacro()
  # Find TensorFlow Lite dependencies.
  find_package(absl REQUIRED)
@@ -16,15 +8,26 @@ index 663f07ab31c..9f05de4ebec 100644
 +find_package(Eigen3 REQUIRED)
  find_package(farmhash REQUIRED)
 -find_package(fft2d REQUIRED)
--find_package(flatbuffers REQUIRED)
 +find_package(fft REQUIRED)
-+find_package(Flatbuffers REQUIRED)
+ find_package(flatbuffers REQUIRED)
  find_package(gemmlowp REQUIRED)
 -find_package(neon2sse REQUIRED)
  find_package(clog REQUIRED)
  find_package(cpuinfo REQUIRED)  #CPUINFO is used by XNNPACK and RUY library
  find_package(ruy REQUIRED)
-@@ -162,6 +161,10 @@ set(TFLITE_TARGET_PUBLIC_OPTIONS "")
+@@ -151,6 +150,11 @@
+ # We used to have an actual compilation logic with flatc but decided to use
+ # schema_generated.h since flatc doesn't work with cross compilation.
+ set(TFLITE_FLATBUFFERS_SCHEMA_DIR "${TFLITE_SOURCE_DIR}/schema")
++if(TARGET flatbuffers::flatbuffers_shared)
++    set(FLATBUFFERS_TARGET flatbuffers::flatbuffers_shared)
++else()
++    set(FLATBUFFERS_TARGET flatbuffers::flatbuffers)
++endif()
+ set(TF_TARGET_PRIVATE_OPTIONS "")
+ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
+   # TensorFlow uses a heap of deprecated proto fields so surpress these
+@@ -162,6 +166,10 @@
  set(TFLITE_TARGET_PRIVATE_OPTIONS "")
  # Additional library dependencies based upon enabled features.
  set(TFLITE_TARGET_DEPENDENCIES "")
@@ -35,7 +38,7 @@ index 663f07ab31c..9f05de4ebec 100644
  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
    # TFLite uses deprecated methods in neon2sse which generates a huge number of
    # warnings so surpress these until they're fixed.
-@@ -411,7 +414,7 @@ if(TFLITE_ENABLE_XNNPACK)
+@@ -411,7 +419,7 @@
      FILTER ".*(_test|_tester)\\.(cc|h)"
    )
    list(APPEND TFLITE_TARGET_DEPENDENCIES
@@ -44,7 +47,7 @@ index 663f07ab31c..9f05de4ebec 100644
    )
    list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
  endif()
-@@ -519,17 +522,16 @@ target_include_directories(tensorflow-lite
+@@ -519,17 +527,16 @@
  target_link_libraries(tensorflow-lite
    PUBLIC
      Eigen3::Eigen
@@ -61,7 +64,7 @@ index 663f07ab31c..9f05de4ebec 100644
 -    gemmlowp
 +    farmhash::farmhash
 +    fft::fft
-+    flatbuffers::flatbuffers
++    ${FLATBUFFERS_TARGET}
 +    gemmlowp::eight_bit_int_gemm
      ruy::ruy
      ${CMAKE_DL_LIBS}
