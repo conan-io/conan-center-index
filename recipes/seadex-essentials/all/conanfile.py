@@ -23,7 +23,8 @@ class SeadexEssentialsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "spdlog/*:header_only": True
     }
 
     @property
@@ -49,7 +50,6 @@ class SeadexEssentialsConan(ConanFile):
             self.options.shared = False
 
     def configure(self):
-        self.options["spdlog/*"].header_only = True
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
