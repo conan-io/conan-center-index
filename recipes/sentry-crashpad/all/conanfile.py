@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class SentryCrashpadConan(ConanFile):
@@ -19,7 +19,7 @@ class SentryCrashpadConan(ConanFile):
     license = "Apache-2.0"
     topics = ("crashpad", "error-reporting", "crash-reporting")
     provides = "crashpad", "mini_chromium"
-
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -141,10 +141,10 @@ class SentryCrashpadConan(ConanFile):
         # util
         self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
         self.cpp_info.components["crashpad_util"].libs = ["crashpad_util"]
-        # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
-        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib", "libcurl::libcurl"]
+        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
+            # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
             self.cpp_info.components["crashpad_util"].requires.extend(["libcurl::libcurl"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["crashpad_util"].system_libs.append("winhttp")
