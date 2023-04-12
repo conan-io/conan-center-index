@@ -119,7 +119,7 @@ class SpdlogConan(ConanFile):
                  src=os.path.join(self.source_folder, "include"),
                  pattern="*.h", dst=os.path.join(self.package_folder, "include"),
                  # Unvendor bundled dependencies https://github.com/gabime/spdlog/commit/18495bf25dad3a4e8c2fe3777a5f79acecde27e3
-                 excludes=("fmt/bundled"))
+                 excludes=("spdlog/fmt/bundled/*"))
         else:
             cmake = CMake(self)
             cmake.install()
