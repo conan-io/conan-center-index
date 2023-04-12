@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def configure(self):
-        self.options["spdlog/1.11.0"].header_only = True
+        self.options["spdlog/*"].header_only = True
 
     def layout(self):
         cmake_layout(self)
