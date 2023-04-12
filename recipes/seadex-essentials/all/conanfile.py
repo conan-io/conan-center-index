@@ -23,8 +23,7 @@ class SeadexEssentialsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "spdlog/*:header_only": True
+        "fPIC": True
     }
 
     @property
@@ -52,6 +51,7 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["spdlog/1.11.0"].header_only = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -74,6 +74,8 @@ class SeadexEssentialsConan(ConanFile):
                 )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if not self.dependencies["spdlog/1.11.0"].options.header_only:
+            raise ConanInvalidConfiguration()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
