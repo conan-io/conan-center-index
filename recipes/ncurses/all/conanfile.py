@@ -271,11 +271,15 @@ class NCursesConan(ConanFile):
     def _package_info_for_components(self):
         if self._with_tinfo():
             self.cpp_info.components["tinfo"].libs = [f"tinfo{self._lib_suffix}"]
+            self.cpp_info.components["tinfo"].set_property("pkg_config_name", f"tinfo{self._lib_suffix}")
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components["tinfo"].names["pkg_config"] = f"tinfo{self._lib_suffix}"
             self.cpp_info.components["tinfo"].includedirs.append(os.path.join("include", f"ncurses{self._suffix}"))
 
         self.cpp_info.components["libcurses"].libs = [f"ncurses{self._lib_suffix}"]
         self.cpp_info.components["libcurses"].set_property("pkg_config_name", f"ncurses{self._lib_suffix}")
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["libcurses"].names["pkg_config"] = f"ncurses{self._lib_suffix}"
         self.cpp_info.components["libcurses"].includedirs.append(os.path.join("include", f"ncurses{self._suffix}"))
         if not self.options.shared:
             self.cpp_info.components["libcurses"].defines = ["NCURSES_STATIC"]
@@ -300,14 +304,20 @@ class NCursesConan(ConanFile):
         self.cpp_info.components["libcurses"].build_modules["cmake_find_package_multi"] = [module_rel_path]
 
         self.cpp_info.components["panel"].libs = [f"panel{self._lib_suffix}"]
+        self.cpp_info.components["panel"].set_property("pkg_config_name", f"panel{self._lib_suffix}")
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["panel"].names["pkg_config"] = f"panel{self._lib_suffix}"
         self.cpp_info.components["panel"].requires = ["libcurses"]
 
         self.cpp_info.components["menu"].libs = [f"menu{self._lib_suffix}"]
+        self.cpp_info.components["menu"].set_property("pkg_config_name", f"menu{self._lib_suffix}")
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["menu"].names["pkg_config"] = f"menu{self._lib_suffix}"
         self.cpp_info.components["menu"].requires = ["libcurses"]
 
         self.cpp_info.components["form"].libs = [f"form{self._lib_suffix}"]
+        self.cpp_info.components["form"].set_property("pkg_config_name", f"form{self._lib_suffix}")
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["form"].names["pkg_config"] = f"form{self._lib_suffix}"
         self.cpp_info.components["form"].requires = ["libcurses"]
         if self.options.with_pcre2:
@@ -316,11 +326,15 @@ class NCursesConan(ConanFile):
         if self.options.with_cxx:
             self.cpp_info.components["curses++"].libs = [f"ncurses++{self._lib_suffix}"]
             self.cpp_info.components["curses++"].set_property("pkg_config_name", f"ncurses++{self._lib_suffix}")
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+            self.cpp_info.components["curses++"].names["pkg_config"] = f"ncurses++{self._lib_suffix}"
             self.cpp_info.components["curses++"].requires = ["libcurses"]
 
         if self._with_ticlib():
             self.cpp_info.components["ticlib"].libs = [f"tic{self._lib_suffix}"]
             self.cpp_info.components["ticlib"].set_property("pkg_config_name", f"tic{self._lib_suffix}")
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+            self.cpp_info.components["ticlib"].names["pkg_config"] = f"tic{self._lib_suffix}"
             self.cpp_info.components["ticlib"].requires = ["libcurses"]
 
 
