@@ -884,7 +884,7 @@ class QtConan(ConanFile):
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
         save(self, os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
-        def _create_private_module(module, dependencies=[]):
+        def _create_private_module(module, dependencies):
             dependencies_string = ';'.join('Qt6::%s' % dependency for dependency in dependencies)
             contents = textwrap.dedent("""\
             if(NOT TARGET Qt6::{0}Private)
@@ -1133,8 +1133,8 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             networkReqs.append("krb5::krb5-gssapi")
         _create_module("Network", networkReqs)
-        _create_module("Sql")
-        _create_module("Test")
+        _create_module("Sql", [])
+        _create_module("Test", [])
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
             _add_build_module("qtWidgets", self._cmake_qt6_private_file("Widgets"))
@@ -1144,11 +1144,11 @@ class QtConan(ConanFile):
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
-        _create_module("Concurrent")
-        _create_module("Xml")
+        _create_module("Concurrent", [])
+        _create_module("Xml", [])
 
         if self.options.qt5compat:
-            _create_module("Core5Compat")
+            _create_module("Core5Compat", [])
 
         # since https://github.com/qt/qtdeclarative/commit/4fb84137f1c0a49d64b8bef66fef8a4384cc2a68
         qt_quick_enabled = self.options.gui and (Version(self.version) < "6.2.0" or self.options.qtshadertools)
@@ -1215,9 +1215,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtlottie"):
             _create_module("Bodymovin", ["Gui"])
         if self.options.get_safe("qtscxml"):
-            _create_module("StateMachine")
+            _create_module("StateMachine", [])
             _create_module("StateMachineQml", ["StateMachine", "Qml"])
-            _create_module("Scxml")
+            _create_module("Scxml", [])
             _create_plugin("QScxmlEcmaScriptDataModelPlugin", "qscxmlecmascriptdatamodel", "scxmldatamodel", ["Scxml", "Qml"])
             _create_module("ScxmlQml", ["Scxml", "Qml"])
         if self.options.get_safe("qtvirtualkeyboard") and qt_quick_enabled:
@@ -1295,12 +1295,12 @@ class QtConan(ConanFile):
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
         if self._has_positioning:
-            _create_module("Positioning")
+            _create_module("Positioning", [])
             _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
             _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
 
         if self.options.get_safe("qtsensors"):
-            _create_module("Sensors")
+            _create_module("Sensors", [])
             _create_plugin("genericSensorPlugin", "qtsensors_generic", "sensors", [])
             _create_plugin("IIOSensorProxySensorPlugin", "qtsensors_iio-sensor-proxy", "sensors", [])
             if self.settings.os == "Linux":
@@ -1313,7 +1313,7 @@ class QtConan(ConanFile):
             _create_module("Nfc", [])
 
         if self.options.get_safe("qtserialport"):
-            _create_module("SerialPort")
+            _create_module("SerialPort", [])
 
         if self.options.get_safe("qtserialbus"):
             _create_module("SerialBus", ["SerialPort"] if self.options.get_safe("qtserialport") else [])
@@ -1341,7 +1341,7 @@ class QtConan(ConanFile):
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
         if self.options.get_safe("qtremoteobjects"):
-            _create_module("RemoteObjects")
+            _create_module("RemoteObjects", [])
 
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
