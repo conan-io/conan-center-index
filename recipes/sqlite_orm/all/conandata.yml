@@ -1,4 +1,7 @@
 sources:
+  "1.8.2":
+    url: "https://github.com/fnc12/sqlite_orm/archive/refs/tags/v1.8.2.tar.gz"
+    sha256: "56e0c7729800637a8061658d0fdad4424d2cdde77b063d23cc1b76aa20339072"
   "1.8.1":
     url: "https://github.com/fnc12/sqlite_orm/archive/v1.8.1.tar.gz"
     sha256: "3fbe40d4bb7884a29a9a5764baa27e150ef53940895eb097014202bee3f06644"
