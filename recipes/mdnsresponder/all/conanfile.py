@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import symlinks, rmdir, get, replace_in_file, rename, chdir, patch, mkdir
+from conan.tools.files import symlinks, rmdir, get, replace_in_file, rename, chdir, patch, mkdir, copy
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import MSBuild
@@ -190,17 +190,17 @@ class MdnsResponderConan(ConanFile):
         return os.path.join(self._source_subfolder, *argv, self._msvc_platform, str(self.settings.build_type))
 
     def _install_msvc(self):
-        self.copy("mDNSResponder.exe", dst="bin", src=self._msvc_build_folder("mDNSWindows", "SystemService"))
-        self.copy("dns_sd.h", dst="include", src=os.path.join(self._source_subfolder, "mDNSShared"))
-        self.copy("dnssd.dll", dst="bin", src=self._msvc_build_folder("mDNSWindows", "DLL"))
-        self.copy("dnssdStatic.lib", dst="lib", src=self._msvc_build_folder("mDNSWindows", "DLLStub"))
+        copy(self, "mDNSResponder.exe", dst="bin", src=self._msvc_build_folder("mDNSWindows", "SystemService"))
+        copy(self, "dns_sd.h", dst="include", src=os.path.join(self._source_subfolder, "mDNSShared"))
+        copy(self, "dnssd.dll", dst="bin", src=self._msvc_build_folder("mDNSWindows", "DLL"))
+        copy(self, "dnssdStatic.lib", dst="lib", src=self._msvc_build_folder("mDNSWindows", "DLLStub"))
         # rename consistently with Bonjour SDK
         rename(self, src=os.path.join(self.package_folder, "lib", "dnssdStatic.lib"),
                      dst=os.path.join(self.package_folder, "lib", "dnssd.lib"))
-        self.copy("dns-sd.exe", dst="bin", src=self._msvc_build_folder("Clients", "DNS-SD.VisualStudio"))
+        copy(self, "dns-sd.exe", dst="bin", src=self._msvc_build_folder("Clients", "DNS-SD.VisualStudio"))
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.os == "Linux":
             self._install_make()
         elif self.settings.os == "Windows":
