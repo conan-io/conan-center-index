@@ -80,6 +80,8 @@ class AprUtilConan(ConanFile):
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
             # https://github.com/conan-io/conan-center-index/pull/16142#issuecomment-1494282164
+            # transitive_libs needs to be set because some sys-frameworks on the old mac images for c3i
+            # are pulling it in - discovered in https://github.com/conan-io/conan-center-index/pull/16266
             self.requires("libiconv/1.17", transitive_libs=True)
         if self.options.with_openssl:
             self.requires("openssl/1.1.1t")
