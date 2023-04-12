@@ -44,12 +44,6 @@ class FoonathanMemoryConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
-        # FIXME: jenkins servers throw error with this combination
-        # quick fix until somebody can reproduce
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
