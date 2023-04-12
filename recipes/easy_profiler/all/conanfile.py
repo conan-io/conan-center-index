@@ -15,7 +15,7 @@ class EasyProfilerConan(ConanFile):
     name = "easy_profiler"
     description = "Lightweight profiler library for c++"
     license = "MIT"
-    topics = ("easy_profiler")
+    topics = ("profiler")
     homepage = "https://github.com/yse/easy_profiler/"
     url = "https://github.com/conan-io/conan-center-index"
 
