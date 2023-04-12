@@ -47,8 +47,7 @@ class SeadexEssentialsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.shared = False
-        self.options["fmt/9.1.0"].header_only = True
-        self.options["spdlog/1.11.0"].header_only = True
+        self.options["spdlog"].header_only = True
 
     def configure(self):
         if self.options.shared:
