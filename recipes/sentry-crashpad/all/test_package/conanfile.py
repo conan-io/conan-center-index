@@ -11,8 +11,11 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, run=can_run(self)) # We need the exes and the libs for testing
+        self.requires(self.tested_reference_str)
 
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str) # We need the exes and the libs for testing
+        
     def layout(self):
         cmake_layout(self)
 
