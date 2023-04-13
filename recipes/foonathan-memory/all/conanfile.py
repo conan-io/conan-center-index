@@ -53,7 +53,7 @@ class FoonathanMemoryConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self) and \
                 str(self.settings.os) == "Macos" and self.options.with_tools:
             raise ConanInvalidConfiguration(
-                "Cross building tools for macos is not yet supported. Contributions are welcome")
+                "Cross building tools for Macos is not yet supported. Contributions are welcome")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
