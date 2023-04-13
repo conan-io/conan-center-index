@@ -17,6 +17,9 @@ class SysConfigVDPAUConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
+    def layout(self):
+        pass
+
     def package_id(self):
         self.info.clear()
 
