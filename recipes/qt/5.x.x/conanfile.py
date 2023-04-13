@@ -951,7 +951,7 @@ Examples = bin/datadir/examples""")
                     self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime_type = "Release/Debug"
-        if self.settings.os == "Android":
+        if self.info.settings.os == "Android":
             del self.info.options.android_sdk
 
     def package_info(self):
