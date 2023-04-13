@@ -80,8 +80,6 @@ class SeadexEssentialsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["ESS_BUILD_UNIT_TESTS"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
