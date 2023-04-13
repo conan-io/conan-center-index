@@ -8,15 +8,13 @@ required_conan_version = ">=1.54"
 
 class ImplotConan(ConanFile):
     name = "implot"
-
-    package_type = "library"
-
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/epezent/implot"
     description = "Advanced 2D Plotting for Dear ImGui"
     topics = ("imgui", "plot", "graphics", )
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
 
     options = {
         "shared": [True, False],
