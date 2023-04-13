@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.system import package_manager
 from conan.tools.gnu import PkgConfig
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class LibUDEVConan(ConanFile):
