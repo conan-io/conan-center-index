@@ -18,12 +18,15 @@ class ConanGTK(ConanFile):
     options = {"version": [2, 3]}
     default_options = {"version": 2}
 
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
+    def layout(self):
+        pass
 
     def package_id(self):
         self.info.settings.clear()
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
