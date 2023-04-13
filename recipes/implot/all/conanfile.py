@@ -39,9 +39,11 @@ class ImplotConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "0.14":
             self.requires("imgui/1.89.4", transitive_headers=True)
-        else:
+        elif Version(self.version) >= "0.13":
             # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
             self.requires("imgui/1.88", transitive_headers=True)
+        else:
+            self.requires("imgui/1.86", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
