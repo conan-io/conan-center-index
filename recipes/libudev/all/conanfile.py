@@ -17,6 +17,9 @@ class LibUDEVConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
+    def layout(self):
+        pass
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libudev is only supported on Linux.")
