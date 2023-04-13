@@ -1,8 +1,8 @@
 import os
 from conan import ConanFile
-from conan.tools.files import get, replace_in_file, rmdir, rm
+from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.scm import Version
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 
 
 required_conan_version = ">=1.47.0"
@@ -41,12 +41,7 @@ class Mosquitto(ConanFile):
         "threading": True,
     }
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    _cmake_toolchain = None
 
     @property
     def _build_subfolder(self):
@@ -67,6 +62,9 @@ class Mosquitto(ConanFile):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1q")
@@ -76,61 +74,67 @@ class Mosquitto(ConanFile):
             self.requires("libwebsockets/4.2.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_STATIC_LIBRARIES"] = not self.options.shared
-        self._cmake.definitions["WITH_PIC"] = self.options.get_safe("fPIC", False)
-        self._cmake.definitions["WITH_TLS"] = self.options.ssl
-        self._cmake.definitions["WITH_CLIENTS"] = self.options.clients
+    def _configure_cmake_toolchain(self):
+        if self._cmake_toolchain:
+            return self._cmake_toolchain
+        self._cmake_toolchain = CMakeToolchain(self)
+        self._cmake_toolchain.variables["WITH_STATIC_LIBRARIES"] = not self.options.shared
+        self._cmake_toolchain.variables["WITH_PIC"] = self.options.get_safe("fPIC", False)
+        self._cmake_toolchain.variables["WITH_TLS"] = self.options.ssl
+        self._cmake_toolchain.variables["WITH_CLIENTS"] = self.options.clients
         if Version(self.version) < "2.0.6":
-            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_cJSON"] = not self.options.get_safe("cjson")
+            self._cmake_toolchain.variables["CMAKE_DISABLE_FIND_PACKAGE_cJSON"] = not self.options.get_safe("cjson")
         else:
-            self._cmake.definitions["WITH_CJSON"] = self.options.get_safe("cjson")
-        self._cmake.definitions["WITH_BROKER"] = self.options.broker
-        self._cmake.definitions["WITH_APPS"] = self.options.apps
-        self._cmake.definitions["WITH_PLUGINS"] = False
-        self._cmake.definitions["WITH_LIB_CPP"] = self.options.build_cpp
-        self._cmake.definitions["WITH_THREADING"] = self.settings.compiler != "Visual Studio" and self.options.threading
-        self._cmake.definitions["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
-        self._cmake.definitions["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.options["libwebsockets"].shared
-        self._cmake.definitions["DOCUMENTATION"] = False
-        self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            self._cmake_toolchain.variables["WITH_CJSON"] = self.options.get_safe("cjson")
+        self._cmake_toolchain.variables["WITH_BROKER"] = self.options.broker
+        self._cmake_toolchain.variables["WITH_APPS"] = self.options.apps
+        self._cmake_toolchain.variables["WITH_PLUGINS"] = False
+        self._cmake_toolchain.variables["WITH_LIB_CPP"] = self.options.build_cpp
+        self._cmake_toolchain.variables["WITH_THREADING"] = self.settings.compiler != "msvc" and self.options.threading
+        self._cmake_toolchain.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
+        self._cmake_toolchain.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.options["libwebsockets"].shared
+        self._cmake_toolchain.variables["DOCUMENTATION"] = False
+        self._cmake_toolchain.variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
+        self._cmake_toolchain.generate()
+        return self._cmake_toolchain
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self._source_subfolder, "client", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
-        replace_in_file(self, os.path.join(self._source_subfolder, "client", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
-        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
-        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
-        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_passwd", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        replace_in_file(self, os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        replace_in_file(self, os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
-        replace_in_file(self, os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "MOSQ_LIBS", "CONAN_LIBS")
-        replace_in_file(self, os.path.join(self._source_subfolder, "include", "mosquitto.h"), "__declspec(dllimport)", "")
-        replace_in_file(self, os.path.join(self._source_subfolder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "client", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self.source_folder, "client", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self.source_folder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self.source_folder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
+        replace_in_file(self, os.path.join(self.source_folder, "apps", "mosquitto_passwd", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self.source_folder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "MOSQ_LIBS", "CONAN_LIBS")
+        replace_in_file(self, os.path.join(self.source_folder, "include", "mosquitto.h"), "__declspec(dllimport)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
         # dynlibs for apple mobile want code signatures and that will not work here
         # this would actually be the right patch for static builds also, but this would have other side effects, so
         if(self.settings.os in ["iOS", "watchOS", "tvOS"]):
-            replace_in_file(self, os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "SHARED", "")
-            replace_in_file(self, os.path.join(self._source_subfolder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
+            replace_in_file(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"), "SHARED", "")
+            replace_in_file(self, os.path.join(self.source_folder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
+
+    def generate(self):
+        self._configure_cmake_toolchain()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        self.copy("epl-v20", src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "edl-v10", src=self.source_folder, dst="licenses")
+        copy(self, "epl-v20", src=self.source_folder, dst="licenses")
+        copy(self, "LICENSE.txt", src=self.source_folder, dst="licenses")
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.example", os.path.join(self.package_folder, "res"))
@@ -139,9 +143,9 @@ class Mosquitto(ConanFile):
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         elif self.options.shared and self.settings.compiler == "Visual Studio":
-            self.copy("mosquitto.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
+            copy(self, "mosquitto.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
             if self.options.build_cpp:
-                self.copy("mosquittopp.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
+                copy(self, "mosquittopp.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
 
     def package_info(self):
         libsuffix = "" if self.options.shared else "_static"
