@@ -14,7 +14,7 @@ required_conan_version = ">=1.59.0"
 class NodejsConan(ConanFile):
     name = "nodejs"
     description = "nodejs binaries for use in recipes"
-    topics = ("node", "nodejs")
+    topics = ("node", "javascript", "runtime")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
