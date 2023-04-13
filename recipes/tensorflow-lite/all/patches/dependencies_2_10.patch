@@ -1,5 +1,5 @@
 --- a/tensorflow/lite/CMakeLists.txt	2023-04-12 18:04:31
-+++ b/tensorflow/lite/CMakeLists.txt	2023-04-13 08:15:22
++++ b/tensorflow/lite/CMakeLists.txt	2023-04-12 17:53:22
 @@ -138,12 +138,11 @@
  endmacro()
  # Find TensorFlow Lite dependencies.
@@ -38,23 +38,16 @@
  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
    # TFLite uses deprecated methods in neon2sse which generates a huge number of
    # warnings so surpress these until they're fixed.
-@@ -406,12 +414,14 @@
- if(TFLITE_ENABLE_XNNPACK)
-   find_package(fp16_headers REQUIRED)
-   find_package(xnnpack REQUIRED)
-+  find_package(threadpool REQUIRED)
-   populate_tflite_source_vars("delegates/xnnpack"
-     TFLITE_DELEGATES_XNNPACK_SRCS
+@@ -411,7 +419,7 @@
      FILTER ".*(_test|_tester)\\.(cc|h)"
    )
    list(APPEND TFLITE_TARGET_DEPENDENCIES
 -    XNNPACK
 +    xnnpack::xnnpack
-+    threadpool::threadpool
    )
    list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
  endif()
-@@ -519,17 +529,16 @@
+@@ -519,17 +527,16 @@
  target_link_libraries(tensorflow-lite
    PUBLIC
      Eigen3::Eigen
