@@ -24,6 +24,7 @@ class SeadexEssentialsConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "spdlog/*:header_only": True
     }
 
     @property
@@ -40,9 +41,6 @@ class SeadexEssentialsConan(ConanFile):
             "apple-clang": "10"
         }        
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,12 +52,19 @@ class SeadexEssentialsConan(ConanFile):
         self.options["spdlog/*"].fmt_external = True
         self.options["spdlog/*"].header_only = True
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def requirements(self):
         self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
         self.requires("fmt/9.1.0", transitive_headers=True, transitive_libs=True)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        rename(self, "examples", "to_ignore")
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os not in ["Linux", "Windows", "Macos"]:
@@ -77,10 +82,6 @@ class SeadexEssentialsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
         if not self.dependencies["spdlog"].options.header_only:
             raise ConanInvalidConfiguration()
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rename(self, "examples", "to_ignore")
 
     def generate(self):
         tc = CMakeToolchain(self)
