@@ -17,12 +17,15 @@ class SysConfigVAAPIConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
+    def layout(self):
+        pass
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
