@@ -22,7 +22,7 @@ class FoonathanMemoryConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tools": [True, False],
-        "with_sizecheck":[True, False],
+        "with_sizecheck": [True, False],
     }
     default_options = {
         "shared": False,
@@ -43,6 +43,17 @@ class FoonathanMemoryConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def validate(self):
+        # FIXME: jenkins servers throw 'ld: library not found for -lcrt0.o' error
+        # when cross building tools for Macos M1. This is most likely produced by the
+        # '-static' flag for the tool target, since this flag is not recommended by
+        # apple and should be avoided. Somebody with an Mac M1 could try to reproduce
+        # the issue and provide a patch. 
+        if hasattr(self, "settings_build") and cross_building(self) and \
+                str(self.settings.os) == "Macos" and self.options.with_tools:
+            raise ConanInvalidConfiguration(
+                "Cross building tools for macos is not yet supported. Contributions are welcome")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -65,10 +76,12 @@ class FoonathanMemoryConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "foonathan_memory", "cmake"))
+        rmdir(self, os.path.join(self.package_folder,
+              "lib", "foonathan_memory", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
@@ -97,7 +110,8 @@ class FoonathanMemoryConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "foonathan_memory")
         self.cpp_info.set_property("cmake_target_name", "foonathan_memory")
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.includedirs = [os.path.join("include", "foonathan_memory")]
+        self.cpp_info.includedirs = [
+            os.path.join("include", "foonathan_memory")]
 
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
@@ -107,5 +121,7 @@ class FoonathanMemoryConan(ConanFile):
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "foonathan_memory"
         self.cpp_info.names["cmake_find_package_multi"] = "foonathan_memory"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [
+            self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [
+            self._module_file_rel_path]
