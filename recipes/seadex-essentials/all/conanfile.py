@@ -57,8 +57,8 @@ class SeadexEssentialsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("spdlog/1.11.0", transitive_headers=True)
-        self.requires("fmt/9.1.0", transitive_headers=True)
+        self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
+        self.requires("fmt/9.1.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.os not in ["Linux", "Windows", "Macos"]:
