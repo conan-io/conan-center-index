@@ -10,10 +10,11 @@ class SysConfigEGLConan(ConanFile):
     name = "egl"
     version = "system"
     description = "cross-platform virtual conan package for the EGL support"
-    topics = ("conan", "opengl", "egl")
+    topics = ("opengl", "egl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.khronos.org/egl"
     license = "MIT"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def configure(self):
