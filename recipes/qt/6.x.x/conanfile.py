@@ -364,37 +364,37 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1t")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.40")
+            self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.231.0")
+            self.requires("vulkan-loader/1.3.239.0")
             if is_apple_os(self):
-                self.requires("moltenvk/1.2.0")
+                self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.75.1")
+            self.requires("glib/2.76.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.1")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/72.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/5.3.1")
+            self.requires("harfbuzz/6.0.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.4")
+                self.requires("libjpeg-turbo/2.1.5")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.40.0")
+            self.requires("sqlite3/3.41.1")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
@@ -403,14 +403,14 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_x11", False):
-            self.requires("xkbcommon/1.4.1")
+            self.requires("xkbcommon/1.5.0")
             self.requires("xorg/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.qtwayland:
-            self.requires("xkbcommon/1.4.1")
+            self.requires("xkbcommon/1.5.0")
             self.requires("wayland/1.21.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
@@ -419,7 +419,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
-            self.requires("nss/3.85")
+            self.requires("nss/3.89")
             self.requires("libdrm/2.4.114")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")

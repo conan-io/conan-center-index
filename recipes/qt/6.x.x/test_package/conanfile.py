@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.25.3")
         if self._meson_supported():
-            self.tool_requires("meson/0.60.2")
+            self.tool_requires("meson/1.0.1")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
