@@ -48,10 +48,10 @@ class PROPOSALConan(ConanFile):
 
     def requirements(self):
         #TODO: Add note why transitive_headers are necessary
-        self.requires("cubicinterpolation/0.1.4", transitive_headers=True)
-        self.requires("spdlog/1.9.2", transitive_headers=True)
+        self.requires("cubicinterpolation/0.1.4", transitive_headers=True, transitive_libs=True)
+        self.requires("spdlog/1.9.2", transitive_headers=True, transitive_libs=True)
         # transitive_headers probably due to usage of json_fwd.hpp
-        self.requires("nlohmann_json/3.10.5", transitive_headers=True)
+        self.requires("nlohmann_json/3.10.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_python:
             self.requires("pybind11/2.9.1")
 
