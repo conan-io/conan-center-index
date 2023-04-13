@@ -47,11 +47,13 @@ class PROPOSALConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        #TODO: Add note why transitive_headers are necessary
+        # cubicinterpolation: headers are transitively included, and function calls are made
+        # from implementation in headers (templates)
         self.requires("cubicinterpolation/0.1.4", transitive_headers=True, transitive_libs=True)
+        # spdlog: requires transitive_libs due to direct calls to functionality from headers
         self.requires("spdlog/1.9.2", transitive_headers=True, transitive_libs=True)
-        # transitive_headers probably due to usage of json_fwd.hpp
-        self.requires("nlohmann_json/3.10.5", transitive_headers=True, transitive_libs=True)
+        # nlohmann_json: public headers include json.hpp and json_fwd.hpp
+        self.requires("nlohmann_json/3.10.5", transitive_headers=True)
         if self.options.with_python:
             self.requires("pybind11/2.9.1")
 
