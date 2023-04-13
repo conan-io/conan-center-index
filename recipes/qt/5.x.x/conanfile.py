@@ -474,6 +474,8 @@ class QtConan(ConanFile):
         if self._settings_build.os == "Macos":
             save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % env.vars(self).get("DYLD_LIBRARY_PATH"))
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
+        envvars = env.vars(self)
+        envvars.save_script("my_env_file")
 
     def _make_program(self):
         if is_msvc(self):
