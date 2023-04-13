@@ -24,7 +24,6 @@ class SeadexEssentialsConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "spdlog/*:header_only": True
     }
 
     @property
@@ -52,6 +51,8 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["spdlog/*"].fmt_external = True
+        self.options["spdlog/*"].header_only = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
