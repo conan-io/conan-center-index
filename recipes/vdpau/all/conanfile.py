@@ -10,10 +10,11 @@ class SysConfigVDPAUConan(ConanFile):
     name = "vdpau"
     version = "system"
     description = "VDPAU is the Video Decode and Presentation API for UNIX. It provides an interface to video decode acceleration and presentation hardware present in modern GPUs."
-    topics = ("vdpau", "hwaccel", "video")
+    topics = ("hwaccel", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/VDPAU/"
     license = "MIT"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def validate(self):
