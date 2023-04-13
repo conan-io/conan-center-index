@@ -20,9 +20,12 @@ sources:
   "4.0.0":
     url: "https://github.com/JustWhit3/osmanip/archive/refs/tags/v4.0.0.tar.gz"
     sha256: "c6848e1d9b15eb409af88efeee7cd1ce87374ea7ac87424f5d2cf30104f098a0"
-
 patches:
+  "4.5.1":
+    - patch_file: "patches/4.5.1-0001-fix-cmake.patch"
+      patch_description: "use cci package, disable building examples"
+      patch_type: "conan"
   "4.0.0":
-    - patch_file: "patches/0001-replace-runtime_error_func.patch"
+    - patch_file: "patches/4.0.0-0001-replace-runtime_error_func.patch"
       patch_description: "following function renaming on arsenalgear/1.2.2"
       patch_type: "conan"

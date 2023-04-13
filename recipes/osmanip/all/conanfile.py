@@ -102,3 +102,8 @@ class OsmanipConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["osmanip"]
+        if Version(self.version) >= "4.5.0":
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+                self.cpp_info.system_libs += ["stdc++fs"]
+            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
+                self.cpp_info.system_libs += ["c++fs"]

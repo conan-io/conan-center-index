@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f8f4ddc..00591f4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,8 +24,8 @@ set( CMAKE_CXX_EXTENSIONS OFF )
+ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
+ 
+ # Fetching deps
+-add_subdirectory( deps )
+-include_directories( ${CMAKE_CURRENT_BINARY_DIR}/_deps/arsenalgear-src/include )
++#add_subdirectory( deps )
++#include_directories( ${CMAKE_CURRENT_BINARY_DIR}/_deps/arsenalgear-src/include )
+ 
+ # Creating the static library
+ add_library( osmanip STATIC
+@@ -56,7 +56,7 @@ else()
+ endif()
+ 
+ # Compiling examples
+-add_subdirectory( examples )
++#add_subdirectory( examples )
+ 
+ # Setting installation paths
+ target_include_directories( osmanip INTERFACE
+@@ -109,4 +109,4 @@ install( FILES
+ 
+ export( EXPORT osmanipTargets
+     FILE "${CMAKE_CURRENT_BINARY_DIR}/osmanipTargets.cmake"
+-)
+\ No newline at end of file
++)
