@@ -39,10 +39,15 @@ class SeadexEssentialsConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
             "apple-clang": "10"
-        }
+        }        
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            self.options.shared = False
 
     def configure(self):
         if self.options.shared:
