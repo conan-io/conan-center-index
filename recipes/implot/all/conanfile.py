@@ -4,7 +4,7 @@ from conan.tools.files import get, copy
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.59"
+required_conan_version = ">=1.54"
 
 class ImplotConan(ConanFile):
     name = "implot"
