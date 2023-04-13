@@ -10,10 +10,11 @@ class SysConfigVAAPIConan(ConanFile):
     name = "vaapi"
     version = "system"
     description = "VA-API is an open-source library and API specification, which provides access to graphics hardware acceleration capabilities for video processing."
-    topics = ("conan", "vaapi", "hwaccel", "video")
+    topics = ("hwaccel", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://01.org/linuxmedia/vaapi"
     license = "MIT"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def validate(self):
