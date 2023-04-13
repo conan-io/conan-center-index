@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class SysConfigVAAPIConan(ConanFile):
@@ -22,9 +22,7 @@ class SysConfigVAAPIConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.arch
-        del self.info.settings.build_type
+        self.info.clear()
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
