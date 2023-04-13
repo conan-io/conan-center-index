@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class SysConfigEGLConan(ConanFile):
@@ -17,12 +17,15 @@ class SysConfigEGLConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    def configure(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
+    def layout(self):
+        pass
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
