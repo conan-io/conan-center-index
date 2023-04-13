@@ -1,13 +1,12 @@
 import os
 
-from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.build import can_run
+from conans import ConanFile, CMake
+from conans.tools import cross_building
 
 
 class ImplotTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "cmake", "cmake_find_package_multi"
     test_type = "explicit"
 
     def requirements(self):
@@ -18,10 +17,7 @@ class ImplotTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def layout(self):
-        cmake_layout(self)
-
     def test(self):
-        if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(cmd, run_environment=True)
+        if not cross_building(self):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
