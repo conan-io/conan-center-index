@@ -1,4 +1,7 @@
 sources:
+  "3.6.0":
+    url: "https://storage.googleapis.com/aom-releases/libaom-3.6.0.tar.gz"
+    sha256: "a4a6c0fab685da743b796662a928fcdf7ae60594edc306efb73e78a17ea6cde6"
   "3.5.0":
     url: "https://storage.googleapis.com/aom-releases/libaom-3.5.0.tar.gz"
     sha256: "d37dbee372e2430a7efde813984ae6d78bdf1fc4080ebe32457c9115408b0738"
@@ -18,8 +21,12 @@ sources:
     url: "https://storage.googleapis.com/aom-releases/libaom-2.0.1.tar.gz"
     sha256: "a0cff299621e2ef885aba219c498fa39a7d9a7ddf47585a118fd66c64ad1b312"
 patches:
+  "3.6.0":
+    - patch_file: "patches/0001-3.4.0-fix-install.patch"
+      patch_type: conan
+      patch_description: Install just aom library without aom_static.
   "3.5.0":
-    - patch_file: "patches/0001-3.5.0-fix-install.patch"
+    - patch_file: "patches/0001-3.4.0-fix-install.patch"
       patch_type: conan
       patch_description: Install just aom library without aom_static.
   "3.4.0":

@@ -47,7 +47,7 @@ class C4CoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_fast_float:
-            self.requires("fast_float/3.11.0", transitive_headers=True)
+            self.requires("fast_float/4.0.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
