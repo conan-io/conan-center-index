@@ -13,6 +13,7 @@ class SysConfigGLUConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
