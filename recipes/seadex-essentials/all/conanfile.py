@@ -49,7 +49,6 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["spdlog/*"].fmt_external = True
         self.options["spdlog/*"].header_only = True
 
     def requirements(self):
@@ -59,6 +58,7 @@ class SeadexEssentialsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         rename(self, "examples", "to_ignore")
+        rename(self, "bug_reproductions", "to_ignore_2")
 
     def export_sources(self):
         export_conandata_patches(self)
