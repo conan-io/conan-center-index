@@ -49,9 +49,6 @@ class NodejsConan(ConanFile):
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
         if Version(self.version) >= "18.0.0":
-            if str(self.info.settings.compiler) == "gcc" and Version(self.info.settings.compiler.version) < "8.3":
-                raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
-
             if str(self.info.settings.os) == "Linux":
                 if Version(self._glibc_version) < '2.27':
                     raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
