@@ -1,6 +1,6 @@
 import os
 import re
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.scm import Version
 from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
@@ -59,7 +59,7 @@ class NodejsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version][str(self.info.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        if Version(__version__) < '2.0.0':
+        if conan_version.major == "1":
             self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
             self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
             self.copy(pattern="*", src=os.path.join(self._source_subfolder, "lib"), dst="lib")
