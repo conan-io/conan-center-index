@@ -1,8 +1,14 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import XCRun
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class LdnsConan(ConanFile):
@@ -23,53 +29,55 @@ class LdnsConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows is not supported by the ldns recipe. Contributions are welcome.")
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def requirements(self):
-        self.requires("openssl/1.1.1o")
-
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("openssl/1.1.1t")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported by the ldns recipe. Contributions are welcome.")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
+    def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
+        # This fixes the issue of linking against ldns in combination of openssl:shared=False, ldns:shared=True, and an older GCC:
+        # > hidden symbol `pthread_atfork' in /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a(pthread_atfork.oS) is referenced by DSO
+        # OpenSSL adds -lpthread to link POSIX thread library explicitly. That is not correct because using the library
+        # may require setting various defines on compilation as well. The compiler has a dedicated -pthread option for that.
+        tc = AutotoolsDeps(self)
+        tc.environment.remove("LIBS", "-lpthread")
+        tc.environment.append("CFLAGS", "-pthread")
+        tc.generate()
+
+        tc = AutotoolsToolchain(self)
         def yes_no(v): return "yes" if v else "no"
-        args = [
-            # libraries
-            f"--enable-shared={yes_no(self.options.shared)}",
-            f"--enable-static={yes_no(not self.options.shared)}",
-            f"--with-pic={yes_no(self.settings.os != 'Windows' and (self.options.shared or self.options.fPIC))}",
+        tc.configure_args.extend([
             "--disable-rpath",
-            # dependencies
-            f"--with-ssl={self.deps_cpp_info['openssl'].rootpath}",
+            f"--with-ssl={self.dependencies['openssl'].package_folder}",
             # DNSSEC algorithm support
             "--enable-ecdsa",
             "--enable-ed25519",
@@ -84,36 +92,24 @@ class LdnsConan(ConanFile):
             # library bindings
             "--without-pyldns",
             "--without-p5-dns-ldns",
-        ]
+        ])
         if self.settings.compiler == "apple-clang":
-            args.append(f"--with-xcode-sdk={tools.XCRun(self.settings).sdk_version}")
-
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-
-        # This fixes the issue of linking against ldns in combination of openssl:shared=False, ldns:shared=True, and an older GCC:
-        # > hidden symbol `pthread_atfork' in /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a(pthread_atfork.oS) is referenced by DSO
-        # OpenSSL adds -lpthread to link POSIX thread library explicitly. That is not correct because using the library
-        # may require setting various on compilation as well. The compiler has a dedicated -pthread option for that.
-        if self.settings.os == "Linux":
-            self._autotools.libs.remove("pthread")
-            env = self._autotools.vars
-            env["CFLAGS"] += " -pthread"
-        else:
-            env = None
-
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args, vars=env)
-        return self._autotools
+            tc.configure_args.append(f"--with-xcode-sdk={XCRun(self).sdk_version}")
+        tc.generate()
 
     def build(self):
-        autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        autotools = self._configure_autotools()
+        print(self.package_folder)
+        autotools = Autotools(self)
         for target in ["install-h", "install-lib"]:
-            autotools.make(target=target)
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+            autotools.install(target=target)
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libs = ["ldns"]
