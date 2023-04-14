@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualRunEnv
@@ -44,11 +44,11 @@ class LibBsdConan(ConanFile):
             del self.options.fPIC
         try:
             del self.settings.compiler.libcxx
-        except Exception:
+        except ConanException:
             pass
         try:
             del self.settings.compiler.cppstd
-        except Exception:
+        except ConanException:
             pass
     
     def generate(self):
