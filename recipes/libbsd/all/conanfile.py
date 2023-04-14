@@ -56,6 +56,9 @@ class LibBsdConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = AutotoolsToolchain(self)
+        if is_apple_os(self):
+            tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
+            tc.extra_cxxflags.append("-Wno-error=implicit-function-declaration")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -75,8 +78,6 @@ class LibBsdConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = Autotools(self)
-        if is_apple_os(self):
-            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
         ]
         if self.options.shared:
