@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(PROPOSAL REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PROPOSAL::PROPOSAL)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+target_link_libraries(${PROJECT_NAME} PRIVATE PROPOSAL::PROPOSAL)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)

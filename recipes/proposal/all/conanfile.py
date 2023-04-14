@@ -1,11 +1,11 @@
 import os
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, rmdir, copy
-from conan.tools.cmake import CMake, CMakeToolchain
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -14,7 +14,6 @@ class PROPOSALConan(ConanFile):
     name = "proposal"
     homepage = "https://github.com/tudo-astroparticlephysics/PROPOSAL"
     license = "LGPL-3.0"
-    exports_sources = "CMakeLists.txt"
     package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     description = "monte Carlo based lepton and photon propagator"
@@ -32,11 +31,19 @@ class PROPOSALConan(ConanFile):
         "with_python": False,
     }
 
-    generators = "CMakeDeps"
+    @property
+    def _min_cppstd(self):
+        return "14"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,6 +52,9 @@ class PROPOSALConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # cubicinterpolation: headers are transitively included, and function calls are made
@@ -67,18 +77,14 @@ class PROPOSALConan(ConanFile):
                 "Can not build shared library on Visual Studio."
             )
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "14")
+            check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False
         )
-        if not minimum_version:
-            self.output.warning(
-                "PROPOSAL requires C++14. Your compiler is unknown. Assuming it supports C++14."
-            )
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                "PROPOSAL requires gcc >= 5, clang >= 5 or Visual Studio >= 15 as a compiler!"
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support"
             )
 
     def source(self):
@@ -101,6 +107,8 @@ class PROPOSALConan(ConanFile):
         tc.cache_variables["BUILD_PYTHON"] = self.options.with_python
         tc.cache_variables["BUILD_DOCUMENTATION"] = False
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PROPOSAL")
