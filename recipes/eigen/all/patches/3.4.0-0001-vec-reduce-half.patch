@@ -1,0 +1,49 @@
+From b0fe14213ec4c8615de485fe4c2bcd4bab0cbd19 Mon Sep 17 00:00:00 2001
+From: Alex Druinsky <adruinsky@google.com>
+Date: Wed, 20 Oct 2021 16:03:12 -0700
+Subject: [PATCH] Fix vectorized reductions for Eigen::half
+
+Fixes compiler errors in expressions that look like
+
+  Eigen::Matrix<Eigen::half, 3, 1>::Random().maxCoeff()
+
+The error comes from the code that creates the initial value for
+vectorized reductions. The fix is to specify the scalar type of the
+reduction's initial value.
+
+The cahnge is necessary for Eigen::half because unlike other types,
+Eigen::half scalars cannot be implicitly created from integers.
+
+
+(cherry picked from commit d0e3791b1a0e2db9edd5f1d1befdb2ac5a40efe0)
+---
+ Eigen/src/Core/PartialReduxEvaluator.h | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/Eigen/src/Core/PartialReduxEvaluator.h b/Eigen/src/Core/PartialReduxEvaluator.h
+index 29abf35b99..17c06f0783 100644
+--- a/Eigen/src/Core/PartialReduxEvaluator.h
++++ b/Eigen/src/Core/PartialReduxEvaluator.h
+@@ -54,12 +54,17 @@ struct packetwise_redux_traits
+ /* Value to be returned when size==0 , by default let's return 0 */
+ template<typename PacketType,typename Func>
+ EIGEN_DEVICE_FUNC
+-PacketType packetwise_redux_empty_value(const Func& ) { return pset1<PacketType>(0); }
++PacketType packetwise_redux_empty_value(const Func& ) {
++  const typename unpacket_traits<PacketType>::type zero(0);
++  return pset1<PacketType>(zero);
++}
+ 
+ /* For products the default is 1 */
+ template<typename PacketType,typename Scalar>
+ EIGEN_DEVICE_FUNC
+-PacketType packetwise_redux_empty_value(const scalar_product_op<Scalar,Scalar>& ) { return pset1<PacketType>(1); }
++PacketType packetwise_redux_empty_value(const scalar_product_op<Scalar,Scalar>& ) {
++  return pset1<PacketType>(Scalar(1));
++}
+ 
+ /* Perform the actual reduction */
+ template<typename Func, typename Evaluator,
+-- 
+GitLab
+

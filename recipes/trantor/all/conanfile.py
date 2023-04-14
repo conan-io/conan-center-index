@@ -17,6 +17,7 @@ class TrantorConan(ConanFile):
     homepage = "https://github.com/an-tao/trantor"
     topics = ("tcp-server", "asynchronous-programming", "non-blocking-io")
     license = "BSD-3-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -55,7 +56,7 @@ class TrantorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/1.1.1t")
         if self.options.with_c_ares:
             self.requires("c-ares/1.19.0")
 
@@ -75,8 +76,7 @@ class TrantorConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
