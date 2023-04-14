@@ -37,7 +37,7 @@ class OpenTelemetryProtoConan(ConanFile):
         save(self, os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
 
     def package_info(self):
-        self.conf_info.define("user.myconf:proto_root", os.path.join(self.package_folder, "res"))
+        self.conf_info.define("user.opentelemetry-proto:proto_root", os.path.join(self.package_folder, "res"))
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = []
