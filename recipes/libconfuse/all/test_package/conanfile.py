@@ -26,7 +26,7 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             config_path = os.path.join(self.source_folder, "hello.conf")
             output = StringIO()
-            self.run(f"{bin_path} {config_path}", env="conanrun", output=output)
+            self.run(f"{bin_path} {config_path}", output, env="conanrun")
             text = output.getvalue()
             print(text)
             assert "Neighbour" in text

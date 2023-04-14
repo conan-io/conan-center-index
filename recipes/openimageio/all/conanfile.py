@@ -1,10 +1,13 @@
+from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, Version
+from conan.tools import files
+from conan.errors import ConanInvalidConfiguration
+from conans import CMake
 import functools
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenImageIOConan(ConanFile):
@@ -49,15 +52,15 @@ class OpenImageIOConan(ConanFile):
         "with_freetype": True,
         "with_hdf5": True,
         "with_opencolorio": True,
-        "with_opencv": True,
-        "with_tbb": True,
-        "with_dicom": False, # Heavy dependency, disabled by default
+        "with_opencv": False,
+        "with_tbb": False,
+        "with_dicom": False,  # Heavy dependency, disabled by default
         "with_ffmpeg": True,
         "with_giflib": True,
         "with_libheif": True,
-        "with_raw": False, # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
+        "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
         "with_openjpeg": True,
-        "with_openvdb": False, # FIXME: broken on M1
+        "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
         "with_libwebp": True,
     }
@@ -88,12 +91,12 @@ class OpenImageIOConan(ConanFile):
 
     def requirements(self):
         # Required libraries
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("boost/1.78.0")
-        self.requires("libtiff/4.3.0")
+        self.requires("libtiff/4.4.0")
         self.requires("openexr/2.5.7")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.2")
         self.requires("pugixml/1.12.1")
@@ -103,13 +106,13 @@ class OpenImageIOConan(ConanFile):
 
         # Optional libraries
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_freetype:
-            self.requires("freetype/2.11.1")
+            self.requires("freetype/2.12.1")
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.1")
         if self.options.with_opencolorio:
-            if tools.Version(self.version) < "2.3.7.2":
+            if Version(self.version) < "2.3.7.2":
                 self.requires("opencolorio/1.1.1")
             else:
                 self.requires("opencolorio/2.1.0")
@@ -129,38 +132,44 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_raw:
             self.requires("libraw/0.20.2")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_openvdb:
             self.requires("openvdb/8.0.1")
         if self.options.with_ptex:
             self.requires("ptex/2.4.0")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if tools.Version(self.version) >= "2.3.0.0" or self.options.with_openvdb:
-                tools.check_min_cppstd(self, 14)
+            if Version(self.version) >= "2.3.0.0" or self.options.with_openvdb:
+                check_min_cppstd(self, 14)
             else:
-                tools.check_min_cppstd(self, 11)
+                check_min_cppstd(self, 11)
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
-            raise ConanInvalidConfiguration("Building shared library with static runtime is not supported!")
+            raise ConanInvalidConfiguration(
+                "Building shared library with static runtime is not supported!"
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self._source_subfolder
+        )
 
     def _patch_sources(self):
-         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        files.apply_conandata_patches(self)
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
 
         # CMake options
-        cmake.definitions["CMAKE_DEBUG_POSTFIX"] = "" # Needed for 2.3.x.x+ versions
+        cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""  # Needed for 2.3.x.x+ versions
         cmake.definitions["OIIO_BUILD_TOOLS"] = True
         cmake.definitions["OIIO_BUILD_TESTS"] = False
         cmake.definitions["BUILD_DOCS"] = False
@@ -172,8 +181,12 @@ class OpenImageIOConan(ConanFile):
         cmake.definitions["USE_EXTERNAL_PUGIXML"] = True
 
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
-        cmake.definitions["USE_JPEGTURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
-        cmake.definitions["USE_JPEG"] = True # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
+        cmake.definitions["USE_JPEGTURBO"] = (
+            self.options.with_libjpeg == "libjpeg-turbo"
+        )
+        cmake.definitions[
+            "USE_JPEG"
+        ] = True  # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
         cmake.definitions["USE_HDF5"] = self.options.with_hdf5
         cmake.definitions["USE_OPENCOLORIO"] = self.options.with_opencolorio
         cmake.definitions["USE_OPENCV"] = self.options.with_opencv
@@ -211,9 +224,9 @@ class OpenImageIOConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        files.rmdir(self, os.path.join(self.package_folder, "share"))
 
         self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
 
@@ -222,28 +235,47 @@ class OpenImageIOConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenImageIO::OpenImageIO")
         self.cpp_info.set_property("pkg_config_name", "OpenImageIO")
 
-        self.cpp_info.components["openimageio_util"].set_property("cmake_target_name", "OpenImageIO::OpenImageIO_Util")
+        self.cpp_info.components["openimageio_util"].set_property(
+            "cmake_target_name", "OpenImageIO::OpenImageIO_Util"
+        )
         self.cpp_info.components["openimageio_util"].libs = ["OpenImageIO_Util"]
         self.cpp_info.components["openimageio_util"].requires = [
-            "boost::filesystem", "boost::thread", "boost::system",
-            "boost::regex", "openexr::openexr",
+            "boost::filesystem",
+            "boost::thread",
+            "boost::system",
+            "boost::regex",
+            "openexr::openexr",
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["openimageio_util"].system_libs.extend(["dl", "m", "pthread"])
+            self.cpp_info.components["openimageio_util"].system_libs.extend(
+                ["dl", "m", "pthread"]
+            )
 
-        self.cpp_info.components["main"].set_property("cmake_target_name", "OpenImageIO::OpenImageIO")
+        self.cpp_info.components["main"].set_property(
+            "cmake_target_name", "OpenImageIO::OpenImageIO"
+        )
         self.cpp_info.components["main"].set_property("pkg_config_name", "OpenImageIO")
         self.cpp_info.components["main"].libs = ["OpenImageIO"]
         self.cpp_info.components["main"].requires = [
-            "openimageio_util", "zlib::zlib", "boost::thread", "boost::system",
-            "boost::container", "boost::regex", "libtiff::libtiff",
-            "openexr::openexr", "pugixml::pugixml", "tsl-robin-map::tsl-robin-map",
-            "libsquish::libsquish", "fmt::fmt",
+            "openimageio_util",
+            "zlib::zlib",
+            "boost::thread",
+            "boost::system",
+            "boost::container",
+            "boost::regex",
+            "libtiff::libtiff",
+            "openexr::openexr",
+            "pugixml::pugixml",
+            "tsl-robin-map::tsl-robin-map",
+            "libsquish::libsquish",
+            "fmt::fmt",
         ]
         if self.options.with_libjpeg == "libjpeg":
             self.cpp_info.components["main"].requires.append("libjpeg::libjpeg")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.cpp_info.components["main"].requires.append("libjpeg-turbo::libjpeg-turbo")
+            self.cpp_info.components["main"].requires.append(
+                "libjpeg-turbo::libjpeg-turbo"
+            )
         if self.options.with_libpng:
             self.cpp_info.components["main"].requires.append("libpng::libpng")
         if self.options.with_freetype:
@@ -255,7 +287,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_opencv:
             self.cpp_info.components["main"].requires.append("opencv::opencv")
         if self.options.with_tbb:
-            self.cpp_info.components["main"].requires.append("onetbb::onetbb")
+            self.cpp_info.components["openimageio_util"].requires.append("onetbb::onetbb")
         if self.options.with_dicom:
             self.cpp_info.components["main"].requires.append("dcmtk::dcmtk")
         if self.options.with_ffmpeg:
@@ -284,5 +316,7 @@ class OpenImageIOConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenImageIO"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenImageIO"
         self.cpp_info.names["pkg_config"] = "OpenImageIO"
-        self.cpp_info.components["openimageio_util"].names["cmake_find_package"] = "OpenImageIO_Util"
+        self.cpp_info.components["openimageio_util"].names[
+            "cmake_find_package"
+        ] = "OpenImageIO_Util"
         self.cpp_info.components["main"].names["cmake_find_package"] = "OpenImageIO"

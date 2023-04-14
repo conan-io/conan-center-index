@@ -18,7 +18,7 @@ class Dav1dConan(ConanFile):
     topics = ("av1", "codec", "video", "decoding")
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -58,7 +58,7 @@ class Dav1dConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
         if self.options.assembly:
             self.tool_requires("nasm/2.15.05")
 
