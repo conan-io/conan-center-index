@@ -87,7 +87,7 @@ class SeadexEssentialsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["ESS_BUILD_UNIT_TESTS"] = False
         tc.cache_variables["SPDLOG_FMT_EXTERNAL"] = True
-        tc.cache_variables["SPDLOG_FMT_EXTERNAL_HO "] = True
+        tc.cache_variables["SPDLOG_FMT_EXTERNAL_HO"] = True
         tc.generate()
 
     def build(self):
