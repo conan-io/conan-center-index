@@ -57,8 +57,6 @@ class SeadexEssentialsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rename(self, "examples", "to_ignore")
-        rename(self, "bug_reproductions", "to_ignore_2")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -85,9 +83,6 @@ class SeadexEssentialsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["ESS_BUILD_UNIT_TESTS"] = False
-        tc.cache_variables["SPDLOG_FMT_EXTERNAL"] = True
-        tc.cache_variables["SPDLOG_FMT_EXTERNAL_HO"] = True
         tc.generate()
 
     def build(self):
