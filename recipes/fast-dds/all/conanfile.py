@@ -70,6 +70,7 @@ class FastDDSConan(ConanFile):
     def requirements(self):
         self.requires("tinyxml2/9.0.0")
         self.requires("asio/1.21.0")
+        # self.requires("fast-cdr/1.0.26", transitive_headers=True, transitive_libs=True)
         self.requires("fast-cdr/1.0.26", transitive_headers=True)
         self.requires("foonathan-memory/0.7.3")
         self.requires("boost/1.75.0")  # boost/1.76 is required by version 2.3.2, boost/1.75.0 required for 2.3.3 by Windows
@@ -170,7 +171,7 @@ class FastDDSConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["fastrtps"].system_libs.extend(["rt", "dl", "atomic", "m"])
         elif self.settings.os == "Windows":
-            self.cpp_info.components["fastrtps"].system_libs.extend(["iphlpapi", "shlwapi"])
+            self.cpp_info.components["fastrtps"].system_libs.extend(["iphlpapi", "shlwapi", "mswsock", "ws2_32"])
             if self.options.shared:
                 self.cpp_info.components["fastrtps"].defines.append("FASTRTPS_DYN_LINK")
         if self.options.with_ssl:
