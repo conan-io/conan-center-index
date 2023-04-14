@@ -92,7 +92,7 @@ class LibBsdConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
 
         autotools = self._configure_autotools()
         autotools.install()
