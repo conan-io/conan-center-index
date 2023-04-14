@@ -36,7 +36,8 @@ class XnnpackConan(ConanFile):
         "sparse": True,
     }
 
-    exports_sources = "CMakeLists.txt"
+    def export_sources(self):
+        copy(self, "xnnpack_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,18 +45,10 @@ class XnnpackConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        # for plain C projects only
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -63,7 +56,9 @@ class XnnpackConan(ConanFile):
     def requirements(self):
         self.requires("cpuinfo/cci.20220228")
         self.requires("fp16/cci.20210320")
-        self.requires("pthreadpool/cci.20210218")
+        #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15      
+        self.requires("pthreadpool/cci.20210218", transitive_headers=True)
+        self.requires("fxdiv/cci.20200417")
 
     def validate(self):
         check_min_vs(self, 192)
@@ -86,6 +81,7 @@ class XnnpackConan(ConanFile):
                 # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
                 tc.variables["CONAN_XNNPACK_SYSTEM_PROCESSOR"] = "arm64"
         tc.cache_variables["XNNPACK_LIBRARY_TYPE"] = "shared" if self.options.shared else "static"
+        tc.cache_variables["CMAKE_PROJECT_XNNPACK_INCLUDE"] = os.path.join(self.source_folder, "xnnpack_project_include.cmake")
         tc.variables["XNNPACK_ENABLE_ASSEMBLY"] = self.options.assembly
         tc.variables["XNNPACK_ENABLE_MEMOPT"] = self.options.memopt
         tc.variables["XNNPACK_ENABLE_SPARSE"] = self.options.sparse
@@ -101,6 +97,16 @@ class XnnpackConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        # The CMake scripts don't use targets prefixed with `namespace::`
+        # so we can coerce CMakeDeps to define the exact target names that
+        # are expected. This works in tandem with the file
+        # `CMAKE_PROJECT_XNNPACK_INCLUDE` which ensure an early call to 
+        # the relevant `find_package`
+        deps.set_property("cpuinfo", "cmake_target_name", "cpuinfo")
+        deps.set_property("cpuinfo", "cmake_target_aliases", ["clog"] )
+        deps.set_property("pthreadpool", "cmake_target_name", "pthreadpool")
+        deps.set_property("fp16", "cmake_target_name", "fp16")
+        deps.set_property("fxdiv", "cmake_target_name", "fxdiv")
         deps.generate()
 
     def _patch_sources(self):
@@ -111,7 +117,7 @@ class XnnpackConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build(target="XNNPACK")
 
     def package(self):
