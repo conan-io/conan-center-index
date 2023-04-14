@@ -88,7 +88,7 @@ class SociConan(ConanFile):
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
         if compiler not in self._minimum_compilers_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+            self.output.warning("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
         elif compiler_version < self._minimum_compilers_version[compiler]:
             raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
