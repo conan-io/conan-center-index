@@ -384,11 +384,11 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/72.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/6.0.0")
+            self.requires("harfbuzz/7.1.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.5")
@@ -951,7 +951,7 @@ Examples = bin/datadir/examples""")
                     self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime_type = "Release/Debug"
-        if self.settings.os == "Android":
+        if self.info.settings.os == "Android":
             del self.info.options.android_sdk
 
     def package_info(self):
