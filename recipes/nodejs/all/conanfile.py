@@ -1,6 +1,5 @@
 import os
 import re
-from conans import __version__
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import copy, get
