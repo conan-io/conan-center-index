@@ -59,17 +59,13 @@ class PROPOSALConan(ConanFile):
     def requirements(self):
         # cubicinterpolation: headers are transitively included, and function calls are made
         # from implementation in headers (templates)
-        self.requires("cubicinterpolation/0.1.4", transitive_headers=True, transitive_libs=True)
+        self.requires("cubicinterpolation/0.1.5", transitive_headers=True, transitive_libs=True)
         # spdlog: requires transitive_libs due to direct calls to functionality from headers
-        self.requires("spdlog/1.9.2", transitive_headers=True, transitive_libs=True)
+        self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
         # nlohmann_json: public headers include json.hpp and json_fwd.hpp
-        self.requires("nlohmann_json/3.10.5", transitive_headers=True)
+        self.requires("nlohmann_json/3.11.2", transitive_headers=True)
         if self.options.with_python:
-            self.requires("pybind11/2.9.1")
-
-    @property
-    def _minimum_compilers_version(self):
-        return {"Visual Studio": "15", "gcc": "5", "clang": "5", "apple-clang": "5"}
+            self.requires("pybind11/2.10.1")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
