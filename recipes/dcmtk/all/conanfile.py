@@ -126,7 +126,7 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_WITH_XML"] = self.options.with_libxml2
         if self.options.with_libxml2:
             tc.variables["WITH_LIBXMLINC"] = self.dependencies["libxml2"].package_folder
-            tc.variables["WITH_LIBXML_SHARED"] = self.options["libxml2"].get_safe("shared")
+            tc.variables["WITH_LIBXML_SHARED"] = self.options["libxml2"].shared
         tc.variables["DCMTK_WITH_ZLIB"] = self.options.with_zlib
         if self.options.with_zlib:
             tc.variables["WITH_ZLIBINC"] = self.dependencies["zlib"].package_folder
