@@ -134,33 +134,6 @@ class QtConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and is_msvc(self):
-            self.tool_requires("jom/1.1.3")
-        if self.options.qtwebengine:
-            self.tool_requires("ninja/1.11.1")
-            self.tool_requires("nodejs/16.3.0")
-            self.tool_requires("gperf/3.1")
-            # gperf, bison, flex, python >= 2.7.5 & < 3
-            if self.settings.os != "Windows":
-                self.tool_requires("bison/3.8.2")
-                self.tool_requires("flex/2.6.4")
-            else:
-                self.tool_requires("winflexbison/2.5.24")
-
-        if self.options.qtwayland:
-            self.tool_requires("wayland/1.21.0")
-        if self.options.with_doubleconversion:
-            self.tool_requires("double-conversion/3.2.1")
-        if self.options.get_safe("with_icu", False):
-            self.tool_requires("icu/72.1")
-        if self.options.with_pcre2:
-            self.tool_requires("pcre2/10.42")
-        if self.options.with_zstd:
-            self.tool_requires("zstd/1.5.5")
-        if self.options.with_glib:
-            self.tool_requires("glib/2.76.1")
-
     def validate_build(self):
         if self.options.qtwebengine:
             # Check if a valid python2 is available in PATH or it will failflex
@@ -441,6 +414,22 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and is_msvc(self):
+            self.tool_requires("jom/1.1.3")
+        if self.options.qtwebengine:
+            self.tool_requires("ninja/1.11.1")
+            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("gperf/3.1")
+            # gperf, bison, flex, python >= 2.7.5 & < 3
+            if self._settings_build.os == "Windows":
+                self.tool_requires("winflexbison/2.5.24")
+            else:
+                self.tool_requires("bison/3.8.2")
+                self.tool_requires("flex/2.6.4")
+        if self.options.qtwayland:
+            self.tool_requires("wayland/1.21.0")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination="qt5")
@@ -464,8 +453,9 @@ class QtConan(ConanFile):
         ms.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate()
-        vre = VirtualRunEnv(self)
-        vre.generate()
+        if not cross_building(self):
+            vre = VirtualRunEnv(self)
+            vre.generate(scope="build")
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
@@ -530,7 +520,7 @@ class QtConan(ConanFile):
 
         elif self.settings.os == "WindowsStore":
             if is_msvc(self):
-                if self.settings.compiler == "Visual Studio":
+                if str(self.settings.compiler) == "Visual Studio":
                     msvc_version = str(self.settings.compiler.version)
                 else:
                     msvc_version = {
@@ -943,13 +933,13 @@ Examples = bin/datadir/examples""")
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
-        if self.info.options.multiconfiguration and is_msvc(self):
+        if self.info.options.multiconfiguration:
             if self.info.settings.compiler == "Visual Studio":
                 if "MD" in self.info.settings.compiler.runtime:
                     self.info.settings.compiler.runtime = "MD/MDd"
                 else:
                     self.info.settings.compiler.runtime = "MT/MTd"
-            else:
+            elif self.info.settings.compiler == "msvc":
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
