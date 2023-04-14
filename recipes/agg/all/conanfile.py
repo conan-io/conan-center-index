@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class AggConan(ConanFile):
     name = 'agg'
@@ -49,10 +49,7 @@ class AggConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        try:
-            del self.options.fPIC
-        except Exception:
-            pass
+        self.options.sm_safe("fPIC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
