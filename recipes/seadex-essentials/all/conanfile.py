@@ -24,6 +24,7 @@ class SeadexEssentialsConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "fmt/*:header_only": True,
         "spdlog/*:header_only": True
     }
 
@@ -50,7 +51,6 @@ class SeadexEssentialsConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.options["fmt/*"].header_only = True
-        self.options["spdlog/*"].fmt_external = True
         self.options["spdlog/*"].header_only = True
 
     def requirements(self):
