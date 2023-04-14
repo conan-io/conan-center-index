@@ -23,9 +23,7 @@ class SeadexEssentialsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "fmt/*:header_only": True,
-        "spdlog/*:header_only": True
+        "fPIC": True
     }
 
     @property
@@ -89,6 +87,7 @@ class SeadexEssentialsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["ESS_BUILD_UNIT_TESTS"] = False
         tc.cache_variables["SPDLOG_FMT_EXTERNAL"] = True
+        tc.cache_variables["SPDLOG_FMT_EXTERNAL_HO "] = True
         tc.generate()
 
     def build(self):
