@@ -42,8 +42,14 @@ class LibBsdConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
     
     def generate(self):
         if not cross_building(self):
@@ -86,7 +92,8 @@ class LibBsdConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self._source_subfolder, dst="licenses")
+        copy(self, "COPYING", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+
         autotools = self._configure_autotools()
         autotools.install()
 
