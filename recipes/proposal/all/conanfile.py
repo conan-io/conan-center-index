@@ -1,8 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, rmdir, copy
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class PROPOSALConan(ConanFile):
@@ -10,6 +15,7 @@ class PROPOSALConan(ConanFile):
     homepage = "https://github.com/tudo-astroparticlephysics/PROPOSAL"
     license = "LGPL-3.0"
     exports_sources = "CMakeLists.txt"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     description = "monte Carlo based lepton and photon propagator"
     topics = ("propagator", "lepton", "photon", "stochastic")
@@ -26,29 +32,28 @@ class PROPOSALConan(ConanFile):
         "with_python": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
+    generators = "CMakeDeps"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("cubicinterpolation/0.1.4")
-        self.requires("spdlog/1.9.2")
-        self.requires("nlohmann_json/3.10.5")
+        # cubicinterpolation: headers are transitively included, and function calls are made
+        # from implementation in headers (templates)
+        self.requires("cubicinterpolation/0.1.4", transitive_headers=True, transitive_libs=True)
+        # spdlog: requires transitive_libs due to direct calls to functionality from headers
+        self.requires("spdlog/1.9.2", transitive_headers=True, transitive_libs=True)
+        # nlohmann_json: public headers include json.hpp and json_fwd.hpp
+        self.requires("nlohmann_json/3.10.5", transitive_headers=True)
         if self.options.with_python:
             self.requires("pybind11/2.9.1")
 
@@ -57,48 +62,45 @@ class PROPOSALConan(ConanFile):
         return {"Visual Studio": "15", "gcc": "5", "clang": "5", "apple-clang": "5"}
 
     def validate(self):
-        if self._is_msvc and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Can not build shared library on Visual Studio."
             )
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+            check_min_cppstd(self, "14")
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False
         )
         if not minimum_version:
-            self.output.warn(
+            self.output.warning(
                 "PROPOSAL requires C++14. Your compiler is unknown. Assuming it supports C++14."
             )
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
+        elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 "PROPOSAL requires gcc >= 5, clang >= 5 or Visual Studio >= 15 as a compiler!"
             )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_PYTHON"] = self.options.with_python
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        self._cmake.configure()
-        return self._cmake
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_PYTHON"] = self.options.with_python
+        tc.cache_variables["BUILD_DOCUMENTATION"] = False
+        tc.generate()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PROPOSAL")
