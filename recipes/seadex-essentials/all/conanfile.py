@@ -4,7 +4,7 @@ from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.files import export_conandata_patches, get, copy, rename
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=1.53.0"
@@ -49,6 +49,7 @@ class SeadexEssentialsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["fmt/*"].header_only = True
         self.options["spdlog/*"].header_only = True
 
     def requirements(self):
@@ -81,7 +82,7 @@ class SeadexEssentialsConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
         if not self.dependencies["spdlog"].options.header_only:
-            raise ConanInvalidConfiguration()
+            raise ConanInvalidConfiguration("Spdlog must be header only!")
 
     def generate(self):
         tc = CMakeToolchain(self)
