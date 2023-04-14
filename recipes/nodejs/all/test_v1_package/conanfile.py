@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import can_run
+from conan.tools.build import cross_building
 
 
 class TestPackageConan(ConanFile):
@@ -11,6 +11,6 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def test(self):
-        if can_run(self):
+        if not cross_building(self):
             self.output.info("Node version:")
             self.run("node --version")
