@@ -220,7 +220,8 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}")
+            # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
+            self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True)
         if self.options.with_ade:
             self.requires("ade/0.1.2a")
 
@@ -245,8 +246,7 @@ class OpenCVConan(ConanFile):
                 self.tool_requires(f"protobuf/{self._protobuf_version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
 
         get(self, **self.conan_data["sources"][self.version][1],
             destination=self._contrib_folder, strip_root=True)
