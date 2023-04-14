@@ -1,8 +1,9 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.3"
 
 
 class SysConfigGLUConan(ConanFile):
@@ -20,7 +21,9 @@ class SysConfigGLUConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("opengl/system")
+        # - glu headers include opengl headers
+        # - on Apple OS, glu is part of OpenGL framework, already managed by opengl recipe
+        self.requires("opengl/system", transitive_headers=True, transitive_libs=is_apple_os(self))
 
     def package_id(self):
         self.info.clear()
