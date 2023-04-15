@@ -1,4 +1,4 @@
 sources:
   "1.0":
-    url: "https://github.com/bennyhuo/tinycthreadpool/archive/refs/tags/1.0.tar.gz"
-    sha256: "2a144e883251dc63179990e671b5a9ce3ebaf42186471baee00ecad322dd2fd9"
+    url: "https://github.com/bennyhuo/tinycthreadpool/archive/refs/tags/v1.0.tar.gz"
+    sha256: "a3e9876d3e3008cffed96216d026504b57ab6be6ee3df62d5916fecd4106ede5"

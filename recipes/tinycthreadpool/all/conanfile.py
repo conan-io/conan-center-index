@@ -41,6 +41,9 @@ class TinyCThreadPoolConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("tinycthread/cci.20161001", transitive_headers=True)
+
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
