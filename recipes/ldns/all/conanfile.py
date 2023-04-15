@@ -64,13 +64,16 @@ class LdnsConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
-        # This fixes the issue of linking against ldns in combination of openssl:shared=False, ldns:shared=True, and an older GCC:
-        # > hidden symbol `pthread_atfork' in /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a(pthread_atfork.oS) is referenced by DSO
-        # OpenSSL adds -lpthread to link POSIX thread library explicitly. That is not correct because using the library
-        # may require setting various defines on compilation as well. The compiler has a dedicated -pthread option for that.
         tc = AutotoolsDeps(self)
-        tc.environment.remove("LIBS", "-lpthread")
-        tc.environment.append("CFLAGS", "-pthread")
+        try:
+            # This fixes an issue of linking against ldns in combination of openssl:shared=False, ldns:shared=True, and an older GCC:
+            # > hidden symbol `pthread_atfork' in /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a(pthread_atfork.oS) is referenced by DSO
+            # OpenSSL adds -lpthread to link with POSIX thread library. Instead, it should use -pthread compiler flag which additionally
+            # sets required macros at compile time.
+            tc.environment.remove("LIBS", "-lpthread")
+            tc.environment.append("CFLAGS", "-pthread")
+        except ValueError:
+            pass
         tc.generate()
 
         tc = AutotoolsToolchain(self)
