@@ -476,10 +476,18 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
         if self._settings_build.os == "Macos":
-            save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % env.vars(self).get("DYLD_LIBRARY_PATH"))
+            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
+            dyld_library_path = "$DYLD_LIBRARY_PATH"
+            dyld_library_path_build = vbe.vars().get("DYLD_LIBRARY_PATH")
+            if dyld_library_path_build:
+                dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
+            if not cross_building(self):
+                dyld_library_path_host = vre.vars().get("DYLD_LIBRARY_PATH")
+                if dyld_library_path_host:
+                    dyld_library_path = f"{dyld_library_path_host}:{dyld_library_path}"
+            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
-        envvars = env.vars(self)
-        envvars.save_script("my_env_file")
+        env.vars(self).save_script("conan_qt_env_file")
 
     def _make_program(self):
         if is_msvc(self):
