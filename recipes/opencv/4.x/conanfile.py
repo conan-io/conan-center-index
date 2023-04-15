@@ -1325,99 +1325,27 @@ class OpenCVConan(ConanFile):
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
         # Main modules
-        tc.variables["BUILD_opencv_calib3d"] = self.options.calib3d
         tc.variables["BUILD_opencv_core"] = True
-        tc.variables["BUILD_opencv_dnn"] = self.options.dnn
+        for module in OPENCV_MAIN_MODULES_OPTIONS:
+            tc.variables[f"BUILD_opencv_{module}"] = self.options.get_safe(module, False)
         tc.variables["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
-        tc.variables["BUILD_opencv_features2d"] = self.options.features2d
-        tc.variables["BUILD_opencv_flann"] = self.options.flann
-        tc.variables["BUILD_opencv_gapi"] = self.options.gapi
         tc.variables["WITH_ADE"] = self.options.gapi
-        tc.variables["BUILD_opencv_highgui"] = self.options.highgui
-        tc.variables["BUILD_opencv_imgcodecs"] = self.options.imgcodecs
-        tc.variables["BUILD_opencv_imgproc"] = self.options.imgproc
-        tc.variables["BUILD_opencv_ml"] = self.options.ml
-        tc.variables["BUILD_opencv_objdetect"] = self.options.objdetect
         if self.options.objdetect:
             tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
-        tc.variables["BUILD_opencv_photo"] = self.options.photo
-        tc.variables["BUILD_opencv_stitching"] = self.options.stitching
-        tc.variables["BUILD_opencv_video"] = self.options.video
-        tc.variables["BUILD_opencv_videoio"] = self.options.videoio
-        tc.variables["BUILD_opencv_world"] = self.options.world
 
         # Extra modules
         tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
-        if self._has_alphamat_option:
-            tc.variables["BUILD_opencv_alphamat"] = self.options.alphamat
-        tc.variables["BUILD_opencv_aruco"] = self.options.aruco
-        if self._has_barcode_option:
-            tc.variables["BUILD_opencv_barcode"] = self.options.barcode
-        tc.variables["BUILD_opencv_bgsegm"] = self.options.bgsegm
-        tc.variables["BUILD_opencv_bioinspired"] = self.options.bioinspired
-        tc.variables["BUILD_opencv_ccalib"] = self.options.ccalib
-        tc.variables["BUILD_opencv_cnn_3dobj"] = False
-        tc.variables["BUILD_opencv_cudaarithm"] = self.options.cudaarithm
-        tc.variables["BUILD_opencv_cudabgsegm"] = self.options.cudabgsegm
-        tc.variables["BUILD_opencv_cudacodec"] = self.options.cudacodec
-        tc.variables["BUILD_opencv_cudafeatures2d"] = self.options.cudafeatures2d
-        tc.variables["BUILD_opencv_cudafilters"] = self.options.cudafilters
-        tc.variables["BUILD_opencv_cudaimgproc"] = self.options.cudaimgproc
-        tc.variables["BUILD_opencv_cudalegacy"] = self.options.cudalegacy
-        tc.variables["BUILD_opencv_cudaobjdetect"] = self.options.cudaobjdetect
-        tc.variables["BUILD_opencv_cudaoptflow"] = self.options.cudaoptflow
-        tc.variables["BUILD_opencv_cudastereo"] = self.options.cudastereo
-        tc.variables["BUILD_opencv_cudawarping"] = self.options.cudawarping
         tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
-        tc.variables["BUILD_opencv_cvv"] = self.options.cvv
-        tc.variables["BUILD_opencv_datasets"] = self.options.datasets
-        tc.variables["BUILD_opencv_dnn_objdetect"] = self.options.dnn_objdetect
-        tc.variables["BUILD_opencv_dnn_superres"] = self.options.dnn_superres
-        tc.variables["BUILD_opencv_dpm"] = self.options.dpm
-        tc.variables["BUILD_opencv_face"] = self.options.face
-        tc.variables["BUILD_opencv_freetype"] = self.options.freetype
-        tc.variables["BUILD_opencv_fuzzy"] = self.options.fuzzy
-        tc.variables["BUILD_opencv_hdf"] = self.options.hdf
-        tc.variables["BUILD_opencv_hfs"] = self.options.hfs
-        tc.variables["BUILD_opencv_img_hash"] = self.options.img_hash
-        if self._has_intensity_transform_option:
-            tc.variables["BUILD_opencv_intensity_transform"] = self.options.intensity_transform
+        for module in OPENCV_EXTRA_MODULES_OPTIONS:
+            tc.variables[f"BUILD_opencv_{module}"] = self.options.get_safe(module, False)
+        tc.variables["BUILD_opencv_cnn_3dobj"] = False
         if Version(self.version) >= "4.4.0":
             tc.variables["BUILD_opencv_julia"] = False
-        tc.variables["BUILD_opencv_line_descriptor"] = self.options.line_descriptor
         tc.variables["BUILD_opencv_matlab"] = False
-        if self._has_mcc_option:
-            tc.variables["BUILD_opencv_mcc"] = self.options.mcc
-        tc.variables["BUILD_opencv_optflow"] = self.options.optflow
-        tc.variables["BUILD_opencv_ovis"] = self.options.ovis
-        tc.variables["BUILD_opencv_phase_unwrapping"] = self.options.phase_unwrapping
-        tc.variables["BUILD_opencv_plot"] = self.options.plot
-        tc.variables["BUILD_opencv_quality"] = self.options.quality
-        if self._has_rapid_option:
-            tc.variables["BUILD_opencv_rapid"] = self.options.rapid
-        tc.variables["BUILD_opencv_reg"] = self.options.reg
-        tc.variables["BUILD_opencv_rgbd"] = self.options.rgbd
-        tc.variables["BUILD_opencv_saliency"] = self.options.saliency
-        tc.variables["BUILD_opencv_sfm"] = self.options.sfm
-        tc.variables["BUILD_opencv_shape"] = self.options.shape
-        tc.variables["BUILD_opencv_stereo"] = self.options.stereo
-        tc.variables["BUILD_opencv_structured_light"] = self.options.structured_light
-        tc.variables["BUILD_opencv_superres"] = self.options.get_safe("superres", False)
-        tc.variables["BUILD_opencv_surface_matching"] = self.options.surface_matching
-        tc.variables["BUILD_opencv_text"] = self.options.text
         if self.options.text:
             tc.variables["WITH_TESSERACT"] = self.options.with_tesseract
-        tc.variables["BUILD_opencv_tracking"] = self.options.tracking
-        tc.variables["BUILD_opencv_videostab"] = self.options.videostab
-        tc.variables["BUILD_opencv_viz"] = self.options.viz
-        if self._has_wechat_qrcode_option:
-            tc.variables["BUILD_opencv_wechat_qrcode"] = self.options.wechat_qrcode
-        tc.variables["BUILD_opencv_xfeatures2d"] = self.options.xfeatures2d
-        tc.variables["BUILD_opencv_ximgproc"] = self.options.ximgproc
-        tc.variables["BUILD_opencv_xobjdetect"] = self.options.xobjdetect
-        tc.variables["BUILD_opencv_xphoto"] = self.options.xphoto
 
         if self.options.get_safe("with_jpeg2000") == "openjpeg":
             openjpeg_version = Version(self.dependencies["openjpeg"].ref.version)
