@@ -1012,7 +1012,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.7.0")
+            self.requires("onetbb/2021.8.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         # dnn module dependencies
@@ -1027,7 +1027,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.8")
+            self.requires("qt/5.15.9")
         # imgcodecs module dependencies
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
@@ -1050,7 +1050,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gdal"):
             self.requires("gdal/3.5.2")
         if self.options.get_safe("with_gdcm"):
-            self.requires("gdcm/3.0.20")
+            self.requires("gdcm/3.0.21")
         # objdetect module dependencies
         if self.options.get_safe("with_quirc"):
             self.requires("quirc/1.1")
@@ -1061,7 +1061,7 @@ class OpenCVConan(ConanFile):
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/6.0.0")
+            self.requires("harfbuzz/7.1.0")
         # hdf module dependencies
         if self.options.hdf:
             self.requires("hdf5/1.14.0")
