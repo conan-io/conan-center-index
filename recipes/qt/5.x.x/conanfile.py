@@ -1422,7 +1422,7 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
                 if self.options.widgets:
-                    self.cpp_info.components["qtWidgets"].system_libs.append("UxTheme")
+                    self.cpp_info.components["qtWidgets"].system_libs.append("uxtheme")
                     self.cpp_info.components["qtWidgets"].system_libs.append("dwmapi")
                 if self.options.get_safe("qtwinextras"):
                     self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
