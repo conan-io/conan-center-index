@@ -92,10 +92,14 @@ class EasyProfilerConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE.MIT", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE.APACHE", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "LICENSE.MIT", self.package_folder)
+        rm(self, "LICENSE.APACHE", self.package_folder)
         if self.settings.os == "Windows":
             for dll_prefix in ["concrt", "msvcp", "vcruntime"]:
                 rm(self, "{}*.dll".format(dll_prefix), os.path.join(self.package_folder, "bin"))
