@@ -233,10 +233,13 @@ class OnnxRuntimeConan(ConanFile):
 
         self.cpp_info.includedirs.append("include/onnxruntime/core/session")
 
-        if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
+        if self.settings.os in {"Linux", "Android", "FreeBSD", "SunOS", "AIX"}:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
         if is_apple_os(self):
             self.cpp_info.frameworks.append("Foundation")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("shlwapi")
 
+        # https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L1584
         self.cpp_info.set_property("pkg_config_name", "onnxruntime")
