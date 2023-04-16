@@ -66,7 +66,7 @@ class EasyProfilerConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-        if is_msvc_static_runtime(self) and self.options.shared and Version(self.settings.compiler.version) >= "15":
+        if is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "{} {} with static runtime not supported".format(self.settings.compiler,
                                                                  self.settings.compiler.version)
