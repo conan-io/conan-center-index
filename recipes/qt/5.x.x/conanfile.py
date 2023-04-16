@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -14,7 +15,7 @@ import os
 import textwrap
 import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.59.0"
 
 
 class QtConan(ConanFile):
@@ -69,6 +70,7 @@ class QtConan(ConanFile):
         "gui": [True, False],
         "widgets": [True, False],
 
+        "android_sdk": [None, "ANY"],
         "device": [None, "ANY"],
         "cross_compile": [None, "ANY"],
         "sysroot": [None, "ANY"],
@@ -111,6 +113,7 @@ class QtConan(ConanFile):
         "gui": True,
         "widgets": True,
 
+        "android_sdk": None,
         "device": None,
         "cross_compile": None,
         "sysroot": None,
@@ -154,9 +157,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.tool_requires("pcre2/10.42")
         if self.options.with_zstd:
-            self.tool_requires("zstd/1.5.4")
+            self.tool_requires("zstd/1.5.5")
         if self.options.with_glib:
-            self.tool_requires("glib/2.75.3")
+            self.tool_requires("glib/2.76.1")
 
     def validate_build(self):
         if self.options.qtwebengine:
@@ -224,6 +227,9 @@ class QtConan(ConanFile):
 
         if self.settings.os != "Macos":
             del self.options.qtmacextras
+
+        if self.settings.os != "Android":
+            del self.options.android_sdk
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -313,8 +319,11 @@ class QtConan(ConanFile):
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
-        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+        if self.settings.os == "Android":
+            if self.options.get_safe("opengl", "no") == "desktop":
+                raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+            if not self.options.get_safe("android_sdk", ""):
+                raise ConanInvalidConfiguration("Path to Android SDK is required to build Qt")
 
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
@@ -349,7 +358,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
-        if cross_building(self) and self.options.cross_compile == "None" and not is_apple_os(self):
+        if cross_building(self) and self.options.cross_compile == "None" and not is_apple_os(self) and self.settings.os != "Android":
             raise ConanInvalidConfiguration("option cross_compile must be set for cross compilation "
                                             "cf https://doc.qt.io/qt-5/configure-options.html#cross-compilation-options")
 
@@ -363,36 +372,36 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.224.0")
+            self.requires("vulkan-loader/1.3.239.0")
             if is_apple_os(self):
-                self.requires("moltenvk/1.1.10")
+                self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.75.3")
+            self.requires("glib/2.76.1")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.2.1")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/72.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/5.3.1")
+            self.requires("harfbuzz/7.1.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.4")
+                self.requires("libjpeg-turbo/2.1.5")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.39.4")
+            self.requires("sqlite3/3.41.1")
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
@@ -406,7 +415,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.5.0")
             self.requires("opus/1.3.1")
@@ -428,7 +437,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.46.0")
+            self.requires("at-spi2-core/2.47.1")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -465,6 +474,8 @@ class QtConan(ConanFile):
         if self._settings_build.os == "Macos":
             save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % env.vars(self).get("DYLD_LIBRARY_PATH"))
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
+        envvars = env.vars(self)
+        envvars.save_script("my_env_file")
 
     def _make_program(self):
         if is_msvc(self):
@@ -727,16 +738,15 @@ class QtConan(ConanFile):
                 args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
-            args += ["-android-abis %s" % {"armv7": "armeabi-v7a",
-                                           "armv8": "arm64-v8a",
-                                           "x86": "x86",
-                                           "x86_64": "x86_64"}.get(str(self.settings.arch))]
+            args += [f"-android-abis {android_abi(self)}"]
 
         if self.settings.get_safe("compiler.libcxx") == "libstdc++":
             args += ["-D_GLIBCXX_USE_CXX11_ABI=0"]
         elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
             args += ["-D_GLIBCXX_USE_CXX11_ABI=1"]
 
+        if self.options.get_safe("android_sdk", ""):
+            args += [f"-android-sdk {self.options.android_sdk}"]
         if self.options.sysroot:
             args += [f"-sysroot {self.options.sysroot}"]
 
@@ -941,6 +951,8 @@ Examples = bin/datadir/examples""")
                     self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime_type = "Release/Debug"
+        if self.info.settings.os == "Android":
+            del self.info.options.android_sdk
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
@@ -958,6 +970,8 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(module)
 
         libsuffix = ""
+        if self.settings.os == "Android":
+            libsuffix = f"_{android_abi(self)}"
         if not self.options.multiconfiguration:
             if self.settings.build_type == "Debug":
                 if self.settings.os == "Windows" and is_msvc(self):
@@ -1430,8 +1444,9 @@ Examples = bin/datadir/examples""")
                     self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
                 if not self.options.openssl: # with SecureTransport
                     self.cpp_info.components["qtNetwork"].frameworks.append("Security")
-            if self.settings.os == "Macos":
+            if self.settings.os == "Macos" or (self.settings.os == "iOS" and Version(self.settings.compiler.version) >= "14.0"):
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
+            if self.settings.os == "Macos":
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
