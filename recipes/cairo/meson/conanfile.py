@@ -103,13 +103,13 @@ class CairoConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.93")
         if self.options.with_png:
             self.requires("libpng/1.6.39")
         if self.options.with_glib:
-            self.requires("glib/2.75.2")
+            self.requires("glib/2.76.1")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
