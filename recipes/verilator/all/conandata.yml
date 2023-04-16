@@ -29,4 +29,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-add-msvc_link-sh.patch"
       base_path: "source_subfolder"
-
