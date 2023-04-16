@@ -39,7 +39,9 @@ class RestinioConan(ConanFile):
     def requirements(self):
         self.requires("http_parser/2.9.4")
 
-        if Version(self.version) >= "0.6.16":
+        if Version(self.version) >= "0.6.17":
+            self.requires("fmt/9.1.0")
+        elif Version(self.version) >= "0.6.16":
             self.requires("fmt/9.0.0")
         else:
             self.requires("fmt/8.1.1")
