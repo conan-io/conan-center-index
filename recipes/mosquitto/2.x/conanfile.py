@@ -131,9 +131,8 @@ class Mosquitto(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "edl-v10", src=self.source_folder, dst="licenses")
-        copy(self, "epl-v20", src=self.source_folder, dst="licenses")
-        copy(self, "LICENSE.txt", src=self.source_folder, dst="licenses")
+        for license_file in ("LICENSE.txt", "edl-v10", "epl-v20"):
+            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
