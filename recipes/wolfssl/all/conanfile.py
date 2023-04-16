@@ -125,7 +125,7 @@ class WolfSSLConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", f"{ar_wrapper} lib")
         tc.generate(env)
 
     def build(self):
