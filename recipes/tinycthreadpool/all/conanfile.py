@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
