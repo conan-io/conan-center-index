@@ -33,12 +33,8 @@ class CloveUnitConan(ConanFile):
         apply_conandata_patches(self)
 
     def package(self):
-        #copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="clove-unit.h", 
-             dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include")
-        )
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "clove-unit.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_id(self):
         self.info.clear()
