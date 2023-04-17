@@ -1,10 +1,12 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import pathlib
+import yaml
 
 required_conan_version = ">=1.52.0"
 
@@ -43,6 +45,12 @@ class DoxygenConan(ConanFile):
             "msvc": "191",
         }
 
+    @property
+    def _conan_home(self):
+        conan_home_env = "CONAN_USER_HOME" if Version(conan_version).major < 2 else "CONAN_HOME"
+        conan_home_dir = ".conan" if Version(conan_version).major < 2 else ".conan2"
+        return os.environ.get(conan_home_env, pathlib.Path(pathlib.Path.home(), conan_home_dir))
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -55,10 +63,17 @@ class DoxygenConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def package_id(self):
-        del self.info.settings.compiler
+        self.info.requires.full_version_mode()
 
     def compatibility(self):
-        return [{"settings": [("build_type", "Release")]}]
+        # is there a better way of reading all possible versions from settings.yml?
+        settings_yml_path = pathlib.Path(self._conan_home, "settings.yml")
+        with open(settings_yml_path, "r") as f:
+            settings_yml = yaml.safe_load(f)
+
+        compatible_versions = [{"settings": [("compiler.version", v), ("build_type", "Release")]}
+            for v in settings_yml["compiler"][str(self.settings.compiler)]["version"] if v <= Version(self.settings.compiler.version)]
+        return compatible_versions
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
