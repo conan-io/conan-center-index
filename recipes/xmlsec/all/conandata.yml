@@ -1,10 +1,10 @@
 sources:
   "1.2.32":
-    url: "http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.32.tar.gz"
+    url: "https://www.aleksey.com/xmlsec/download/older-releases/xmlsec1-1.2.32.tar.gz"
     sha256: "e383702853236004e5b08e424b8afe9b53fe9f31aaa7a5382f39d9533eb7c043"
   "1.2.31":
-    url: "http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.31.tar.gz"
+    url: "http://www.aleksey.com/xmlsec/download/older-releases/xmlsec1-1.2.31.tar.gz"
     sha256: "9b10bc52cc31e4f76162e3975e50db26b71ab49c571d810b311ca626be5a0b26"
   "1.2.30":
-    url: "http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.30.tar.gz"
+    url: "http://www.aleksey.com/xmlsec/download/older-releases/xmlsec1-1.2.30.tar.gz"
     sha256: "2d84360b03042178def1d9ff538acacaed2b3a27411db7b2874f1612ed71abc8"
