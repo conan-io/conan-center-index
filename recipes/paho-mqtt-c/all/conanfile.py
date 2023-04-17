@@ -14,6 +14,7 @@ class PahoMqttcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("mqtt", "iot", "eclipse", "ssl", "tls", "paho")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -55,14 +56,12 @@ class PahoMqttcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1s")
+            # Headers are exposed https://github.com/eclipse/paho.mqtt.c/blob/f7799da95e347bbc930b201b52a1173ebbad45a7/src/SSLSocket.h#L29
+            self.requires("openssl/1.1.1t", transitive_headers=True)
 
     def validate(self):
         if not self.options.shared and Version(self.version) < "1.3.4":
             raise ConanInvalidConfiguration(f"{self.ref} does not support static linking")
-
-    def package_id(self):
-        del self.info.options.samples
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

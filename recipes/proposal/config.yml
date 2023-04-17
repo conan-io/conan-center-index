@@ -1,27 +1,29 @@
 versions:
-  "7.0.2":
+  "7.5.1":
     folder: all
-  "7.0.4":
-    folder: all
-  "7.0.5":
-    folder: all
-  "7.0.7":
-    folder: all
-  "7.1.0":
-    folder: all
-  "7.1.1":
-    folder: all
-  "7.2.1":
-    folder: all
-  "7.3.0":
-    folder: all
-  "7.3.1":
-    folder: all
-  "7.4.0":
-    folder: all
-  "7.4.1":
+  "7.5.0":
     folder: all
   "7.4.2":
     folder: all
-  "7.5.0":
+  "7.4.1":
+    folder: all
+  "7.4.0":
+    folder: all
+  "7.3.1":
+    folder: all
+  "7.3.0":
+    folder: all
+  "7.2.1":
+    folder: all
+  "7.1.1":
+    folder: all
+  "7.1.0":
+    folder: all
+  "7.0.7":
+    folder: all
+  "7.0.5":
+    folder: all
+  "7.0.4":
+    folder: all
+  "7.0.2":
     folder: all
