@@ -208,6 +208,7 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["ENABLED_PROFILING"] = False
         tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
         tc.cache_variables["WIX_DIR"] = False
+        tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
 
         tc.cache_variables["WITH_LZ4"] = "system"
 
