@@ -16,14 +16,13 @@ class DBCpppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xR3b0rn/dbcppp"
     topics = ("can", "dbc", "network")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "with_tools": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "with_tools": False,
     }
@@ -50,7 +49,6 @@ class DBCpppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["boost"].header_only = True
 
     def layout(self):
         cmake_layout(self)
@@ -61,9 +59,6 @@ class DBCpppConan(ConanFile):
         self.requires("boost/1.80.0")
 
     def validate(self):
-        if self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not currently support {self.ref}:shared=True")
-
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         check_min_vs(self, 191)
@@ -75,12 +70,10 @@ class DBCpppConan(ConanFile):
                 )
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)],destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.variables["build_tests"] = False
         tc.variables["build_examples"] = False
         tc.variables["build_tools"] = self.options.with_tools
@@ -108,4 +101,5 @@ class DBCpppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libdbcppp"]
-        self.env_info.path.append(os.path.join(self.package_folder, "bin"))
+        if self.info.option.with_tools:
+            self.env_info.path.append(os.path.join(self.package_folder, "bin"))
