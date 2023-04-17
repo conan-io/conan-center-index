@@ -90,7 +90,7 @@ patches:
       patch_source: "https://github.com/boostorg/filesystem/issues/250"
     - patch_file: "patches/1.80.0-0005-config-libcpp15.patch"
       patch_description: "Support for libcpp15 which removes std::unary_function and std::binary_function."
-      patch_type: "official"
+      patch_type: "portability"
       patch_source: "https://www.boost.org/patches/1_80_0/0005-config-libcpp15.patch"
     - patch_file: "patches/1.80.0-0006-unordered-msvc-rtcc.patch"
       patch_description: "Fix MSVC /RTCc build runtime failures."
