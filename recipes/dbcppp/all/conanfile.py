@@ -101,5 +101,5 @@ class DBCpppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libdbcppp"]
-        if self.info.options.with_tools:
+        if self.options.with_tools:
             self.env_info.path.append(os.path.join(self.package_folder, "bin"))
