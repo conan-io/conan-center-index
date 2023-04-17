@@ -24,7 +24,7 @@ class arg_routerRecipe(ConanFile):
     no_copy_source = True
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd")
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
 
     def source(self):
