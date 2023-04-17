@@ -121,6 +121,8 @@ class UniAlgoConan(ConanFile):
                     self.cpp_info.libs = [f"{self.name}-debug"]
             else:
                 self.cpp_info.libs = [f"{self.name}"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # see https://github.com/uni-algo/uni-algo/blob/v0.7.1/CMakeLists.txt#L75-L109
         self.cpp_info.set_property("cmake_file_name", f"{self.name}")
