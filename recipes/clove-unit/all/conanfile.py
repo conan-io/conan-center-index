@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.layout import basic_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import export_conandata_patches, get, copy
 import os
 
 required_conan_version = ">=1.43.0"
@@ -22,10 +22,10 @@ class CloveUnitConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-       basic_layout(self, src_folder=".")
+        basic_layout(self, src_folder="src")
 
     def source(self):
-       get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         #copy(pattern="LICENSE", dst="licenses", src=self.source_folder)
