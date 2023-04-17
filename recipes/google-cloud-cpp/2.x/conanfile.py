@@ -27,10 +27,10 @@ class GoogleCloudCppConan(ConanFile):
     )
     homepage = "https://github.com/googleapis/google-cloud-cpp"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "CMakeToolchain"
 
     short_paths = True
 
@@ -78,6 +78,17 @@ class GoogleCloudCppConan(ConanFile):
             and Version(self.settings.compiler.version) < "5.4"
         ):
             raise ConanInvalidConfiguration("Building requires GCC >= 5.4")
+
+        if self.info.options.shared and \
+           (not self.dependencies["protobuf"].options.shared or \
+            not self.dependencies["googleapis"].options.shared or \
+            not self.dependencies["grpc-proto"].options.shared or \
+            not self.dependencies["grpc"].options.shared):
+            raise ConanInvalidConfiguration(
+                "If built as shared, protobuf, googleapis, grpc-proto, and grpc must be shared as well."
+                " Please, use `protobuf/*:shared=True`, `googleapis/*:shared=True`, `grpc-proto/*:shared=True`,"
+                " and `grpc/*:shared=True`",
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
