@@ -13,7 +13,7 @@ requirements:
     NGHTTP2:    ["libnghttp2/1.51.0"]
     PCRE:       ["pcre/8.45"]
     PNG:        ["libpng/1.6.39"]
-    PROTOBUF:   ["protobuf/3.21.4"]
+    PROTOBUF:   ["protobuf/3.21.9"]
     SQLITE3:    ["sqlite3/3.41.1"]
     TIFF:       ["libtiff/4.4.0"]
     XML:        ["libxml2/2.10.3"]
