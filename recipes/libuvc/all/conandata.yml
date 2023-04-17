@@ -4,7 +4,9 @@ sources:
     sha256: "42175a53c1c704365fdc782b44233925e40c9344fbb7f942181c1090f06e2873"
 patches:
   "0.0.6":
-    - patch_file: "patches/0001-adjust-libusb.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-adjust-libusb-libjpeg.patch"
+      patch_description: "Robust discovery and injection of libusb & libjpeg"
+      patch_type: "conan"
     - patch_file: "patches/0002-adjust-install-folder.patch"
-      base_path: "source_subfolder"
+      patch_description: "Install to standard layout"
+      patch_type: "conan"

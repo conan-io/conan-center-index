@@ -1,7 +1,10 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class GainputConan(ConanFile):
@@ -22,16 +25,8 @@ class GainputConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,35 +34,39 @@ class GainputConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["GAINPUT_SAMPLES"] = False
-        cmake.definitions["GAINPUT_TESTS"] = False
-        cmake.definitions["GAINPUT_BUILD_SHARED"] = self.options.shared
-        cmake.definitions["GAINPUT_BUILD_STATIC"] = not self.options.shared
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["GAINPUT_SAMPLES"] = False
+        tc.variables["GAINPUT_TESTS"] = False
+        tc.variables["GAINPUT_BUILD_SHARED"] = self.options.shared
+        tc.variables["GAINPUT_BUILD_STATIC"] = not self.options.shared
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -78,8 +77,8 @@ class GainputConan(ConanFile):
             self.cpp_info.system_libs.extend(["xinput", "ws2_32"])
         elif self.settings.os == "Android":
             self.cpp_info.system_libs.extend(["native_app_glue", "log", "android"])
-        elif tools.is_apple_os(self.settings.os):
-            self.cpp_info.frameworks.extend(["Foundation", "IOKit", "GameController"])
+        elif is_apple_os(self):
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "Foundation", "IOKit", "GameController"])
             if self.settings.os == "iOS":
                 self.cpp_info.frameworks.extend(["UIKit", "CoreMotion"])
             else:

@@ -3,21 +3,22 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class BenchmarkConan(ConanFile):
     name = "benchmark"
     description = "A microbenchmark support library."
-    topics = ("benchmark", "google", "microbenchmark")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://github.com/google/benchmark"
-    license = "Apache-2.0"
+    topics = ("google", "microbenchmark")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,23 +39,33 @@ class BenchmarkConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= "12":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio <= 12")
-        if Version(self.version) < "1.7.0" and is_msvc(self) and self.info.options.shared:
+        check_min_vs(self, "190")
+        if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
+    def _cmake_new_enough(self, required_version):
+        try:
+            import re
+            from io import StringIO
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.7.1" and not self._cmake_new_enough("3.16.3"):
+            self.tool_requires("cmake/3.25.3")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -97,7 +108,7 @@ class BenchmarkConan(ConanFile):
         if Version(self.version) >= "1.7.0" and not self.options.shared:
             self.cpp_info.components["_benchmark"].defines.append("BENCHMARK_STATIC_DEFINE")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt", "m"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["_benchmark"].system_libs.append("shlwapi")
         elif self.settings.os == "SunOS":

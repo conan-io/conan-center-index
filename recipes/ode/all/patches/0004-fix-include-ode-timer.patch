@@ -1,0 +1,11 @@
+--- a/ode/src/timer.cpp
++++ b/ode/src/timer.cpp
+@@ -197,7 +197,7 @@ static inline void getClockCount (unsigned long cc[2])
+ #else // macintosh
+ 
+ #include <CoreServices/CoreServices.h>
+-#include <ode/Timer.h>
++#include <ode/timer.h>
+ 
+ static inline void getClockCount (unsigned long cc[2])
+ {

@@ -1,7 +1,7 @@
 sources:
-  "cci.20200514":
-    url: "https://github.com/Maratyszcza/FP16/archive/4dfe081cf6bcd15db339cf2680b9281b8451eeb3.zip"
-    sha256: "d973501a40c55126b31accc2d9f08d931ec3cc190c0430309a5e341d3c0ce32a"
   "cci.20210320":
     url: "https://github.com/Maratyszcza/FP16/archive/0a92994d729ff76a58f692d3028ca1b64b145d91.zip"
     sha256: "e66e65515fa09927b348d3d584c68be4215cfe664100d01c9dbc7655a5716d70"
+  "cci.20200514":
+    url: "https://github.com/Maratyszcza/FP16/archive/4dfe081cf6bcd15db339cf2680b9281b8451eeb3.zip"
+    sha256: "d973501a40c55126b31accc2d9f08d931ec3cc190c0430309a5e341d3c0ce32a"

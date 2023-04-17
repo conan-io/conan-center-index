@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(vcglib)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
-set(VCGLIB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+project(vcglib LANGUAGES CXX)
 
 find_package(Eigen3 REQUIRED CONFIG)
 
@@ -14,6 +9,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE
 target_include_directories(${PROJECT_NAME} PUBLIC ${VCGLIB_SRC_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 
+include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

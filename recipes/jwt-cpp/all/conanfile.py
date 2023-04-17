@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.scm import Version
-from conan.tools.files import get, copy, apply_conandata_patches
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 class JwtCppConan(ConanFile):
     name = "jwt-cpp"
@@ -12,8 +12,8 @@ class JwtCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Thalhammer/jwt-cpp"
     description = "A C++ JSON Web Token library for encoding/decoding"
-    topics = ("jwt-cpp", "json", "jwt", "jws", "jwe", "jwk", "jwks", "jose", "header-only")
-    settings = "arch", "build_type", "compiler", "os"
+    topics = ("json", "jwt", "jws", "jwe", "jwk", "jwks", "jose", "header-only")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -21,11 +21,10 @@ class JwtCppConan(ConanFile):
         return Version(self.version) >= "0.5.0"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def requirements(self):
-        self.requires("openssl/1.1.1q")
+        self.requires("openssl/1.1.1s")
         if not self._supports_generic_json:
             self.requires("picojson/1.3.0")
 

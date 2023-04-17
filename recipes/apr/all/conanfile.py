@@ -1,19 +1,31 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.54.0"
 
 
 class AprConan(ConanFile):
     name = "apr"
-    description = "The Apache Portable Runtime (APR) provides a predictable and consistent interface to underlying platform-specific implementations"
+    description = (
+        "The Apache Portable Runtime (APR) provides a predictable and consistent "
+        "interface to underlying platform-specific implementations"
+    )
     license = "Apache-2.0"
     topics = ("apache", "platform", "library")
     homepage = "https://apr.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,28 +38,18 @@ class AprConan(ConanFile):
         "force_apr_uuid": True,
     }
 
-    generators = "cmake"
-    _autotools = None
-    _cmake = None
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _should_call_autoreconf(self):
         return self.settings.compiler == "apple-clang" and \
-               tools.Version(self.settings.compiler.version) >= "12" and \
+               Version(self.settings.compiler.version) >= "12" and \
                self.version == "1.7.0"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,101 +57,99 @@ class AprConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        if is_msvc(self):
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks")
 
     def build_requirements(self):
-        if self._should_call_autoreconf:
-            self.build_requires("libtool/2.4.6")
+        if not is_msvc(self):
+            if self._should_call_autoreconf:
+                self.tool_requires("libtool/2.4.7")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["INSTALL_PDB"] = False
-        self._cmake.definitions["APR_BUILD_TESTAPR"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--with-installbuilddir=${prefix}/bin/build-1",
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        if tools.cross_building(self):
-            #
-            conf_args.append("apr_cv_mutex_robust_shared=yes")
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+    def generate(self):
+        if is_msvc(self):
+            tc = CMakeToolchain(self)
+            tc.variables["INSTALL_PDB"] = False
+            tc.variables["APR_BUILD_TESTAPR"] = False
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--with-installbuilddir=${prefix}/res/build-1")
+            if cross_building(self):
+                tc.configure_args.append("apr_cv_mutex_robust_shared=yes")
+            tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         if self.options.force_apr_uuid:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "apr.h.in"),
+            replace_in_file(self, os.path.join(self.source_folder, "include", "apr.h.in"),
                                   "@osuuid@", "0")
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
-            cmake = self._configure_cmake()
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.configure()
             cmake.build(target="libapr-1" if self.options.shared else "apr-1")
         else:
+            autotools = Autotools(self)
             if self._should_call_autoreconf:
-                with tools.chdir(self._source_subfolder):
-                    self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-            autotools = self._configure_autotools()
+                autotools.autoreconf()
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            cmake = CMake(self)
             cmake.install()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "build-1"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            fix_apple_shared_install_name(self)
 
-            os.unlink(os.path.join(self.package_folder, "lib", "libapr-1.la"))
-            tools.rmdir(os.path.join(self.package_folder, "build-1"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-            apr_rules_mk = os.path.join(self.package_folder, "bin", "build-1", "apr_rules.mk")
+            apr_rules_mk = os.path.join(self.package_folder, "res", "build-1", "apr_rules.mk")
             apr_rules_cnt = open(apr_rules_mk).read()
             for key in ("apr_builddir", "apr_builders", "top_builddir"):
-                apr_rules_cnt, nb = re.subn("^{}=[^\n]*\n".format(key), "{}=$(_APR_BUILDDIR)\n".format(key), apr_rules_cnt, flags=re.MULTILINE)
+                apr_rules_cnt, nb = re.subn(f"^{key}=[^\n]*\n", f"{key}=$(_APR_BUILDDIR)\n", apr_rules_cnt, flags=re.MULTILINE)
                 if nb == 0:
-                    raise ConanException("Could not find/replace {} in {}".format(key, apr_rules_mk))
+                    raise ConanException(f"Could not find/replace {key} in {apr_rules_mk}")
             open(apr_rules_mk, "w").write(apr_rules_cnt)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name",  "apr-1")
-        self.cpp_info.libs = ["libapr-1" if self.settings.compiler == "Visual Studio" and self.options.shared else "apr-1"]
+        prefix = "lib" if is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"{prefix}apr-1"]
+        self.cpp_info.resdirs = ["res"]
         if not self.options.shared:
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs = ["dl", "pthread"]
+                self.cpp_info.system_libs = ["crypt", "dl", "pthread", "rt"]
             if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["rpcrt4"]
+                self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
-        apr_root = tools.unix_path(self.package_folder)
-        self.output.info("Settings APR_ROOT environment var: {}".format(apr_root))
-        self.env_info.APR_ROOT = apr_root
-
-        apr_mk_dir = tools.unix_path(os.path.join(self.package_folder, "bin", "build-1"))
-        self.env_info._APR_BUILDDIR = apr_mk_dir
+        # TODO: to remove in conan v2
+        self.env_info.APR_ROOT = self.package_folder
+        self.env_info._APR_BUILDDIR = os.path.join(self.package_folder, "res", "build-1")

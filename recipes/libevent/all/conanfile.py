@@ -1,9 +1,10 @@
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
-import functools
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibeventConan(ConanFile):
@@ -28,22 +29,8 @@ class LibeventConan(ConanFile):
         "disable_threads": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-    short_paths = True
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,57 +38,59 @@ class LibeventConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1t")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.options.with_openssl:
+            tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        tc.cache_variables["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
+        tc.variables["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
+        tc.variables["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
+        tc.variables["EVENT__DISABLE_THREAD_SUPPORT"] = self.options.disable_threads
+        tc.variables["EVENT__DISABLE_BENCHMARK"] = True
+        tc.variables["EVENT__DISABLE_TESTS"] = True
+        tc.variables["EVENT__DISABLE_REGRESS"] = True
+        tc.variables["EVENT__DISABLE_SAMPLES"] = True
+        # libevent uses static runtime (MT) for static builds by default
+        if is_msvc(self):
+            tc.variables["EVENT__MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # relocatable shared libs on macOS
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "AddEventLibrary.cmake"),
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "AddEventLibrary.cmake"),
                               "INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/lib\"",
                               "")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        if self.options.with_openssl:
-            cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-        cmake.definitions["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
-        cmake.definitions["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
-        cmake.definitions["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
-        cmake.definitions["EVENT__DISABLE_THREAD_SUPPORT"] = self.options.disable_threads
-        cmake.definitions["EVENT__DISABLE_BENCHMARK"] = True
-        cmake.definitions["EVENT__DISABLE_TESTS"] = True
-        cmake.definitions["EVENT__DISABLE_REGRESS"] = True
-        cmake.definitions["EVENT__DISABLE_SAMPLES"] = True
-        # libevent uses static runtime (MT) for static builds by default
-        if is_msvc(self):
-            cmake.definitions["EVENT__MSVC_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
-        
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Libevent")

@@ -1,12 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES CXX)
 
 find_package(arsenalgear REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} arsenalgear::arsenalgear)
+target_link_libraries(${PROJECT_NAME} PRIVATE arsenalgear::arsenalgear)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

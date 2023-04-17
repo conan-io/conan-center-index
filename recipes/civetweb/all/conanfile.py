@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.53.0"
 
 
 class CivetwebConan(ConanFile):
@@ -14,8 +14,9 @@ class CivetwebConan(ConanFile):
     homepage = "https://github.com/civetweb/civetweb"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
-    topics = ("civetweb", "web-server", "embedded")
+    topics = ("web-server", "embedded")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -59,8 +60,7 @@ class CivetwebConan(ConanFile):
         return Version(self.version) >= "1.15"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, patch["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -70,34 +70,34 @@ class CivetwebConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.with_cxx:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
         if not self.options.with_ssl:
             del self.options.ssl_dynamic_loading
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1t")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
+        if self.options.get_safe("ssl_dynamic_loading") and not self.dependencies["openssl"].options.shared:
             raise ConanInvalidConfiguration("ssl_dynamic_loading requires shared openssl")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
-    def layout(self):
-        cmake_layout(self)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
 
         if self.options.with_ssl:
-            openssl_version = Version(self.dependencies["openssl"].ref.version[:-1])
+            openssl_version = Version(str(self.dependencies["openssl"].ref.version)[:-1])
             tc.variables["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
             tc.variables["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
             tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
@@ -144,15 +144,12 @@ class CivetwebConan(ConanFile):
                 os.remove(os.path.join(bin_folder, bin_file))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "civetweb"
-        self.cpp_info.names["cmake_find_package_multi"] = "civetweb"
         self.cpp_info.set_property("cmake_file_name", "civetweb")
-        self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb")
-        self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
-        self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
+        self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb-cpp" if self.options.with_cxx else "civetweb::civetweb")
+
         self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_civetweb"].system_libs.extend(["rt", "pthread"])
             if self.options.get_safe("ssl_dynamic_loading"):
                 self.cpp_info.components["_civetweb"].system_libs.append("dl")
@@ -162,24 +159,25 @@ class CivetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].system_libs.append("ws2_32")
             if self.options.shared:
                 self.cpp_info.components["_civetweb"].defines.append("CIVETWEB_DLL_IMPORTS")
-
         if self.options.with_ssl:
             self.cpp_info.components["_civetweb"].requires.append("openssl::openssl")
         if self.options.get_safe("with_zlib"):
             self.cpp_info.components["_civetweb"].requires.append("zlib::zlib")
 
         if self.options.with_cxx:
-            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
-            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
             self.cpp_info.components["civetweb-cpp"].set_property("cmake_target_name", "civetweb::civetweb-cpp")
             self.cpp_info.components["civetweb-cpp"].libs = ["civetweb-cpp"]
             self.cpp_info.components["civetweb-cpp"].requires = ["_civetweb"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["civetweb-cpp"].system_libs.append("m")
             elif self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["civetweb-cpp"].defines.append("CIVETWEB_CXX_DLL_IMPORTS")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        # TODO: to remove once conan v1 support dropped
+        self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
+        self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
+        if self.options.with_cxx:
+            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
+            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -1,4 +1,19 @@
 sources:
+  "1.3.243.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.243.0.tar.gz"
+    sha256: "549fff809de2b3484bcc5d710ccd76ca29cbd764dd304c3687252e2f3d034e06"
+  "1.3.239.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.239.0.tar.gz"
+    sha256: "a1695022880e7ef3c2d407647f79876045dc2a3ed012753adc71ead5cc5178ba"
+  "1.3.236.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "8140a2b53d1e218e9be1f8d5e2749b1ebe854d456e5cb356218fd288747d5438"
+  "1.3.231.1":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "3b42f5b6e46b45600e09fd55234f59edb7cfca803e49d7830dc6fb5a086143b1"
+  "1.3.224.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.224.0.tar.gz"
+    sha256: "00256c33e235c5b9f0fc4b531fb9058d3cf1ff53e21e2db62cd8db848525536c"
   "1.3.216.0":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.216.0.tar.gz"
     sha256: "dd66ce2f9e6d3b9b8055662ac25172fa5559603f2f23c1a178c74f1602de8732"
@@ -36,21 +51,19 @@ sources:
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2020-04-03.tar.gz"
     sha256: "93f3a6dfad17c9ca0bf4d2d80809e90118e13b47502eb395baba8784025d7e97"
 patches:
+  "1.3.236.0":
+    - patch_file: "patches/1.3.236.0-0001-fix-gcc5.patch"
+      patch_description: "Fix compilation with gcc-5"
+      patch_type: "portability"
   "cci.20210621":
     - patch_file: "patches/0001-fix-bundle-install-cci.20210621.patch"
-      base_path: "source_subfolder"
   "20210115":
     - patch_file: "patches/0001-fix-bundle-install-20210115.patch"
-      base_path: "source_subfolder"
   "20200917":
     - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
-      base_path: "source_subfolder"
   "20200629":
     - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
-      base_path: "source_subfolder"
   "20200519":
     - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
-      base_path: "source_subfolder"
   "20200403":
     - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
-      base_path: "source_subfolder"

@@ -61,15 +61,15 @@ class LibGlvndConan(ConanFile):
         if self.options.x11:
             self.requires("xorg/system")
         if self.options.glx:
-            self.requires("xorg-proto/2021.4")
+            self.requires("xorg-proto/2022.2")
 
     def validate(self):
         if self.settings.os not in ['Linux', 'FreeBSD']:
             raise ConanInvalidConfiguration("libglvnd is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.build_requires("meson/0.62.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/0.63.2")
+        self.build_requires("pkgconf/1.9.3")
 
     def layout(self):
         basic_layout(self)

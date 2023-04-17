@@ -13,8 +13,6 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Avoiding conflicts](#avoiding-conflicts)
   * [Draft](#draft)
   * [Getting your pull request reviewed](#getting-your-pull-request-reviewed)
-    * [Official reviewers](#official-reviewers)
-    * [Community reviewers](#community-reviewers)
     * [Rule of 2 reviews](#rule-of-2-reviews)
     * [Reviews from others](#reviews-from-others)
     * [Addressing review comments](#addressing-review-comments)
@@ -51,13 +49,8 @@ If you struggle to fix build errors yourself, you may want to ask for help from 
 ### Unexpected error
 
 Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
-Keep in mind conan-center-index is still *under development*, and there can be some instabilities. Especially, as we're using lots of external services,
-which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
-So, what to do once `Unexpected error` was encountered? You may consider re-running the build by closing your pull request, waiting 15 seconds, and then re-opening it again.
 
-Sometimes it's necessary to restart the build several times.
-If an `Unexpected error` persists, tag [@jgsogo](https://github.com/jgsogo) and [@danimtb](https://github.com/danimtb) asking for the help with CI.
-Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-index/issues/new/choose).
+To learn more, checkout the [label definition](labels.md#unexpected-error).
 
 ## Avoiding conflicts
 
@@ -72,42 +65,16 @@ Once you're done with your changes, remember to convert from "Draft" to "Normal"
 
 ## Getting your pull request reviewed
 
-Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from random people, we have two categories of reviewers:
+Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from anyone, we have two categories of reviewers:
 
-### Official reviewers
+- Official reviewers: these are active team members who are responsible for developing Conan, ConanCenter, and ConanCenterIndex.
+- Community reviewers: this list includes former Conan team members and ConanCenterIndex contributors who are very active and proven to be trusted - they frequently submit pull requests and provide their own useful reviews
 
-The list includes only official Conan developers:
-
-- [@memsharded](https://github.com/memsharded)
-- [@lasote](https://github.com/lasote)
-- [@danimtb](https://github.com/danimtb)
-- [@jgsogo](https://github.com/jgsogo)
-- [@czoido](https://github.com/czoido)
-- [@sse4](https://github.com/sse4)
-- [@uilianries](https://github.com/uilianries)
-
-### Community reviewers
-
-The list includes conan-center-index contributors who are very active and proven to be trusted - they frequently submit pull requests and provide their own useful reviews:
-
-- [@madebr](https://github.com/madebr)
-- [@SpaceIm](https://github.com/SpaceIm)
-- [@ericLemanissier](https://github.com/ericLemanissier)
-- [@prince-chrismc](https://github.com/prince-chrismc)
-- [@Croydon](https://github.com/Croydon)
-- [@intelligide](https://github.com/intelligide)
-- [@theirix](https://github.com/theirix)
-- [@gocarlos](https://github.com/gocarlos)
-- [@mathbunnyru](https://github.com/mathbunnyru)
-- [@ericriff](https://github.com/ericriff)
-- [@toge](https://github.com/toge)
-- [@AndreyMlashkin](https://github.com/AndreyMlashkin)
-- [@MartinDelille](https://github.com/MartinDelille)
-- [@dmn-star](https://github.com/dmn-star)
-
-The list, located [here](../.c3i/reviewers.yml),
+The list or reviewers, located [here](../.c3i/reviewers.yml),
 is not constant and will change periodically based on contribution.
 That also means **you can be included in this list** as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
+
+> **Note**: GitHubs user interface does not support such custom rules so you should not rely solely on the message it provides.
 
 ### Rule of 2 reviews
 
@@ -134,7 +101,7 @@ The bot runs Automatic Merges every 20 minutes. Currently, it can only merge a s
 PR is selected for the merge only if:
 
 - Author is already [approved](https://github.com/conan-io/conan-center-index/issues/4).
-- Author has signed CLA.
+- Author has signed the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md).
 - PR is not a Draft.
 - PR has a green status (successful build).
 - PR doesn't have merge conflicts with `master` branch.

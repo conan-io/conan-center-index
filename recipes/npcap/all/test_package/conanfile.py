@@ -11,8 +11,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
-    # Needed to make sure libpcap gets compiled
-    build_policy = "missing"
 
     def requirements(self):
         self.requires(self.tested_reference_str)

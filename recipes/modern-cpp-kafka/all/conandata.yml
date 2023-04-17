@@ -1,7 +1,19 @@
 sources:
+  "2023.03.07":
+    url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2023.03.07.tar.gz"
+    sha256: "4685527a9768d44ed769ec6e502c3edde0b5cf4d341d8f9b476474955c61bba4"
+  "2023.01.05":
+    url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2023.01.05.tar.gz"
+    sha256: "3ac5256b7b16bab020b32ac048cf53fddc3353682068bb727eb7c95550598b9b"
+  "2022.12.07":
+    url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2022.12.07.tar.gz"
+    sha256: "980533fe5e0f5630d7deab6567ed051cf51d61ac341e4a75810f68d58cbff439"
+  "2022.10.12":
+    url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2022.10.12.tar.gz"
+    sha256: "f60c6d6328e64a8ae0c3233921078160fc4e42a3484eb823d9918895f5f1b39f"
   "2022.08.01":
     url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2022.08.01.tar.gz"
     sha256: "77998caf50ffcc55c77713571d9ce04a37020ccff7b713d14abad9eb8ceb05b3"
   "2022.06.15":
-    url: https://github.com/morganstanley/modern-cpp-kafka/archive/refs/tags/v2022.06.15.tar.gz
-    sha256: 478fcf560057b7cf7b4be851838ebf0520806d057b172de23261606fce088d27
+    url: "https://github.com/morganstanley/modern-cpp-kafka/archive/refs/tags/v2022.06.15.tar.gz"
+    sha256: "478fcf560057b7cf7b4be851838ebf0520806d057b172de23261606fce088d27"

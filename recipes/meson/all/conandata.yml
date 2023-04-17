@@ -1,4 +1,22 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/mesonbuild/meson/archive/1.1.0.tar.gz"
+    sha256: "f29a3e14062043d75e82d16f1e41856e6b1ed7a7c016e10c7b13afa7ee6364cc"
+  "1.0.1":
+    url: "https://github.com/mesonbuild/meson/archive/1.0.1.tar.gz"
+    sha256: "4ab3a5c0060dc22bdefb04507efc6c38acb910e91bcd467a38e1fa211e5a6cfe"
+  "1.0.0":
+    url: "https://github.com/mesonbuild/meson/releases/download/1.0.0/meson-1.0.0.tar.gz"
+    sha256: "aa50a4ba4557c25e7d48446abfde857957dcdf58385fffbe670ba0e8efacce05"
+  "0.64.1":
+    url: "https://github.com/mesonbuild/meson/archive/0.64.1.tar.gz"
+    sha256: "1d12a4bc1cf3ab18946d12cf0b6452e5254ada1ad50aacc97f87e2cccd7da315"
+  "0.64.0":
+    url: "https://github.com/mesonbuild/meson/archive/0.64.0.tar.gz"
+    sha256: "6477993d781b6efea93091616a6d6a0766c0e026076dbeb11249bf1c9b49a347"
+  "0.63.3":
+    url: "https://github.com/mesonbuild/meson/archive/0.63.3.tar.gz"
+    sha256: "7c516c2099b762203e8a0a22412aa465b7396e6f9b1ab728bad6e6db44dc2659"
   "0.63.2":
     url: "https://github.com/mesonbuild/meson/archive/0.63.2.tar.gz"
     sha256: "023a3f7c74e68991154c3205a6975705861eedbf8130e013d15faa1df1af216e"

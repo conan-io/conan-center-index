@@ -1,4 +1,7 @@
 sources:
+  "1.83.0":
+    url: "https://github.com/DanBloomberg/leptonica/archive/1.83.0.tar.gz"
+    sha256: "14cf531c2219a1414e8e3c51a3caa5cf021a52e782c4a6561bf64d0ef2119282"
   "1.82.0":
     url: "https://github.com/DanBloomberg/leptonica/archive/1.82.0.tar.gz"
     sha256: "40fa9ac1e815b91e0fa73f0737e60c9eec433a95fa123f95f2573dd3127dd669"
@@ -17,4 +20,6 @@ sources:
 patches:
   "1.78.0":
     - patch_file: "patches/fix-find-modules-variables.patch"
-      base_path: "source_subfolder"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "portability"
+      patch_source: "https://github.com/DanBloomberg/leptonica/pull/456"

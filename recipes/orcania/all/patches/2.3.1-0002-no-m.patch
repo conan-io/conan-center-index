@@ -1,0 +1,9 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -34,1 +34,1 @@
+-set(LIBS "-lm")
++set(LIBS )
+--- src/base64.c
++++ src/base64.c
+@@ -10,1 +11,0 @@
+-#include <math.h>

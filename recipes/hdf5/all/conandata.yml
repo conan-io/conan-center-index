@@ -1,14 +1,15 @@
 sources:
+  "1.14.0":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_0.tar.gz"
+    sha256: "0f2ec13c1bf6e9f506fd03681c83a476d722e7479cad9ce6f8585a26c317d0ad"
   "1.13.1":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_13_1.tar.gz"
     sha256: "92552458f35c7e58128ce1bfc2831abf901cc142ea0fdd2b056311e4452db7bf"
   "1.12.2":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_12_2.tar.gz"
     sha256: "1ca14cadff7bc4b61826eee591da1a330f44c107db66c9510ee95df3b2bc5f78"
-  "1.12.1":
-    url: "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.1/src/hdf5-1.12.1.tar.gz"
-    sha256: "79c66ff67e666665369396e9c90b32e238e501f345afd2234186bfb8331081ca"
   "1.12.0":
+    # Need 1.12.0 for NetCDF 4.7.4 with byteranges=True
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_12_0.tar.gz"
     sha256: "c64ffec2539ae6b6041f97952a40b0893c3c0df4d5b1c0177fb8aba567808158"
   "1.10.6":
@@ -21,44 +22,55 @@ sources:
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_21.tar.gz"
     sha256: "753520e34a576a64809b8e02d9c015d6126f7974f678c7417a60492d835a88f4"
 patches:
+  "1.14.0":
+    - patch_file: "patches/conanize-link-szip-1.14.0+.patch"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.13.1":
     - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.12.2":
     - patch_file: "patches/conanize-link-szip-1.12.2+.patch"
-      base_path: "source_subfolder"
-  "1.12.1":
-    - patch_file: "patches/conanize-link-szip-1.12.1+.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.12.0":
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.10.6":
     - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fix missing function prototypes"
     - patch_file: "patches/fix-missing-function-prototypes-1.10.6.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fix missing function prototypes"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
   "1.10.5":
     - patch_file: "patches/fix-missing-function-prototypes-1.10.5+.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fix missing function prototypes"
     - patch_file: "patches/conanize-link-szip-1.10.5+.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/build-either-static-or-shared-1.10.5.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
     - patch_file: "patches/mingw-cmake-size-type-checks-1.10.5.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "mingw cmake size type checks"
     - patch_file: "patches/mingw-fix-prefix-lib.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "mingw fix prefix lib"
     - patch_file: "patches/mingw-unused-ellipses.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "mingw unused ellipses"
   "1.8.21":
     - patch_file: "patches/conanize-link-szip-1.8.21.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/build-either-static-or-shared-1.8.21.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup target_link_libraries() targets for szip and zlib"
     - patch_file: "patches/mingw-cmake-size-type-checks-1.8.21.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "mingw cmake size type checks"
     - patch_file: "patches/mingw-fix-prefix-lib.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "mingw fix prefix lib"

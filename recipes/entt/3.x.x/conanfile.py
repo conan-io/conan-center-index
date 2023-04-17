@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class EnttConan(ConanFile):
@@ -15,53 +15,54 @@ class EnttConan(ConanFile):
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    no_copy_source = True
     settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _min_cppstd(self):
+        return "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15.9",
+            "msvc": "191",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         # TODO: use self.info.settings in validate() instead of self.settings
-        minimal_cpp_standard = "17"
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, minimal_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
-        minimal_version = {
-            "Visual Studio": "15.9",
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10"
-        }
-
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-            return
-
-        # Compare versions asuming minor satisfies if not explicitly set
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        if lazy_lt_semver(str(self.settings.compiler.version), minimal_version[compiler]):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -71,8 +72,8 @@ class EnttConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "EnTT")
         self.cpp_info.set_property("cmake_target_name", "EnTT::EnTT")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
+
+        # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "EnTT"
         self.cpp_info.names["cmake_find_package_multi"] = "EnTT"

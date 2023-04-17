@@ -1,18 +1,20 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.53.0"
 
 
 class SfmlConan(ConanFile):
     name = "sfml"
     description = "Simple and Fast Multimedia Library."
     license = "Zlib"
-    topics = ("sfml", "multimedia", "games", "graphics", "audio")
+    topics = ("multimedia", "games", "graphics", "audio")
     homepage = "https://www.sfml-dev.org"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -34,20 +36,8 @@ class SfmlConan(ConanFile):
         "audio": True,
     }
 
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,7 +45,10 @@ class SfmlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.window:
@@ -65,73 +58,72 @@ class SfmlConan(ConanFile):
                 self.requires("libudev/system")
                 self.requires("xorg/system")
         if self.options.graphics:
-            self.requires("freetype/2.11.1")
-            self.requires("stb/cci.20210910")
+            self.requires("freetype/2.12.1")
+            self.requires("stb/cci.20220909")
         if self.options.audio:
             self.requires("flac/1.3.3")
-            self.requires("openal/1.21.1")
+            self.requires("openal/1.22.2")
             self.requires("vorbis/1.3.7")
 
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
-            raise ConanInvalidConfiguration("SFML not supported on {}".format(self.settings.os))
+            raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-        tools.rmdir(os.path.join(self._source_subfolder, "extlibs"))
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+        rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder
-        cmake.definitions["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
-        cmake.definitions["SFML_BUILD_WINDOW"] = self.options.window
-        cmake.definitions["SFML_BUILD_GRAPHICS"] = self.options.graphics
-        cmake.definitions["SFML_BUILD_NETWORK"] = self.options.network
-        cmake.definitions["SFML_BUILD_AUDIO"] = self.options.audio
-        cmake.definitions["SFML_INSTALL_PKGCONFIG_FILES"] = False
-        cmake.definitions["SFML_GENERATE_PDB"] = False
-        cmake.definitions["SFML_USE_SYSTEM_DEPS"] = True
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder.replace("\\", "/")
+        tc.cache_variables["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
+        tc.variables["SFML_BUILD_WINDOW"] = self.options.window
+        tc.variables["SFML_BUILD_GRAPHICS"] = self.options.graphics
+        tc.variables["SFML_BUILD_NETWORK"] = self.options.network
+        tc.variables["SFML_BUILD_AUDIO"] = self.options.audio
+        tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
+        tc.variables["SFML_GENERATE_PDB"] = False
+        tc.variables["SFML_USE_SYSTEM_DEPS"] = True
         if is_msvc(self):
-            cmake.definitions["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {values["target"]: "SFML::{}".format(component) for component, values in self._sfml_components.items()}
+            {values["target"]: f"SFML::{component}" for component, values in self._sfml_components.items()}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _sfml_components(self):
@@ -166,7 +158,7 @@ class SfmlConan(ConanFile):
             return ["log"] if self.settings.os == "Android" else []
 
         def foundation():
-            return ["Foundation"] if tools.is_apple_os(self.settings.os) else []
+            return ["Foundation"] if is_apple_os(self) else []
 
         def appkit():
             return ["AppKit"] if self.settings.os == "Macos" else []
@@ -204,15 +196,15 @@ class SfmlConan(ConanFile):
         sfml_components = {
             "system": {
                 "target": "sfml-system",
-                "libs": ["sfml-system{}".format(suffix)],
+                "libs": [f"sfml-system{suffix}"],
                 "system_libs": winmm() + pthread() + rt() + android() + log(),
             },
         }
         if self.settings.os in ["Windows", "Android", "iOS"]:
             sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
-            sfmlmain_libs = ["sfml-main{}".format(sfml_main_suffix)]
+            sfmlmain_libs = [f"sfml-main{sfml_main_suffix}"]
             if self.settings.os == "Android":
-                sfmlmain_libs.append("sfml-activity{}".format(suffix))
+                sfmlmain_libs.append(f"sfml-activity{suffix}")
             sfml_components.update({
                 "main": {
                     "target": "sfml-main",
@@ -224,7 +216,7 @@ class SfmlConan(ConanFile):
             sfml_components.update({
                 "window": {
                     "target": "sfml-window",
-                    "libs": ["sfml-window{}".format(suffix)],
+                    "libs": [f"sfml-window{suffix}"],
                     "requires": ["system"] + opengl() + xorg() + libudev(),
                     "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
@@ -236,7 +228,7 @@ class SfmlConan(ConanFile):
             sfml_components.update({
                 "graphics": {
                     "target": "sfml-graphics",
-                    "libs": ["sfml-graphics{}".format(suffix)],
+                    "libs": [f"sfml-graphics{suffix}"],
                     "requires": ["window", "freetype::freetype", "stb::stb"],
                 },
             })
@@ -244,7 +236,7 @@ class SfmlConan(ConanFile):
             sfml_components.update({
                 "network": {
                     "target": "sfml-network",
-                    "libs": ["sfml-network{}".format(suffix)],
+                    "libs": [f"sfml-network{suffix}"],
                     "requires": ["system"],
                     "system_libs": ws2_32(),
                 },
@@ -253,7 +245,7 @@ class SfmlConan(ConanFile):
             sfml_components.update({
                 "audio": {
                     "target": "sfml-audio",
-                    "libs": ["sfml-audio{}".format(suffix)],
+                    "libs": [f"sfml-audio{suffix}"],
                     "requires": ["system", "flac::flac", "openal::openal", "vorbis::vorbis"],
                     "system_libs": android(),
                 },

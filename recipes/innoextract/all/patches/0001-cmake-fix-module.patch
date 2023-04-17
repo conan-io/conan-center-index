@@ -3,11 +3,11 @@ index dbb64f1..a8a67e8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -105,7 +105,7 @@ endif()
- 
+
  include(CheckSymbolExists)
- 
+
 -set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake") # For custom cmake modules
-+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake") # For custom cmake modules
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake") # For custom cmake modules
  include(BuildType)
  include(CompileCheck)
  include(CreateSourceGroups)

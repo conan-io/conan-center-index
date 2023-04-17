@@ -1,6 +1,9 @@
 sources:
+  "1.2.3":
+    url: "https://github.com/mariusbancila/stduuid/archive/v1.2.3.tar.gz"
+    sha256: "b1176597e789531c38481acbbed2a6894ad419aab0979c10410d59eb0ebf40d3"
   "1.2.2":
-    url: https://github.com/mariusbancila/stduuid/archive/v1.2.2.tar.gz
+    url: "https://github.com/mariusbancila/stduuid/archive/v1.2.2.tar.gz"
     sha256: "f554f6a9fe4d852fa217de6ab977afbf3f49e4a1dcb263afd61a94253c4c7a48"
   "1.0":
     url: "https://github.com/mariusbancila/stduuid/archive/v1.0.tar.gz"

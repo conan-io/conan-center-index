@@ -1,4 +1,10 @@
 sources:
+  "3.11.1":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.11.1.tar.gz"
+    sha256: "0ac010f232d3089200c5e545bcbd6480cf68b705de6930d8ff7cdb0a29f5b47b"
+  "3.11.0":
+    url: "https://github.com/skypjack/entt/archive/refs/tags/v3.11.0.tar.gz"
+    sha256: "7cca2bd4d4aeef6c5bdbe06b9e047e7f2519ebaff901207cc81ac71a2bbe185e"
   "3.10.3":
     url: "https://github.com/skypjack/entt/archive/refs/tags/v3.10.3.tar.gz"
     sha256: "315918fc678e89a326ce1c13b0e9d3e53882dd9c58a63fef413325917a5c753b"
@@ -50,3 +56,12 @@ sources:
   "3.2.2":
     url: "https://github.com/skypjack/entt/archive/v3.2.2.tar.gz"
     sha256: "94592270b6750dd0b057a4af9d2c1ea8798369b3bb127927a8f70db232808f93"
+patches:
+  "3.11.1":
+    - patch_file: "patches/0001-3.11.0-fix-gcc-7.0-7.3.patch"
+      patch_description: "Fix GCC 7.0 to 7.3"
+      patch_type: "portability"
+  "3.11.0":
+    - patch_file: "patches/0001-3.11.0-fix-gcc-7.0-7.3.patch"
+      patch_description: "Fix GCC 7.0 to 7.3"
+      patch_type: "portability"

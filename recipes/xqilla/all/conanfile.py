@@ -1,23 +1,29 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rename, rm, save
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
-class ConanXqilla(ConanFile):
+class XqillaConan(ConanFile):
     name = "xqilla"
-    
     description = (
-        "XQilla is an XQuery and XPath 2 library and command line utility written in C++, implemented on top of the Xerces-C library"
+        "XQilla is an XQuery and XPath 2 library and command line utility "
+        "written in C++, implemented on top of the Xerces-C library"
     )
-    topics = ("xqilla", "xml", "xquery")
+    topics = ("xml", "xquery")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xqilla.sourceforge.net/HomePage"
     license = "Apache-2.0"
-    settings = "os", "arch", "compiler", "build_type"
 
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -27,97 +33,105 @@ class ConanXqilla(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/**"
-    _autotools = None
+    @property
+    def _min_cppstd(self):
+        return "11"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("xerces-c/3.2.3")
 
-    @property
-    def _doc_folder(self):
-        return os.path.join(
-            self._source_subfolder,
-            "doc"
-        )
-
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("The xqilla recipe currently only supports Linux.")
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("xqilla recipe doesn't support msvc build yet")
 
     def build_requirements(self):
-        self.build_requires("gnu-config/cci.20210814")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        self.tool_requires("gnu-config/cci.20210814")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        conf_args = [
-            "--with-xerces={}".format(tools.unix_path(self.deps_cpp_info["xerces-c"].rootpath)),
-        ]
-        
-        if not self.settings.compiler.cppstd:
-            self._autotools.cppstd_flag = "-std=c++11"
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append(f"--with-xerces={unix_path(self, self.dependencies['xerces-c'].package_folder)}")
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.extra_cxxflags.append(f"-std=c++{self._min_cppstd}")
+        tc.generate()
 
-        if self.options.get_safe("fPIC", True):
-            conf_args.extend(["--with-pic"])
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
-        self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
-        return self._autotools
-
-    @property 
-    def _user_info_build(self): 
-        return getattr(self, "user_info_build", self.deps_user_info) 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config),
+                           src=os.path.dirname(gnu_config),
+                           dst=os.path.join(self.source_folder, "autotools"))
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "autotools","config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "autotools","config.guess"))
-        autotools = self._configure_autotools()
+        self._patch_sources()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
+    def _extract_yajl_license(self):
+        tmp = load(self, os.path.join(self.source_folder, "src", "yajl", "yajl_buf.h"))
+        return tmp[2:tmp.find("*/", 1)]
+
     def package(self):
-        autotools = self._configure_autotools()
-        autotools.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("README", dst="licenses/LICENSE.mapm", src=os.path.join(self._source_subfolder, "src", "mapm"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "README", src=os.path.join(self.source_folder, "src", "mapm"),
+                             dst=os.path.join(self.package_folder, "licenses"))
+        rename(self, os.path.join(self.package_folder, "licenses", "README"),
+                     os.path.join(self.package_folder, "licenses", "LICENSE.mapm"))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE.yajl"), self._extract_yajl_license())
 
-        tmp = tools.load(os.path.join(self._source_subfolder, "src", "yajl", "yajl_buf.h"))
-        license_contents = tmp[2:tmp.find("*/", 1)] 
-        tools.save("LICENSE", license_contents)
-        self.copy("LICENSE", dst="licenses/LICENSE.yajl",  ignore_case=True, keep_path=False)
+        autotools = Autotools(self)
+        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
+        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libxqilla"
-        self.cpp_info.libs =  tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["xqilla"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.path.append(bin_path)
 
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

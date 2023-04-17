@@ -11,23 +11,15 @@ sources:
 patches:
   "1.6":
     - patch_file: "patches/backward-cpp-1.5.patch"
-      base_path: "source_subfolder"
   "1.5":
     - patch_file: "patches/backward-cpp-1.5.patch"
-      base_path: "source_subfolder"
-      # https://github.com/bombela/backward-cpp/commit/74dd7d6733d1ab6b79994f4acbc1ad86ba950d23.patch
     - patch_file: "patches/backward-cpp-1.5-74dd7d6733d1ab6b79994f4acbc1ad86ba950d23.patch"
-      base_path: "source_subfolder"
+      patch_source: "https://github.com/bombela/backward-cpp/commit/74dd7d6733d1ab6b79994f4acbc1ad86ba950d23.patch"
     - patch_file: "patches/backward-cpp-1.5-add-iterator-include.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/backward-cpp-1.5-mingw.patch"
-      base_path: "source_subfolder"
   "1.4":
     - patch_file: "patches/backward-cpp-1.4.patch"
-      base_path: "source_subfolder"
-      # https://github.com/bombela/backward-cpp/commit/7539d53b54f08f056dc9366c8d5c24c5d749cfce.patch
     - patch_file: "patches/backward-cpp-1.4-7539d53b54f08f056dc9366c8d5c24c5d749cfce.patch"
-      base_path: "source_subfolder"
-      # https://github.com/bombela/backward-cpp/commit/b7ffd640ec48ada93045f8c46fc65f823490819b.patch
+      patch_source: "https://github.com/bombela/backward-cpp/commit/7539d53b54f08f056dc9366c8d5c24c5d749cfce.patch"
     - patch_file: "patches/backward-cpp-1.4-b7ffd640ec48ada93045f8c46fc65f823490819b.patch"
-      base_path: "source_subfolder"
+      patch_source: "https://github.com/bombela/backward-cpp/commit/b7ffd640ec48ada93045f8c46fc65f823490819b.patch"

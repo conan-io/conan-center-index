@@ -1,5 +1,7 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, save
+from conan.tools.build import check_min_cppstd
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -15,6 +17,7 @@ class HanaConan(ConanFile):
     topics = ("hana", "metaprogramming", "boost")
     settings = "compiler"
     no_copy_source = True
+    deprecated = "boost"
 
     @property
     def _source_subfolder(self):
@@ -31,7 +34,7 @@ class HanaConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+            check_min_cppstd(self, "14")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -45,23 +48,26 @@ class HanaConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++14, which your compiler does not support.".format(self.name, self.version))
 
+        raise ConanInvalidConfiguration(f"{self.ref} is deprecated of Boost. Please, use boost package.")
+
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(**self.conan_data["sources"][self.version],
+              destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self._create_cmake_module_alias_targets(
+            self,
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"hana": "hana::hana"}
         )
 
     @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(conanfile, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -70,7 +76,7 @@ class HanaConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(conanfile, module_file, content)
 
     @property
     def _module_subfolder(self):

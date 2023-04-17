@@ -1,31 +1,35 @@
-import functools
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
-import glob
 import shutil
 
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
-from conan.tools import files, scm
-from conan.tools.microsoft import is_msvc
-from conans import tools, Meson, VisualStudioBuildEnvironment
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class GLibConan(ConanFile):
     name = "glib"
-    description = "GLib provides the core application building blocks for libraries and applications written in C"
-    topics = ("glib", "gobject", "gio", "gmodule")
+    description = (
+        "Low-level core library that forms the basis for projects such as GTK+ and GNOME. "
+        "It provides data structure handling for C, portability wrappers, and interfaces "
+        "for such runtime functionality as an event loop, threads, dynamic loading, and an object system."
+    )
+    topics = "gio", "gmodule", "gnome", "gobject", "gtk"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
-    license = "LGPL-2.1"
-
+    license = "LGPL-2.1-or-later"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_pcre": [True, False],
         "with_elf": [True, False],
         "with_selinux": [True, False],
         "with_mount": [True, False],
@@ -33,33 +37,18 @@ class GLibConan(ConanFile):
     default_options = {
         "shared": True,
         "fPIC": True,
-        "with_pcre": True,
         "with_elf": True,
         "with_mount": True,
         "with_selinux": True,
     }
-
     short_paths = True
-    generators = "pkg_config"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if scm.Version(self.version) < "2.71.1":
-                self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
@@ -68,18 +57,20 @@ class GLibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
-        self.requires("libffi/3.4.2")
-        if self.options.with_pcre:
-            if scm.Version(self.version) >= "2.73.2":
-                self.requires("pcre2/10.40")
-            else:
-                self.requires("pcre/8.45")
+        self.requires("zlib/1.2.13")
+        self.requires("libffi/3.4.3")
+        if Version(self.version) >= "2.73.2":
+            self.requires("pcre2/10.42")
+        else:
+            self.requires("pcre/8.45")
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
@@ -88,93 +79,63 @@ class GLibConan(ConanFile):
             self.requires("libselinux/3.3")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("libgettext/0.21")
+            self.requires("libgettext/0.21", transitive_headers=True, transitive_libs=True)
 
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             self.requires("libiconv/1.17")
 
-    def validate(self):
-        if hasattr(self, 'settings_build') and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-        if scm.Version(self.version) >= "2.69.0" and not self.options.with_pcre:
-            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
-        if self.settings.os == "Windows" and not self.options.shared and scm.Version(self.version) < "2.71.1":
-            raise ConanInvalidConfiguration(
-                "glib < 2.71.1 can not be built as static library on Windows. "
-                "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
-            )
-        if scm.Version(self.version) < "2.67.0" and not is_msvc(self) and not self.options.with_elf:
-            raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
-
     def build_requirements(self):
-        self.build_requires("meson/0.61.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/1.0.0")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = {}
-        if tools.is_apple_os(self.settings.os):
-            defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
-        defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
-        defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
+    def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = MesonToolchain(self)
 
-        if scm.Version(self.version) < "2.69.0":
-            defs["internal_pcre"] = not self.options.with_pcre
-
+        if is_apple_os(self) and Version(self.version) < "2.75.1":
+            tc.project_options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
+        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
+        tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
         if self.settings.os == "FreeBSD":
-            defs["xattr"] = "false"
-        if scm.Version(self.version) >= "2.67.2":
-            defs["tests"] = "false"
-
-        if scm.Version(self.version) >= "2.67.0":
-            defs["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
-
-        meson.configure(
-            source_folder=self._source_subfolder,
-            args=["--wrap-mode=nofallback"],
-            build_folder=self._build_subfolder,
-            defs=defs,
-        )
-        return meson
+            tc.project_options["xattr"] = "false"
+        tc.project_options["tests"] = "false"
+        tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if scm.Version(self.version) < "2.67.2":
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
-                "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())",
-                "build_tests = false",
-            )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "meson.build"),
+        apply_conandata_patches(self)
+        replace_in_file(self,
+            os.path.join(self.source_folder, "meson.build"),
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        if scm.Version(self.version) < "2.73.2":
+        if Version(self.version) < "2.73.2":
             for filename in [
-                os.path.join(self._source_subfolder, "meson.build"),
-                os.path.join(self._source_subfolder, "glib", "meson.build"),
-                os.path.join(self._source_subfolder, "gobject", "meson.build"),
-                os.path.join(self._source_subfolder, "gio", "meson.build"),
+                os.path.join(self.source_folder, "meson.build"),
+                os.path.join(self.source_folder, "glib", "meson.build"),
+                os.path.join(self.source_folder, "gobject", "meson.build"),
+                os.path.join(self.source_folder, "gio", "meson.build"),
             ]:
-                tools.replace_in_file(filename, "subdir('tests')", "#subdir('tests')")
+                replace_in_file(self, filename, "subdir('tests')", "#subdir('tests')")
         if self.settings.os != "Linux":
             # allow to find gettext
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
-                "libintl = cc.find_library('intl', required : false)" if scm.Version(self.version) < "2.73.1" \
-                else "libintl = dependency('intl', required: false)",
-                "libintl = dependency('libgettext', method : 'pkg-config', required : false)",
+            replace_in_file(self,
+                os.path.join(self.source_folder, "meson.build"),
+                "libintl = cc.find_library('intl', required : false" if Version(self.version) < "2.73.1" \
+                else "libintl = dependency('intl', required: false",
+                "libintl = dependency('libgettext', method : 'pkg-config', required : false",
             )
 
-        tools.replace_in_file(
+        replace_in_file(self,
             os.path.join(
-                self._source_subfolder,
+                self.source_folder,
                 "gio",
                 "gdbus-2.0",
                 "codegen",
@@ -183,47 +144,29 @@ class GLibConan(ConanFile):
             "'share'",
             "'res'",
         )
-        if self.settings.os != "Linux":
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
-                "if cc.has_function('ngettext'",
-                "if false #cc.has_function('ngettext'",
-            )
 
     def build(self):
         self._patch_sources()
-        with tools.environment_append(
-            VisualStudioBuildEnvironment(self).vars
-        ) if is_msvc(self) else tools.no_op():
-            meson = self._configure_meson()
-            meson.build()
-
-    def _fix_library_names(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.chdir(os.path.join(self.package_folder, "lib")):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info(f"rename {filename_old} into {filename_new}")
-                    shutil.move(filename_old, filename_new)
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        if scm.Version(self.version) < "2.73.0":
-            self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        if Version(self.version) < "2.73.0":
+            copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         else:
-            self.copy(pattern="LGPL-2.1-or-later.txt", dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
-        with tools.environment_append(
-            VisualStudioBuildEnvironment(self).vars
-        ) if is_msvc(self) else tools.no_op():
-            meson = self._configure_meson()
-            meson.install()
-            self._fix_library_names()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            copy(self, pattern="LGPL-2.1-or-later.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "LICENSES"))
+        meson = Meson(self)
+        meson.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "libexec"))
         shutil.move(
             os.path.join(self.package_folder, "share"),
             os.path.join(self.package_folder, "res"),
         )
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.unlink(pdb_file)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.components["glib-2.0"].set_property("pkg_config_name", "glib-2.0")
@@ -232,9 +175,11 @@ class GLibConan(ConanFile):
             os.path.join("include", "glib-2.0"),
             os.path.join("lib", "glib-2.0", "include")
         ]
+        self.cpp_info.components["glib-2.0"].resdirs = ["res"]
 
         self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
+        self.cpp_info.components["gmodule-no-export-2.0"].resdirs = ["res"]
         self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
@@ -245,14 +190,17 @@ class GLibConan(ConanFile):
 
         self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
+        self.cpp_info.components["gobject-2.0"].resdirs = ["res"]
         self.cpp_info.components["gobject-2.0"].requires += ["glib-2.0", "libffi::libffi"]
 
         self.cpp_info.components["gthread-2.0"].set_property("pkg_config_name", "gthread-2.0")
         self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
+        self.cpp_info.components["gthread-2.0"].resdirs = ["res"]
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
+        self.cpp_info.components["gio-2.0"].resdirs = ["res"]
         self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
 
         self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
@@ -270,9 +218,11 @@ class GLibConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["glib-2.0"].system_libs += ["ws2_32", "ole32", "shell32", "user32", "advapi32"]
             self.cpp_info.components["gio-2.0"].system_libs.extend(["iphlpapi", "dnsapi", "shlwapi"])
+            self.cpp_info.components["gio-windows-2.0"].set_property("pkg_config_name", "gio-windows-2.0")
             self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
             self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join("include", "gio-win32-2.0")]
         else:
+            self.cpp_info.components["gio-unix-2.0"].set_property("pkg_config_name", "gio-unix-2.0")
             self.cpp_info.components["gio-unix-2.0"].requires += ["gobject-2.0", "gio-2.0"]
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
 
@@ -281,14 +231,13 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].frameworks += ["Foundation", "CoreServices", "CoreFoundation"]
             self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
 
-            if tools.is_apple_os(self.settings.os):
+            if is_apple_os(self):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
-        if self.options.with_pcre:
-            if scm.Version(self.version) >= "2.73.2":
-                self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
-            else:
-                self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+        if Version(self.version) >= "2.73.2":
+            self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
+        else:
+            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
@@ -305,15 +254,14 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
 
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
         pkgconfig_variables = {
             'datadir': '${prefix}/res',
             'schemasdir': '${datadir}/glib-2.0/schemas',
             'bindir': '${prefix}/bin',
-            'giomoduledir': '${libdir}/gio/modules',
+            # Can't use libdir here as it is libdir1 when using the PkgConfigDeps generator.
+            'giomoduledir': '${prefix}/lib/gio/modules',
             'gio': '${bindir}/gio',
             'gio_querymodules': '${bindir}/gio-querymodules',
             'glib_compile_schemas': '${bindir}/glib-compile-schemas',
@@ -336,3 +284,19 @@ class GLibConan(ConanFile):
         self.cpp_info.components["glib-2.0"].set_property(
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    from conan.tools.files import rename
+    import glob
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

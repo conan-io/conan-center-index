@@ -1,4 +1,10 @@
 sources:
+  "3.1.7":
+    url: "https://github.com/AcademySoftwareFoundation/Imath/archive/v3.1.7.tar.gz"
+    sha256: "bff1fa140f4af0e7f02c6cb78d41b9a7d5508e6bcdfda3a583e35460eb6d4b47"
+  "3.1.6":
+    url: "https://github.com/AcademySoftwareFoundation/Imath/archive/v3.1.6.tar.gz"
+    sha256: "ea5592230f5ab917bea3ceab266cf38eb4aa4a523078d46eac0f5a89c52304db"
   "3.1.5":
     url: "https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.1.5.tar.gz"
     sha256: "1e9c7c94797cf7b7e61908aed1f80a331088cc7d8873318f70376e4aed5f25fb"

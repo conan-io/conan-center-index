@@ -1,20 +1,21 @@
+from conan import ConanFile
+from conan.tools.build import stdcpp_library
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import os
-import glob
-from conans import ConanFile, CMake, tools
 
-
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class MeshOptimizerConan(ConanFile):
     name = "meshoptimizer"
-    description = " Mesh optimization library that makes meshes smaller and faster to render"
-    topics = ("conan", "mesh", "optimizer", "3d")
+    description = "Mesh optimization library that makes meshes smaller and faster to render"
+    topics = ("mesh", "optimizer", "3d")
     homepage = "https://github.com/zeux/meshoptimizer"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,60 +26,55 @@ class MeshOptimizerConan(ConanFile):
         "fPIC": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["MESHOPT_BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MESHOPT_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # Don't override warning levels for msvc
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "add_compile_options(/W4 /WX)", "")
+        apply_conandata_patches(self)
+        # No warnings as errors
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "add_compile_options(/W4 /WX)", "")
+        replace_in_file(self, cmakelists, "-Werror", "")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        for f in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(f)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
+        self.cpp_info.set_property("cmake_file_name", "meshoptimizer")
+        self.cpp_info.set_property("cmake_target_name", "meshoptimizer::meshoptimizer")
+        self.cpp_info.libs = ["meshoptimizer"]
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines = ["MESHOPTIMIZER_API=__declspec(dllimport)"]

@@ -4,13 +4,14 @@ from conan.tools.files import collect_libs, copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class JSONCConan(ConanFile):
     name = "json-c"
+    package_type = "library"
     description = "JSON-C - A JSON implementation in C"
-    topics = ("json-c", "json", "encoding", "decoding", "manipulation")
+    topics = ("json", "encoding", "decoding", "manipulation")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/json-c/json-c"
     license = "MIT"
@@ -31,22 +32,15 @@ class JSONCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -55,8 +49,6 @@ class JSONCConan(ConanFile):
             tc.variables["DISABLE_STATIC_FPIC"] = not self.options.get_safe("fPIC", True)
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):

@@ -1,9 +1,0 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -380,5 +380,6 @@
-   ENDIF (MSVC)
- 
-   set_target_properties (czmq PROPERTIES
-+    LINKER_LANGUAGE CXX
-     PUBLIC_HEADER "${public_headers}"
-     DEFINE_SYMBOL "CZMQ_EXPORTS"

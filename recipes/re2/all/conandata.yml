@@ -1,4 +1,13 @@
 sources:
+  "20230301":
+    url: "https://github.com/google/re2/archive/refs/tags/2023-03-01.tar.gz"
+    sha256: "7a9a4824958586980926a300b4717202485c4b4115ac031822e29aa4ef207e48"
+  "20230201":
+    url: "https://github.com/google/re2/archive/refs/tags/2023-02-01.tar.gz"
+    sha256: "cbce8b7803e856827201a132862e41af386e7afd9cc6d9a9bc7a4fa4d8ddbdde"
+  "20221201":
+    url: "https://github.com/google/re2/archive/refs/tags/2022-12-01.tar.gz"
+    sha256: "665b65b6668156db2b46dddd33405cd422bd611352c5052ab3dae6a5fbac5506"
   "20220601":
     url: "https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"
     sha256: "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f"
@@ -23,27 +32,3 @@ sources:
   "20201101":
     url: "https://github.com/google/re2/archive/2020-11-01.tar.gz"
     sha256: "8903cc66c9d34c72e2bc91722288ebc7e3ec37787ecfef44d204b2d6281954d7"
-  "20201001":
-    url: "https://github.com/google/re2/archive/2020-10-01.tar.gz"
-    sha256: "0915741f524ad87debb9eb0429fe6016772a1569e21dc6d492039562308fcb0f"
-  "20200801":
-    url: "https://github.com/google/re2/archive/2020-08-01.tar.gz"
-    sha256: "6f4c8514249cd65b9e85d3e6f4c35595809a63ad71c5d93083e4d1dcdf9e0cd6"
-  "20200701":
-    url: "https://github.com/google/re2/archive/2020-07-01.tar.gz"
-    sha256: "116c74f4490b5d348492bc3822292320c9e5effe18c87bcafb616be464043321"
-  "20200601":
-    url: "https://github.com/google/re2/archive/2020-06-01.tar.gz"
-    sha256: "fb8e0f4ed7a212e3420507f27933ef5a8c01aec70e5148c6a35313573269fae6"
-  "20200501":
-    url: "https://github.com/google/re2/archive/2020-05-01.tar.gz"
-    sha256: "88864d7f5126bb17daa1aa8f41b05599aa6e3222e7b28a90e372db53c1c49aeb"
-  "20200401":
-    url: "https://github.com/google/re2/archive/2020-04-01.tar.gz"
-    sha256: "98794bc5416326817498384a9c43cbb5a406bab8da9f84f83c39ecad43ed5cea"
-  "20200301":
-    url: "https://github.com/google/re2/archive/2020-03-01.tar.gz"
-    sha256: "192a2855e9853091ad3f4c40c03b56d6f5d1fd4cb98ba07101c92f313d0398dc"
-  "20191101":
-    url: "https://github.com/google/re2/archive/2019-11-01.tar.gz"
-    sha256: "5229d7e801bdb3d62a1b9d82de7c74eda223cb5e264d5bd04bcf31a933245d27"

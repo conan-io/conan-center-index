@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a75251a..a55654e 100644
+index a75251a..3a5d087 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,7 +4,7 @@ project(ryml
@@ -11,7 +11,17 @@ index a75251a..a55654e 100644
      AUTHOR "Joao Paulo Magalhaes <dev@jpmag.me>")
  
  
-@@ -52,8 +52,7 @@ c4_add_library(ryml
+@@ -17,8 +17,7 @@ option(RYML_DBG "Enable (very verbose) ryml debug prints." OFF)
+ 
+ #-------------------------------------------------------
+ 
+-c4_require_subproject(c4core INCORPORATE
+-    SUBDIRECTORY ${RYML_EXT_DIR}/c4core)
++find_package(c4core REQUIRED CONFIG)
+ 
+ c4_add_library(ryml
+     SOURCES
+@@ -52,8 +51,7 @@ c4_add_library(ryml
      INC_DIRS
          $<BUILD_INTERFACE:${RYML_SRC_DIR}>
          $<INSTALL_INTERFACE:include>
@@ -21,7 +31,7 @@ index a75251a..a55654e 100644
      )
  
  if(NOT RYML_DEFAULT_CALLBACKS)
-@@ -68,7 +67,6 @@ endif()
+@@ -68,7 +66,6 @@ endif()
  #-------------------------------------------------------
  
  c4_install_target(ryml)

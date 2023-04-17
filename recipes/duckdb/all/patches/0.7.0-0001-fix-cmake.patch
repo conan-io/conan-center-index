@@ -1,0 +1,61 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 99cd46c..3f3d039 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -182,9 +182,18 @@ if(BUILD_PYTHON
+   endif()
+ endif()
+ 
+-install(
+-  TARGETS duckdb duckdb_static
+-  EXPORT "${DUCKDB_EXPORT_SET}"
+-  LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
+-  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+-  RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++if(BUILD_SHARED_LIBS)
++  install(
++    TARGETS duckdb
++    EXPORT "${DUCKDB_EXPORT_SET}"
++    LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++    RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++else()
++  install(
++    TARGETS duckdb_static
++    EXPORT "${DUCKDB_EXPORT_SET}"
++    LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++    RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++endif()
+diff --git a/tools/odbc/CMakeLists.txt b/tools/odbc/CMakeLists.txt
+index 8f13cfe..6755894 100644
+--- a/tools/odbc/CMakeLists.txt
++++ b/tools/odbc/CMakeLists.txt
+@@ -53,6 +53,14 @@ add_library(
+ set_target_properties(duckdb_odbc PROPERTIES DEFINE_SYMBOL "DUCKDB_ODBC_API")
+ target_link_libraries(duckdb_odbc ${LINK_LIB_LIST} duckdb_static)
+ 
++install(
++    TARGETS duckdb_odbc
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
++
+ if(NOT WIN32 AND NOT CLANG_TIDY)
+   add_subdirectory(test)
+ endif()
+diff --git a/tools/sqlite3_api_wrapper/CMakeLists.txt b/tools/sqlite3_api_wrapper/CMakeLists.txt
+index e785d4f..922746f 100644
+--- a/tools/sqlite3_api_wrapper/CMakeLists.txt
++++ b/tools/sqlite3_api_wrapper/CMakeLists.txt
+@@ -17,7 +17,7 @@ add_library(sqlite3_api_wrapper_static STATIC ${SQLITE_API_WRAPPER_FILES})
+ target_link_libraries(sqlite3_api_wrapper_static duckdb_static duckdb_utf8proc)
+ link_threads(sqlite3_api_wrapper_static)
+ 
+-if(NOT WIN32)
++if(BUILD_SHARED_LIBS AND NOT WIN32)
+   add_library(sqlite3_api_wrapper SHARED ${SQLITE_API_WRAPPER_FILES})
+   target_link_libraries(sqlite3_api_wrapper duckdb ${DUCKDB_EXTRA_LINK_FLAGS})
+   link_threads(sqlite3_api_wrapper)

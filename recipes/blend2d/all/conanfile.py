@@ -1,15 +1,12 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import check_min_vs
 import os
 
-from conan import ConanFile
-from conan import tools
-from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches
-from conan.tools.microsoft import is_msvc
-from conan.errors import ConanInvalidConfiguration
+required_conan_version = ">=1.53.0"
 
-required_conan_version = ">=1.50.0"
 
 class Blend2dConan(ConanFile):
     name = "blend2d"
@@ -18,6 +15,7 @@ class Blend2dConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://blend2d.com/"
     topics = ("2d-graphics", "rasterization", "asmjit", "jit")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,9 +27,7 @@ class Blend2dConan(ConanFile):
     }
 
     def export_sources(self):
-        tools.files.copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.files.copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,37 +35,38 @@ class Blend2dConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder='src')
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asmjit/cci.20220210")
+        self.requires("asmjit/cci.20221111")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
         # In Visual Studio < 16, there are compilation error. patch is already provided.
         # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
-        if is_msvc(self) and Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("This recipe does not support this compiler version")
+        check_min_vs(self, 192)
 
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        toolchain = CMakeToolchain(self)
-        toolchain.variables["BUILD_TESTING"] = False
-        toolchain.variables["BLEND2D_TEST"] = False
-        toolchain.variables["BLEND2D_EMBED"] = False
-        toolchain.variables["BLEND2D_STATIC"] = not self.options.shared
-        toolchain.variables["BLEND2D_NO_STDCXX"] = False
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BLEND2D_TEST"] = False
+        tc.variables["BLEND2D_EMBED"] = False
+        tc.variables["BLEND2D_STATIC"] = not self.options.shared
+        tc.variables["BLEND2D_NO_STDCXX"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if not valid_min_cppstd(self, 11):
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
         if not self.options.shared:
-            toolchain.variables["CMAKE_C_FLAGS"] = "-DBL_STATIC"
-            toolchain.variables["CMAKE_CXX_FLAGS"] = "-DBL_STATIC"
-        toolchain.generate()
+            tc.preprocessor_definitions["BL_STATIC"] = "1"
+        tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
@@ -77,20 +74,20 @@ class Blend2dConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        tools.files.copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        tools.files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "blend2d")
+        self.cpp_info.set_property("cmake_target_name", "blend2d::blend2d")
         self.cpp_info.libs = ["blend2d"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "rt",])
         if not self.options.shared:
             self.cpp_info.defines.append("BL_STATIC")
-
-        self.cpp_info.requires.append("asmjit::asmjit")

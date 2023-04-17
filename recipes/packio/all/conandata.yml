@@ -32,3 +32,12 @@ sources:
   "2.2.0":
     url: "https://github.com/qchateau/packio/archive/2.2.0.tar.gz"
     sha256: "ac9f33d5e8dd92bd3cdec106e10453424060bae9c4cd97281aa5d20fb20476f7"
+  "2.3.0":
+    url: "https://github.com/qchateau/packio/archive/2.3.0.tar.gz"
+    sha256: "4ef3bc76934855cc1a17eb00311bb42f5f14f616c75d4d1cc35151efcc988358"
+  "2.4.0":
+    url: "https://github.com/qchateau/packio/archive/2.4.0.tar.gz"
+    sha256: "2815d7772ef8d2360c5e15de7738ec7267e1e54a7afb817bf42a18a9f100ff52"
+  "2.4.1":
+    url: "https://github.com/qchateau/packio/archive/2.4.1.tar.gz"
+    sha256: "c115548146d6da432048265037b30f77ba6ad7a39350693c4fb36fd896bc7a4b"

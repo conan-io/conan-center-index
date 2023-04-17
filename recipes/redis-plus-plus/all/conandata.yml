@@ -1,26 +1,40 @@
 sources:
+  "1.3.7":
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.7.tar.gz"
+    sha256: "89cb83b0a23ac5825300c301814eab74aa3cdcfcd12e87d443c2692e367768ba"
   "1.3.3":
-    sha256: 23689059b7ba50fcd8fa673c5dbb7bdb010b896b14abad5aa80a5ec48eb64f26
-    url: https://github.com/sewenew/redis-plus-plus/archive/1.3.3.tar.gz
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.3.tar.gz"
+    sha256: "23689059b7ba50fcd8fa673c5dbb7bdb010b896b14abad5aa80a5ec48eb64f26"
   "1.3.2":
-    sha256: e172cd8dcfeaf649e20a2d24537f8676c7cabed5c24182d73be189e53a013289
-    url: https://github.com/sewenew/redis-plus-plus/archive/1.3.2.tar.gz
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.2.tar.gz"
+    sha256: "e172cd8dcfeaf649e20a2d24537f8676c7cabed5c24182d73be189e53a013289"
   "1.2.3":
-    sha256: 1a3336752133019c963e06c28667b96690d6395b804e5e326671777ff88982ea
-    url: https://github.com/sewenew/redis-plus-plus/archive/1.2.3.tar.gz
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.2.3.tar.gz"
+    sha256: "1a3336752133019c963e06c28667b96690d6395b804e5e326671777ff88982ea"
   "1.2.1":
-    sha256: f09c9fcc362955edb887632cd008102887278c94934d7e8c9d0acb8707671902
-    url: https://github.com/sewenew/redis-plus-plus/archive/1.2.1.tar.gz
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.2.1.tar.gz"
+    sha256: "f09c9fcc362955edb887632cd008102887278c94934d7e8c9d0acb8707671902"
 patches:
+  "1.3.7":
+    - patch_file: "patches/1.3.7-0001-fix-dependencies-injection.patch"
+      patch_description: "Robust discovery & injection of dependencies, and handle missing hiredis_ssl-config.cmake"
+      patch_type: "conan"
   "1.3.3":
-    - patch_file: "patches/1.3.3-fix-conan-cmake-package.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.3.3-0001-fix-dependencies-injection.patch"
+      patch_description: "Robust discovery & injection of dependencies, and handle missing hiredis_ssl-config.cmake"
+      patch_type: "conan"
   "1.3.2":
-    - patch_file: "patches/1.3.2-fix-conan-cmake-package.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.3.2-0001-fix-dependencies-injection.patch"
+      patch_description: "Robust discovery & injection of dependencies, and handle missing hiredis_ssl-config.cmake"
+      patch_type: "conan"
   "1.2.3":
-    - patch_file: "patches/1.2.3-fix-conan-cmake-package.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.2.3-0001-fix-conan-cmake-package.patch"
+      patch_description: "Robust discovery & injection of dependencies"
+      patch_type: "conan"
   "1.2.1":
-    - patch_file: "patches/fix-hiredis-consumption.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.2.1-0001-fix-hiredis-consumption.patch"
+      patch_description: "Robust discovery & injection of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/1.2.1-0002-cmake-minimum-required.patch"
+      patch_description: "CMake: move cmake_minimum_required() before project()"
+      patch_type: "conan"

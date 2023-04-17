@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53.0"
 
 
 class MariadbConnectorcConan(ConanFile):
@@ -16,6 +16,7 @@ class MariadbConnectorcConan(ConanFile):
     homepage = "https://mariadb.com/kb/en/mariadb-connector-c"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,8 +36,7 @@ class MariadbConnectorcConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,37 +46,30 @@ class MariadbConnectorcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def requirements(self):
-        self.requires("zlib/1.2.12")
-        if self.options.get_safe("with_iconv"):
-            self.requires("libiconv/1.17")
-        if self.options.with_curl:
-            self.requires("libcurl/7.84.0")
-        if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1q")
-
-    def validate(self):
-        if self.info.settings.os != "Windows" and self.info.options.with_ssl == "schannel":
-            raise ConanInvalidConfiguration("schannel only supported on Windows")
-        if self.info.options.with_ssl == "gnutls":
-            raise ConanInvalidConfiguration("gnutls not yet available in CCI")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("zlib/1.2.13")
+        if self.options.get_safe("with_iconv"):
+            self.requires("libiconv/1.17")
+        if self.options.with_curl:
+            self.requires("libcurl/8.0.0")
+        if self.options.with_ssl == "openssl":
+            self.requires("openssl/1.1.1t")
+
+    def validate(self):
+        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
+            raise ConanInvalidConfiguration("schannel only supported on Windows")
+        if self.options.with_ssl == "gnutls":
+            raise ConanInvalidConfiguration("gnutls not yet available in CCI")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -127,6 +120,7 @@ class MariadbConnectorcConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "symbols"))
+        rmdir(self, os.path.join(self.package_folder, "man"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
@@ -141,9 +135,7 @@ class MariadbConnectorcConan(ConanFile):
                 self.cpp_info.system_libs.append("secur32")
 
         plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
-        self.output.info("Prepending to MARIADB_PLUGIN_DIR runtime environment variable: {}".format(plugin_dir))
         self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
 
-        # TODO: to remove in conan v2?
-        self.cpp_info.names["pkg_config"] = "libmariadb"
+        # TODO: to remove in conan v2
         self.env_info.MARIADB_PLUGIN_DIR.append(plugin_dir)

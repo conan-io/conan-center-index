@@ -23,3 +23,6 @@ sources:
   2.5.0:
     url: https://github.com/bernedom/SI/archive/2.5.0.tar.gz
     sha256: dc00eb8cfaa32e19c83595b238726188d2b857f8999dae08fe3001d0107ba276
+  2.5.1:
+    url: https://github.com/bernedom/SI/archive/2.5.1.tar.gz
+    sha256: b7b977c04c220a47a2bd3b8e2b6acfd640d286dfe1ae609f20e184cfec998798

@@ -66,13 +66,23 @@
  set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
 --- a/src/SFML/Graphics/CMakeLists.txt
 +++ b/src/SFML/Graphics/CMakeLists.txt
-@@ -134,8 +134,8 @@ if(SFML_OS_ANDROID)
+@@ -97,7 +97,8 @@ sfml_add_library(sfml-graphics
+ target_link_libraries(sfml-graphics PUBLIC sfml-window)
+ 
+ # stb_image sources
+-target_include_directories(sfml-graphics PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/stb_image")
++find_package(stb REQUIRED CONFIG)
++target_link_libraries(sfml-graphics PRIVATE stb::stb)
+ 
+ # let CMake know about our additional graphics libraries paths
+ if(SFML_OS_WINDOWS)
+@@ -134,8 +135,8 @@ if(SFML_OS_ANDROID)
      target_link_libraries(sfml-graphics PRIVATE z EGL GLESv1_CM)
  endif()
  
 -sfml_find_package(Freetype INCLUDE "FREETYPE_INCLUDE_DIRS" LINK "FREETYPE_LIBRARY")
 -target_link_libraries(sfml-graphics PRIVATE Freetype)
-+find_package(Freetype REQUIRED)
++find_package(Freetype REQUIRED MODULE)
 +target_link_libraries(sfml-graphics PRIVATE Freetype::Freetype)
  
  # add preprocessor symbols

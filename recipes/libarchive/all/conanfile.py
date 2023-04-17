@@ -1,18 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibarchiveConan(ConanFile):
     name = "libarchive"
     description = "Multi-format archive and compression library"
-    topics = ("libarchive", "tar", "data-compressor", "file-compression")
+    topics = "archive", "compression", "tar", "data-compressor", "file-compression"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD-2-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -57,61 +61,51 @@ class LibarchiveConan(ConanFile):
         "with_xattr": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "3.4.2":
+        if Version(self.version) < "3.4.2":
             del self.options.with_mbedtls
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.14")
+            self.requires("libxml2/2.10.3")
         if self.options.with_expat:
-            self.requires("expat/2.4.8")
+            self.requires("expat/2.5.0")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
             self.requires("pcre/8.45")
         if self.options.with_nettle:
-            self.requires("nettle/3.6")
+            self.requires("nettle/3.8.1")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/3.0.8")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.get_safe("with_mbedtls"):
             self.requires("mbedtls/3.2.1")
 
@@ -123,103 +117,57 @@ class LibarchiveConan(ConanFile):
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+    def generate(self):
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
+        tc = CMakeToolchain(self)
         # turn off deps to avoid picking up them accidentally
-        self._cmake.definitions["ENABLE_NETTLE"] = self.options.with_nettle
-        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["ENABLE_LIBB2"] = self.options.with_libb2
-        self._cmake.definitions["ENABLE_LZ4"] = self.options.with_lz4
-        self._cmake.definitions["ENABLE_LZO"] = self.options.with_lzo
-        self._cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
-        self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["ENABLE_BZip2"] = self.options.with_bzip2
+        tc.variables["ENABLE_NETTLE"] = self.options.with_nettle
+        tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
+        tc.variables["ENABLE_LIBB2"] = self.options.with_libb2
+        tc.variables["ENABLE_LZ4"] = self.options.with_lz4
+        tc.variables["ENABLE_LZO"] = self.options.with_lzo
+        tc.variables["ENABLE_LZMA"] = self.options.with_lzma
+        tc.variables["ENABLE_ZSTD"] = self.options.with_zstd
+        tc.variables["ENABLE_ZLIB"] = self.options.with_zlib
+        tc.variables["ENABLE_BZip2"] = self.options.with_bzip2
         # requires LibXml2 cmake name
-        self._cmake.definitions["ENABLE_LIBXML2"] = self.options.with_libxml2
-        self._cmake.definitions["ENABLE_ICONV"] = self.options.with_iconv
-        self._cmake.definitions["ENABLE_EXPAT"] = self.options.with_expat
-        self._cmake.definitions["ENABLE_PCREPOSIX"] = self.options.with_pcreposix
+        tc.variables["ENABLE_LIBXML2"] = self.options.with_libxml2
+        tc.variables["ENABLE_ICONV"] = self.options.with_iconv
+        tc.variables["ENABLE_EXPAT"] = self.options.with_expat
+        tc.variables["ENABLE_PCREPOSIX"] = self.options.with_pcreposix
         if self.options.with_pcreposix:
-            self._cmake.definitions["POSIX_REGEX_LIB"] = "LIBPCREPOSIX"
-        self._cmake.definitions["ENABLE_LibGCC"] = False
-        self._cmake.definitions["ENABLE_CNG"] = self.options.with_cng
+            tc.variables["POSIX_REGEX_LIB"] = "LIBPCREPOSIX"
+        tc.variables["ENABLE_LibGCC"] = False
+        tc.variables["ENABLE_CNG"] = self.options.with_cng
         # turn off features
-        self._cmake.definitions["ENABLE_ACL"] = self.options.with_acl
+        tc.variables["ENABLE_ACL"] = self.options.with_acl
         # turn off components
-        self._cmake.definitions["ENABLE_TAR"] = False
-        self._cmake.definitions["ENABLE_CPIO"] = False
-        self._cmake.definitions["ENABLE_CAT"] = False
-        self._cmake.definitions["ENABLE_TEST"] = False
+        tc.variables["ENABLE_TAR"] = False
+        tc.variables["ENABLE_CPIO"] = False
+        tc.variables["ENABLE_CAT"] = False
+        tc.variables["ENABLE_TEST"] = False
         # too strict check
-        self._cmake.definitions["ENABLE_WERROR"] = False
-        if tools.Version(self.version) >= "3.4.2":
-            self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.with_mbedtls
-        self._cmake.definitions["ENABLE_XATTR"] = self.options.with_xattr
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        cmakelists_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
-
-        # it can possibly override CMAKE_MODULE_PATH provided by generator
-        tools.replace_in_file(cmakelists_path,
-                              "SET(CMAKE_MODULE_PATH",
-                              "LIST(APPEND CMAKE_MODULE_PATH")
-        # allow openssl on macOS
-        if self.options.with_openssl:
-            tools.replace_in_file(cmakelists_path,
-                                  "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
-                                  "IF(ENABLE_OPENSSL)")
-        # wrong lzma cmake var name
-        if self.options.with_lzma:
-            tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LIBLZMA_INCLUDE_DIRS")
-        # add possible names for lz4 library
-        if not self.options.shared:
-            tools.replace_in_file(cmakelists_path,
-                                  "FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4)",
-                                  "FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4 lz4_static liblz4_static)")
-
-        # Exclude static/shared targets from build
-        if self.options.shared:
-            tools.save(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
-                       "set_target_properties(archive_static PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
-                       append=True)
-        else:
-            tools.save(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
-                       "set_target_properties(archive PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
-                       append=True)
-
-        # Exclude static/shared targets from install
-        if self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
-                                  "INSTALL(TARGETS archive archive_static",
-                                  "INSTALL(TARGETS archive")
-        else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libarchive", "CMakeLists.txt"),
-                                  "INSTALL(TARGETS archive archive_static",
-                                  "INSTALL(TARGETS archive_static")
+        tc.variables["ENABLE_WERROR"] = False
+        if Version(self.version) >= "3.4.2":
+            tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        tc.variables["ENABLE_XATTR"] = self.options.with_xattr
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -230,8 +178,8 @@ class LibarchiveConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "LibArchive"
         self.cpp_info.names["cmake_find_package_multi"] = "LibArchive"
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows" and self.options.with_cng:
             self.cpp_info.system_libs.append("bcrypt")
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"] and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]

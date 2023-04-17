@@ -11,8 +11,8 @@ class CgalConan(ConanFile):
     license = "GPL-3.0-or-later", "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CGAL/cgal"
-    description = "C++ library that aims to provide easy access to efficient and reliable algorithms"\
-                  "in computational geometry."
+    description = "C++ library that provides easy access to efficient and reliable algorithms"\
+                  " in computational geometry."
     topics = ("cgal", "geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"

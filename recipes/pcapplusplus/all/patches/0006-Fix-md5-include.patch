@@ -1,0 +1,11 @@
+--- mk/vs/Packet++.vcxproj.template
++++ mk/vs/Packet++.vcxproj.template
+@@ -275,7 +275,7 @@
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\..\3rdParty\hash-library\md5.cpp" />
+-    <ClCompile Include="..\..\3rdParty\hash-library\md5.h" />
++    <ClInclude Include="..\..\3rdParty\hash-library\md5.h" />
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="Common++.vcxproj">

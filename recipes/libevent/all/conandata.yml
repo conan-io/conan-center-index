@@ -8,7 +8,5 @@ sources:
 patches:
   "2.1.12":
     - patch_file: patches/fix-cmake-2.1.12.patch
-      base_path: source_subfolder
   "2.1.11":
     - patch_file: patches/fix-cmake-2.1.11.patch
-      base_path: source_subfolder

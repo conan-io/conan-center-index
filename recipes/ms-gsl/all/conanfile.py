@@ -13,7 +13,7 @@ required_conan_version = ">=1.50.0"
 
 class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
-    description = "Microsoft implementation of the Guidelines Support Library"
+    description = "Microsoft's implementation of the Guidelines Support Library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/GSL"
     license = "MIT"
@@ -26,6 +26,10 @@ class MicrosoftGslConan(ConanFile):
     default_options = {
         "on_contract_violation": "terminate"
     }
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
 
     @property
     def _contract_map(self):
@@ -52,7 +56,7 @@ class MicrosoftGslConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
         check_min_vs(self, "190")
 
@@ -60,15 +64,18 @@ class MicrosoftGslConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version:
                 if Version(self.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration("ms-gsl requires C++14, which your compiler does not fully support.")
+                    raise ConanInvalidConfiguration(
+                        f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not fully support.")
             else:
-                self.output.warn("ms-gsl requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+                self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. "
+                                 "Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         pass

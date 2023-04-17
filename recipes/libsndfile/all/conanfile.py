@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibsndfileConan(ConanFile):
@@ -17,8 +17,8 @@ class LibsndfileConan(ConanFile):
         "Libsndfile is a library of C routines for reading and writing files "
         "containing sampled audio data."
     )
-    topics = ("audio")
-
+    topics = ("audio",)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,6 +27,7 @@ class LibsndfileConan(ConanFile):
         "experimental": [True, False],
         "with_alsa": [True, False],
         "with_external_libs": [True, False],
+        "with_mpeg": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,20 +36,25 @@ class LibsndfileConan(ConanFile):
         "experimental": False,
         "with_alsa": False,
         "with_external_libs": True,
+        "with_mpeg": True,
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_alsa
+        if Version(self.version) < "1.1.0":
+            del self.options.with_mpeg
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("with_alsa"):
@@ -56,15 +62,14 @@ class LibsndfileConan(ConanFile):
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
-            self.requires("flac/1.3.3")
+            self.requires("flac/1.4.2")
             self.requires("opus/1.3.1")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.options.get_safe("with_mpeg", False):
+            self.requires("mpg123/1.31.2")
+            self.requires("libmp3lame/3.100")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -87,10 +92,10 @@ class LibsndfileConan(ConanFile):
         if is_msvc(self) and Version(self.version) < "1.0.30":
             tc.variables["ENABLE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_REGTEST"] = False
+        if Version(self.version) > "1.11.0":
+            tc.variables["ENABLE_MPEG"] = self.options.with_mpeg
         # Fix iOS/tvOS/watchOS
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -121,6 +126,9 @@ class LibsndfileConan(ConanFile):
                 "ogg::ogg", "vorbis::vorbismain", "vorbis::vorbisenc",
                 "flac::flac", "opus::opus",
             ])
+        if self.options.get_safe("with_mpeg", False):
+            self.cpp_info.components["sndfile"].requires.append("mpg123::mpg123")
+            self.cpp_info.components["sndfile"].requires.append("libmp3lame::libmp3lame")
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
         if not self.options.shared:
@@ -129,12 +137,9 @@ class LibsndfileConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.components["sndfile"].system_libs.append("winmm")
 
-        if self.options.programs:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "SndFile"
         self.cpp_info.names["cmake_find_package_multi"] = "SndFile"
         self.cpp_info.components["sndfile"].set_property("cmake_target_name", "SndFile::sndfile")
+        if self.options.programs:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

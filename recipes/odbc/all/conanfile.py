@@ -1,14 +1,17 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 import os
-import shutil
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class OdbcConan(ConanFile):
     name = "odbc"
+    package_type = "library"
     description = "Package providing unixODBC"
     topics = ("odbc", "database", "dbms", "data-access")
     url = "https://github.com/conan-io/conan-center-index"
@@ -27,25 +30,20 @@ class OdbcConan(ConanFile):
         "with_libiconv": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("libtool/2.4.7")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
 
@@ -54,57 +52,68 @@ class OdbcConan(ConanFile):
             raise ConanInvalidConfiguration("odbc is a system lib on Windows")
 
     def build_requirements(self):
-        self.build_requires("gnu-config/cci.20201022")
+        self.tool_requires("gnu-config/cci.20210814")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        yes_no = lambda v: "yes" if v else "no"
+        libtool_cppinfo = self.dependencies["libtool"].cpp_info.aggregated_components()
+        tc.configure_args.extend([
+            "--without-included-ltdl",
+            f"--with-ltdl-include={libtool_cppinfo.includedirs[0]}",
+            f"--with-ltdl-lib={libtool_cppinfo.libdirs[0]}",
+            "--disable-ltdl-install",
+            f"--enable-iconv={yes_no(self.options.with_libiconv)}",
+            "--sysconfdir=/etc",
+        ])
+        if self.options.with_libiconv:
+            libiconv_prefix = self.dependencies["libiconv"].package_folder
+            tc.configure_args.append(f"--with-libiconv-prefix={libiconv_prefix}")
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-        # relocatable shared libs on macOS
-        for configure in [
-            os.path.join(self._source_subfolder, "configure"),
-            os.path.join(self._source_subfolder, "libltdl", "configure"),
+        apply_conandata_patches(self)
+        # support more triplets
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
         ]:
-            tools.replace_in_file(configure, "-install_name \\$rpath/", "-install_name @rpath/")
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-ltdl-install",
-            "--enable-iconv={}".format(yes_no(self.options.with_libiconv)),
-            "--sysconfdir=/etc",
-        ]
-        if self.options.with_libiconv:
-            libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-            args.append("--with-libiconv-prefix={}".format(libiconv_prefix))
-        autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return autotools
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        # allow external libtdl (in libtool recipe)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "configure"),
+            "if test -f \"$with_ltdl_lib/libltdl.la\";",
+            "if true;",
+        )
+        libtool_system_libs = self.dependencies["libtool"].cpp_info.aggregated_components().system_libs
+        if libtool_system_libs:
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "configure"),
+                "-L$with_ltdl_lib -lltdl",
+                "-L$with_ltdl_lib -lltdl -l{}".format(" -l".join(libtool_system_libs)),
+            )
 
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -119,26 +128,22 @@ class OdbcConan(ConanFile):
         # odbc
         self.cpp_info.components["_odbc"].set_property("pkg_config_name", "odbc")
         self.cpp_info.components["_odbc"].libs = ["odbc"]
-        self.cpp_info.components["_odbc"].requires = ["odbcltdl"]
+        self.cpp_info.components["_odbc"].requires = ["libtool::libtool"]
         if self.options.with_libiconv:
             self.cpp_info.components["_odbc"].requires.append("libiconv::libiconv")
 
         # odbcinst
         self.cpp_info.components["odbcinst"].set_property("pkg_config_name", "odbcinst")
         self.cpp_info.components["odbcinst"].libs = ["odbcinst"]
-        self.cpp_info.components["odbcinst"].requires = ["odbcltdl"]
+        self.cpp_info.components["odbcinst"].requires = ["libtool::libtool"]
 
         # odbccr
         self.cpp_info.components["odbccr"].set_property("pkg_config_name", "odbccr")
         self.cpp_info.components["odbccr"].libs = ["odbccr"]
 
-        self.cpp_info.components["odbcltdl"].libs = ["ltdl"]
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_odbc"].system_libs = ["pthread"]
             self.cpp_info.components["odbcinst"].system_libs = ["pthread"]
-            self.cpp_info.components["odbcltdl"].system_libs = ["dl"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

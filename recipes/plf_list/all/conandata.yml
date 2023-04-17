@@ -1,7 +1,26 @@
 sources:
+  "2.57":
+    url: "https://github.com/mattreecebentley/plf_list/archive/d7a06d7497dc01261dd2c2fe675a8b605acb7a56.tar.gz"
+    sha256: "4297c7578fe5ea2c6346541b28a57d87ec311522fa55bc8a5ab069921fc073e9"
+  "2.52":
+    url: "https://github.com/mattreecebentley/plf_list/archive/76115adac11a5f362b7a8eea8362314d547284df.tar.gz"
+    sha256: "897ff5309c399ec0f7c875b398c7eb07ebe3cd80a75ce337a0bd70456668116b"
   "2.50":
     url: "https://github.com/mattreecebentley/plf_list/archive/b520008d5d076402da2344994dd2c1e3cc097460.tar.gz"
     sha256: "086a1ecad544202c93a3fa4bb7d26cf4140db7ebc2bb39af3e75620050c78f23"
   "2.03":
     url: "https://github.com/mattreecebentley/plf_list/archive/cc579a5cc828d8a0da6715ef075d560e4de89901.tar.gz"
     sha256: "4ab3f7ca41e3567710a64ede3a9f708b388f3ae52e09b3ee1a45d6b4fd89dd09"
+patches:
+  "2.57":
+    - patch_file: "patches/2.57-0001-disable-cxx20-from-apple-clang14.patch"
+      patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
+      patch_type: "portability"
+  "2.52":
+    - patch_file: "patches/2.50-0001-disable-cxx20-from-apple-clang14.patch"
+      patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
+      patch_type: "portability"
+  "2.50":
+    - patch_file: "patches/2.50-0001-disable-cxx20-from-apple-clang14.patch"
+      patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
+      patch_type: "portability"

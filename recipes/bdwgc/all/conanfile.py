@@ -151,7 +151,7 @@ class BdwGcConan(ConanFile):
         if self.options.gc_debug:
             self.cpp_info.components["gc"].defines.append("GC_DEBUG")
         if self.settings.os == "Windows":
-            self.cpp_info.components["gc"].requires = ["libatomic_ops::libatomic_ops"]
+            self.cpp_info.components["gc"].requires = ["libatomic_ops::atomic_ops"]
 
         if self.options.cplusplus and self.options.get_safe("throw_bad_alloc_library"):
             self.cpp_info.components["gctba"].set_property("cmake_target_name", "BDWgc::gctba")

@@ -1,10 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.scm import Version
 
 import os
-import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 class MpppConan(ConanFile):
     name = "mppp"
@@ -13,6 +17,7 @@ class MpppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/bluescarni/mppp/"
     topics = ("multiprecision", "gmp", "math-bignum", "computer-algebra")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,6 +27,7 @@ class MpppConan(ConanFile):
         "with_mpc": [True, False],
         "with_quadmath": [True, False],
         "with_boost": [True, False],
+        "with_fmt": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,17 +37,15 @@ class MpppConan(ConanFile):
         "with_mpc": False,
         "with_quadmath": False,
         "with_boost": False,
+        "with_fmt": False,
     }
-    generators = "cmake", "cmake_find_package_multi"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,64 +53,76 @@ class MpppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.27":
+            del self.options.with_fmt
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("gmp/6.2.1")
-        if self.options.with_mpfr == True:
+        if self.options.with_mpfr:
             self.requires("mpfr/4.1.0")
-        if self.options.with_mpc == True:
+        if self.options.with_mpc:
             self.requires("mpc/1.2.0")
-        if self.options.with_boost == True:
-            self.requires("boost/1.79.0")
+        if self.options.with_boost:
+            self.requires("boost/1.81.0")
+        if self.options.get_safe("with_fmt"):
+            self.requires("fmt/9.1.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if self.options.with_arb:
-            raise ConanInvalidConfiguration("{}/{} doesn't supported arb (yet)".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.ref}:with_arb=True is not supported because `fredrik-johansson/arb` is not packaged in CCI. (yet)")
         if self.options.with_quadmath:
-            raise ConanInvalidConfiguration("{}/{} doesn't supported libquadmath (yet)".format(self.name, self.version))
-        if self.options.with_boost and self.options["boost"].without_serialization:
-            raise ConanInvalidConfiguration("{}:with_boost=True requires boost::without_serialization=False".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.ref}:with_quadmath=True is not supported because `libquadmath` is not available from CCI. (yet)")
+        if self.options.with_boost and self.dependencies["boost"].options.without_serialization:
+            raise ConanInvalidConfiguration(f"{self.ref}:with_boost=True requires boost:without_serialization=False")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["MPPP_BUILD_STATIC_LIBRARY"] = not self.options.shared
-        cmake.definitions["MPPP_WITH_MPFR"] = self.options.with_mpfr
-        cmake.definitions["MPPP_WITH_ARB"] = self.options.with_arb
-        cmake.definitions["MPPP_WITH_MPC"] = self.options.with_mpc
-        cmake.definitions["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
-        cmake.definitions["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["MPPP_BUILD_STATIC_LIBRARY"] = not self.options.shared
+        tc.variables["MPPP_WITH_MPFR"] = self.options.with_mpfr
+        tc.variables["MPPP_WITH_ARB"] = self.options.with_arb
+        tc.variables["MPPP_WITH_MPC"] = self.options.with_mpc
+        tc.variables["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
+        tc.variables["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
+        if Version(self.version) >= "0.27":
+            tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
         if not self.options.shared:
-            cmake.definitions["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = self.settings.compiler.get_safe("runtime") in ["MD", "MDd"]
-        cmake.configure()
-        return cmake
+            tc.variables["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = not is_msvc_static_runtime(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["mp++"]
         self.cpp_info.set_property("cmake_file_name", "mp++")
         self.cpp_info.set_property("cmake_target_name", "mp++::mp++")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
+        if self.options.get_safe("with_fmt"):
+            self.cpp_info.defines.append("MPPP_WITH_FMT")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "mp++"

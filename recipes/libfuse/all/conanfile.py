@@ -1,8 +1,13 @@
-from conans import ConanFile, tools, Meson
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
+
 
 class LibfuseConan(ConanFile):
     name = "libfuse"
@@ -11,6 +16,7 @@ class LibfuseConan(ConanFile):
     license = "LGPL-2.1"
     description = "The reference implementation of the Linux FUSE interface"
     topics = ("fuse", "libfuse", "filesystem", "linux")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,60 +26,51 @@ class LibfuseConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "pkg_config"
-    
-    _meson = None
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
             raise ConanInvalidConfiguration("libfuse supports only Linux and FreeBSD")
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("meson/0.59.2")
+        self.tool_requires("meson/1.0.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        self._meson.options["examples"] = False
-        self._meson.options["utils"] = False
-        self._meson.options["tests"] = False
-        self._meson.options["useroot"] = False
-        self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._meson
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = MesonToolchain(self)
+        tc.project_options["examples"] = False
+        tc.project_options["utils"] = False
+        tc.project_options["tests"] = False
+        tc.project_options["useroot"] = False
+        tc.generate()
 
     def build(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "fuse3")
         self.cpp_info.libs = ["fuse3"]
         self.cpp_info.includedirs = [os.path.join("include", "fuse3")]
-        self.cpp_info.names["pkg_config"] = "fuse3"
         self.cpp_info.system_libs = ["pthread"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "rt"])

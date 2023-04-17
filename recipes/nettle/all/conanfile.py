@@ -1,17 +1,26 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
-class NettleTLS(ConanFile):
+class NettleConan(ConanFile):
     name = "nettle"
     description = "The Nettle and Hogweed low-level cryptographic libraries"
     homepage = "https://www.lysator.liu.se/~nisse/nettle"
-    topics = ("conan", "nettle", "crypto", "low-level-cryptographic", "cryptographic")
+    topics = ("crypto", "low-level-cryptographic", "cryptographic")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,12 +39,6 @@ class NettleTLS(ConanFile):
         "x86_shani": False,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,18 +50,21 @@ class NettleTLS(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.public_key:
             self.requires("gmp/6.2.1")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
-        if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built with Visual Studio")
+        if Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
     @property
@@ -66,65 +72,71 @@ class NettleTLS(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = [
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             "--enable-public-key" if self.options.public_key else "--disable-public-key",
             "--enable-fat" if self.options.get_safe("fat") else "--disable-fat",
             "--enable-x86-aesni" if self.options.get_safe("x86_aesni") else "--disable-x86-aesni",
             "--enable-x86_sshni" if self.options.get_safe("x86_sshni") else "--disable-x86_sshni",
-        ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        # srcdir in unix path causes some troubles in asm files on Windows
-        if self.settings.os == "Windows":
-            tools.replace_in_file(os.path.join(self.build_folder, "config.m4"),
-                                  tools.unix_path(os.path.join(self.build_folder, self._source_subfolder)),
-                                  os.path.join(self.build_folder, self._source_subfolder).replace("\\", "/"))
-        return self._autotools
+        ])
+        tc.generate()
+        tc = AutotoolsDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
-        makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
-        tools.replace_in_file(makefile_in,
+        makefile_in = os.path.join(self.source_folder, "Makefile.in")
+        # discard subdirs
+        replace_in_file(self, makefile_in,
                               "SUBDIRS = tools testsuite examples",
                               "SUBDIRS = ")
         # Fix broken tests for compilers like apple-clang with -Werror,-Wimplicit-function-declaration
-        tools.replace_in_file(os.path.join(self._source_subfolder, "aclocal.m4"),
+        replace_in_file(self, os.path.join(self.source_folder, "aclocal.m4"),
                               "cat >conftest.c <<EOF",
                               "cat >conftest.c <<EOF\n#include <stdlib.h>")
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        # srcdir in unix path causes some troubles in asm files on Windows
+        if self._settings_build.os == "Windows":
+            replace_in_file(self, os.path.join(self.build_folder, "config.m4"),
+                                  unix_path(self, os.path.join(self.build_folder, self.source_folder)),
+                                  os.path.join(self.build_folder, self.source_folder).replace("\\", "/"))
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, pattern="COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.components["hogweed"].names["pkgconfig"] = "hogweed"
+        self.cpp_info.set_property("pkg_config_name", "hogweed")
+
+        self.cpp_info.components["libnettle"].set_property("pkg_config_name", "nettle")
+        self.cpp_info.components["libnettle"].libs = ["nettle"]
+
+        self.cpp_info.components["hogweed"].set_property("pkg_config_name", "hogweed")
         self.cpp_info.components["hogweed"].libs = ["hogweed"]
+        self.cpp_info.components["hogweed"].requires = ["libnettle"]
         if self.options.public_key:
             self.cpp_info.components["hogweed"].requires.append("gmp::libgmp")
-
-        self.cpp_info.components["libnettle"].libs = ["nettle"]
-        self.cpp_info.components["libnettle"].requires = ["hogweed"]
-        self.cpp_info.components["libnettle"].names["pkgconfig"] = "nettle"

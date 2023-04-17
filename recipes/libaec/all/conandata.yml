@@ -8,9 +8,15 @@ sources:
 patches:
   "1.0.4":
     - patch_file: "patches/1.0.4-0001-Fix-static-library-builds.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fix static library builds"
     - patch_file: "patches/1.0.4-0002-fix-install-ios.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fix install iOS"
   "1.0.6":
     - patch_file: "patches/1.0.6-0001-fix-library-builds.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fix library builds"
+    - patch_file: "patches/1.0.6-0002-fix-cmake-build-with-ninja.patch"
+      patch_type: "conan"
+      patch_description: "Ninja needs 'aec' binary to be put in a separate folder to an imaginary 'aec' object output"

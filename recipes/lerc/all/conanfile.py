@@ -1,20 +1,21 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class LercConan(ConanFile):
     name = "lerc"
     description = "C++ library for limited Error Raster Compression."
     license = "Apache-2.0"
-    topics = ("lerc", "lerclib", "compression", "decompression", "image", "raster")
-    homepage = "https://github.com/Esri/lerc"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/Esri/lerc"
+    topics = ("lerclib", "compression", "decompression", "image", "raster")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,9 +26,12 @@ class LercConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,18 +39,17 @@ class LercConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -63,7 +66,15 @@ class LercConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        if Version(self.version) >= "3.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
     def package_info(self):
-        self.cpp_info.libs = ["LercLib"]
+        self.cpp_info.libs = ["LercLib" if Version(self.version) < "4.0.0" else "Lerc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        if Version(self.version) >= "3.0":
+            self.cpp_info.set_property("pkg_config_name", "Lerc")
+            if not self.options.shared:
+                self.cpp_info.defines = ["LERC_STATIC"]

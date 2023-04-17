@@ -1,8 +1,14 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag
-import os, glob
+from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
+from conan.tools.build import cross_building
+from conans import tools
+import os
+import glob
 
+required_conan_version = ">=1.51.3"
 
 class NSSConan(ConanFile):
     name = "nss"
@@ -30,7 +36,7 @@ class NSSConan(ConanFile):
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
         if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/3.38.1")
+            self.build_requires("sqlite3/3.39.3")
 
     def configure(self):
         self.options["nspr"].shared = True
@@ -42,8 +48,8 @@ class NSSConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("nspr/4.33")
-        self.requires("sqlite3/3.38.1")
+        self.requires("nspr/4.35")
+        self.requires("sqlite3/3.39.3")
         self.requires("zlib/1.2.12")
 
     def validate(self):
@@ -57,10 +63,13 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
+        if Version(self.version) < "3.74":
+            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
+                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")
 
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     @property
     def _make_args(self):
@@ -131,7 +140,7 @@ class NSSConan(ConanFile):
                         library += ".lib"
                     result.append(library)
                 else:
-                    result.append("-l%s" % library)
+                    result.append(f"-l{library}")
             return result
 
 
@@ -143,21 +152,20 @@ class NSSConan(ConanFile):
         args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
         args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
         args.append("NSDISTMODE=copy")
-        if tools.cross_building(self):
+        if cross_building(self):
             args.append("CROSS_COMPILE=1")
         return args
 
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+        apply_conandata_patches(self)
+        with chdir(self, os.path.join(self._source_subfolder, "nss")):
             with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 self.run("make %s" % " ".join(self._make_args), run_environment=True)
 
     def package(self):
         self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
-        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+        with chdir(self, os.path.join(self._source_subfolder, "nss")):
             self.run("make install %s" % " ".join(self._make_args))
         self.copy("*",
                   src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
@@ -171,23 +179,20 @@ class NSSConan(ConanFile):
             self.copy("*", src = f)
 
         for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-            tools.rename(dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
+            rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
+            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
 
 
     def package_info(self):
 
         def _library_name(lib,vers):
-            if self.options.shared:
-                return "%s%s" % (lib,vers)
-            else:
-                return lib
+            return f"{lib}{vers}" if self.options.shared else lib
         self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
         self.cpp_info.components["libnss"].requires = ["nssutil", "nspr::nspr"]
 

@@ -1,15 +1,26 @@
 sources:
+  "2.20.1":
+    url: "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.1/SDL2_ttf-2.20.1.tar.gz"
+    sha256: "78cdad51f3cc3ada6932b1bb6e914b33798ab970a1e817763f22ddbfd97d0c57"
   "2.0.18":
     url: "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-2.0.18.tar.gz"
     sha256: "6b61544441b72bdfa1ced89034c6396fe80228eff201eb72c5f78e500bb80bd0"
   "2.0.15":
-    url: "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/release-2.0.15.tar.gz"
-    sha256: "02e887b560faf398cbd60f56ce0a1cbaf96012dd4ddaa455f8307cb4911c86cc"
-
+    url: "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.0.15/SDL2_ttf-2.0.15.tar.gz"
+    sha256: "a9eceb1ad88c1f1545cd7bd28e7cbc0b2c14191d40238f531a15b01b1b22cd33"
 patches:
+  "2.20.1":
+    - patch_file: "patches/2.20.1-0001-fix-cmake-min-version.patch"
+      patch_description: "Disable useless .pc file install to avoid relying on CMake 3.21 features"
+      patch_type: "conan"
   "2.0.18":
-    - patch_file: "patches/cmake-fix-link-target-2.0.18.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.18-0001-cmake-fix-link-target.patch"
+      patch_description: "correct target name, disable PIC fixed"
+      patch_type: "portability"
+    - patch_file: "patches/2.0.18-0002-fix-android.patch"
+      patch_description: "Fix Android build"
+      patch_type: "portability"
   "2.0.15":
-    - patch_file: "patches/cmake-fix-link-target-2.0.15.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.15-0001-cmake-fix-link-target.patch"
+      patch_description: "correct target name"
+      patch_type: "portability"

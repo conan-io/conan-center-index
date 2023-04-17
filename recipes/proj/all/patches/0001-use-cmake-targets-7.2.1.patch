@@ -1,3 +1,15 @@
+diff -ru a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2020-12-27 02:57:21.000000000 +0800
++++ b/CMakeLists.txt	2022-12-14 21:21:31.516729458 +0800
+@@ -121,6 +121,8 @@
+ include(ProjMac)
+ include(policies)
+ 
++find_package(nlohmann_json REQUIRED)
++
+ ################################################################################
+ # Check for sqlite3
+ ################################################################################
 --- a/src/lib_proj.cmake
 +++ b/src/lib_proj.cmake
 @@ -414,19 +414,16 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
@@ -6,7 +18,7 @@
  
 -target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
 -target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
-+target_link_libraries(${PROJ_CORE_TARGET} CONAN_PKG::nlohmann_json CONAN_PKG::sqlite3)
++target_link_libraries(${PROJ_CORE_TARGET} nlohmann_json::nlohmann_json SQLite::SQLite3)
  
  if(TIFF_ENABLED)
    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DTIFF_ENABLED)

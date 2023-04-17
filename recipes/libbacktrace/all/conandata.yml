@@ -5,6 +5,4 @@ sources:
 patches:
   "cci.20210118":
     - patch_file: "patches/0001-pointer-arithmetic.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-unistd-alternative.patch"
-      base_path: "source_subfolder"

@@ -1,38 +1,35 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import os
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.33.0"
+import os
+
+required_conan_version = ">=1.52.0"
 
 class QuillConan(ConanFile):
     name = "quill"
     description = "Asynchronous Low Latency C++ Logging Library"
-    topics = ("quill", "logging", "log", "async")
     license = "MIT"
-    homepage = "https://github.com/odygrd/quill/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
+    homepage = "https://github.com/odygrd/quill/"
+    topics = ("quill", "logging", "log", "async")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "with_bounded_queue": [True, False],
         "with_no_exceptions": [True, False],
+        "with_x86_arch": [True, False],
     }
     default_options = {
         "fPIC": True,
         "with_bounded_queue": False,
         "with_no_exceptions": False,
+        "with_x86_arch": False,
     }
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _compilers_minimum_versions(self):
@@ -57,79 +54,104 @@ class QuillConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if Version(self.version) >= "1.6.3":
+            self.requires("fmt/9.1.0")
+        else:
+            self.requires("fmt/7.1.3")
+
     def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]
 
         if not any(arch in str(self.settings.arch) for arch in supported_archs):
-            raise ConanInvalidConfiguration("{} is not supported by {}".format(self.settings.arch, self.name))
+            raise ConanInvalidConfiguration(f"{self.settings.arch} is not supported by {self.ref}")
 
-        cxx_std = "17" if tools.Version(self.version) >= "2.0.0" else "14"
+        cxx_std = "17" if Version(self.version) >= "2.0.0" else "14"
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, cxx_std)
+            check_min_cppstd(self, cxx_std)
 
         compilers_minimum_version = self._compilers_minimum_versions[cxx_std]
         minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, cxx_std))
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{cxx_std}, which your compiler does not support.")
         else:
-            self.output.warn("{} requires C++{}. Your compiler is unknown. Assuming it supports C++{}.".format(self.name, cxx_std, cxx_std))
+            self.output.warning(f"{self.ref} requires C++{cxx_std}. Your compiler is unknown. Assuming it supports C++{cxx_std}.")
 
-        if tools.Version(self.version) >= "2.0.0" and \
-            self.settings.compiler== "clang" and tools.Version(self.settings.compiler.version).major == "11" and \
+        if Version(self.version) >= "2.0.0" and \
+            self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
             self.settings.compiler.libcxx == "libstdc++":
-            raise ConanInvalidConfiguration("{}/{} requires C++ filesystem library, which your compiler doesn't support.".format(self.name, self.version))
-
-    def requirements(self):
-        if tools.Version(self.version) >= "1.6.3":
-            self.requires("fmt/9.0.0")
-        else:
-            self.requires("fmt/7.1.3")
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, which your compiler doesn't support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["QUILL_FMT_EXTERNAL"] = True
-        cmake.definitions["QUILL_ENABLE_INSTALL"] = True
-        cmake.definitions["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
-        cmake.definitions["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
-        cmake.configure(build_folder=self._build_subfolder)
+    def is_quilll_x86_arch(self):
+        if not self.options.with_x86_arch:
+            return False
+        if Version(self.version) < "2.7.0":
+            return False
+        if self.settings.arch not in ("x86", "x86_64"):
+            return False
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+            return False
+        if is_msvc(self):
+            return False
+        return True
 
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["QUILL_FMT_EXTERNAL"] = True
+        tc.variables["QUILL_ENABLE_INSTALL"] = True
+        tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
+        tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if self.is_quilll_x86_arch():
+            tc.variables["QUILL_X86ARCH"] = True
+            tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
+        tc.generate()
 
-    def build(self):
-        if tools.Version(self.version) >= "2.0.0":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        # remove bundled fmt
+        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "include", "quill", "bundled", "fmt"))
+        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "src", "bundled", "fmt"))
+
+        if Version(self.version) >= "2.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/quill/cmake" CACHE STRING "Modules for CMake" FORCE)""",
                 """set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_LIST_DIR}/quill/cmake")"""
             )
 
-        # remove bundled fmt
-        tools.rmdir(os.path.join(self._source_subfolder, "quill", "quill", "include", "quill", "bundled", "fmt"))
-        tools.rmdir(os.path.join(self._source_subfolder, "quill", "quill", "src", "bundled", "fmt"))
-
-        cmake = self._configure_cmake()
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.defines = ["QUILL_FMT_EXTERNAL"]
+        self.cpp_info.libs = ["quill"]
+        self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
+        if self.is_quilll_x86_arch():
+            self.cpp_info.defines.append("QUILL_X86ARCH")
+            self.cpp_info.cxxflags.append("-mclflushopt")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        if tools.Version(self.version) >= "2.0.0" and \
-            self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version).major == "8":
+        if Version(self.version) >= "2.0.0" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")

@@ -1,0 +1,12 @@
+diff --git a/a/zzipwrap/CMakeLists.txt b/b/zzipwrap/CMakeLists.txt
+index ea7ea93..39de22f 100644
+--- a/a/zzipwrap/CMakeLists.txt
++++ b/b/zzipwrap/CMakeLists.txt
+@@ -84,6 +84,7 @@ endif()
+ 
+ install(FILES ${libzzipwrap_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zzip )
+ install(TARGETS libzzipwrap
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 

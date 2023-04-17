@@ -1,0 +1,30 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -103,7 +103,7 @@ if (GOOGLETEST_INSTALL_DIR)
+     list(APPEND CMAKE_PREFIX_PATH ${GOOGLETEST_INSTALL_DIR})
+ endif()
+ 
+-find_package(VulkanHeaders REQUIRED)
++find_package(VulkanHeaders REQUIRED MODULE)
+ add_library(Vulkan-Headers INTERFACE)
+ target_include_directories(Vulkan-Headers INTERFACE ${VulkanHeaders_INCLUDE_DIRS})
+ add_library(Vulkan::Headers ALIAS Vulkan-Headers)
+@@ -229,7 +229,6 @@ if(BUILD_LAYERS OR BUILD_TESTS)
+     endif()
+ 
+     # VVLGenerateSourceCode depends on spirv/unified1
+-    include(VVLGenerateSourceCode)
+ 
+     if (NOT TARGET SPIRV-Tools-opt)
+         find_package(SPIRV-Tools-opt REQUIRED CONFIG)
+--- a/cmake/FindVulkanHeaders.cmake
++++ b/cmake/FindVulkanHeaders.cmake
+@@ -63,7 +63,7 @@ if(DEFINED VULKAN_HEADERS_INSTALL_DIR)
+       NO_DEFAULT_PATH)
+   find_path(VulkanRegistry_DIR
+       NAMES vk.xml
+-      HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry
++      HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry
+       NO_CMAKE_FIND_ROOT_PATH
+       NO_DEFAULT_PATH)
+ else()

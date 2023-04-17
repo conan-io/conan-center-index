@@ -1,0 +1,51 @@
+name: 'Changed files in PR'
+description: 'Get all changed files in a Pull Request'
+author: 'ericLemanissier'
+inputs:
+  files:
+    description: "Check for changes using only this list of files (Defaults to the entire repo)"
+    required: false
+    default: ""
+    
+outputs:
+  all_changed_files:
+    description: List of all copied, modified, and added files.
+    value: ${{ steps.changed-files.outputs.all_changed_files }}
+  any_changed:
+    description: Return true only when any files provided using the files input have changed.
+    value: ${{ steps.changed-files.outputs.any_changed }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYVER }}
+    - name: Get changed files
+      id: changed-files
+      shell: python
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        import json
+        import subprocess
+        import fnmatch
+        import os
+        from pathlib import Path
+
+        patterns = [Path(p).parts for p in '''${{ inputs.files }}'''.splitlines()]
+
+        res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
+        files = []
+        for f in json.loads(res.stdout):
+          if f["status"] == "removed":
+            continue
+          filename = Path(f["filename"]).parts
+          for pattern in patterns:
+            if len(pattern) != len(filename):
+              continue
+            if all(fnmatch.fnmatch(filename[i], pattern[i]) for i in range(len(pattern))):
+              files.append(f["filename"])
+              break
+        with open(os.getenv("GITHUB_OUTPUT"), "a") as output_file:
+            output_file.write(f"any_changed={'true' if files else 'false'}\n")
+            output_file.write(f"all_changed_files={' '.join(files)}\n")

@@ -10,21 +10,21 @@ class OpenclHeadersConan(ConanFile):
     name = "opencl-headers"
     description = "C language headers for the OpenCL API"
     license = "Apache-2.0"
-    topics = ("opencl-headers", "opencl", "header-only", "api-headers")
+    topics = ("opencl", "header-only", "api-headers")
     homepage = "https://github.com/KhronosGroup/OpenCL-Headers"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -38,9 +38,7 @@ class OpenclHeadersConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenCL::Headers")
         self.cpp_info.set_property("pkg_config_name", "OpenCL")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OpenCLHeaders"
@@ -53,6 +51,4 @@ class OpenclHeadersConan(ConanFile):
         self.cpp_info.components["_opencl-headers"].set_property("cmake_target_name", "OpenCL::Headers")
         self.cpp_info.components["_opencl-headers"].set_property("pkg_config_name", "OpenCL")
         self.cpp_info.components["_opencl-headers"].bindirs = []
-        self.cpp_info.components["_opencl-headers"].frameworkdirs = []
         self.cpp_info.components["_opencl-headers"].libdirs = []
-        self.cpp_info.components["_opencl-headers"].resdirs = []

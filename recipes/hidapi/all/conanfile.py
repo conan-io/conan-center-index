@@ -1,9 +1,15 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.54.0"
 
 
 class HidapiConan(ConanFile):
@@ -25,87 +31,110 @@ class HidapiConan(ConanFile):
         "shared": False,
     }
 
-    generators = "pkg_config"
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _msbuild_configuration(self):
+        return "Debug" if self.settings.build_type == "Debug" else "Release"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self._is_msvc:
+        if is_msvc(self):
             self.options.shared = True
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libusb/1.0.24")
+            self.requires("libusb/1.0.26")
+        if self.settings.os == "Linux":
+            self.requires("libudev/system")
 
     def validate(self):
-        if self._is_msvc and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Static libraries for Visual Studio are currently not available")
 
     def build_requirements(self):
-        if not self._is_msvc:
-            self.build_requires("libtool/2.4.6")
+        if not is_msvc(self):
+            self.tool_requires("libtool/2.4.7")
+            if self.settings.os in ["Linux", "FreeBSD"] and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.configuration = self._msbuild_configuration
+            tc.properties["WholeProgramOptimization"] = "false"
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
-                              "AC_CONFIG_MACRO_DIR", "dnl AC_CONFIG_MACRO_DIR")
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return autotools
+        replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
+                        "AC_CONFIG_MACRO_DIR", "dnl AC_CONFIG_MACRO_DIR")
 
     def build(self):
         self._patch_sources()
-        if self._is_msvc:
-            self._build_msvc()
+        if is_msvc(self):
+            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
+            replace_in_file(
+                self, os.path.join(self.source_folder, "windows", "hidapi.vcxproj"),
+                "<WholeProgramOptimization>true</WholeProgramOptimization>",
+                "",
+            )
+            conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+            replace_in_file(
+                self, os.path.join(self.source_folder, "windows", "hidapi.vcxproj"),
+                "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+                f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+            )
+
+            msbuild = MSBuild(self)
+            msbuild.build_type = self._msbuild_configuration
+            msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
+            msbuild.build(os.path.join(self.source_folder, "windows", "hidapi.sln"), targets=["hidapi"])
         else:
-            with tools.chdir(self._source_subfolder):
-                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-                # relocatable shared lib on macOS
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
             autotools.make()
 
-    def _build_msvc(self):
-        msbuild = MSBuild(self)
-        msbuild.build(os.path.join(self._source_subfolder, "windows", "hidapi.sln"),
-                      platforms={"x86": "Win32"})
-
     def package(self):
-        self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
-        if self.settings.os == "Windows":
-            self.copy(os.path.join("hidapi", "*.h"), dst="include", src=self._source_subfolder)
-            self.copy("*hidapi.lib", dst="lib", keep_path=False)
-            self.copy("*.dll", dst="bin", keep_path=False)
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            copy(self, os.path.join("hidapi", "*.h"), src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+            output_folder = os.path.join(self.source_folder, "windows")
+            copy(self, "*hidapi.lib", src=output_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=output_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -116,8 +145,12 @@ class HidapiConan(ConanFile):
 
             self.cpp_info.components["hidraw"].set_property("pkg_config_name", "hidapi-hidraw")
             self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["hidraw"].requires = ["libudev::libudev"]
             self.cpp_info.components["hidraw"].system_libs = ["pthread", "dl"]
         else:
             self.cpp_info.libs = ["hidapi"]
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation", "Appkit"])
+                self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation", "AppKit"])
+            if Version(self.version) == "0.10.1" and self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["setupapi"]

@@ -1,0 +1,11 @@
+--- a/cmake/DefineProjectMacros.cmake
++++ b/cmake/DefineProjectMacros.cmake
+@@ -18,7 +18,7 @@ macro(easyhttpcpp_generate_package target_name)
+            NAMESPACE "${CMAKE_PROJECT_NAME}::"
+            )
+ 
+-    configure_file("${CMAKE_MODULE_PATH}/${CMAKE_PROJECT_NAME}${target_name}Config.cmake.in"
++    configure_file("${PROJECT_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}${target_name}Config.cmake.in"
+                    "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}/${CMAKE_PROJECT_NAME}${target_name}Config.cmake"
+                    @ONLY
+                    )

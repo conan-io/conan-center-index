@@ -1,7 +1,10 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
-from conans import ConanFile, tools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class FastDoubleParserConan(ConanFile):
@@ -15,22 +18,21 @@ class FastDoubleParserConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def package(self):
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy("*.h", dst="include", src=include_folder)
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
+        include_folder = os.path.join(self.source_folder, "include")
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=include_folder)
+        copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

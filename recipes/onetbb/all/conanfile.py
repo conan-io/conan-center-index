@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
 from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class OneTBBConan(ConanFile):
@@ -26,61 +26,69 @@ class OneTBBConan(ConanFile):
         "fPIC": [True, False],
         "tbbmalloc": [True, False],
         "tbbproxy": [True, False],
+        "interprocedural_optimization": [True, False],
     }
     default_options = {
         "shared": True,
         "fPIC": True,
         "tbbmalloc": False,
         "tbbproxy": False,
+        "interprocedural_optimization": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not (Version(self.version) >= "2021.6.0" and self.options.shared and self.settings.os != "Android"):
+            del self.options.interprocedural_optimization
         if Version(self.version) < "2021.2.0":
             del self.options.shared
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.get_safe("shared", True):
-            del self.options.fPIC
-
-    def package_id(self):
-        del self.info.options.tbbmalloc
-        del self.info.options.tbbproxy
-
-    def validate(self):
-        if (self.settings.os == "Macos"
-                and self.settings.compiler == "apple-clang"
-                and Version(self.settings.compiler.version) < "11.0"):
-            raise ConanInvalidConfiguration(
-                "{} {} couldn't be built by apple-clang < 11.0".format(
-                    self.name,
-                    self.version,
-                ))
-        if not self.options.get_safe("shared", True):
-            self.output.warn(
-                "oneTBB strongly discourages usage of static linkage")
-        if (self.options.tbbproxy
-                and not (self.options.tbbmalloc
-                         and self.options.get_safe("shared", True))):
-            raise ConanInvalidConfiguration(
-                "tbbproxy needs tbbmalloc and shared options")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def package_id(self):
+        if Version(self.version) < "2021.6.0":
+            del self.info.options.tbbmalloc
+            del self.info.options.tbbproxy
+
+    def validate(self):
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
+            raise ConanInvalidConfiguration(f"{self.ref} couldn't be built by apple-clang < 11.0")
+        if not self.options.get_safe("shared", True):
+            if Version(self.version) >= "2021.6.0":
+                raise ConanInvalidConfiguration(
+                    "Building oneTBB as a static library is highly discouraged and not supported "
+                    "to avoid unforeseen issues like https://github.com/oneapi-src/oneTBB/issues/920. "
+                    "Please consider fixing at least the aforementioned issue in upstream."
+                )
+            self.output.warning("oneTBB strongly discourages usage of static linkage")
+        if self.options.tbbproxy and not (self.options.tbbmalloc and self.options.get_safe("shared", True)):
+            raise ConanInvalidConfiguration("tbbproxy needs tbbmalloc and shared options")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
+        if Version(self.version) >= "2021.6.0":
+            toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
+            toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+            toolchain.variables["TBB_ENABLE_IPO"] = self.options.get_safe("interprocedural_optimization", False)
         toolchain.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -118,9 +126,9 @@ class OneTBBConan(ConanFile):
                 version_info,
                 flags=re.MULTILINE | re.DOTALL,
             )
-            tbb.libs.append(lib_name("tbb{}".format(binary_version)))
+            tbb.libs.append(lib_name(f"tbb{binary_version}"))
         if self.settings.os in ["Linux", "FreeBSD"]:
-            tbb.system_libs = ["dl", "rt", "pthread"]
+            tbb.system_libs = ["m", "dl", "rt", "pthread"]
 
         # tbbmalloc
         if self.options.tbbmalloc:
@@ -138,6 +146,8 @@ class OneTBBConan(ConanFile):
                 tbbproxy.set_property("cmake_target_name", "TBB::tbbmalloc_proxy")
                 tbbproxy.libs = [lib_name("tbbmalloc_proxy")]
                 tbbproxy.requires = ["tbbmalloc"]
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    tbbproxy.system_libs = ["m", "dl", "pthread"]
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "TBB"

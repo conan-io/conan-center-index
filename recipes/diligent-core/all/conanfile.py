@@ -1,13 +1,13 @@
 from conan import ConanFile
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches, copy, apply_conandata_patches
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.52.0"
 
 
 class DiligentCoreConan(ConanFile):
@@ -28,18 +28,7 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    generators = "cmake_find_package", "cmake", "cmake_find_package_multi"
-    _cmake = None
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _minimum_compilers_version(self):
@@ -68,8 +57,13 @@ class DiligentCoreConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=False)
+        export_conandata_patches(self)
+        
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=os.path.join(self.source_folder, "source_subfolder"), strip_root=True)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
@@ -77,6 +71,28 @@ class DiligentCoreConan(ConanFile):
                 self.info.settings.compiler.runtime = "MD/MDd"
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DILIGENT_BUILD_SAMPLES"] = False
+        tc.variables["DILIGENT_NO_FORMAT_VALIDATION"] = True
+        tc.variables["DILIGENT_BUILD_TESTS"] = False
+        tc.variables["DILIGENT_NO_DXC"] = True
+        tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
+        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
+        tc.variables["BUILD_SHARED_LIBS"] = False
+        tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
+        tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
+        tc.variables["ENABLE_RTTI"] = True
+        tc.variables["ENABLE_EXCEPTIONS"] = True
+        tc.variables[self._diligent_platform()] = True
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def configure(self):
         if self.options.shared:
@@ -90,19 +106,20 @@ class DiligentCoreConan(ConanFile):
         patches.apply_conandata_patches(self)
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.24.0")
+        self.tool_requires("cmake/3.24.2")
 
     def requirements(self):
         self.requires("opengl/system")
-        self.requires("wayland/1.21.0")
+        if self.settings.os == "Linux":
+            self.requires("wayland/1.21.0")
 
-        self.requires("spirv-cross/1.3.216.0")
-        self.requires("spirv-tools/1.3.216.0")
+        self.requires("spirv-cross/1.3.224.0")
+        self.requires("spirv-tools/1.3.224.0")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.216.0")
-        self.requires("vulkan-headers/1.3.216.0")
-        self.requires("vulkan-validationlayers/1.3.216.0")
-        self.requires("volk/1.3.216.0")
+            self.requires("glslang/1.3.224.0")
+        self.requires("vulkan-headers/1.3.224.1")
+        self.requires("vulkan-validationlayers/1.3.224.1")
+        self.requires("volk/1.3.224.1")
         self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -126,34 +143,14 @@ class DiligentCoreConan(ConanFile):
         elif self.settings.os == "watchOS":
             return "PLATFORM_TVOS"
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
-        self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
-        self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
-        self._cmake.definitions["DILIGENT_NO_DXC"] = True
-        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = False
-        self._cmake.definitions["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
-        self._cmake.definitions["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
-
-        self._cmake.definitions["ENABLE_RTTI"] = True
-        self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
-
-        self._cmake.definitions[self._diligent_platform()] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
         dst=os.path.join(self.package_folder, "include", "DiligentCore"))
@@ -161,25 +158,24 @@ class DiligentCoreConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "Licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
-        self.copy("License.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.package_folder, self.source_folder, "source_subfolder"))
 
         if self.options.shared:
-            self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-            self.copy(pattern="*.so", dst="lib", keep_path=False)
-            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+            copy(self, pattern="*.dylib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.so", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
             rm(self, os.path.join(self.package_folder, "lib"), "*.a", recursive=True)
             if self.settings.os != "Windows":
                 rm(self, os.path.join(self.package_folder, "lib"), "*.lib", recursive=True)
         else:
-            self.copy(pattern="*.a", dst="lib", keep_path=False)
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            copy(self, pattern="*.a",   dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+            copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
             rm(self, os.path.join(self.package_folder, "lib"), "*.dylib", recursive=True)
             rm(self, os.path.join(self.package_folder, "lib"), "*.so", recursive=True)
             rm(self, os.path.join(self.package_folder, "lib"), "*.dll", recursive=True)
 
-        self.copy(pattern="*.fxh", dst="res", keep_path=False)
-
-        self.copy("File2String*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
+        copy(self, pattern="*.fxh", dst=os.path.join(self.package_folder, "res"), src=self.source_folder, keep_path=False)
+        copy(self, "File2String*",  dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
         rm(self, "*.pdb", self.package_folder, recursive=True)
         # MinGw creates many invalid files, called objects.a, remove them here:
         rm(self, "objects.a", self.package_folder, recursive=True)

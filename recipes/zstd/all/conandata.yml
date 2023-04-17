@@ -1,43 +1,82 @@
 sources:
-  "1.3.5":
-    sha256: d6e1559e4cdb7c4226767d4ddc990bff5f9aab77085ff0d0490c828b025e2eea
-    url: https://github.com/facebook/zstd/archive/v1.3.5.tar.gz
-  "1.3.8":
-    sha256: 90d902a1282cc4e197a8023b6d6e8d331c1fd1dfe60f7f8e4ee9da40da886dc3
-    url: https://github.com/facebook/zstd/archive/v1.3.8.tar.gz
-  "1.4.3":
-    sha256: 5eda3502ecc285c3c92ee0cc8cd002234dee39d539b3f692997a0e80de1d33de
-    url: https://github.com/facebook/zstd/archive/v1.4.3.tar.gz
-  "1.4.4":
-    sha256: a364f5162c7d1a455cc915e8e3cf5f4bd8b75d09bc0f53965b0c9ca1383c52c8
-    url: https://github.com/facebook/zstd/archive/v1.4.4.tar.gz
-  "1.4.5":
-    sha256: 734d1f565c42f691f8420c8d06783ad818060fc390dee43ae0a89f86d0a4f8c2
-    url: https://github.com/facebook/zstd/archive/v1.4.5.tar.gz
-  "1.4.7":
-    sha256: 085500c8d0b9c83afbc1dc0d8b4889336ad019eba930c5d6a9c6c86c20c769c8
-    url: https://github.com/facebook/zstd/archive/v1.4.7.tar.gz
-  "1.4.8":
-    sha256: f176f0626cb797022fbf257c3c644d71c1c747bb74c32201f9203654da35e9fa
-    url: https://github.com/facebook/zstd/archive/v1.4.8.tar.gz
-  "1.4.9":
-    sha256: acf714d98e3db7b876e5b540cbf6dee298f60eb3c0723104f6d3f065cd60d6a8
-    url: https://github.com/facebook/zstd/archive/v1.4.9.tar.gz
-  "1.5.0":
-    sha256: 0d9ade222c64e912d6957b11c923e214e2e010a18f39bec102f572e693ba2867
-    url: https://github.com/facebook/zstd/archive/v1.5.0.tar.gz
-  "1.5.1":
-    sha256: dc05773342b28f11658604381afd22cb0a13e8ba17ff2bd7516df377060c18dd
-    url: https://github.com/facebook/zstd/archive/v1.5.1.tar.gz
+  "1.5.5":
+    url: "https://github.com/facebook/zstd/releases/download/v1.5.5/zstd-1.5.5.tar.gz"
+    sha256: "9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4"
+  "1.5.4":
+    url: "https://github.com/facebook/zstd/releases/download/v1.5.4/zstd-1.5.4.tar.gz"
+    sha256: "0f470992aedad543126d06efab344dc5f3e171893810455787d38347343a4424"
   "1.5.2":
-    sha256: f7de13462f7a82c29ab865820149e778cbfe01087b3a55b5332707abf9db4a6e
-    url: https://github.com/facebook/zstd/archive/v1.5.2.tar.gz
-patches:
-  "1.3.5":
-    - patch_file: "patches/1.3.5-cmake-project.patch"
-  "1.4.5":
-    - patch_file: "patches/1.4.5-cmake-install-dll.patch"
+    url: "https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz"
+    sha256: "7c42d56fac126929a6a85dbc73ff1db2411d04f104fae9bdea51305663a83fd0"
   "1.5.1":
-    - patch_file: "patches/1.5.1-cmake-remove-asm-except-x86_64.patch"
+    url: "https://github.com/facebook/zstd/releases/download/v1.5.1/zstd-1.5.1.tar.gz"
+    sha256: "e28b2f2ed5710ea0d3a1ecac3f6a947a016b972b9dd30242369010e5f53d7002"
+  "1.5.0":
+    url: "https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz"
+    sha256: "5194fbfa781fcf45b98c5e849651aa7b3b0a008c6b72d4a0db760f3002291e94"
+  "1.4.9":
+    url: "https://github.com/facebook/zstd/releases/download/v1.4.9/zstd-1.4.9.tar.gz"
+    sha256: "29ac74e19ea28659017361976240c4b5c5c24db3b89338731a6feb97c038d293"
+  "1.4.8":
+    url: "https://github.com/facebook/zstd/releases/download/v1.4.8/zstd-1.4.8.tar.gz"
+    sha256: "32478297ca1500211008d596276f5367c54198495cf677e9439f4791a4c69f24"
+  "1.4.7":
+    url: "https://github.com/facebook/zstd/releases/download/v1.4.7/zstd-1.4.7.tar.gz"
+    sha256: "192cbb1274a9672cbcceaf47b5c4e9e59691ca60a357f1d4a8b2dfa2c365d757"
+  "1.4.5":
+    url: "https://github.com/facebook/zstd/releases/download/v1.4.5/zstd-1.4.5.tar.gz"
+    sha256: "98e91c7c6bf162bf90e4e70fdbc41a8188b9fa8de5ad840c401198014406ce9e"
+  "1.4.4":
+    url: "https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz"
+    sha256: "59ef70ebb757ffe74a7b3fe9c305e2ba3350021a918d168a046c6300aeea9315"
+  "1.4.3":
+    url: "https://github.com/facebook/zstd/releases/download/v1.4.3/zstd-1.4.3.tar.gz"
+    sha256: "e88ec8d420ff228610b77fba4fbf22b9f8b9d3f223a40ef59c9c075fcdad5767"
+  "1.3.8":
+    url: "https://github.com/facebook/zstd/releases/download/v1.3.8/zstd-1.3.8.tar.gz"
+    sha256: "293fa004dfacfbe90b42660c474920ff27093e3fb6c99f7b76e6083b21d6d48e"
+  "1.3.5":
+    url: "https://github.com/facebook/zstd/archive/refs/tags/v1.3.5.tar.gz"
+    sha256: "d6e1559e4cdb7c4226767d4ddc990bff5f9aab77085ff0d0490c828b025e2eea"
+patches:
+  "1.5.5":
+    - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
+      patch_description: "use assembler codes only on x86_64"
+      patch_type: "portability"
+  "1.5.4":
+    - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
+      patch_description: "use assembler codes only on x86_64"
+      patch_type: "portability"
+    - patch_file: "patches/1.5.4-decrease-min-cmake-version.patch"
+      patch_description: "Don't require CMake 3.18 or later"
+      patch_type: "portability"
+      patch_source: "https://github.com/facebook/zstd/pull/3510"
   "1.5.2":
     - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
+      patch_description: "use assembler codes only on x86_64"
+      patch_type: "portability"
+    - patch_file: "patches/1.5.0-remove-explicit-standard-setting.patch"
+      patch_description: "fix strange performance and scalability issues"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/facebook/zstd/pull/3167"
+  "1.5.1":
+    - patch_file: "patches/1.5.1-cmake-remove-asm-except-x86_64.patch"
+      patch_description: "use assembler codes only on x86_64"
+      patch_type: "portability"
+    - patch_file: "patches/1.5.0-remove-explicit-standard-setting.patch"
+      patch_description: "fix strange performance and scalability issues"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/facebook/zstd/pull/3167"
+  "1.5.0":
+    - patch_file: "patches/1.5.0-remove-explicit-standard-setting.patch"
+      patch_description: "fix strange performance and scalability issues"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/facebook/zstd/pull/3167"
+  "1.4.5":
+    - patch_file: "patches/1.4.5-cmake-install-dll.patch"
+      patch_description: "fix runtime installation path"
+      patch_type: "conan"
+  "1.3.5":
+    - patch_file: "patches/1.3.5-cmake-project.patch"
+      patch_description: "fix `project()` position"
+      patch_type: "portability"

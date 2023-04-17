@@ -5,4 +5,6 @@ sources:
   "0.3.0":
     url: https://github.com/linksplatform/Hashing/archive/refs/tags/cpp_0.3.0.zip
     sha256: 8f7d6d401eaec1a78d1f10bfa3783b31ac6189a6ea8edf1ef7f300c47c0e5cb1
-
+  "0.4.0":
+    url: https://github.com/linksplatform/Hashing/archive/refs/tags/cpp_0.4.0.zip
+    sha256: afb8a27a483f636515ca4289f2bfa80fbd37c8416631f0b3ff7001d17a054320

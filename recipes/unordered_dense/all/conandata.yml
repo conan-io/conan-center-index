@@ -1,4 +1,31 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/martinus/unordered_dense/archive/v4.0.0.tar.gz"
+    sha256: "c9d43bfc60ed03e9aa667bc6d3c586f7a04dfb0082333b0e50624aac71c53172"
+  "3.1.1":
+    url: "https://github.com/martinus/unordered_dense/archive/v3.1.1.tar.gz"
+    sha256: "634194cec08f6a41aa72ed4804719cdf8ba94f9ba8575bf7a80496a33dfbbb12"
+  "3.1.0":
+    url: "https://github.com/martinus/unordered_dense/archive/v3.1.0.tar.gz"
+    sha256: "adf8670bf494a84f1148687375ac568e2990167b8ced3cc1e5bacc9f6c49f272"
+  "3.0.2":
+    url: "https://github.com/martinus/unordered_dense/archive/v3.0.2.tar.gz"
+    sha256: "0c0b874e9682cce3c75a1152308bfbb108538aaf1e90824d7789e2b64122520b"
+  "3.0.0":
+    url: "https://github.com/martinus/unordered_dense/archive/v3.0.0.tar.gz"
+    sha256: "e73452d7c1e274b4a15b553c0904f1de4bcfa61b00514acd1eaad7deac805ef0"
+  "2.0.1":
+    url: "https://github.com/martinus/unordered_dense/archive/v2.0.1.tar.gz"
+    sha256: "450d53bd8709f9476702a3c4975bf6e40d66059b25b125e480534228d7f5616d"
+  "2.0.0":
+    url: "https://github.com/martinus/unordered_dense/archive/v2.0.0.tar.gz"
+    sha256: "e838bdcf380a1aeb6f1fee17fbdf59d7a14b6b9fb6dfca32981e4cbd60739d20"
+  "1.4.0":
+    url: "https://github.com/martinus/unordered_dense/archive/v1.4.0.tar.gz"
+    sha256: "36b6bfe2fe2633f9d9c537b9b808b4be6b77ff51c66d370d855f477517bc3bc9"
+  "1.3.3":
+    url: "https://github.com/martinus/unordered_dense/archive/v1.3.3.tar.gz"
+    sha256: "621a984d7f1de156d3078ecb5e1252bcc2ebc875de6eb6b8635f6c2a0898e496"
   "1.3.2":
     url: "https://github.com/martinus/unordered_dense/archive/v1.3.2.tar.gz"
     sha256: "f12db3b93f31f7f20f4d8cac6adc551f6ae17a5b9a16040abeee427f54427953"

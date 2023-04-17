@@ -1,20 +1,22 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class SDLImageConan(ConanFile):
     name = "sdl_image"
     description = "SDL_image is an image file loading library"
-    topics = ("sdl_image", "sdl_image", "sdl2", "sdl", "images", "opengl")
+    topics = ("sdl2", "sdl", "images", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org/projects/SDL_image/"
     license = "MIT"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -60,45 +62,39 @@ class SDLImageConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Macos":
+        if not is_apple_os(self):
             del self.options.imageio
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             # sdl static into sdl_image shared is not allowed
             self.options["sdl"].shared = True
 
-    def requirements(self):
-        self.requires("sdl/2.0.20")
-        if self.options.with_libtiff:
-            self.requires("libtiff/4.4.0")
-        if self.options.with_libjpeg:
-            self.requires("libjpeg/9d")
-        if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
-        if self.options.with_libwebp:
-            self.requires("libwebp/1.2.4")
-
-    def validate(self):
-        if self.info.options.shared and not self.dependencies["sdl"].options.shared:
-            raise ConanInvalidConfiguration("sdl_image shared requires sdl shared")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
+        self.requires("sdl/2.26.1", transitive_headers=True)
+        if self.options.with_libtiff:
+            self.requires("libtiff/4.4.0")
+        if self.options.with_libjpeg:
+            self.requires("libjpeg/9e")
+        if self.options.with_libpng:
+            self.requires("libpng/1.6.39")
+        if self.options.with_libwebp:
+            self.requires("libwebp/1.3.0")
+
+    def validate(self):
+        if self.options.shared and not self.dependencies["sdl"].options.shared:
+            raise ConanInvalidConfiguration("sdl_image shared requires sdl shared")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -118,11 +114,6 @@ class SDLImageConan(ConanFile):
         tc.variables["XCF"] = self.options.xcf
         tc.variables["XPM"] = self.options.xpm
         tc.variables["XV"] = self.options.xv
-        # TODO: https://github.com/bincrafters/community/pull/1317#pullrequestreview-584847138
-        tc.variables["TIF_DYNAMIC"] = self.dependencies["libtiff"].options.shared if self.options.with_libtiff else False
-        tc.variables["JPG_DYNAMIC"] = self.dependencies["libjpeg"].options.shared if self.options.with_libjpeg else False
-        tc.variables["PNG_DYNAMIC"] = self.dependencies["libpng"].options.shared if self.options.with_libpng else False
-        tc.variables["WEBP_DYNAMIC"] = self.dependencies["libwebp"].options.shared if self.options.with_libwebp else False
         tc.variables["SDL_IS_SHARED"] = self.dependencies["sdl"].options.shared
         tc.generate()
         cd = CMakeDeps(self)
@@ -167,3 +158,17 @@ class SDLImageConan(ConanFile):
             self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
         if self.options.with_libwebp:
             self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
+        if self.options.get_safe("imageio") and not self.options.shared:
+            self.cpp_info.components["_sdl_image"].frameworks = [
+                "CoreFoundation",
+                "CoreGraphics",
+                "Foundation",
+                "ImageIO",
+            ]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["_sdl_image"].frameworks.append("ApplicationServices")
+            else:
+                self.cpp_info.components["_sdl_image"].frameworks.extend([
+                    "MobileCoreServices",
+                    "UIKit",
+                ])

@@ -1,0 +1,4 @@
+sources:
+  "1.1":
+    url: "https://github.com/corporateshark/LUrlParser/archive/refs/tags/release-1.1.tar.gz"
+    sha256: "f697bf9151c78b5e54682ff8f1ff759b15c3cbe73b179576a921b526cdf9ff22"

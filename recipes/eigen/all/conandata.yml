@@ -12,5 +12,21 @@ sources:
     url: "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2"
     sha256: "685adf14bd8e9c015b78097c1dc22f2f01343756f196acdc76a678e1ae352e11"
 patches:
+  "3.4.0":
+    - patch_file: "patches/3.4.0-0001-vec-reduce-half.patch"
+      patch_description: "Fix vectorized reductions compilation errors for Eigen::half"
+      patch_type: "bugfix"
+      patch_source: "https://gitlab.com/libeigen/eigen/-/commit/b0fe14213ec4c8615de485fe4c2bcd4bab0cbd19.patch"
+  "3.3.9":
+    - patch_file: "patches/0002-cmake-minimum-required.patch"
+      patch_description: "CMake: Move cmake_minimum_required() before project()"
+      patch_type: "conan"
   "3.3.8":
     - patch_file: "patches/0001-assert-exception-upstream-issue-2011.patch"
+    - patch_file: "patches/0002-cmake-minimum-required.patch"
+      patch_description: "CMake: Move cmake_minimum_required() before project()"
+      patch_type: "conan"
+  "3.3.7":
+    - patch_file: "patches/0002-cmake-minimum-required.patch"
+      patch_description: "CMake: Move cmake_minimum_required() before project()"
+      patch_type: "conan"

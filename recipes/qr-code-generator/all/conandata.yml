@@ -16,19 +16,26 @@ sources:
     sha256: "fcdf9fd69fde07ae4dca2351d84271a9de8093002f733b77c70f52f1630f6e4a"
 patches:
   "1.8.0":
-    - base_path: "."
-      patch_file: "patches/004-cmake-1.7.patch"
+    - patch_file: "patches/004-cmake-1.7.patch"
+      patch_description: "add library name and list of source files"
+      patch_type: conan
   "1.7.0":
-    - base_path: "."
-      patch_file: "patches/004-cmake-1.7.patch"
+    - patch_file: "patches/004-cmake-1.7.patch"
+      patch_description: "add library name and list of source files"
+      patch_type: conan
   "1.6.0":
-    - base_path: "."
-      patch_file: "patches/003-cmake-1.6.patch"
+    - patch_file: "patches/003-cmake-1.6.patch"
+      patch_description: "add library name and list of source files"
+      patch_type: conan
   "1.5.0":
-    - base_path: "."
-      patch_file: "patches/002-cmake-pre-1.6.patch"
+    - patch_file: "patches/002-cmake-pre-1.6.patch"
+      patch_description: "add library name and list of source files"
+      patch_type: conan
   "1.4.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/001-qrcode-1_4.patch"
-    - base_path: "."
-      patch_file: "patches/002-cmake-pre-1.6.patch"
+    - patch_file: "patches/001-qrcode-1_4.patch"
+      patch_description: "add missing include"
+      patch_type: backport
+      patch_source: "https://github.com/nayuki/QR-Code-generator/commit/ec729bf2695300691f4b3a96ba5eaba083ebec00"
+    - patch_file: "patches/002-cmake-pre-1.6.patch"
+      patch_description: "add library name and list of source files"
+      patch_type: conan

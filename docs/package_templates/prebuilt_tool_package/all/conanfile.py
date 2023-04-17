@@ -11,11 +11,13 @@ required_conan_version = ">=1.47.0"
 class PackageConan(ConanFile):
     name = "package"
     description = "short description"
-    license = "" # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
+    license = ""  # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
-    topics = ("topic1", "topic2", "topic3", "pre-built") # no "conan"  and project name in topics. Use "pre-built" for tooling packages
-    settings = "os", "arch", "compiler", "build_type" # even for pre-built executables
+    # no "conan"  and project name in topics. Use "pre-built" for tooling packages
+    topics = ("topic1", "topic2", "topic3", "pre-built")
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"  # even for pre-built executables
 
     # not needed but supress warning message from conan commands
     def layout(self):
@@ -28,7 +30,7 @@ class PackageConan(ConanFile):
 
     # in case some configuration is not supported
     def validate(self):
-        if self.info.settings.os == "Macos" and Version(self.info.settings.os.version) < 11:
+        if self.settings.os == "Macos" and Version(self.settings.os.version) < 11:
             raise ConanInvalidConfiguration(f"{self.ref} requires OSX >=11.")
 
     # do not cache as source, instead, use build folder
@@ -37,8 +39,11 @@ class PackageConan(ConanFile):
 
     # download the source here, than copy to package folder
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
-            destination=self.source_folder, strip_root=True)
+        get(
+            self,
+            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
+            strip_root=True,
+        )
 
     # copy all needed files to the package folder
     def package(self):
@@ -54,10 +59,6 @@ class PackageConan(ConanFile):
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
-        bin_folder = os.path.join(self.package_folder, "bin")
-        # In case need to find packaged tools when building a package
-        self.buildenv_info.append("PATH", bin_folder)
-        # In case need to find packaged tools at runtime
-        self.runenv_info.append("PATH", bin_folder)
         # TODO: Legacy, to be removed on Conan 2.0
+        bin_folder = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_folder)

@@ -108,5 +108,10 @@ if ("${GDAL_CONAN_PACKAGE_FOR_JPEG}" STREQUAL "libjpeg-turbo")
     add_library(JPEG::JPEG ALIAS ${TARGET_FOR_JPEG})
 endif()
 
+if (${GDAL_USE_PCRE2})
+    find_package(PCRE2 REQUIRED)
+    add_library(PCRE2::PCRE2-8 ALIAS PCRE2::8BIT)
+endif()
+
 
 add_subdirectory("source_subfolder")

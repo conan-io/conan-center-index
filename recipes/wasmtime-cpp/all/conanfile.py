@@ -1,9 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.layout import basic_layout
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class WasmtimeCppConan(ConanFile):
     name = 'wasmtime-cpp'
@@ -11,57 +14,61 @@ class WasmtimeCppConan(ConanFile):
     license = 'Apache-2.0'
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'https://github.com/bytecodealliance/wasmtime-cpp'
-    topics = ("webassembly", "wasm", "wasi", "c++")
+    topics = ("webassembly", "wasm", "wasi", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
-            "apple-clang": "12.0",
-            "clang": "12.0",
-            "gcc": "10.0"
+            "msvc": "192",
+            "apple-clang": "12",
+            "clang": "12",
+            "gcc": "10"
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         version = str(self.version)
-        if version == "0.35.0":
-            version = "0.35.1"
-        elif version == "0.39.0":
-            version = "0.39.1"
-        self.requires(f"wasmtime/{version}")
+        version_map = {
+            "0.35.0": "0.35.1",
+            "0.39.0": "0.39.1",
+            "1.0.0": "1.0.1",
+            "6.0.0": "6.0.1",
+        }
+        self.requires(f"wasmtime/{version_map.get(version, version)}")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
-        compiler = self.settings.compiler
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-        min_version = self._minimum_compilers_version[str(compiler)]
-        try:
-            if tools.Version(compiler.version) < min_version:
-                msg = (
-                    "{} requires C++{} features which are not supported by compiler {} {} !!"
-                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                "{} recipe lacks information about the {} compiler, "
-                "support for the required C++{} features is assumed"
-            ).format(self.name, compiler, self._minimum_cpp_standard)
-            self.output.warn(msg)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        shutil.copytree(os.path.join(self.source_folder, "include"),
-                        os.path.join(self.package_folder, "include"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self,
+            pattern="*.hh",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include")
+        )
 
-        self.copy('LICENSE', dst='licenses', src=self.source_folder)
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

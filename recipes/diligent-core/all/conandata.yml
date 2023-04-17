@@ -1,4 +1,10 @@
 sources:
+  "api.252009":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252009.tar.gz"
+    sha256: "48d62ba72551166ea47eec4d2ad0589811e51c76c40d1998ad5049096efe8c19"
+  "api.252005":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252005.tar.gz"
+    sha256: "20d164b36ec6ff6f1ef69aa44210bb46f3244af1c0d9538ac3758ca2437fb2e1"
   "api.252004":
     url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/API252004.tar.gz"
     sha256: "06e4ee5f95163ae74bbe62f59dcdf1da5e181ff2d6a8e3982319bb5c8f97c53b"
@@ -42,8 +48,6 @@ patches:
       base_path: "source_subfolder"
   "api.250014":
     - patch_file: "patches/0007-API250014-remove_warning_as_error.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0008-API250014-use_conan_dependencies_in_shader_tools.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0009-API250014-use_conan_dependencies_in_third_party.patch"
       base_path: "source_subfolder"

@@ -1,0 +1,68 @@
+From 4404b770be337bd0d5d3c2289abfd34426433db2 Mon Sep 17 00:00:00 2001
+From: Axel Braun <docb@users.sourceforge.net>
+Date: Mon, 7 Jun 2021 16:27:52 +0200
+Subject: [PATCH] gdcm fails to build with gcc11 compiler
+
+gdcm fails to build with gcc11 compiler:
+cd
+/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/build/Source/MediaStorageAndFileFormat
+&& /usr/bin/c++ -DgdcmMSFF_EXPORTS
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/Common
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/build/Source/Common
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/DataStructureAndEncodingDefinition
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/DataDictionary
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/InformationObjectDefinition
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/MediaStorageAndFileFormat
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Utilities
+-I/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/build/Utilities
+-I/usr/include/charls -I/usr/include/openjpeg-2.4 -I/usr/include/json-c
+-I/usr/include/json -O2 -Wall -D_FORTIFY_SOURCE=2
+-fstack-protector-strong -funwind-tables -fasynchronous-unwind-tables
+-fstack-clash-protection -Werror=return-type -flto=auto -g -fpermissive
+-O2 -g -DNDEBUG -fPIC -MD -MT
+Source/MediaStorageAndFileFormat/CMakeFiles/gdcmMSFF.dir/gdcmImageChangePhotometricInterpretation.cxx.o
+-MF
+CMakeFiles/gdcmMSFF.dir/gdcmImageChangePhotometricInterpretation.cxx.o.d
+-o
+CMakeFiles/gdcmMSFF.dir/gdcmImageChangePhotometricInterpretation.cxx.o
+-c
+/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.cxx
+[  131s] In file included from
+/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.cxx:14:
+[  131s]
+/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.h:
+In function 'T gdcm::Clamp(int)':
+[  131s]
+/home/abuild/rpmbuild/BUILD/gdcm-3.0.8/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.h:67:32:
+error: 'numeric_limits' is not a member of 'std'
+[  131s]    67 |   return v < 0 ? 0 : (v > std::numeric_limits<T>::max()
+? std::numeric_limits<T>::max() : v);
+---
+ Source/MediaStorageAndFileFormat/gdcmImage.cxx                   | 1 +
+ .../gdcmImageChangePhotometricInterpretation.h                   | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/Source/MediaStorageAndFileFormat/gdcmImage.cxx b/Source/MediaStorageAndFileFormat/gdcmImage.cxx
+index f59fdd7b7..78a1f7a5c 100644
+--- a/Source/MediaStorageAndFileFormat/gdcmImage.cxx
++++ b/Source/MediaStorageAndFileFormat/gdcmImage.cxx
+@@ -20,6 +20,7 @@
+ #include "gdcmFragment.h"
+ 
+ #include <iostream>
++#include <limits>
+ 
+ namespace gdcm
+ {
+diff --git a/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.h b/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.h
+index d55a5ee47..798d3dfa6 100644
+--- a/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.h
++++ b/Source/MediaStorageAndFileFormat/gdcmImageChangePhotometricInterpretation.h
+@@ -16,6 +16,7 @@
+ 
+ #include "gdcmImageToImageFilter.h"
+ #include "gdcmPhotometricInterpretation.h"
++#include <limits>
+ 
+ namespace gdcm
+ {

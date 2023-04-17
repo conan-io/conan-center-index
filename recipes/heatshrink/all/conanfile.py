@@ -1,8 +1,10 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.53.0"
 
-required_conan_version = ">=1.36.0"
 
 class HeatshrinkConan(ConanFile):
     name = "heatshrink"
@@ -11,9 +13,8 @@ class HeatshrinkConan(ConanFile):
     description = "data compression library for embedded/real-time systems"
     topics = ("compression", "embedded", "realtime")
     homepage = "https://github.com/atomicobject/heatshrink"
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
         "fPIC": [True, False],
@@ -29,9 +30,7 @@ class HeatshrinkConan(ConanFile):
         "use_index": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,44 +38,47 @@ class HeatshrinkConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["HEATSHRINK_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
 
     def _patch_sources(self):
-        config_file = os.path.join(self._source_subfolder, "heatshrink_config.h")
+        config_file = os.path.join(self.source_folder, "heatshrink_config.h")
         if not self.options.dynamic_alloc:
-            tools.replace_in_file(config_file,
+            replace_in_file(self, config_file,
                 "#define HEATSHRINK_DYNAMIC_ALLOC 1",
                 "#define HEATSHRINK_DYNAMIC_ALLOC 0")
         if self.options.debug_log:
-            tools.replace_in_file(config_file,
+            replace_in_file(self, config_file,
                 "#define HEATSHRINK_DEBUGGING_LOGS 0",
                 "#define HEATSHRINK_DEBUGGING_LOGS 1")
         if not self.options.use_index:
-            tools.replace_in_file(config_file,
+            replace_in_file(self, config_file,
                 "#define HEATSHRINK_USE_INDEX 1",
                 "#define HEATSHRINK_USE_INDEX 0")
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", "licenses", self._source_subfolder)
-
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["heatshrink"]
-

@@ -1,0 +1,13 @@
+sources:
+  "2.14.2":
+    url: "https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.14.2.tar.xz"
+    sha256: "dba695b57bce15023d2ceedef82062c2b925e51f5d4cc4aef736cf13f60a468b"
+  "2.13.93":
+    url: "https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.13.93.tar.gz"
+    sha256: "0f302a18ee52dde0793fe38b266bf269dfe6e0c0ae140e30d72c6cca5dc08db5"
+patches:
+  "2.13.93":
+    - patch_file: "patches/0001-meson-win32.patch"
+      patch_type: "portability"
+      patch_source: "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/commit/7bfbaecf819a8b1630dfc8f56126e31f985d5fb3"
+      patch_description: "Windows: Fix symlink privilege error detection"

@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.47.0"
-
+required_conan_version = ">=1.52.0"
 
 class AwsChecksums(ConanFile):
     name = "aws-checksums"
@@ -12,11 +11,10 @@ class AwsChecksums(ConanFile):
         "Cross-Platform HW accelerated CRC32c and CRC32 with fallback to efficient "
         "SW implementations. C interface with language bindings for each of our SDKs."
     )
-    topics = ("aws", "checksum", )
+    license = "Apache-2.0",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-checksums"
-    license = "Apache-2.0",
-
+    topics = ("aws", "checksum", )
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,8 +26,7 @@ class AwsChecksums(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,7 +34,10 @@ class AwsChecksums(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -51,7 +51,7 @@ class AwsChecksums(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.19")
+        self.requires("aws-c-common/0.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

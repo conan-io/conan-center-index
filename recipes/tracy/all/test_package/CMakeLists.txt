@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(Tracy REQUIRED CONFIG)
 
-find_package(tracy REQUIRED)
-
-add_executable(test_package example.cpp)
-target_link_libraries(test_package tracy::tracy)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE Tracy::TracyClient)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+if(Tracy_VERSION VERSION_GREATER_EQUAL "0.9")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE TRACY_GE_0_9)
+endif()

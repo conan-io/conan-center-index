@@ -1,7 +1,9 @@
 versions:
-  "1.16.0":
-    folder: all
-  "1.17.2":
-    folder: all
+  "1.17.6":
+    folder: meson
   "1.17.4":
     folder: meson
+  "1.17.2":
+    folder: all
+  "1.16.0":
+    folder: all

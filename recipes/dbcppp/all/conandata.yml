@@ -1,0 +1,9 @@
+sources:
+  "3.2.6":
+    url: https://github.com/xR3b0rn/dbcppp/archive/refs/tags/v3.2.6.tar.gz
+    sha256: "e54829abf503abbc95513629e9318450224c1b22c0fcee4febc16cbfd73afafb"
+patches:
+  "3.2.6":
+    - patch_file: "patches/0001-dep-cmake-rem-kcd.patch"
+      patch_type: "conan"
+      patch_description: "Disable use of KCD to ensure compatibility with conan"

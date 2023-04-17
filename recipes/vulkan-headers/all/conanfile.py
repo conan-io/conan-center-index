@@ -13,18 +13,18 @@ class VulkanHeadersConan(ConanFile):
     topics = ("vulkan-headers", "vulkan")
     homepage = "https://github.com/KhronosGroup/Vulkan-Headers"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -38,13 +38,12 @@ class VulkanHeadersConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "VulkanHeaders")
         self.cpp_info.components["vulkanheaders"].set_property("cmake_target_name", "Vulkan::Headers")
         self.cpp_info.components["vulkanheaders"].bindirs = []
-        self.cpp_info.components["vulkanheaders"].frameworkdirs = []
         self.cpp_info.components["vulkanheaders"].libdirs = []
         self.cpp_info.components["vulkanregistry"].set_property("cmake_target_name", "Vulkan::Registry")
         self.cpp_info.components["vulkanregistry"].includedirs = [os.path.join("res", "vulkan", "registry")]
         self.cpp_info.components["vulkanregistry"].bindirs = []
-        self.cpp_info.components["vulkanregistry"].frameworkdirs = []
         self.cpp_info.components["vulkanregistry"].libdirs = []
+        self.cpp_info.components["vulkanregistry"].resdirs = ["res"]
 
         self.cpp_info.filenames["cmake_find_package"] = "VulkanHeaders"
         self.cpp_info.filenames["cmake_find_package_multi"] = "VulkanHeaders"

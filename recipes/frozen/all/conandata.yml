@@ -1,10 +1,10 @@
 sources:
+  "1.1.1":
+    url: "https://github.com/serge-sans-paille/frozen/archive/1.1.1.tar.gz"
+    sha256: "f7c7075750e8fceeac081e9ef01944f221b36d9725beac8681cbd2838d26be45"
+  "1.0.1":
+    url: "https://github.com/serge-sans-paille/frozen/archive/1.0.1.tar.gz"
+    sha256: "29ab5de4eb6bebfb803cd4bd33e324777488fb035116dab1aea27f9118809d0d"
   "1.0.0":
-    url: https://github.com/serge-sans-paille/frozen/archive/1.0.0.tar.gz
-    sha256: 590440d45dd53c6150b47df86071bba5128055e823ccc8715b363f75fc531269
-  "1.0.1":  
-    url: https://github.com/serge-sans-paille/frozen/archive/1.0.1.tar.gz
-    sha256: 29ab5de4eb6bebfb803cd4bd33e324777488fb035116dab1aea27f9118809d0d
-  "1.1.1":  
-    url: https://github.com/serge-sans-paille/frozen/archive/1.1.1.tar.gz
-    sha256: f7c7075750e8fceeac081e9ef01944f221b36d9725beac8681cbd2838d26be45 
+    url: "https://github.com/serge-sans-paille/frozen/archive/1.0.0.tar.gz"
+    sha256: "590440d45dd53c6150b47df86071bba5128055e823ccc8715b363f75fc531269"

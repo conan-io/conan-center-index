@@ -1,0 +1,96 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7d59f14..9fdfe43 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,7 +12,6 @@ endif()
+ 
+ 
+ if(WIN32 OR ${IS_WIN_CROSS_COMPILE})
+-  include(ChooseMSVCCRT)
+ endif()
+ include(CheckCXXCompilerFlag)
+ include(CheckCCompilerFlag)
+@@ -70,7 +69,6 @@ endif()
+ 
+ # Dependencies
+ # ============
+-set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
+ include(LIEFDependencies)
+ 
+ # iOS specific config
+@@ -376,12 +374,14 @@ endif()
+ # Leaf
+ # =======================================
+ if(LIEF_EXTERNAL_LEAF)
++  find_package(Boost REQUIRED CONFIG)
+   message(STATUS "Using external LEAF version")
+   if(LIEF_EXTERNAL_LEAF_DIR)
+     message(STATUS "External LEAF include dir: ${LIEF_EXTERNAL_LEAF_DIR}")
+     target_include_directories(LIB_LIEF SYSTEM PUBLIC
+                                "$<BUILD_INTERFACE:${LIEF_EXTERNAL_LEAF_DIR}>")
+   endif()
++  target_link_libraries(LIB_LIEF PRIVATE Boost::headers)
+ else()
+   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/LIEF/third-party/internal/leaf.hpp
+     COMMAND
+@@ -425,6 +425,8 @@ if(LIEF_EXTERNAL_SPAN)
+     target_include_directories(LIB_LIEF SYSTEM PUBLIC
+                                "$<BUILD_INTERFACE:${LIEF_EXTERNAL_SPAN_DIR}>")
+   endif()
++  find_package(tcb-span REQUIRED CONFIG)
++  target_link_libraries(LIB_LIEF PRIVATE tcb-span::tcb-span)
+ else()
+   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/LIEF/third-party/internal/span.hpp
+     COMMAND
+@@ -439,7 +441,6 @@ else()
+ endif()
+ 
+ 
+-
+ target_link_libraries(LIB_LIEF PRIVATE lief_spdlog)
+ 
+ # Flags definition
+@@ -448,8 +449,7 @@ target_link_libraries(LIB_LIEF PRIVATE lief_spdlog)
+ # cmake-format: off
+ set_target_properties(
+   LIB_LIEF
+-  PROPERTIES POSITION_INDEPENDENT_CODE ON
+-             CXX_STANDARD              11
++  PROPERTIES CXX_STANDARD              11
+              CXX_STANDARD_REQUIRED     ON
+              CXX_VISIBILITY_PRESET     hidden
+              C_VISIBILITY_PRESET       hidden)
+@@ -667,8 +667,9 @@ endif()
+ # Installation
+ # ======================
+ 
++include(GNUInstallDirs)
++if(0)
+ if(UNIX)
+-  include(GNUInstallDirs)
+   set(CMAKE_INSTALL_LIBDIR "lib")
+ else()
+   if(WIN32)
+@@ -682,13 +683,14 @@ else()
+       message(FATAL_ERROR "System not UNIX nor WIN32 - not implemented yet")
+     endif()
+ endif()
++endif()
+ 
+ install(
+   TARGETS LIB_LIEF lief_spdlog
+   EXPORT LIEFExport
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-  RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT libraries
+   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ install(
+@@ -727,6 +729,3 @@ export(
+   NAMESPACE LIEF::
+   FILE LIEFExport-${lib_type}.cmake)
+ 
+-# Package
+-# ======================
+-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/package")

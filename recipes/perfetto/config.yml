@@ -1,21 +1,27 @@
 versions:
-  "20.1":
+  "32.1":
     folder: all
-  "21.0":
+  "31.0":
     folder: all
-  "22.0":
+  "30.0":
     folder: all
-  "22.1":
-    folder: all
-  "23.0":
-    folder: all
-  "24.2":
-    folder: all
-  "25.0":
-    folder: all
-  "26.1":
+  "27.1":
     folder: all
   "27.0":
     folder: all
-  "27.1":
+  "26.1":
+    folder: all
+  "25.0":
+    folder: all
+  "24.2":
+    folder: all
+  "23.0":
+    folder: all
+  "22.1":
+    folder: all
+  "22.0":
+    folder: all
+  "21.0":
+    folder: all
+  "20.1":
     folder: all

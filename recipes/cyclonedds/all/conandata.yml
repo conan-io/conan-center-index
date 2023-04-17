@@ -1,7 +1,7 @@
 sources:
   "0.10.2":
     url: "https://github.com/eclipse-cyclonedds/cyclonedds/archive/refs/tags/0.10.2.tar.gz"
-    sha256: "BC84E137E0C8A055B8CD97FBEAFEC94E36DE1B0C2E88800896A82384FD867AE5"
+    sha256: "bc84e137e0c8a055b8cd97fbeafec94e36de1b0c2e88800896a82384fd867ae5"
 patches:
   "0.10.2":
     - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"

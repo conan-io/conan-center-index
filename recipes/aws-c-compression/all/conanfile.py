@@ -30,7 +30,10 @@ class AwsCCompression(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -44,7 +47,7 @@ class AwsCCompression(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.19")
+        self.requires("aws-c-common/0.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

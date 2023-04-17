@@ -1,0 +1,34 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6d9431c..0f3a1b3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -64,11 +64,13 @@ if(AVIF_LOCAL_LIBGAV1)
+     enable_language(CXX)
+ endif()
+ 
++if(0)
+ if(APPLE)
+     set(XCRUN xcrun)
+ else()
+     set(XCRUN)
+ endif()
++endif()
+ 
+ # ---------------------------------------------------------------------------------------
+ # This insanity is for people embedding libavif or making fully static or Windows builds.
+@@ -141,6 +143,7 @@ if(AVIF_LOCAL_LIBSHARPYUV)
+ endif()
+ # ---------------------------------------------------------------------------------------
+ 
++if(0)
+ # Enable all warnings
+ include(CheckCCompilerFlag)
+ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+@@ -189,6 +192,7 @@ if(AVIF_ENABLE_COVERAGE)
+         message(WARNING "libavif: Ignoring request for coverage (AVIF_ENABLE_COVERAGE); only clang is currently supported.")
+     endif()
+ endif()
++endif()
+ 
+ set(AVIF_SRCS
+     src/alpha.c

@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(libdc1394 REQUIRED CONFIG)
 
-add_executable(example test_package.c)
-target_link_libraries(example ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE libdc1394::libdc1394)

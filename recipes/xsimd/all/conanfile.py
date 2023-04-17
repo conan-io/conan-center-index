@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
 import os
 import textwrap
 
@@ -16,7 +17,7 @@ class XsimdConan(ConanFile):
     homepage = "https://github.com/xtensor-stack/xsimd"
     description = "C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)"
     topics = ("simd-intrinsics", "vectorization", "simd")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "xtl_complex": [True, False],
@@ -43,8 +44,7 @@ class XsimdConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -82,6 +82,11 @@ class XsimdConan(ConanFile):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
+
+        ## TODO: workaround for arm compilation issue : https://github.com/xtensor-stack/xsimd/issues/735
+        if Version(self.version) >= "9.0.0" and \
+            is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            self.cpp_info.cxxflags.extend(["-flax-vector-conversions", "-fsigned-char",])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

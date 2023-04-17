@@ -4,7 +4,7 @@ sources:
     sha256: "7ef445410b42f36b9bad426608b53ccb9ccca4101e545c383f564c11db672ca8"
 patches:
   "5.0.1":
-    # bug about install target in 5.0.1. It is already fixed in upstream.
-    # https://github.com/sahlberg/libnfs/pull/377
-    - base_path: "source_subfolder"
-      patch_file: "patches/5.0.1-0001-remove-exports.patch"
+    - patch_file: "patches/5.0.1-0001-remove-exports.patch"
+      patch_description: "Fix installation"
+      patch_type: "conan"
+      patch_source: "https://github.com/sahlberg/libnfs/pull/377"

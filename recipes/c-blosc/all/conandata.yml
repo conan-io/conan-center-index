@@ -1,4 +1,7 @@
 sources:
+  "1.21.3":
+    url: "https://github.com/Blosc/c-blosc/archive/v1.21.3.tar.gz"
+    sha256: "941016c4564bca662080bb01aea74f06630bd665e598c6f6967fd91b2e2e0bb6"
   "1.21.1":
     url: "https://github.com/Blosc/c-blosc/archive/v1.21.1.tar.gz"
     sha256: "f387149eab24efa01c308e4cba0f59f64ccae57292ec9c794002232f7903b55b"
@@ -21,24 +24,35 @@ sources:
     url: "https://github.com/Blosc/c-blosc/archive/v1.17.1.tar.gz"
     sha256: "19a6948b579c27e8ac440b4f077f99fc90e7292b1d9cb896bec0fd781d68fba2"
 patches:
+  "1.21.3":
+    - patch_file: "patches/cmake-dependencies-1.21.2+.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.21.1":
     - patch_file: "patches/cmake-dependencies-1.21.1+.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.21.0":
     - patch_file: "patches/cmake-dependencies-1.20.0+.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.20.1":
     - patch_file: "patches/cmake-dependencies-1.20.0+.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.20.0":
     - patch_file: "patches/cmake-dependencies-1.20.0+.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.19.0":
     - patch_file: "patches/cmake-dependencies-1.19.0.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.18.1":
     - patch_file: "patches/cmake-dependencies-1.18.1-.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.17.1":
     - patch_file: "patches/cmake-dependencies-1.18.1-.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package"
+      patch_type: "conan"

@@ -1,7 +1,21 @@
 sources:
+  "5.4.2":
+    url: "https://tukaani.org/xz/xz-5.4.2.tar.gz"
+    sha256: "87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05"
+  "5.4.0":
+    url: "https://tukaani.org/xz/xz-5.4.0.tar.gz"
+    sha256: "7471ef5991f690268a8f2be019acec2e0564b7b233ca40035f339fe9a07f830b"
+  "5.2.10":
+    url: "https://tukaani.org/xz/xz-5.2.10.tar.gz"
+    sha256: "eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3"
   "5.2.5":
     url: "https://tukaani.org/xz/xz-5.2.5.tar.gz"
     sha256: "f6f4910fd033078738bd82bfba4f49219d03b17eb0794eb91efbae419f4aba10"
   "5.2.4":
     url: "https://tukaani.org/xz/xz-5.2.4.tar.gz"
     sha256: "b512f3b726d3b37b6dc4c8570e137b9311e7552e8ccbab4d39d47ce5f4177145"
+patches:
+  "5.2.4":
+    - patch_file: "patches/0001-relax_windows-sdk-restriction.patch"
+      patch_description: "Relax Windows SDK restriction"
+      patch_type: "conan"

@@ -1,11 +1,18 @@
---- a/libgeotiff/CMakeLists.txt
-+++ b/libgeotiff/CMakeLists.txt
-@@ -12,7 +12,7 @@ SET(GEOTIFF_LIBRARY_TARGET geotiff_library)
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,6 +5,7 @@
+ # Author: Mateusz Loskot <mateusz@loskot.net>
+ #
+ ###############################################################################
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT(GeoTIFF)
+ 
+ SET(GEOTIFF_LIB_NAME geotiff)
+@@ -12,7 +13,6 @@ SET(GEOTIFF_LIBRARY_TARGET geotiff_library)
  
  ##############################################################################
  # CMake settings
 -CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
-+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
  
  SET(CMAKE_COLOR_MAKEFILE ON)
  
