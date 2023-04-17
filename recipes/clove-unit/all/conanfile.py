@@ -14,7 +14,7 @@ class CloveUnitConan(ConanFile):
     license = "MIT"
     no_copy_source = True
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
+    #settings = "os", "arch", "compiler", "build_type"
 
     # Use the export_sources(self) method instead of the exports_sources attribute.
     # This allows finer grain exportation of patches per version
