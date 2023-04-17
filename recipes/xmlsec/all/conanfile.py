@@ -60,9 +60,9 @@ class XmlSecConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.10.3")
+        self.requires("libxml2/2.10.4")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/3.1.0")
         if self.options.with_xslt:
             self.requires("libxslt/1.1.34")
 
@@ -140,7 +140,15 @@ class XmlSecConan(ConanFile):
             crypto_engines = []
             if self.options.with_openssl:
                 ov = Version(self.dependencies["openssl"].ref.version)
-                crypto_engines.append(f"openssl={ov.major}{ov.minor}0")
+                if ov.major >= "3":
+                    if Version(self.version) < "1.2.35":
+                        # configure.js doesn't understand openssl=300 before xmlsec 1.2.35,
+                        # For these xmlsec versions, setting 110 even for OpenSSL 3.x should be compatible
+                        crypto_engines.append("openssl=110")
+                    else:
+                        crypto_engines.append("openssl=300")
+                else:
+                    crypto_engines.append(f"openssl={ov.major}{ov.minor}0")
 
             yes_no = lambda v: "yes" if v else "no"
             args = [
