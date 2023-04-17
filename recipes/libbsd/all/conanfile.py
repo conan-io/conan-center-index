@@ -38,7 +38,6 @@ class LibBsdConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        # plain C project
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
     
@@ -58,22 +57,21 @@ class LibBsdConan(ConanFile):
     
     def validate(self):
         if not is_apple_os(self) and self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} is only available for Linux currently")
+            raise ConanInvalidConfiguration(f"{self.ref} is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.autoreconf(args=['-fiv'])
+        autotools.autoreconf()
         conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        autotools.configure(args=conf_args, build_script_folder=self.source_folder)
+        autotools.configure(args=conf_args)
         autotools.make()
 
     def package(self):
