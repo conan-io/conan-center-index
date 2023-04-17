@@ -63,7 +63,7 @@ class CunitConan(ConanFile):
 
     def requirements(self):
         if self.options.with_curses == "ncurses":
-            self.requires("ncurses/6.2")
+            self.requires("ncurses/6.4")
 
     @property
     def _settings_build(self):
