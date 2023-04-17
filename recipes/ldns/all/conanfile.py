@@ -77,7 +77,6 @@ class LdnsConan(ConanFile):
         tc.generate()
 
         tc = AutotoolsToolchain(self)
-        def yes_no(v): return "yes" if v else "no"
         tc.configure_args.extend([
             "--disable-rpath",
             f"--with-ssl={self.dependencies['openssl'].package_folder}",
