@@ -20,7 +20,6 @@ class KModConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
         "with_zstd": [True, False],
         "with_xz": [True, False],
         "with_zlib": [True, False],
@@ -29,7 +28,6 @@ class KModConan(ConanFile):
         "logging": [True, False],
     }
     default_options = {
-        "fPIC": True,
         "with_zstd": True,
         "with_xz": True,
         "with_zlib": True,
