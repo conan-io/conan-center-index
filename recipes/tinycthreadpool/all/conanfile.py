@@ -46,8 +46,6 @@ class TinyCThreadPoolConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
 
         tc = CMakeDeps(self)
