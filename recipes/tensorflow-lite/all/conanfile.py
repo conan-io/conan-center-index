@@ -61,28 +61,30 @@ class TensorflowLiteConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("abseil/20220623.0")
+        self.requires("abseil/20230125.1")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/2.0.6")
+        self.requires("flatbuffers/23.1.21", transitive_headers=True)
         self.requires("gemmlowp/cci.20210928")
+        self.requires("ruy/cci.20220628")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
+            # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
+            self.requires("pthreadpool/cci.20210218")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.24.0")
+        self.tool_requires("cmake/3.25.3")
 
     def layout(self):
-        cmake_layout(self, build_folder=f"build_folder/{self.settings.build_type}")
+        cmake_layout(self, src_folder="src", build_folder=f"build_folder/{self.settings.build_type}")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -109,7 +111,7 @@ class TensorflowLiteConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if not minimum_version:
-            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            self.output.warning(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
         elif Version(self.info.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
 

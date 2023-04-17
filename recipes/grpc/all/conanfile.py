@@ -92,10 +92,10 @@ class grpcConan(ConanFile):
         else:
             self.requires("abseil/20220623.0", transitive_headers=True)
         self.requires("c-ares/1.18.1")
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/1.1.1t")
         self.requires("re2/20220601")
         self.requires("zlib/1.2.13")
-        self.requires("protobuf/3.21.4", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True)
         self.requires("googleapis/cci.20221108")
         self.requires("grpc-proto/cci.20220627")
 
@@ -123,7 +123,7 @@ class grpcConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.21.4')
+            self.build_requires('protobuf/3.21.9')
             # when cross compiling we need pre compiled grpc plugins for protoc
             if cross_building(self):
                 self.build_requires('grpc/{}'.format(self.version))
