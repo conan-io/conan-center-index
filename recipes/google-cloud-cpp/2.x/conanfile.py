@@ -124,15 +124,7 @@ class GoogleCloudCppConan(ConanFile):
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
         tc.generate()
-        # We may need a build environment to run the gRPC plugin. I (@coryan)
-        # took this code for the gRPC test packages. They may not be the "Right Thing"[tm]
-        # in this context.
-        if hasattr(self, "settings_build"):
-            VirtualBuildEnv(self).generate()
-        else:
-            # Cover case in Conan 1.x when only one profile is provided
-            self.output.info("Generating VirtualRunEnv in build environment - using two profiles is advised.")
-            VirtualRunEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="build")
         deps = CMakeDeps(self)
         deps.generate()
 
