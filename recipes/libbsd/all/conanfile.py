@@ -82,6 +82,7 @@ class LibBsdConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = self._configure_autotools()
+        autotools.autoreconf(args=['-fiv'])
         autotools.make()
 
     def package(self):
