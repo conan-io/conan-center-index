@@ -268,6 +268,9 @@ class QtConan(ConanFile):
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
+        if Version(self.version) >= "6.5.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
+            raise ConanInvalidConfiguration("qt 6.5.0 cannot be built with gcc 9, cf QTBUG-112920")
+
         if Version(self.version) >= "6.4.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("apple-clang >= 12 required by qt >= 6.4.0")
 
