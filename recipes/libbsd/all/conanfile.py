@@ -29,8 +29,6 @@ class LibBsdConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
 
@@ -66,29 +64,22 @@ class LibBsdConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination=self.source_folder)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = Autotools(self)
-        conf_args = [
-        ]
+    def build(self):
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.autoreconf(args=['-fiv'])
+        conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, build_script_folder=self.source_folder)
-        return self._autotools
-
-    def build(self):
-        apply_conandata_patches(self)
-        autotools = self._configure_autotools()
-        autotools.autoreconf(args=['-fiv'])
+        autotools.configure(args=conf_args, build_script_folder=self.source_folder)
         autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
         autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
