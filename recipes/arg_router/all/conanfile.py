@@ -24,7 +24,8 @@ class arg_routerRecipe(ConanFile):
     no_copy_source = True
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        if self.settings.compiler.get_safe("cppstd")
+            check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -49,8 +50,7 @@ class arg_routerRecipe(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "arg_router")
-        self.cpp_info.set_property(
-            "cmake_target_name", "arg_router::arg_router")
+        self.cpp_info.set_property("cmake_target_name", "arg_router::arg_router")
 
     def package_id(self):
         # build_type and compiler are needed for the Conan's CMake tools but are not actually used
