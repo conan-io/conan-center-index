@@ -18,7 +18,6 @@ class Hdf5Conan(ConanFile):
     topics = "hdf", "data"
     homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
     url = "https://github.com/conan-io/conan-center-index"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,6 +30,7 @@ class Hdf5Conan(ConanFile):
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False],
         "parallel": [True, False],
+        "enable_unsupported": [True, False],
     }
     default_options = {
         "shared": False,
@@ -42,7 +42,9 @@ class Hdf5Conan(ConanFile):
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
+        "enable_unsupported": False
     }
+
     @property
     def _min_cppstd(self):
         if Version(self.version) < "1.14.0":
@@ -62,7 +64,8 @@ class Hdf5Conan(ConanFile):
         if not self.options.enable_cxx:
             self.settings.rm_safe("compiler.cppstd")
             self.settings.rm_safe("compiler.libcxx")
-        if self.options.enable_cxx or self.options.hl or (self.settings.os == "Windows" and not self.options.shared):
+        if (not self.options.enable_unsupported and (self.options.enable_cxx or self.options.hl))\
+            or (self.settings.os == "Windows" and not self.options.shared):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
@@ -84,11 +87,11 @@ class Hdf5Conan(ConanFile):
         if not can_run(self):
             # While building it runs some executables like H5detect
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
-        if self.options.parallel:
+        if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
-                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
-            if self.options.get_safe("threadsafe"): # FIXME why can't I define the default valid as False?
-                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
+                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
+            if self.options.get_safe("threadsafe", False):
+                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive, forcefully allow with enable_unsupported=True")
         if self.options.szip_support == "with_szip" and \
                 self.options.szip_encoding and \
                 not self.dependencies["szip"].options.enable_encoding:
@@ -160,7 +163,6 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
         tc.variables["BUILD_TESTING"] = False
 
-        # FIXME is there no built-in way of doing the replace?
         tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
         tc.variables["HDF5_BUILD_TOOLS"] = False
@@ -170,6 +172,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if Version(self.version) >= "1.10.0":
             tc.variables["HDF5_BUILD_JAVA"] = False
+        tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
 
     def build(self):
