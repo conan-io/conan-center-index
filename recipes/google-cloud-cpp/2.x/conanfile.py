@@ -97,11 +97,11 @@ class GoogleCloudCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("protobuf/3.21.9")
-        self.requires("grpc/1.50.1")
+        self.requires("protobuf/3.21.9", transitive_headers=True)
+        self.requires("grpc/1.50.1", transitive_headers=True)
         self.requires("nlohmann_json/3.10.0")
         self.requires("crc32c/1.1.1")
-        self.requires("abseil/20220623.0")
+        self.requires("abseil/20220623.0", transitive_headers=True)
         self.requires("libcurl/7.88.1")
         self.requires("openssl/1.1.1t")
         self.requires("zlib/1.2.13")
@@ -111,7 +111,7 @@ class GoogleCloudCppConan(ConanFile):
         # missing.
         # Working with newer versions of these protos almost always will work. There
         # are very few breaking changes on the proto files.
-        self.requires(f"googleapis/{self._GOOGLEAPIS_VERSIONS[self.version]}")
+        self.requires(f"googleapis/{self._GOOGLEAPIS_VERSIONS[self.version]}", transitive_headers=True)
 
     def build_requirements(self):
         # For the grpc-cpp-plugin executable
