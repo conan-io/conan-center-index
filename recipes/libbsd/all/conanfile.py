@@ -7,7 +7,9 @@ from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualRunEnv
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
-from conan.tools.cmake import cmake_layout
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.53.0"
 
 class LibBsdConan(ConanFile):
     name = "libbsd"
@@ -42,14 +44,9 @@ class LibBsdConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except ConanException:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except ConanException:
-            pass
+        # plain C project
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
     
     def generate(self):
         if not cross_building(self):
@@ -63,11 +60,11 @@ class LibBsdConan(ConanFile):
         deps.generate()
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
     
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("libbsd is only available for Linux currently")
+        if not is_apple_os(self) and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} is only available for Linux currently")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
