@@ -119,13 +119,13 @@ class Mosquitto(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
 
     def generate(self):
+        self._patch_sources()
         self._configure_cmake_toolchain()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
