@@ -53,7 +53,7 @@ jobs:
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
           echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
-          pylint --rcfile=linter/pylintrc_recipe `ls recipes/*/*/test_package/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --exit-zero
+          pylint --rcfile=linter/pylintrc_testpackage `ls recipes/*/*/test_package/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --exit-zero
           jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
           jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
@@ -120,5 +120,5 @@ jobs:
         run: |
           echo "::add-matcher::linter/recipe_linter.json"
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            pylint --rcfile=linter/pylintrc_recipe --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=parseable ${file}
+            pylint --rcfile=linter/pylintrc_testpackage --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=parseable ${file}
           done
