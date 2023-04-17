@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import export_conandata_patches, get, copy, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
@@ -75,7 +75,7 @@ class UniAlgoConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-        if is_msvc(self):
+        else:
             check_min_vs(self, int(self._compilers_minimum_version["msvc"]))
             if self.options.get_safe("shared"):
                 raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
@@ -85,8 +85,7 @@ class UniAlgoConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.header_only:
-            tc.variables["UNI_ALGO_HEADER_ONLY"] = True
+        tc.variables["UNI_ALGO_HEADER_ONLY"] = self.options.header_only
         tc.generate()
 
     def build(self):
