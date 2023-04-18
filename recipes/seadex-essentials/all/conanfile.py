@@ -64,8 +64,6 @@ class SeadexEssentialsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "Windows", "Macos"]:
-            raise ConanInvalidConfiguration("This recipe supports only Linux, Windows and macOS!")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
