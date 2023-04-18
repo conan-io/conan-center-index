@@ -91,6 +91,8 @@ class AwsCCal(ConanFile):
 
         self.cpp_info.components["aws-c-cal-lib"].libs = ["aws-c-cal"]
         self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-cal-lib"].defines.append("AWS_CAL_USE_IMPORT_EXPORT")
         if self.settings.os == "Windows":
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("ncrypt")
         elif is_apple_os(self):
