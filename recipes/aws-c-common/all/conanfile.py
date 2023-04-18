@@ -95,6 +95,8 @@ class AwsCCommon(ConanFile):
         self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package_multi"] = "aws-c-common"
 
         self.cpp_info.components["aws-c-common-lib"].libs = ["aws-c-common"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-common-lib"].defines.append("AWS_COMMON_USE_IMPORT_EXPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["dl", "m", "pthread", "rt"]
         elif self.settings.os == "Windows":
