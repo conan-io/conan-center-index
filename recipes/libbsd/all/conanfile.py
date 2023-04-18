@@ -66,12 +66,7 @@ class LibBsdConan(ConanFile):
         apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.autoreconf()
-        conf_args = []
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
-        autotools.configure(args=conf_args)
+        autotools.configure()
         autotools.make()
 
     def package(self):
