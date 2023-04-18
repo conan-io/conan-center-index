@@ -48,9 +48,9 @@ class AwsCCal(ConanFile):
 
     def requirements(self):
         if Version(self.version) <= "0.5.11":
-            self.requires("aws-c-common/0.6.11")
+            self.requires("aws-c-common/0.6.11", transitive_headers=True)
         else:
-            self.requires("aws-c-common/0.8.2")
+            self.requires("aws-c-common/0.8.2", transitive_headers=True)
         if self._needs_openssl:
             self.requires("openssl/3.1.0")
 
