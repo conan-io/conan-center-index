@@ -53,7 +53,9 @@ class SeadexEssentialsConan(ConanFile):
         self.options["spdlog/*"].header_only = True
 
     def requirements(self):
-        self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
+        # Headers are exposed https://github.com/SeadexGmbH/essentials/blob/622a07dc1530f5668f5dde0ce18007d420c371cd/essentials/include/essentials/log/log_level.hpp#L15
+        self.requires("spdlog/1.11.0", transitive_headers=True)
+        # Exposes headers and symbols https://github.com/SeadexGmbH/essentials/blob/622a07dc1530f5668f5dde0ce18007d420c371cd/essentials/include/essentials/type_wrapper.hpp#L282
         self.requires("fmt/9.1.0", transitive_headers=True, transitive_libs=True)
 
     def source(self):
