@@ -4,8 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualRunEnv
-from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.layout import basic_layout
 
@@ -30,11 +29,15 @@ class LibBsdConan(ConanFile):
     }
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        self.tool_requires("libtool/2.4.7")
 
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+    
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -42,9 +45,8 @@ class LibBsdConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
     
     def generate(self):
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = AutotoolsToolchain(self)
         if is_apple_os(self):
             tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
@@ -81,13 +83,13 @@ class LibBsdConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["bsd"].libs = ["bsd"]
-        self.cpp_info.components["bsd"].names["pkg_config"] = "libbsd"
+        self.cpp_info.components["bsd"].set_property("pkg_config_name", "libbsd")
 
         self.cpp_info.components["libbsd-overlay"].libs = []
         self.cpp_info.components["libbsd-overlay"].requires = ["bsd"]
         self.cpp_info.components["libbsd-overlay"].includedirs.append(os.path.join("include", "bsd"))
         self.cpp_info.components["libbsd-overlay"].defines = ["LIBBSD_OVERLAY"]
-        self.cpp_info.components["libbsd-overlay"].names["pkg_config"] = "libbsd-overlay"
+        self.cpp_info.components["libbsd-overlay"].set_property("pkg_config_name", "libbsd-overlay")
 
         # on apple-clang, GNU .init_array section is not supported
         if self.settings.compiler != "apple-clang":
@@ -96,4 +98,5 @@ class LibBsdConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["libbsd-ctor"].exelinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
                 self.cpp_info.components["libbsd-ctor"].sharedlinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
-            self.cpp_info.components["libbsd-ctor"].names["pkg_config"] = "libbsd-ctor"
+            self.cpp_info.components["libbsd-ctor"].set_property("pkg_config_name", "libbsd-ctor")
+
