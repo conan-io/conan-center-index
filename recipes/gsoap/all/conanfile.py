@@ -17,6 +17,7 @@ class GsoapConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/gsoap2"
     topics = ("gsoap", "logging")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
