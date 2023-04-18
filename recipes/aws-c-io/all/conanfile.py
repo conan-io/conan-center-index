@@ -86,6 +86,8 @@ class AwsCIO(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-io")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["aws-c-io-lib"].libs = ["aws-c-io"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-io-lib"].defines.append("AWS_IO_USE_IMPORT_EXPORT")
         if self.settings.os == "Macos":
             self.cpp_info.components["aws-c-io-lib"].frameworks.append("Security")
         if self.settings.os == "Windows":
