@@ -15,6 +15,7 @@ class LibniceConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "a GLib ICE implementation"
     topics = ("ice", "stun", "turn")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -49,18 +50,18 @@ class LibniceConan(ConanFile):
     def validate(self):
         if self.settings.os != "Windows" and self.options.crypto_library == "win32":
             raise ConanInvalidConfiguration(
-                "-o libnice:crypto_library=win32 is not supported on non-Windows")
+                f"-o {self.ref}:crypto_library=win32 is not supported on non-Windows")
         if self.settings.os == "Windows" and self.options.with_gtk_doc:
             raise ConanInvalidConfiguration(
-                "-o libnice:with_gtk_doc=True is not support on Windows")
-        if is_msvc_static_runtime(self) and self.options["glib"].shared:
+                f"-o {self.ref}:with_gtk_doc=True is not support on Windows")
+        if is_msvc_static_runtime(self) and self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
-                "-o glib:shared=True with static runtime is not supported")
+                "-o glib/*:shared=True with static runtime is not supported")
 
     def requirements(self):
         self.requires("glib/2.75.2")
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.2")
 
@@ -72,8 +73,7 @@ class LibniceConan(ConanFile):
             self.tool_requires("gobject-introspection/1.72.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = PkgConfigDeps(self)
