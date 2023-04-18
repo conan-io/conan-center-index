@@ -1,4 +1,7 @@
 sources:
+  "2023.04.17":
+    url: "https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2023.04.17.tar.gz"
+    sha256: "0ce992f4167f958f68a37918dec6325be18f848dee29a4521c633aae3304915d"
   "2022.09.30":
     url: "https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.09.30.tar.gz"
     sha256: "0ae857ecb28af95a420c800b21ed2d0f437503e104f841ab8db249df5f4fbe5c"
