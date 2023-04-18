@@ -81,6 +81,8 @@ class AwsCAuth(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-auth")
         # TODO: back to global scope once conan v1 support dropped
         self.cpp_info.components["aws-c-auth-lib"].libs = ["aws-c-auth"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-auth-lib"].defines.append("AWS_AUTH_USE_IMPORT_EXPORT")
         self.cpp_info.components["aws-c-auth-lib"].requires = [
             "aws-c-common::aws-c-common-lib",
             "aws-c-cal::aws-c-cal-lib",
