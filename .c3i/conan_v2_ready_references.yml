@@ -11,6 +11,7 @@ required_for_references:
 - antlr4-cppruntime
 - approvaltests.cpp
 - apr
+- apr-util
 - arduinojson
 - arg_router
 - asio
@@ -98,6 +99,7 @@ required_for_references:
 - farmhash
 - fast-cdr
 - fast_float
+- ffmpeg
 - fft
 - fftw
 - flac
@@ -106,6 +108,7 @@ required_for_references:
 - flex
 - fmt
 - fontconfig
+- foonathan-memory
 - fp16
 - freeglut
 - freetype
@@ -156,6 +159,7 @@ required_for_references:
 - imake
 - imath
 - imgui
+- incbin
 - indicators
 - inja
 - intel-neon2sse
@@ -185,6 +189,7 @@ required_for_references:
 - libcds
 - libconfuse
 - libcurl
+- libde265
 - libdeflate
 - libdisasm
 - libdwarf
@@ -209,6 +214,7 @@ required_for_references:
 - libltc
 - libmodbus
 - libmodplug
+- libmorton
 - libmount
 - libmp3lame
 - libmysqlclient
@@ -244,6 +250,7 @@ required_for_references:
 - libuuid
 - libuv
 - libverto
+- libvips
 - libvpx
 - libwebp
 - libx264
@@ -271,6 +278,7 @@ required_for_references:
 - meson
 - mgs
 - mikelankamp-fpm
+- mimalloc
 - minisat
 - minizip
 - minizip-ng
@@ -326,6 +334,7 @@ required_for_references:
 - pkgconf
 - poco
 - proj
+- proposal
 - protobuf
 - psimd
 - pthreadpool
@@ -354,6 +363,7 @@ required_for_references:
 - s2n
 - scnlib
 - sdl
+- sdl_image
 - semimap
 - sentry-breakpad
 - serd
@@ -382,6 +392,7 @@ required_for_references:
 - tensorpipe
 - termcap
 - threadpool
+- tinycthread
 - tinyexif
 - tinyxml2
 - tl-expected
@@ -407,6 +418,7 @@ required_for_references:
 - vulkan-headers
 - vulkan-loader
 - wasmtime
+- wasmtime-cpp
 - wayland
 - wayland-protocols
 - websocketpp

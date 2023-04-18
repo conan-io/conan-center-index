@@ -188,11 +188,6 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
-          files: "recipes/gtk/*/*"
-          reviewers: ""
-
-      - uses: ./.github/actions/alert-community
-        with:
           files: "recipes/imgui/*/*"
           reviewers: "@Hopobcn"
 
