@@ -14,7 +14,7 @@ class AmqpcppConan(ConanFile):
     topics = ("amqp", "network", "queue")
     license = "Apache-2.0"
     description = "C++ library for asynchronous non-blocking communication with RabbitMQ"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
