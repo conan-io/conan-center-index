@@ -1,6 +1,9 @@
 from conan import ConanFile
-from conan.tools import files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    replace_in_file, rmdir
+)
 import os
 
 required_conan_version = ">=1.53.0"
@@ -12,9 +15,9 @@ class CppRestSDKConan(ConanFile):
                   "C++ API design"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Microsoft/cpprestsdk"
-    topics = ("cpprestsdk", "rest", "client", "http", "https")
+    topics = ("rest", "client", "http", "https")
     license = "MIT"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,7 +39,7 @@ class CppRestSDKConan(ConanFile):
     }
 
     def export_sources(self):
-        files.export_conandata_patches(self)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,6 +53,9 @@ class CppRestSDKConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("boost/1.81.0")
         self.requires("openssl/3.1.0")
@@ -58,15 +64,8 @@ class CppRestSDKConan(ConanFile):
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
 
-    def package_id(self):
-        self.info.requires["boost"].minor_mode()
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -90,22 +89,22 @@ class CppRestSDKConan(ConanFile):
 
     def _patch_clang_libcxx(self):
         if self.settings.compiler == 'clang' and str(self.settings.compiler.libcxx) in ['libstdc++', 'libstdc++11']:
-            files.replace_in_file(self, os.path.join(self.source_folder, 'Release', 'CMakeLists.txt'),
+            replace_in_file(self, os.path.join(self.source_folder, 'Release', 'CMakeLists.txt'),
                                   'libc++', 'libstdc++')
 
     def build(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
         self._patch_clang_libcxx()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        files.copy(self, "license.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "license.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cpprestsdk"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cpprestsdk"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cpprestsdk")
@@ -120,7 +119,7 @@ class CppRestSDKConan(ConanFile):
         self.cpp_info.components["cpprestsdk_openssl_internal"].requires = ["openssl::openssl"]
         # cpprest
         self.cpp_info.components["cpprest"].set_property("cmake_target_name", "cpprestsdk::cpprest")
-        self.cpp_info.components["cpprest"].libs = files.collect_libs(self)
+        self.cpp_info.components["cpprest"].libs = collect_libs(self)
         self.cpp_info.components["cpprest"].requires = ["cpprestsdk_boost_internal", "cpprestsdk_openssl_internal"]
         if self.settings.os == "Linux":
             self.cpp_info.components["cpprest"].system_libs.append("pthread")
