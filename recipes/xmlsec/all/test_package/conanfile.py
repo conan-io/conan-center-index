@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("libxml2/2.10.4")
 
     def build(self):
         cmake = CMake(self)
