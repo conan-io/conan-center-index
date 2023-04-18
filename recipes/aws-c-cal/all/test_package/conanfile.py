@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
 import os
-import io
 
 
 class TestPackageConan(ConanFile):
@@ -23,9 +22,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            stream = io.StringIO()
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun", output=stream)
-            self.output.info(stream.getvalue())
-            if self.deps_user_info["aws-c-cal"].with_openssl == "True":
-                assert "found static libcrypto" in stream.getvalue()
+            self.run(bin_path, env="conanrun")
