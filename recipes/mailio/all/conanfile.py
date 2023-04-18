@@ -57,7 +57,7 @@ class MailioConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.81.0", transitive_headers=True)
         self.requires("openssl/3.1.0")
 
     def validate(self):
