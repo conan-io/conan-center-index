@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import export_conandata_patches, get, copy, rmdir
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import export_conandata_patches, get, copy, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -32,13 +33,13 @@ class UniAlgoConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
-            "msvc": "191",
+            "msvc": "192",
             "gcc": "7",
             "clang": "8",
             "apple-clang": "11",
@@ -69,16 +70,17 @@ class UniAlgoConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-        else:
-            check_min_vs(self, int(self._compilers_minimum_version["msvc"]))
-            if self.options.get_safe("shared"):
-                raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if is_msvc(self) and self.options.get_safe("shared"):
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with msvc")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
