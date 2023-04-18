@@ -33,7 +33,7 @@ class mailioConan(ConanFile):
         return 17
 
     @property
-    def _compiler_required_cpp(self): 
+    def _compiler_required_cpp(self):
         return {
             "gcc": "8.3",
             "clang": "6",
@@ -58,7 +58,7 @@ class mailioConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.81.0")
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/3.1.0")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
