@@ -125,11 +125,5 @@ class UniAlgoConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
         # see https://github.com/uni-algo/uni-algo/blob/v0.7.1/CMakeLists.txt#L75-L109
-        self.cpp_info.set_property("cmake_file_name", f"{self.name}")
-        self.cpp_info.set_property("cmake_target_name", f"{self.name}::{self.name}")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = f"{self.name}"
-        self.cpp_info.filenames["cmake_find_package_multi"] = f"{self.name}"
-        self.cpp_info.names["cmake_find_package"] = f"{self.name}"
-        self.cpp_info.names["cmake_find_package_multi"] = f"{self.name}"
+        self.cpp_info.set_property("cmake_file_name", "uni-algo")
+        self.cpp_info.set_property("cmake_target_name", "uni-algo::uni-algo")
