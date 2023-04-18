@@ -37,9 +37,9 @@ class NcbiCxxToolkit(ConanFile):
         "with_components": ""
     }
     short_paths = True
-    tk_dependencies = None
-    tk_requirements = None
-    tk_componenttargets = set()
+    _dependencies = None
+    _requirements = None
+    _componenttargets = set()
 
     @property
     def _min_cppstd(self):
@@ -67,23 +67,23 @@ class NcbiCxxToolkit(ConanFile):
 
     @property
     def _tk_dependencies(self):
-        if self.tk_dependencies is None:
+        if self._dependencies is None:
             dependencies_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._dependencies_filename)
             if not os.path.isfile(dependencies_filepath):
                 raise ConanException(f"Cannot find {dependencies_filepath}")
             with open(dependencies_filepath, "r", encoding="utf-8") as f:
-                self.tk_dependencies = yaml.safe_load(f)
-        return self.tk_dependencies
+                self._dependencies = yaml.safe_load(f)
+        return self._dependencies
 
     @property
     def _tk_requirements(self):
-        if self.tk_requirements is None:
+        if self._requirements is None:
             requirements_filepath = os.path.join(self.recipe_folder, self._dependencies_folder, self._requirements_filename)
             if not os.path.isfile(requirements_filepath):
                 raise ConanException(f"Cannot find {requirements_filepath}")
             with open(requirements_filepath, "r", encoding="utf-8") as f:
-                self.tk_requirements = yaml.safe_load(f)
-        return self.tk_requirements
+                self._requirements = yaml.safe_load(f)
+        return self._requirements
 
     def _translate_req(self, key):
         if "Boost" in key:
@@ -160,7 +160,7 @@ class NcbiCxxToolkit(ConanFile):
             _required_components.update( self._tk_dependencies["components"])
         else:
             for component in _required_components:
-                self.tk_componenttargets.update(self._tk_dependencies["libraries"][component])
+                self._componenttargets.update(self._tk_dependencies["libraries"][component])
 
         requirements = set()
         for component in _required_components:
@@ -210,8 +210,8 @@ class NcbiCxxToolkit(ConanFile):
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = str(self.options.with_projects) + ";-app/netcache"
         if self.options.with_targets != "":
             tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
-        if len(self.tk_componenttargets) != 0:
-            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self.tk_componenttargets)
+        if len(self._componenttargets) != 0:
+            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._componenttargets)
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.generate()
