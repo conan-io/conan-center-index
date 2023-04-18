@@ -83,9 +83,10 @@ class UniAlgoConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["UNI_ALGO_HEADER_ONLY"] = self.options.header_only
-        tc.generate()
+        if not self.options.header_only:
+            tc = CMakeToolchain(self)
+            tc.variables["UNI_ALGO_HEADER_ONLY"] = self.options.header_only
+            tc.generate()
 
     def build(self):
         if not self.options.header_only:
