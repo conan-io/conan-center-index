@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, get, copy, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -44,9 +44,6 @@ class UniAlgoConan(ConanFile):
             "clang": "8",
             "apple-clang": "11",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
