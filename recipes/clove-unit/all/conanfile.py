@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.layout import basic_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import export_conandata_patches, get, copy
 import os
 
 required_conan_version = ">=1.52.0"
@@ -14,7 +14,7 @@ class CloveUnitConan(ConanFile):
     license = "MIT"
     no_copy_source = True
     package_type = "header-library"
-    #settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
 
     # Use the export_sources(self) method instead of the exports_sources attribute.
     # This allows finer grain exportation of patches per version
@@ -30,7 +30,8 @@ class CloveUnitConan(ConanFile):
     # Not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
         # The attribute no_copy_source should not be used when applying patches in build
-        apply_conandata_patches(self)
+        # apply_conandata_patches(self)
+        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -40,11 +41,13 @@ class CloveUnitConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "CloveUnit")
+        self.cpp_info.set_property("cmake_target_name", "CloveUnit::CloveUnit")
         # Folders not used for header-only
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "CloveUnit"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "CloveUnit"
-        self.cpp_info.names["cmake_find_package"] = "CloveUnit"
-        self.cpp_info.names["cmake_find_package_multi"] = "CloveUnit"
+        # self.cpp_info.filenames["cmake_find_package"] = "CloveUnit"
+        # self.cpp_info.filenames["cmake_find_package_multi"] = "CloveUnit"
+        # self.cpp_info.names["cmake_find_package"] = "CloveUnit"
+        # self.cpp_info.names["cmake_find_package_multi"] = "CloveUnit"
