@@ -16,7 +16,7 @@ class GsoapConan(ConanFile):
     license = ("gSOAP-1.3b", "GPL-2.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/gsoap2"
-    topics = ("gsoap", "logging")
+    topics = ("logging",)
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
