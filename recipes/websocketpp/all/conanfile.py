@@ -34,13 +34,13 @@ class WebsocketPPConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1t", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/3.1.0", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.24.0", transitive_headers=True)
+            self.requires("asio/1.27.0", transitive_headers=True)
         elif self.options.asio == "boost":
             self.requires("boost/1.81.0", transitive_headers=True)
 
