@@ -15,7 +15,7 @@ class LibZipConan(ConanFile):
     homepage = "https://github.com/nih-at/libzip"
     license = "BSD-3-Clause"
     topics = ("zip", "zip-archives", "zip-editing")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
