@@ -106,27 +106,25 @@ class PahoMqttcConan(ConanFile):
         rm(self, "*.cmake", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.components["_paho-mqtt-c"].libs = [self._lib_target]
-
         self.cpp_info.set_property("cmake_file_name", "eclipse-paho-mqtt-c")
+        self.cpp_info.set_property("cmake_target_name", f"eclipse-paho-mqtt-c::{self._cmake_target}")
 
-        self.cpp_info.components["_paho-mqtt-c"].set_property("cmake_target_name", f"eclipse-paho-mqtt-c::{self._cmake_target}")
-
+        # TODO: back to global scope in conan v2
+        self.cpp_info.components["_paho-mqtt-c"].libs = [self._lib_target]
         if self.settings.os == "Windows":
             if not self.options.shared:
                 self.cpp_info.components["_paho-mqtt-c"].system_libs.append("ws2_32")
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(
                         ["wsock32", "uuid", "crypt32", "rpcrt4"])
+        elif self.settings.os == "Linux":
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["anl", "c", "dl", "pthread"])
+        elif self.settings.os == "FreeBSD":
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["compat", "pthread"])
+        elif self.settings.os == "Android":
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c"])
         else:
-            if self.settings.os == "Linux":
-                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "dl", "pthread"])
-            elif self.settings.os == "FreeBSD":
-                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["compat", "pthread"])
-            elif self.settings.os == "Android":
-                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c"])
-            else:
-                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "pthread"])
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "pthread"])
 
         if self.options.ssl:
             self.cpp_info.components["_paho-mqtt-c"].requires = ["openssl::openssl"]
@@ -136,6 +134,7 @@ class PahoMqttcConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
         self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package"] = self._cmake_target
         self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package_multi"] = self._cmake_target
+        self.cpp_info.components["_paho-mqtt-c"].set_property("cmake_target_name", f"eclipse-paho-mqtt-c::{self._cmake_target}")
 
     @property
     def _epl_file(self):
