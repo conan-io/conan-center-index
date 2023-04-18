@@ -47,7 +47,8 @@ class CloveUnitConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        # self.cpp_info.filenames["cmake_find_package"] = "CloveUnit"
-        # self.cpp_info.filenames["cmake_find_package_multi"] = "CloveUnit"
-        # self.cpp_info.names["cmake_find_package"] = "CloveUnit"
-        # self.cpp_info.names["cmake_find_package_multi"] = "CloveUnit"
+        # NOTE: needed by conan test phase on test_v1_package folder
+        self.cpp_info.filenames["cmake_find_package"] = "CloveUnit"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "CloveUnit"
+        self.cpp_info.names["cmake_find_package"] = "CloveUnit"
+        self.cpp_info.names["cmake_find_package_multi"] = "CloveUnit"
