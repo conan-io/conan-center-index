@@ -49,7 +49,7 @@ class GsoapConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/3.1.0")
             self.requires("zlib/1.2.13")
 
     def build_requirements(self):
@@ -59,7 +59,7 @@ class GsoapConan(ConanFile):
         if is_msvc(self, build_context=True):
             self.tool_requires("winflexbison/2.5.24")
         else:
-            self.tool_requires("bison/3.7.6")
+            self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
 
     def source(self):
