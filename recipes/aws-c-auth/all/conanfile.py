@@ -14,7 +14,7 @@ class AwsCAuth(ConanFile):
         "C99 library implementation of AWS client-side authentication: "
         "standard credentials providers and signing."
     )
-    license = "Apache-2.0",
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-auth"
     topics = ("aws", "amazon", "cloud", "authentication", "credentials", "providers", "signing")
@@ -83,14 +83,6 @@ class AwsCAuth(ConanFile):
         self.cpp_info.components["aws-c-auth-lib"].libs = ["aws-c-auth"]
         if self.options.shared:
             self.cpp_info.components["aws-c-auth-lib"].defines.append("AWS_AUTH_USE_IMPORT_EXPORT")
-        self.cpp_info.components["aws-c-auth-lib"].requires = [
-            "aws-c-common::aws-c-common-lib",
-            "aws-c-cal::aws-c-cal-lib",
-            "aws-c-io::aws-c-io-lib",
-            "aws-c-http::aws-c-http-lib",
-        ]
-        if Version(self.version) >= "0.6.5":
-            self.cpp_info.components["aws-c-auth-lib"].requires.append("aws-c-sdkutils::aws-c-sdkutils-lib")
 
         # TODO: to remove once conan v1 support dropped
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-auth"
@@ -100,3 +92,11 @@ class AwsCAuth(ConanFile):
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "AWS::aws-c-auth")
+        self.cpp_info.components["aws-c-auth-lib"].requires = [
+            "aws-c-common::aws-c-common",
+            "aws-c-cal::aws-c-cal",
+            "aws-c-io::aws-c-io",
+            "aws-c-http::aws-c-http",
+        ]
+        if Version(self.version) >= "0.6.5":
+            self.cpp_info.components["aws-c-auth-lib"].requires.append("aws-c-sdkutils::aws-c-sdkutils")
