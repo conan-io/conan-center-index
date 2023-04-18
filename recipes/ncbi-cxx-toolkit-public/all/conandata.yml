@@ -6,4 +6,8 @@ sources:
 patches:
   "27.0.0":
     - patch_file: "patches/27.0.0-compiler.patch"
+      patch_description: "Corrected version check of GCC compiler"
+      patch_type: "bugfix"
     - patch_file: "patches/27.0.0-install.patch"
+      patch_description: "Replaced hard-coded configuration with cmake generator expression"
+      patch_type: "bugfix"
