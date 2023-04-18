@@ -80,17 +80,21 @@ class AwsCHttp(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "aws-c-http")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-http")
 
+        # TODO: back to global scope in conan v2
+        self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-http-lib"].defines.append("AWS_HTTP_USE_IMPORT_EXPORT")
+
+        # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-http"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-http"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-
         self.cpp_info.components["aws-c-http-lib"].set_property("cmake_target_name", "AWS::aws-c-http")
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package_multi"] = "aws-c-http"
-        self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
         self.cpp_info.components["aws-c-http-lib"].requires = [
-            "aws-c-common::aws-c-common-lib",
-            "aws-c-compression::aws-c-compression-lib",
-            "aws-c-io::aws-c-io-lib"
+            "aws-c-common::aws-c-common",
+            "aws-c-compression::aws-c-compression",
+            "aws-c-io::aws-c-io",
         ]
