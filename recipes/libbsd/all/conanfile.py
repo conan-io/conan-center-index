@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.layout import basic_layout
@@ -33,10 +33,6 @@ class LibBsdConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
     
     def configure(self):
         if self.options.shared:
@@ -80,6 +76,7 @@ class LibBsdConan(ConanFile):
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["bsd"].libs = ["bsd"]
