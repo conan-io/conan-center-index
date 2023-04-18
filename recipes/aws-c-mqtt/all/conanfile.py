@@ -82,7 +82,12 @@ class AwsCMQTT(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-mqtt")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-mqtt")
+        # TODO: back to root in conan v2
+        self.cpp_info.components["aws-c-mqtt-lib"].libs = ["aws-c-mqtt"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-mqtt-lib"].defines.append("AWS_MQTT_USE_IMPORT_EXPORT")
 
+        # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-mqtt"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-mqtt"
         self.cpp_info.names["cmake_find_package"] = "AWS"
@@ -90,11 +95,9 @@ class AwsCMQTT(ConanFile):
         self.cpp_info.components["aws-c-mqtt-lib"].names["cmake_find_package"] = "aws-c-mqtt"
         self.cpp_info.components["aws-c-mqtt-lib"].names["cmake_find_package_multi"] = "aws-c-mqtt"
         self.cpp_info.components["aws-c-mqtt-lib"].set_property("cmake_target_name", "AWS::aws-c-mqtt")
-
-        self.cpp_info.components["aws-c-mqtt-lib"].libs = ["aws-c-mqtt"]
         self.cpp_info.components["aws-c-mqtt-lib"].requires = [
-            "aws-c-common::aws-c-common-lib",
-            "aws-c-cal::aws-c-cal-lib",
-            "aws-c-io::aws-c-io-lib",
-            "aws-c-http::aws-c-http-lib"
+            "aws-c-common::aws-c-common",
+            "aws-c-cal::aws-c-cal",
+            "aws-c-io::aws-c-io",
+            "aws-c-http::aws-c-http",
         ]
