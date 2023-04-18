@@ -13,7 +13,7 @@ class WebsocketPPConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zaphoyd/websocketpp"
     license = "BSD-3-Clause"
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "asio": ["boost", "standalone", False],
@@ -48,8 +48,7 @@ class WebsocketPPConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
