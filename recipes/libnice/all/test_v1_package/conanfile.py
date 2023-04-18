@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conans import CMake
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 
 
 class LibniceTestConan(ConanFile):
@@ -14,6 +14,6 @@ class LibniceTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
+        if can_run(self):
             bin_path = os.path.join("bin", "example")
             self.run(bin_path, run_environment=True)
