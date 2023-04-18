@@ -88,7 +88,7 @@ class LibtorrentConan(ConanFile):
         else:
             self.requires("boost/1.76.0", transitive_headers=True)
         if self.options.enable_encryption:
-            self.requires("openssl/1.1.1t", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/3.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.enable_iconv:
             self.requires("libiconv/1.17")
 
