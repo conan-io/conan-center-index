@@ -44,7 +44,6 @@ class SeadexEssentialsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.options.shared = False
 
     def configure(self):
         if self.options.shared:
