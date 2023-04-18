@@ -28,7 +28,7 @@ class AwsCCal(ConanFile):
 
     @property
     def _needs_openssl(self):
-        return self.settings.os != "Windows" and not is_apple_os(self)
+        return not (self.settings.os == "Windows" or is_apple_os(self))
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -98,7 +98,6 @@ class AwsCCal(ConanFile):
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("dl")
 
-        self.user_info.with_openssl = self._needs_openssl
         if self._needs_openssl:
             self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
             if not self.dependencies["openssl"].options.shared:
