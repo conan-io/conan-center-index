@@ -8,4 +8,7 @@ if(XMLSEC_WITH_XSLT)
 endif()
 
 add_executable(${PROJECT_NAME} sign1.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE LibXml2::LibXml2 LibXslt::LibXslt xmlsec::xmlsec)
+target_link_libraries(${PROJECT_NAME} PRIVATE LibXml2::LibXml2 xmlsec::xmlsec)
+if(XMLSEC_WITH_XSLT)
+    target_link_libraries(${PROJECT_NAME} PRIVATE LibXslt::LibXslt)
+endif()
