@@ -1,8 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
 
+
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
@@ -12,10 +12,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            # core component
-            bin_path = os.path.join("bin", "test_package_core")
-            self.run(bin_path, run_environment=True)
-            # lsr component
-            if self.options["soxr"].with_lsr_bindings:
-                bin_path = os.path.join("bin", "test_package_lsr")
-                self.run(bin_path, run_environment=True)
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {tools.cpu_count()}", run_environment=True)

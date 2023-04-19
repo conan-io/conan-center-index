@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
+
 
 class AvcppConan(ConanFile):
     name = "avcpp"
@@ -16,6 +16,7 @@ class AvcppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/h4tr3d/avcpp/"
     topics = ("ffmpeg", "cpp")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -27,8 +28,8 @@ class AvcppConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 17
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -36,6 +37,8 @@ class AvcppConan(ConanFile):
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12.0",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def export_sources(self):
@@ -47,18 +50,7 @@ class AvcppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
-                )
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,8 +58,18 @@ class AvcppConan(ConanFile):
     def requirements(self):
         self.requires("ffmpeg/5.0")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

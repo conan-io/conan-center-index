@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
-
-project(TestPackage LANGUAGES CXX)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 20)
+project(test_package LANGUAGES CXX)
 
 find_package(yaclib REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE yaclib)
+
+if(YACLIB_CORO)
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+else()
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+endif()

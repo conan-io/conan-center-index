@@ -3,15 +3,15 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, load, replace_in_file, rmdir, save
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, load, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import json
 import os
 import re
 import textwrap
 
-required_conan_version = ">=1.51.3"
-
+required_conan_version = ">=1.53.0"
 
 class AbseilConan(ConanFile):
     name = "abseil"
@@ -21,6 +21,7 @@ class AbseilConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,13 +31,27 @@ class AbseilConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
     short_paths = True
+
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "20230125.0" else "14"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         copy(self, "abi_trick/*", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,21 +59,26 @@ class AbseilConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if self.info.options.shared and is_msvc(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if self.options.shared and is_msvc(self):
             # upstream tries its best to export symbols, but it's broken for the moment
-            raise ConanInvalidConfiguration("abseil shared not availabe for Visual Studio (yet)")
+            raise ConanInvalidConfiguration(f"{self.ref} shared not availabe for Visual Studio (yet)")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
