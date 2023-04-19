@@ -16,7 +16,11 @@ disable=fixme,
         missing-class-docstring,
         invalid-name,
         wrong-import-order,  # TODO: Remove
-        import-outside-toplevel  # TODO: Remove
+        import-outside-toplevel,  # TODO: Remove
+        
+        # Not relevant to test package
+        conan-missing-layout-src-folder,
+        conan-layout-src-folder-is-src
 
 enable=conan-test-no-name,
        conan-import-conanfile
