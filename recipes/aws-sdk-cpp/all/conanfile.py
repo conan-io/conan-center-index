@@ -425,8 +425,16 @@ class AwsSdkCppConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable warnings as errors
+        replace_in_file(
+            self, os.path.join(self.source_folder, "cmake", "compiler_settings.cmake"),
+            'list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")', "",
+        )
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
