@@ -137,7 +137,9 @@ class CivetwebConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         bin_folder = os.path.join(self.package_folder, "bin")
         for bin_file in os.listdir(bin_folder):
             if not bin_file.startswith("civetweb"):
@@ -146,6 +148,7 @@ class CivetwebConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "civetweb")
         self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb-cpp" if self.options.with_cxx else "civetweb::civetweb")
+        self.cpp_info.set_property("pkg_config_name", "civetweb")
 
         self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
