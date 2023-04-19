@@ -5,6 +5,7 @@ from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, rename, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanInvalidConfiguration
 import glob
 import os
 from conan.tools.layout import basic_layout
@@ -40,17 +41,21 @@ class CunitConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def validate(self):
+        if self.options.shared and not self.options.with_curses:
+            # For shared builds we always need to depend on ncurses, since otherwise we get undefined
+            # symbols, like:
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `echo'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `wattr_on'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `acs_map'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `cbreak'
+            raise ConanInvalidConfiguration("cunit package is built with shared, which requires "
+                                            "cunit:with_curses=ncurses option")
+
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # For shared builds we always need to depend on ncurses, since otherwise we get undefined
-        # symbols, like:
-        # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `echo'
-        # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `wattr_on'
-        # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `acs_map'
-        # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `cbreak'
-        if self.options.shared:
-            self.options.with_curses = "ncurses"
 
     def configure(self):
         if self.options.shared:
