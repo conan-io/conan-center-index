@@ -1,11 +1,11 @@
 sources:
   # Newer versions at the top
-  "1.2.1-dev":
+  "cci.20221028":
     url: "https://github.com/libtom/libtommath/archive/03de03dee753442d4b23166982514639c4ccbc39.tar.gz"
     sha256: "ab65fcfc88f7bd457b13a615228298935f05af17a0a8554ad0e3fba9812b03c2"
 patches:
   # Newer versions at the top
-  "1.2.1-dev":
+  "cci.20221028":
     - patch_file: "patches/0002-enable-building-dlls.patch"
       patch_description: "add support for windows dlls"
       patch_type: "portability"
