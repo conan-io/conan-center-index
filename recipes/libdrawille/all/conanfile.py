@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -42,6 +43,8 @@ class LibdrawilleConan(ConanFile):
     def validate(self):
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration(f"{self.ref} supports x86 and x86_64 only.")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC.(yet)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
