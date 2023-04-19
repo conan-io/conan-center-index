@@ -95,6 +95,7 @@ class SoPlexConan(ConanFile):
         tc.variables["Boost_VERSION_MACRO"] = "108100"
         if self.options.with_gmp:
             tc.cache_variables["GMP_INCLUDE_DIRS"] = ";".join(self.dependencies["gmp"].cpp_info.includedirs)
+            tc.cache_variables["GMP_LIBRARIES"] = "gmp::gmp"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
