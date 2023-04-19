@@ -124,16 +124,12 @@ class LibffiConan(ConanFile):
                 compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
                 if architecture_flag:
                     compile_wrapper = f"{compile_wrapper} {architecture_flag}"
-                # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
-                # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
-                [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
-                automake_version = f"{version_major}.{version_minor}"
-                ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
 
+                ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
                 env.define("CC", f"{compile_wrapper}")
                 env.define("CXX", f"{compile_wrapper}")
-                env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
                 env.define("LD", "link -nologo")
+                env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
                 env.define("NM", "dumpbin -symbols")
                 env.define("OBJDUMP", ":")
                 env.define("RANLIB", ":")
