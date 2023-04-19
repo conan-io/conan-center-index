@@ -1,13 +1,15 @@
 import os
 from conan import ConanFile
+from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.47.0"
 
 
 class NodejsConan(ConanFile):
     name = "nodejs"
+    package_type = "application"
     description = "nodejs binaries for use in recipes"
     topics = ("conan", "node", "nodejs")
     url = "https://github.com/conan-io/conan-center-index"
@@ -16,9 +18,12 @@ class NodejsConan(ConanFile):
     settings = "os", "arch"
     no_copy_source = True
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+        return os.path.join(self.source_folder, "src")
 
     @property
     def _nodejs_arch(self):
@@ -47,9 +52,8 @@ class NodejsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = []
-        bin_dir = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
-        self.runenv_info.prepend_path("PATH", bin_dir)
 
         # TODO: Legacy, to be removed on Conan 2.0
+        bin_dir = os.path.join(self.package_folder, "bin")
+        self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
         self.env_info.PATH.append(bin_dir)
