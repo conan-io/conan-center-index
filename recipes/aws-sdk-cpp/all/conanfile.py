@@ -331,7 +331,7 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if Version(self.version) < "1.9":
-            del self.options.s3-crt
+            self.options.rm_safe("s3-crt")
 
     def configure(self):
         if self.options.shared:
