@@ -43,12 +43,6 @@ class CunitConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
         # For shared builds we always need to depend on ncurses, since otherwise we get undefined
         # symbols, like:
         # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `echo'
@@ -57,6 +51,12 @@ class CunitConan(ConanFile):
         # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `cbreak'
         if self.options.shared:
             self.options.with_curses = "ncurses"
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
