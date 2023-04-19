@@ -62,4 +62,4 @@ class B64Conan(ConanFile):
         self.cpp_info.libs = ["b64"]
 
         # TODO: Only for Conan 1.x legacy - Remove after running Conan 2.x only
-        self.env_info.PATH = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
