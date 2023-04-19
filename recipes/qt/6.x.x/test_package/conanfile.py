@@ -64,7 +64,7 @@ class TestPackageConan(ConanFile):
                     args.append(f"QMAKE_LINK=\"{value}\"")
                     args.append(f"QMAKE_LINK_SHLIB=\"{value}\"")
 
-                self.run("qmake %s" % " ".join(args), run_environment=True)
+                self.run(f"qmake {' '.join(args)}", run_environment=True)
                 if tools.os_info.is_windows:
                     if is_msvc(self):
                         self.run("nmake", run_environment=True)
