@@ -94,23 +94,26 @@ class AwsCrtCpp(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-crt-cpp")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-crt-cpp")
-
-        self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package"] = "aws-crt-cpp"
-        self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package_multi"] = "aws-crt-cpp"
+        # TODO: back to root level in conan v2
         self.cpp_info.components["aws-crt-cpp-lib"].libs = ["aws-crt-cpp"]
-        self.cpp_info.components["aws-crt-cpp-lib"].requires = [
-            "aws-c-event-stream::aws-c-event-stream-lib",
-            "aws-c-common::aws-c-common-lib",
-            "aws-c-io::aws-c-io-lib",
-            "aws-c-http::aws-c-http-lib",
-            "aws-c-auth::aws-c-auth-lib",
-            "aws-c-mqtt::aws-c-mqtt-lib",
-            "aws-c-s3::aws-c-s3-lib",
-            "aws-checksums::aws-checksums-lib"
-        ]
+        if self.options.shared:
+            self.cpp_info.components["aws-crt-cpp-lib"].defines.append("AWS_CRT_CPP_USE_IMPORT_EXPORT")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "aws-crt-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-crt-cpp"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package"] = "aws-crt-cpp"
+        self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package_multi"] = "aws-crt-cpp"
+        self.cpp_info.components["aws-crt-cpp-lib"].set_property("cmake_target_name", "AWS::aws-crt-cpp")
+        self.cpp_info.components["aws-crt-cpp-lib"].requires = [
+            "aws-c-event-stream::aws-c-event-stream",
+            "aws-c-common::aws-c-common",
+            "aws-c-io::aws-c-io",
+            "aws-c-http::aws-c-http",
+            "aws-c-auth::aws-c-auth",
+            "aws-c-mqtt::aws-c-mqtt",
+            "aws-c-s3::aws-c-s3",
+            "aws-checksums::aws-checksums",
+        ]
