@@ -35,8 +35,9 @@ tasks:
     write_comments: false
     update_labels: false
     user_feedback:
-      title: "Conan v2 pipeline (informative, not required for merge)"
-      description: "> **Note**: Conan v2 builds are informative and they are not required for the PR to be merged."
+      title: "Conan v2 pipeline"
+      description: "> **Note**: Conan v2 builds may be required once they are on the [v2 ready](https://github.com/conan-io/conan-center-index/blob/master/.c3i/conan_v2_ready_references.yml) list"
+      regression: "> **Regression**: Conan v2 builds are mandatory and they are required for the PR to be merged, because this recipe worked with Conan v2 previously."
       text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
       collapse_on_success: false
       collapse_on_failure: true
