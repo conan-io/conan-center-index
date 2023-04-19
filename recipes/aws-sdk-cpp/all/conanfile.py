@@ -343,6 +343,7 @@ class AwsSdkCppConan(ConanFile):
     def requirements(self):
         self.requires("aws-c-common/0.8.2")
         self.requires("aws-c-event-stream/0.2.15")
+        self.requires("aws-checksums/0.1.13")
         if self._use_aws_crt_cpp:
             self.requires("aws-c-cal/0.5.20")
             self.requires("aws-c-http/0.6.22")
