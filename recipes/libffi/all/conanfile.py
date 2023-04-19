@@ -39,6 +39,18 @@ class LibffiConan(ConanFile):
     def _is_msvc_like(self):
         return is_msvc(self) or (self.settings.compiler == 'clang' and self.settings.get_safe('compiler.runtime_version') is not None)
 
+    @property
+    def _msvc_arch_flag(self):
+        if self.settings.arch == "x86_64":
+            return "-m64"
+        elif self.settings.arch == "x86":
+            return "-m32"
+        elif self.settings.arch == "armv8":
+            return "-marm64"
+        elif self.settings.arch == "armv7":
+            return "-marm"
+        return None
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -88,7 +100,7 @@ class LibffiConan(ConanFile):
             tc.extra_defines.append("FFI_BUILDING_DLL")
 
         env = tc.environment()
-        if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
+        if self._settings_build.os == "Windows" and self._is_msvc_like:
             build = "{}-{}-{}".format(
                 "x86_64" if self._settings_build.arch == "x86_64" else "i686",
                 "pc" if self._settings_build.arch == "x86" else "win64",
@@ -113,29 +125,25 @@ class LibffiConan(ConanFile):
 
             architecture_flag = ""
             if is_msvc(self):
-                if self.settings.arch == "x86_64":
-                    architecture_flag = "-m64"
-                elif self.settings.arch == "x86":
-                    architecture_flag = "-m32"
+                architecture_flag = self._msvc_arch_flag
             elif self.settings.compiler == "clang":
-                architecture_flag = "-clang-cl"
+                architecture_flag = f"{self._msvc_arch_flag} -clang-cl"
 
-            if self._is_msvc_like:
-                compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
-                if architecture_flag:
-                    compile_wrapper = f"{compile_wrapper} {architecture_flag}"
+            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
+            if architecture_flag:
+                compile_wrapper = f"{compile_wrapper} {architecture_flag} --verbose"
 
-                ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
-                env.define("CC", f"{compile_wrapper}")
-                env.define("CXX", f"{compile_wrapper}")
-                env.define("LD", "link -nologo")
-                env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
-                env.define("NM", "dumpbin -symbols")
-                env.define("OBJDUMP", ":")
-                env.define("RANLIB", ":")
-                env.define("STRIP", ":")
-                env.define("CXXCPP", "cl -nologo -EP")
-                env.define("CPP", "cl -nologo -EP")
+            ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
+            env.define("CC", f"{compile_wrapper}")
+            env.define("CXX", f"{compile_wrapper}")
+            env.define("LD", "link -nologo")
+            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.define("CXXCPP", f"{compile_wrapper} -nologo -EP")
+            env.define("CPP", f"{compile_wrapper} -nologo -EP")
             env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
             env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
         tc.generate(env=env)
@@ -143,6 +151,8 @@ class LibffiConan(ConanFile):
     def _patch_source(self):
         apply_conandata_patches(self)
 
+        if self._is_msvc_like and self.settings.compiler == "clang":
+            replace_in_file(self, os.path.join(self.source_folder, "configure.host"), 'if test "${ax_cv_c_compiler_vendor}" = "microsoft"', 'if test 1')
         if Version(self.version) < "3.3":
             if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
                 # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
