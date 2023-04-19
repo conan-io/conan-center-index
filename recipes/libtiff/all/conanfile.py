@@ -17,6 +17,7 @@ class LibtiffConan(ConanFile):
     homepage = "http://www.simplesystems.org/libtiff"
     topics = ("tiff", "image", "bigtiff", "tagged-image-file-format")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -82,29 +83,28 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.15")
+            self.requires("libdeflate/1.17")
         if self.options.lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.0")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.4")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
 
     def validate(self):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

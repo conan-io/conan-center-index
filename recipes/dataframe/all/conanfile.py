@@ -2,13 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class DataFrameConan(ConanFile):
@@ -38,6 +38,7 @@ class DataFrameConan(ConanFile):
         "large-data",
     )
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -47,6 +48,10 @@ class DataFrameConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _minimum_compilers_version(self):
@@ -59,8 +64,7 @@ class DataFrameConan(ConanFile):
         }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,29 +72,26 @@ class DataFrameConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if is_msvc(self) and self.info.options.shared and Version(self.version) < "1.20.0":
-            raise ConanInvalidConfiguration(
-                "dataframe {} doesn't support shared lib with Visual Studio".format(self.version)
-            )
-
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, "17")
-
-        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                "{} requires C++17, which your compiler does not support.".format(self.name)
-            )
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if is_msvc(self) and self.options.shared and Version(self.version) < "1.20.0":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared lib with Visual Studio")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -151,10 +152,9 @@ class DataFrameConan(ConanFile):
             if Version(self.version) < "1.20.0" and not self.options.shared:
                 # weird but required in those versions of dataframe
                 self.cpp_info.defines.append("LIBRARY_EXPORTS")
-        if Version(self.version) >= "1.20.0" and self.options.shared:
+        if "1.20.0" <= Version(self.version) < "2.0.0" and self.options.shared:
             self.cpp_info.defines.append("HMDF_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "DataFrame"
         self.cpp_info.names["cmake_find_package_multi"] = "DataFrame"
-        self.cpp_info.names["pkg_config"] = "DataFrame"

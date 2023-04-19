@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -43,6 +43,9 @@ class SVTAV1Conan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("nasm/2.15.05")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -61,6 +64,7 @@ class SVTAV1Conan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

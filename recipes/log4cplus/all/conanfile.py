@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -95,10 +96,16 @@ class Log4cplusConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        if Version(self.version) >= "2.1.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "log4cplus")
         self.cpp_info.set_property("cmake_target_name", "log4cplus::log4cplus")
+        if Version(self.version) >= "2.1.0":
+            self.cpp_info.set_property("pkg_config_name", "log4cplus")
+
         self.cpp_info.libs = collect_libs(self)
         if self.options.unicode:
             self.cpp_info.defines = ["UNICODE", "_UNICODE"]

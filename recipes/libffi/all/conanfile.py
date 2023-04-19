@@ -4,13 +4,13 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
 from conan.tools.scm import Version
 import glob
 import os
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibffiConan(ConanFile):
@@ -97,13 +97,13 @@ class LibffiConan(ConanFile):
                 "x86_64" if self.settings.arch == "x86_64" else "i686",
                 "pc" if self.settings.arch == "x86" else "win64",
                 "mingw64")
-            tc.configure_args.extend([
-                f"--build={build}",
-                f"--host={host}",
-            ])
+            tc.update_configure_args({
+                "--build": build,
+                "--host": host
+                })
 
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-                (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
+                # https://github.com/conan-io/conan/issues/6514
                 tc.extra_cflags.append("-FS")
 
             if is_msvc_static_runtime(self):
