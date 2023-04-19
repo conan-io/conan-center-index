@@ -83,7 +83,12 @@ class AwsCS3(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-s3")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-s3")
+        # TODO: back to root level in conan v2
+        self.cpp_info.components["aws-c-s3-lib"].libs = ["aws-c-s3"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-s3-lib"].defines.append("AWS_S3_USE_IMPORT_EXPORT")
 
+        # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-s3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-s3"
         self.cpp_info.names["cmake_find_package"] = "AWS"
@@ -91,13 +96,11 @@ class AwsCS3(ConanFile):
         self.cpp_info.components["aws-c-s3-lib"].names["cmake_find_package"] = "aws-c-s3"
         self.cpp_info.components["aws-c-s3-lib"].names["cmake_find_package_multi"] = "aws-c-s3"
         self.cpp_info.components["aws-c-s3-lib"].set_property("cmake_target_name", "AWS::aws-c-s3")
-
-        self.cpp_info.components["aws-c-s3-lib"].libs = ["aws-c-s3"]
         self.cpp_info.components["aws-c-s3-lib"].requires = [
-            "aws-c-common::aws-c-common-lib",
-            "aws-c-io::aws-c-io-lib",
-            "aws-c-http::aws-c-http-lib",
-            "aws-c-auth::aws-c-auth-lib"
+            "aws-c-common::aws-c-common",
+            "aws-c-io::aws-c-io",
+            "aws-c-http::aws-c-http",
+            "aws-c-auth::aws-c-auth",
         ]
         if Version(self.version) >= "0.1.36":
-            self.cpp_info.components["aws-c-s3-lib"].requires.append("aws-checksums::aws-checksums-lib")
+            self.cpp_info.components["aws-c-s3-lib"].requires.append("aws-checksums::aws-checksums")
