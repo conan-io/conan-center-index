@@ -12,6 +12,7 @@ required_for_references:
 - approvaltests.cpp
 - apr
 - apr-util
+- apriltag
 - arduinojson
 - arg_router
 - asio
@@ -86,6 +87,7 @@ required_for_references:
 - drwav
 - duckdb
 - earcut
+- easy_profiler
 - editline
 - egl
 - eigen
@@ -94,6 +96,7 @@ required_for_references:
 - enum-flags
 - etl
 - expat
+- expected-lite
 - exprtk
 - fakeit
 - farmhash
@@ -118,6 +121,7 @@ required_for_references:
 - fxdiv
 - g3log
 - gamma
+- gdcm
 - gdk-pixbuf
 - gemmlowp
 - geos
@@ -153,6 +157,7 @@ required_for_references:
 - hipony-enumerate
 - hiredis
 - homog2d
+- http_parser
 - icu
 - iir1
 - im95able-rea
@@ -167,14 +172,17 @@ required_for_references:
 - jasper
 - jbig
 - joltphysics
+- jom
 - json-c
 - json-schema-validator
 - jsoncons
 - jsoncpp
 - jwt-cpp
 - kangaru
+- kmod
 - kuba-zip
 - lcms
+- ldns
 - lemon
 - leptonica
 - lerc
@@ -302,6 +310,7 @@ required_for_references:
 - nsync
 - nuraft
 - odbc
+- ogdf
 - ogg
 - onetbb
 - onnx
@@ -318,6 +327,7 @@ required_for_references:
 - openjpeg
 - openmesh
 - openssl
+- optional-lite
 - opus
 - osqp
 - out_ptr
@@ -384,6 +394,7 @@ required_for_references:
 - status-code
 - stb
 - strawberryperl
+- string-view-lite
 - symengine
 - tabulate
 - taocpp-pegtl
@@ -393,6 +404,7 @@ required_for_references:
 - termcap
 - threadpool
 - tinycthread
+- tinycthreadpool
 - tinyexif
 - tinyxml2
 - tl-expected
@@ -425,6 +437,7 @@ required_for_references:
 - wil
 - winflexbison
 - wiringpi
+- wolfssl
 - wslay
 - wt
 - xapian-core
