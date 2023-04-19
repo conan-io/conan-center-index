@@ -10,10 +10,12 @@ file(GLOB_RECURSE SOURCES "${LIBELF_SRC_DIR}/lib/*.c")
 file(GLOB_RECURSE HEADERS "${LIBELF_SRC_DIR}/lib/*.h")
 
 add_library(${PROJECT_NAME} ${SOURCES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE "HAVE_CONFIG_H=1")
 set_target_properties(${PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER "${HEADERS}"
     WINDOWS_EXPORT_ALL_SYMBOLS TRUE
 )
+target_include_directories(${PROJECT_NAME} PRIVATE "${LIBELF_SRC_DIR}")
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC "${LIBELF_SRC_DIR}/lib")
 target_compile_definitions(${PROJECT_NAME} PUBLIC HAVE_MEMCMP=1 HAVE_MEMCPY=1 HAVE_MEMMOVE=1)
 
