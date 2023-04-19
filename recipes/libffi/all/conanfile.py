@@ -35,6 +35,10 @@ class LibffiConan(ConanFile):
         # TODO: Remove for Conan v2
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _is_msvc_like(self):
+        return is_msvc(self) or (self.settings.compiler == 'clang' and self.settings.get_safe('compiler.runtime_version') is not None)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -56,7 +60,8 @@ class LibffiConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
+
+        if self._is_msvc_like:
             self.tool_requires("automake/1.16.5")
 
     def source(self):
@@ -115,24 +120,26 @@ class LibffiConan(ConanFile):
             elif self.settings.compiler == "clang":
                 architecture_flag = "-clang-cl"
 
-            compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
-            if architecture_flag:
-                compile_wrapper = f"{compile_wrapper} {architecture_flag}"
-            # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
-            # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
-            [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
-            automake_version = f"{version_major}.{version_minor}"
-            ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
-            env.define("CC", f"{compile_wrapper}")
-            env.define("CXX", f"{compile_wrapper}")
-            env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
-            env.define("CXXCPP", "cl -nologo -EP")
-            env.define("CPP", "cl -nologo -EP")
+            if self._is_msvc_like:
+                compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
+                if architecture_flag:
+                    compile_wrapper = f"{compile_wrapper} {architecture_flag}"
+                # FIXME: Use the conf once https://github.com/conan-io/conan-center-index/pull/12898 is merged
+                # env.define("AR", f"{unix_path(self, self.conf.get('tools.automake:ar-lib'))}")
+                [version_major, version_minor, _] = self.dependencies.direct_build['automake'].ref.version.split(".", 2)
+                automake_version = f"{version_major}.{version_minor}"
+                ar_wrapper = unix_path(self, os.path.join(self.dependencies.direct_build['automake'].cpp_info.resdirs[0], f"automake-{automake_version}", "ar-lib"))
+
+                env.define("CC", f"{compile_wrapper}")
+                env.define("CXX", f"{compile_wrapper}")
+                env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+                env.define("LD", "link -nologo")
+                env.define("NM", "dumpbin -symbols")
+                env.define("OBJDUMP", ":")
+                env.define("RANLIB", ":")
+                env.define("STRIP", ":")
+                env.define("CXXCPP", "cl -nologo -EP")
+                env.define("CPP", "cl -nologo -EP")
             env.define("LIBTOOL", unix_path(self, os.path.join(self.source_folder, "ltmain.sh")))
             env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
         tc.generate(env=env)
