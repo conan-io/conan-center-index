@@ -419,7 +419,7 @@ class AwsSdkCppConan(ConanFile):
             tc.cache_variables["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
             tc.cache_variables["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
         if is_msvc(self):
-            tc.cache_variables["_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"] = "1"
+            tc.preprocessor_definitions["_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"] = "1"
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
