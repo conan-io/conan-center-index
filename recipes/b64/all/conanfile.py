@@ -1,8 +1,6 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, chdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
-from conan.tools.layout import basic_layout
+from conan.tools.files import get, copy
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake
 import os
 
 
@@ -16,100 +14,50 @@ class B64Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libb64.sourceforge.net/"
     topics = ("base64", "codec", "encoder", "decoder")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "static": [True, False],
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "static": False,
+        "shared": False,
         "fPIC": True,
     }
 
-    @property
-    def _msvc_platform(self):
-        return {
-            "x86": "Win32",
-            "x86_64": "Win32",
-        }[str(self.settings.arch)]
-
-    @property
-    def _msbuild_configuration(self):
-        return "Debug" if self.settings.build_type == "Debug" else "Release"
-
-    @property
-    def _msvc_directory(self):
-        return os.path.join(self.source_folder, "base64", "VisualStudioProject");
-
-    def _patch_sources_msvc(self):
-        toolset = MSBuildToolchain(self).toolset
-        replace_in_file(
-            self,
-            os.path.join(self._msvc_directory, "base64.vcxproj"),
-            "<CharacterSet>Unicode</CharacterSet>",
-            f"<CharacterSet>Unicode</CharacterSet>\n<PlatformToolset>{toolset}</PlatformToolset>",
-        )
-        replace_in_file(
-            self,
-            os.path.join(self._msvc_directory, "base64.vcxproj"),
-            "H:\\builds\\libb64\\working.libb64\\include",
-            os.path.join(self.source_folder, "include"),
-        )
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-    
+
     def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if is_msvc(self):
-            tc = MSBuildToolchain(self)
-            tc.configuration = self._msbuild_configuration
-            tc.generate()
-        else:
-            tc = AutotoolsToolchain(self)
-            tc.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        if is_msvc(self):
-            self._patch_sources_msvc()
-
-            msbuild = MSBuild(self)
-            msbuild.platform = self._msvc_platform
-            msbuild.build_type = self._msbuild_configuration
-            msbuild.build(os.path.join(self._msvc_directory, "base64.sln"))
-        else:
-            with chdir(self, self.source_folder):
-                autotools = Autotools(self)
-                autotools.make(target="all_src")
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(
-            self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, "*.h",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include"))
-        copy(self, "*.a",
-            dst=os.path.join(self.package_folder, "lib"),
-            src=self.source_folder, keep_path=False)
-        copy(self, "*.lib",
-            dst=os.path.join(self.package_folder, "lib"),
-            src=self.source_folder, keep_path=False)
-        copy(self, "*.dll",
-            dst=os.path.join(self.package_folder, "bin"),
-            src=self.source_folder, keep_path=False)
-
-
+        copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["b64"]
+
+        # TODO: Only for Conan 1.x legacy - Remove after running Conan 2.x only
+        self.env_info.PATH = os.path.join(self.package_folder, "bin")
