@@ -80,17 +80,9 @@ class AwsCCal(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-cal")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-cal")
-
-        self.cpp_info.filenames["cmake_find_package"] = "aws-c-cal"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-cal"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package"] = "aws-c-cal"
-        self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package_multi"] = "aws-c-cal"
-        self.cpp_info.components["aws-c-cal-lib"].set_property("cmake_target_name", "AWS::aws-c-cal")
-
+        # TODO: back to root level in conan v2
         self.cpp_info.components["aws-c-cal-lib"].libs = ["aws-c-cal"]
-        self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
+        self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common"]
         if self.options.shared:
             self.cpp_info.components["aws-c-cal-lib"].defines.append("AWS_CAL_USE_IMPORT_EXPORT")
         if self.settings.os == "Windows":
@@ -120,3 +112,12 @@ class AwsCCal(ConanFile):
                 crypto_link_flags = "-Wl," + ",".join(f"-u{symbol}" for symbol in crypto_symbols)
                 self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(crypto_link_flags)
                 self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(crypto_link_flags)
+
+        # TODO: to remove in conan v2
+        self.cpp_info.filenames["cmake_find_package"] = "aws-c-cal"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-cal"
+        self.cpp_info.names["cmake_find_package"] = "AWS"
+        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package"] = "aws-c-cal"
+        self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package_multi"] = "aws-c-cal"
+        self.cpp_info.components["aws-c-cal-lib"].set_property("cmake_target_name", "AWS::aws-c-cal")
