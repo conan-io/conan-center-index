@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 import os
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -69,20 +70,35 @@ class S2nConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "s2n"))
 
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"AWS::s2n": "s2n::s2n"}
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "s2n")
         self.cpp_info.set_property("cmake_target_name", "AWS::s2n")
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["s2n-lib"].libs = ["s2n"]
-        self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
+        self.cpp_info.libs = ["s2n"]
+        self.cpp_info.requires = ["openssl::crypto"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["s2n-lib"].system_libs = ["m", "pthread"]
+            self.cpp_info.system_libs = ["m", "pthread"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "s2n"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "s2n"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["s2n-lib"].names["cmake_find_package"] = "s2n"
-        self.cpp_info.components["s2n-lib"].names["cmake_find_package_multi"] = "s2n"
-        self.cpp_info.components["s2n-lib"].set_property("cmake_target_name", "AWS::s2n")
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
