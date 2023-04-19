@@ -23,7 +23,7 @@ class CapnprotoConan(ConanFile):
     topics = ("serialization", "rpc")
     homepage = "https://capnproto.org"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -77,7 +77,7 @@ class CapnprotoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/3.1.0")
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.13")
 
@@ -103,8 +103,7 @@ class CapnprotoConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if self.settings.os == "Windows":

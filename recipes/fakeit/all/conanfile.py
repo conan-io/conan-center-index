@@ -48,7 +48,10 @@ class FakeItConan(ConanFile):
             raise ConanInvalidConfiguration("%s is not (yet) available on cci" % self.options.integration)
 
     def package_id(self):
-        self.info.clear()
+        # The "integration" option must be kept because it will impact which header is packaged,
+        # therefor self.info.clear() cannot be used.
+        self.info.settings.clear()
+        self.info.requires.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
