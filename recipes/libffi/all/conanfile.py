@@ -37,7 +37,7 @@ class LibffiConan(ConanFile):
 
     @property
     def _is_msvc_like(self):
-        return is_msvc(self) or (self.settings.compiler == 'clang' and self.settings.get_safe('compiler.runtime_version') is not None)
+        return is_msvc(self) or (self.settings.compiler == 'clang' and self.settings.get_safe('compiler.runtime') is not None)
 
     @property
     def _msvc_arch_flag(self):
