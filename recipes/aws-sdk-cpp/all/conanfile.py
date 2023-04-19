@@ -551,6 +551,14 @@ class AwsSdkCppConan(ConanFile):
         if libcxx:
             self.cpp_info.components["core"].system_libs.append(libcxx)
 
+        self.cpp_info.components["plugin_scripts"].requires = ["core"]
+        self.cpp_info.components["plugin_scripts"].builddirs.extend([
+            os.path.join(self._res_folder, "cmake"),
+            os.path.join(self._res_folder, "toolchains")])
+        sdk_plugin_conf = os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake")
+        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package"] = [sdk_plugin_conf]
+        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package_multi"] = [sdk_plugin_conf]
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"
         self.cpp_info.filenames["cmake_find_package_multi"] = "AWSSDK"
@@ -558,9 +566,3 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["core"].names["cmake_find_package"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
-
-        self.cpp_info.components["plugin_scripts"].requires = ["core"]
-        self.cpp_info.components["plugin_scripts"].builddirs.extend([
-            os.path.join(self._res_folder, "cmake"),
-            os.path.join(self._res_folder, "toolchains")])
-        self.cpp_info.components["plugin_scripts"].build_modules.append(os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake"))
