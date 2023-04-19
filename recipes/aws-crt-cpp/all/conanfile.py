@@ -1,10 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -91,29 +92,34 @@ class AwsCrtCpp(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-crt-cpp"))
 
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"AWS::aws-crt-cpp": "aws-crt-cpp::aws-crt-cpp"}
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-crt-cpp")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-crt-cpp")
-        # TODO: back to root level in conan v2
-        self.cpp_info.components["aws-crt-cpp-lib"].libs = ["aws-crt-cpp"]
+        self.cpp_info.libs = ["aws-crt-cpp"]
         if self.options.shared:
-            self.cpp_info.components["aws-crt-cpp-lib"].defines.append("AWS_CRT_CPP_USE_IMPORT_EXPORT")
+            self.cpp_info.defines.append("AWS_CRT_CPP_USE_IMPORT_EXPORT")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "aws-crt-cpp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-crt-cpp"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package"] = "aws-crt-cpp"
-        self.cpp_info.components["aws-crt-cpp-lib"].names["cmake_find_package_multi"] = "aws-crt-cpp"
-        self.cpp_info.components["aws-crt-cpp-lib"].set_property("cmake_target_name", "AWS::aws-crt-cpp")
-        self.cpp_info.components["aws-crt-cpp-lib"].requires = [
-            "aws-c-event-stream::aws-c-event-stream",
-            "aws-c-common::aws-c-common",
-            "aws-c-io::aws-c-io",
-            "aws-c-http::aws-c-http",
-            "aws-c-auth::aws-c-auth",
-            "aws-c-mqtt::aws-c-mqtt",
-            "aws-c-s3::aws-c-s3",
-            "aws-checksums::aws-checksums",
-        ]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
