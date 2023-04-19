@@ -114,7 +114,7 @@ class Mosquitto(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
         # dynlibs for apple mobile want code signatures and that will not work here
         # this would actually be the right patch for static builds also, but this would have other side effects, so
-        if(self.settings.os in ["iOS", "watchOS", "tvOS"]):
+        if(self.settings.os in ["iOS", "watchOS", "tvOS", "Macos"]):
             replace_in_file(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"), "SHARED", "")
             replace_in_file(self, os.path.join(self.source_folder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
 
