@@ -72,7 +72,12 @@ class AwsCSDKUtils(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-sdkutils")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-sdkutils")
+        # TODO: back to root level in conan v2
+        self.cpp_info.components["aws-c-sdkutils-lib"].libs = ["aws-c-sdkutils"]
+        if self.options.shared:
+            self.cpp_info.components["aws-c-sdkutils-lib"].defines.append("AWS_SDKUTILS_USE_IMPORT_EXPORT")
 
+        # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-sdkutils"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-sdkutils"
         self.cpp_info.names["cmake_find_package"] = "AWS"
@@ -80,6 +85,4 @@ class AwsCSDKUtils(ConanFile):
         self.cpp_info.components["aws-c-sdkutils-lib"].names["cmake_find_package"] = "aws-c-sdkutils"
         self.cpp_info.components["aws-c-sdkutils-lib"].names["cmake_find_package_multi"] = "aws-c-sdkutils"
         self.cpp_info.components["aws-c-sdkutils-lib"].set_property("cmake_target_name", "AWS::aws-c-sdkutils")
-
-        self.cpp_info.components["aws-c-sdkutils-lib"].libs = ["aws-c-sdkutils"]
-        self.cpp_info.components["aws-c-sdkutils-lib"].requires = ["aws-c-common::aws-c-common-lib"]
+        self.cpp_info.components["aws-c-sdkutils-lib"].requires = ["aws-c-common::aws-c-common"]
