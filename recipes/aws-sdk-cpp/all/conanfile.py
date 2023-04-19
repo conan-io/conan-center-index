@@ -8,7 +8,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class AwsSdkCppConan(ConanFile):
@@ -393,30 +393,34 @@ class AwsSdkCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # All option() are defined before project() in upstream CMakeLists,
+        # therefore we must use cache_variables
+
         build_only = ["core"]
         for sdk in self._sdks:
             if self.options.get_safe(sdk):
                 build_only.append(sdk)
-        tc.variables["BUILD_ONLY"] = ";".join(build_only)
+        tc.cache_variables["BUILD_ONLY"] = ";".join(build_only)
 
-        tc.variables["ENABLE_UNITY_BUILD"] = True
-        tc.variables["ENABLE_TESTING"] = False
-        tc.variables["AUTORUN_UNIT_TESTS"] = False
-        tc.variables["BUILD_DEPS"] = False
+        tc.cache_variables["ENABLE_UNITY_BUILD"] = True
+        tc.cache_variables["ENABLE_TESTING"] = False
+        tc.cache_variables["AUTORUN_UNIT_TESTS"] = False
+        tc.cache_variables["BUILD_DEPS"] = False
         if self.settings.os != "Windows":
-            tc.variables["ENABLE_OPENSSL_ENCRYPTION"] = True
+            tc.cache_variables["ENABLE_OPENSSL_ENCRYPTION"] = True
 
-        tc.variables["MINIMIZE_SIZE"] = self.options.min_size
+        tc.cache_variables["MINIMIZE_SIZE"] = self.options.min_size
         if is_msvc(self) and not self._use_aws_crt_cpp:
-            tc.variables["FORCE_SHARED_CRT"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["FORCE_SHARED_CRT"] = not is_msvc_static_runtime(self)
 
         if cross_building(self):
-            tc.variables["CURL_HAS_H2_EXITCODE"] = "0"
-            tc.variables["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
-            tc.variables["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
-            tc.variables["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.cache_variables["CURL_HAS_H2_EXITCODE"] = "0"
+            tc.cache_variables["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.cache_variables["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
+            tc.cache_variables["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
         if is_msvc(self):
-            tc.variables["_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"] = "1"
+            tc.cache_variables["_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"] = "1"
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
         deps = CMakeDeps(self)
