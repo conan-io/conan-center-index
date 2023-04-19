@@ -289,5 +289,6 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].system_libs = ["dl", "rt", "m", "pthread", "resolv"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["core"].system_libs = ["dl", "c", "m", "pthread", "resolv"]
+            self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         self.cpp_info.components["core"].builddirs.append("res")
         self.cpp_info.components["core"].build_modules = ["res/build-system/cmake/CMake.NCBIpkg.conan.cmake"]
