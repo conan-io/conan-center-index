@@ -777,3 +777,99 @@ index ea89669..fc4e5cb 100644
  
      // Calculate alphabet.
      array<u16, ALPHABET_SIZE> unalpha;
+diff --git a/tools/hsbench/main.cpp b/tools/hsbench/main.cpp
+index 22becbd..4c671c0 100644
+--- a/tools/hsbench/main.cpp
++++ b/tools/hsbench/main.cpp
+@@ -1043,7 +1043,7 @@ void runBenchmark(const Engine &db,
+ int HS_CDECL main(int argc, char *argv[]) {
+     unique_ptr<Grey> grey;
+ #if !defined(RELEASE_BUILD)
+-    grey = make_unique<Grey>();
++    grey = ue2::make_unique<Grey>();
+ #endif
+     setlocale(LC_ALL, ""); // use the user's locale
+ 
+diff --git a/tools/hscheck/main.cpp b/tools/hscheck/main.cpp
+index 197087b..bdecab8 100644
+--- a/tools/hscheck/main.cpp
++++ b/tools/hscheck/main.cpp
+@@ -664,7 +664,7 @@ int HS_CDECL main(int argc, char **argv) {
+     num_of_threads = max(1u, std::thread::hardware_concurrency());
+ 
+ #if !defined(RELEASE_BUILD)
+-    g_grey = make_unique<Grey>();
++    g_grey = ue2::make_unique<Grey>();
+ #endif
+     processArgs(argc, argv, g_grey);
+ 
+diff --git a/tools/hscollider/GraphTruth.cpp b/tools/hscollider/GraphTruth.cpp
+index 0b67b11..e43beb1 100644
+--- a/tools/hscollider/GraphTruth.cpp
++++ b/tools/hscollider/GraphTruth.cpp
+@@ -134,7 +134,7 @@ void CNGInfo::compile() {
+             auto pl = ue2::make_unique<ParsedLogical>();
+             pl->parseLogicalCombination(id, re.c_str(), ~0U, 0, ~0ULL);
+             pl->logicalKeyRenumber();
+-            cng = make_unique<CompiledNG>(move(pl));
++            cng = ue2::make_unique<CompiledNG>(move(pl));
+             return;
+         }
+ 
+@@ -193,7 +193,7 @@ void CNGInfo::compile() {
+             }
+         }
+ 
+-        cng = make_unique<CompiledNG>(move(g), move(rm));
++        cng = ue2::make_unique<CompiledNG>(move(g), move(rm));
+     } catch (CompileError &e) {
+         throw NGCompileFailure(e.reason);
+     } catch (NGUnsupportedFailure &e) {
+@@ -257,7 +257,7 @@ unique_ptr<CNGInfo> GraphTruth::preprocess(unsigned id,
+         }
+     }
+ 
+-    auto cngi = make_unique<CNGInfo>(id, m_expr);
++    auto cngi = ue2::make_unique<CNGInfo>(id, m_expr);
+     cngi->utf8 = hs_flags & HS_FLAG_UTF8;
+     cngi->highlander = highlander;
+     cngi->prefilter = prefilter;
+diff --git a/tools/hscollider/GroundTruth.cpp b/tools/hscollider/GroundTruth.cpp
+index a267306..d9293dc 100644
+--- a/tools/hscollider/GroundTruth.cpp
++++ b/tools/hscollider/GroundTruth.cpp
+@@ -331,7 +331,7 @@ GroundTruth::compile(unsigned id, bool no_callouts) {
+     int errloc = 0;
+     int errcode = 0;
+ 
+-    unique_ptr<CompiledPcre> compiled = make_unique<CompiledPcre>();
++    unique_ptr<CompiledPcre> compiled = ue2::make_unique<CompiledPcre>();
+     compiled->utf8 = flags & PCRE_UTF8;
+     compiled->highlander = highlander;
+     compiled->prefilter = prefilter;
+diff --git a/tools/hscollider/main.cpp b/tools/hscollider/main.cpp
+index afa6ef5..c85526e 100644
+--- a/tools/hscollider/main.cpp
++++ b/tools/hscollider/main.cpp
+@@ -1606,7 +1606,7 @@ void generateTests(CorporaSource &corpora_src, const ExpressionMap &exprMap,
+                                       max_generator_queue_len);
+     vector<unique_ptr<CorpusGenThread>> generators;
+     for (size_t i = 0; i < numGeneratorThreads; i++) {
+-        auto c = make_unique<CorpusGenThread>(i, testq, corpq, corpora_src);
++        auto c = ue2::make_unique<CorpusGenThread>(i, testq, corpq, corpora_src);
+         c->start();
+         generators.push_back(move(c));
+     }
+diff --git a/util/ng_corpus_generator.cpp b/util/ng_corpus_generator.cpp
+index f796cd4..1613082 100644
+--- a/util/ng_corpus_generator.cpp
++++ b/util/ng_corpus_generator.cpp
+@@ -200,7 +200,7 @@ void findPaths(const NGHolder &g, CorpusProperties &cProps,
+             if (boost::next(ai) == ae) {
+                 new_path = std::move(p);
+             } else {
+-                new_path = make_unique<VertexPath>(*p);
++                new_path = ue2::make_unique<VertexPath>(*p);
+             }
+ 
+             new_path->push_back(v);

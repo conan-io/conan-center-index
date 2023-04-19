@@ -30,6 +30,6 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "hs_example")
             self.run(bin_path, env="conanrun")
 
-            if self.options["hyperscan"].build_chimera:
+            if self.dependencies["hyperscan"].options.build_chimera:
                 bin_path = os.path.join(self.cpp.build.bindirs[0], "ch_example")
                 self.run(bin_path, env="conanrun")
