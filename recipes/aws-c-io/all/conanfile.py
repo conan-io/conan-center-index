@@ -1,7 +1,7 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 required_conan_version = ">=1.53.0"
@@ -93,6 +93,6 @@ class AwsCIO(ConanFile):
         self.cpp_info.components["aws-c-io-lib"].names["cmake_find_package"] = "aws-c-io"
         self.cpp_info.components["aws-c-io-lib"].names["cmake_find_package_multi"] = "aws-c-io"
         self.cpp_info.components["aws-c-io-lib"].set_property("cmake_target_name", "AWS::aws-c-io")
-        self.cpp_info.components["aws-c-io-lib"].requires = ["aws-c-cal::aws-c-cal-lib", "aws-c-common::aws-c-common-lib"]
+        self.cpp_info.components["aws-c-io-lib"].requires = ["aws-c-cal::aws-c-cal", "aws-c-common::aws-c-common"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.cpp_info.components["aws-c-io-lib"].requires.append("s2n::s2n-lib")
+            self.cpp_info.components["aws-c-io-lib"].requires.append("s2n::s2n")
