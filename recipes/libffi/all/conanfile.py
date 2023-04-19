@@ -123,15 +123,13 @@ class LibffiConan(ConanFile):
             if "d" in msvc_runtime_flag(self):
                 tc.extra_defines.append("USE_DEBUG_RTL")
 
-            architecture_flag = ""
-            if is_msvc(self):
-                architecture_flag = self._msvc_arch_flag
-            elif self.settings.compiler == "clang":
-                architecture_flag = f"{self._msvc_arch_flag} -clang-cl"
+            architecture_flag = self._msvc_arch_flag
+            if self.settings.compiler == "clang":
+                architecture_flag += " -clang-cl"
 
             compile_wrapper = unix_path(self, os.path.join(self.source_folder, "msvcc.sh"))
             if architecture_flag:
-                compile_wrapper = f"{compile_wrapper} {architecture_flag} --verbose"
+                compile_wrapper = f"{compile_wrapper} {architecture_flag}"
 
             ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
             env.define("CC", f"{compile_wrapper}")
@@ -183,7 +181,7 @@ class LibffiConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["{}ffi".format("lib" if is_msvc(self) else "")]
+        self.cpp_info.libs = ["{}ffi".format("lib" if self._is_msvc_like else "")]
         self.cpp_info.set_property("pkg_config_name", "libffi")
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
