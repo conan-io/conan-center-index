@@ -95,7 +95,8 @@ class CunitConan(ConanFile):
         tc.configure_args.append("--enable-automated" if self.options.enable_automated else "--disable-automated")
         tc.configure_args.append("--enable-basic" if self.options.enable_basic else "--disable-basic")
         tc.configure_args.append("--enable-console" if self.options.enable_console else "--disable-console")
-        tc.configure_args.append("--enable-curses" if self.options.with_curses is not False else "--disable-curses")
+        tc.configure_args.append("--disable-curses" if not self.options.with_curses else
+                                 "--enable-curses")
 
         env = tc.environment()
 
