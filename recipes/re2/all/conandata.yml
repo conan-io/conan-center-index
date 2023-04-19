@@ -1,4 +1,7 @@
 sources:
+  "20230301":
+    url: "https://github.com/google/re2/archive/refs/tags/2023-03-01.tar.gz"
+    sha256: "7a9a4824958586980926a300b4717202485c4b4115ac031822e29aa4ef207e48"
   "20230201":
     url: "https://github.com/google/re2/archive/refs/tags/2023-02-01.tar.gz"
     sha256: "cbce8b7803e856827201a132862e41af386e7afd9cc6d9a9bc7a4fa4d8ddbdde"
