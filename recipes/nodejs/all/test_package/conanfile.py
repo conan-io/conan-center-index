@@ -6,10 +6,10 @@ class TestPackageConan(ConanFile):
 
     settings = "os", "arch"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
         if not cross_building(self):
             self.output.info("Node version:")
-            self.run("node --version", env="conanbuild")
+            self.run("node --version")
