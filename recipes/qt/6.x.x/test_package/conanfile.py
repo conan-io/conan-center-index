@@ -51,18 +51,18 @@ class TestPackageConan(ConanFile):
 
                 value = _getenvpath('CC')
                 if value:
-                    args.append(f"QMAKE_CC={value}")
+                    args.append(f"QMAKE_CC=\"{value}\"")
 
                 value = _getenvpath('CXX')
                 if value:
-                    args.append(f"QMAKE_CXX={value}")
+                    args.append(f"QMAKE_CXX=\"{value}\"")
 
                 value = _getenvpath('LD')
                 if value:
-                    args.append(f"QMAKE_LINK_C={value}")
-                    args.append(f"QMAKE_LINK_C_SHLIB={value}")
-                    args.append(f"QMAKE_LINK={value}")
-                    args.append(f"QMAKE_LINK_SHLIB={value}")
+                    args.append(f"QMAKE_LINK_C=\"{value}\"")
+                    args.append(f"QMAKE_LINK_C_SHLIB=\"{value}\"")
+                    args.append(f"QMAKE_LINK=\"{value}\"")
+                    args.append(f"QMAKE_LINK_SHLIB=\"{value}\"")
 
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
