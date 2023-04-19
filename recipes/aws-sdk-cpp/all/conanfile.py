@@ -1,11 +1,14 @@
 import os
 
-from conan.tools.files import rename
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building, stdcpp_library
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class AwsSdkCppConan(ConanFile):
@@ -15,7 +18,7 @@ class AwsSdkCppConan(ConanFile):
     homepage = "https://github.com/aws/aws-sdk-cpp"
     description = "AWS SDK for C++"
     topics = ("aws", "cpp", "cross-platform", "amazon", "cloud")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     _sdks = (
         "access-management",
@@ -304,17 +307,7 @@ class AwsSdkCppConan(ConanFile):
     default_options["transfer"] = True
     default_options["text-to-speech"] = True
 
-    generators = "cmake", "cmake_find_package"
     short_paths = True
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _internal_requirements(self):
@@ -329,35 +322,36 @@ class AwsSdkCppConan(ConanFile):
 
     @property
     def _use_aws_crt_cpp(self):
-        return tools.Version(self.version) >= "1.9"
+        return Version(self.version) >= "1.9"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "1.9":
-            delattr(self.options, "s3-crt")
+        if Version(self.version) < "1.9":
+            del self.options.s3-crt
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.19")
+        self.requires("aws-c-common/0.8.2")
         if self._use_aws_crt_cpp:
-            self.requires("aws-c-cal/0.5.13")
-            self.requires("aws-c-http/0.6.13")
-            self.requires("aws-c-io/0.10.20")
-            self.requires("aws-crt-cpp/0.17.23")
+            self.requires("aws-c-cal/0.5.20")
+            self.requires("aws-c-http/0.6.22")
+            self.requires("aws-c-io/0.13.4")
+            self.requires("aws-crt-cpp/0.18.8")
         else:
-            self.requires("aws-c-event-stream/0.2.7")
+            self.requires("aws-c-event-stream/0.2.15")
         if self.settings.os != "Windows":
-            self.requires("openssl/1.1.1n")
-            self.requires("libcurl/7.80.0")
+            self.requires("openssl/3.1.0")
+            self.requires("libcurl/8.0.1")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
@@ -365,21 +359,21 @@ class AwsSdkCppConan(ConanFile):
     def validate(self):
         if (self.options.shared
             and self.settings.compiler == "gcc"
-            and tools.Version(self.settings.compiler.version) < "6.0"):
+            and Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration(
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
-        if (tools.Version(self.version) < "1.9.234"
+        if (Version(self.version) < "1.9.234"
             and self.settings.compiler == "gcc"
-            and tools.Version(self.settings.compiler.version) >= "11.0"
+            and Version(self.settings.compiler.version) >= "11.0"
             and self.settings.build_type == "Release"):
             raise ConanInvalidConfiguration(
                 "Versions prior to 1.9.234 don't support release builds on >= gcc 11 "
                 "See https://github.com/aws/aws-sdk-cpp/issues/1505"
             )
         if self._use_aws_crt_cpp:
-            if self._is_msvc and "MT" in msvc_runtime_flag(self):
+            if is_msvc(self) and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
         else:
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
@@ -390,48 +384,48 @@ class AwsSdkCppConan(ConanFile):
 
     def package_id(self):
         for hl_comp in self._internal_requirements.keys():
-            if getattr(self.options, hl_comp):
+            if getattr(self.info.options, hl_comp):
                 for internal_requirement in self._internal_requirements[hl_comp]:
                     setattr(self.info.options, internal_requirement, True)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-
+    def generate(self):
+        tc = CMakeToolchain(self)
         build_only = ["core"]
         for sdk in self._sdks:
             if self.options.get_safe(sdk):
                 build_only.append(sdk)
-        self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
+        tc.variables["BUILD_ONLY"] = ";".join(build_only)
 
-        self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
-        self._cmake.definitions["ENABLE_TESTING"] = False
-        self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
-        self._cmake.definitions["BUILD_DEPS"] = False
+        tc.variables["ENABLE_UNITY_BUILD"] = True
+        tc.variables["ENABLE_TESTING"] = False
+        tc.variables["AUTORUN_UNIT_TESTS"] = False
+        tc.variables["BUILD_DEPS"] = False
         if self.settings.os != "Windows":
-            self._cmake.definitions["ENABLE_OPENSSL_ENCRYPTION"] = True
+            tc.variables["ENABLE_OPENSSL_ENCRYPTION"] = True
 
-        self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
-        if self._is_msvc and not self._use_aws_crt_cpp:
-            self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in msvc_runtime_flag(self)
+        tc.variables["MINIMIZE_SIZE"] = self.options.min_size
+        if is_msvc(self) and not self._use_aws_crt_cpp:
+            tc.variables["FORCE_SHARED_CRT"] = not is_msvc_static_runtime(self)
 
-        if tools.cross_building(self):
-            self._cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
-            self._cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
-            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
-            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
-        self._cmake.configure()
-        return self._cmake
+        if cross_building(self):
+            tc.variables["CURL_HAS_H2_EXITCODE"] = "0"
+            tc.variables["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.variables["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
+            tc.variables["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
+        if is_msvc(self):
+            tc.variables["_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING"] = "1"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     @property
@@ -449,24 +443,31 @@ class AwsSdkCppConan(ConanFile):
             "toolchains/pkg-config.pc.in",
             "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
         ]:
-            self.copy(file, src=self._source_subfolder, dst=self._res_folder)
-            tools.replace_in_file(os.path.join(self.package_folder, self._res_folder, file), "CMAKE_CURRENT_SOURCE_DIR", "AWS_NATIVE_SDK_ROOT", strict=False)
+            copy(self, file, src=self.source_folder, dst=os.path.join(self.package_folder, self._res_folder))
+            replace_in_file(
+                self, os.path.join(self.package_folder, self._res_folder, file),
+                "CMAKE_CURRENT_SOURCE_DIR", "AWS_NATIVE_SDK_ROOT",
+                strict=False,
+            )
 
         # avoid getting error from hook
-        with tools.chdir(os.path.join(self.package_folder, self._res_folder)):
-            rename(self, os.path.join("toolchains", "cmakeProjectConfig.cmake"), os.path.join("toolchains", "cmakeProjectConf.cmake"))
-            tools.replace_in_file(os.path.join("cmake", "utilities.cmake"), "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake")
+        rename(self, os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConfig.cmake"),
+                     os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConf.cmake"))
+        replace_in_file(
+            self, os.path.join(self.package_folder, self._res_folder, "cmake", "utilities.cmake"),
+            "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake",
+        )
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        if self._is_msvc:
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.lib")
+        if is_msvc(self):
+            copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            rm(self, "*.lib", os.path.join(self.package_folder, "bin"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_project_cmake_module()
 
@@ -477,16 +478,16 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].set_property("cmake_target_name", "AWS::aws-sdk-cpp-core")
         self.cpp_info.components["core"].set_property("pkg_config_name", "aws-sdk-cpp-core")
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
-        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
+        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common"]
         if self._use_aws_crt_cpp:
             self.cpp_info.components["core"].requires.extend([
-                "aws-c-cal::aws-c-cal-lib",
-                "aws-c-http::aws-c-http-lib",
-                "aws-c-io::aws-c-io-lib",
-                "aws-crt-cpp::aws-crt-cpp-lib",
+                "aws-c-cal::aws-c-cal",
+                "aws-c-http::aws-c-http",
+                "aws-c-io::aws-c-io",
+                "aws-crt-cpp::aws-crt-cpp",
             ])
         else:
-            self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
+            self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream")
 
         # other components
         enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
@@ -500,8 +501,8 @@ class AwsSdkCppConan(ConanFile):
             # TODO: there is no way to properly emulate COMPONENTS names for
             #       find_package(AWSSDK COMPONENTS <sdk>) in set_property()
             #       right now: see https://github.com/conan-io/conan/issues/10258
-            self.cpp_info.components[sdk].set_property("cmake_target_name", "AWS::aws-sdk-cpp-{}".format(sdk))
-            self.cpp_info.components[sdk].set_property("pkg_config_name", "aws-sdk-cpp-{}".format(sdk))
+            self.cpp_info.components[sdk].set_property("cmake_target_name", f"AWS::aws-sdk-cpp-{sdk}")
+            self.cpp_info.components[sdk].set_property("pkg_config_name", f"aws-sdk-cpp-{sdk}")
             self.cpp_info.components[sdk].requires = ["core"]
             if sdk in self._internal_requirements:
                 self.cpp_info.components[sdk].requires.extend(self._internal_requirements[sdk])
@@ -510,7 +511,7 @@ class AwsSdkCppConan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
             self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
-            component_alias = "aws-sdk-cpp-{}_alias".format(sdk) # to emulate COMPONENTS names for find_package()
+            component_alias = f"aws-sdk-cpp-{sdk}_alias" # to emulate COMPONENTS names for find_package()
             self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
             self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
             self.cpp_info.components[component_alias].requires = [sdk]
@@ -534,9 +535,9 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].frameworks.append("CoreAudio")
 
-        lib_stdcpp = tools.stdcpp_library(self)
-        if lib_stdcpp:
-            self.cpp_info.components["core"].system_libs.append(lib_stdcpp)
+        libcxx = stdcpp_library(self)
+        if libcxx:
+            self.cpp_info.components["core"].system_libs.append(libcxx)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"

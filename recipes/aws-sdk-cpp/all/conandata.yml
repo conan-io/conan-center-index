@@ -10,29 +10,17 @@ sources:
     sha256: "5dd09baa28d3f6f4fb03fbba1a4269724d79bcca3d47752cd3e15caf97276bda"
 patches:
   "1.9.234":
-    - base_path: source_subfolder
-      patch_file: patches/1.9.234-0001-issue-1816.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.9.234-0002-disable-sort-links.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
+    - patch_file: patches/1.9.234-0001-issue-1816.patch
+    - patch_file: patches/1.9.234-0002-disable-sort-links.patch
+    - patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
   "1.9.100":
-    - base_path: source_subfolder
-      patch_file: patches/1.9.100-0001-disable-sort-links.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.9.100-0003-issue-1816.patch
+    - patch_file: patches/1.9.100-0001-disable-sort-links.patch
+    - patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
+    - patch_file: patches/1.9.100-0003-issue-1816.patch
   "1.8.130":
-    - base_path: source_subfolder
-      patch_file: patches/1.8.130-0001-disable-sort-links.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.8.130-0002-force-archive-directory-to-library-directory.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.8.130-0003-disable-cmake-install-rpath-use-link-path.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.8.130-0004-improve-pulseaudio-detection.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.8.130-0005-aws-plugin-conf.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.8.130-0006-issue-1816.patch
+    - patch_file: patches/1.8.130-0001-disable-sort-links.patch
+    - patch_file: patches/1.8.130-0002-force-archive-directory-to-library-directory.patch
+    - patch_file: patches/1.8.130-0003-disable-cmake-install-rpath-use-link-path.patch
+    - patch_file: patches/1.8.130-0004-improve-pulseaudio-detection.patch
+    - patch_file: patches/1.8.130-0005-aws-plugin-conf.patch
+    - patch_file: patches/1.8.130-0006-issue-1816.patch
