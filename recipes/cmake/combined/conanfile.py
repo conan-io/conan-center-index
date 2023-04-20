@@ -12,6 +12,7 @@ required_conan_version = ">=1.51.0"
 
 
 class CMakeConan(ConanFile):
+    name = "cmake"
     package_type = "application"
     description = "CMake, the cross-platform, open-source build system."
     topics = ("build", "installer")
@@ -41,7 +42,8 @@ class CMakeConan(ConanFile):
 
     def validate(self):
         if self.options.from_sources:
-            return self._from_sources_validate()
+            self._from_sources_validate()
+            return
         if self.settings.arch not in ["x86_64", "armv8"]:
             raise ConanInvalidConfiguration("CMake binaries are only provided for x86_64 and armv8 architectures")
 
@@ -50,7 +52,8 @@ class CMakeConan(ConanFile):
 
     def build(self):
         if self.options.from_sources:
-            return self._from_sources_build()
+            self._from_sources_build()
+            return
         arch = str(self.settings.arch) if self.settings.os != "Macos" else "universal"
         get(self, **self.conan_data["binaries"][self.version][str(self.settings.os)][arch],
             destination=self.source_folder, strip_root=True)
@@ -70,7 +73,8 @@ class CMakeConan(ConanFile):
 
     def package(self):
         if self.options.from_sources:
-            return self._from_sources_package()
+            self._from_sources_package()
+            return
         copy(self, "*", src=self.build_folder, dst=self.package_folder)
 
         if self.settings.os == "Macos":

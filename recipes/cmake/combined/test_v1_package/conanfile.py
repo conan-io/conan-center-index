@@ -1,4 +1,3 @@
-import os
 from six import StringIO
 from conan import ConanFile
 import re
@@ -15,9 +14,9 @@ class TestPackageConan(ConanFile):
         output = StringIO()
         self.run("cmake --version", output=output, run_environment=False)
         output_str = str(output.getvalue())
-        self.output.info("Installed version: {}".format(output_str))
+        self.output.info(f"Installed version: {output_str}")
         tokens = re.split('[@#]', self.tested_reference_str)
         require_version = tokens[0].split("/", 1)[1]
-        self.output.info("Expected version: {}".format(require_version))
-        assert_cmake_version = "cmake version %s" % require_version
-        assert(assert_cmake_version in output_str)
+        self.output.info(f"Expected version: {require_version}")
+        assert_cmake_version = f"cmake version {require_version}"
+        assert ssert_cmake_version in output_str
