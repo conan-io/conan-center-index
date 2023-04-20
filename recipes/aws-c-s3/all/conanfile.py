@@ -40,15 +40,15 @@ class AwsCS3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
+        self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "0.1.49":
-            self.requires("aws-c-io/0.10.20")
+            self.requires("aws-c-auth/0.6.11", transitive_headers=True)
             self.requires("aws-c-http/0.6.13")
-            self.requires("aws-c-auth/0.6.11")
+            self.requires("aws-c-io/0.10.20", transitive_headers=True)
         else:
-            self.requires("aws-c-io/0.13.4")
+            self.requires("aws-c-auth/0.6.17", transitive_headers=True)
             self.requires("aws-c-http/0.6.22")
-            self.requires("aws-c-auth/0.6.17")
+            self.requires("aws-c-io/0.13.4", transitive_headers=True)
         if Version(self.version) >= "0.1.36":
             self.requires("aws-checksums/0.1.13")
 
