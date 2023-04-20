@@ -593,7 +593,6 @@ class FFMpegConan(ConanFile):
             args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
         if tc.ldflags:
             args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
-        tc.configure_args.extend(args)
         # Custom configure script of ffmpeg understands:
         # --prefix, --bindir, --datadir, --docdir, --incdir, --libdir, --mandir
         # Options --datadir, --docdir, --incdir, and --mandir are not injected by AutotoolsToolchain  but their default value
@@ -608,6 +607,7 @@ class FFMpegConan(ConanFile):
             "--host": None,
             "--target": None,
         })
+        tc.configure_args.extend(args)
         tc.generate()
 
         if is_msvc(self):
