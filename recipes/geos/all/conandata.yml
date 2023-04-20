@@ -1,4 +1,7 @@
 sources:
+  "3.11.2":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.2/geos-3.11.2.tar.bz2"
+    sha256: "b1f077669481c5a3e62affc49e96eb06f281987a5d36fdab225217e5b825e4cc"
   "3.11.1":
     url: "https://github.com/libgeos/geos/releases/download/3.11.1/geos-3.11.1.tar.bz2"
     sha256: "be83ed195ffb82373710c90befc580911ea0eb57003a2d703e30101c5b262f62"
