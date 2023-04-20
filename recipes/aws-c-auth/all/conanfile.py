@@ -47,13 +47,13 @@ class AwsCAuth(ConanFile):
         self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-cal/0.5.13")
         if Version(self.version) < "0.6.17":
-            self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.6.13", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-io/0.10.20", transitive_headers=True)
+            self.requires("aws-c-http/0.6.13", transitive_headers=True)
         else:
-            self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.6.22", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-io/0.13.4", transitive_headers=True)
+            self.requires("aws-c-http/0.6.22", transitive_headers=True)
         if Version(self.version) >= "0.6.5":
-            self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
