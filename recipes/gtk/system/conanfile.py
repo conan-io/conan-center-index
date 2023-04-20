@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
-from conans import tools
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class ConanGTK(ConanFile):
@@ -12,37 +12,21 @@ class ConanGTK(ConanFile):
     license = "LGPL-2.1-or-later"
     homepage = "https://www.gtk.org"
     description = "A free and open-source cross-platform widget toolkit for creating graphical user interfaces"
+    topics = ("gui", "widget", "graphical")
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {"version": [2, 3]}
     default_options = {"version": 2}
-    topics = ("gui", "widget", "graphical")
 
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
+    def layout(self):
+        pass
 
     def package_id(self):
         self.info.settings.clear()
 
-    def _fill_cppinfo_from_pkgconfig(self, name):
-        pkg_config = tools.PkgConfig(name)
-        if not pkg_config.provides:
-            raise ConanException(f"GTK-{self.options.version} development files aren't available, give up.")
-        libs = [lib[2:] for lib in pkg_config.libs_only_l]
-        lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
-        ldflags = [flag for flag in pkg_config.libs_only_other]
-        include_dirs = [include[2:] for include in pkg_config.cflags_only_I]
-        cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
-        defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
-
-        self.cpp_info.components[name].system_libs = libs
-        self.cpp_info.components[name].libdirs = lib_dirs
-        self.cpp_info.components[name].sharedlinkflags = ldflags
-        self.cpp_info.components[name].exelinkflags = ldflags
-        self.cpp_info.components[name].defines = defines
-        self.cpp_info.components[name].includedirs = include_dirs
-        self.cpp_info.components[name].cflags = cflags
-        self.cpp_info.components[name].cxxflags = cflags
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
@@ -65,4 +49,5 @@ class ConanGTK(ConanFile):
 
     def package_info(self):
         for name in [f"gtk+-{self.options.version}.0"]:
-            self._fill_cppinfo_from_pkgconfig(name)
+            pkg_config = PkgConfig(self, name)
+            pkg_config.fill_cpp_info(self.cpp_info, is_system=True)
