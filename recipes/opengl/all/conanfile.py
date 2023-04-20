@@ -1,6 +1,7 @@
 from conan import ConanFile
-from conan.tools.system import package_manager
+from conan.errors import ConanException
 from conan.tools.gnu import PkgConfig
+from conan.tools.system import package_manager
 
 required_conan_version = ">=1.50.0"
 
@@ -30,7 +31,7 @@ class SysConfigOpenGLConan(ConanFile):
         yum.install(["mesa-libGL-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install_substitutes(["libgl-dev"], ["libgl1-mesa-dev"], update=True, check=True)
+        apt.install_substitutes(["libopengl-dev"], ["libgl-dev"], ["libgl1-mesa-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
         pacman.install(["libglvnd"], update=True, check=True)
@@ -57,5 +58,9 @@ class SysConfigOpenGLConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["opengl32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            pkg_config = PkgConfig(self, 'gl')
-            pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")
+            try:
+                pkg_config = PkgConfig(self, "opengl")
+                pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")
+            except ConanException:
+                pkg_config = PkgConfig(self, "gl")
+                pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")
