@@ -19,4 +19,4 @@ class TestPackageConan(ConanFile):
         require_version = tokens[0].split("/", 1)[1]
         self.output.info(f"Expected version: {require_version}")
         assert_cmake_version = f"cmake version {require_version}"
-        assert ssert_cmake_version in output_str
+        assert assert_cmake_version in output_str
