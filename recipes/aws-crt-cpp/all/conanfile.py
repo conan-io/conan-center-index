@@ -47,7 +47,7 @@ class AwsCrtCpp(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
+        self.requires("aws-c-common/0.8.2", transitive_headers=True)
         self.requires("aws-checksums/0.1.13")
         if Version(self.version) < "0.17.29":
             self.requires("aws-c-io/0.10.20")
