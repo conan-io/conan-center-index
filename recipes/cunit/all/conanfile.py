@@ -92,7 +92,7 @@ class CunitConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if check_min_vs(self, "180", raise_invalid=False):
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         tc.configure_args.append("--datarootdir=${prefix}/bin/share")
