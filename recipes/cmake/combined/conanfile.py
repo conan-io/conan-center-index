@@ -55,7 +55,7 @@ class CMakeConan(ConanFile):
             self._from_sources_build()
             return
         arch = str(self.settings.arch) if self.settings.os != "Macos" else "universal"
-        get(self, **self.conan_data["binaries"][self.version][str(self.settings.os)][arch],
+        get(self, **self.conan_data["sources"][self.version]["precompiled"][str(self.settings.os)][arch],
             destination=self.source_folder, strip_root=True)
 
     def package_id(self):
@@ -157,7 +157,7 @@ class CMakeConan(ConanFile):
     def source(self):
         if not self.options.from_sources:
             return
-        get(self, **self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version]["code"],
             destination=self.source_folder, strip_root=True)
         rmdir(self, os.path.join(self.source_folder, "Tests", "RunCMake", "find_package"))
 
