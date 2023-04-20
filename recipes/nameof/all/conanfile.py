@@ -32,10 +32,10 @@ class NameofConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7.4",
+            "gcc": "9",
             "clang": "5",
             "apple-clang": "9",
-            "Visual Studio": "15",
+            "Visual Studio": "15.3",
             "msvc": "191",
         }
 
