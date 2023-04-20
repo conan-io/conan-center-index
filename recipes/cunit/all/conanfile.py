@@ -41,18 +41,6 @@ class CunitConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def validate(self):
-        if self.options.shared and not self.options.with_curses:
-            # For shared builds we always need to depend on ncurses, since otherwise we get undefined
-            # symbols, like:
-            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `echo'
-            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `wattr_on'
-            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `acs_map'
-            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `cbreak'
-            raise ConanInvalidConfiguration("cunit package is built with shared, which requires "
-                                            "cunit:with_curses=ncurses option")
-
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -69,6 +57,17 @@ class CunitConan(ConanFile):
     def requirements(self):
         if self.options.with_curses == "ncurses":
             self.requires("ncurses/6.4")
+
+    def validate(self):
+        if self.options.shared and not self.options.with_curses:
+            # For shared builds we always need to depend on ncurses, since otherwise we get undefined
+            # symbols, like:
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `echo'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `wattr_on'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `acs_map'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `cbreak'
+            raise ConanInvalidConfiguration("cunit package is built with shared, which requires "
+                                            "cunit:with_curses=ncurses option")
 
     @property
     def _settings_build(self):
