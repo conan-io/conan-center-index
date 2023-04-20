@@ -11,7 +11,7 @@ index 59982cf..5f6c123 100644
 +option(LOG4CXX_ENABLE_ODBC "Support logging via ODBC" OFF)
 +if(LOG4CXX_ENABLE_ODBC)
 +    if(WIN32)
-+            CHECK_INCLUDE_FILES(sqlext.h HAS_ODBC)
++            set(HAS_ODBC 1)
 +    else()
 +            find_package(ODBC)
 +
