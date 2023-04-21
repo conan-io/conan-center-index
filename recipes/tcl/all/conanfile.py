@@ -184,9 +184,6 @@ class TclConan(ConanFile):
             drive, path = os.path.splitdrive(self.build_folder)
             build_folder = "".join([drive, path.lower().replace("\\", "/")])
 
-        print(f"package_path={package_path}")
-        print(f"build_folder={build_folder}")
-
         replace_in_file(self, tclConfigShPath,
                         package_path,
                         "${TCL_ROOT}")
@@ -201,7 +198,7 @@ class TclConan(ConanFile):
                         "\nTCL_SRC_DIR",
                         "\n#TCL_SRC_DIR")
 
-        fix_apple_shared_install_name(self)
+        #fix_apple_shared_install_name(self)
 
     def package_info(self):
         libs = []
