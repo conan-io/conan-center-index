@@ -72,7 +72,7 @@ class IslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+                  strip_root=True)
     
     def layout(self):
         self.folders.source = self._source_subfolder
