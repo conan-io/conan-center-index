@@ -64,7 +64,7 @@ class LibMysqlClientCConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1t")
         self.requires("zlib/1.2.13")
-        self.requires("zstd/1.5.4")
+        self.requires("zstd/1.5.5")
         self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.6.2")
@@ -208,6 +208,10 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["ENABLED_PROFILING"] = False
         tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
         tc.cache_variables["WIX_DIR"] = False
+        # Disable additional Linux distro-specific compiler checks. 
+        # The recipe already checks for minimum versions of supported
+        # compilers.
+        tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
 
         tc.cache_variables["WITH_LZ4"] = "system"
 
