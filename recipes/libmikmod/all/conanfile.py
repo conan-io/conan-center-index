@@ -114,8 +114,9 @@ class LibmikmodConan(ConanFile):
         copy(self, "COPYING.LESSER", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        os.remove(os.path.join(self.package_folder, "bin", "libmikmod-config"))
-        if not self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
+            os.remove(os.path.join(self.package_folder, "bin", "libmikmod-config"))
+        else:
             rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
