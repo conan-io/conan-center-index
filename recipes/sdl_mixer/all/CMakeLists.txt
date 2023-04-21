@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(sdl2_mixer)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.15)
+project(sdl2_mixer LANGUAGES C)
 
 include(CheckTypeSize)
 
@@ -31,72 +28,70 @@ add_music_option(MID_FLUIDSYNTH)
 add_music_option(MID_TINYMIDI)
 
 if(${MID_NATIVE})
+    set(NATIVE_MIDI_SOURCES
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi_common.c
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi_common.h
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi_haiku.cpp
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi_mac.c
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi_macosx.c
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi_win32.c
+    )
 
-set(NATIVE_MIDI_SOURCES
-source_subfolder/native_midi/native_midi_common.c
-source_subfolder/native_midi/native_midi_common.h
-source_subfolder/native_midi/native_midi_haiku.cpp
-source_subfolder/native_midi/native_midi_mac.c
-source_subfolder/native_midi/native_midi_macosx.c
-source_subfolder/native_midi/native_midi_win32.c
-)
-
-set(NATIVE_MIDI_HEADERS
-source_subfolder/native_midi/native_midi.h
-)
-
+    set(NATIVE_MIDI_HEADERS
+        ${SDL_MIXER_SRC_DIR}/native_midi/native_midi.h
+    )
 endif()
 
 set(SOURCES
-source_subfolder/effect_position.c
-source_subfolder/effect_stereoreverse.c
-source_subfolder/effects_internal.c
-source_subfolder/load_aiff.c
-source_subfolder/load_voc.c
-source_subfolder/mixer.c
-source_subfolder/music.c
-source_subfolder/music_cmd.c
-source_subfolder/music_flac.c
-source_subfolder/music_fluidsynth.c
-source_subfolder/music_mad.c
-source_subfolder/music_mikmod.c
-source_subfolder/music_modplug.c
-source_subfolder/music_mpg123.c
-source_subfolder/music_nativemidi.c
-source_subfolder/music_ogg.c
-source_subfolder/music_opus.c
-source_subfolder/music_timidity.c
-source_subfolder/music_wav.c
-${NATIVE_MIDI_SOURCES}
+    ${SDL_MIXER_SRC_DIR}/effect_position.c
+    ${SDL_MIXER_SRC_DIR}/effect_stereoreverse.c
+    ${SDL_MIXER_SRC_DIR}/effects_internal.c
+    ${SDL_MIXER_SRC_DIR}/load_aiff.c
+    ${SDL_MIXER_SRC_DIR}/load_voc.c
+    ${SDL_MIXER_SRC_DIR}/mixer.c
+    ${SDL_MIXER_SRC_DIR}/music.c
+    ${SDL_MIXER_SRC_DIR}/music_cmd.c
+    ${SDL_MIXER_SRC_DIR}/music_flac.c
+    ${SDL_MIXER_SRC_DIR}/music_fluidsynth.c
+    ${SDL_MIXER_SRC_DIR}/music_mad.c
+    ${SDL_MIXER_SRC_DIR}/music_mikmod.c
+    ${SDL_MIXER_SRC_DIR}/music_modplug.c
+    ${SDL_MIXER_SRC_DIR}/music_mpg123.c
+    ${SDL_MIXER_SRC_DIR}/music_nativemidi.c
+    ${SDL_MIXER_SRC_DIR}/music_ogg.c
+    ${SDL_MIXER_SRC_DIR}/music_opus.c
+    ${SDL_MIXER_SRC_DIR}/music_timidity.c
+    ${SDL_MIXER_SRC_DIR}/music_wav.c
+    ${NATIVE_MIDI_SOURCES}
 )
 
 set(HEADERS
-source_subfolder/effects_internal.h
-source_subfolder/load_aiff.h
-source_subfolder/load_voc.h
-source_subfolder/mixer.h
-source_subfolder/music.h
-source_subfolder/music_cmd.h
-source_subfolder/music_flac.h
-source_subfolder/music_fluidsynth.h
-source_subfolder/music_mad.h
-source_subfolder/music_mikmod.h
-source_subfolder/music_modplug.h
-source_subfolder/music_mpg123.h
-source_subfolder/music_nativemidi.h
-source_subfolder/music_ogg.h
-source_subfolder/music_opus.h
-source_subfolder/music_timidity.h
-source_subfolder/music_wav.h
-${NATIVE_MIDI_HEADERS}
+    ${SDL_MIXER_SRC_DIR}/effects_internal.h
+    ${SDL_MIXER_SRC_DIR}/load_aiff.h
+    ${SDL_MIXER_SRC_DIR}/load_voc.h
+    ${SDL_MIXER_SRC_DIR}/mixer.h
+    ${SDL_MIXER_SRC_DIR}/music.h
+    ${SDL_MIXER_SRC_DIR}/music_cmd.h
+    ${SDL_MIXER_SRC_DIR}/music_flac.h
+    ${SDL_MIXER_SRC_DIR}/music_fluidsynth.h
+    ${SDL_MIXER_SRC_DIR}/music_mad.h
+    ${SDL_MIXER_SRC_DIR}/music_mikmod.h
+    ${SDL_MIXER_SRC_DIR}/music_modplug.h
+    ${SDL_MIXER_SRC_DIR}/music_mpg123.h
+    ${SDL_MIXER_SRC_DIR}/music_nativemidi.h
+    ${SDL_MIXER_SRC_DIR}/music_ogg.h
+    ${SDL_MIXER_SRC_DIR}/music_opus.h
+    ${SDL_MIXER_SRC_DIR}/music_timidity.h
+    ${SDL_MIXER_SRC_DIR}/music_wav.h
+    ${NATIVE_MIDI_HEADERS}
 )
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder")
+target_include_directories(${PROJECT_NAME} PRIVATE ${SDL_MIXER_SRC_DIR})
 
 if(${MID_NATIVE})
-  target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder/native_midi")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${SDL_MIXER_SRC_DIR}/native_midi)
 endif()
 
 find_package(SDL2 CONFIG REQUIRED)
@@ -146,7 +141,7 @@ if(MID_TINYMIDI)
   target_link_libraries(${PROJECT_NAME} PRIVATE tinymidi::tinymidi)
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/SDL_mixer.h)
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER ${SDL_MIXER_SRC_DIR}/SDL_mixer.h)
 
 if(${BUILD_SHARED_LIBS})
   target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
