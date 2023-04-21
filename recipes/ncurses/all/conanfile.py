@@ -3,15 +3,14 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, save
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
+
 import os
 import textwrap
 
 required_conan_version = ">=1.54.0"
-
 
 class NCursesConan(ConanFile):
     name = "ncurses"
@@ -45,6 +44,11 @@ class NCursesConan(ConanFile):
         "with_tinfo": "auto",
         "with_pcre2": False,
     }
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _settings_build(self):
@@ -83,9 +87,6 @@ class NCursesConan(ConanFile):
             self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_widec:
             self.options.rm_safe("with_extended_colors")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_pcre2:
@@ -126,10 +127,9 @@ class NCursesConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        def yes_no(v):
-            if v:
-                return "yes"
-            return "no"
+        def yes_no(value):
+            return "yes" if value else "no"
+
         tc.configure_args.extend([
             f"--with-shared={yes_no(self.options.shared)}",
             f"--with-cxx-shared={yes_no(self.options.shared)}",
@@ -181,24 +181,48 @@ class NCursesConan(ConanFile):
         if host:
             tc.configure_args.append(f"ac_cv_host={host}")
             tc.configure_args.append(f"ac_cv_target={host}")
-        tc.generate()
-
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
-        tc = AutotoolsDeps(self)
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
             env = Environment()
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
+            env.define("CC", f"cl -nologo")
+            env.define("CXX", f"cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", "lib -nologo")
+            env.define("AR", f"lib -nologo")
             env.define("NM", "dumpbin -symbols")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_msvc")
+        tc.generate(env)
+
+        if is_msvc(self) or self._is_clang_cl:
+            # Custom AutotoolsDeps for cl like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
+
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -336,7 +360,6 @@ class NCursesConan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components["ticlib"].names["pkg_config"] = f"tic{self._lib_suffix}"
             self.cpp_info.components["ticlib"].requires = ["libcurses"]
-
 
     def package_info(self):
         self.cpp_info.set_property("cmake_module_file_name", "Curses")
