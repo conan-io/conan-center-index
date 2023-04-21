@@ -524,6 +524,10 @@ class QtConan(ConanFile):
                 tc.variables["INPUT_openssl"] = "linked"
                 tc.variables["QT_FEATURE_openssl_linked"] = "ON"
 
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        if is_msvc(self):
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+
         if self.options.with_dbus:
             tc.variables["INPUT_dbus"] = "linked"
         else:
