@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.scm import Version
@@ -65,7 +65,7 @@ class JsonnetConan(ConanFile):
         # or the c4core functions that rapidyaml depends on will not be able to be found.
         # This seems to be a issue of rapidyaml.
         # https://github.com/conan-io/conan-center-index/pull/9786#discussion_r829887879
-        if self.options.shared and Version(self.version) >= "0.18.0" and self.dependencies["rapidyml"].options.shared == False:
+        if self.options.shared and Version(self.version) >= "0.18.0" and self.dependencies["rapidyaml"].options.shared == False:
             raise ConanInvalidConfiguration(f"shared {self.ref} requires rapidyaml to be built as shared")
 
     def source(self):
