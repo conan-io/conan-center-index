@@ -85,6 +85,8 @@ class LibmikmodConan(ConanFile):
         tc.variables["ENABLE_OSS"] = self.options.get_safe("with_oss", False)
         tc.variables["ENABLE_PULSE"] = self.options.get_safe("with_pulse", False)
         tc.variables["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
