@@ -388,6 +388,27 @@ class FFMpegConan(ConanFile):
             return {"cc": "cl.exe", "cxx": "cl.exe"}
         return {}
 
+    def _create_toolchain(self):
+        tc = AutotoolsToolchain(self)
+        # Custom configure script of ffmpeg understands:
+        # --prefix, --bindir, --datadir, --docdir, --incdir, --libdir, --mandir
+        # Options --datadir, --docdir, --incdir, and --mandir are not injected by AutotoolsToolchain  but their default value
+        # in ffmpeg script matches expected conan install layout.
+        # Several options injected by AutotoolsToolchain are unknown from this configure script and must be pruned.
+        # This must be done before modifying tc.configure_args, because update_configre_args currently removes
+        # duplicate configuration keys, even when they have different values, such as list of encoder flags.
+        # See https://github.com/conan-io/conan-center-index/issues/17140 for further information.
+        tc.update_configure_args({
+            "--sbindir": None,
+            "--includedir": None,
+            "--oldincludedir": None,
+            "--datarootdir": None,
+            "--build": None,
+            "--host": None,
+            "--target": None,
+        })
+        return tc
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -402,7 +423,8 @@ class FFMpegConan(ConanFile):
             if v:
                 args.append(f"--disable-{what}")
 
-        tc = AutotoolsToolchain(self)
+        tc = self._create_toolchain()
+
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
@@ -593,20 +615,6 @@ class FFMpegConan(ConanFile):
             args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
         if tc.ldflags:
             args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
-        # Custom configure script of ffmpeg understands:
-        # --prefix, --bindir, --datadir, --docdir, --incdir, --libdir, --mandir
-        # Options --datadir, --docdir, --incdir, and --mandir are not injected by AutotoolsToolchain  but their default value
-        # in ffmpeg script matches expected conan install layout.
-        # Several options injected by AutotoolsToolchain are unknown from this configure script and must be pruned:
-        tc.update_configure_args({
-            "--sbindir": None,
-            "--includedir": None,
-            "--oldincludedir": None,
-            "--datarootdir": None,
-            "--build": None,
-            "--host": None,
-            "--target": None,
-        })
         tc.configure_args.extend(args)
         tc.generate()
 
