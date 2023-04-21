@@ -4,6 +4,6 @@ sources:
     sha256: "ad9d64dfc8f83684876419ea7cd4ff4a41d8bcd8c23ef37ecb3a200a16b46d19"
 patches:
   "3.3.11.1":
-    - patch_file: "patches/0001-CMakeLists.txt.patch"
+    - patch_file: "patches/0001-fix-cmake.patch"
       patch_description: "Fix cmake_minimum_required() position and dll installation, and build either static or shared"
       patch_type: "conan"
