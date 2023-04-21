@@ -15,7 +15,8 @@ class WasmerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/wasmerio/wasmer/"
     topics = ("webassembly", "wasm", "wasi", "emscripten")
-    settings = "os", "arch", "compiler"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
     }
@@ -28,7 +29,7 @@ class WasmerConan(ConanFile):
         return {
             "Visual Studio": "Visual Studio",
             "msvc": "Visual Studio",
-        }.get(str(self.settings.compiler), "gcc")
+        }.get(str(self.info.settings.compiler), "gcc")
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -60,26 +61,26 @@ class WasmerConan(ConanFile):
 
     def source(self):
         get(
-            self, 
-            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias], destination=self.source_folder
+            self,
+            **self.conan_data["sources"][self.version][str(self.info.settings.os)][str(self.info.settings.arch)][self._compiler_alias]
         )
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        self.copy("*.h", src=os.path.join(self.source_folder, "include"), dst="include", keep_path=False)
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
 
         srclibdir = os.path.join(self.source_folder, "lib")
         dstlibdir = os.path.join(self.package_folder, "lib")
         dstbindir = os.path.join(self.package_folder, "bin")
         if self.options.shared:
-            self.copy("wasmer.dll.lib", src=srclibdir, dst=dstlibdir, keep_path=False)  # FIXME: not available (yet)
-            self.copy("wasmer.dll", src=srclibdir, dst=dstbindir, keep_path=False)
-            self.copy("libwasmer.so*", src=srclibdir, dst=dstlibdir, keep_path=False)
-            self.copy("libwasmer.dylib", src=srclibdir,  dst=dstlibdir, keep_path=False)
+            copy(self, pattern="wasmer.dll.lib", dst=dstlibdir, src=srclibdir)  # FIXME: not available (yet)
+            copy(self, pattern="wasmer.dll", dst=dstbindir, src=srclibdir)
+            copy(self, pattern="libwasmer.so*", dst=dstlibdir, src=srclibdir)
+            copy(self, pattern="libwasmer.dylib", dst=dstlibdir, src=srclibdir)
         else:
-            self.copy("wasmer.lib", src=srclibdir, dst=dstlibdir, keep_path=False)
-            self.copy("libwasmer.a", src=srclibdir, dst=dstlibdir, keep_path=False)
+            copy(self, pattern="wasmer.lib", dst=dstlibdir, src=srclibdir)
+            copy(self, pattern="libwasmer.a", dst=dstlibdir, src=srclibdir)
             replace_in_file(self, os.path.join(self.package_folder, "include", "wasm.h"),
                             "__declspec(dllimport)", "")
 
