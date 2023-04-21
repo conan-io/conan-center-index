@@ -747,7 +747,7 @@ class QtConan(ConanFile):
             if self.settings.compiler == "sun-cc":
                 if self.settings.arch == "sparc":
                     return "solaris-cc-stlport" if self.settings.compiler.libcxx == "libstlport" else "solaris-cc"
-                elif self.settings.arch == "sparcv9":
+                if self.settings.arch == "sparcv9":
                     return "solaris-cc64-stlport" if self.settings.compiler.libcxx == "libstlport" else "solaris-cc64"
             elif self.settings.compiler == "gcc":
                 return {"sparc": "solaris-g++",
@@ -988,7 +988,7 @@ class QtConan(ConanFile):
                 reqs.append(corrected_req)
             return reqs
 
-        def _create_module(module, requires=[], has_include_dir=True):
+        def _create_module(module, requires, has_include_dir=True):
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{module}")
@@ -1006,7 +1006,7 @@ class QtConan(ConanFile):
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
-        def _create_plugin(pluginname, libname, type, requires):
+        def _create_plugin(pluginname, libname, plugintype, requires):
             componentname = f"qt{pluginname}"
             assert componentname not in self.cpp_info.components, f"Plugin {pluginname} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{pluginname}")
@@ -1014,7 +1014,7 @@ class QtConan(ConanFile):
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
