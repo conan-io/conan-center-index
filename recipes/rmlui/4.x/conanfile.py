@@ -73,10 +73,10 @@ class RmluiConan(ConanFile):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
+            self.output.warning(f"{self.ref} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
             if lazy_lt_semver(str(self.settings.compiler.version), min_version):
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def requirements(self):
         if self.options.font_interface == "freetype":
@@ -86,7 +86,7 @@ class RmluiConan(ConanFile):
             self.requires("lua/5.3.5")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.11.3", headers=True, transitive_headers=True)
+            self.requires("robin-hood-hashing/3.11.3", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
