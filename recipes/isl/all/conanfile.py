@@ -1,4 +1,4 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
@@ -65,7 +65,7 @@ class IslConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows":
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "msvc":
             self.build_requires("automake/1.16.4")
