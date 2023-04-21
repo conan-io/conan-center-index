@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, replace_in_file, copy
+from conan.tools.files import get, replace_in_file, copy, export_conandata_patches, apply_conandata_patches
 import os
 
 
@@ -51,6 +51,9 @@ class RmluiConan(ConanFile):
     @property
     def _minimum_cpp_standard(self):
         return 14
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -111,44 +114,9 @@ class RmluiConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
 
-        # Since we have switched to CMakeDeps, the targets are named differently, so we need to patch
-        # the CMakeLists.txt to use the new names
-        replace_mapping = {
-            "if(FREETYPE_FOUND)": "if(TRUE)", # only in 4.0
-            "include_directories(${FREETYPE_INCLUDE_DIRS})": "",    # only in 4.0
-            "link_directories(${FREETYPE_LINK_DIRS})": "",    # only in 4.0
-            "list(APPEND CORE_LINK_LIBS ${FREETYPE_LIBRARY})": "list(APPEND CORE_LINK_LIBS freetype)", # only in 4.0
-            "list(APPEND CORE_LINK_LIBS ${FREETYPE_LIBRARIES})": "list(APPEND CORE_LINK_LIBS freetype)",
-            "list(APPEND CORE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})": "",
-            "if(LUA_FOUND)": "if(TRUE)", # only in 4.0
-            "list(include_directories(${LUA_INCLUDE_DIR}))": "", # only in 4.0
-            "list(APPEND LUA_BINDINGS_INCLUDE_DIRS ${LUA_INCLUDE_DIR})": "",
-            "list(APPEND LUA_BINDINGS_LINK_LIBS ${LUA_LIBRARIES})": "list(APPEND LUA_BINDINGS_LINK_LIBS lua::lua)",
-            # disables the built-in generation of package configuration files
-            "if(PkgHelpers_AVAILABLE)": "if(FALSE)"
-        }
-
-        if self.version >= "4.4":
-            inject_robinhood_dep = """
-find_package(robin_hood REQUIRED)
-target_link_libraries(RmlCore PUBLIC robin_hood::robin_hood)
-if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )
-"""
-        else:
-            inject_robinhood_dep = """
-find_package(robin_hood REQUIRED)
-target_link_libraries(RmlCore robin_hood::robin_hood)
-if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )
-"""
-        if self.options.with_thirdparty_containers:
-            replace_mapping['if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )'] = inject_robinhood_dep
-
-        cmakelists_path = os.path.join(
-            self.source_folder, "CMakeLists.txt")
-        for key, value in replace_mapping.items():
-            replace_in_file(self, cmakelists_path, key, value, strict=False)
-
+        # If we are using robin_hood hashing provided by conan, we need to change its include path
         if self.options.with_thirdparty_containers:
             config_path = os.path.join(self.source_folder,
                                        "Include", "RmlUi", "Config", "Config.h")
