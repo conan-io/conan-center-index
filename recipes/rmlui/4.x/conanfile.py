@@ -18,7 +18,6 @@ class RmluiConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "enable_rtti_and_exceptions": [True, False],
         "font_interface": ["freetype", None],
         "fPIC": [True, False],
         "matrix_mode": ["column_major", "row_major"],
@@ -27,7 +26,6 @@ class RmluiConan(ConanFile):
         "with_thirdparty_containers": [True, False]
     }
     default_options = {
-        "enable_rtti_and_exceptions": True,
         "font_interface": "freetype",
         "fPIC": True,
         "matrix_mode": "column_major",
@@ -102,7 +100,7 @@ class RmluiConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
         tc.cache_variables["BUILD_SAMPLES"] = False
-        tc.cache_variables["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
+        tc.cache_variables["DISABLE_RTTI_AND_EXCEPTIONS"] = False
         tc.cache_variables["ENABLE_PRECOMPILED_HEADERS"] = True
         tc.cache_variables["ENABLE_TRACY_PROFILING"] = False
         tc.cache_variables["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
@@ -137,13 +135,6 @@ class RmluiConan(ConanFile):
     def package_info(self):
         if self.options.matrix_mode == "row_major":
             self.cpp_info.defines.append("RMLUI_MATRIX_ROW_MAJOR")
-
-        if not self.options.enable_rtti_and_exceptions:
-            self.cpp_info.defines.append("RMLUI_USE_CUSTOM_RTTI")
-            if self.settings.compiler == "gcc" or self.settings.compiler == "clang":
-                self.cpp_info.cxxflags.append("-fno-rtti -fno-exceptions")
-            elif self.settings.compiler == "Visual Studio" or self.settings.compiler == "msvc":
-                self.cpp_info.cxxflags.append("-D_HAS_EXCEPTIONS=0 /GR-")
 
         if not self.options.shared:
             self.cpp_info.defines.append("RMLUI_STATIC_LIB")
