@@ -889,7 +889,7 @@ class QtConan(ConanFile):
 
         def _create_private_module(module, dependencies):
             dependencies_string = ';'.join(f"Qt6::{dependency}" for dependency in dependencies)
-            contents = textwrap.dedent("""\
+            contents = textwrap.dedent(f"""\
             if(NOT TARGET Qt6::{module}Private)
                 add_library(Qt6::{module}Private INTERFACE IMPORTED)
 
