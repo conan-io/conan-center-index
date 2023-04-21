@@ -1,19 +1,23 @@
-import functools
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.53.0"
 
 class JsonnetConan(ConanFile):
     name = "jsonnet"
     description = "Jsonnet - The data templating language"
-    topics = ("config", "json", "functional", "configuration")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/jsonnet"
+    topics = ("config", "json", "functional", "configuration")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,15 +26,13 @@ class JsonnetConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,70 +40,70 @@ class JsonnetConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-            # This is a workround.
-            # If jsonnet is shared, rapidyaml must be built as shared,
-            # or the c4core functions that rapidyaml depends on will not be able to be found.
-            # This seems to be a issue of rapidyaml.
-            # https://github.com/conan-io/conan-center-index/pull/9786#discussion_r829887879
-            if tools.Version(self.version) >= "0.18.0":
-                self.options["rapidyaml"].shared = True
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.10.5")
-        if tools.Version(self.version) >= "0.18.0":
-            self.requires("rapidyaml/0.4.1")
+        self.requires("nlohmann_json/3.11.2")
+        if Version(self.version) >= "0.18.0":
+            self.requires("rapidyaml/0.5.0")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("jsonnet does not support cross building")
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support cross building")
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+            check_min_cppstd(self, self._min_cppstd)
 
         if self.options.shared and is_msvc(self) and "d" in msvc_runtime_flag(self):
-            raise ConanInvalidConfiguration("shared {} is not supported with MTd/MDd runtime".format(self.name))
+            raise ConanInvalidConfiguration(f"shared {self.ref} is not supported with MTd/MDd runtime")
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        # This is a workround.
+        # If jsonnet is shared, rapidyaml must be built as shared,
+        # or the c4core functions that rapidyaml depends on will not be able to be found.
+        # This seems to be a issue of rapidyaml.
+        # https://github.com/conan-io/conan-center-index/pull/9786#discussion_r829887879
+        if self.options.shared and Version(self.version) >= "0.18.0" and self.dependencies["rapidyml"].options.shared == False:
+            raise ConanInvalidConfiguration(f"shared {self.ref} requires rapidyaml to be built as shared")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        cmake.definitions["BUILD_SHARED_BINARIES"] = False
-        cmake.definitions["BUILD_JSONNET"] = False
-        cmake.definitions["BUILD_JSONNETFMT"] = False
-        cmake.definitions["USE_SYSTEM_JSON"] = True
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["BUILD_SHARED_BINARIES"] = False
+        tc.variables["BUILD_JSONNET"] = False
+        tc.variables["BUILD_JSONNETFMT"] = False
+        tc.variables["USE_SYSTEM_JSON"] = True
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.components["libjsonnet"].libs = ["jsonnet"]
         self.cpp_info.components["libjsonnet"].requires = ["nlohmann_json::nlohmann_json"]
-        if tools.Version(self.version) >= "0.18.0":
+        if Version(self.version) >= "0.18.0":
             self.cpp_info.components["libjsonnet"].requires.append("rapidyaml::rapidyaml")
 
-        if tools.stdcpp_library(self):
-            self.cpp_info.components["libjsonnet"].system_libs.append(tools.stdcpp_library(self))
+        if stdcpp_library(self):
+            self.cpp_info.components["libjsonnet"].system_libs.append(stdcpp_library(self))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libjsonnet"].system_libs.append("m")
 

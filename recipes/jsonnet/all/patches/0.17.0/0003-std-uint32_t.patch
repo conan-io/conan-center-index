@@ -1,0 +1,63 @@
+diff --git a/cpp/libjsonnet++.cpp b/cpp/libjsonnet++.cpp
+index 085a3d1..697ef53 100644
+--- a/cpp/libjsonnet++.cpp
++++ b/cpp/libjsonnet++.cpp
+@@ -38,12 +38,12 @@ bool Jsonnet::init()
+     return vm_ != nullptr;
+ }
+ 
+-void Jsonnet::setMaxStack(uint32_t depth)
++void Jsonnet::setMaxStack(std::uint32_t depth)
+ {
+     ::jsonnet_max_stack(vm_, static_cast<unsigned>(depth));
+ }
+ 
+-void Jsonnet::setGcMinObjects(uint32_t objects)
++void Jsonnet::setGcMinObjects(std::uint32_t objects)
+ {
+     ::jsonnet_gc_min_objects(vm_, static_cast<unsigned>(objects));
+ }
+@@ -63,7 +63,7 @@ void Jsonnet::addImportPath(const std::string& path)
+     ::jsonnet_jpath_add(vm_, path.c_str());
+ }
+ 
+-void Jsonnet::setMaxTrace(uint32_t lines)
++void Jsonnet::setMaxTrace(std::uint32_t lines)
+ {
+     ::jsonnet_max_trace(vm_, static_cast<unsigned>(lines));
+ }
+diff --git a/include/libjsonnet++.h b/include/libjsonnet++.h
+index 5d68719..c2dd7a5 100644
+--- a/include/libjsonnet++.h
++++ b/include/libjsonnet++.h
+@@ -18,6 +18,7 @@ limitations under the License.
+ #define CPP_JSONNET_H_
+ 
+ #include <cstring>
++#include <cstdint>
+ #include <functional>
+ #include <map>
+ #include <string>
+@@ -46,11 +47,11 @@ class Jsonnet {
+     bool init();
+ 
+     /// Sets the maximum stack depth.
+-    void setMaxStack(uint32_t depth);
++    void setMaxStack(std::uint32_t depth);
+ 
+     /// Sets the number of objects required before a garbage collection cycle is
+     /// allowed.
+-    void setGcMinObjects(uint32_t objects);
++    void setGcMinObjects(std::uint32_t objects);
+ 
+     /// Run the garbage collector after this amount of growth in the number of
+     /// objects.
+@@ -60,7 +61,7 @@ class Jsonnet {
+     void setStringOutput(bool string_output);
+ 
+     /// Set the number of lines of stack trace to display (0 to display all).
+-    void setMaxTrace(uint32_t lines);
++    void setMaxTrace(std::uint32_t lines);
+ 
+     /// Add to the default import callback's library search path.
+     void addImportPath(const std::string& path);
