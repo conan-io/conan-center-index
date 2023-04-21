@@ -140,6 +140,11 @@ if(MID_TINYMIDI)
   find_package(tinymidi CONFIG REQUIRED)
   target_link_libraries(${PROJECT_NAME} PRIVATE tinymidi::tinymidi)
 endif()
+if(APPLE)
+    find_library(COREFOUNDATION_FWK NAMES CoreFoundation)
+    find_library(AUDIOTOOLBOX_FWK NAMES AudioToolbox)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${COREFOUNDATION_FWK} ${AUDIOTOOLBOX_FWK})
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER ${SDL_MIXER_SRC_DIR}/SDL_mixer.h)
 

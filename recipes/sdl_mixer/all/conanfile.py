@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
@@ -146,6 +147,8 @@ class SDLMixerConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "SDL2_mixer")
         self.cpp_info.libs = ["SDL2_mixer"]
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
+        if is_apple_os(self):
+            self.cpp_info.frameworks.extend(["AudioToolbox", "CoreFoundation"])
 
         self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"
