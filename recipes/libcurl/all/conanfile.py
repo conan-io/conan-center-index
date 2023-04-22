@@ -134,7 +134,7 @@ class LibcurlConan(ConanFile):
 
     @property
     def _is_using_cmake_build(self):
-        return is_msvc(self) or self._is_win_x_android
+        return is_msvc(self) or self._is_mingw() or self._is_win_x_android
 
     @property
     def _has_metalink_option(self):
