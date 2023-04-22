@@ -121,9 +121,9 @@ class IslConan(ConanFile):
                 "--with-gmp-prefix={}".format(self.dependencies["gmp"].package_folder.replace("\\", "/")),
             ])
         if self.settings.compiler == "msvc":
-            if tools.Version(self.settings.compiler.version) >= 15:
+            if self.settings.get_safe("compiler.version") >= 15:
                 self._autotools.cflags.append("-Zf")
-            if tools.Version(self.settings.compiler.version) >= 12:
+            if self.settings.get_safe("compiler.version") >= 12:
                 self._autotools.cflags.append("-FS")
         self._autotools.generate()
 
