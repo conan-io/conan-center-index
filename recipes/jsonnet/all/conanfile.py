@@ -29,7 +29,19 @@ class JsonnetConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return "11" if Version(self) < "0.20.0" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -44,6 +56,15 @@ class JsonnetConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
