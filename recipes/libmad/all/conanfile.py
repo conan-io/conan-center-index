@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -39,6 +41,10 @@ class LibmadConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported by msvc")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

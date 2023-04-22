@@ -22,7 +22,6 @@ set_target_properties(mad
     PROPERTIES
         VERSION ${LIBMAD_VERSION}
         SOVERSION ${LIBMAD_VERSION_MAJOR}
-        WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 include(GNUInstallDirs)
