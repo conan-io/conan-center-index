@@ -4,6 +4,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.53.0"
@@ -93,3 +94,5 @@ class WasmerConan(ConanFile):
                     self.cpp_info.system_libs.append("rt")
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["bcrypt", "userenv", "ws2_32"]
+            elif is_apple_os(self) and Version(self.version) >= "3.2.0":
+                self.cpp_info.frameworks = ["Security"]
