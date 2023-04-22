@@ -59,20 +59,12 @@ class NodejsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version][str(self.info.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        if conan_version.major == "1":
-            self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-            self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
-            self.copy(pattern="*", src=os.path.join(self._source_subfolder, "lib"), dst="lib")
-            self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
-            self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
-            self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
-        else:
-            copy(self, pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-            copy(self, pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
-            copy(self, pattern="*", src=os.path.join(self._source_subfolder, "lib"), dst="lib")
-            copy(self, pattern="node.exe", src=self._source_subfolder, dst="bin")
-            copy(self, pattern="npm", src=self._source_subfolder, dst="bin")
-            copy(self, pattern="npx", src=self._source_subfolder, dst="bin")
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
+        copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self._source_subfolder, "bin"))
+        copy(self, pattern="*", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self._source_subfolder, "lib"))
+        copy(self, pattern="node.exe", dst=os.path.join(self.package_folder, "bin"), src=self._source_subfolder)
+        copy(self, pattern="npm", dst=os.path.join(self.package_folder, "bin"), src=self._source_subfolder)
+        copy(self, pattern="npx", dst=os.path.join(self.package_folder, "bin"), src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.includedirs = []
