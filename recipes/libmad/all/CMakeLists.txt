@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(libmad LANGUAGES C)
 
-add_library(libmad
+add_library(mad
     ${LIBMAD_SRC_DIR}/bit.c
     ${LIBMAD_SRC_DIR}/decoder.c
     ${LIBMAD_SRC_DIR}/fixed.c
@@ -16,14 +16,19 @@ add_library(libmad
     ${LIBMAD_SRC_DIR}/huffman.c
 )
 
-target_include_directories(libmad PUBLIC ${LIBMAD_SRC_DIR}/msvc++)
-target_compile_definitions(libmad PRIVATE FPM_DEFAULT ASO_ZEROCHECK HAVE_CONFIG_H)
-set_target_properties(libmad PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_include_directories(mad PUBLIC ${LIBMAD_SRC_DIR}/msvc++)
+target_compile_definitions(mad PRIVATE FPM_DEFAULT ASO_ZEROCHECK HAVE_CONFIG_H)
+set_target_properties(mad
+    PROPERTIES
+        VERSION ${LIBMAD_VERSION}
+        SOVERSION ${LIBMAD_VERSION_MAJOR}
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
 
 include(GNUInstallDirs)
 install(FILES ${LIBMAD_SRC_DIR}/msvc++/mad.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(
-    TARGETS libmad
+    TARGETS mad
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
