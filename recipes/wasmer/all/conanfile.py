@@ -53,7 +53,7 @@ class WasmerConan(ConanFile):
         if self.settings.os == "Linux" and self.options.shared and "2.3.0" <= Version(self.version):
             raise ConanInvalidConfiguration(f"Shared Linux build of {self.ref} are not working. It requires glibc >= 2.25")
 
-        if is_msvc(self) and not self.options.shared and not is_msvc_static_runtime():
+        if is_msvc(self) and not self.options.shared and not is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} is only available with compiler.runtime=static")
 
     def package_id(self):
