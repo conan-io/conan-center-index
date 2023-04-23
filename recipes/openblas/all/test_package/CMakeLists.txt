@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package CXX)
 
-find_package(OpenBLAS REQUIRED CONFIG)
+find_package(OpenBLAS CONFIG REQUIRED)
+#find_package(OpenBLAS CONFIG COMPONENTS OpenBLAS::pthread REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} OpenBLAS::OpenBLAS)

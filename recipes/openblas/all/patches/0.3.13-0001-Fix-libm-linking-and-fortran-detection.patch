@@ -1,0 +1,66 @@
+From 55ce48e2486fb7653adcc398f9bde7bc99b81f90 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 21 Apr 2023 10:04:12 +0200
+Subject: [PATCH] Fix libm linking and fortran fixes
+
+---
+ CMakeLists.txt      | 2 +-
+ cmake/f_check.cmake | 3 ++-
+ cmake/fc.cmake      | 7 +++++--
+ 3 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 12730e0e..471d58c2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -184,7 +184,7 @@ add_library(${OpenBLAS_LIBNAME} ${LA_SOURCES} ${LAPACKE_SOURCES} ${RELA_SOURCES}
+ target_include_directories(${OpenBLAS_LIBNAME} INTERFACE $<INSTALL_INTERFACE:include/openblas${SUFFIX64}>)
+ 
+ # Android needs to explicitly link against libm
+-if(ANDROID)
++if (${CMAKE_SYSTEM_NAME} MATCHES "AIX|Android|Linux|FreeBSD|OpenBSD|NetBSD|DragonFly|Darwin")
+   target_link_libraries(${OpenBLAS_LIBNAME} m)
+ endif()
+ 
+diff --git a/cmake/f_check.cmake b/cmake/f_check.cmake
+index 0f5d0e15..e66e9780 100644
+--- a/cmake/f_check.cmake
++++ b/cmake/f_check.cmake
+@@ -25,8 +25,9 @@ if (NOT NO_LAPACK)
+   check_language(Fortran)
+   if(CMAKE_Fortran_COMPILER)
+     enable_language(Fortran)
++    file(WRITE ${CMAKE_BINARY_DIR}/FORTRAN_COMPILER ${CMAKE_Fortran_COMPILER_ID})
+   else()
+-  message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")
++  message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
+   set (NOFORTRAN 1)
+   set (NO_LAPACK 1)
+   endif()
+diff --git a/cmake/fc.cmake b/cmake/fc.cmake
+index fc1f9bb2..6c8f07d2 100644
+--- a/cmake/fc.cmake
++++ b/cmake/fc.cmake
+@@ -77,14 +77,17 @@ if (${F_COMPILER} STREQUAL "GFORTRAN")
+   endif ()
+ endif ()
+ 
+-if (${F_COMPILER} STREQUAL "INTEL")
++if (${F_COMPILER} STREQUAL "IFORT" OR ${F_COMPILER} STREQUAL "IFX")
++  if (MSVC)
++    set(FCOMMON_OPT "${FCOMMON_OPT} -names:lowercase -assume:underscore")
++  endif ()
+   set(CCOMMON_OPT "${CCOMMON_OPT} -DF_INTERFACE_INTEL")
+   if (INTERFACE64)
+     set(FCOMMON_OPT "${FCOMMON_OPT} -i8")
+   endif ()
+   set(FCOMMON_OPT "${FCOMMON_OPT} -recursive")
+   if (USE_OPENMP)
+-    set(FCOMMON_OPT "${FCOMMON_OPT} -openmp")
++    set(FCOMMON_OPT "${FCOMMON_OPT} -fopenmp")
+   endif ()
+ endif ()
+ 
+-- 
+2.30.2
+
