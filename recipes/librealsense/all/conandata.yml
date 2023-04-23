@@ -19,3 +19,8 @@ patches:
     - patch_file: "patches/2.49.0-0001-fix-cmake.patch"
     - patch_file: "patches/2.49.0-0002-fix-avx-check.patch"
     - patch_file: "patches/2.49.0-0003-atlstr-removal.patch"
+      patch_description: "Remove Windows ATL libraries usage because it's missing in CI of conancenter"
+      patch_type: "conan"
+    - patch_file: "patches/2.49.0-0004-fix-GUID_DEVINTERFACE_USB_DEVICE.patch"
+      patch_description: "Fix undefined ref to GUID_DEVINTERFACE_USB_DEVICE on Windows"
+      patch_type: "conan"
