@@ -1,0 +1,52 @@
+From b06e6e0ed959ee423838b8bba37ace5bb441dda1 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 21 Apr 2023 10:41:33 +0200
+Subject: [PATCH] Fix Intel Fortran detection and flag change to -fopenmp
+
+---
+ cmake/f_check.cmake | 2 ++
+ cmake/fc.cmake      | 7 +++++--
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/f_check.cmake b/cmake/f_check.cmake
+index df3a4858..9072c28c 100644
+--- a/cmake/f_check.cmake
++++ b/cmake/f_check.cmake
+@@ -24,8 +24,10 @@ include(CheckLanguage)
+ check_language(Fortran)
+ if(CMAKE_Fortran_COMPILER)
+   enable_language(Fortran)
++  file(WRITE ${CMAKE_BINARY_DIR}/FORTRAN_COMPILER ${CMAKE_Fortran_COMPILER_ID})
+ else()
+   set (NOFORTRAN 1)
++  file(WRITE ${CMAKE_BINARY_DIR}/FORTRAN_COMPILER 0)
+   if (NOT NO_LAPACK)
+      if (NOT XXXXX)
+ 	message(STATUS "No Fortran compiler found, can build only BLAS and f2c-converted LAPACK")
+diff --git a/cmake/fc.cmake b/cmake/fc.cmake
+index e615e148..5149199d 100644
+--- a/cmake/fc.cmake
++++ b/cmake/fc.cmake
+@@ -87,14 +87,17 @@ if (${F_COMPILER} STREQUAL "GFORTRAN")
+   endif ()
+ endif ()
+ 
+-if (${F_COMPILER} STREQUAL "INTEL")
++if (${F_COMPILER} STREQUAL "IFORT" OR ${F_COMPILER} STREQUAL "IFX")
++  if (MSVC)
++    set(FCOMMON_OPT "${FCOMMON_OPT} -names:lowercase -assume:underscore")
++  endif ()
+   set(CCOMMON_OPT "${CCOMMON_OPT} -DF_INTERFACE_INTEL")
+   if (INTERFACE64)
+     set(FCOMMON_OPT "${FCOMMON_OPT} -i8")
+   endif ()
+   set(FCOMMON_OPT "${FCOMMON_OPT} -recursive")
+   if (USE_OPENMP)
+-    set(FCOMMON_OPT "${FCOMMON_OPT} -openmp")
++    set(FCOMMON_OPT "${FCOMMON_OPT} -fopenmp")
+   endif ()
+ endif ()
+ 
+-- 
+2.30.2
+

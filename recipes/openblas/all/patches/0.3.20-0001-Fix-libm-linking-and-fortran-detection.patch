@@ -1,0 +1,80 @@
+From 0bd25ba0a3a6fdbd88b26ad6fb7b3542d23d3968 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 21 Apr 2023 10:09:21 +0200
+Subject: [PATCH] Fix libm linking and fortran fixes
+
+---
+ CMakeLists.txt      | 2 +-
+ cmake/f_check.cmake | 3 ++-
+ cmake/fc.cmake      | 7 +++++--
+ test/CMakeLists.txt | 1 +
+ 4 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ab9f3af8..873cd28f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -236,7 +236,7 @@ endif()
+ set_target_properties(${OpenBLAS_LIBS} PROPERTIES OUTPUT_NAME ${OpenBLAS_LIBNAME})
+ 
+ # Android needs to explicitly link against libm
+-if(ANDROID)
++if (${CMAKE_SYSTEM_NAME} MATCHES "AIX|Android|Linux|FreeBSD|OpenBSD|NetBSD|DragonFly|Darwin")
+   if(BUILD_STATIC_LIBS)
+     target_link_libraries(${OpenBLAS_LIBNAME}_static m)
+   endif()
+diff --git a/cmake/f_check.cmake b/cmake/f_check.cmake
+index 14683ed2..a98b489d 100644
+--- a/cmake/f_check.cmake
++++ b/cmake/f_check.cmake
+@@ -24,9 +24,10 @@ include(CheckLanguage)
+ check_language(Fortran)
+ if(CMAKE_Fortran_COMPILER)
+   enable_language(Fortran)
++    file(WRITE ${CMAKE_BINARY_DIR}/FORTRAN_COMPILER ${CMAKE_Fortran_COMPILER_ID})
+ else()
+   if (NOT NO_LAPACK)
+-    message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")
++    message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
+   endif()
+   set (NOFORTRAN 1)
+   set (NO_LAPACK 1)
+diff --git a/cmake/fc.cmake b/cmake/fc.cmake
+index 9feda9be..0cb6308f 100644
+--- a/cmake/fc.cmake
++++ b/cmake/fc.cmake
+@@ -79,14 +79,17 @@ if (${F_COMPILER} STREQUAL "GFORTRAN")
+   endif ()
+ endif ()
+ 
+-if (${F_COMPILER} STREQUAL "INTEL")
++if (${F_COMPILER} STREQUAL "IFORT" OR ${F_COMPILER} STREQUAL "IFX")
++  if (MSVC)
++    set(FCOMMON_OPT "${FCOMMON_OPT} -names:lowercase -assume:underscore")
++  endif ()
+   set(CCOMMON_OPT "${CCOMMON_OPT} -DF_INTERFACE_INTEL")
+   if (INTERFACE64)
+     set(FCOMMON_OPT "${FCOMMON_OPT} -i8")
+   endif ()
+   set(FCOMMON_OPT "${FCOMMON_OPT} -recursive")
+   if (USE_OPENMP)
+-    set(FCOMMON_OPT "${FCOMMON_OPT} -openmp")
++    set(FCOMMON_OPT "${FCOMMON_OPT} -fopenmp")
+   endif ()
+ endif ()
+ 
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index e4ee8b28..c94b5a6c 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -28,6 +28,7 @@ endforeach()
+ # $1 exec, $2 input, $3 output_result
+ if(WIN32)
+ FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_helper.ps1
++"[Console]::InputEncoding = New-Object Text.UTF8Encoding $false\n" 
+ "if (Test-Path $args[2]) { Remove-Item -Force $args[2] } \n"
+ "$ErrorActionPreference = \"Stop\"\n"
+ "Get-Content $args[1] | & $args[0]\n"
+-- 
+2.30.2
+

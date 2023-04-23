@@ -1,4 +1,7 @@
 sources:
+  "0.3.23":
+    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.23.tar.gz"
+    sha256: "5d9491d07168a5d00116cdc068a40022c3455bf9293c7cb86a65b1054d7e5114"
   "0.3.20":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.20.tar.gz"
     sha256: "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c"
@@ -17,3 +20,40 @@ sources:
   "0.3.10":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.10.tar.gz"
     sha256: "0484d275f87e9b8641ff2eecaa9df2830cbe276ac79ad80494822721de6e1693"
+
+patches:
+  "0.3.10":
+    -
+      patch_file: "patches/0.3.10-0001-Fix-libm-linking-and-fortran-detection.patch"
+      patch_description: "Fix libm linking, fortran detection and intel fortran"
+      patch_type: "conan"
+  "0.3.12":
+    -
+      patch_file: "patches/0.3.12-0001-Fix-libm-linking-and-fortran-detection.patch"
+      patch_description: "Fix libm linking, fortran detection and intel fortran"
+      patch_type: "conan"
+  "0.3.13":
+    -
+      patch_file: "patches/0.3.13-0001-Fix-libm-linking-and-fortran-detection.patch"
+      patch_description: "Fix libm linking, fortran detection and intel fortran"
+      patch_type: "conan"
+  "0.3.15":
+    -
+      patch_file: "patches/0.3.15-0001-Fix-libm-linking-and-fortran-detection.patch"
+      patch_description: "Fix libm linking, fortran detection and intel fortran"
+      patch_type: "conan"
+  "0.3.17":
+    -
+      patch_file: "patches/0.3.17-0001-Fix-libm-linking-and-fortran-detection.patch"
+      patch_description: "Fix libm linking, fortran detection and intel fortran"
+      patch_type: "conan"
+  "0.3.20":
+    -
+      patch_file: "patches/0.3.20-0001-Fix-libm-linking-and-fortran-detection.patch"
+      patch_description: "Fix libm linking, fortran detection and intel fortran"
+      patch_type: "conan"
+  "0.3.23":
+    -
+      patch_file: "patches/0.3.23-0001-Fix-Intel-Fortran-detection-and-flag-change-to-fopen.patch"
+      patch_description: "Fix intel fortran detection and flag change to -fopenmp"
+      patch_type: "conan"
