@@ -16,9 +16,6 @@ sources:
         sha256: "b837b2cff2b270b89eed3c0b212ab4108389a20b6e07c19dd5957918ff9ce7e0"
 patches:
   "2.49.0":
-    - patch_file: "patches/2.49.0-fix-cmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/2.49.0-fix-avx-check.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/2.49.0-atlstr-removal.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2.49.0-0001-fix-cmake.patch"
+    - patch_file: "patches/2.49.0-0002-fix-avx-check.patch"
+    - patch_file: "patches/2.49.0-0003-atlstr-removal.patch"
