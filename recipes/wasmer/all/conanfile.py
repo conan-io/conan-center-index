@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -48,13 +48,13 @@ class WasmerConan(ConanFile):
             raise ConanInvalidConfiguration("Binaries for this combination of version/os/arch/compiler are not available")
 
         if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared Windows build of wasmer are non-working atm (no import libraries are available)")
+            raise ConanInvalidConfiguration(f"Shared Windows build of {self.ref} are non-working atm (no import libraries are available)")
 
         if self.settings.os == "Linux" and self.options.shared and "2.3.0" <= Version(self.version):
-            raise ConanInvalidConfiguration("Shared Linux build of wasmer are not working. It requires glibc >= 2.25")
+            raise ConanInvalidConfiguration(f"Shared Linux build of {self.ref} are not working. It requires glibc >= 2.25")
 
-        if is_msvc(self) and not self.options.shared and self.settings.compiler.runtime != "MT":
-            raise ConanInvalidConfiguration("wasmer is only available with compiler.runtime=MT")
+        if is_msvc(self) and not self.options.shared and not is_msvc_static_runtime():
+            raise ConanInvalidConfiguration(f"{self.ref} is only available with compiler.runtime=static")
 
     def package_id(self):
         del self.info.settings.compiler.version
