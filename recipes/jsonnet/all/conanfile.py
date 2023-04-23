@@ -66,17 +66,8 @@ class JsonnetConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
-        if Version(self.version) >= "0.18.0":
-            self.requires("rapidyaml/0.5.0")
-
-    def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration(f"{self.ref} does not support cross building")
-
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
 
         if self.options.shared and is_msvc(self) and "d" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(f"shared {self.ref} is not supported with MTd/MDd runtime")
@@ -88,6 +79,11 @@ class JsonnetConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/pull/9786#discussion_r829887879
         if self.options.shared and Version(self.version) >= "0.18.0" and self.dependencies["rapidyaml"].options.shared == False:
             raise ConanInvalidConfiguration(f"shared {self.ref} requires rapidyaml to be built as shared")
+
+    def requirements(self):
+        self.requires("nlohmann_json/3.11.2")
+        if Version(self.version) >= "0.18.0":
+            self.requires("rapidyaml/0.5.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
