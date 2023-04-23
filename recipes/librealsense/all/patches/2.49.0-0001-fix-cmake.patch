@@ -23,8 +23,8 @@
 -    endif()
 -    install(TARGETS usb EXPORT realsense2Targets)
 +    find_package(libusb REQUIRED CONFIG)
-+    add_library(usb INTERFACE)
-+    target_link_libraries(usb INTERFACE libusb::libusb)
++    add_library(usb INTERFACE IMPORTED)
++    set_property(TARGET usb PROPERTY INTERFACE_LINK_LIBRARIES libusb::libusb)
  endif()
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
