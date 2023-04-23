@@ -26,6 +26,20 @@
 +    add_library(usb INTERFACE IMPORTED)
 +    set_property(TARGET usb PROPERTY INTERFACE_LINK_LIBRARIES libusb::libusb)
  endif()
+--- a/CMake/windows_config.cmake
++++ b/CMake/windows_config.cmake
+@@ -57,8 +57,9 @@ macro(os_target_config)
+         if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+             message("Preparing Windows 7 drivers" )
+             make_directory(${CMAKE_CURRENT_BINARY_DIR}/drivers/)
+-            file(GLOB DRIVERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/" "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/*")
+-            foreach(item IN LISTS DRIVERS)
++            file(GLOB DRIVERS "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/" "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/*")
++            foreach(_driver_path IN LISTS DRIVERS)
++                get_filename_component(item ${_driver_path} NAME)
+                 message("Copying ${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item} to ${CMAKE_CURRENT_BINARY_DIR}/drivers/" )
+                 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item}" "${CMAKE_CURRENT_BINARY_DIR}/drivers/${item}" COPYONLY)
+             endforeach()
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1.0)
