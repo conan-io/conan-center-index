@@ -55,6 +55,9 @@ class LibsrtpRecipe(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
         tc.variables["TEST_APPS"] = False
+        if Version(self.version) < "2.4.0":
+            # Relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
