@@ -38,8 +38,8 @@ class NodejsConan(ConanFile):
     def _glibc_version(self):
         buff = StringIO()
         self.run(['ldd', '--version'], output=buff)
-        buff = re.search('GLIBC \d{1,3}.\d{1,3}', buff.getvalue())
-        return str(buff.group()[6:])
+        buff = re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue())
+        return str(buff.group(1))
 
     def validate(self):
         if not self.version in self.conan_data["sources"] or \
