@@ -1,7 +1,8 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.scm import Version
 import os
 
 
@@ -31,7 +32,11 @@ class TestPackageConan(ConanFile):
         calc_wsdl = os.path.join(self.source_folder, "calc.wsdl")
         self.output.info(f"Generating code from WSDL '{calc_wsdl}'")
         self.run(f"wsdl2h -o calc.h {calc_wsdl}")
-        import_dir = os.path.join(self.dependencies["gsoap"].package_folder, "bin", "import")
+        if Version(conan_version).major < "2":
+            # conan v1 limitation: self.dependencies is not defined in build() method of test package
+            import_dir = os.path.join(self.deps_cpp_info["gsoap"].rootpath, "bin", "import")
+        else:
+            import_dir = os.path.join(self.dependencies["gsoap"].package_folder, "bin", "import")
         self.run(f"soapcpp2 -j -CL -I{import_dir} calc.h")
 
         cmake = CMake(self)
