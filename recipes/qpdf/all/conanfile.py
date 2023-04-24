@@ -98,7 +98,7 @@ class QpdfConan(ConanFile):
 
     def build_requirements(self):
         if not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.3")
+            self.tool_requires("cmake/[>3.16 <4]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
