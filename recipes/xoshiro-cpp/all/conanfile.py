@@ -16,6 +16,7 @@ class XoshiroCppConan(ConanFile):
     homepage = "https://github.com/Reputeless/Xoshiro-cpp"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("prng", "xoshiro", "header-only")
+    package_type = "header-library"
     settings = "arch", "build_type", "compiler", "os"
 
     @property
