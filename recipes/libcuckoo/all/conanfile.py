@@ -15,6 +15,7 @@ class LibCuckooConan(ConanFile):
     homepage = "https://github.com/efficient/libcuckoo"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("concurrency", "hashmap", "header-only", "library", "cuckoo")
+    package_type = "header-library"
     settings = "arch", "build_type", "compiler", "os"
 
     @property
