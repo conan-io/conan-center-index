@@ -17,7 +17,6 @@ class XoshiroCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("prng", "xoshiro", "header-only")
     settings = "arch", "build_type", "compiler", "os"
-    exports_sources = ["XoshiroCpp.hpp", "LICENSE"]
 
     @property
     def _minimum_compilers_version(self):
