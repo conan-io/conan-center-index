@@ -1,0 +1,44 @@
+From 1e6c27128c452a631ac486cb8f8d02d4bc1167aa Mon Sep 17 00:00:00 2001
+From: Robert Griebl <robert.griebl@qt.io>
+Date: Mon, 6 Mar 2023 13:27:24 +0100
+Subject: [PATCH] Fix debug build against MSVC2022
+
+Due to the level-4 warnings and warnings-are-errors in debug builds,
+we are running into warnings in Qt's private headers and an unused
+warning for the "args" pack in invokeCb()
+---
+ qcoro/qcorotask.h          | 2 +-
+ qcoro/qml/qcoroqmltask.cpp | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/qcoro/qcorotask.h b/qcoro/qcorotask.h
+index 26f3e7b..1d1e87a 100644
+--- a/qcoro/qcorotask.h
++++ b/qcoro/qcorotask.h
+@@ -581,7 +581,7 @@ public:
+ 
+ private:
+     template<typename ThenCallback, typename ... Args>
+-    auto invokeCb(ThenCallback &&callback, Args && ... args) {
++    auto invokeCb(ThenCallback &&callback, [[maybe_unused]] Args && ... args) {
+         if constexpr (std::is_invocable_v<ThenCallback, Args ...>) {
+             return callback(std::forward<Args>(args) ...);
+         } else {
+diff --git a/qcoro/qml/qcoroqmltask.cpp b/qcoro/qml/qcoroqmltask.cpp
+index 48136d6..f859cae 100644
+--- a/qcoro/qml/qcoroqmltask.cpp
++++ b/qcoro/qml/qcoroqmltask.cpp
+@@ -9,7 +9,10 @@
+ #include <optional>
+ 
+ #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
++QT_WARNING_PUSH
++QT_WARNING_DISABLE_MSVC(4458 4201)
+ #include <private/qjsvalue_p.h>
++QT_WARNING_POP
+ #endif
+ 
+ Q_DECLARE_LOGGING_CATEGORY(qcoroqml)
+-- 
+2.39.2
+

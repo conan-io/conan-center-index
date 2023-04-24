@@ -1,5 +1,10 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.33.0"
@@ -23,17 +28,10 @@ class QCoroConan(ConanFile):
         "fPIC": True,
         "asan": False,
     }
-    generators = "cmake", "cmake_find_package_multi"
-    exports_sources = ["CMakeLists.txt"]
     _cmake = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     @property
     def _compilers_minimum_version(self):
@@ -55,10 +53,13 @@ class QCoroConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("cmake/3.23.2")
+        self.build_requires("cmake/3.26.4")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.3.1")
+        self.requires("qt/6.5.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -70,7 +71,7 @@ class QCoroConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        #Special check for clang that can only be linked to libc++
+        # Special check for clang that can only be linked to libc++
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
 
@@ -85,31 +86,36 @@ class QCoroConan(ConanFile):
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-
-        self._cmake.definitions["QCORO_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["QCORO_ENABLE_ASAN"] = self.options.asan
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["QCORO_WITH_QTDBUS"] = self.options["qt"].with_dbus
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_QT_VERSION"] = Version(self.deps_cpp_info["qt"].version).major
+        tc.variables["QCORO_BUILD_EXAMPLES"] = False
+        tc.variables["QCORO_DISABLE_DEPRECATED_TASK_H"] = True
+        tc.variables["QCORO_ENABLE_ASAN"] = self.options.asan
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["QCORO_WITH_QTDBUS"] = self.options["qt"].with_dbus
+        tc.variables["QCORO_WITH_QTQUICK"] = False
+        tc.variables["QCORO_WITH_QML"] = False
+        tc.variables["QCORO_WITH_QTWEBSOCKETS"] = False
+        tc.variables["QCORO_EXCEPTION_MESSAGE_PRINT"] = True
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("*", dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
-        cmake = self._configure_cmake()
+        self.copy("*", dst="licenses", src=os.path.join(self.source_folder, "LICENSES"))
+        cmake = CMake(self)
         cmake.install()
 
         for mask in ["Find*.cmake", "*Config*.cmake", "*-config.cmake", "*Targets*.cmake"]:

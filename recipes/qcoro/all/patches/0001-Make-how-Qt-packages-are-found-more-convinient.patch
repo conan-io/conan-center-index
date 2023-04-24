@@ -1,0 +1,39 @@
+From 49b27a7dd26044a027a56fdc1247da154da3c01c Mon Sep 17 00:00:00 2001
+From: Paul T <developer.paul.123@gmail.com>
+Date: Thu, 6 Apr 2023 15:16:41 -0400
+Subject: [PATCH] Make how Qt packages are found more convinient
+
+This change allows users to specify `Qt5_DIR` or `Qt6_DIR` and then the rest of the components are automatically found. Prior to this, since `find_package()` was called for each component of Qt, CMake configuring would fail with each component not found. So you would have to specify all the paths at once.
+---
+ cmake/QCoroFindQt.cmake | 14 ++++----------
+ 1 file changed, 4 insertions(+), 10 deletions(-)
+
+diff --git a/cmake/QCoroFindQt.cmake b/cmake/QCoroFindQt.cmake
+index 9bda234..9951b02 100644
+--- a/cmake/QCoroFindQt.cmake
++++ b/cmake/QCoroFindQt.cmake
+@@ -12,17 +12,11 @@ macro(qcoro_find_qt)
+             set(ARGS_QT_VERSION 5)
+         endif()
+     endif()
++    
++    list(APPEND REQUIRED_QT_COMPONENTS "${ARGS_QT${ARGS_QT_VERSION}_COMPONENTS}")
++    list(FILTER REQUIRED_QT_COMPONENTS EXCLUDE REGEX "Private$$")
+ 
+-    foreach (component IN LISTS ARGS_COMPONENTS ARGS_QT${ARGS_QT_VERSION}_COMPONENTS)
+-        message(STATUS "Qt component: ${component}")
+-        if ("${component}" MATCHES "Private$$")
+-            string(REPLACE "Private" "" base_component "${component}")
+-            find_package(Qt${ARGS_QT_VERSION}${base_component} REQUIRED COMPONENTS Private)
+-        else()
+-            find_package(Qt${ARGS_QT_VERSION}${component} REQUIRED)
+-        endif()
+-    endforeach()
++    find_package(Qt${ARGS_QT_VERSION} REQUIRED COMPONENTS ${REQUIRED_QT_COMPONENTS})
+ 
+     set(${ARGS_FOUND_VER_VAR} ${ARGS_QT_VERSION})
+ endmacro()
+-
+-- 
+2.39.2
+
