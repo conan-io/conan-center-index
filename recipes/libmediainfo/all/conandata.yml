@@ -44,3 +44,6 @@ patches:
     - patch_file: "patches/20.03-0002-cmake-handle-dependencies.patch"
       patch_description: "CMake: robust discovery and link of dependencies"
       patch_type: "conan"
+    - patch_file: "patches/20.03-0003-cmake-minimum-required.patch"
+      patch_description: "CMake: fix cmake_minimum_required()"
+      patch_type: "conan"
