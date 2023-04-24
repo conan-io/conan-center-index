@@ -15,6 +15,7 @@ class LibBigWigConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dpryan79/libBigWig"
     license = "MIT"
+    package_type = "library"
     settings = "arch", "build_type", "compiler", "os"
 
     options = {
