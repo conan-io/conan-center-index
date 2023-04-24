@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -60,6 +60,9 @@ class OpenSubdivConan(ConanFile):
             "clang": "11",
             "apple-clang": "11.0",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -130,10 +133,14 @@ class OpenSubdivConan(ConanFile):
         tc.variables["NO_MACOS_FRAMEWORK"] = True
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
+        apply_conandata_patches(self)
         if self.settings.os == "Macos" and not self._osd_gpu_enabled:
             path = os.path.join(self.source_folder, "opensubdiv", "CMakeLists.txt")
             replace_in_file(self, path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
