@@ -58,7 +58,7 @@ class MailioConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.81.0", transitive_headers=True)
-        self.requires("openssl/3.1.0")
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -71,8 +71,7 @@ class MailioConan(ConanFile):
             )
 
     def build_requirements(self):
-        # mailio requires cmake >= 3.16.3
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
