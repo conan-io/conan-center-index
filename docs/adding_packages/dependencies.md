@@ -175,7 +175,7 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 
 ### Version Ranges
  
-Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/1/versioning/version_ranges.html). With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful dependencies. Currently, these are:
+Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/1/versioning/version_ranges.html). With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies. Currently, these are:
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts.
 
