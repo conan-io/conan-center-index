@@ -59,7 +59,7 @@ class OpusFileConan(ConanFile):
         self.requires("ogg/1.3.5", transitive_headers=True)
         self.requires("opus/1.3.1", transitive_headers=True)
         if self.options.http:
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
