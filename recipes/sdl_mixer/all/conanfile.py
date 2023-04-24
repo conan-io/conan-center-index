@@ -81,7 +81,7 @@ class SDLMixerConan(ConanFile):
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
         if self.options.opus:
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
             self.requires("opus/1.3.1")
             self.requires("opusfile/0.12")
         if self.options.mikmod:
