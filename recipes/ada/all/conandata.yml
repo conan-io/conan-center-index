@@ -1,0 +1,7 @@
+sources:
+  "2.2.0":
+    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "40a6b3fe0d5c62936c081e8403790ec05d5afe3d0909eece894efcfef7e678ee"
+  "2.0.0":
+    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "a18272e1c5d6580f62a333df88149e3810ffedcb61b3fb06c480a5b52e458b5e"
