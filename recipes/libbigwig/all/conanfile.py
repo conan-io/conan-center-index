@@ -42,11 +42,11 @@ class LibBigWigConan(ConanFile):
 
     def requirements(self):
         if self.options.with_curl:
-            self.requires("libcurl/7.85.0")
+            self.requires("libcurl/8.0.1")
         if self.options.with_zlibng:
-            self.requires("zlib-ng/2.0.6")
+            self.requires("zlib-ng/2.0.7")
         else:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.info.settings.os == "Windows":
