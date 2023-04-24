@@ -64,7 +64,7 @@ class QpdfConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.13")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
