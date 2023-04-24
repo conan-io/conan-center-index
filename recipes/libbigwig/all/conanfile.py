@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibBigWigConan(ConanFile):
@@ -89,3 +89,7 @@ class LibBigWigConan(ConanFile):
 
         if not self.options.with_curl:
             self.cpp_info.defines = ["NOCURL"]
+
+        # TODO: Remove in Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "BigWig"
+        self.cpp_info.names["cmake_find_package_multi"] = "BigWig"
