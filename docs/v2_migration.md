@@ -50,9 +50,9 @@ When different build tools are use, at least one layout needs to be set.
 ```python
     def layout(self):
         if self._use_cmake():
-            cmake_layout(self, src_folder="src")
-        else: # using autotools or header-only mode
-            basic_layout(self, src_folder="src")
+            cmake_layout(self)
+        else: # using autotools
+            basic_layout(self)
 ```
 
 The `src_folder` must be the same when using different layouts and should
