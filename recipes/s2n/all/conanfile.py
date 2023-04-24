@@ -40,7 +40,7 @@ class S2nConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/3.1.0")
+        self.requires("openssl/[>=1 <4]")
 
     def validate(self):
         if self.settings.os == "Windows":
