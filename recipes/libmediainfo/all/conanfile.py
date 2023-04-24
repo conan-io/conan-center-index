@@ -6,6 +6,7 @@ from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file,
     rm, rmdir, save
 )
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -64,8 +65,9 @@ class LibmediainfoConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_ZENLIB"] = False
         tc.variables["BUILD_ZLIB"] = False
-        # Generate a relocatable shared lib on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "22.03":
+            # Generate a relocatable shared lib on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
