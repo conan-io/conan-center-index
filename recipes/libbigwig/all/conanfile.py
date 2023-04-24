@@ -42,7 +42,7 @@ class LibBigWigConan(ConanFile):
 
     def requirements(self):
         if self.options.with_curl:
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/8.0.1", transitive_headers=True)
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.0.7")
         else:
@@ -87,7 +87,15 @@ class LibBigWigConan(ConanFile):
         self.cpp_info.libs = ["BigWig"]
         self.cpp_info.system_libs = ["m"]
 
-        if not self.options.with_curl:
+        self.cpp_info.requires = []
+        if self.options.get_safe("with_curl"):
+            self.cpp_info.requires.append("libcurl::libcurl")
+        if self.options.get_safe("with_zlibng"):
+            self.cpp_info.requires.append("zlib-ng::zlib-ng")
+        else:
+            self.cpp_info.requires.append("zlib::zlib")
+
+        if not self.options.get_safe("with_curl"):
             self.cpp_info.defines = ["NOCURL"]
 
         # TODO: Remove in Conan 2.0
