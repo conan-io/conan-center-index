@@ -130,7 +130,7 @@ recipes compatible **with both new and current generators** for some time.
 
 We will cover some cases of porting all the information set with the current model to the
 new one. To read more about the properties available for each generator and how the
-properties model work, please check the [Conan documentation]([https://docs.conan.io/1/conan_v2.html#editables-don-t-use-external-templates-any-more-new-layout-model](https://docs.conan.io/1/migrating_to_2.0/properties.html)).
+properties model work, please check the [Conan documentation](https://docs.conan.io/1/migrating_to_2.0/properties.html).
 
 > **Note**: Please, remember that the **new** ``set_property`` and the **current** attributes
 > model are *completely independent since Conan 1.43*. Setting ``set_property`` in recipes will
