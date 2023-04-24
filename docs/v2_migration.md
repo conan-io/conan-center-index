@@ -120,7 +120,7 @@ New Conan generators like
 [CMakeDeps](https://docs.conan.io/1/reference/conanfile/tools/cmake/cmakedeps.html)
 and
 [PkgConfigDeps](https://docs.conan.io/1/reference/conanfile/tools/gnu/pkgconfigdeps.html),
-don't listen to *cpp_info* ``.names`` and ``.filenames`` attributes.
+don't listen to `cpp_info`'s ``.names``, ``.filenames`` or ``.build_modules`` attributes.
 There is a new way of setting the `cpp_info` information with these
 generators using the ``set_property(property_name, value)`` method.
 
