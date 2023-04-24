@@ -39,17 +39,25 @@ class RestinioConan(ConanFile):
     def requirements(self):
         self.requires("http_parser/2.9.4")
 
-        if Version(self.version) >= "0.6.17":
-            self.requires("fmt/9.1.0")
-        elif Version(self.version) >= "0.6.16":
-            self.requires("fmt/9.0.0")
-        else:
-            self.requires("fmt/8.1.1")
+        # Set up default versions for requirements
+        requirements = {
+            "fmt": "8.1.1",
+            "expected-lite": "0.5.0",
+            "optional-lite": "3.5.0",
+            "string-view-lite": "1.6.0",
+            "variant-lite": "2.0.0"
+        }
 
-        self.requires("expected-lite/0.5.0")
-        self.requires("optional-lite/3.5.0")
-        self.requires("string-view-lite/1.6.0")
-        self.requires("variant-lite/2.0.0")
+        # Override defaults, if necessary
+        if Version(self.version) >= "0.6.16":
+            requirements["fmt"] = "9.0.0"
+            requirements["expected-lite"] = "0.6.1"
+
+        if Version(self.version) >= "0.6.17":
+            requirements["fmt"] = "9.1.0"
+
+        for (lib, version) in requirements.items():
+            self.requires(f"{lib}/{version}")
 
         if self.options.asio == "standalone":
             if Version(self.version) >= "0.6.9":
