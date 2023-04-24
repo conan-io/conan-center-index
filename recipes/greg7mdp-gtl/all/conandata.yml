@@ -1,4 +1,7 @@
 sources:
+  "1.1.7":
+    url: "https://github.com/greg7mdp/gtl/archive/v1.1.7.tar.gz"
+    sha256: "6fefe22b49cf2ba19c9038d60d78a19814707554683e032df39afb5928118ce6"
   "1.1.5":
     url: "https://github.com/greg7mdp/gtl/archive/v1.1.5.tar.gz"
     sha256: "2d943d2ccc33c6c662918efc51782dac414354a1458441f16041a98eec164bda"
