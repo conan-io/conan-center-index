@@ -1,0 +1,9 @@
+sources:
+  "3.6":
+    url: "http://dist.schmorp.de/liblzf/liblzf-3.6.tar.gz"
+    sha256: "9c5de01f7b9ccae40c3f619d26a7abec9986c06c36d260c179cedd04b89fb46a"
+patches:
+  "3.6":
+    - patch_file: "patches/add-extern-c.patch"
+      patch_description: "link using C symbol names in C++"
+      patch_type: "portability"
