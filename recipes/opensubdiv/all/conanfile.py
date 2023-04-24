@@ -17,7 +17,7 @@ class OpenSubdivConan(ConanFile):
     description = "An Open-Source subdivision surface library"
     topics = ("cgi", "vfx", "animation", "subdivision surface")
     package_type = "library"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -138,6 +138,8 @@ class OpenSubdivConan(ConanFile):
         if self.settings.os == "Macos" and not self._osd_gpu_enabled:
             path = os.path.join(self.source_folder, "opensubdiv", "CMakeLists.txt")
             replace_in_file(self, path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
+        # No warnings as errors
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/WX", "")
 
     def build(self):
         self._patch_sources()
