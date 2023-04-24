@@ -15,6 +15,7 @@ class GlazeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/stephenberry/glaze"
     topics = ("json", "memory", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -26,8 +27,8 @@ class GlazeConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "11" if Version(self.version) < "0.2.4" else "12",
-            "clang": "12" if Version(self.version) < "0.2.4" else "13",
+            "gcc": "12",
+            "clang": "12" if Version(self.version) > "1.0.0" else "13",
             "apple-clang": "13.1",
         }
 
@@ -41,9 +42,9 @@ class GlazeConan(ConanFile):
         if Version(self.version) < "0.2.4":
             self.requires("fmt/9.1.0")
             self.requires("frozen/1.1.1")
-            self.requires("nanorange/20200505")
+            self.requires("nanorange/cci.20200706")
         if Version(self.version) < "0.2.3":
-            self.requires("fast_float/3.9.0")
+            self.requires("fast_float/4.0.0")
         if "0.1.5" <= Version(self.version) < "0.2.3":
             self.requires("dragonbox/1.1.3")
 
@@ -67,7 +68,7 @@ class GlazeConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)

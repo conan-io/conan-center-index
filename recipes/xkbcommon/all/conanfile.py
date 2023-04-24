@@ -15,6 +15,7 @@ required_conan_version = ">=1.53.0"
 
 class XkbcommonConan(ConanFile):
     name = "xkbcommon"
+    package_type = "library"
     description = "keymap handling library for toolkits and window systems"
     topics = ("keyboard", "wayland", "x11", "xkb")
     url = "https://github.com/conan-io/conan-center-index"
