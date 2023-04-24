@@ -1,6 +1,6 @@
 import os
 import re
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
