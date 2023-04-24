@@ -33,15 +33,9 @@ class LibBigWigConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,7 +58,8 @@ class LibBigWigConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option zlib-ng:zlib_compat=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -87,14 +82,10 @@ class LibBigWigConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["BigWig"]
-        self.cpp_info.system_libs = ["m"]
         self.cpp_info.set_property("cmake_file_name", "BigWig")
         self.cpp_info.set_property("cmake_target_name", "BigWig::BigWig")
+        self.cpp_info.libs = ["BigWig"]
+        self.cpp_info.system_libs = ["m"]
 
         if not self.options.with_curl:
             self.cpp_info.defines = ["NOCURL"]
-
-        # TODO: Remove in Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "BigWig"
-        self.cpp_info.names["cmake_find_package_multi"] = "BigWig"
