@@ -77,7 +77,7 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
 
     def build_requirements(self):
-        if is_msvc(self, build_context=True):
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.8.2")
