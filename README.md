@@ -7,6 +7,13 @@ Conan Center Index is the source index of recipes of the [ConanCenter](https://c
 This repository includes a Continuous Integration system that will build automatically the Conan packages for the recipes submitted via
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
+### Server Status
+
+The current Conan Center Index CI status can be found on https://status.conan.io/
+
+Any maintenance, outage or important event related to the CI will be informed there.
+
+
 ### Add ConanCenter remote
 
 ConanCenter remote is configured by default in any Conan client installation. If, for any reason, you need to add it manually, just execute:

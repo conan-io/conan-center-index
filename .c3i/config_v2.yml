@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.0-beta10
+  version: 2.0.2
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -35,18 +35,22 @@ tasks:
     write_comments: false
     update_labels: false
     user_feedback:
-      title: "Conan v2 pipeline (informative, not required for merge)"
-      description: "> **Note**: Conan v2 builds are informative and they are not required for the PR to be merged."
+      title: "Conan v2 pipeline"
+      description: "> **Note**: Conan v2 builds may be required once they are on the [v2 ready](https://github.com/conan-io/conan-center-index/blob/master/.c3i/conan_v2_ready_references.yml) list"
+      regression: "> **Regression**: Conan v2 builds are mandatory and they are required for the PR to be merged, because this recipe worked with Conan v2 previously."
       text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
       collapse_on_success: false
       collapse_on_failure: true
+  list_packages:
+    update_yaml_list_path: ".c3i/conan_v2_ready_references"
+    update_yaml_list_key: "required_for_references"
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
     report_issue_append: false
 
 configurations:
   - id: linux-gcc
-    epochs: [0, 20220628]
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "Linux, GCC"
     build_profile:
       os: "Linux"
@@ -58,8 +62,8 @@ configurations:
               compiler.libcxx: ["libstdc++11"]
               compiler.version: ["11"]
               build_type: ["Release"]
-  - id: configs/macos-clang
-    epochs: [0, 20220628]
+  - id: macos-clang
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "macOS, Clang"
     build_profile:
       os: "Macos"
@@ -71,8 +75,8 @@ configurations:
               compiler.version: [ "13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
-  - id: configs/macos-m1-clang
-    epochs: [0, 20220628]
+  - id: macos-m1-clang
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "macOS M1, Clang"
     build_profile:
       os: "Macos"
@@ -85,8 +89,8 @@ configurations:
               compiler.version: ["13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
-  - id: configs/windows-msvc
-    epochs: [0, 20220628]
+  - id: windows-msvc
+    epochs: [0, 20211221, 20220120, 20220628]
     hrname: "Windows, MSVC"
     build_profile:
       os: "Windows"
@@ -98,7 +102,7 @@ configurations:
               compiler.version: [ "192" ]
               build_type:
                 - "Release":
-                    compiler.runtime: [ "static", "dynamic" ]
+                    compiler.runtime: ["dynamic"]
                     compiler.runtime_type: [ "Release" ]
 
 cppstd:

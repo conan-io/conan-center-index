@@ -60,10 +60,11 @@ class SentryCrashpadConan(ConanFile):
             self.tool_requires("jwasm/2.13")
 
     def requirements(self):
-        self.requires("libcurl/7.87.0")
         self.requires("zlib/1.2.13")
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.requires("libcurl/7.87.0")
         if self.options.get_safe("with_tls"):
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1t")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -73,7 +74,7 @@ class SentryCrashpadConan(ConanFile):
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+            self.output.warning("Compiler is unknown. Assuming it supports C++14.")
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"Build requires support for C++14. Minimum version for {self.settings.compiler} is {minimum_version}")
 
@@ -95,14 +96,16 @@ class SentryCrashpadConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
-        replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"),
-                        "find_package(OpenSSL)", openssl_repl)
+        if Version(self.version) < "0.6.1":
+            replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"),
+                            "find_package(OpenSSL)", openssl_repl)
         cmake = CMake(self)
         cmake.configure(build_script_folder="external/crashpad")
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=os.path.join(self.source_folder, "external", "crashpad"),
+                              dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.configure(build_script_folder="external/crashpad")
         cmake.install()
@@ -141,6 +144,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["crashpad_util"].requires.extend(["libcurl::libcurl"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["crashpad_util"].system_libs.append("winhttp")
         elif self.settings.os == "Macos":
