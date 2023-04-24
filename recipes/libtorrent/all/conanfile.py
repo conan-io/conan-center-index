@@ -88,7 +88,7 @@ class LibtorrentConan(ConanFile):
         else:
             self.requires("boost/1.76.0", transitive_headers=True)
         if self.options.enable_encryption:
-            self.requires("openssl/3.1.0", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.enable_iconv:
             self.requires("libiconv/1.17")
 
@@ -119,7 +119,7 @@ class LibtorrentConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.0.4" and not self._cmake_new_enough("3.16.0"):
-            self.tool_requires("cmake/3.25.3")
+            self.tool_requires("cmake/[>3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
