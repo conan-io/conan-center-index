@@ -63,11 +63,6 @@ class LibBigWigConan(ConanFile):
             if not zlib_ng.options.zlib_compat:
                 raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option zlib-ng:zlib_compat=True")
 
-        if self.options.with_curl:
-            libcurl = self.dependencies["libcurl"]
-            if libcurl.options.with_imap or libcurl.options.with_pop3 or libcurl.options.with_smtp:
-                raise ConanInvalidConfiguration(f"{self.ref} requires libcurl using the follow options: -o libcurl:with_imap=False -o libcurl:with_pop3=False -o libcurl:with_smtp=False")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
