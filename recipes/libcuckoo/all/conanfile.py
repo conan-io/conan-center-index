@@ -1,7 +1,11 @@
 import os
-from conans import CMake, ConanFile, tools
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class LibCuckooConan(ConanFile):
@@ -12,45 +16,54 @@ class LibCuckooConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("concurrency", "hashmap", "header-only", "library", "cuckoo")
     settings = "arch", "build_type", "compiler", "os"
-    generators = "cmake", "cmake_find_package_multi"
-    no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
         return 11
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def package(self):
-        # Install with CMake
-        cmake = CMake(self)
-        cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        cmake.definitions["BUILD_STRESS_TESTS"] = "OFF"
-        cmake.definitions["BUILD_TESTS"] = "OFF"
-        cmake.definitions["BUILD_UNIT_TESTS"] = "OFF"
-        cmake.definitions["BUILD_UNIVERSAL_BENCHMARK"] = "OFF"
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
-        # Copy license files
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        # Remove CMake config files (only files in share)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_STRESS_TESTS"] = False
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_UNIT_TESTS"] = False
+        tc.variables["BUILD_UNIVERSAL_BENCHMARK"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # Install with CMake
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libcuckoo")
+        self.cpp_info.set_property("cmake_target_name", "libcuckoo::libcuckoo")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
-        self.cpp_info.names["cmake_find_package"] = "libcuckoo"
-        self.cpp_info.names["cmake_find_package_multi"] = "libcuckoo"
