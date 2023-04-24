@@ -50,7 +50,7 @@ class LibmediainfoConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/8.0.1")
-        self.requires("libzen/0.4.38")
+        self.requires("libzen/0.4.38", transitive_headers=True)
         self.requires("tinyxml2/9.0.0")
         self.requires("zlib/1.2.13")
 
