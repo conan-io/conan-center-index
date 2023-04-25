@@ -108,7 +108,7 @@ class LibtorrentConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.0.4":
-            self.tool_requires("cmake/[>=3.16]")
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
