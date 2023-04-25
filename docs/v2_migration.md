@@ -15,11 +15,8 @@ This is expected for recipes to be updates in each pull request.
   * [CMakeToolchain](#cmaketoolchain)
   * [New conf_info properties](#new-conf_info-properties)
   * [New cpp_info set_property model](#new-cpp_info-set_property-model)
-    * [CMakeDeps](#cmakedeps)
-    * [Update required_conan_version to ">=1.43.0"](#update-required_conan_version-to-1430)
     * [Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name](#translating-names-information-to-cmake_target_name-cmake_module_target_name-and-cmake_file_name)
     * [Translating .filenames information to cmake_file_name, cmake_module_file_name and cmake_find_mode](#translating-filenames-information-to-cmake_file_name-cmake_module_file_name-and-cmake_find_mode)
-    * [Understanding some workarounds with the .names attribute model in recipes](#understanding-some-workarounds-with-the-names-attribute-model-in-recipes)
     * [Translating .build_modules to cmake_build_modules](#translating-build_modules-to-cmake_build_modules)
     * [PkgConfigDeps](#pkgconfigdeps)<!-- endToc -->
 
