@@ -1,8 +1,10 @@
 # Preparing recipes for Conan 2.0
 
-Refer to [road to Conan v2](v2_roadmap.md) to know the steps that
-will be taken in ConanCenter and this repository to start running
-Conan v2 in pull requests.
+This is expected for recipes to be updates in each pull request.
+
+- Updated helpers are expected, this is enforced by the [v2_linter](v2_linter.md)
+- Once a recipe publishes v2 packages, it must pass the v2 pipeline
+- The v2 pipeline with **shortly be required** for changes to be merged.
 
 <!-- toc -->
 ## Contents
@@ -110,6 +112,7 @@ In ConanCenterIndex this will typically looks like:
           tool_path = self.conf_info.get("user.pkg:tool")
           self.run(f"{tool_path} --build")
   ```
+
 > **Note**: This should only be used when absolutely required. In the vast majority of cases, the new
 > ["Environments"](https://docs.conan.io/1/reference/conanfile/tools/env/environment.html?highlight=Virtual)
 > will include the `self.cpp_info.bindirs` which will provide access to the tools in the correct scopes.
