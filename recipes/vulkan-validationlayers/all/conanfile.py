@@ -135,22 +135,11 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
         if self._needs_pkg_config and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if Version(self.version) >= "1.3.239" and not self._cmake_new_enough("3.17.2"):
-            self.tool_requires("cmake/3.25.3")
+        if Version(self.version) >= "1.3.239":
+            self.tool_requires("cmake/[>=3.17.2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
