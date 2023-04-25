@@ -99,20 +99,9 @@ class LibMysqlClientCConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if is_apple_os(self) and not self._cmake_new_enough("3.18"):
-            self.tool_requires("cmake/[^3.18]")
+        if is_apple_os(self):
+            self.tool_requires("cmake/[>=3.18]")
         if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
