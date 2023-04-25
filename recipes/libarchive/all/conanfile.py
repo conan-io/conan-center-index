@@ -85,7 +85,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.10.4")
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_iconv:
@@ -95,7 +95,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_nettle:
             self.requires("nettle/3.8.1")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.8")
+            self.requires("openssl/3.1.0")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -103,9 +103,9 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
         if self.options.get_safe("with_mbedtls"):
             self.requires("mbedtls/3.2.1")
 
