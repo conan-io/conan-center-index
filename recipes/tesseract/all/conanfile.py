@@ -17,7 +17,7 @@ class TesseractConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tesseract-ocr/tesseract"
     topics = ("ocr", "image", "multimedia", "graphics")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -59,13 +59,13 @@ class TesseractConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("leptonica/1.82.0")
+        self.requires("leptonica/1.83.0", transitive_headers=True)
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
             self.requires("libarchive/3.6.2")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/7.86.0")
+            self.requires("libcurl/8.0.1")
 
     def validate(self):
         # Check compiler version
@@ -113,12 +113,13 @@ class TesseractConan(ConanFile):
 
         # disable autodetect of vector extensions and march=native
         tc.variables["ENABLE_OPTIMIZATIONS"] = self.options.with_auto_optimize
-
         if Version(self.version) < "5.0.0":
             tc.variables["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
+        if Version(self.version) >= "5.3.1":
+            tc.variables["ENABLE_NATIVE"] = self.options.with_auto_optimize
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
-        tc.variables["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath.replace("\\", "/")
+        tc.variables["Leptonica_DIR"] = self.dependencies["leptonica"].package_folder
 
         if Version(self.version) >= "5.0.0":
             tc.variables["DISABLE_CURL"] = not self.options.with_libcurl
