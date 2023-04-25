@@ -561,7 +561,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/4.9.3")
+            self.tool_requires("b2/4.9.6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
