@@ -73,7 +73,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_dbus:
             self.requires("dbus/1.15.2")
         if self.options.with_gdbm:
@@ -92,8 +92,6 @@ class PulseAudioConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("gettext/0.21")
-        self.tool_requires("libtool/2.4.7")
         # CCI policy assumes that Meson may not be installed on consumers machine
         self.tool_requires("meson/0.63.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
