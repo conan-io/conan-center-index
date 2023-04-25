@@ -63,7 +63,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "8.0.30":
-            self.requires("openssl/{}".format("1.1.1t" if Version(conan_version).major < "2" else "[>=1.1 <2]"))
+            self.requires("openssl/{}".format("1.1.1t" if Version(conan_version).major < "2" else "[^1.1]"))
         else:
             self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
