@@ -86,7 +86,7 @@ class QpdfConan(ConanFile):
             raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16]")
+        self.tool_requires("cmake/[>=3.16 <4]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
