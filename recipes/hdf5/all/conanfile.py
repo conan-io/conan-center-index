@@ -101,7 +101,7 @@ class Hdf5Conan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.14.0":
-            self.tool_requires("cmake/[>=3.18]")
+            self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
