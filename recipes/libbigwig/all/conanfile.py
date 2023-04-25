@@ -88,13 +88,6 @@ class LibBigWigConan(ConanFile):
         self.cpp_info.libs = ["BigWig"]
         self.cpp_info.system_libs = ["m"]
 
-        self.cpp_info.requires = []
-        if self.options.get_safe("with_curl"):
-            self.cpp_info.requires.append("libcurl::libcurl")
-        if self.options.get_safe("with_zlibng"):
-            self.cpp_info.requires.append("zlib-ng::zlib-ng")
-        else:
-            self.cpp_info.requires.append("zlib::zlib")
 
         if not self.options.get_safe("with_curl"):
             self.cpp_info.defines = ["NOCURL"]
