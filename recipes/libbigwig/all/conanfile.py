@@ -43,6 +43,8 @@ class LibBigWigConan(ConanFile):
 
     def requirements(self):
         if self.options.with_curl:
+            # transitive_headers=True is required due to includes in bigWigIO.h
+            # https://github.com/dpryan79/libBigWig/blob/master/bigWigIO.h#L5
             self.requires("libcurl/8.0.1", transitive_headers=True)
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.0.7")
