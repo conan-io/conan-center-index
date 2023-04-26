@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from os.path import join
+from os.path import join, normpath
 
 required_conan_version = ">=1.53.0"
 
@@ -85,6 +85,10 @@ class SCIPConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @staticmethod
+    def _to_cmake(*arrays):
+        return ";".join(normpath(item) for sublist in arrays for item in sublist)
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SHARED"] = self.options.shared
@@ -94,17 +98,17 @@ class SCIPConan(ConanFile):
         tc.variables["TPI"] = self.options.with_tpi
         tc.variables["LPS"] = "spx"
         tc.variables["SYM"] = self.options.with_sym
-        tc.variables["SOPLEX_INCLUDE_DIRS"] = ";".join(self.dependencies["soplex"].cpp_info.includedirs)
+        tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
             tc.variables["SOPLEX_PIC_LIBRARIES"] = "soplex"
         if self.options.with_gmp:
-            tc.cache_variables["GMP_INCLUDE_DIRS"] = ";".join(self.dependencies["gmp"].cpp_info.includedirs)
+            tc.cache_variables["GMP_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["gmp"].cpp_info.includedirs)
         if self.options.with_boost:
-            tc.cache_variables["SOPLEX_INCLUDE_DIRS"] = ";".join([  # docu states BOOST_ROOT, yet that does not exist in CMakeLists
-                ";".join(self.dependencies["soplex"].cpp_info.includedirs),
-                ";".join(self.dependencies["soplex"].dependencies["boost"].cpp_info.includedirs)
-            ])
+            tc.cache_variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(  # docu states BOOST_ROOT, yet that does not exist in CMakeLists
+                self.dependencies["soplex"].cpp_info.includedirs,
+                self.dependencies["soplex"].dependencies["boost"].cpp_info.includedirs
+            )
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
