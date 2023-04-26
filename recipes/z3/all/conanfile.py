@@ -25,14 +25,14 @@ class Z3Conan(ConanFile):
         "fPIC": [True, False],
         "multithreaded": [True, False],
         "use_gmp": [True, False],
-        "multiprecision": ["internal", "gmp", "mpir"]
+        "multiprecision": ["internal", "gmp", "mpir"] # TODO: DEPRECATED
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "multithreaded": True,
         "use_gmp": False,
-        "multiprecision": "gmp"
+        "multiprecision": "gmp" # TODO: DEPRECATED
     }
 
     @property
@@ -49,9 +49,26 @@ class Z3Conan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def patch_cmake_lists(self):
+        # This function patches CMakeLists.txt to use the GMP library provided by Conan Center
+        path = os.path.join(self.source_folder, "CMakeLists.txt")
+        with open(path, "r") as file:
+            content = file.read()
+        content.replace("list(APPEND Z3_DEPENDENT_LIBS GMP::GMP)",
+                        "list(APPEND Z3_DEPENDENT_LIBS gmp::gmp)",
+                        1)
+        with open(path, "w") as file:
+            file.write(content)
 
+    def export_sources(self):
+        # Patch CMakeLists.txt for all supported Z3 versions
+        # to use the GMP library provided by Conan Center
+        # if and only if a user specifies to use GMP
+        if self.options.use_gmp:
+            self.patch_cmake_lists()
+            self.output.info("CMakeLists.txt has been patched to use GMP provided by Conan Center.")
+        # Then apply the patch designed for a specific range of Z3 versions
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
