@@ -11,20 +11,16 @@ patches:
     - patch_file: "patches/0001-cmake-use-conan-mpir-4.8.8.patch"
       patch_description: "Support building with MPIR"
       patch_type: "conan"
-      base_path: "source_subfolder"
 
     - patch_file: "patches/0002-python-interp-3-4.8.8.patch"
       patch_description: "Fix finding the Python interpreter"
       patch_type: "backport"
-      base_path: "source_subfolder"
 
   "4.10.2":
     - patch_file: "patches/0001-cmake-use-conan-mpir-4.10.2.patch"
       patch_description: "Support building with MPIR"
       patch_type: "conan"
-      base_path: "source_subfolder"
 
     - patch_file: "patches/0003-cmake-try-compile-flags-4.10.2.patch"
       patch_description: "Fix flag transmission to CMake try_compile"
       patch_type: "portability"
-      base_path: "source_subfolder"
