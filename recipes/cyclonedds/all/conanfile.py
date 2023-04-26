@@ -187,12 +187,12 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "CycloneDDS"
         self.cpp_info.names["cmake_find_package"] = "CycloneDDS"
         self.cpp_info.names["cmake_find_package_multi"] = "CycloneDDS"
-        self.cpp_info.components["ddsc"].names["cmake_find_package"] = "ddsc"
-        self.cpp_info.components["ddsc"].names["cmake_find_package_multi"] = "ddsc"
-        self.cpp_info.components["ddsc"].build_modules["cmake_find_package"] = build_modules
-        self.cpp_info.components["ddsc"].build_modules["cmake_find_package_multi"] = build_modules
-        self.cpp_info.components["ddsc"].set_property("cmake_target_name", "CycloneDDS::ddsc")
-        self.cpp_info.components["ddsc"].set_property("cmake_file_name", "CycloneDDS::ddsc")
-        self.cpp_info.components["ddsc"].set_property("pkg_config_name", "CycloneDDS")
+        self.cpp_info.components["CycloneDDS"].names["cmake_find_package"] = "ddsc"
+        self.cpp_info.components["CycloneDDS"].names["cmake_find_package_multi"] = "ddsc"
+        self.cpp_info.components["CycloneDDS"].build_modules["cmake_find_package"] = build_modules
+        self.cpp_info.components["CycloneDDS"].build_modules["cmake_find_package_multi"] = build_modules
+        self.cpp_info.components["CycloneDDS"].set_property("cmake_target_name", "CycloneDDS::ddsc")
+        self.cpp_info.components["CycloneDDS"].set_property("cmake_file_name", "CycloneDDS::ddsc")
+        self.cpp_info.components["CycloneDDS"].set_property("pkg_config_name", "CycloneDDS")
         if self._has_idlc():
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
