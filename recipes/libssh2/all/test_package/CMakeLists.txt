@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(Libssh2 REQUIRED CONFIG)
+find_package(libssh2 REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} Libssh2::libssh2)
+target_link_libraries(${PROJECT_NAME} libssh2::libssh2)
