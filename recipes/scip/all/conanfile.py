@@ -25,6 +25,7 @@ class SCIPConan(ConanFile):
         "with_boost": [True, False],
         "with_gmp": [True, False],
         "with_tpi": ["none", "omp", "tny"],
+        "with_sym": ["bliss", "none"],
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,7 @@ class SCIPConan(ConanFile):
         "with_boost": True,
         "with_gmp": True,
         "with_tpi": "none",
+        "with_sym": "bliss",
     }
 
     @property
@@ -58,6 +60,8 @@ class SCIPConan(ConanFile):
                 )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if self.options.shared and self.options.with_sym == "bliss":
+            raise ConanInvalidConfiguration("Bliss is not supported in shared mode.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,6 +90,7 @@ class SCIPConan(ConanFile):
         tc.variables["BOOST"] = self.options.with_boost
         tc.variables["TPI"] = self.options.with_tpi
         tc.variables["LPS"] = "spx"
+        tc.variables["SYM"] = self.options.with_sym
         tc.variables["SOPLEX_INCLUDE_DIRS"] = ";".join(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
@@ -124,9 +129,9 @@ class SCIPConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib"]
-        if self.options.shared:
-            self.cpp_info.libs = ["scip"]
+        if self.options.with_sym == "bliss":
+            self.cpp_info.libs = ["scip", "bliss"]
         else:
-            self.cpp_info.libs = ["scip", "bliss"]  # we do not use collect_libs, as the order is important
+            self.cpp_info.libs = ["scip"]
         if self.options.with_tpi == "omp":
             self.cpp_info.system_libs.append("-fopenmp")
