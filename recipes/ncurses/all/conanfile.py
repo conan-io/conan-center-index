@@ -119,13 +119,7 @@ class NCursesConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
+    def _generate_autotools_toolchain(self):
         tc = AutotoolsToolchain(self)
         def yes_no(value):
             return "yes" if value else "no"
@@ -184,14 +178,24 @@ class NCursesConan(ConanFile):
         env = tc.environment()
         if is_msvc(self):
             env = Environment()
-            env.define("CC", f"cl -nologo")
-            env.define("CXX", f"cl -nologo")
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"lib -nologo")
+            env.define("AR", "lib -nologo")
             env.define("NM", "dumpbin -symbols")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
         tc.generate(env)
+
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
+        self._generate_autotools_toolchain()
 
         if is_msvc(self) or self._is_clang_cl:
             # Custom AutotoolsDeps for cl like compilers
