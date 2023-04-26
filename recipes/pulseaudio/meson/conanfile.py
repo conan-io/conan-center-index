@@ -93,7 +93,7 @@ class PulseAudioConan(ConanFile):
 
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
@@ -104,6 +104,7 @@ class PulseAudioConan(ConanFile):
         tc = MesonToolchain(self)
 
         yes_no = lambda v: "enabled" if v else "disabled"
+        tc.project_options["man"] = False
         tc.project_options["daemon"] = False
         tc.project_options["tests"] = False
         tc.project_options["doxygen"] = False
