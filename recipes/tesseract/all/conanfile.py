@@ -59,7 +59,10 @@ class TesseractConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("leptonica/1.83.0", transitive_headers=True)
+        if Version(self.version) < "5.2.0":
+            self.requires("leptonica/1.82.0", transitive_headers=True)
+        else:
+            self.requires("leptonica/1.83.0", transitive_headers=True)
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
             self.requires("libarchive/3.6.2")
