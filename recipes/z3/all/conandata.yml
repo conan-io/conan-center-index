@@ -6,5 +6,8 @@ sources:
     url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.11.2.tar.gz"
     sha256: "e3a82431b95412408a9c994466fad7252135c8ed3f719c986cd75c8c5f234c7e"
   "4.10.2":
-    url: "https://github.com/Z3Prover/z3/archive/z3-4.10.2.tar.gz"
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.10.2.tar.gz"
     sha256: "889fd035b833775c8cd2eb4723eb011bf916a3e9bf08ce66b31c548acee7a321"
+  "4.9.1":
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.9.1.tar.gz"
+    sha256: "ca08ba933481242507b2f8b303c3ebdf5d16b0005d397fb45018321dc639a0d7"
