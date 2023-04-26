@@ -49,22 +49,14 @@ class Z3Conan(ConanFile):
     def patch_cmake_lists(self):
         # This function patches CMakeLists.txt to use the GMP library provided by Conan Center
         path = os.path.join(self.source_folder, "CMakeLists.txt")
+        find = "list(APPEND Z3_DEPENDENT_LIBS GMP::GMP)"
+        repl = "list(APPEND Z3_DEPENDENT_LIBS gmp::gmp)"
         with open(path, "r") as file:
-            content = file.read()
-        content.replace("list(APPEND Z3_DEPENDENT_LIBS GMP::GMP)",
-                        "list(APPEND Z3_DEPENDENT_LIBS gmp::gmp)",
-                        1)
+            content = file.read().replace(find, repl, 1)
         with open(path, "w") as file:
             file.write(content)
 
     def export_sources(self):
-        # Patch CMakeLists.txt for all supported Z3 versions
-        # to use the GMP library provided by Conan Center
-        # if and only if a user specifies to use GMP
-        if self.options.use_gmp:
-            self.patch_cmake_lists()
-            self.output.info("CMakeLists.txt has been patched to use GMP provided by Conan Center.")
-        # Then apply the patch designed for a specific range of Z3 versions
         export_conandata_patches(self)
 
     def config_options(self):
@@ -112,6 +104,12 @@ class Z3Conan(ConanFile):
         tc.generate()
 
     def build(self):
+        # Patch CMakeLists.txt for all supported Z3 versions
+        # to use the GMP library provided by Conan Center
+        # if and only if users have specified to use GMP
+        if self.options.use_gmp:
+            self.patch_cmake_lists()
+        # Then apply the patch specific to a range of Z3 versions
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
