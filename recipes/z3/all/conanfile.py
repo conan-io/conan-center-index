@@ -24,12 +24,14 @@ class Z3Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "multithreaded": [True, False],
+        "use_gmp": [True, False],
         "multiprecision": ["internal", "gmp", "mpir"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "multithreaded": True,
+        "use_gmp": False,
         "multiprecision": "gmp"
     }
 
