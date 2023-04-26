@@ -126,6 +126,9 @@ class SociConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mysql", "cmake_file_name", "MYSQL")
+        deps.set_property("libpq", "cmake_file_name", "POSTGRESQL")
+        deps.set_property("sqlite3", "cmake_file_name", "SQLITE3")
         deps.generate()
 
     def build(self):
