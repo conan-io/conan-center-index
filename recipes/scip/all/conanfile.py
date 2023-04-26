@@ -62,6 +62,9 @@ class SCIPConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
         if self.options.shared and self.options.with_sym == "bliss":
             raise ConanInvalidConfiguration("Bliss is not supported in shared mode.")
+        comp = self.settings.compiler
+        if self.options.with_sym == "bliss" and comp == 'clang' and comp.libcxx and comp.libcxx == 'libc++':
+            raise ConanInvalidConfiguration("Bliss does not support libc++.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
