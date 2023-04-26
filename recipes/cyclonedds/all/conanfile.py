@@ -51,7 +51,13 @@ class CycloneDDSConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def _has_idlc(self, info=False):
+        # don't build idlc when it makes little sense or not supported
+        host_os = self.info.settings.os if info else self.settings.os
+        return host_os not in ["Android", "iOS", "watchOS", "tvOS", "Neutrino"]
+
     def export_sources(self):
+        copy(self, os.path.join("cmake", "CycloneDDS_idlc.cmake"), self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -105,11 +111,7 @@ class CycloneDDSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # TODO : determine how to do in conan :
-        # - idlc is a code generator that is used as tool (and so not cross compiled)
-        # - other tools like ddsperf is cross compiled for target
-        # - maybe separate package like cyclonedds_idlc
-        tc.variables["BUILD_IDLC"] = False
+        tc.variables["BUILD_IDLC"] = self._has_idlc()
         tc.variables["BUILD_IDLC_TESTING"] = False
         tc.variables["BUILD_DDSPERF"] = False
         tc.variables["BUILD_IDLC_TESTING"] = False
@@ -131,15 +133,23 @@ class CycloneDDSConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "CycloneDDS_idlc.cmake",
+                   src=os.path.join(self.source_folder, os.pardir, "cmake"),
+                   dst=os.path.join(self.package_folder, self._module_path))
+        copy(self, "Generate.cmake",
+                   src=os.path.join(self.source_folder, "cmake", "Modules"),
+                   dst=os.path.join(self.package_folder, self._module_path))
         if self.settings.os == "Windows" and self.options.shared:
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
-        else:
-            rmdir(self, os.path.join(self.package_folder, "bin"))
+
+    @property
+    def _module_path(self):
+        return os.path.join("lib", "cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
@@ -163,6 +173,13 @@ class CycloneDDSConan(ConanFile):
                 "iphlpapi"
             ]
 
+        # Provide CycloneDDS::idlc target
+        build_modules = [
+            os.path.join(self._module_path, "CycloneDDS_idlc.cmake"),
+            os.path.join(self._module_path, "Generate.cmake"),
+        ]
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
+
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "CycloneDDS"
         self.cpp_info.names["cmake_find_package_multi"] = "CycloneDDS"
@@ -170,3 +187,5 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].names["cmake_find_package_multi"] = "ddsc"
         self.cpp_info.components["CycloneDDS"].set_property("cmake_target_name", "CycloneDDS::ddsc")
         self.cpp_info.components["CycloneDDS"].set_property("pkg_config_name", "CycloneDDS")
+        if self._has_idlc():
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
