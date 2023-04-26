@@ -16,12 +16,14 @@ class ArduinojsonConan(ConanFile):
     topics = ("json", "arduino", "iot", "embedded", "esp8266")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def validate(self):
-        if Version(self.version) >= "6.21.0":
-            check_min_cppstd(self, 11)
+        if self.settings.compiler.get_safe("cppstd"):
+            if Version(self.version) >= "6.21.0":
+                check_min_cppstd(self, 11)
 
     def package_id(self):
         self.info.clear()
