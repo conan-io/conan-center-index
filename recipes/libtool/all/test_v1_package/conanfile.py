@@ -46,9 +46,7 @@ class TestPackageConan(ConanFile):
         # Copy autotools directory to build folder
         shutil.copytree(os.path.join(self.source_folder, "autotools"), os.path.join(self.build_folder, "autotools"))
         with tools.chdir("autotools"):
-            # Work around the fact that "used_special_vars" in conans/client/tools/win.py doesn't handle ACLOCAL_PATH
-            aclocal_path = "$ACLOCAL_PATH:" + self.deps_env_info.vars["ACLOCAL_PATH"][0].lower()
-            self.run("ACLOCAL_PATH={} autoreconf --install --verbose -Wall".format(aclocal_path), win_bash=tools.os_info.is_windows)
+            self.run("autoreconf --install --verbose -Wall", win_bash=tools.os_info.is_windows)
 
         tools.mkdir(self._package_folder)
         conf_args = [
@@ -120,9 +118,7 @@ class TestPackageConan(ConanFile):
 
         # Copy autotools directory to build folder
         with tools.chdir(autotools_folder):
-            # Work around the fact that "used_special_vars" in conans/client/tools/win.py doesn't handle ACLOCAL_PATH
-            aclocal_path = "$ACLOCAL_PATH:" + self.deps_env_info.vars["ACLOCAL_PATH"][0].lower()
-            self.run("ACLOCAL_PATH={} autoreconf -ifv -Wall".format(aclocal_path), win_bash=tools.os_info.is_windows)
+            self.run("autoreconf -ifv -Wall", win_bash=tools.os_info.is_windows)
 
         with tools.chdir(autotools_folder):
             conf_args = [

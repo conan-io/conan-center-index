@@ -17,6 +17,7 @@ class JasperConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("toolkit", "coding", "jpeg", "images")
     description = "JasPer Image Processing/Coding Tool Kit"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,13 +50,12 @@ class JasperConan(ConanFile):
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.with_libjpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -106,17 +106,15 @@ class JasperConan(ConanFile):
 
     # FIXME: Missing CMake alias variables. See https://github.com/conan-io/conan/issues/7691
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             set(JASPER_FOUND TRUE)
             if(DEFINED Jasper_INCLUDE_DIR)
-                set(JASPER_INCLUDE_DIR ${Jasper_INCLUDE_DIR})
+                set(JASPER_INCLUDE_DIR ${{Jasper_INCLUDE_DIR}})
             endif()
             if(DEFINED Jasper_LIBRARIES)
-                set(JASPER_LIBRARIES ${Jasper_LIBRARIES})
+                set(JASPER_LIBRARIES ${{Jasper_LIBRARIES}})
             endif()
-            if(DEFINED Jasper_VERSION)
-                set(JASPER_VERSION_STRING ${Jasper_VERSION})
-            endif()
+            set(JASPER_VERSION_STRING "{self.version}")
         """)
         save(self, module_file, content)
 

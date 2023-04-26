@@ -2,14 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class MongoCDriverConan(ConanFile):
@@ -20,6 +20,7 @@ class MongoCDriverConan(ConanFile):
     homepage = "https://mongoc.org/"
     topics = ("libbson", "libmongoc", "mongo", "mongodb", "database", "db")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,26 +66,26 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.9")
+            self.requires("snappy/1.1.10")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.with_icu:
             self.requires("icu/72.1")
 
     def validate(self):
-        if self.info.options.with_ssl == "darwin" and not is_apple_os(self.settings.os):
+        if self.options.with_ssl == "darwin" and not is_apple_os(self):
             raise ConanInvalidConfiguration("with_ssl=darwin only allowed on Apple os family")
-        if self.info.options.with_ssl == "windows" and self.info.settings.os != "Windows":
+        if self.options.with_ssl == "windows" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_ssl=windows only allowed on Windows")
-        if self.info.options.with_sasl == "sspi" and self.info.settings.os != "Windows":
+        if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
 
     def build_requirements(self):
@@ -93,8 +94,7 @@ class MongoCDriverConan(ConanFile):
                 self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _ssl_cmake_value(self):
@@ -163,11 +163,6 @@ class MongoCDriverConan(ConanFile):
             deps.generate()
             env = VirtualBuildEnv(self)
             env.generate()
-            # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            envvars = env.vars(self)
-            envvars.save_script("conanbuildenv_pkg_config_path")
 
     def _patch_sources(self):
         apply_conandata_patches(self)

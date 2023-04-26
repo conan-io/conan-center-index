@@ -45,12 +45,16 @@ class LibtoolConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("automake/1.16.5")
-        #self.requires("m4/1.4.19") TODO: add as runtime dependency
+
+        #TODO: consider adding m4 as direct dependency, perhaps when we start using version ranges.
+        # https://github.com/conan-io/conan-center-index/pull/16248#discussion_r1116332095
+        #self.requires("m4/1.4.19") 
 
     @property
     def _settings_build(self):
@@ -221,8 +225,6 @@ class LibtoolConan(ConanFile):
 
         # Define environment variables such that libtool m4 files are seen by Automake
         libtool_aclocal_dir = os.path.join(self._datarootdir, "aclocal")
-        self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal_dir))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(libtool_aclocal_dir))
 
         self.buildenv_info.append_path("ACLOCAL_PATH", libtool_aclocal_dir)
         self.buildenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", libtool_aclocal_dir)
@@ -231,7 +233,7 @@ class LibtoolConan(ConanFile):
         
         # For Conan 1.x downstream consumers, can be removed once recipe is Conan 1.x only:
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env: {}".format(bin_path))
+        self.output.info(f"Appending PATH env: bin_path{bin_path}")
         self.env_info.PATH.append(bin_path)
 
         self.env_info.ACLOCAL_PATH.append(unix_path_package_info_legacy(self, libtool_aclocal_dir))

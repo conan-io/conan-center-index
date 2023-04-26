@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
@@ -52,10 +51,6 @@ class PkgConfConan(ConanFile):
        
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
-    def validate(self):
-        if cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building is not implemented in the recipe, contributions welcome.")
 
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")

@@ -41,8 +41,7 @@ class M4Conan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -63,12 +62,11 @@ class M4Conan(ConanFile):
             ])
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 tc.extra_ldflags.append("-PDB")
-        elif self.settings.compiler == "clang":
-            if Version(self.version) < "1.4.19":
-                tc.extra_cflags.extend([
-                    "-rtlib=compiler-rt",
-                    "-Wno-unused-command-line-argument",
-                ])
+        elif self.settings.compiler == "clang" and Version(self.version) < "1.4.19":
+            tc.extra_cflags.extend([
+                "-rtlib=compiler-rt",
+                "-Wno-unused-command-line-argument",
+            ])
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
         env = tc.environment()

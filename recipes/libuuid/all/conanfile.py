@@ -17,6 +17,7 @@ class LibuuidConan(ConanFile):
     homepage = "https://sourceforge.net/projects/libuuid/"
     license = "BSD-3-Clause"
     topics = "id", "identifier", "unique", "uuid"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,7 +32,7 @@ class LibuuidConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -44,23 +45,22 @@ class LibuuidConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = AutotoolsToolchain(self)
         if "x86" in self.settings.arch:
             tc.extra_cflags.append("-mstackrealign")
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         apply_conandata_patches(self)
