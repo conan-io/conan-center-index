@@ -140,7 +140,7 @@ class FFMpegConan(ConanFile):
         "with_libwebp": True,
         "with_ssl": "openssl",
         "with_libalsa": True,
-        "with_pulse": True,
+        "with_pulse": False,
         "with_vaapi": True,
         "with_vdpau": True,
         "with_vulkan": True,
