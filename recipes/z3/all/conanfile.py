@@ -38,9 +38,10 @@ class Z3Conan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        # Compiling z3 with GCC 7 results in a segfault
         return {
             "17": {
-                "gcc": "7",
+                "gcc": "8",
                 "clang": "5",
                 "apple-clang": "9.1",
             },
