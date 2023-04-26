@@ -27,20 +27,6 @@ class LibTomMathConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return None
-
-    # These are the oldest versions I could find in the docs
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "4.1",
-            "Visual Studio": "8",
-            "clang": "3.3",
-            "apple-clang": "5.0",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -51,7 +37,6 @@ class LibTomMathConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -62,31 +47,11 @@ class LibTomMathConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
-        # Boolean values are preferred instead of "ON"/"OFF"
-        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
-        if is_msvc(self):
-            # don't use self.settings.compiler.runtime
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        # # deps_cpp_info, deps_env_info and deps_user_info are no longer used
-        # if self.dependencies["dependency"].options.foobar:
-        #     tc.variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
-        # cache_variables should be used sparingly, example setting cmake policies
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
-        tc = CMakeDeps(self)
-        tc.generate()
-        # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
