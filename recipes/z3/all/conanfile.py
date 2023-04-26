@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.tools.microsoft import check_min_vs
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rmdir, save
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
-import textwrap
 
 required_conan_version = ">=1.53.0"
 
