@@ -51,9 +51,9 @@ class Z3Conan(ConanFile):
         path = os.path.join(self.source_folder, "CMakeLists.txt")
         find = "list(APPEND Z3_DEPENDENT_LIBS GMP::GMP)"
         repl = "list(APPEND Z3_DEPENDENT_LIBS gmp::gmp)"
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             content = file.read().replace(find, repl, 1)
-        with open(path, "w") as file:
+        with open(path, "w", encoding="utf-8") as file:
             file.write(content)
 
     def export_sources(self):
