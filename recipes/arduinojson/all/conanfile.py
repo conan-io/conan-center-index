@@ -28,11 +28,12 @@ class ArduinojsonConan(ConanFile):
             "msvc": "192",
             "gcc": "6",
             "clang": "6",
-            "apple-clang": "12",
         }
 
     def validate(self):
-        if Version(self.version) >= "6.21.0":
+        if str(self.settings.compiler) == 'apple-clang':
+            raise ConanInvalidConfiguration(f"apple-clang is currently not supported.")
+        elif Version(self.version) >= "6.21.0":
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
             else:
