@@ -124,6 +124,9 @@ class SCIPConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib"]
-        self.cpp_info.libs = ["scip", "bliss"]  # we do not use collect_libs, as the order is important
+        if self.options.shared:
+            self.cpp_info.libs = ["scip"]
+        else:
+            self.cpp_info.libs = ["scip", "bliss"]  # we do not use collect_libs, as the order is important
         if self.options.with_tpi == "omp":
             self.cpp_info.system_libs.append("-fopenmp")
