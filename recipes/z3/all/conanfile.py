@@ -82,14 +82,8 @@ class Z3Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.output.info(
-            f"{self.name} will build using {self.options.multiprecision} multiprecision implementation.")
-        if self.options.multiprecision == "mpir":
-            self.requires("mpir/3.0.0")
-        elif self.options.multiprecision == "gmp":
+        if self.options.use_gmp:
             self.requires("gmp/6.2.1")
-        elif self.options.multiprecision == "internal":
-            pass
 
     def validate(self):
         # Z3 requires C++17, and it is recommended to use VS2019 or later
