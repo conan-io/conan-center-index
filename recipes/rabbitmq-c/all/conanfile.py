@@ -39,7 +39,7 @@ class RabbitmqcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
