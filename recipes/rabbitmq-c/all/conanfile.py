@@ -14,7 +14,7 @@ class RabbitmqcConan(ConanFile):
     homepage = "https://github.com/alanxz/rabbitmq-c"
     description = "This is a C-language AMQP client library for use with v2.0+ of the RabbitMQ broker."
     topics = ("rabbitmq", "message queue")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
