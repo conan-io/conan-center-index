@@ -1,4 +1,7 @@
 sources:
+  "3.4.4":
+    url: "https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz"
+    sha256: "d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676"
   "3.4.3":
     url: "https://github.com/libffi/libffi/releases/download/v3.4.3/libffi-3.4.3.tar.gz"
     sha256: "4416dd92b6ae8fcb5b10421e711c4d3cb31203d77521a77d85d0102311e6c3b8"
@@ -9,6 +12,11 @@ sources:
     url: "https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz"
     sha256: "72fba7922703ddfa7a028d513ac15a85c8d54c8d67f55fa5a4802885dc652056"
 patches:
+  "3.4.4":
+    - patch_file: "patches/0002-3.4.3-fix-libtool-path.patch"
+    - patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"
+    - patch_file: "patches/0005-3.4.4-do-not-install-libraries-to-arch-dependent-directories.patch"
+    - patch_file: "patches/0006-3.4.4-library-no-version-suffix.patch"
   "3.4.3":
     - patch_file: "patches/0002-3.4.3-fix-libtool-path.patch"
     - patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"

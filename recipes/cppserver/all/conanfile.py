@@ -17,6 +17,7 @@ class CppServer(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/chronoxor/CppServer"
     topics = ("network", "socket", "asynchronous", "low-latency")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -69,20 +70,9 @@ class CppServer(ConanFile):
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "1.0.2.0" and not self._cmake_new_enough("3.20"):
-            self.tool_requires("cmake/3.25.1")
+        if Version(self.version) >= "1.0.2.0":
+            self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
