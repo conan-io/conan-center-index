@@ -24,15 +24,13 @@ class Z3Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "multithreaded": [True, False],
-        "use_gmp": [True, False],
-        "multiprecision": ["internal", "gmp", "mpir"] # TODO: DEPRECATED
+        "use_gmp": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "multithreaded": True,
-        "use_gmp": False,
-        "multiprecision": "gmp" # TODO: DEPRECATED
+        "use_gmp": False
     }
 
     @property
@@ -103,8 +101,7 @@ class Z3Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["Z3_USE_LIB_GMP"] = self.options.multiprecision != "internal"
-        tc.variables["Z3_USE_LIB_MPIR"] = self.options.multiprecision == "mpir"
+        tc.variables["Z3_USE_LIB_GMP"] = self.options.use_gmp
         tc.variables["Z3_SINGLE_THREADED"] = not self.options.multithreaded
         tc.variables["Z3_BUILD_LIBZ3_SHARED"] = self.options.shared
         tc.variables["Z3_INCLUDE_GIT_HASH"] = False
@@ -117,13 +114,6 @@ class Z3Conan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-
-        if self.options.multiprecision == "mpir":
-            save(self, os.path.join(self.source_folder, "gmp.h"), textwrap.dedent("""\
-                #pragma once
-                #include <mpir.h>
-                """))
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -153,14 +143,5 @@ class Z3Conan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "z3"
         self.cpp_info.components["libz3"].names["cmake_find_package"] = "libz3"
         self.cpp_info.components["libz3"].names["cmake_find_package_multi"] = "libz3"
-        self.cpp_info.components["libz3"].set_property(
-            "cmake_target_name", "z3::libz3")
-
-        libz3_requirements = []
-        if self.options.multiprecision == "mpir":
-            libz3_requirements.append("mpir::mpir")
-        elif self.options.multiprecision == "gmp":
-            libz3_requirements.append("gmp::gmp")
-        elif self.options.multiprecision == "internal":
-            pass
-        self.cpp_info.components["libz3"].requires = libz3_requirements
+        self.cpp_info.components["libz3"].set_property("cmake_target_name", "z3::libz3")
+        self.cpp_info.components["libz3"].requires = ["gmp::gmp"] if self.options.use_gmp else []
