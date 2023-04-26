@@ -30,7 +30,7 @@ class BrynetConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()
