@@ -53,3 +53,9 @@ sources:
   "4.9.4":
     url: "https://github.com/bfgroup/b2/releases/download/4.9.4/b2-4.9.4.tar.bz2"
     sha256: "1996d8098955ad3fdecab242d784afaef0fba80dd5d2ef0b3a41592e26772312"
+  "4.9.5":
+    url: "https://github.com/bfgroup/b2/releases/download/4.9.5/b2-4.9.5.tar.bz2"
+    sha256: "f81bea44601613f633d3311341f3f63594608537bf38d7073b877ec1edb2760a"
+  "4.9.6":
+    url: "https://github.com/bfgroup/b2/releases/download/4.9.6/b2-4.9.6.tar.bz2"
+    sha256: "10c1344c751fcf5a1f9ec6f52c02626cfbf78a4806f7817949b115e107bbbc5f"
