@@ -8,10 +8,3 @@ sources:
   "0.180":
     url: "https://sourceware.org/elfutils/ftp/0.180/elfutils-0.180.tar.bz2"
     sha256: "b827b6e35c59d188ba97d7cf148fa8dc6f5c68eb6c5981888dfdbb758c0b569d"
-#patches:
-#  "0.186":
-#    - patch_file: "patches/0.186-0001-Add-enable-werror-configure-option.patch"
-#    - patch_file: "patches/0.186-0002-add-enable-static-option-to-configure.patch"
-#  "0.180":
-#    - patch_file: "patches/0.180-0001-Add-enable-werror-configure-option.patch"
-#    - patch_file: "patches/0.180-0002-add-enable-static-option-to-configure.patch"
