@@ -100,6 +100,11 @@ class Z3Conan(ConanFile):
         tc.variables["Z3_INCLUDE_GIT_DESCRIBE"] = False
         tc.variables["Z3_ENABLE_EXAMPLE_TARGETS"] = False
         tc.variables["Z3_BUILD_DOCUMENTATION"] = False
+        # Set the flag `stdlib` for Clang on Linux to fix the linker errors
+        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+            # Possible values: `libc++`, `libstdc++11` and `libstdc++`
+            stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")
+            tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + stdlib
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
