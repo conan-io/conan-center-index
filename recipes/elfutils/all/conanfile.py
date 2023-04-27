@@ -67,7 +67,7 @@ class ElfutilsConan(ConanFile):
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5") # TODO: xz_utils
+            self.requires("xz_utils/5.4.2")
         if self.options.get_safe("libdebuginfod"):
             self.requires("libcurl/7.83.0") # TODO: libcurl/8.0.1
         if self.options.debuginfod:
