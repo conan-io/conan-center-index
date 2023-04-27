@@ -35,12 +35,11 @@ class ArduinojsonConan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
             elif str(self.settings.compiler) == 'apple-clang':
-                raise ConanInvalidConfiguration(f"cppstd needs to be set on apple-clang to activate c++11.")
+                raise ConanInvalidConfiguration("cppstd needs to be set on apple-clang to activate c++11.")
             else:
                 minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
                 if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++11, which your compiler does not support.")
+                    raise ConanInvalidConfiguration("{self.ref} requires C++11, which your compiler does not support.")
 
     def package_id(self):
         self.info.clear()
