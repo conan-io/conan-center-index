@@ -89,22 +89,5 @@ class QtAwesomeConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-
     def package_info(self):
         self.cpp_info.libs = ["QtAwesome"]
-
-        self.cpp_info.set_property("cmake_module_file_name", "QtAwesome")
-        self.cpp_info.set_property("cmake_module_target_name", "QtAwesome::QtAwesome")
-        self.cpp_info.set_property("pkg_config_name", "qtawesome")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "QtAwesome"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "QtAwesome"
-        self.cpp_info.names["cmake_find_package"] = "QtAwesome"
-        self.cpp_info.names["cmake_find_package_multi"] = "QtAwesome"
