@@ -1,7 +1,7 @@
 from conan import ConanFile, Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
 from conan.tools.microsoft import unix_path
@@ -119,6 +119,8 @@ class ElfutilsConan(ConanFile):
         tc.configure_args.append(f"BUILD_STATIC={'0' if self.options.shared else '1'}")
         tc.generate()
         deps = AutotoolsDeps(self)
+        deps.generate()
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     def build(self):
