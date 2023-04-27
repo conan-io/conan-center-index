@@ -72,8 +72,6 @@ class ElfutilsConan(ConanFile):
             self.requires("libcurl/7.83.0") # TODO: libcurl/8.0.1
         if self.options.debuginfod:
             self.requires("libmicrohttpd/0.9.75")
-            # FIXME: missing recipe for libmicrohttpd
-            # raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
 
     def build_requirements(self):
         self.build_requires("gettext/0.21")
@@ -129,36 +127,6 @@ class ElfutilsConan(ConanFile):
         autotools.autoreconf(args=["-fiv"])
         autotools.configure()
         autotools.make()
-
-
-    # def _configure_autotools(self):
-    #     if not self._autotools:
-    #         args = [
-    #             "--disable-werror",
-    #             "--enable-static={}".format("no" if self.options.shared else "yes"),
-    #             "--enable-deterministic-archives",
-    #             "--enable-silent-rules",
-    #             "--with-zlib",
-    #             "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
-    #             "--with-lzma" if self.options.with_lzma else "--without-lzma",
-    #             "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
-    #         ]
-    #         if tools.Version(self.version) >= "0.186":
-    #             args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
-    #         args.append('BUILD_STATIC={}'.format("0" if self.options.shared else "1"))
-    #
-    #         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-    #         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-    #     return self._autotools
-
-    # def build(self):
-    #     for patch in self.conan_data.get("patches", {}).get(self.version, []):
-    #         tools.patch(**patch)
-    #     with tools.chdir(self._source_subfolder):
-    #         self.run("autoreconf -fiv")
-    #     autotools = self._configure_autotools()
-    #     autotools.make()
-
 
     def package(self):
         copy(self, pattern="COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
