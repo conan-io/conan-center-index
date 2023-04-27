@@ -31,11 +31,11 @@ class PackageConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15",
-            "msvc": "14.1",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "9",
+            "clang": "9",
+            "apple-clang": "11",
         }
 
     # Use the export_sources(self) method instead of the exports_sources attribute.
