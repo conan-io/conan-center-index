@@ -204,9 +204,13 @@ class ElfutilsConan(ConanFile):
 
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")
+        lib_path = os.path.join(self.package_folder, "lib")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)                 # Conan V1
+        self.env_info.LD_LIBRARY_PATH.append(lib_path)      # Conan V1
         self.buildenv_info.append_path("PATH", bin_path)    # Conan V2
+        self.buildenv_info.append_path("LD_LIBRARY_PATH", lib_path)
+
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
