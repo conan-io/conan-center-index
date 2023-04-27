@@ -126,7 +126,7 @@ class ElfutilsConan(ConanFile):
                 raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
                                                 "elfutils only supports GCC.")
         if self.settings.compiler != "gcc":
-            self.output.warn(f"Your compiler {self.settings.compiler} is not GCC.")
+            self.output.warning(f"Your compiler {self.settings.compiler} is not GCC.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
