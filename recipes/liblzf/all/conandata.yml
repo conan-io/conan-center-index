@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/add-extern-c.patch"
       patch_description: "link using C symbol names in C++"
       patch_type: "portability"
+    - patch_file: "patches/fix-macro-expansion-ub.patch"
+      patch_description: "fix \"macro expansion producing 'defined' has undefined behaviour\" warning in Clang"
+      patch_type: "portability"

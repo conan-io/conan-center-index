@@ -6,12 +6,7 @@ add_library(liblzf
     src/lzf_d.c
 )
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(liblzf PRIVATE "-funroll-all-loops")
-elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(liblzf PRIVATE "-Wno-expansion-to-defined")
-endif()
-
+# The original autotools config specified -O3 -funroll-all-loops for GCC
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
    CMAKE_C_COMPILER_ID STREQUAL "Clang")
     target_compile_options(liblzf PRIVATE "$<$<CONFIG:Release>:-O3>")
@@ -19,6 +14,9 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(liblzf PRIVATE "$<$<CONFIG:Release>:/O2>")
     target_compile_options(liblzf PRIVATE "$<$<CONFIG:RelWithDebInfo>:/O2>")
+endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(liblzf PRIVATE "-funroll-all-loops")
 endif()
 
 include(GNUInstallDirs)
