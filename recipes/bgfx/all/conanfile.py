@@ -262,7 +262,7 @@ class bgfxConan(ConanFile):
             copy(self, pattern="geometryv*", dst=os.path.join(self.package_folder, "bin"), src=build_bin, keep_path=False)
 
         # Rename for consistency across platforms and configs
-        if (not self.settings.os in ["Macos", "iOS"]) or (not self.options.shared and self.settings.os in ["Macos", "iOS"]): #Apparently apple dylibs break if renamed
+        if not (self.settings.os in ["Macos", "iOS"] and self.options.shared): #Apparently apple dylibs break if renamed
             for bgfx_file in Path(os.path.join(self.package_folder, "lib")).glob("*bgfx*"):
                 rename(self, os.path.join(self.package_folder, "lib", bgfx_file.name), 
                         os.path.join(self.package_folder, "lib", f"{package_lib_prefix}bgfx{bgfx_file.suffix}"))
