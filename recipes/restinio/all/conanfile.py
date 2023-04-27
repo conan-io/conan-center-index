@@ -18,7 +18,7 @@ class RestinioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "RESTinio is a header-only C++14 library that gives you an embedded HTTP/Websocket server."
     topics = ("http-server", "websockets", "rest", "tls-support")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "asio": ["boost", "standalone"],
@@ -34,12 +34,14 @@ class RestinioConan(ConanFile):
     }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
 
-        if Version(self.version) >= "0.6.16":
+        if Version(self.version) >= "0.6.17":
+            self.requires("fmt/9.1.0")
+        elif Version(self.version) >= "0.6.16":
             self.requires("fmt/9.0.0")
         else:
             self.requires("fmt/8.1.1")
@@ -105,8 +107,7 @@ class RestinioConan(ConanFile):
         deps.generate()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -117,7 +118,6 @@ class RestinioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "restinio")
         self.cpp_info.set_property("cmake_target_name", "restinio::restinio")
