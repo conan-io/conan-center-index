@@ -11,7 +11,7 @@ required_conan_version = ">=1.52.0"
 
 
 class SpdlogSetupConan(ConanFile):
-    name = "spdlog_setup"
+    name = "gegles-spdlog_setup"
     description = "Setup spdlog via a TOML config file"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
