@@ -76,6 +76,7 @@ class ElfutilsConan(ConanFile):
             # raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
 
     def build_requirements(self):
+        self.build_requires("gettext/0.21")
         self.build_requires("automake/1.16.5")
         self.build_requires("m4/1.4.19")
         self.build_requires("flex/2.6.4")
