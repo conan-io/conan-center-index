@@ -124,11 +124,11 @@ class ElfutilsConan(ConanFile):
             raise ConanInvalidConfiguration("elfutils does not support macOS.")
 
         if Version(self.version) >= "0.186":
-            if self.settings.compiler in ["apple-clang", "msvc"]:
+            if str(self.settings.compiler) in ["Visual Studio", "apple-clang", "msvc"]:
                 raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
                                                 "elfutils only supports GCC and Clang.")
         else:
-            if self.settings.compiler in ["clang", "apple-clang", "msvc"]:
+            if str(self.settings.compiler) in ["Visual Studio", "clang", "apple-clang", "msvc"]:
                 raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
                                                 "elfutils only supports GCC.")
         if self.settings.compiler != "gcc":
