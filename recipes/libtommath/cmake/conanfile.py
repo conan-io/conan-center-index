@@ -1,12 +1,10 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibTomMathConan(ConanFile):
@@ -61,19 +59,12 @@ class LibTomMathConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["tommath"]
         self.cpp_info.set_property("cmake_file_name", "libtommath")
-        self.cpp_info.set_property("cmake_target_name", "libtommath::libtommath")
-        self.cpp_info.set_property("pkg_config_name", "libtommath")
+        self.cpp_info.set_property("cmake_target_name", "libtommath")
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -82,7 +73,5 @@ class LibTomMathConan(ConanFile):
             self.cpp_info.system_libs.append("dl")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "LIBTOMMATH"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libtommath"
-        self.cpp_info.names["cmake_find_package"] = "LIBTOMMATH"
+        self.cpp_info.names["cmake_find_package"] = "libtommath"
         self.cpp_info.names["cmake_find_package_multi"] = "libtommath"
