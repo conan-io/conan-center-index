@@ -811,7 +811,7 @@ class QtConan(ConanFile):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_entry_point.cmake")
 
     def _cmake_qt6_private_file(self, module):
-        return os.path.join("lib", "cmake", f"Qt6{module}", "conan_qt_qt6_{module.lower()}private.cmake")
+        return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
     def package(self):
         with self._build_context():
