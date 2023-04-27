@@ -1,4 +1,7 @@
 sources:
+  "7.2.0":
+    url: "https://github.com/harfbuzz/harfbuzz/archive/7.2.0.tar.gz"
+    sha256: "a58446480a2216b0f01f897c635e18e75faf3d40a3b8ee953ce72cf77c9118ac"
   "7.1.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/7.1.0/harfbuzz-7.1.0.tar.xz"
     sha256: "f135a61cd464c9ed6bc9823764c188f276c3850a8dc904628de2a87966b7077b"
