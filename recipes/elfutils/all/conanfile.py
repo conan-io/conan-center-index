@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, replace_in_file, copy, get, rm, rmdir
 from conan.tools.microsoft import unix_path
 import os
 
@@ -41,6 +41,37 @@ class ElfutilsConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def disable_werror_flags(self):
+        # This function patches `eu.am` so that warnings are not treated as errors
+        # otherwise the library cannot be built due to warnings related to dereferencing pointers
+        path = os.path.join(self.source_folder, "config", "eu.am")
+        find = '$(if $($(*F)_no_Werror),,-Werror)'
+        repl = '$(if $($(*F)_no_Werror),,)'
+        replace_in_file(self, path, find, repl)
+
+    def enable_static_elfutils(self):
+        # This function patches `configure.ac` to allow building elfutils as a static library
+        path = os.path.join(self.source_folder, "configure.ac")
+        find1 = r'AM_CONDITIONAL(INSTALL_ELFH, test "$install_elfh" = yes)'
+        repl1 = f'{find1}\n\n'
+        repl1 += r'AC_MSG_CHECKING([whether to build elfutils as a static library])' "\n"
+        repl1 += r'AC_ARG_ENABLE([static],' "\n"
+        repl1 += r'AS_HELP_STRING([--enable-static],[build elfutils as static libraries]),' "\n"
+        repl1 += r'[static_elfutils=$enableval], [static_elfutils=no])' "\n\n"
+        repl1 += r'static_elfutils=$static_elfutils' "\n\n"
+        repl1 += r'if test "$static_elfutils" = yes ; then' "\n"
+        repl1 += r'  AC_MSG_RESULT([yes])' "\n"
+        repl1 += r'else' "\n"
+        repl1 += r'  if test "$use_gprof" = yes -o "$use_gcov" = yes ; then' "\n"
+        repl1 += r'    AC_MSG_ERROR([cannot build a shared elfutils with gprof or gcov enabled])' "\n"
+        repl1 += r'  fi' "\n"
+        repl1 += r'  AC_MSG_RESULT([no])' "\n"
+        repl1 += 'fi' "\n\n"
+        find2 = r'test "$use_gprof" = yes -o "$use_gcov" = yes])'
+        repl2 = r'test "$static_elfutils" = yes])'
+        replace_in_file(self, path, find1, repl1)
+        replace_in_file(self, path, find2, repl2)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -124,6 +155,8 @@ class ElfutilsConan(ConanFile):
         deps.generate()
 
     def build(self):
+        self.disable_werror_flags()
+        self.enable_static_elfutils()
         apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.autoreconf(args=["-fiv"])
