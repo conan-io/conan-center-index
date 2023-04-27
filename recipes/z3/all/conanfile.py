@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.microsoft import check_min_vs
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, replace_in_file, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -52,10 +52,7 @@ class Z3Conan(ConanFile):
         path = os.path.join(self.source_folder, "CMakeLists.txt")
         find = "list(APPEND Z3_DEPENDENT_LIBS GMP::GMP)"
         repl = "list(APPEND Z3_DEPENDENT_LIBS gmp::gmp)"
-        with open(path, "r", encoding="utf-8") as file:
-            content = file.read().replace(find, repl, 1)
-        with open(path, "w", encoding="utf-8") as file:
-            file.write(content)
+        replace_in_file(self, path, find, repl)
 
     def export_sources(self):
         export_conandata_patches(self)
