@@ -103,7 +103,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires("crc32c/1.1.1")
         self.requires("abseil/20220623.0", transitive_headers=True)
         self.requires("libcurl/7.88.1")
-        self.requires("openssl/1.1.1t")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
         # `google-cloud-cpp` contains code generated from the proto files.
         # Working with older versions of these protos almost always will fail, as
