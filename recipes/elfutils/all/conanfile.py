@@ -117,6 +117,12 @@ class ElfutilsConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def validate(self):
+        # Note that elfutils cannot be built on macOS
+        # Example Error: "configure: error: __thread support required"
+        # Reference: https://stackoverflow.com/questions/72372589/elfutils-build-error-on-mac-configure-error-thread-support-required
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("elfutils does not support macOS.")
+
         if Version(self.version) >= "0.186":
             if self.settings.compiler in ["apple-clang", "msvc"]:
                 raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
