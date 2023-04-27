@@ -1,4 +1,7 @@
 sources:
+  "0.189":
+    url: "https://sourceware.org/elfutils/ftp/0.189/elfutils-0.189.tar.bz2"
+    sha256: "39bd8f1a338e2b7cd4abc3ff11a0eddc6e690f69578a57478d8179b4148708c8"
   "0.186":
     url: "https://sourceware.org/elfutils/ftp/0.186/elfutils-0.186.tar.bz2"
     sha256: "7f6fb9149b1673d38d9178a0d3e0fb8a1ec4f53a9f4c2ff89469609879641177"
