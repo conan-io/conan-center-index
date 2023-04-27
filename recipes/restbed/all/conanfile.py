@@ -75,9 +75,9 @@ class RestbedConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asio/1.24.0")
+        self.requires("asio/1.27.0")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.5")
+            self.requires("openssl/[>=1.1 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
