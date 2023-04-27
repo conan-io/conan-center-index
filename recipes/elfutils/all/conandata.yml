@@ -7,12 +7,8 @@ sources:
     sha256: "b827b6e35c59d188ba97d7cf148fa8dc6f5c68eb6c5981888dfdbb758c0b569d"
 patches:
   "0.186":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.186-0001-Add-enable-werror-configure-option.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.186-0002-add-enable-static-option-to-configure.patch"
+    - patch_file: "patches/0.186-0001-Add-enable-werror-configure-option.patch"
+    - patch_file: "patches/0.186-0002-add-enable-static-option-to-configure.patch"
   "0.180":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.180-0001-Add-enable-werror-configure-option.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.180-0002-add-enable-static-option-to-configure.patch"
+    - patch_file: "patches/0.180-0001-Add-enable-werror-configure-option.patch"
+    - patch_file: "patches/0.180-0002-add-enable-static-option-to-configure.patch"
