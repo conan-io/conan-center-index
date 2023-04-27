@@ -110,6 +110,8 @@ class SociConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        # MacOS @rpath
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.variables["SOCI_SHARED"] = self.options.shared
         tc.variables["SOCI_STATIC"] = not self.options.shared
         tc.variables["SOCI_TESTS"] = False
