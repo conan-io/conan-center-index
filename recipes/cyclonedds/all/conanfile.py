@@ -137,14 +137,11 @@ class CycloneDDSConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "CycloneDDS_idlc.cmake",
                    src=os.path.join(self.source_folder, os.pardir, "cmake"),
-                   dst=os.path.join(self.package_folder, self._module_path))
-        copy(self, "Generate.cmake",
-                   src=os.path.join(self.source_folder, "cmake", "Modules"),
-                   dst=os.path.join(self.package_folder, self._module_path))
+                   dst=os.path.join(self.package_folder, self._module_path, "CycloneDDS"))
         if self.settings.os == "Windows" and self.options.shared:
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
@@ -178,8 +175,8 @@ class CycloneDDSConan(ConanFile):
 
         # Provide CycloneDDS::idlc target
         build_modules = [
-            os.path.join(self._module_path, "CycloneDDS_idlc.cmake"),
-            os.path.join(self._module_path, "Generate.cmake"),
+            os.path.join(self._module_path, "CycloneDDS", "CycloneDDS_idlc.cmake"),
+            os.path.join(self._module_path, "CycloneDDS", "idlc", "Generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
