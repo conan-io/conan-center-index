@@ -261,7 +261,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
@@ -291,7 +291,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/3.1.0")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
@@ -388,6 +388,27 @@ class FFMpegConan(ConanFile):
             return {"cc": "cl.exe", "cxx": "cl.exe"}
         return {}
 
+    def _create_toolchain(self):
+        tc = AutotoolsToolchain(self)
+        # Custom configure script of ffmpeg understands:
+        # --prefix, --bindir, --datadir, --docdir, --incdir, --libdir, --mandir
+        # Options --datadir, --docdir, --incdir, and --mandir are not injected by AutotoolsToolchain  but their default value
+        # in ffmpeg script matches expected conan install layout.
+        # Several options injected by AutotoolsToolchain are unknown from this configure script and must be pruned.
+        # This must be done before modifying tc.configure_args, because update_configre_args currently removes
+        # duplicate configuration keys, even when they have different values, such as list of encoder flags.
+        # See https://github.com/conan-io/conan-center-index/issues/17140 for further information.
+        tc.update_configure_args({
+            "--sbindir": None,
+            "--includedir": None,
+            "--oldincludedir": None,
+            "--datarootdir": None,
+            "--build": None,
+            "--host": None,
+            "--target": None,
+        })
+        return tc
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -402,7 +423,8 @@ class FFMpegConan(ConanFile):
             if v:
                 args.append(f"--disable-{what}")
 
-        tc = AutotoolsToolchain(self)
+        tc = self._create_toolchain()
+
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
@@ -594,20 +616,6 @@ class FFMpegConan(ConanFile):
         if tc.ldflags:
             args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
         tc.configure_args.extend(args)
-        # Custom configure script of ffmpeg understands:
-        # --prefix, --bindir, --datadir, --docdir, --incdir, --libdir, --mandir
-        # Options --datadir, --docdir, --incdir, and --mandir are not injected by AutotoolsToolchain  but their default value
-        # in ffmpeg script matches expected conan install layout.
-        # Several options injected by AutotoolsToolchain are unknown from this configure script and must be pruned:
-        tc.update_configure_args({
-            "--sbindir": None,
-            "--includedir": None,
-            "--oldincludedir": None,
-            "--datarootdir": None,
-            "--build": None,
-            "--host": None,
-            "--target": None,
-        })
         tc.generate()
 
         if is_msvc(self):
