@@ -21,6 +21,10 @@ class NodejsConan(ConanFile):
     no_copy_source = True
     short_paths = True
 
+    def init(self):
+        self.__os = None
+        self.__arch = None
+
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
@@ -52,11 +56,15 @@ class NodejsConan(ConanFile):
                 if Version(self._glibc_version) < '2.27':
                     raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
+        self.__os = self.settings.os
+        self.__arch = self._nodejs_arch
+
     def build(self):
         pass
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.__os)][self.__arch],
+            destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
