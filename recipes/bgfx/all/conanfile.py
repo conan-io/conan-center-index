@@ -3,7 +3,7 @@ from conan.tools.files import copy, get, rename
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import MSBuild, VCVars
@@ -11,9 +11,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
 from pathlib import Path
 import os
-
-required_conan_version = ">=1.50.0"
-
 
 class bgfxConan(ConanFile):
     name = "bgfx"
@@ -263,7 +260,7 @@ class bgfxConan(ConanFile):
             copy(self, pattern="geometryv*", dst=os.path.join(self.package_folder, "bin"), src=build_bin, keep_path=False)
 
         # Rename for consistency across platforms and configs
-        if not (self.settings.os in ["Macos", "iOS"] and self.options.shared): #Apparently apple dylibs break if renamed
+        if not (is_apple_os(self) and self.options.shared): #Apparently apple dylibs break if renamed
             for bgfx_file in Path(os.path.join(self.package_folder, "lib")).glob("*bgfx*"):
                 rename(self, os.path.join(self.package_folder, "lib", bgfx_file.name), 
                         os.path.join(self.package_folder, "lib", f"{package_lib_prefix}bgfx{bgfx_file.suffix}"))
@@ -286,7 +283,8 @@ class bgfxConan(ConanFile):
                         os.path.join(self.package_folder, "bin", f"geometryv{bgfx_file.suffix}"))
                 
         # Maybe this helps
-        fix_apple_shared_install_name(self)
+        if is_apple_os(self):
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]

@@ -7,5 +7,5 @@ find_package(bimg REQUIRED CONFIG)
 find_package(bgfx REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 target_link_libraries(${PROJECT_NAME} bx::bx bimg::bimg bgfx::bgfx)

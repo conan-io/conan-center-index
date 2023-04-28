@@ -7,7 +7,7 @@ required_conan_version = ">=1.50.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -17,10 +17,9 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build(self):
-        if can_run(self):
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if can_run(self):
