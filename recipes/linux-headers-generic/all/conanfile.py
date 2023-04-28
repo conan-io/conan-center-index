@@ -1,8 +1,11 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools import build, files
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LinuxHeadersGenericConan(ConanFile):
@@ -14,30 +17,37 @@ class LinuxHeadersGenericConan(ConanFile):
     topics = ("linux", "headers", "generic")
     settings = "os", "arch", "build_type", "compiler"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def package_id(self):
-        del self.info.settings.os
-        del self.info.settings.build_type
-        del self.info.settings.compiler
+        self.info.settings.clear()
+
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("linux-headers-generic supports only Linux")
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and build.cross_building(self):
             raise ConanInvalidConfiguration("linux-headers-generic can not be cross-compiled")
 
+    def layout(self):
+       basic_layout(self, src_folder="source")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        files.get(self, **self.conan_data["sources"][self.version],
+                  strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        env = tc.environment()
+        tc.generate(env)
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
-            autotools = AutoToolsBuildEnvironment(self)
+        with files.chdir(self, self.source_folder):
+            autotools = Autotools(self)
             autotools.make(target="headers")
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("include/*.h", src=os.path.join(self._source_subfolder, "usr"))
+        files.copy(self, "COPYING", dst="licenses", src=self.source_folder)
+        files.copy(self, "include/*.h", src=os.path.join(self.source_folder, "usr"), dst=os.path.join(self.package_folder, "include"))
+
+    def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "linux-headers-generic")
+        self.cpp_info.libs = ["linux-headers-generic"]
