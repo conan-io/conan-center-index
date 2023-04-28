@@ -12,7 +12,6 @@ required_conan_version = ">=1.51.3"
 
 class Greg7mdpGtlConan(ConanFile):
     name = "greg7mdp-gtl"
-    version = "1.1.8"
     description = "Greg's Template Library of useful classes."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -43,12 +42,11 @@ class Greg7mdpGtlConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        pass
-        #if self.settings.get_safe("compiler.cppstd"):
-        #    check_min_cppstd(self, 20)
-        #minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        #if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
-        #    raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 20)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
