@@ -9,7 +9,7 @@ import sys
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
     def requirements(self):
@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
         deps.generate()
 
         toolchain = CMakeToolchain(self)
-        toolchain.variables["PYTHON_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
+        toolchain.variables["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
         toolchain.generate()
 
         env = Environment()

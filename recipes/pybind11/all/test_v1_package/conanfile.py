@@ -1,16 +1,15 @@
 from conans import ConanFile, CMake, tools
 import os
 import sys
-from platform import python_version
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["PYTHON_EXECUTABLE"] = self._python_interpreter
+        cmake.definitions["Python_EXECUTABLE"] = self._python_interpreter
         cmake.configure()
         cmake.build()
 
