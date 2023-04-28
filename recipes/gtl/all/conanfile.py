@@ -38,7 +38,7 @@ class GtlConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.h", src=os.path.join(self.source_folder, "include", "gtl"),
+        copy(self, "*", src=os.path.join(self.source_folder, "include", "gtl"),
                           dst=os.path.join(self.package_folder, "include", "gtl"))
         copy(self, "gtl.natvis", src=self.source_folder, dst=os.path.join(self.source_folder, "res"))
 
