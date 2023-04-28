@@ -40,7 +40,7 @@ class NuRaftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/3.1.0")
+        self.requires("openssl/[>=1.1 <4]")
         if self.options.asio == "boost":
             self.requires("boost/1.81.0")
         else:
