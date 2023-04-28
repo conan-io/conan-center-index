@@ -31,7 +31,7 @@ class CycloneDDSConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": True,
+        "with_ssl": False,
         "with_shm": False,
         "enable_security": False,
         "enable_discovery": True,
@@ -136,10 +136,10 @@ class CycloneDDSConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "CycloneDDS_idlc.cmake",
                    src=os.path.join(self.source_folder, os.pardir, "cmake"),
                    dst=os.path.join(self.package_folder, self._module_path, "CycloneDDS"))
