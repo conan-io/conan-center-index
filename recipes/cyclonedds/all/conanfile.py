@@ -105,8 +105,7 @@ class CycloneDDSConan(ConanFile):
             return False
 
     def build_requirements(self):
-        if not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.2")
+        self.tool_requires("cmake/3.25.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
