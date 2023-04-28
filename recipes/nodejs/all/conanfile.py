@@ -53,7 +53,7 @@ class NodejsConan(ConanFile):
         pass
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.__os)][self.__arch],
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self.settings.arch],
             destination=self._source_subfolder, strip_root=True)
 
     def package(self):
