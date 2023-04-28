@@ -10,7 +10,6 @@ required_conan_version = ">=1.50.0"
 
 class ParallelHashmapConan(ConanFile):
     name = "parallel-hashmap"
-    version = "1.3.11"
     description = "A family of header-only, very fast and memory-friendly hashmap and btree containers."
     license = "Apache-2.0"
     topics = ("parallel-hashmap", "parallel", "hashmap", "btree")
