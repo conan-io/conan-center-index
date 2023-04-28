@@ -27,29 +27,20 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return "17"
 
-    # In case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16",
+            "Visual Studio": "16.9",
             "msvc": "192",
-            "gcc": "9",
-            "clang": "9",
-            "apple-clang": "11",
+            "gcc": "11",
+            "clang": "13",
+            "apple-clang": "14",
         }
 
-    # Use the export_sources(self) method instead of the exports_sources attribute.
-    # This allows finer grain exportation of patches per version
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
-        # src_folder must use the same source folder name than the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # Prefer self.requires method instead of requires attribute
-        # Direct dependencies of header only libs are always transitive since they are included in public headers
         self.requires("cli11/2.3.2")
         self.requires("fmt/9.1.0")
         self.requires("highfive/2.7.1")
@@ -57,13 +48,11 @@ class PackageConan(ConanFile):
         self.requires("xsimd/10.0.0")
         self.requires("xtensor/0.24.3")
 
-    # same package ID for any package
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            # Validate the minimum cpp standard supported when installing the package. For C++ projects only
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -76,13 +65,7 @@ class PackageConan(ConanFile):
         #     raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
 
     def source(self):
-        # Download source package and extract to source folder
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    # Not mandatory when there is no patch, but will suppress warning message about missing build() method
-    def build(self):
-        # The attribute no_copy_source should not be used when applying patches in build
-        apply_conandata_patches(self)
 
     # Copy all files to the package folder
     def package(self):
@@ -108,10 +91,6 @@ class PackageConan(ConanFile):
         # (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "samurai")
         self.cpp_info.set_property("cmake_target_name", "samurai::samurai")
-
-        # Add m, pthread and dl if needed in Linux/FreeBSD
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "samurai"
