@@ -39,7 +39,7 @@ class ArduinojsonConan(ConanFile):
             else:
                 minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
                 if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration("{self.ref} requires C++11, which your compiler does not support.")
+                    raise ConanInvalidConfiguration(f"{self.ref} requires C++11, which your compiler does not support.")
 
     def package_id(self):
         self.info.clear()
