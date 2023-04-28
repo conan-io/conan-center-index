@@ -53,9 +53,6 @@ class NodejsConan(ConanFile):
                 if Version(self._glibc_version) < '2.27':
                     raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
-        self.__os = self.settings.os
-        self.__arch = self._nodejs_arch
-
     def build(self):
         pass
 
