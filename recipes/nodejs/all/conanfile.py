@@ -20,10 +20,6 @@ class NodejsConan(ConanFile):
     no_copy_source = True
     short_paths = True
 
-    def init(self):
-        self.__os = None
-        self.__arch = None
-
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
