@@ -1,7 +1,7 @@
 import os
 import re
 from six import StringIO
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.scm import Version
 from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
@@ -35,8 +35,9 @@ class NodejsConan(ConanFile):
 
     @property
     def _glibc_version(self):
+        cmd = ['ldd', '--version'] if conan_version.major == "1" else ['ldd --version']
         buff = StringIO()
-        self.run(['ldd', '--version'], buff)
+        self.run(cmd, buff)
         return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue()).group(1))
 
     def validate(self):
