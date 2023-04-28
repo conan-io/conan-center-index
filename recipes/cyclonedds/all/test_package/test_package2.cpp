@@ -7,6 +7,7 @@
 #include <thread>
 
 #include "dds/dds.h"
+#include "test_message.h"
 
 int main() {
   dds_entity_t participant;
@@ -16,6 +17,9 @@ int main() {
   participant = dds_create_participant (DDS_DOMAIN_DEFAULT, NULL, NULL);
   if (participant < 0)
     DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-participant));
+
+  conan_cyclonedds_test_message msg;
+  msg.payload._length = 0;
 
   return EXIT_SUCCESS;
 }

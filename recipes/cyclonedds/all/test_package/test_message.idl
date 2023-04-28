@@ -1,8 +1,8 @@
 module conan {
   module cyclonedds {
-    struct Message {
+    struct test_message {
       sequence<octet> payload;
     };
-    #pragma keylist Message
+    #pragma keylist test_message
   };
 };
