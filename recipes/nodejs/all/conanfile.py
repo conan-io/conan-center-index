@@ -1,11 +1,10 @@
 import os
 import re
+import subprocess
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import copy, get
 from conan.errors import ConanInvalidConfiguration
-
-from six import StringIO
 
 required_conan_version = ">=1.59.0"
 
@@ -40,10 +39,8 @@ class NodejsConan(ConanFile):
 
     @property
     def _glibc_version(self):
-        buff = StringIO()
-        self.run(['ldd', '--version'], output=buff)
-        buff = re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue())
-        return str(buff.group(1))
+        ret = subprocess.run(['ldd', '--version'], capture_output=True, text=True)
+        return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', str(ret.stdout)).group(1))
 
     def validate(self):
         if not self.version in self.conan_data["sources"] or \
