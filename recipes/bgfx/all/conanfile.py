@@ -3,6 +3,7 @@ from conan.tools.files import copy, get, rename
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import MSBuild, VCVars
@@ -283,6 +284,9 @@ class bgfxConan(ConanFile):
             for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*geometryv*"):
                 rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
                         os.path.join(self.package_folder, "bin", f"geometryv{bgfx_file.suffix}"))
+                
+        # Maybe this helps
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
