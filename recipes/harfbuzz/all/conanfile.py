@@ -74,9 +74,9 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.1")
         if self.options.with_glib:
-            self.requires("glib/2.76.0", run=can_run(self))
+            self.requires("glib/2.76.1", run=can_run(self))
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -93,11 +93,11 @@ class HarfbuzzConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_glib and not can_run(self):
-            self.tool_requires("glib/2.76.0")
+            self.tool_requires("glib/2.76.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
