@@ -143,15 +143,6 @@ class CycloneDDSConan(ConanFile):
         copy(self, "CycloneDDS_idlc.cmake",
                    src=os.path.join(self.source_folder, os.pardir, "cmake"),
                    dst=os.path.join(self.package_folder, self._module_path, "CycloneDDS"))
-        props = """
-set_target_properties(CycloneDDS::ddsc
-                      PROPERTIES SHM_SUPPORT_IS_AVAILABLE {with_shm}
-                                 TYPE_DISCOVERY_IS_AVAILABLE {enable_discovery}
-                                 TOPIC_DISCOVERY_IS_AVAILABLE {enable_discovery}
-)
-""".format(with_shm=self.options.with_shm, enable_discovery=self.options.enable_discovery)
-        with open(os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "CycloneDDS_props.cmake"), "w") as f:
-            f.write(props)
         if self.settings.os == "Windows" and self.options.shared:
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
@@ -186,7 +177,6 @@ set_target_properties(CycloneDDS::ddsc
         # Provide CycloneDDS::idlc target
         build_modules = [
             os.path.join(self._module_path, "CycloneDDS", "CycloneDDS_idlc.cmake"),
-            os.path.join(self._module_path, "CycloneDDS", "CycloneDDS_props.cmake"),
             os.path.join(self._module_path, "CycloneDDS", "idlc", "Generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
