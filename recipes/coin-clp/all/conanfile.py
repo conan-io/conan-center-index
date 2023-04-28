@@ -49,6 +49,7 @@ class CoinClpConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16053#issuecomment-1512637106
         self.requires("coin-utils/2.11.6", transitive_headers=True, transitive_libs=True)
         self.requires("coin-osi/0.108.7", transitive_headers=True)
 
