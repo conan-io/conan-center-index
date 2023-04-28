@@ -1,6 +1,6 @@
 import os
 import re
-import subprocess
+from six import StringIO
 from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import copy, get
@@ -35,8 +35,9 @@ class NodejsConan(ConanFile):
 
     @property
     def _glibc_version(self):
-        ret = subprocess.run(['ldd', '--version'], capture_output=True, text=True)
-        return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', str(ret.stdout)).group(1))
+        buff = StringIO()
+        self.run(['ldd', '--version'], buff)
+        return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue()).group(1))
 
     def validate(self):
         if not self.version in self.conan_data["sources"] or \
@@ -53,7 +54,7 @@ class NodejsConan(ConanFile):
         pass
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self.settings.arch],
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch],
             destination=self._source_subfolder, strip_root=True)
 
     def package(self):
