@@ -91,7 +91,7 @@ class LibBigWigConan(ConanFile):
         self.cpp_info.system_libs = ["m"]
 
 
-        if not self.options.get_safe("with_curl"):
+        if not self.options.with_curl:
             self.cpp_info.defines = ["NOCURL"]
 
         # TODO: Remove in Conan 2.0
