@@ -52,7 +52,7 @@ class NodejsConan(ConanFile):
     def build(self):
         pass
 
-    def source(self):
+    def build(self):
         get(self, **self.conan_data["sources"][self.version][str(self.__os)][self.__arch],
             destination=self._source_subfolder, strip_root=True)
 
