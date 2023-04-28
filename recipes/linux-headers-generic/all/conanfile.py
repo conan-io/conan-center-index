@@ -28,7 +28,7 @@ class LinuxHeadersGenericConan(ConanFile):
             raise ConanInvalidConfiguration("linux-headers-generic can not be cross-compiled")
 
     def layout(self):
-       basic_layout(self, src_folder="source")
+       basic_layout(self, src_folder="src")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
