@@ -27,12 +27,12 @@ class NodejsConan(ConanFile):
 
     @property
     def _nodejs_arch(self):
-        if str(self.info.settings.os) == "Linux":
-            if str(self.info.settings.arch).startswith("armv7"):
+        if str(self.settings.os) == "Linux":
+            if str(self.settings.arch).startswith("armv7"):
                 return "armv7"
-            if str(self.info.settings.arch).startswith("armv8") and "32" not in str(self.info.settings.arch):
+            if str(self.settings.arch).startswith("armv8") and "32" not in str(self.settings.arch):
                 return "armv8"
-        return str(self.info.settings.arch)
+        return str(self.settings.arch)
 
     @property
     def _glibc_version(self):
@@ -43,12 +43,12 @@ class NodejsConan(ConanFile):
 
     def validate(self):
         if not self.version in self.conan_data["sources"] or \
-           not str(self.info.settings.os) in self.conan_data["sources"][self.version] or \
-           not self._nodejs_arch in self.conan_data["sources"][self.version][str(self.info.settings.os)]:
+           not str(self.settings.os) in self.conan_data["sources"][self.version] or \
+           not self._nodejs_arch in self.conan_data["sources"][self.version][str(self.settings.os)]:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
         if Version(self.version) >= "18.0.0":
-            if str(self.info.settings.os) == "Linux":
+            if str(self.settings.os) == "Linux":
                 if Version(self._glibc_version) < '2.27':
                     raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
@@ -56,7 +56,7 @@ class NodejsConan(ConanFile):
         pass
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.info.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
