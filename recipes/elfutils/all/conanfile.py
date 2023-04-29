@@ -193,6 +193,8 @@ class ElfutilsConan(ConanFile):
             self.cpp_info.components["libdw"].requires.append("bzip2::bzip2")
         if self.options.with_lzma:
             self.cpp_info.components["libdw"].requires.append("xz_utils::xz_utils")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libdw"].system_libs.extend(["dl"])
 
         self.cpp_info.components["libasm"].includedirs = ["include/elfutils"]
         self.cpp_info.components["libasm"].libs = ["asm"]
