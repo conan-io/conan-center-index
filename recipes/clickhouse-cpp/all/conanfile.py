@@ -10,6 +10,7 @@ class ClickHouseCppConan(ConanFile):
     homepage = "https://github.com/ClickHouse/clickhouse-cpp"
     url = "https://github.com/conan-io/conan-center-index"
     description = "ClickHouse C++ API"
+    license = "Apache-2.0"
     topics = ("database", "db", "clickhouse")
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -86,4 +87,3 @@ class ClickHouseCppConan(ConanFile):
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'wsock32']
-
