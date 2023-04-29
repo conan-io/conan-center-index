@@ -2,3 +2,9 @@ sources:
   "6.4.0":
     url: "https://github.com/gamecreature/QtAwesome/archive/font-awesome-6.4.0.tar.gz"
     sha256: "4310aba189e0bba4090997ecfefe27c2c7595aa499b790389dabdce5b4e54f5a"
+patches:
+  "6.4.0":
+    - patch_file: "patches/0001-add-install.patch"
+      patch_description: "Add install target to CMakeLists.txt"
+      patch_type: "cci"
+      patch_source: "https://github.com/gamecreature/QtAwesome/pull/52"
