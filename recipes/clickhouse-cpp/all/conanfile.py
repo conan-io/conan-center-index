@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -34,7 +35,7 @@ class ClickHouseCppConan(ConanFile):
         self.requires("lz4/1.9.3")
 
         self.requires("abseil/20211102.0")
-  
+
         self.requires("cityhash/cci.20130801")
         if self.options.with_openssl:
             self.requires("openssl/3.0.2")
@@ -43,9 +44,15 @@ class ClickHouseCppConan(ConanFile):
         if self.options.build_bench:
             self.requires("benchmark/1.6.0")
 
+    @property
+    def _min_cppstd(self):
+        return "17"
+
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Invalid configuration") 
+            raise ConanInvalidConfiguration("Invalid configuration")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
 
     def config_options(self):
@@ -64,6 +71,7 @@ class ClickHouseCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_BENCHMARK"] =  self.options.build_bench
         tc.variables["BUILD_TESTS"] = self.options.build_tests
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
@@ -86,12 +94,12 @@ class ClickHouseCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "clickhouse-cpp-lib")
-        self.cpp_info.set_property("pkg_config_name", "clickhouse-cpp-lib")
+        self.cpp_info.set_property("cmake_file_name", "clickhouse-cpp")
+        self.cpp_info.set_property("pkg_config_name", "clickhouse-cpp")
 
         self.cpp_info.libs.append("clickhouse-cpp-lib")
         self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib")
-        
+
         self.cpp_info.filenames["cmake_find_package"] = "clickhouse-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "clickhouse-cpp"
         self.cpp_info.names["cmake_find_package"] = "clickhouse-cpp-lib"
