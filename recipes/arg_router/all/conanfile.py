@@ -19,7 +19,6 @@ class ArgRouterConan(ConanFile):
     topics = ("cpp", "command-line", "argument-parser", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     package_type = "header-library"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
