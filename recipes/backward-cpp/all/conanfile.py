@@ -139,7 +139,7 @@ class BackwardCppConan(ConanFile):
 
         self.cpp_info.libs = ["backward"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl"])
+            self.cpp_info.system_libs.extend(["dl", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "dbghelp"])
 
