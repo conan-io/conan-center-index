@@ -39,11 +39,11 @@ class BackwardCppConan(ConanFile):
             supported_os.append("Windows")
         return supported_os
 
-    def _has_stack_walking(self, type):
-        return self.options.stack_walking == type
+    def _has_stack_walking(self, method):
+        return self.options.stack_walking == method
 
-    def _has_stack_details(self, type):
-        return False if self.settings.os == "Windows" else self.options.stack_details == type
+    def _has_stack_details(self, method):
+        return False if self.settings.os == "Windows" else self.options.stack_details == method
 
     def export_sources(self):
         export_conandata_patches(self)
