@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, rmdir, save
+from conan.tools.files import copy, get
 import os
 
 required_conan_version = ">=1.51.3"
@@ -80,6 +80,10 @@ class ClickHouseCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "clickhouse"
+        self.cpp_info.names["cmake_find_package"] = "clickhouse-cpp"
         self.cpp_info.libs.append("clickhouse-cpp-lib")
+        self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib")
+
+        if self.settings.os == 'Windows':
+            self.cpp_info.system_libs = ['ws2_32', 'wsock32']
 
