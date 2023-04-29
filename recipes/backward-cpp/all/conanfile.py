@@ -80,8 +80,11 @@ class BackwardCppConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self._has_stack_walking("libunwind") and Version(self.version) < "1.6":
-            raise ConanInvalidConfiguration("Support for libunwind is only available as of 1.6.")
+        if self._has_stack_walking("libunwind"):
+            if Version(self.version) < "1.6":
+                raise ConanInvalidConfiguration("Support for libunwind is only available as of 1.6.")
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Support for libunwind is only available on Linux and macOS.")
         if self.settings.os == "Macos":
             if self.settings.arch == "armv8" and Version(self.version) < "1.6":
                 raise ConanInvalidConfiguration("Support for Apple Silicon is only available as of 1.6.")
