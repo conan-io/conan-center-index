@@ -1278,6 +1278,7 @@ class BoostConan(ConanFile):
 
         sysroot = self.conf.get("tools.build:sysroot")
         sysroot = sysroot.replace("\\", "/") if sysroot is not None else None
+        sysroot = f'"{sysroot}"' if ' ' in sysroot else sysroot
         if sysroot and not is_msvc(self):
             cppflags += f"--sysroot={sysroot} "
             ldflags += f"--sysroot={sysroot} "
