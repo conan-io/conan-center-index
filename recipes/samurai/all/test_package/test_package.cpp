@@ -1,9 +1,8 @@
-#include <cstdlib>
 #include <iostream>
-#include "samurai/uniform_mesh.hpp"
+#include <samurai/uniform_mesh.hpp>
 
-
-int main(void) {
+int main(void)
+{
     constexpr std::size_t dim = 2;
     using Config = samurai::UniformConfig<dim>;
 
