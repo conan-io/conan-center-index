@@ -29,7 +29,7 @@ class ArgRouterConan(ConanFile):
         return {
             "apple-clang": "10",
             "clang": "5",
-            "gcc": "7",
+            "gcc": "8",
             "msvc": "191",
             "Visual Studio": "15",
         }
