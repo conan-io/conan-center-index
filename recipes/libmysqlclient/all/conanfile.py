@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
@@ -63,7 +63,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "8.0.30":
-            self.requires("openssl/{}".format("1.1.1t" if Version(conan_version).major < "2" else "[^1.1]"))
+            self.requires("openssl/1.1.1t")
         else:
             self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
@@ -154,18 +154,24 @@ class LibMysqlClientCConan(ConanFile):
                         "NAMES zstd",
                         f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+        # Fix discovery & link to OpenSSL
+        ssl_cmake = self, os.path.join(self.source_folder, "cmake", "ssl.cmake")
+        replace_in_file(self, ssl_cmake,
                         "NAMES ssl",
                         f"NAMES ssl {self.dependencies['openssl'].cpp_info.components['ssl'].libs[0]}")
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+        replace_in_file(self, ssl_cmake,
                         "NAMES crypto",
                         f"NAMES crypto {self.dependencies['openssl'].cpp_info.components['crypto'].libs[0]}")
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+        replace_in_file(self, ssl_cmake,
                         "IF(NOT OPENSSL_APPLINK_C)\n",
                         "IF(FALSE AND NOT OPENSSL_APPLINK_C)\n",
                         strict=False)
+
+        replace_in_file(self, ssl_cmake,
+                        "SET(SSL_LIBRARIES ${MY_OPENSSL_LIBRARY} ${MY_CRYPTO_LIBRARY})",
+                        "find_package(OpenSSL REQUIRED MODULE)\nset(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)")
 
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"]
