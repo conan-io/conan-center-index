@@ -1273,13 +1273,14 @@ class BoostConan(ConanFile):
         cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list)) + " "
         buildenv_vars = VirtualBuildEnv(self).vars()
         cppflags = buildenv_vars.get("CPPFLAGS", "") + " "
-        sysroot = self.conf.get("tools.build:sysroot")
-        if sysroot:
-            cppflags += f"--sysroot={sysroot} "
         ldflags = " ".join(self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)) + " "
-        if sysroot:
-            ldflags += f"--sysroot={sysroot} "
         asflags = buildenv_vars.get("ASFLAGS", "") + " "
+
+        sysroot = self.conf.get("tools.build:sysroot")
+        sysroot = sysroot.replace("\\", "/") if sysroot is not None else None
+        if sysroot and not is_msvc(self):
+            cppflags += f"--sysroot={sysroot} "
+            ldflags += f"--sysroot={sysroot} "
 
         if self._with_stacktrace_backtrace:
             backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
