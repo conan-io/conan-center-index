@@ -8,3 +8,7 @@ patches:
       patch_description: "Add install target to CMakeLists.txt"
       patch_type: "cci"
       patch_source: "https://github.com/gamecreature/QtAwesome/pull/52"
+    - patch_file: "patches/0002-ce7784e-add-header.patch"
+      patch_description: "Add header to CMakeLists.txt"
+      patch_type: "bug"
+      patch_source: "https://github.com/gamecreature/QtAwesome/pull/50"
