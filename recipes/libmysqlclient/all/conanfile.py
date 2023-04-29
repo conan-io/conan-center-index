@@ -155,7 +155,7 @@ class LibMysqlClientCConan(ConanFile):
                         f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
 
         # Fix discovery & link to OpenSSL
-        ssl_cmake = self, os.path.join(self.source_folder, "cmake", "ssl.cmake")
+        ssl_cmake = os.path.join(self.source_folder, "cmake", "ssl.cmake")
         replace_in_file(self, ssl_cmake,
                         "NAMES ssl",
                         f"NAMES ssl {self.dependencies['openssl'].cpp_info.components['ssl'].libs[0]}")
