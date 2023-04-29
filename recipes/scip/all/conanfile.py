@@ -19,6 +19,7 @@ class SCIPConan(ConanFile):
     homepage = "https://scipopt.org/"
     topics = ("mip", "solver", "linear", "programming")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
