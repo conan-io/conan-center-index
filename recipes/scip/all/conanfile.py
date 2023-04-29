@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from os.path import join, normpath
+from os.path import join
 
 required_conan_version = ">=1.53.0"
 
@@ -87,7 +87,7 @@ class SCIPConan(ConanFile):
 
     @staticmethod
     def _to_cmake(*arrays):
-        return ";".join(normpath(item) for sublist in arrays for item in sublist)
+        return ";".join(item.replace("\\", "/") for sublist in arrays for item in sublist)
 
     def generate(self):
         tc = CMakeToolchain(self)
