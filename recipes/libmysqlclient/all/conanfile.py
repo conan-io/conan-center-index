@@ -173,6 +173,11 @@ class LibMysqlClientCConan(ConanFile):
                         "SET(SSL_LIBRARIES ${MY_OPENSSL_LIBRARY} ${MY_CRYPTO_LIBRARY})",
                         "find_package(OpenSSL REQUIRED MODULE)\nset(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)")
 
+        # And do not merge OpenSSL libs into mysqlclient lib
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "libutils.cmake"),
+                        'IF(WIN32 AND ${TARGET} STREQUAL "mysqlclient")',
+                        "if(0)")
+
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"]
         for dep in deps_shared:
