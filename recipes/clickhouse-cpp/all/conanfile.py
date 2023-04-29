@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.51.3"
@@ -41,6 +42,11 @@ class ClickHouseCppConan(ConanFile):
     def build_requirements(self):
         if self.options.build_bench:
             self.requires("benchmark/1.6.0")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Invalid configuration") 
+            # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
 
     def config_options(self):
         if self.settings.os == "Windows":
