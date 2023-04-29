@@ -132,13 +132,13 @@ class SCIPConan(ConanFile):
         else:
             copy(self, pattern="*.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
             copy(self, pattern="*.lib", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib"]
+        self.cpp_info.libs = ["libscip" if is_msvc(self) else "scip"]
         if self.options.with_sym == "bliss":
-            self.cpp_info.libs = ["scip", "bliss"]
-        else:
-            self.cpp_info.libs = ["scip"]
+            self.cpp_info.libs.append("bliss")
         if self.options.with_tpi == "omp":
             self.cpp_info.system_libs.append("-fopenmp")
