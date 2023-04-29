@@ -151,6 +151,8 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_ENABLE_INSTALL"] = True
         tc.variables["SENTRY_TRANSPORT"] = self.options.transport
         tc.variables["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
+        tc.variables["SENTRY_BUILD_TESTS"] = False
+        tc.variables["SENTRY_BUILD_EXAMPLES"] = False
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
         if self.options.get_safe("wer", False):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
