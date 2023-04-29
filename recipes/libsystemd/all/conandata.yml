@@ -1,4 +1,7 @@
 sources:
+  "253.3":
+    url: "https://github.com/systemd/systemd-stable/archive/v253.3.tar.gz"
+    sha256: "569775d77084e45d15e103004cf4fbc00d7249c33791471b80f0c3296962bbfd"
   "252.9":
     url: "https://github.com/systemd/systemd-stable/archive/v252.9.tar.gz"
     sha256: "c386aac4ba39fa1bca3a3c9ef9df5a737e3184c9c6a04340e34d6d0254007845"
@@ -18,6 +21,13 @@ sources:
     url: "https://github.com/systemd/systemd-stable/archive/v246.16.tar.gz"
     sha256: "b69f9940d65870f090269a28f1047a633d4b80d0001e091d53a031dd40a822d2"
 patches:
+  "253.3":
+    - patch_file: "patches/253.3/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
+      patch_type: "conan"
+    - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "252.9":
     - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
