@@ -24,7 +24,6 @@ class CppcheckConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-
     def requirements(self):
         if self.options.get_safe("have_rules"):
             self.requires("pcre/8.45")
