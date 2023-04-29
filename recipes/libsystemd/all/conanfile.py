@@ -132,6 +132,8 @@ class LibsystemdConan(ConanFile):
             unrelated.extend(["sysext", "nscd"])
         if Version(self.version) >= "251.1":
             unrelated.append("link-boot-shared")
+        if Version(self.version) >= "252.1":
+            unrelated.append("link-journalctl-shared")
 
         for opt in unrelated:
             tc.project_options[opt] = "false"
