@@ -1273,7 +1273,12 @@ class BoostConan(ConanFile):
         cflags = " ".join(self.conf.get("tools.build:cflags", default=[], check_type=list)) + " "
         buildenv_vars = VirtualBuildEnv(self).vars()
         cppflags = buildenv_vars.get("CPPFLAGS", "") + " "
+        sysroot = self.conf.get("tools.build:sysroot")
+        if sysroot:
+            cppflags += f"--sysroot={sysroot} "
         ldflags = " ".join(self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)) + " "
+        if sysroot:
+            ldflags += f"--sysroot={sysroot} "
         asflags = buildenv_vars.get("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
