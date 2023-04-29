@@ -1,0 +1,23 @@
+sources:
+  "2022.3.0":
+    "openvino":
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2022.3.0.tar.gz"
+      sha256: "b8dc1880d9ab71bd24aa5b2565724c12fb78172613e23ce312e0b98a6d8a0dd7"
+    "openvino_contrib":
+      url: "https://github.com/openvinotoolkit/openvino_contrib/archive/refs/tags/2022.3.0.tar.gz"
+      sha256: "245e19b4a2c926aedb764fecbd02c5023deab56eba497e4a3c8194e760e26413"
+    "arm_compute":
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v22.11.tar.gz"
+      sha256: "e20a060d3c4f803889d96c2f0b865004ba3ef4e228299a44339ea1c1ba827c85"
+    "onednn_cpu":
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/44de3c3698b687c26e487fc8f0213fa487e8fe2c.tar.gz"
+      sha256: "2c6aa7d787a947aa032224683f216ab38c168de4aed61d0554671774060a3615"
+    "ittapi":
+      url: "https://github.com/intel/ittapi/archive/refs/tags/v3.23.0.tar.gz"
+      sha256: "9af1231808c602c2f7a66924c8798b1741d3aa4b15f3874d82ca7a89b5dbb1b1"
+    "xbyak":
+      url: "https://github.com/herumi/xbyak/archive/refs/tags/v6.63.tar.gz"
+      sha256: "16c60f0682502624115c4dc9fec66782ae68ef32e469946f50cd169179ea92bb"
+    "onnx":
+      url: "https://github.com/onnx/onnx/archive/refs/tags/v1.12.0.tar.gz"
+      sha256: "052ad3d5dad358a33606e0fc89483f8150bb0655c99b12a43aa58b5b7f0cc507"
