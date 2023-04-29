@@ -1,6 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -45,6 +48,29 @@ class AmqpcppConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
             self.requires("openssl/[>=1.1 <4]")
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7.4",
+            "Visual Studio": "15.7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
+
+    def validate(self):
+        if Version(self.version) >= "4.3.20":
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, "17")
+            compiler = self.settings.compiler
+            min_version = self._compilers_minimum_version.get(str(compiler), False)
+            if min_version:
+                if Version(compiler.version) < min_version:
+                    raise ConanInvalidConfiguration(
+                        f"{self.name} requires C++17, which {compiler} {compiler.version} does not support.")
+            else:
+                self.output.info(
+                    f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
