@@ -34,7 +34,7 @@ class ClickHouseCppConan(ConanFile):
 
         self.requires("lz4/1.9.3")
 
-        self.requires("abseil/20211102.0")
+        self.requires("abseil/20211102.0", transitive_headers=True)
 
         self.requires("cityhash/cci.20130801")
         if self.options.with_openssl:
