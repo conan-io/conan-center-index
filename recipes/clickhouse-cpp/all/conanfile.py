@@ -94,11 +94,8 @@ class ClickHouseCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "clickhouse-cpp")
-        self.cpp_info.set_property("pkg_config_name", "clickhouse-cpp")
-
         self.cpp_info.libs.append("clickhouse-cpp-lib")
-        self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib")
+        self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib::clickhouse-cpp-lib")
 
         self.cpp_info.filenames["cmake_find_package"] = "clickhouse-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "clickhouse-cpp"
