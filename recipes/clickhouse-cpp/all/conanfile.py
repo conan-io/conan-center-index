@@ -53,8 +53,7 @@ class ClickHouseCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -87,9 +86,16 @@ class ClickHouseCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "clickhouse-cpp"
+        self.cpp_info.set_property("cmake_file_name", "clickhouse-cpp-lib")
+        self.cpp_info.set_property("pkg_config_name", "clickhouse-cpp-lib")
+
         self.cpp_info.libs.append("clickhouse-cpp-lib")
         self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib")
+        
+        self.cpp_info.filenames["cmake_find_package"] = "clickhouse-cpp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "clickhouse-cpp"
+        self.cpp_info.names["cmake_find_package"] = "clickhouse-cpp-lib"
+        self.cpp_info.names["cmake_find_package_multi"] = "clickhouse-cpp-lib"
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'wsock32']
