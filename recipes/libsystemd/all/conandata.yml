@@ -1,53 +1,53 @@
 sources:
-  "252.4":
-    url: "https://github.com/systemd/systemd-stable/archive/v252.4.tar.gz"
-    sha256: "cf2d27e67663d599a045101c7178cf0ec63d9df2962a54adf7de0d0357724f00"
-  "251.4":
-    url: "https://github.com/systemd/systemd-stable/archive/v251.4.tar.gz"
-    sha256: "3459239979f52b8c4ace33734d31c2fb69fa13cf81d04b1b982f7d8d4651e015"
-  "249.12":
-    url: "https://github.com/systemd/systemd-stable/archive/v249.12.tar.gz"
-    sha256: "cf8851e94cbd82c65a86ab122747f3e0018b04cd991c7daccbacb4a3ef149b68"
-  "248.10":
-    url: "https://github.com/systemd/systemd-stable/archive/v248.10.tar.gz"
-    sha256: "dab015c2ccd5cb0427b1c3ec85ac0f02974b38ca643de31932f198a8b60de8da"
-  "247.11":
-    url: "https://github.com/systemd/systemd-stable/archive/v247.11.tar.gz"
-    sha256: "99537ecf15815d5bac2f8f75b4e04635e1f8e95e7c857c711e42483aa2744f7f"
+  "252.9":
+    url: "https://github.com/systemd/systemd-stable/archive/v252.9.tar.gz"
+    sha256: "c386aac4ba39fa1bca3a3c9ef9df5a737e3184c9c6a04340e34d6d0254007845"
+  "251.15":
+    url: "https://github.com/systemd/systemd-stable/archive/v251.15.tar.gz"
+    sha256: "570b30b5b9a649d7481ca2bd0355a2d659f9a0ebb71a24588c6c365cda90c298"
+  "249.16":
+    url: "https://github.com/systemd/systemd-stable/archive/v249.16.tar.gz"
+    sha256: "e6c8a686023ef0ce402f4abde42245e3ada661e000c4811dc16c8cd9b4c6d885"
+  "248.12":
+    url: "https://github.com/systemd/systemd-stable/archive/v248.12.tar.gz"
+    sha256: "d0826453439363b57a4f092ae078b128a95e87047281a79e8b136116ab83abc9"
+  "247.13":
+    url: "https://github.com/systemd/systemd-stable/archive/v247.13.tar.gz"
+    sha256: "0958bfcebf3ed4e451f6cc49802f338fcc80eb4fe4f0cf5cb5b1b90fa62e5f47"
   "246.16":
     url: "https://github.com/systemd/systemd-stable/archive/v246.16.tar.gz"
     sha256: "b69f9940d65870f090269a28f1047a633d4b80d0001e091d53a031dd40a822d2"
 patches:
-  "252.4":
-    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+  "252.9":
+    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
       patch_type: "conan"
-    - patch_file: "patches/251.4/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
-  "251.4":
-    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+  "251.15":
+    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
       patch_type: "conan"
-    - patch_file: "patches/251.4/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
-  "249.12":
-    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+  "249.16":
+    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
       patch_type: "conan"
-    - patch_file: "patches/249.12/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/249.16/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
-  "248.10":
-    - patch_file: "patches/248.10/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+  "248.12":
+    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
       patch_type: "conan"
-    - patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/247.13/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
-  "247.11":
-    - patch_file: "patches/247.11/0001-Remove-dependency-from-coreutils.patch"
+  "247.13":
+    - patch_file: "patches/247.13/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
   "246.16":
