@@ -32,7 +32,7 @@ class PackageConan(ConanFile):
         return {
             "Visual Studio": "16.9",
             "msvc": "192",
-            "gcc": "11",
+            "gcc": "12",
             "clang": "13",
             "apple-clang": "14",
         }
