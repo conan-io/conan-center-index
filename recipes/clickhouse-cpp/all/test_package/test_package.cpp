@@ -21,7 +21,7 @@ int main()
     }
     catch (const std::exception &ex)
     {
-        std::cout << ex.what() << std::endl;
+        std::cout << "not connected but works" << std::endl;
     }
       
     return 0;
