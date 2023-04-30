@@ -44,6 +44,7 @@ class TensorflowLiteConan(ConanFile):
         return {
             "gcc": "8",
             "Visual Studio": "15.8",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "5.1",
         }
