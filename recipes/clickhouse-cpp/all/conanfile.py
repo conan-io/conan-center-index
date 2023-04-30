@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain,CMakeDeps, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
@@ -88,13 +88,16 @@ class ClickHouseCppConan(ConanFile):
         tc.variables["BUILD_BENCHMARK"] =  self.options.build_bench
         tc.variables["BUILD_TESTS"] = self.options.build_tests
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
-        tc.variables["WITH_SYSTEM_ABSEIL"] = True
-        tc.variables["WITH_SYSTEM_LZ4"] = True
-        tc.variables["WITH_SYSTEM_CITYHASH"] = True
+        tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
+        tc.cache_variables["WITH_SYSTEM_LZ4"] = True
+        tc.cache_variables["WITH_SYSTEM_CITYHASH"] = True
         if self.settings.compiler == 'clang' and self.settings.os == 'Linux':
             if self.settings.compiler.libcxx == 'libc++':
                 tc.preprocessor_definitions['CMAKE_CXX_FLAGS'] = '-stdlib=libc++'
         tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
         cmake = CMake(self)

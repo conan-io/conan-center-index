@@ -3,6 +3,8 @@
 #include <clickhouse/types/type_parser.h>
 #include <clickhouse/base/socket.h>
 
+#include <iostream>
+#include <stdexcept>
 using namespace clickhouse;
 
 int main()
@@ -13,6 +15,14 @@ int main()
         .SetUser("default")
         .SetPassword("")
         .SetDefaultDatabase("default");
-    Client client(ClientOptions(localHostEndpoint));   
+
+    try {
+        Client client(localHostEndpoint); 
+    }
+    catch (const std::exception &ex)
+    {
+        std::cout << ex.what() << std::endl;
+    }
+      
     return 0;
 }
