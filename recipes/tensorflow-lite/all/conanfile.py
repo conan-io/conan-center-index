@@ -18,7 +18,7 @@ class TensorflowLiteConan(ConanFile):
     description = ("TensorFlow Lite is a set of tools that enables on-device machine learning "
                    "by helping developers run their models on mobile, embedded, and IoT devices.")
     topics = ("machine-learning", "neural-networks", "deep-learning")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
