@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "df46ab60153f75ef0a1ab269e6b107ec34fdc467993c3984029d7deb5e0fab6c"
   "1.22.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/1.22.0.tar.gz"
     sha256: "4b244241cd56893fccb22f7c874588f0d86b444912382ed6e9a4cf95e55ffda2"
@@ -29,3 +32,8 @@ sources:
   "1.12.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/1.12.0.tar.gz"
     sha256: "e951a699bd048bd7a034ac60bdd45f15cf066a04fda33cb22030d192b91a836c"
+patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0001-use-abs.patch"
+      patch_description: "use std::abs instead fabsf/fabsl"
+      patch_type: "portability"

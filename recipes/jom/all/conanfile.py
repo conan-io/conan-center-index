@@ -12,6 +12,7 @@ class JomInstallerConan(ConanFile):
     homepage = "http://wiki.qt.io/Jom"
     license = "GPL-3.0-only"
     topics = ("build", "make", "makefile", "nmake")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -22,7 +23,7 @@ class JomInstallerConan(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        if self.info.settings.os != "Windows":
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Windows")
 
     def source(self):
@@ -37,9 +38,7 @@ class JomInstallerConan(ConanFile):
         copy(self, "*.exe", self.build_folder, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
         # TODO: Legacy, to be removed on Conan 2.0

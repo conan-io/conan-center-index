@@ -25,7 +25,7 @@ class ICUConan(ConanFile):
                   "providing Unicode and Globalization support for software applications."
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("icu", "icu4c", "i see you", "unicode")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -74,7 +74,7 @@ class ICUConan(ConanFile):
         if self.options.dat_package_file:
             if not os.path.exists(self.options.dat_package_file):
                 raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
-        
+
     def layout(self):
         basic_layout(self, src_folder="src")
 

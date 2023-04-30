@@ -14,7 +14,7 @@ class AmqpcppConan(ConanFile):
     topics = ("amqp", "network", "queue")
     license = "Apache-2.0"
     description = "C++ library for asynchronous non-blocking communication with RabbitMQ"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,7 +44,7 @@ class AmqpcppConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import get, apply_conandata_patches, rmdir, save, export_conandata_patches
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class QarchiveConan(ConanFile):
@@ -18,7 +18,7 @@ class QarchiveConan(ConanFile):
         "This library helps you to extract and compress archives supported by libarchive"
     )
     topics = ("qt", "compress", "libarchive")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,21 +42,20 @@ class QarchiveConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("libarchive/3.6.1")
-        self.requires("qt/5.15.7")
-
-    def build_requirements(self):
-        self.tool_requires("cmake/3.24.2")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("libarchive/3.6.2")
+        self.requires("qt/5.15.9")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.17 <4]")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -73,7 +72,7 @@ class QarchiveConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
