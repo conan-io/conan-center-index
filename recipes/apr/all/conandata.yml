@@ -1,8 +1,13 @@
 sources:
+  "1.7.4":
+    url: "https://archive.apache.org/dist/apr/apr-1.7.4.tar.bz2"
+    sha256: "fc648de983f3a2a6c9e78dea1f180639bd2fad6c06d556d4367a701fe5c35577"
   "1.7.0":
     url: "https://archive.apache.org/dist/apr/apr-1.7.0.tar.bz2"
     sha256: "e2e148f0b2e99b8e5c6caa09f6d4fb4dd3e83f744aa72a952f94f5a14436f7ea"
 patches:
+  "1.7.4":
+    - patch_file: "patches/0401-cmake-build-only-shared-static.patch"
   "1.7.0":
     - patch_file: "patches/0001-cmake-build-only-shared-static.patch"
     - patch_file: "patches/0002-apr-config-prefix-env.patch"
