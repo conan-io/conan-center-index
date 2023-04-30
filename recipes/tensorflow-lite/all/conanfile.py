@@ -81,7 +81,7 @@ class TensorflowLiteConan(ConanFile):
             self.requires("fp16/cci.20210320")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src", build_folder=f"build_folder/{self.settings.build_type}")
