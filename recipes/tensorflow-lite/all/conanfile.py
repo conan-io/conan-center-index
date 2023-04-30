@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from os.path import join
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class TensorflowLiteConan(ConanFile):
