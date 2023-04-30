@@ -60,11 +60,15 @@ class DoxygenConan(ConanFile):
         self.info.requires.full_version_mode()
 
     def compatibility(self):
-        # This will only work when host profile == build profile
-        # For some reason self.settings.compiler here returns the compiler from the build profile
-        compatible_versions = [{"settings": [("compiler.version", v), ("build_type", "Release")]}
-            for v in self.settings.compiler.version.get_definition() if v <= Version(self.settings.compiler.version)]
-        return compatible_versions
+        if (Version(conan_version).major >= 2):
+            # This will only work when host profile == build profile
+            # For some reason self.settings.compiler here returns the compiler from the build profile
+            # Models libc++ compatibility and identifies Debug builds as equivalent to Release builds
+            compatible_versions = [{"settings": [("compiler.version", v), ("build_type", "Release")]}
+                for v in self.settings.compiler.version.get_definition() if v <= Version(self.settings.compiler.version)]
+            return compatible_versions
+        # Models Debug builds as equivalent to Release builds as this is a tool_requires package
+        return [{"settings": [("build_type", "Release")]}]
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
