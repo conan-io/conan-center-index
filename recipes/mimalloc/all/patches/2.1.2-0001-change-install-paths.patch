@@ -7,7 +7,7 @@ index 2bcd1ef..37eee49 100644
    endif()
  
 -  install(TARGETS mimalloc EXPORT mimalloc DESTINATION ${mi_install_libdir} LIBRARY)
-+  install(TARGETS mimalloc-static EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
++  install(TARGETS mimalloc EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
    install(EXPORT mimalloc DESTINATION ${mi_install_cmakedir})
  endif()
  
