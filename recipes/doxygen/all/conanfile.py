@@ -45,12 +45,6 @@ class DoxygenConan(ConanFile):
             "msvc": "191",
         }
 
-    @property
-    def _conan_home(self):
-        conan_home_env = "CONAN_USER_HOME" if Version(conan_version).major < 2 else "CONAN_HOME"
-        conan_home_dir = ".conan" if Version(conan_version).major < 2 else ".conan2"
-        return os.environ.get(conan_home_env, pathlib.Path(pathlib.Path.home(), conan_home_dir))
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -66,13 +60,10 @@ class DoxygenConan(ConanFile):
         self.info.requires.full_version_mode()
 
     def compatibility(self):
-        # is there a better way of reading all possible versions from settings.yml?
-        settings_yml_path = pathlib.Path(self._conan_home, "settings.yml")
-        with open(settings_yml_path, "r") as f:
-            settings_yml = yaml.safe_load(f)
-
+        # This will only work when host profile == build profile
+        # For some reason self.settings.compiler here returns the compiler from the build profile
         compatible_versions = [{"settings": [("compiler.version", v), ("build_type", "Release")]}
-            for v in settings_yml["compiler"][str(self.settings.compiler)]["version"] if v <= Version(self.settings.compiler.version)]
+            for v in self.settings.compiler.version.get_definition() if v <= Version(self.settings.compiler.version)]
         return compatible_versions
 
     def validate(self):
