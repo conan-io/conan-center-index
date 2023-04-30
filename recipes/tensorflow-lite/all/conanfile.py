@@ -40,6 +40,10 @@ class TensorflowLiteConan(ConanFile):
     short_paths = True
 
     @property
+    def _min_cppstd(self):
+        return "17"
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
@@ -64,6 +68,9 @@ class TensorflowLiteConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("abseil/20230125.1")
         self.requires("eigen/3.4.0")
@@ -81,11 +88,21 @@ class TensorflowLiteConan(ConanFile):
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src", build_folder=f"build_folder/{self.settings.build_type}")
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -105,19 +122,6 @@ class TensorflowLiteConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-
-    def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 17)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
     def build(self):
         apply_conandata_patches(self)
