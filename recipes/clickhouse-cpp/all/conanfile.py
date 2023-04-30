@@ -35,7 +35,7 @@ class ClickHouseCppConan(ConanFile):
 
         self.requires("lz4/1.9.3")
 
-        self.requires("abseil/20211102.0", transitive_headers=True)
+        self.requires("abseil/20230125.2", transitive_headers=True)
 
         self.requires("cityhash/cci.20130801")
         if self.options.with_openssl:
@@ -67,7 +67,7 @@ class ClickHouseCppConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")    
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Invalid configuration")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
@@ -118,7 +118,7 @@ class ClickHouseCppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib::clickhouse-cpp-lib")
 
         if self._requires_compiler_rt:
-            ldflags = ["-rtlib=compiler-rt -lgcc_s"]
+            ldflags = ["--rtlib=compiler-rt -lgcc_s"]
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
 
