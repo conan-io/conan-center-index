@@ -118,7 +118,7 @@ class ClickHouseCppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib::clickhouse-cpp-lib")
 
         if self._requires_compiler_rt:
-            ldflags = ["--rtlib=compiler-rt -lgcc_s"]
+            ldflags = ["--rtlib=compiler-rt"]
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
 
