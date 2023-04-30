@@ -58,6 +58,10 @@ class ClickHouseCppConan(ConanFile):
             "clang": "6",
         }
 
+    @property
+    def _requires_compiler_rt(self):
+        return self.settings.compiler == "clang" and (( self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and not self.options.shared) or  self.settings.compiler.libcxx == "libc++" )
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -112,6 +116,11 @@ class ClickHouseCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs.append("clickhouse-cpp-lib")
         self.cpp_info.set_property("cmake_target_name", "clickhouse-cpp-lib::clickhouse-cpp-lib")
+
+        if self._requires_compiler_rt:
+            ldflags = ["-rtlib=compiler-rt -lgcc_s"]
+            self.cpp_info.exelinkflags = ldflags
+            self.cpp_info.sharedlinkflags = ldflags
 
         self.cpp_info.filenames["cmake_find_package"] = "clickhouse-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "clickhouse-cpp"
