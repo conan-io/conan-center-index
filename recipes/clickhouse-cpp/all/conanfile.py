@@ -46,6 +46,10 @@ class ClickHouseCppConan(ConanFile):
             self.requires("benchmark/1.6.0")
 
     @property
+    def _min_cppstd(self):
+        return "17"
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
