@@ -11,9 +11,18 @@ sources:
   2.9.2:
     url: "https://github.com/pybind/pybind11/archive/v2.9.2.tar.gz"
     sha256: "6bd528c4dbe2276635dc787b6b1f2e5316cf6b49ee3e150264e455a0d68d19c1"
-  "2.10.0":
+  2.10.0:
     url: "https://github.com/pybind/pybind11/archive/v2.10.0.tar.gz"
     sha256: "eacf582fa8f696227988d08cfc46121770823839fe9e301a20fbce67e7cd70ec"
   2.10.1:
     url: "https://github.com/pybind/pybind11/archive/v2.10.1.tar.gz"
     sha256: "111014b516b625083bef701df7880f78c2243835abdb263065b6b59b960b6bad"
+  2.10.2:
+    url: "https://github.com/pybind/pybind11/archive/v2.10.2.tar.gz"
+    sha256: "93bd1e625e43e03028a3ea7389bba5d3f9f2596abc074b068e70f4ef9b1314ae"
+  2.10.3:
+    url: "https://github.com/pybind/pybind11/archive/v2.10.3.tar.gz"
+    sha256: "5d8c4c5dda428d3a944ba3d2a5212cb988c2fae4670d58075a5a49075a6ca315"
+  2.10.4:
+    url: "https://github.com/pybind/pybind11/archive/v2.10.4.tar.gz"
+    sha256: "832e2f309c57da9c1e6d4542dedd34b24e4192ecb4d62f6f4866a737454c9970"
