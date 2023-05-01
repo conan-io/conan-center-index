@@ -1,0 +1,12 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/ros/console_bridge/archive/refs/tags/1.0.2.tar.gz"
+    sha256: "303a619c01a9e14a3c82eb9762b8a428ef5311a6d46353872ab9a904358be4a4"
+patches:
+  "1.0.2":
+    - patch_file: "patches/disable-pkgconfig-export.patch"
+      patch_type: "conan"
+      patch_description: "Skip exporting of pkg-config files in CMakelists.txt"
+    - patch_file: "patches/replace-gtest.patch"
+      patch_type: "conan"
+      patch_description: "Replace vendored GTest with Conan package"
