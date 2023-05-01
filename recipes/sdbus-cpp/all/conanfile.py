@@ -58,6 +58,9 @@ class SdbusCppConan(ConanFile):
         self.requires("libsystemd/253.3")
 
     def validate(self):
+        if self.info.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only Linux supported")
+
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.info.settings.compiler))
@@ -68,8 +71,6 @@ class SdbusCppConan(ConanFile):
             if Version(self.info.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.info.settings.compiler, self.info.settings.compiler.version))
-        if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
         self.tool_requires("pkgconf/1.9.3")
