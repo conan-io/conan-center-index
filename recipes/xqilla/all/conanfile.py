@@ -22,7 +22,7 @@ class XqillaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xqilla.sourceforge.net/HomePage"
     license = "Apache-2.0"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
