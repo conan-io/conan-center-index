@@ -56,7 +56,8 @@ class XqillaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xerces-c/3.2.4", transitive_headers=True)
+        # xerces-c is public, see https://c3i.jfrog.io/artifactory/misc-v2/logs/pr/17332/3-linux-gcc/xqilla/2.3.4/ed5ac4a4d7ee70de0440268155f960162d458f1d-test.txt
+        self.requires("xerces-c/3.2.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
