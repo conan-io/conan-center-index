@@ -56,7 +56,7 @@ class XqillaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xerces-c/3.2.3")
+        self.requires("xerces-c/3.2.4")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
