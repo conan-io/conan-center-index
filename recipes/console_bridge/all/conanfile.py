@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
     name = "console_bridge"
-    description = "A ROS-independent library that provides logging calls which mirror those found in rosconsole"
+    description = "A ROS-independent library for logging that seamlessly pipes into rosconsole/rosout for ROS-dependent packages"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ros/console_bridge"
