@@ -68,6 +68,8 @@ class PackageConan(ConanFile):
         tc.variables["APPEND_PROJECT_NAME_TO_INCLUDEDIR"] = False
         tc.variables["BUILD_TESTING"] = self._tests_enabled
         tc.variables["BUILD_APPS"] = False
+        if not self.options.shared:
+            tc.preprocessor_definitions["URDFDOM_STATIC"] = "1"
         tc.generate()
         CMakeDeps(self).generate()
 
@@ -95,3 +97,6 @@ class PackageConan(ConanFile):
             "urdfdom_sensor",
             "urdfdom_world",
         ]
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("URDFDOM_STATIC=1")
