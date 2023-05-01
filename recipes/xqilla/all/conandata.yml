@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-honor-deps-ldflags.patch"
       patch_description: "Honor LDFLAGS from dependencies"
       patch_type: "conan"
+    - patch_file: "patches/0002-fix-c++17-no-register.patch"
+      patch_description: "Remove register keyword to fix compilation with C++17"
+      patch_type: "portability"

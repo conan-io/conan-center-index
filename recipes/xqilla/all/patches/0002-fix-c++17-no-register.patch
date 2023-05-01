@@ -1,0 +1,135 @@
+--- a/include/xqilla/utils/XPath2Utils.hpp
++++ b/include/xqilla/utils/XPath2Utils.hpp
+@@ -104,8 +104,8 @@ inline bool XPath2Utils::equals(const XMLCh *const str1, const XMLCh *const str2
+   if(str1 == 0) return *str2 == 0; // str2 == 0 is handled by the first line
+   if(str2 == 0) return *str1 == 0; // str1 == 0 is handled by the first line
+ 
+-  register const XMLCh* psz1 = str1;
+-  register const XMLCh* psz2 = str2;
++  const XMLCh* psz1 = str1;
++  const XMLCh* psz2 = str2;
+ 
+   while(*psz1 == *psz2) {
+     // If either has ended, then they both ended, so equal
+@@ -125,7 +125,7 @@ inline int XPath2Utils::compare(const XMLCh *str1, const XMLCh *str2) {
+   if(str1 == 0) return -*str2; // str2 == 0 is handled by the first line
+   if(str2 == 0) return *str1; // str1 == 0 is handled by the first line
+ 
+-  register int cmp;
++  int cmp;
+   while((cmp = *str1 - *str2) == 0) {
+     // If either has ended, then they both ended, so equal
+     if(*str1 == 0) break;
+--- a/src/lexer/XQLexer.cpp
++++ b/src/lexer/XQLexer.cpp
+@@ -14079,9 +14079,9 @@ YY_MALLOC_DECL
+ 
+ YY_DECL
+ 	{
+-	register yy_state_type yy_current_state;
+-	register YY_CHAR *yy_cp, *yy_bp;
+-	register int yy_act;
++	yy_state_type yy_current_state;
++	YY_CHAR *yy_cp, *yy_bp;
++	int yy_act;
+ 
+ #line 209 "../src/lexer/XQLexer.l"
+ 
+@@ -14157,7 +14157,7 @@ YY_DECL
+ yy_match:
+ 		do
+ 			{
+-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
++			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+ 			if ( yy_accept[yy_current_state] )
+ 				{
+ 				yy_last_accepting_state = yy_current_state;
+@@ -16045,9 +16045,9 @@ void yyFlexLexer::LexerOutput( const YY_CHAR* buf, int size )
+ 
+ int yyFlexLexer::yy_get_next_buffer()
+ 	{
+-	register YY_CHAR *dest = yy_current_buffer->yy_ch_buf;
+-	register YY_CHAR *source = yytext_ptr;
+-	register int number_to_move, i;
++	YY_CHAR *dest = yy_current_buffer->yy_ch_buf;
++	YY_CHAR *source = yytext_ptr;
++	int number_to_move, i;
+ 	int ret_val;
+ 
+ 	if ( yy_c_buf_p > &yy_current_buffer->yy_ch_buf[yy_n_chars + 1] )
+@@ -16178,14 +16178,14 @@ int yyFlexLexer::yy_get_next_buffer()
+ 
+ yy_state_type yyFlexLexer::yy_get_previous_state()
+ 	{
+-	register yy_state_type yy_current_state;
+-	register YY_CHAR *yy_cp;
++	yy_state_type yy_current_state;
++	YY_CHAR *yy_cp;
+ 
+ 	yy_current_state = yy_start;
+ 
+ 	for ( yy_cp = yytext_ptr + YY_MORE_ADJ; yy_cp < yy_c_buf_p; ++yy_cp )
+ 		{
+-		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
++		YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
+ 		if ( yy_accept[yy_current_state] )
+ 			{
+ 			yy_last_accepting_state = yy_current_state;
+@@ -16212,10 +16212,10 @@ yy_state_type yyFlexLexer::yy_get_previous_state()
+ 
+ yy_state_type yyFlexLexer::yy_try_NUL_trans( yy_state_type yy_current_state )
+ 	{
+-	register int yy_is_jam;
+-	register YY_CHAR *yy_cp = yy_c_buf_p;
++	int yy_is_jam;
++	YY_CHAR *yy_cp = yy_c_buf_p;
+ 
+-	register YY_CHAR yy_c = 1;
++	YY_CHAR yy_c = 1;
+ 	if ( yy_accept[yy_current_state] )
+ 		{
+ 		yy_last_accepting_state = yy_current_state;
+@@ -16234,9 +16234,9 @@ yy_state_type yyFlexLexer::yy_try_NUL_trans( yy_state_type yy_current_state )
+ 	}
+ 
+ 
+-void yyFlexLexer::yyunput( int c, register YY_CHAR * yy_bp )
++void yyFlexLexer::yyunput( int c, YY_CHAR * yy_bp )
+ 	{
+-	register YY_CHAR *yy_cp = yy_c_buf_p;
++	YY_CHAR *yy_cp = yy_c_buf_p;
+ 
+ 	/* undo effects of setting up yytext */
+ 	*yy_cp = yy_hold_char;
+@@ -16244,10 +16244,10 @@ void yyFlexLexer::yyunput( int c, register YY_CHAR * yy_bp )
+ 	if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
+ 		{ /* need to shift things up to make room */
+ 		/* +2 for EOB chars. */
+-		register int number_to_move = yy_n_chars + 2;
+-		register YY_CHAR *dest = &yy_current_buffer->yy_ch_buf[
++		int number_to_move = yy_n_chars + 2;
++		YY_CHAR *dest = &yy_current_buffer->yy_ch_buf[
+ 					yy_current_buffer->yy_buf_size + 2];
+-		register YY_CHAR *source =
++		YY_CHAR *source =
+ 				&yy_current_buffer->yy_ch_buf[number_to_move];
+ 
+ 		while ( source > yy_current_buffer->yy_ch_buf )
+@@ -16561,7 +16561,7 @@ yyconst YY_CHAR *s2;
+ int n;
+ #endif
+ 	{
+-	register int i;
++	int i;
+ 	for ( i = 0; i < n; ++i )
+ 		s1[i] = s2[i];
+ 	}
+@@ -16575,7 +16575,7 @@ static int yy_flex_strlen( s )
+ yyconst YY_CHAR *s;
+ #endif
+ 	{
+-	register int n;
++	int n;
+ 	for ( n = 0; s[n]; ++n )
+ 		;
+ 
