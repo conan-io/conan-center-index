@@ -1,3 +1,14 @@
+--- a/include/xqilla/ast/XQDocumentOrder.hpp
++++ b/include/xqilla/ast/XQDocumentOrder.hpp
+@@ -68,7 +68,7 @@ private:
+   public:
+     uniqueLessThanCompareFn(const DynamicContext *context)
+       : context_(context) {}
+-    bool operator()(const Node::Ptr &first, const Node::Ptr &second)
++    bool operator()(const Node::Ptr &first, const Node::Ptr &second) const
+     {
+       return first->uniqueLessThan(second, context_);
+     }
 --- a/include/xqilla/utils/XPath2Utils.hpp
 +++ b/include/xqilla/utils/XPath2Utils.hpp
 @@ -104,8 +104,8 @@ inline bool XPath2Utils::equals(const XMLCh *const str1, const XMLCh *const str2
@@ -133,3 +144,14 @@
  	for ( n = 0; s[n]; ++n )
  		;
  
+--- a/src/runtime/Sequence.cpp
++++ b/src/runtime/Sequence.cpp
+@@ -186,7 +186,7 @@ public:
+   lessThanCompareFn(const DynamicContext *context)
+     : context_(context) {}
+ 
+-  bool operator()(const Item::Ptr &first, const Item::Ptr &second)
++  bool operator()(const Item::Ptr &first, const Item::Ptr &second) const
+   {
+     return ((const Node*)first.get())->lessThan((const Node::Ptr)second, context_);
+   }
