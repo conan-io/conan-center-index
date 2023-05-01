@@ -79,7 +79,7 @@ class CycloneDDSConan(ConanFile):
         if self.options.with_shm:
             self.requires("iceoryx/2.0.2")
         if self.options.with_ssl:
-            self.requires("openssl/[>=1.1 <4")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.options.enable_security and not self.options.shared:
@@ -94,7 +94,7 @@ class CycloneDDSConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
