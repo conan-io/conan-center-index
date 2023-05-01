@@ -143,7 +143,7 @@ class CycloneDDSConan(ConanFile):
         copy(self, "CycloneDDS_idlc.cmake",
                    src=os.path.join(self.source_folder, os.pardir, "cmake"),
                    dst=os.path.join(self.package_folder, self._module_path, "CycloneDDS"))
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows":
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
 
