@@ -1,0 +1,33 @@
+sources:
+  "3.1.1":
+    urdfdom:
+      url: "https://github.com/ros/urdfdom/archive/refs/tags/3.1.1.tar.gz"
+      sha256: "dd69b2077b8fc1bd2b67022c1dc861cd896ac882df065aa08cabdf2f945a9ac0"
+    urdfdom_headers:
+      # Latest unreleased version from 2023-04-25.
+      # Identical to the latest v1.0.5 release, except headers have been conveniently moved to include/.
+      url: "https://github.com/ros/urdfdom_headers/archive/1fd21b64ed78493508a174f98af982605d1e4607.zip"
+      sha256: "aba42c1c83d6d1fb94e54ec84680a8b9e2417337fbaa85424da0e069d0cc89b6"
+patches:
+  "3.1.1":
+    - patch_file: "patches/install-all-includes.patch"
+      patch_type: "conan"
+      patch_description: "Install headers from urdfdom_headers"
+    - patch_file: "patches/disable-pkgconfig-export.patch"
+      patch_type: "conan"
+      patch_description: "Skip exporting of pkg-config files in CMakelists.txt"
+    - patch_file: "patches/optional-build-apps.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of apps by default"
+    - patch_file: "patches/use-conan-tinyxml.patch"
+      patch_type: "conan"
+      patch_description: "Use tinyxml from Conan"
+    - patch_file: "patches/use-conan-gtest.patch"
+      patch_type: "conan"
+      patch_description: "Use GTest from Conan"
+    - patch_file: "patches/rm-find-urdfdom_headers.patch"
+      patch_type: "conan"
+      patch_description: "Remove find_package(urdfdom_headers) from CMakeLists.txt"
+    - patch_file: "patches/use-conan-console_bridge.patch"
+      patch_type: "conan"
+      patch_description: "Use console_bridge from Conan"

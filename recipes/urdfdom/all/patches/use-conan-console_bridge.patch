@@ -1,0 +1,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,8 +46,7 @@
+ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ 
+ find_package(tinyxml REQUIRED CONFIG)
+-find_package(console_bridge_vendor QUIET) # Provides console_bridge 0.4.0 on platforms without it.
+-find_package(console_bridge REQUIRED)
++find_package(console_bridge REQUIRED CONFIG)
+ 
+ # Control where libraries and executables are placed during the build
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
