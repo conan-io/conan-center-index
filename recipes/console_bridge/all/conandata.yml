@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/replace-gtest.patch"
       patch_type: "conan"
       patch_description: "Replace vendored GTest with Conan package"
+    - patch_file: "patches/disable-linter-tests.patch"
+      patch_type: "conan"
+      patch_description: "Disable linting with external linters during unit tests"
