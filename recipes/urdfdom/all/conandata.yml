@@ -31,3 +31,6 @@ patches:
     - patch_file: "patches/use-conan-console_bridge.patch"
       patch_type: "conan"
       patch_description: "Use console_bridge from Conan"
+    - patch_file: "patches/allow-static-builds.patch"
+      patch_type: "conan"
+      patch_description: "Do not hard-code libraries as SHARED in CMakeLists.txt"
