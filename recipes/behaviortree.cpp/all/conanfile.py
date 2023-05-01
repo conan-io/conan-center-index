@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 class BehaviorTreeCPPConan(ConanFile):
     name = "behaviortree.cpp"
@@ -78,21 +78,21 @@ class BehaviorTreeCPPConan(ConanFile):
     def requirements(self):
 
         self.requires("zeromq/4.3.4")
-        
+
         if Version(self.version) > "4.1.0" and self.options.with_sqlite_logging:
             self.requires("sqlite3/3.40.1")
-        
+
         if Version(self.version) < "4.1.0":
             if self.options.with_coroutines:
                 self.requires("boost/1.81.0")
 
-        
+
         if Version(self.version) < "4.0.1":
             self.requires("ncurses/6.3")
 
         if Version(self.version) < "3.6.0":
             self.requires("boost/1.81.0")
-        
+
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -130,10 +130,10 @@ class BehaviorTreeCPPConan(ConanFile):
             if Version(self.version) == "4.0.1" or Version(self.version) == "4.0.2":
                 tc.variables["BTCPP_MANUAL_SELECTOR"] = False
 
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
+        
         deps.generate()
 
     def build(self):
@@ -177,7 +177,7 @@ class BehaviorTreeCPPConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components[libname].libs = [f"{libname}{postfix}"]
         self.cpp_info.components[libname].requires = ["zeromq::zeromq"]
-        
+
         if Version(self.version) < "3.6.0":
             self.cpp_info.components[libname].requires.append("boost::coroutine")
 
@@ -187,7 +187,7 @@ class BehaviorTreeCPPConan(ConanFile):
 
         if Version(self.version) < "4.0.1":
             self.cpp_info.components[libname].requires.extend(["ncurses::ncurses"])
-        
+
         if Version(self.version) > "4.1.0" and self.options.with_sqlite_logging:
                 self.cpp_info.components[libname].requires.append("sqlite3::sqlite3")
 
