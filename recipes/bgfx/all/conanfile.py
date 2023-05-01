@@ -12,6 +12,8 @@ from conan.tools.env import VirtualBuildEnv
 from pathlib import Path
 import os
 
+required_conan_version = ">=1.50.0"
+
 class bgfxConan(ConanFile):
     name = "bgfx"
     license = "BSD-2-Clause"
@@ -110,7 +112,8 @@ class bgfxConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"bx/{self._bx_version[self.version]}")
+        # bgfx's C99 API absolutely requires a header from bx so we need those to be transitive
+        self.requires(f"bx/{self._bx_version[self.version]}", transitive_headers=True)
         self.requires(f"bimg/{self._bimg_version[self.version]}")
         self.requires("opengl/system")
 
@@ -264,10 +267,6 @@ class bgfxConan(ConanFile):
             for bgfx_file in Path(os.path.join(self.package_folder, "lib")).glob("*bgfx*"):
                 rename(self, os.path.join(self.package_folder, "lib", bgfx_file.name), 
                         os.path.join(self.package_folder, "lib", f"{package_lib_prefix}bgfx{bgfx_file.suffix}"))
-        if self.options.shared:
-            for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*bgfx*"):
-                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
-                        os.path.join(self.package_folder, "bin", f"{package_lib_prefix}bgfx{bgfx_file.suffix}"))            
         if self.options.tools:
             for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*shaderc*"):
                 rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
@@ -292,6 +291,9 @@ class bgfxConan(ConanFile):
             self.cpp_info.libs = [f"bgfx-shared-lib{self.settings.build_type}"]
         else:
             self.cpp_info.libs = ["bgfx"]
+
+        if self.options.shared:
+            self.cpp_info.defines.extend(["BGFX_SHARED_LIB_USE=1"])
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["gdi32"])
