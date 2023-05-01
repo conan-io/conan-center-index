@@ -58,7 +58,7 @@ class ReplxxConan(ConanFile):
 
     def build(self):
         if Version(self.version) < "0.0.3":
-           replace_in_file(self,
+            replace_in_file(self,
                 os.path.join(self.source_folder, "src", "io.cxx"),
                 "#include <array>\n",
                 "#include <array>\n#include <stdexcept>\n"
