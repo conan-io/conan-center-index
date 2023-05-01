@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class XqillaConan(ConanFile):
@@ -59,7 +59,7 @@ class XqillaConan(ConanFile):
         self.requires("xerces-c/3.2.4")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self):
             raise ConanInvalidConfiguration("xqilla recipe doesn't support msvc build yet")
@@ -73,8 +73,7 @@ class XqillaConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -121,10 +120,8 @@ class XqillaConan(ConanFile):
         rename(self, os.path.join(self.package_folder, "licenses", "README"),
                      os.path.join(self.package_folder, "licenses", "LICENSE.mapm"))
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE.yajl"), self._extract_yajl_license())
-
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
