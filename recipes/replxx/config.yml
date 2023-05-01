@@ -1,8 +1,8 @@
 ---
 versions:
-  "0.0.2":
+  "0.0.4":
     folder: "all"
   "0.0.3":
     folder: "all"
-  "0.0.4":
+  "0.0.2":
     folder: "all"
