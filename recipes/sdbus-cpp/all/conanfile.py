@@ -65,7 +65,7 @@ class SdbusCppConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.info.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+            self.output.warning("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.info.settings.compiler))
         else:
             if Version(self.info.settings.compiler.version) < min_version:
