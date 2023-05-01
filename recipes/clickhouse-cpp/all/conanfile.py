@@ -121,6 +121,7 @@ class ClickHouseCppConan(ConanFile):
             ldflags = ["--rtlib=compiler-rt"]
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
+            self.cpp_info.system_libs.append("gcc_s")
 
         self.cpp_info.filenames["cmake_find_package"] = "clickhouse-cpp"
         self.cpp_info.filenames["cmake_find_package_multi"] = "clickhouse-cpp"
