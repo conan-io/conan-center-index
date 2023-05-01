@@ -1,4 +1,7 @@
 sources:
+  "6.1-1.9.2":
+    url: "https://github.com/ctabin/libzippp/archive/libzippp-v6.1-1.9.2.tar.gz"
+    sha256: "3796f174780f23938749da493cf4cbc4c55f84a568ec395f2c256dfe10129305"
   "6.0-1.9.2":
     url: "https://github.com/ctabin/libzippp/archive/libzippp-v6.0-1.9.2.tar.gz"
     sha256: "f9aef9811802a18e69cd50527381d70c2e0f0d8a839f1d41914f6234f5964fc3"
