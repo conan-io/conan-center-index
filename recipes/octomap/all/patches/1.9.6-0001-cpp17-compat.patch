@@ -73,15 +73,6 @@
  
      /// virtual constructor: creates a new object of same type
      /// (Covariant return type requires an up-to-date compiler)
-@@ -51,7 +51,7 @@ namespace octomap {
-     std::string getTreeType() const {return "OcTreeBase";}
-   };
- 
--  };
-+}
- 
- 
- #endif
 --- a/octomap/include/octomap/OcTreeBaseImpl.h
 +++ b/octomap/include/octomap/OcTreeBaseImpl.h
 @@ -244,7 +244,7 @@ namespace octomap {
@@ -192,28 +183,6 @@
      ~ScanGraph();
  
      /// Clears all nodes and edges, and will delete the corresponding objects
---- a/octomap/src/ColorOcTree.cpp
-+++ b/octomap/src/ColorOcTree.cpp
-@@ -91,7 +91,7 @@ namespace octomap {
-   ColorOcTree::ColorOcTree(double in_resolution)
-   : OccupancyOcTreeBase<ColorOcTreeNode>(in_resolution) {
-     colorOcTreeMemberInit.ensureLinking();
--  };
-+  }
- 
-   ColorOcTreeNode* ColorOcTree::setNodeColor(const OcTreeKey& key,
-                                              uint8_t r,
---- a/octomap/src/OcTree.cpp
-+++ b/octomap/src/OcTree.cpp
-@@ -39,7 +39,7 @@ namespace octomap {
- 	OcTree::OcTree(double in_resolution)
- 		: OccupancyOcTreeBase<OcTreeNode>(in_resolution) {
- 		ocTreeMemberInit.ensureLinking();
--	};
-+	}
- 
-   OcTree::OcTree(std::string _filename)
-     : OccupancyOcTreeBase<OcTreeNode> (0.1)  { // resolution will be set according to tree file
 --- a/octomap/src/Pointcloud.cpp
 +++ b/octomap/src/Pointcloud.cpp
 @@ -38,7 +38,7 @@
