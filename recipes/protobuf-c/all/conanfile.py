@@ -99,9 +99,3 @@ class ProtobufCConan(ConanFile):
         bin_dir = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_dir}")
         self.env_info.PATH.append(bin_dir)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "PROTOBUF-C"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf-c"
-        self.cpp_info.names["cmake_find_package"] = "PROTOBUF-C"
-        self.cpp_info.names["cmake_find_package_multi"] = "protobuf-c"
