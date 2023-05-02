@@ -1,9 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class GdbmConan(ConanFile):
@@ -13,10 +18,11 @@ class GdbmConan(ConanFile):
                    "the standard UNIX dbm. "
                    "These routines are provided to a programmer needing "
                    "to create and manipulate a hashed database.")
-    topics = ("conan", "gdbm", "dbm", "hash", "database")
+    license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org.ua/software/gdbm/gdbm.html"
-    license = "GPL-3.0"
+    topics = ("dbm", "hash", "database")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -37,103 +43,93 @@ class GdbmConan(ConanFile):
         "with_nls": True,
     }
 
-    exports_sources = "patches/**"
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_nls:
-            del self.options.with_libiconv
+            self.options.rm_safe("with_libiconv")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("with_libiconv"):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_readline:
             self.requires("readline/8.1.2")
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("gdbm is not supported on Windows")
+            raise ConanInvalidConfiguration(f"{self.name} is not supported on Windows")
 
     def build_requirements(self):
-        self.build_requires("bison/3.7.6")
-        self.build_requires("flex/2.6.4")
-        self.build_requires("gnu-config/cci.20210814")
+        self.tool_requires("bison/3.8.2")
+        self.tool_requires("gnu-config/cci.20210814")
+        self.tool_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        conf_args = [
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--with-readline" if self.options.with_readline else "--without-readline",
-            "--enable-libgdbm-compat" if self.options.libgdbm_compat else "--disable-libgdbm-compat",
-            "--enable-gdbmtool-debug" if self.options.gdbmtool_debug else "--disable-gdbmtool-debug",
-            "--disable-rpath",
-        ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend([
-                "--disable-shared", "--enable-static",
-                "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic"]
-            )
-
-        if not self.options.with_nls:
-            conf_args.extend(["--disable-nls"])
-
+    def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        if not cross_building(self):
+            virtual_run_env = VirtualRunEnv(self)
+            virtual_run_env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        yes_no = lambda v: "yes" if v else "no"
+        enable_debug = self.settings.build_type in ["Debug", "RelWithDebInfo"]
+        tc.configure_args.extend([
+            f"--enable-debug={yes_no(enable_debug)}",
+            f"--enable-libgdbm-compat={yes_no(self.options.libgdbm_compat)}",
+            f"--enable-gdbmtool-debug={yes_no(self.options.gdbmtool_debug)}",
+            f"--enable-nls={yes_no(self.options.with_nls)}",
+            f"--with-readline={yes_no(self.options.with_readline)}",
+            f"--with-pic={yes_no(self.options.fPIC)}",
+        ])
         if self.options.get_safe("with_libiconv"):
-            conf_args.extend([
-                "--with-libiconv-prefix={}"
-                .format(self.deps_cpp_info["libiconv"].rootpath),
+            libiconv_package_folder = self.dependencies.direct_host["libiconv"].package_folder
+            tc.configure_args.extend([
+                f"--with-libiconv-prefix={libiconv_package_folder}"
                 "--with-libintl-prefix"
             ])
         else:
-            conf_args.extend(['--without-libiconv-prefix',
-                              "--without-libintl-prefix"])
+            tc.configure_args.extend([
+                "--without-libiconv-prefix",
+                "--without-libintl-prefix"
+            ])
+        tc.generate()
+        autotools_deps = AutotoolsDeps(self)
+        autotools_deps.generate()
 
-        self._autotools.configure(args=conf_args)
-        return self._autotools
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), self.source_folder)
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            with tools.chdir("src"):
-                autotools.make(target="maintainer-clean-generic")
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make(target="maintainer-clean-generic")
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         if self.options.libgdbm_compat:
