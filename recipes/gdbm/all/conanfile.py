@@ -92,6 +92,8 @@ class GdbmConan(ConanFile):
             f"--with-readline={yes_no(self.options.with_readline)}",
             f"--with-pic={yes_no(self.options.get_safe('fPIC', True))}",
         ])
+        if self.options.gdbmtool_debug:
+            tc.extra_defines.append("YYDEBUG=1")
         if self.options.get_safe("with_libiconv"):
             libiconv_package_folder = self.dependencies.direct_host["libiconv"].package_folder
             tc.configure_args.extend([
