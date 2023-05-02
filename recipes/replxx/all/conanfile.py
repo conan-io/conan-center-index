@@ -74,7 +74,11 @@ class ReplxxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["replxx"]
+        libname = "replxx"
+        if self.settings.build_type == "Debug":
+            libname += "-d"
+
+        self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
         if not self.options.shared:
