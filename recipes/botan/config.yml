@@ -29,3 +29,5 @@ versions:
     folder: all
   "2.19.3":
     folder: all
+  "3.0.0":
+    folder: all
