@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 required_conan_version = ">=1.53.0"
@@ -55,8 +54,6 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.variables["BUILD_TESTING"] = self._tests_enabled
         tc.generate()
         CMakeDeps(self).generate()
