@@ -72,6 +72,9 @@ patches:
     - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
       patch_description: "Honor install layout from conan if Android"
       patch_type: "conan"
+    - patch_file: "patches/4.6.0-0001-fix-avcodec-version.patch"
+      patch_description: "Fix issue to get avcodec version"
+      patch_type: "conan"
   "4.5.5":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
