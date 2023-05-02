@@ -1,4 +1,4 @@
-From 512223a1ada207304787fb24a6da9e844b381239 Mon Sep 17 00:00:00 2001
+From e8ff65fb110f1a1118ab709fe41e1c3dff0b3c40 Mon Sep 17 00:00:00 2001
 From: Sergey Bobrenok <bobrofon@gmail.com>
 Date: Wed, 17 Aug 2022 22:31:13 +0300
 Subject: [PATCH] missing_syscalls.py: Replace unicode with ascii
@@ -25,6 +25,8 @@ index 1bfa31ba37..cc353fe723 100644
      for line in open(filename):
          items = line.split()
          if len(items) >= 2:
+
+base-commit: 786df410b1cb3a2294c9a5d118c958525e7439e6
 -- 
-2.37.2
+2.40.1
 
