@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -32,20 +33,17 @@ class UniAlgoConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
-            "msvc": "191",
+            "msvc": "192",
             "gcc": "7",
             "clang": "8",
             "apple-clang": "11",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -69,32 +67,26 @@ class UniAlgoConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-        if is_msvc(self):
-            check_min_vs(self, int(self._compilers_minimum_version["msvc"]))
-            if self.options.get_safe("shared"):
-                raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if is_msvc(self) and self.options.get_safe("shared"):
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with msvc")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        if self.options.header_only:
-            tc.variables["UNI_ALGO_HEADER_ONLY"] = True
-        elif self.options["shared"]:
-            tc.variables["BUILD_SHARED_LIBS"] = True
-
-        if is_msvc(self):
-            # don't use self.settings.compiler.runtime
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-
-        tc.generate()
+        if not self.options.header_only:
+            tc = CMakeToolchain(self)
+            tc.variables["UNI_ALGO_HEADER_ONLY"] = self.options.header_only
+            tc.generate()
 
     def build(self):
         if not self.options.header_only:
@@ -114,13 +106,8 @@ class UniAlgoConan(ConanFile):
         else:
             cmake = CMake(self)
             cmake.install()
-
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "share"))
-            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         if self.options.header_only:
@@ -134,18 +121,9 @@ class UniAlgoConan(ConanFile):
                     self.cpp_info.libs = [f"{self.name}-debug"]
             else:
                 self.cpp_info.libs = [f"{self.name}"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.append("m")
-                self.cpp_info.system_libs.append("pthread")
-                self.cpp_info.system_libs.append("dl")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # see https://github.com/uni-algo/uni-algo/blob/v0.7.1/CMakeLists.txt#L75-L109
-        self.cpp_info.set_property("cmake_file_name", f"{self.name}")
-        self.cpp_info.set_property("cmake_target_name", f"{self.name}::{self.name}")
-        self.cpp_info.set_property("pkg_config_name", f"{self.name}")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = f"{self.name}"
-        self.cpp_info.filenames["cmake_find_package_multi"] = f"{self.name}"
-        self.cpp_info.names["cmake_find_package"] = f"{self.name}"
-        self.cpp_info.names["cmake_find_package_multi"] = f"{self.name}"
+        self.cpp_info.set_property("cmake_file_name", "uni-algo")
+        self.cpp_info.set_property("cmake_target_name", "uni-algo::uni-algo")
