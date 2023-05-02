@@ -69,8 +69,8 @@ class GdbmConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("bison/3.8.2")
-        self.tool_requires("gnu-config/cci.20210814")
         self.tool_requires("flex/2.6.4")
+        self.tool_requires("gnu-config/cci.20210814")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,7 +90,7 @@ class GdbmConan(ConanFile):
             f"--enable-gdbmtool-debug={yes_no(self.options.gdbmtool_debug)}",
             f"--enable-nls={yes_no(self.options.with_nls)}",
             f"--with-readline={yes_no(self.options.with_readline)}",
-            f"--with-pic={yes_no(self.options.fPIC)}",
+            f"--with-pic={yes_no(self.options.get_safe('fPIC', True))}",
         ])
         if self.options.get_safe("with_libiconv"):
             libiconv_package_folder = self.dependencies.direct_host["libiconv"].package_folder
@@ -114,7 +114,7 @@ class GdbmConan(ConanFile):
             self.conf.get("user.gnu-config:config_sub", check_type=str),
         ]:
             if gnu_config:
-                copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), self.source_folder)
+                copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), os.path.join(self.source_folder, "build-aux"))
 
     def build(self):
         self._patch_sources()
