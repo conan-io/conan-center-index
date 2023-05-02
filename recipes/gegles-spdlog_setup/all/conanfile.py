@@ -58,7 +58,6 @@ class SpdlogSetupConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
@@ -73,9 +72,3 @@ class SpdlogSetupConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "spdlog_setup")
         self.cpp_info.set_property("cmake_target_name", "spdlog_setup::spdlog_setup")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "SPDLOG_SETUP"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "spdlog_setup"
-        self.cpp_info.names["cmake_find_package"] = "SPDLOG_SETUP"
-        self.cpp_info.names["cmake_find_package_multi"] = "spdlog_setup"
