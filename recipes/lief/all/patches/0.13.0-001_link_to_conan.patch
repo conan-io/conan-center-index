@@ -1,0 +1,48 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 774c479..583294f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -99,8 +99,12 @@ endif()
+ 
+ # Dependencies
+ # ============
+-set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
+ include(LIEFDependencies)
++set(LIEF_FROZEN_ENABLED 0)
++if (LIEF_SUPPORT_CXX14 AND NOT LIEF_DISABLE_FROZEN)
++  message(STATUS "Enable Frozen (C++14 support)")
++  set(LIEF_FROZEN_ENABLED 1)
++endif()
+ 
+ # iOS specific config
+ # ===================
+@@ -479,8 +483,7 @@ endif()
+ # cmake-format: off
+ set_target_properties(
+   LIB_LIEF
+-  PROPERTIES POSITION_INDEPENDENT_CODE ON
+-             CXX_STANDARD              11
++  PROPERTIES CXX_STANDARD              11
+              CXX_STANDARD_REQUIRED     ON
+              CXX_VISIBILITY_PRESET     hidden
+              C_VISIBILITY_PRESET       hidden)
+@@ -682,9 +685,9 @@ if (LIEF_INSTALL)
+ 
+   # Installation
+   # ======================
+-
++  include(GNUInstallDirs)
++  if(0)
+   if(UNIX)
+-    include(GNUInstallDirs)
+     set(CMAKE_INSTALL_LIBDIR "lib")
+   else()
+     if(WIN32)
+@@ -698,6 +701,7 @@ if (LIEF_INSTALL)
+         message(FATAL_ERROR "System not UNIX nor WIN32 - not implemented yet")
+       endif()
+   endif()
++  endif()
+ 
+   install(
+     TARGETS LIB_LIEF lief_spdlog
