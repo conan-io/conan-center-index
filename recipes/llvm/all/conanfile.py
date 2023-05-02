@@ -1,6 +1,8 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, rename, apply_conandata_patches
+from conan.tools.files import get, apply_conandata_patches
+from conan.tools.build.cppstd import check_min_cppstd
+from conan.tools.system.package_manager import Apt
 from conan.errors import ConanInvalidConfiguration
 from collections import defaultdict
 from conan.tools.cmake.layout import cmake_layout
@@ -152,36 +154,6 @@ class Llvm(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
-
-    def requirements(self):
-        if self.options.with_ffi:
-            self.requires('libffi/[>3.4.0 <4.0.0]')
-        if self.options.get_safe('with_zlib', False):
-            self.requires('zlib/[>1.2.0 <2.0.0]')
-        if self.options.get_safe('with_xml2', False):
-            self.requires('libxml2/[>2.9.0 <3.0.0]')
-        if self.options.get_safe('with_z3', False):
-            self.requires('z3/[>4.8.0 <5.0.0]')
-
-    @property
-    def repo_folder(self):
-        return os.path.join(self.source_folder, self._source_subfolder)
-
-    def project_folder(self, project):
-        return os.path.join(self.repo_folder, project)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = 'llvm-project-llvmorg-' + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
-
-    def build_requirements(self):
-        # Older cmake versions may have issues generating the graphviz output used
-        # to model the components
-        self.build_requires("cmake/[>=3.21.3 <4.0.0]")
-        self.build_requires("ninja/[>=1.10.0 <2.0.0]")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -192,11 +164,50 @@ class Llvm(ConanFile):
             del self.options.with_zlib
             del self.options.with_xml2
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, '14')
+            check_min_cppstd(self, '14')
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.patch(**patch)
+    def requirements(self):
+        if self.options.with_ffi:
+            self.requires('libffi/[>3.4.0 <4.0.0]')
+        if self.options.get_safe('with_zlib', False):
+            self.requires('zlib/[>1.2.0 <2.0.0]')
+        if self.options.get_safe('with_xml2', False):
+            self.requires('libxml2/[>2.9.0 <3.0.0]') # XXX not migrated to conan2
+        if self.options.get_safe('with_z3', False):
+            self.requires('z3/[>4.8.0 <5.0.0]')
+
+    def build_requirements(self):
+        # Older cmake versions may have issues generating the graphviz output used
+        # to model the components
+        self.build_requires("cmake/[>=3.21.3 <4.0.0]")
+        self.build_requires("ninja/[>=1.10.0 <2.0.0]")
+
+    def validate(self):
+        # check keep_binaries_regex early to fail early
+        re.compile(str(self.options.keep_binaries_regex))
+
+        if self.settings.compiler == "gcc" and tools.Version(
+                self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration(
+                "Compiler version too low for this package.")
+
+        if (self.settings.compiler == "msvc") and tools.Version(
+                    self.settings.compiler.version) < "16.4":
+            raise ConanInvalidConfiguration(
+                "An up to date version of Microsoft Visual Studio 2019 or newer is required."
+            )
+
+        if self.settings.build_type == "Debug" and not self.options.enable_debug:
+            raise ConanInvalidConfiguration(
+                "Set the 'enable_debug' option to allow debug builds")
+
+        for project in projects:
+            for runtime in runtimes:
+                if project == runtime and \
+                        self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
+                    raise ConanInvalidConfiguration(
+                        f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
+
 
     def _cmake_configure(self):
         enabled_projects = [
@@ -543,33 +554,6 @@ class Llvm(ConanFile):
         del self.info.options.enable_debug
         del self.info.options.use_llvm_cmake_files
         del self.info.options.clean_build_bin
-
-    def validate(self):
-        # check keep_binaries_regex early to fail early
-        re.compile(str(self.options.keep_binaries_regex))
-
-        if self.settings.compiler == "gcc" and tools.Version(
-                self.settings.compiler.version) < "10":
-            raise ConanInvalidConfiguration(
-                "Compiler version too low for this package.")
-
-        if (self.settings.compiler == "Visual Studio"
-                or self.settings.compiler == "msvc") and Version(
-                    self.settings.compiler.version) < "16.4":
-            raise ConanInvalidConfiguration(
-                "An up to date version of Microsoft Visual Studio 2019 or newer is required."
-            )
-
-        if self.settings.build_type == "Debug" and not self.options.enable_debug:
-            raise ConanInvalidConfiguration(
-                "Set the 'enable_debug' option to allow debug builds")
-
-        for project in projects:
-            for runtime in runtimes:
-                if project == runtime and \
-                        self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
-                    raise ConanInvalidConfiguration(
-                        f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
 
     @property
     def _module_subfolder(self):
