@@ -166,6 +166,11 @@ class Llvm(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, '14')
 
+    def system_requirements(self):
+        # TODO test in different environments
+        if self.options["with_runtime_compiler-rt"] and Apt(self).check(["libc6-dev-i386"]):
+            raise ConanInvalidConfiguration("For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
+
     def requirements(self):
         if self.options.with_ffi:
             self.requires('libffi/[>3.4.0 <4.0.0]')
