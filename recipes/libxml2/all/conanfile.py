@@ -47,7 +47,7 @@ class Libxml2Conan(ConanFile):
         "python": False,
         "reader": True,
         "regexps": True,
-        "run-debug": False,
+        "run-debug": False,  # dropped after 2.11.0
         "sax1": True,
         "schemas": True,
         "schematron": True,
@@ -82,6 +82,8 @@ class Libxml2Conan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "2.10.3":
             del self.options.docbook
+        if Version(self.version) >= "2.11.0":
+            delattr(self.options, "run-debug")
 
     def configure(self):
         if self.options.shared:
@@ -96,11 +98,11 @@ class Libxml2Conan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
         if self.options.lzma:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.iconv:
             self.requires("libiconv/1.17", transitive_headers=True, transitive_libs=True)
         if self.options.icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.1")
 
     def build_requirements(self):
         if not (is_msvc(self) or self._is_mingw_windows):
