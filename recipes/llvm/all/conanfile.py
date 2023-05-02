@@ -38,7 +38,7 @@ default_projects = [
     # 'libc', # clang-14 crashes for sin/cos/tan for 13.0.0-14.0.6
     'libclc',
     'lld',
-    'lldb',
+    # 'lldb', # lib/liblldb.so.14.0.6 / libxml2, error: undefined symbol: libiconv_open, referenced by encoding.c in libxml2.a
     'openmp',
     'polly',
     'pstl',
@@ -73,9 +73,10 @@ class Llvm(ConanFile):
            for runtime in runtimes},
         **{
             'shared': [True, False],
-            'shared_is_dylib': [True, False],
+            'llvm_build_llvm_dylib': [True, False],
+            'llvm_link_llvm_dylib': [True, False],
+            'llvm_dylib_components': ['ANY'],
             'fPIC': [True, False],
-            'components': ['ANY'],
             'targets': ['ANY'],
             'exceptions': [True, False],
             'rtti': [True, False],
@@ -85,7 +86,7 @@ class Llvm(ConanFile):
             'unwind_tables': [True, False],
             'expensive_checks': [True, False],
             'use_perf': [True, False],
-            'use_sanitizer': [
+            'llvm_use_sanitizer': [
                 'Address',
                 'Memory',
                 'MemoryWithOrigins',
@@ -93,7 +94,7 @@ class Llvm(ConanFile):
                 'Thread',
                 'DataFlow',
                 'Address;Undefined',
-                'None'
+                ''
             ],
             'with_z3': [True, False],
             'with_ffi': [True, False],
@@ -105,6 +106,8 @@ class Llvm(ConanFile):
             'use_llvm_cmake_files': [True, False],
             'enable_debug': [True, False],
             'clean_build_bin': [True, False],
+            'ram_per_compile_job': ['ANY'],
+            'ram_per_link_job': ['ANY'],
         },
     }
     default_options = {
@@ -118,9 +121,10 @@ class Llvm(ConanFile):
         },
         **{
             'shared': False,
-            'shared_is_dylib': True,
+            'llvm_build_llvm_dylib': False,
+            'llvm_link_llvm_dylib': False,
+            'llvm_dylib_components': 'all',
             'fPIC': True,
-            'components': 'all',
             'targets': 'all',
             'exceptions': True,  # llvm 14 default off
             'rtti': True,  # llvm 14 default off
@@ -130,7 +134,7 @@ class Llvm(ConanFile):
             'unwind_tables': True,
             'expensive_checks': False,
             'use_perf': False,
-            'use_sanitizer': 'None',
+            'llvm_use_sanitizer': '',
             'with_z3': False,
             'with_ffi': False,
             'with_zlib': True,
@@ -142,10 +146,12 @@ class Llvm(ConanFile):
             'enable_debug': False,
             'use_llvm_cmake_files': False,  # XXX Should these files be used by conan at all?
             'clean_build_bin': True,  # prevent 40gb debug build folder
+
+            # creating job pools with current free memory
+            'ram_per_compile_job': '2000',
+            'ram_per_link_job': '14000',
         }
     }
-
-    generators = "CMakeToolchain"
 
     exports = 'patches/**/*'
 
@@ -157,16 +163,38 @@ class Llvm(ConanFile):
         apply_conandata_patches(self)
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        else:
-            del self.options.shared_is_dylib
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_zlib
             del self.options.with_xml2
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, '14')
+
+        if self.options.shared:
+            self.output.warning(
+                "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
+
+    def validate(self):
+        # check keep_binaries_regex early to fail early
+        re.compile(str(self.options.keep_binaries_regex))
+
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration(
+                "Compiler version too low for this package.")
+
+        if (self.settings.compiler == "msvc") and tools.Version(self.settings.compiler.version) < "16.4":
+            raise ConanInvalidConfiguration(
+                "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
+
+        if self.settings.build_type == "Debug" and not self.options.enable_debug:
+            raise ConanInvalidConfiguration(
+                "Set the 'enable_debug' option to allow debug builds")
+
+        for project in projects:
+            for runtime in runtimes:
+                if project == runtime and self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
+                    raise ConanInvalidConfiguration(
+                        f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
 
     def system_requirements(self):
         # TODO test in different environments
@@ -191,27 +219,13 @@ class Llvm(ConanFile):
         self.build_requires("cmake/[>=3.21.3 <4.0.0]")
         self.build_requires("ninja/[>=1.10.0 <2.0.0]")
 
-    def validate(self):
-        # check keep_binaries_regex early to fail early
-        re.compile(str(self.options.keep_binaries_regex))
+    def generate(self):
+        tc = CMakeToolchain(self, "Ninja")
+        tc.generate()
 
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
-            raise ConanInvalidConfiguration(
-                "Compiler version too low for this package.")
-
-        if (self.settings.compiler == "msvc") and tools.Version(self.settings.compiler.version) < "16.4":
-            raise ConanInvalidConfiguration(
-                "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
-
-        if self.settings.build_type == "Debug" and not self.options.enable_debug:
-            raise ConanInvalidConfiguration(
-                "Set the 'enable_debug' option to allow debug builds")
-
-        for project in projects:
-            for runtime in runtimes:
-                if project == runtime and self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
-                    raise ConanInvalidConfiguration(
-                        f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
+    def build(self):
+        cmake = self._cmake_configure()
+        cmake.build()
 
     def _cmake_configure(self):
         enabled_projects = [
@@ -227,13 +241,11 @@ class Llvm(ConanFile):
         self.output.info('Enabled LLVM runtimes: {}'.format(
             ', '.join(enabled_runtimes)))
 
-        cmake = CMake(self, generator="Ninja", parallel=False)
-        build_shared_libs = self.options.shared and not self.options.get_safe(
-            'shared_is_dylib', default=True)
+        cmake = CMake(self)
         cmake.configure(
-            args=['--graphviz=graph/llvm.dot'],
-            defs={
-                'BUILD_SHARED_LIBS': build_shared_libs,
+            cli_args=['--graphviz=graph/llvm.dot'],
+            variables={
+                'BUILD_SHARED_LIBS': self.options.shared,
                 'LIBOMP_ENABLE_SHARED': self.options.shared,
                 # cmake RPATH handling https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling#default-rpath-settings
                 # default behaviour for RPATH is to clear it on install
@@ -242,13 +254,11 @@ class Llvm(ConanFile):
                 # e.g. readelf -d bin/llvm-tblgen shows RUNPATH $ORIGIN/../lib for build and install location, which is fine in every case.
                 # Only if executed with elevated privileges this is ignored because of security concerns (it contains $ORIGIN and isn't absolute).
                 # CMAKE_SKIP_RPATH # default is fine, kept for documentation.
-                'CMAKE_POSITION_INDEPENDENT_CODE': \
-                self.options.get_safe(
-                    'fPIC', default=False) or self.options.shared,
                 'LLVM_TARGET_ARCH': 'host',
                 'LLVM_TARGETS_TO_BUILD': self.options.targets,
-                'LLVM_BUILD_LLVM_DYLIB': self.options.shared and self.options.get_safe('shared_is_dylib', default=True),
-                'LLVM_DYLIB_COMPONENTS': self.options.components,
+                'LLVM_BUILD_LLVM_DYLIB': self.options.llvm_build_llvm_dylib,
+                'LLVM_DYLIB_COMPONENTS': self.options.llvm_dylib_components,
+                'LLVM_LINK_LLVM_DYLIB': self.options.llvm_link_llvm_dylib,
                 # llvm default on
                 'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False),
                 'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
@@ -294,23 +304,16 @@ class Llvm(ConanFile):
                 'LLVM_ENABLE_LIBXML2': self.options.get_safe('with_xml2', False),
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
+                'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
+                'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
+                'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
             },
-            source_folder=os.path.join(self.source_folder, 'llvm'))
-        if not self.options.shared:
-            cmake.definitions['DISABLE_LLVM_LINK_LLVM_DYLIB'] = True
-        if self.settings.compiler == 'Visual Studio':
+            build_script_folder=os.path.join(self.source_folder, 'llvm'))
+        if self.settings.compiler == 'msvc':
             build_type = str(self.settings.build_type).upper()
             cmake.definitions['LLVM_USE_CRT_{}'.format(build_type)] = \
                 self.settings.compiler.runtime
-        if self.options.use_sanitizer == 'None':
-            cmake.definitions['LLVM_USE_SANITIZER'] = ''
-        else:
-            cmake.definitions['LLVM_USE_SANITIZER'] = self.options.use_sanitizer
         return cmake
-
-    def build(self):
-        cmake = self._cmake_configure()
-        cmake.build()
 
     def _is_relevant_component(self, target_name):
         package_lib_folder = os.path.join(self.package_folder, "lib")
@@ -558,6 +561,8 @@ class Llvm(ConanFile):
         del self.info.options.enable_debug
         del self.info.options.use_llvm_cmake_files
         del self.info.options.clean_build_bin
+        del self.info.options.ram_per_compile_job
+        del self.info.options.ram_per_link_job
 
     @property
     def _module_subfolder(self):
