@@ -63,18 +63,7 @@ class YAJLConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["yajl"]
+        self.cpp_info.libs = ["yajl"] if self.options.shared else ["yajl_s"]
 
         # https://github.com/lloyd/yajl/blob/5e3a7856e643b4d6410ddc3f84bc2f38174f2872/src/CMakeLists.txt#L64
         self.cpp_info.set_property("pkg_config_name", "yajl")
-
-        if self.options.shared:
-            self.cpp_info.libs = ["yajl"]
-        else:
-            self.cpp_info.libs = ["yajl_s"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "YAJL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "yajl"
-        self.cpp_info.names["cmake_find_package"] = "YAJL"
-        self.cpp_info.names["cmake_find_package_multi"] = "yajl"
