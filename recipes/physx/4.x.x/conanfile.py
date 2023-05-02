@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy, replace_in_file, save
+from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rm, rmdir, copy, replace_in_file, save
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 import os
 
@@ -228,6 +228,7 @@ class PhysXConan(ConanFile):
         copy(self, pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
 
         rmdir(self, os.path.join(self.package_folder, "source"))
+        rm(self, "*.pdb", out_lib_dir, recursive=True)
 
         self._copy_external_bin()
 
