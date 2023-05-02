@@ -60,10 +60,8 @@ class Llvm(ConanFile):
 
     settings = 'os', 'arch', 'compiler', 'build_type'
 
-    no_copy_source = True
-    _source_subfolder = 'source'
-    short_paths = True
-    exports_sources = 'patches/**/*'
+    no_copy_source = True #XXX Conan1 dont copy source to build directory, large software opt
+    short_paths = True #XXX Conan1 short paths for windows, no longer needed for recent win10
 
     options = {
         **{'with_project_' + project: [True, False]
@@ -74,8 +72,8 @@ class Llvm(ConanFile):
             'shared': [True, False],
             'shared_is_dylib': [True, False],
             'fPIC': [True, False],
-            'components': 'ANY',
-            'targets': 'ANY',
+            'components': ['ANY'],
+            'targets': ['ANY'],
             'exceptions': [True, False],
             'rtti': [True, False],
             'threads': [True, False],
@@ -98,7 +96,7 @@ class Llvm(ConanFile):
             'with_ffi': [True, False],
             'with_zlib': [True, False],
             'with_xml2': [True, False],
-            'keep_binaries_regex': 'ANY',
+            'keep_binaries_regex': ['ANY'],
 
             # options removed in package id
             'use_llvm_cmake_files': [True, False],
@@ -137,12 +135,23 @@ class Llvm(ConanFile):
             'keep_binaries_regex': '^$',
 
             # options removed in package id
-            'enable_debug': False,  # disable debug builds in ci
-            'use_llvm_cmake_files': False,
+            'enable_debug': False,  # disable debug builds in ci XXX remove because only used for debugging ci?
+            'use_llvm_cmake_files': False, # XXX Should these files be used by conan at all?
             'clean_build_bin': True,  # prevent 40gb debug build folder
         }
     }
-    generators = 'cmake_find_package'
+
+    generators = "CMakeToolchain"
+
+    exports = 'patches/**/*'
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
 
     def requirements(self):
         if self.options.with_ffi:
@@ -271,7 +280,7 @@ class Llvm(ConanFile):
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
             },
-            source_folder=os.path.join(self._source_subfolder, 'llvm'))
+            source_folder=os.path.join(self.source_folder, 'llvm'))
         if not self.options.shared:
             cmake.definitions['DISABLE_LLVM_LINK_LLVM_DYLIB'] = True
         if self.settings.compiler == 'Visual Studio':
@@ -301,7 +310,7 @@ class Llvm(ConanFile):
 
         self.copy(
             "LICENSE.TXT",
-            src=os.path.join(self._source_subfolder, "clang"),
+            src=os.path.join(self.source_folder, "clang"),
             dst="licenses",
             keep_path=False,
         )
