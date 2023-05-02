@@ -62,8 +62,9 @@ class Llvm(ConanFile):
 
     settings = 'os', 'arch', 'compiler', 'build_type'
 
-    no_copy_source = True #XXX Conan1 dont copy source to build directory, large software opt
-    short_paths = True #XXX Conan1 short paths for windows, no longer needed for recent win10
+    # XXX Conan1 dont copy source to build directory, large software opt
+    no_copy_source = True
+    short_paths = True  # XXX Conan1 short paths for windows, no longer needed for recent win10
 
     options = {
         **{'with_project_' + project: [True, False]
@@ -137,8 +138,9 @@ class Llvm(ConanFile):
             'keep_binaries_regex': '^$',
 
             # options removed in package id
-            'enable_debug': False,  # disable debug builds in ci XXX remove because only used for debugging ci?
-            'use_llvm_cmake_files': False, # XXX Should these files be used by conan at all?
+            # disable debug builds in ci XXX remove because only used for debugging ci?
+            'enable_debug': False,
+            'use_llvm_cmake_files': False,  # XXX Should these files be used by conan at all?
             'clean_build_bin': True,  # prevent 40gb debug build folder
         }
     }
@@ -169,7 +171,8 @@ class Llvm(ConanFile):
     def system_requirements(self):
         # TODO test in different environments
         if self.options["with_runtime_compiler-rt"] and Apt(self).check(["libc6-dev-i386"]):
-            raise ConanInvalidConfiguration("For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
+            raise ConanInvalidConfiguration(
+                "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
 
     def requirements(self):
         if self.options.with_ffi:
@@ -177,7 +180,8 @@ class Llvm(ConanFile):
         if self.options.get_safe('with_zlib', False):
             self.requires('zlib/[>1.2.0 <2.0.0]')
         if self.options.get_safe('with_xml2', False):
-            self.requires('libxml2/[>2.9.0 <3.0.0]') # XXX not migrated to conan2
+            # XXX not migrated to conan2
+            self.requires('libxml2/[>2.9.0 <3.0.0]')
         if self.options.get_safe('with_z3', False):
             self.requires('z3/[>4.8.0 <5.0.0]')
 
@@ -191,16 +195,13 @@ class Llvm(ConanFile):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
 
-        if self.settings.compiler == "gcc" and tools.Version(
-                self.settings.compiler.version) < "10":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration(
                 "Compiler version too low for this package.")
 
-        if (self.settings.compiler == "msvc") and tools.Version(
-                    self.settings.compiler.version) < "16.4":
+        if (self.settings.compiler == "msvc") and tools.Version(self.settings.compiler.version) < "16.4":
             raise ConanInvalidConfiguration(
-                "An up to date version of Microsoft Visual Studio 2019 or newer is required."
-            )
+                "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
         if self.settings.build_type == "Debug" and not self.options.enable_debug:
             raise ConanInvalidConfiguration(
@@ -208,11 +209,9 @@ class Llvm(ConanFile):
 
         for project in projects:
             for runtime in runtimes:
-                if project == runtime and \
-                        self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
+                if project == runtime and self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
                     raise ConanInvalidConfiguration(
                         f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
-
 
     def _cmake_configure(self):
         enabled_projects = [
