@@ -4,5 +4,6 @@ sources:
     sha256: "db7c051d256cec7ecd4c3775ab9bc820da5a4bf72ffd4e9f40b911d79770f145"
 patches:
   "1.1.0a":
-    - patch_file: "patches/0001-nmake-honor-flags.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-nmake.patch"
+      patch_description: "Remove hardcoded paths in NMake"
+      patch_type: "conan"
