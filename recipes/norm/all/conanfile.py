@@ -39,7 +39,7 @@ class NormConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.10.3") # dependency of protolib actually
+        self.requires("libxml2/2.10.4") # dependency of protolib actually
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
