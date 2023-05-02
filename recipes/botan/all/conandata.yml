@@ -44,6 +44,9 @@ sources:
   "2.19.3":
     url: "https://github.com/randombit/botan/archive/2.19.3.tar.gz"
     sha256: "8f568bf74c2e476d92ac8a1cfc2ba8407ec038fe9458bd0a11e7da827a9b8199"
+  "3.0.0":
+    url: "https://github.com/randombit/botan/archive/3.0.0.tar.gz"
+    sha256: "8bafe2e965fa9ccf92ef5741165d735c9fbbe6376c373bbf5702495ad2dfb814"
 patches:
   "2.12.1":
     - patch_file: "patches/dll-dir.patch"
