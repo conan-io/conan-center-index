@@ -1,0 +1,42 @@
+--- a/octomap/include/octomap/OcTreeBase.h
++++ b/octomap/include/octomap/OcTreeBase.h
+@@ -43,7 +43,7 @@ namespace octomap {
+   template <class NODE>
+   class OcTreeBase : public OcTreeBaseImpl<NODE,AbstractOcTree> {
+   public:
+-    OcTreeBase<NODE>(double res) : OcTreeBaseImpl<NODE,AbstractOcTree>(res) {};
++    OcTreeBase<NODE>(double res) : OcTreeBaseImpl<NODE,AbstractOcTree>(res) {}
+ 
+     /// virtual constructor: creates a new object of same type
+     /// (Covariant return type requires an up-to-date compiler)
+--- a/octomap/src/Pointcloud.cpp
++++ b/octomap/src/Pointcloud.cpp
+@@ -38,7 +38,7 @@
+ 
+ #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
+   #include <algorithm>
+-  #if __cplusplus > 199711L
++  #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+     #include <random>
+   #endif
+ #else
+@@ -213,7 +213,7 @@ namespace octomap {
+   #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
+     samples.reserve(this->size());
+     samples.insert(samples.end(), this->begin(), this->end());
+-    #if __cplusplus > 199711L
++    #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+       std::random_device r;
+       std::mt19937 urbg(r());
+       std::shuffle(samples.begin(), samples.end(), urbg);
+--- a/octomap/src/compare_octrees.cpp
++++ b/octomap/src/compare_octrees.cpp
+@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
+       else
+         kld +=log(p1/p2)*p1 + log((1-p1)/(1-p2))*(1-p1);
+ 
+-#if __cplusplus >= 201103L
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+       if (std::isnan(kld)){
+ #else
+       if (isnan(kld)){
