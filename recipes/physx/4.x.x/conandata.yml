@@ -2,11 +2,20 @@ sources:
   "4.1.1":
     url: "https://github.com/NVIDIAGameWorks/PhysX/archive/ae80dede0546d652040ae6260a810e53e20a06fa.zip"
     sha256: "dd7db4c7879659658753029de57d04b18047ec04687b60f70335cde148a48d68"
-    strip_root: true
 patches:
   "4.1.1":
     - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
+      patch_description: "Fixed typeinfo inclusion for some VS versions"
+      patch_type: "portability"
     - patch_file: "patches/0002-GuGJKType-const-discard-qualifiers.patch"
+      patch_description: "Add missing const qualifier to GuGJKType"
+      patch_type: "portability"
     - patch_file: "patches/0003-PsWindowsInlineAoS-msvc142-bug-workaround.patch"
+      patch_description: "Workaround for a MSVC 142 bug on V3LoadA"
+      patch_type: "portability"
     - patch_file: "patches/0004-Conan-PhysXGpu-name-workaround.patch"
+      patch_description: "Fix PhysXGpu library name"
+      patch_type: "conan"
     - patch_file: "patches/0005-CMake-macos-ios-android-install-targets.patch"
+      patch_description: "Add installation targets for iOS, MacOS, Android"
+      patch_type: "portability"
