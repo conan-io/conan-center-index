@@ -6,6 +6,7 @@ This section gathers the most common questions from the community related to pac
 ## Contents
 
   * [What is the policy on recipe name collisions?](#what-is-the-policy-on-recipe-name-collisions)
+  * [What is the policy for naming forks?](#what-is-the-policy-for-naming-forks)
   * [What is the policy on creating packages from pre-compiled binaries?](#what-is-the-policy-on-creating-packages-from-pre-compiled-binaries)
   * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
@@ -54,6 +55,15 @@ This repository will try to follow the most well-known names for each of the rec
 However, if it is not possible and there is the case of a new recipe producing a name collision, the first recipe contributed will have precedence over it. Generally, recipes contributed to the repo won't change its name in order to not break users.
 
 For example, `GSL` is the name of `Guidelines Support Library` from Microsoft and `GNU Scientific Library` from GNU. Both libraries are commonly known as `gsl`, however, to disambiguate (if there is already a `gsl` package in this repo) we could use `ms-gsl` in the first case or `gnu-gsl` in the second.
+
+## What is the policy for naming forks?
+
+When submitting recipes, its important to pick names which clearly identifies the source. For projects which are forks of existing but diverge significantly enough
+to be unique (subject to opinion), the should be prefixed with the author or organization such as `author-name`. A good example is the [crow](https://github.com/ipkn/crow)
+which was forked [crowcpp-crow](https://github.com/CrowCpp/Crow). The original project maintain the `crow` name where as the more featured and advanced fork is `crowcpp-crow`.
+
+Forks are acceptable submissions given they have significantly divergent fro mthe upstream. This can include adding new features, updateing compiler or standard support, and actively being maintained. Changes which are not sufficient are build scripts, small bug fixes, "conan-ization" - all of these can be
+[applied as patches to the original](adding_packages/sources_and_patches.md).
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
