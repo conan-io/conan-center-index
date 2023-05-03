@@ -41,12 +41,9 @@ class OpenblasConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if fortran_id == "GNU":
                 if self.settings.compiler == "gcc":
-                    if Version(self.settings.compiler.version).major in ["5", "6"]:
-                        return "gfortran"  # Runtime version gfortran3
-                    if Version(self.settings.compiler.version).major == "7":
-                        return "gfortran"  # Runtime version gfortran4
-                    if Version(self.settings.compiler.version).major > "7":
-                        return "gfortran"  # Runtime version gfortran5
+                    # Compiler vs. gfortran runtime ver.: 5,6: 3, 7: 4, >=8: 5
+                    if Version(self.settings.compiler.version).major > "5":
+                        return "gfortran"
                 if self.settings.compiler == "clang":
                     if Version(self.settings.compiler.version).major > "8":
                         return "gfortran"  # Runtime version gfortran5
@@ -80,6 +77,10 @@ class OpenblasConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        # Build LAPACK by default if possible w/o Fortran compiler
+        if Version(self.version) >= "0.3.21":
+            self.options.build_lapack = True
 
     def configure(self):
         if self.options.shared:
@@ -153,10 +154,10 @@ class OpenblasConan(ConanFile):
         # don't, may lie to consumer, /MD or /MT is managed by conan
         tc.variables["MSVC_STATIC_CRT"] = False
 
-        # Env variable escape hatch for disabling AVX512
+        # Env variable escape hatch for enabling AVX512
         no_avx512 = environ.get("NO_AVX512")
         if no_avx512 is None:
-            no_avx512 = False
+            no_avx512 = True
         tc.variables["NO_AVX512"] = no_avx512
 
         tc.generate()
