@@ -158,7 +158,7 @@ class Llvm(ConanFile):
         }
     }
 
-    exports = 'patches/**/*'
+    exports_sources = 'patches/**/*'
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -205,7 +205,7 @@ class Llvm(ConanFile):
     def system_requirements(self):
         # TODO test in different environments
         # TODO is printed during test, is it also checked during consume? Probably that would be an error.
-        if self.options["with_runtime_compiler-rt"] and Apt(self).check(["libc6-dev-i386"]):
+        if self.options.get_safe('with_runtime_compiler-rt', False) and Apt(self).check(["libc6-dev-i386"]):
             raise ConanInvalidConfiguration(
                 "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
 
