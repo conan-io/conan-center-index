@@ -41,7 +41,9 @@ default_projects = [
     # 'libc', # clang-14 crashes for sin/cos/tan for 13.0.0-14.0.6
     'libclc',
     'lld',
-    # 'lldb', # lib/liblldb.so.14.0.6 / libxml2, error: undefined symbol: libiconv_open, referenced by encoding.c in libxml2.a
+    # TODO: lib/liblldb.so.14.0.6 / libxml2, error: undefined symbol: libiconv_open, referenced by encoding.c in libxml2.a
+    # probably because libxml2 isn't migrated to conan2, maybe components['lldbHost'].requires.append('Iconv::Iconv') ?
+    # 'lldb',
     'openmp',
     'polly',
     'pstl',
@@ -319,23 +321,18 @@ class Llvm(ConanFile):
                 self.settings.compiler.runtime
         return cmake
 
-    def _is_relevant_component(self, target_name):
+    def _is_installed_llvm_lib(self, target_name):
+        """Is the given target installed by llvm? Is it a library?"""
         package_lib_folder = os.path.join(self.package_folder, "lib")
         return os.path.exists(os.path.join(package_lib_folder, f"lib{target_name}.a")) or \
             os.path.exists(os.path.join(package_lib_folder, f"lib{target_name}.so")) or \
             os.path.exists(os.path.join(
                 package_lib_folder, f"lib{target_name}.dylib"))
 
-    def package(self):
-        cmake = self._cmake_configure()
-        cmake.install()
-
-        self.copy(
-            "LICENSE.TXT",
-            src=os.path.join(self.source_folder, "clang"),
-            dst="licenses",
-            keep_path=False,
-        )
+    def _package_bin(self):
+        """Keep binaries which are matching recipe option keep_binaries_regex.
+        Keeps also links in between, removes everything else.
+        Returns list of all binaries."""
         bin_matcher = re.compile(str(self.options.keep_binaries_regex))
         keep_binaries = []
         # resolve binaries to keep which are links, so we need to keep link target as well.
@@ -367,6 +364,9 @@ class Llvm(ConanFile):
                 self.output.info(f"Removing binary \"{bin}\" from package")
                 os.remove(bin_path)
 
+        return binaries
+
+    def _package_various_removing(self):
         # remove unneccessary files from package
         ignore = ["share", "libexec", "**/Find*.cmake", "**/*Config.cmake"]
         for ignore_entry in ignore:
@@ -385,7 +385,23 @@ class Llvm(ConanFile):
         if self.options.clean_build_bin:
             rmdir(self, os.path.join(self.build_folder, 'bin'))
 
+    def package(self):
+        cmake = self._cmake_configure()
+        cmake.install()
+
+        copy(self,
+             "LICENSE.TXT",
+             src=os.path.join(self.source_folder, "clang"),
+             dst="licenses",
+             keep_path=False,
+             )
+
+        binaries = self._package_bin()
+        self._package_various_removing()
+
         # creating dependency graph
+        # from: libA -> libB -> obj... -> libSystem
+        # to: libA -> libB, libB -> libSystem
         with chdir(self, 'graph'):
             dot_text = load(self, 'llvm.dot').replace('\r\n', '\n')
         dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
@@ -405,18 +421,19 @@ class Llvm(ConanFile):
         external_targets_keys = external_targets.keys()
         dummy_targets = defaultdict(list)
         for target, dep in deps:
-            if not self._is_relevant_component(target) and target not in external_targets_keys:
+            if not self._is_installed_llvm_lib(target) and target not in external_targets_keys:
                 dummy_targets[target].append(dep)
         dummy_targets_keys = dummy_targets.keys()
 
         # fill components with relevant targets
+        # relevant = installed by llvm and is a lib
         components = defaultdict(list)
         ignored_deps = []
         for lib, dep in deps:
             if lib in binaries:
                 continue
 
-            if self._is_relevant_component(lib):
+            if self._is_installed_llvm_lib(lib):
                 components[lib]
 
                 if isinstance(dep, list):
@@ -433,7 +450,7 @@ class Llvm(ConanFile):
 
                     if current_dep in binaries:
                         continue
-                    elif self._is_relevant_component(current_dep):
+                    elif self._is_installed_llvm_lib(current_dep):
                         components[current_dep]
 
                     # Copied from llvm-core but not used on linux, maybe for other systems? ==>
@@ -454,7 +471,7 @@ class Llvm(ConanFile):
                         for d in dummy_targets[current_dep]:
                             if not visited:
                                 current_deps.append(d)
-                    elif self._is_relevant_component(current_dep):
+                    elif self._is_installed_llvm_lib(current_dep):
                         if not self.options.shared:
                             components[lib].append(current_dep)
                     elif current_dep in external_targets_keys:
@@ -469,7 +486,7 @@ class Llvm(ConanFile):
         self.output.info(
             f'ignored these dependencies, will not propagate these to conan: {ignored_deps}')
 
-        # workaround for circular dependencies
+        # workaround for circular dependencies which will create errors in conan
         remove_dependencies = [
             ('lldbBreakpoint', 'lldbCore'),
             ('lldbBreakpoint', 'lldbTarget'),
@@ -503,6 +520,7 @@ class Llvm(ConanFile):
         ]
         keys = components.keys()
 
+        # remove circular dependencies in components
         for target, remove in remove_dependencies:
             if target in keys:
                 if remove in components[target]:
@@ -521,43 +539,24 @@ class Llvm(ConanFile):
             raise ConanException(
                 f"circular dependency found, see error log above")
 
-        lib_path = os.path.join(self.package_folder, 'lib')
+        # manually fix some dependencies
         if not self.options.shared:
             if self.options.get_safe('with_zlib', False):
                 if not 'z' in components['LLVMSupport']:
                     components['LLVMSupport'].append('z')
-            suffixes = ['.a']
-        else:
-            suffixes = ['.dylib', '.so']
-            for ext in suffixes:
-                lib = 'libclang*{}*'.format(ext)
-                copy(self, lib, dst='lib', src='lib')
 
-        for name in os.listdir(lib_path):
-            if not any(suffix in name for suffix in suffixes):
-                remove_path = os.path.join(lib_path, name)
-                # directories are needed for certain binaries, e.g. clang -> lib/clang
-                if os.path.isdir(remove_path):
-                    continue
-                self.output.info(
-                    f"Removing library \"{remove_path}\" from package because it doesn't contain any of {suffixes}")
-                os.remove(remove_path)
-
-        # because we remove libs from lib/folder, we need to clear components as well
-        removed = []
-        for key in components.keys():
-            removed_component = not self._is_relevant_component(key)
-            if removed_component:
-                removed.append(key)
-        for remove in removed:
-            del components[remove]
-        # and check if still existing components rely on these
-        for remove in removed:
-            for key in components.keys():
-                if remove in components[key]:
-                    self.output.info(
-                        f"Removing dependency from \"{key}\" to \"{remove}\" because it doesn't contain any of {suffixes}")
-                    components[key].remove(remove)
+            # fix: ERROR: llvm/14.0.6@...: Required package 'libxml2' not in component 'requires'
+            # llvm 14.0.6 searched for LibXml2::LibXml2
+            xml2_linking = ["LLVMWindowsManifest", "lldbHost", "c-index-test"]
+            report_xml2_issue = self.options.with_xml2
+            if self.options.with_xml2:
+                for component in xml2_linking:
+                    if component in components:
+                        self.cpp_info.components[component].requires.append(
+                            "libxml2::libxml2")
+                        report_xml2_issue = False
+            if report_xml2_issue:
+                raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
 
         # write components.json for package_info
         components_path = os.path.join(
@@ -566,7 +565,6 @@ class Llvm(ConanFile):
             json.dump(components, components_file, indent=4)
 
     def package_id(self):
-        # TODO replace with options.rm_safe
         del self.info.options.enable_debug
         del self.info.options.use_llvm_cmake_files
         del self.info.options.clean_build_bin
@@ -601,7 +599,7 @@ class Llvm(ConanFile):
         for component, deps in components.items():
             self.cpp_info.components[component].libs = [component]
             self.cpp_info.components[component].requires.extend(
-                dep for dep in deps if self._is_relevant_component(dep))
+                dep for dep in deps if self._is_installed_llvm_lib(dep))
 
             for lib, target in external_targets.items():
                 if lib in deps:
@@ -609,7 +607,7 @@ class Llvm(ConanFile):
 
             self.cpp_info.components[component].system_libs = [
                 dep for dep in deps
-                if not self._is_relevant_component(dep) and dep not in dependencies
+                if not self._is_installed_llvm_lib(dep) and dep not in dependencies
             ]
 
             self.cpp_info.components[component].set_property(
@@ -628,19 +626,3 @@ class Llvm(ConanFile):
                     os.path.join(module_subfolder,
                                  "LLVMConfigInternal.cmake")
                 )
-
-        # fix: ERROR: llvm/14.0.6@...: Required package 'libxml2' not in component 'requires'
-        xml2_linking = ["LLVMWindowsManifest", "lldbHost", "c-index-test"]
-        report_xml2_issue = self.options.with_xml2
-        if self.options.with_xml2:
-            for component in xml2_linking:
-                if component in components:
-                    self.cpp_info.components[component].requires.append(
-                        "libxml2::libxml2")
-                    report_xml2_issue = False
-        if report_xml2_issue:
-            raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "LLVM"
-        self.cpp_info.names["cmake_find_package_multi"] = "LLVM"
