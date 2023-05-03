@@ -1,11 +1,14 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, apply_conandata_patches
+from conan.tools.files import get, apply_conandata_patches, rmdir, chdir, load, collect_libs
+from conan.tools.microsoft import is_msvc
+from conan.tools.files.copy_pattern import copy
 from conan.tools.build.cppstd import check_min_cppstd
 from conan.tools.system.package_manager import Apt
 from conan.errors import ConanInvalidConfiguration
 from collections import defaultdict
 from conan.tools.cmake.layout import cmake_layout
+from conan.errors import ConanException
 import os
 import shutil
 import glob
@@ -178,11 +181,12 @@ class Llvm(ConanFile):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
 
+        # TODO tools.Version ?
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration(
                 "Compiler version too low for this package.")
 
-        if (self.settings.compiler == "msvc") and tools.Version(self.settings.compiler.version) < "16.4":
+        if is_msvc(self) and tools.Version(self.settings.compiler.version) < "16.4":
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
@@ -198,6 +202,7 @@ class Llvm(ConanFile):
 
     def system_requirements(self):
         # TODO test in different environments
+        # TODO is printed during test, is it also checked during consume? Probably that would be an error.
         if self.options["with_runtime_compiler-rt"] and Apt(self).check(["libc6-dev-i386"]):
             raise ConanInvalidConfiguration(
                 "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
@@ -208,7 +213,6 @@ class Llvm(ConanFile):
         if self.options.get_safe('with_zlib', False):
             self.requires('zlib/[>1.2.0 <2.0.0]')
         if self.options.get_safe('with_xml2', False):
-            # XXX not migrated to conan2
             self.requires('libxml2/[>2.9.0 <3.0.0]')
         if self.options.get_safe('with_z3', False):
             self.requires('z3/[>4.8.0 <5.0.0]')
@@ -309,7 +313,7 @@ class Llvm(ConanFile):
                 'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
             },
             build_script_folder=os.path.join(self.source_folder, 'llvm'))
-        if self.settings.compiler == 'msvc':
+        if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
             cmake.definitions['LLVM_USE_CRT_{}'.format(build_type)] = \
                 self.settings.compiler.runtime
@@ -379,11 +383,11 @@ class Llvm(ConanFile):
 
         # remove binaries from build, in debug builds these can take 40gb of disk space but are fast to recreate
         if self.options.clean_build_bin:
-            tools.rmdir(os.path.join(self.build_folder, 'bin'))
+            rmdir(self, os.path.join(self.build_folder, 'bin'))
 
         # creating dependency graph
-        with tools.chdir('graph'):
-            dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
+        with chdir(self, 'graph'):
+            dot_text = load(self, 'llvm.dot').replace('\r\n', '\n')
         dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
         deps = re.findall(dep_regex, dot_text)
 
@@ -459,9 +463,11 @@ class Llvm(ConanFile):
                         ignored_deps.append(current_dep)
                 components[lib] = list(set(components[lib]))
                 if lib in components[lib]:
-                    raise "found circular dependency for {lib} over {dep}"
+                    raise ConanException(
+                        f"Conan recipe error, found circular dependency for {lib} over {dep}")
         ignored_deps = list(set(ignored_deps))
-        self.output.info(f'ignored these dependencies: {ignored_deps}')
+        self.output.info(
+            f'ignored these dependencies, will not propagate these to conan: {ignored_deps}')
 
         # workaround for circular dependencies
         remove_dependencies = [
@@ -503,15 +509,17 @@ class Llvm(ConanFile):
                     components[target].remove(remove)
                 if target in components[remove]:
                     components[remove].remove(target)
-        r = False
+        found_circular_dep = False
         for c in keys:
             for c_dep in components[c]:
                 if c_dep in keys:
                     if c in components[c_dep]:
-                        self.output.warn(f"{c} -> {c_dep} -> {c}")
-                        r = True
-        if r:
-            raise "circular dependency found"
+                        self.output.error(
+                            f"circular dependency found: {c} -> {c_dep} -> {c}")
+                        found_circular_dep = True
+        if found_circular_dep:
+            raise ConanException(
+                f"circular dependency found, see error log above")
 
         lib_path = os.path.join(self.package_folder, 'lib')
         if not self.options.shared:
@@ -523,7 +531,7 @@ class Llvm(ConanFile):
             suffixes = ['.dylib', '.so']
             for ext in suffixes:
                 lib = 'libclang*{}*'.format(ext)
-                self.copy(lib, dst='lib', src='lib')
+                copy(self, lib, dst='lib', src='lib')
 
         for name in os.listdir(lib_path):
             if not any(suffix in name for suffix in suffixes):
@@ -558,21 +566,19 @@ class Llvm(ConanFile):
             json.dump(components, components_file, indent=4)
 
     def package_id(self):
+        # TODO replace with options.rm_safe
         del self.info.options.enable_debug
         del self.info.options.use_llvm_cmake_files
         del self.info.options.clean_build_bin
         del self.info.options.ram_per_compile_job
         del self.info.options.ram_per_link_job
 
-    @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
     def package_info(self):
+        module_subfolder = os.path.join("lib", "cmake")
         self.cpp_info.set_property("cmake_file_name", "LLVM")
 
         if self.options.shared:
-            self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.libs = collect_libs(self)
             if self.settings.os == 'Linux':
                 self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
             elif self.settings.os == 'Macos':
@@ -609,19 +615,31 @@ class Llvm(ConanFile):
             self.cpp_info.components[component].set_property(
                 "cmake_target_name", component)
             self.cpp_info.components[component].builddirs.append(
-                self._module_subfolder)
+                module_subfolder)
             self.cpp_info.components[component].names["cmake_find_package"] = component
             self.cpp_info.components[component].names["cmake_find_package_multi"] = component
 
             if self.options.use_llvm_cmake_files:
                 self.cpp_info.components[component].build_modules["cmake_find_package"].append(
-                    os.path.join(self._module_subfolder,
+                    os.path.join(module_subfolder,
                                  "LLVMConfigInternal.cmake")
                 )
                 self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(
-                    os.path.join(self._module_subfolder,
+                    os.path.join(module_subfolder,
                                  "LLVMConfigInternal.cmake")
                 )
+
+        # fix: ERROR: llvm/14.0.6@...: Required package 'libxml2' not in component 'requires'
+        xml2_linking = ["LLVMWindowsManifest", "lldbHost", "c-index-test"]
+        report_xml2_issue = self.options.with_xml2
+        if self.options.with_xml2:
+            for component in xml2_linking:
+                if component in components:
+                    self.cpp_info.components[component].requires.append(
+                        "libxml2::libxml2")
+                    report_xml2_issue = False
+        if report_xml2_issue:
+            raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "LLVM"
