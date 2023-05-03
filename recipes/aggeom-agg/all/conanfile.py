@@ -8,7 +8,7 @@ import os
 required_conan_version = ">=1.53.0"
 
 class AggConan(ConanFile):
-    name = 'agg'
+    name = 'aggeom-agg'
     description = 'AGG Anti-Grain Geometry Library'
     topics = ('graphics')
     url = "https://github.com/conan-io/conan-center-index"
