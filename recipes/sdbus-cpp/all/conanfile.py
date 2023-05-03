@@ -59,7 +59,7 @@ class SdbusCppConan(ConanFile):
 
     def validate(self):
         if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
+            raise ConanInvalidConfiguration(f"{self.name} only supports Linux")
 
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
