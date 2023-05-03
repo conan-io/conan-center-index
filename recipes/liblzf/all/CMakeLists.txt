@@ -5,6 +5,7 @@ add_library(liblzf
     src/lzf_c.c
     src/lzf_d.c
 )
+set_target_properties(liblzf PROPERTIES OUTPUT_NAME lzf)
 
 # The original autotools config specified -O3 -funroll-all-loops for GCC
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR

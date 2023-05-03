@@ -64,4 +64,4 @@ class LiblzfConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["liblzf"]
+        self.cpp_info.libs = ["lzf"]
