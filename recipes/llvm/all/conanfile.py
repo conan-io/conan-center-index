@@ -552,8 +552,10 @@ class Llvm(ConanFile):
             if self.options.with_xml2:
                 for component in xml2_linking:
                     if component in components:
-                        self.cpp_info.components[component].requires.append(
-                            "libxml2::libxml2")
+                        components[component].append(
+                            "xml2")
+                        self.output.info(
+                            f"forced dependency to \"xml2\" for target {component}")
                         report_xml2_issue = False
             if report_xml2_issue:
                 raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
@@ -588,7 +590,6 @@ class Llvm(ConanFile):
         with open(components_path, 'r') as components_file:
             components = json.load(components_file)
 
-        dependencies = ['ffi', 'z', 'iconv', 'xml2']
         external_targets = {
             'ffi': 'libffi::libffi',
             'z': 'zlib::zlib',
@@ -607,7 +608,7 @@ class Llvm(ConanFile):
 
             self.cpp_info.components[component].system_libs = [
                 dep for dep in deps
-                if not self._is_installed_llvm_lib(dep) and dep not in dependencies
+                if not self._is_installed_llvm_lib(dep) and dep not in external_targets.keys()
             ]
 
             self.cpp_info.components[component].set_property(
@@ -626,3 +627,7 @@ class Llvm(ConanFile):
                     os.path.join(module_subfolder,
                                  "LLVMConfigInternal.cmake")
                 )
+
+        self.output.info(
+            "checking if all dependencies added to llvm are referenced by any exposed target")
+        self.cpp_info.check_component_requires(self)
