@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.51.1"
 
 
 class H5ppConan(ConanFile):
@@ -94,10 +94,18 @@ class H5ppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
+        self.cpp_info.components["h5pp_headers"].bindirs = []
+        self.cpp_info.components["h5pp_headers"].libdirs = []
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
-        self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_deps"].bindirs = []
+        self.cpp_info.components["h5pp_deps"].libdirs = []
         self.cpp_info.components["h5pp_deps"].requires = ["hdf5::hdf5"]
+        self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_flags"].bindirs = []
+        self.cpp_info.components["h5pp_flags"].libdirs = []
 
         if Version(self.version) >= "1.10.0":
             if self.options.with_eigen:
