@@ -546,7 +546,6 @@ class Llvm(ConanFile):
                     components['LLVMSupport'].append('z')
 
             # fix: ERROR: llvm/14.0.6@...: Required package 'libxml2' not in component 'requires'
-            # llvm 14.0.6 searched for LibXml2::LibXml2
             xml2_linking = ["LLVMWindowsManifest", "lldbHost", "c-index-test"]
             report_xml2_issue = self.options.with_xml2
             if self.options.with_xml2:
