@@ -176,6 +176,13 @@ class Llvm(ConanFile):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
 
+        if self.options.shared:
+            if self.options.llvm_build_llvm_dylib:
+                raise ConanInvalidConfiguration(
+                    "LLVM needs static compilation for dylib.")
+            self.output.warning(
+                "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
+
         # TODO tools.Version ?
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration(
