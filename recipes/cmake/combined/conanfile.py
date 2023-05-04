@@ -154,16 +154,12 @@ class CMakeConan(ConanFile):
             return
         cmake_layout(self, src_folder="src")
 
-    def source(self):
+    def generate(self):
         if not self.options.from_sources:
             return
         get(self, **self.conan_data["sources"][self.version]["code"],
             destination=self.source_folder, strip_root=True)
         rmdir(self, os.path.join(self.source_folder, "Tests", "RunCMake", "find_package"))
-
-    def generate(self):
-        if not self.options.from_sources:
-            return
         tc = CMakeToolchain(self)
         # Disabling testing because CMake tests build can fail in Windows in some cases
         tc.variables["BUILD_TESTING"] = False
