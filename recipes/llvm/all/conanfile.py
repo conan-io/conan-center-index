@@ -109,7 +109,6 @@ class Llvm(ConanFile):
 
             # options removed in package id
             'use_llvm_cmake_files': [True, False],
-            'enable_debug': [True, False],
             'clean_build_bin': [True, False],
             'ram_per_compile_job': ['ANY'],
             'ram_per_link_job': ['ANY'],
@@ -147,8 +146,6 @@ class Llvm(ConanFile):
             'keep_binaries_regex': '^$',
 
             # options removed in package id
-            # disable debug builds in ci XXX remove because only used for debugging ci?
-            'enable_debug': False,
             'use_llvm_cmake_files': False,  # XXX Should these files be used by conan at all?
             'clean_build_bin': True,  # prevent 40gb debug build folder
 
@@ -187,10 +184,6 @@ class Llvm(ConanFile):
         if is_msvc(self) and tools.Version(self.settings.compiler.version) < "16.4":
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
-
-        if self.settings.build_type == "Debug" and not self.options.enable_debug:
-            raise ConanInvalidConfiguration(
-                "Set the 'enable_debug' option to allow debug builds")
 
         for project in projects:
             for runtime in runtimes:
@@ -562,7 +555,6 @@ class Llvm(ConanFile):
             json.dump(components, components_file, indent=4)
 
     def package_id(self):
-        del self.info.options.enable_debug
         del self.info.options.use_llvm_cmake_files
         del self.info.options.clean_build_bin
         del self.info.options.ram_per_compile_job
