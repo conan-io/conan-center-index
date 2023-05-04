@@ -2,7 +2,7 @@ version: 27.0
 #----------------------------------------------------------------------------
 requirements:
     BACKWARD:   ["backward-cpp/1.6"]
-    UNWIND:     ["libunwind/1.6.2"]
+    UNWIND:     ["libunwind/1.6.2", "xz_utils/5.4.2"]
     BerkeleyDB: ["libdb/5.3.28"]
     BZ2:        ["bzip2/1.0.8"]
     GIF:        ["giflib/5.2.1"]
