@@ -1,5 +1,16 @@
 # Changelog
 
+
+### 04-May-2023 - 16:05 CEST
+
+- [bugfix] Fix cppstd issues when selecting the value to use in profiles.
+- [feature] Add support for raising `InvalidConfiguration` in `validate_build()` method in recipes.
+- [feature] Update Conan client to 2.0.4
+- [feature] Inform users when Conan v2 CI build is mandatory for merging
+- [feature] Implement different "under maintenance" levels: OFF, MINOR, MAJOR, CRITICAL
+- [feature] ValidateInfrastrucure: Check Artifactory repos exist.
+- [feature] Move variables to new folder properties approach.
+
 ### 12-April-2023 - 16:18 CEST
 
 - [feature] Add ListPackages job the posibility to update a list via PR
