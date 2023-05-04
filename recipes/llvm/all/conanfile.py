@@ -175,10 +175,6 @@ class Llvm(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, '14')
 
-        if self.options.shared:
-            self.output.warning(
-                "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
-
     def validate(self):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
