@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, rmdir, get
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 import os
@@ -27,7 +26,7 @@ class PahoMqttCppConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ssl": True
+        "ssl": True,
     }
 
     @property
@@ -61,7 +60,7 @@ class PahoMqttCppConan(ConanFile):
             self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.dependencies["paho-mqtt-c"].options.shared != self.options.shared:
@@ -84,14 +83,9 @@ class PahoMqttCppConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        vbuildenv = VirtualBuildEnv(self)
-        vbuildenv.generate(scope="build")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -105,20 +99,19 @@ class PahoMqttCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
-
         target = "paho-mqttpp3" if self.options.shared else "paho-mqttpp3-static"
         self.cpp_info.set_property("cmake_file_name", "PahoMqttCpp")
         self.cpp_info.set_property("cmake_target_name", f"PahoMqttCpp::{target}")
-
-        self.cpp_info.components["paho-mqttpp"].set_property("cmake_target_name", f"PahoMqttCpp::{target}")
-        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package"] = target
-        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package_multi"] = target
+        # TODO: back to root level once conan v1 support removed
         if self.settings.os == "Windows":
             self.cpp_info.components["paho-mqttpp"].libs = [target]
         else:
             self.cpp_info.components["paho-mqttpp"].libs = ["paho-mqttpp3"]
+
+        # TODO: to remove once conan v1 support removed
+        self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
+        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package"] = target
+        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["paho-mqttpp"].set_property("cmake_target_name", f"PahoMqttCpp::{target}")
         self.cpp_info.components["paho-mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
-        if self.options.ssl:
-            self.cpp_info.components["paho-mqttpp"].requires.extend(["openssl::openssl"])
