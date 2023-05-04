@@ -1,23 +1,25 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conan.tools.files import get
-from conan.tools.build import check_min_cppstd
-from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.50.0"
+
 
 class H5ppConan(ConanFile):
     name = "h5pp"
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DavidAce/h5pp"
-    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "cpp17")
+    topics = ("hdf5", "binary", "storage", "header-only", "cpp17")
     license = "MIT"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    short_paths = True
     options = {
         "with_eigen": [True, False],
         "with_spdlog": [True, False],
@@ -28,14 +30,15 @@ class H5ppConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7.4",
             "Visual Studio": "15.7",
+            "msvc": "191",
             "clang": "6",
             "apple-clang": "10",
         }
@@ -50,6 +53,9 @@ class H5ppConan(ConanFile):
             #     that including the headers is intentional.
             del self.options.with_eigen
             del self.options.with_spdlog
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) < "1.10.0":
@@ -67,25 +73,23 @@ class H5ppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("h5pp requires C++17, which your compiler does not support.")
-        else:
-            self.output.warn("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        get(self,**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self,**self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if Version(self.version) < "1.9.0":
-            includedir = os.path.join(self._source_subfolder, "h5pp", "include")
+            includedir = os.path.join(self.source_folder, "h5pp", "include")
         else:
-            includedir = os.path.join(self._source_subfolder, "include")
-        self.copy("*", src=includedir, dst="include")
+            includedir = os.path.join(self.source_folder, "include")
+        copy(self, "*", src=includedir, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
