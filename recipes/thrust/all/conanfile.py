@@ -33,11 +33,10 @@ class ThrustConan(ConanFile):
         if self.options.device_system == "tbb":
             self.requires("onetbb/2021.8.0", transitive_headers=True, transitive_libs=True)
         elif self.options.device_system != "cpp":
+            dev = str(self.options.device_system).upper()
             self.output.warn(
-                "Conan package for {0} is not available,"
-                " this package will use {0} from system.".format(
-                    str(self.options.device_system).upper()
-                )
+                f"Conan package for {dev} is not available,"
+                f" this package will use {dev} from system."
             )
 
     def package_id(self):
@@ -63,8 +62,5 @@ class ThrustConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.defines = [
-            "THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{}".format(
-                str(self.options.device_system).upper()
-            )
-        ]
+        dev = str(self.options.device_system).upper()
+        self.cpp_info.defines = [f"THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{dev}"]
