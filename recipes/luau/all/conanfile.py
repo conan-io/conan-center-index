@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class LuauConan(ConanFile):
     name = "luau"
@@ -17,6 +17,7 @@ class LuauConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://luau-lang.org/"
     topics = ("lua", "scripting", "typed", "embed")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
@@ -43,6 +44,8 @@ class LuauConan(ConanFile):
             "gcc": "8" if Version(self.version) < "0.549" else "9",
             "clang": "7",
             "apple-clang": "12",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def export_sources(self):
@@ -55,10 +58,7 @@ class LuauConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if Version(self.version) < "0.549":
             del self.options.native_code_gen
 
@@ -66,11 +66,10 @@ class LuauConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        check_min_vs(self, 191)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
@@ -79,7 +78,7 @@ class LuauConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared build in MSVC")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

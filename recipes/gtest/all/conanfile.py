@@ -3,11 +3,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class GTestConan(ConanFile):
@@ -17,6 +17,7 @@ class GTestConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/googletest"
     topics = ("testing", "google-testing", "unit-test")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,22 +37,29 @@ class GTestConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "1.13.0" else "14"
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "14",
-            "msvc": "190",
-            "gcc": "4.8.1" if Version(self.version) < "1.11.0" else "5",
-            "clang": "3.3" if Version(self.version) < "1.11.0" else "5",
-            "apple-clang": "5.0" if Version(self.version) < "1.11.0" else "9.1",
-        }
-
-    @property
-    def _is_clang_cl(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+            "11": {
+                "Visual Studio": "14",
+                "msvc": "190",
+                "gcc": "4.8.1" if Version(self.version) < "1.11.0" else "5",
+                "clang": "3.3" if Version(self.version) < "1.11.0" else "5",
+                "apple-clang": "5.0" if Version(self.version) < "1.11.0" else "9.1",
+            },
+            # Sinse 1.13.0, gtest requires C++14 and Google's Foundational C++ Support Policy
+            # https://github.com/google/oss-policies-info/blob/603a042ce2ee8f165fac46721a651d796ce59cb6/foundational-cxx-support-matrix.md
+            "14": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7.3.1",
+                "clang": "6",
+                "apple-clang": "12",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -73,14 +81,11 @@ class GTestConan(ConanFile):
         del self.info.options.no_main # Only used to expose more targets
 
     def validate(self):
-        if self.info.options.shared and (is_msvc(self) or self._is_clang_cl) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration(
-                "gtest:shared=True with compiler=\"Visual Studio\" is not "
-                "compatible with compiler.runtime=MT/MTd"
-            )
+        if self.options.shared and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("gtest shared is not compatible with static vc runtime")
 
-        if self.info.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -88,42 +93,40 @@ class GTestConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        compiler = self.info.settings.compiler
+        compiler = self.settings.compiler
         min_version = self._minimum_compilers_version.get(str(compiler))
         if min_version and loose_lt_semver(str(compiler.version), min_version):
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires {compiler} {min_version}. The current compiler is {compiler} {compiler.version}."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.variables["BUILD_GMOCK"] = bool(self.options.build_gmock)
         tc.variables["gtest_hide_internal_symbols"] = bool(self.options.hide_symbols)
 
         if self.settings.build_type == "Debug" and Version(self.version) < "1.12.0":
             tc.cache_variables["CUSTOM_DEBUG_POSTFIX"] = str(self.options.debug_postfix)
 
-        if is_msvc(self) or self._is_clang_cl:
-            tc.variables["gtest_force_shared_crt"] = not is_msvc_static_runtime(self)
+        if self.settings.compiler.get_safe("runtime"):
+            tc.variables["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             tc.variables["gtest_disable_pthreads"] = True
+        if Version(self.version) < "1.12.0":
+            # Relocatable shared lib on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
-        internal_utils = os.path.join(self.source_folder, "googletest",
-                                      "cmake", "internal_utils.cmake")
         apply_conandata_patches(self)
+        # No warnings as errors
+        internal_utils = os.path.join(self.source_folder, "googletest", "cmake", "internal_utils.cmake")
+        replace_in_file(self, internal_utils, "-WX", "")
         if Version(self.version) < "1.12.0":
             replace_in_file(self, internal_utils, "-Werror", "")
-
-        if is_msvc(self) or self._is_clang_cl:
-            # No warnings as errors
-            replace_in_file(self, internal_utils, "-WX", "")
 
     def build(self):
         self._patch_sources()

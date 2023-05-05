@@ -1,0 +1,46 @@
+diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
+index 61f0859..d673519 100644
+--- a/src/google/protobuf/port_def.inc
++++ b/src/google/protobuf/port_def.inc
+@@ -616,6 +616,22 @@
+ #undef timezone
+ #endif  // _MSC_VER
+ 
++#ifdef __APPLE__
++// Inconvenient macro names from usr/include/math.h in some macOS SDKs.
++#pragma push_macro("DOMAIN")
++#undef DOMAIN
++// Inconvenient macro names from /usr/include/mach/boolean.h in some macOS SDKs.
++#pragma push_macro("TRUE")
++#undef TRUE
++#pragma push_macro("FALSE")
++#undef FALSE
++// Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs.
++#pragma push_macro("UID_MAX")
++#undef UID_MAX
++#pragma push_macro("GID_MAX")
++#undef GID_MAX
++#endif  // __APPLE__
++
+ #if defined(__clang__) || PROTOBUF_GNUC_MIN(3, 0) || defined(_MSC_VER)
+ // Don't let Objective-C Macros interfere with proto identifiers with the same
+ // name.
+diff --git a/src/google/protobuf/port_undef.inc b/src/google/protobuf/port_undef.inc
+index 82fe794..dfbbf5b 100644
+--- a/src/google/protobuf/port_undef.inc
++++ b/src/google/protobuf/port_undef.inc
+@@ -112,6 +112,14 @@
+ #pragma pop_macro("timezone")
+ #endif
+ 
++#ifdef __APPLE__
++#pragma pop_macro("DOMAIN")
++#pragma pop_macro("TRUE")
++#pragma pop_macro("FALSE")
++#pragma pop_macro("UID_MAX")
++#pragma pop_macro("GID_MAX")
++#endif  // __APPLE__
++
+ #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
+ #pragma pop_macro("DEBUG")
+ #endif // defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)

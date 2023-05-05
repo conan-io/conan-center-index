@@ -1,7 +1,7 @@
 sources:
+  "4.4.13":
+    url: "https://github.com/eyalz800/zpp_bits/archive/v4.4.13.tar.gz"
+    sha256: "817be8218f1ef6ad66f2c18154d16a9577d0f939a29c76cb95c71f7f24c53fe1"
   "4.4.12":
     url: "https://github.com/eyalz800/zpp_bits/archive/v4.4.12.tar.gz"
-    sha256: "0060c36d394ab1fb340120a7d14e45657a72419fd1745426e75d820980fa095a"
-  "4.1.2":
-    url: "https://github.com/eyalz800/zpp_bits/archive/refs/tags/v4.4.12.tar.gz"
     sha256: "0060c36d394ab1fb340120a7d14e45657a72419fd1745426e75d820980fa095a"

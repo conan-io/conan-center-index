@@ -1,15 +1,14 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import stdcpp_library
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
-from conans import tools as tools_legacy
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class CppunitConan(ConanFile):
@@ -22,6 +21,7 @@ class CppunitConan(ConanFile):
     license = " LGPL-2.1-or-later"
     homepage = "https://freedesktop.org/wiki/Software/cppunit/"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,10 +35,6 @@ class CppunitConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,8 +56,7 @@ class CppunitConan(ConanFile):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -72,10 +67,12 @@ class CppunitConan(ConanFile):
             tc.extra_defines.append("CPPUNIT_BUILD_DLL")
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
-            if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
+        if is_apple_os(self):
+            # https://github.com/conan-io/conan-center-index/pull/15759#issuecomment-1419046535
+            tc.extra_ldflags.append("-headerpad_max_install_names")
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
@@ -84,12 +81,10 @@ class CppunitConan(ConanFile):
             "--enable-werror=no",
             "--enable-html-docs=no",
         ])
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
@@ -98,7 +93,7 @@ class CppunitConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_cppunit_msvc")
+        tc.generate(env)
 
     def build(self):
         autotools = Autotools(self)
@@ -108,8 +103,7 @@ class CppunitConan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         if is_msvc(self) and self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "cppunit.dll.lib"),
                          os.path.join(self.package_folder, "lib", "cppunit.lib"))
@@ -122,10 +116,10 @@ class CppunitConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "cppunit")
         self.cpp_info.libs = ["cppunit"]
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.append("dl")
+                self.cpp_info.system_libs.extend(["dl", "m"])
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("CPPUNIT_DLL")

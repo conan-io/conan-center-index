@@ -13,6 +13,7 @@ When pull requests are merged, the CI will upload the generated packages to the 
   + [Contributing to Conan Center Index](../CONTRIBUTING.md)
   + [Developing Recipes Locally](developing_recipes_locally.md)
   + [Adding Packages to ConanCenter](adding_packages/README.md) :point_left: Best place to learn how to contribute
+  + [Bumping versions to existing packages](bump_version.md)
   + [Errors from the conan-center hook (KB-Hxxx)](error_knowledge_base.md)
   + [Review Process](review_process.md)
   + [Labels](labels.md)

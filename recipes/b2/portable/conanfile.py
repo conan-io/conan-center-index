@@ -1,10 +1,12 @@
-import os
-from contextlib import contextmanager
-import conan.tools.files
-import conan.tools.layout
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from six import StringIO
+from conan.tools.build import cross_building
+from conan.tools.files import chdir, copy, get
+from conan.tools.layout import basic_layout
+
+from contextlib import contextmanager
+import os
+from io import StringIO
 
 required_conan_version = ">=1.47.0"
 
@@ -13,11 +15,11 @@ class B2Conan(ConanFile):
     name = "b2"
     homepage = "https://www.bfgroup.xyz/b2/"
     description = "B2 makes it easy to build C++ projects, everywhere."
-    topics = ("b2", "installer", "builder", "build", "build-system")
+    topics = ("installer", "builder", "build", "build-system")
     license = "BSL-1.0"
-    settings = "os", "arch"
     url = "https://github.com/conan-io/conan-center-index"
 
+    settings = "os", "arch"
     '''
     * use_cxx_env: False, True
 
@@ -45,24 +47,31 @@ class B2Conan(ConanFile):
             'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
             'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
             'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143']
+            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143',
+        ]
     }
     default_options = {
         'use_cxx_env': False,
         'toolset': 'auto'
     }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.options.use_cxx_env
+        del self.info.options.toolset
+
     def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} recipe doesn't support cross-build yet")
+
         if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
             raise ConanInvalidConfiguration(
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
-    def layout(self):
-        conan.tools.layout.basic_layout(self, src_folder="root")
-
     def source(self):
-        conan.tools.files.get(
-            self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _b2_dir(self):
@@ -75,10 +84,6 @@ class B2Conan(ConanFile):
     @property
     def _b2_output_dir(self):
         return os.path.join(self.build_folder, "output")
-
-    @property
-    def _pkg_licenses_dir(self):
-        return os.path.join(self.package_folder, "licenses")
 
     @property
     def _pkg_bin_dir(self):
@@ -118,10 +123,10 @@ class B2Conan(ConanFile):
                 # that didn't exist when the build was written. This turns that
                 # into a generic msvc toolset build assuming it could work,
                 # since it's a better version.
-                with conan.tools.files.chdir(self, self._b2_engine_dir):
+                with chdir(self, self._b2_engine_dir):
                     with self._bootstrap_env():
                         buf = StringIO()
-                        self.run('guess_toolset && set', output=buf)
+                        self.run('guess_toolset && set', buf)
                         guess_vars = map(
                             lambda x: x.strip(), buf.getvalue().split("\n"))
                         if "B2_TOOLSET=vcunk" in guess_vars:
@@ -132,9 +137,18 @@ class B2Conan(ConanFile):
                                         kv.split('=')[1].strip(), 'Auxiliary', 'Build', 'vcvars32.bat')
                                     command += '"'+b2_vcvars+'" && '
         command += "build" if use_windows_commands else "./build.sh"
+
+        if self.options.use_cxx_env:
+            cxx = os.environ.get("CXX")
+            if cxx:
+                command += f" --cxx={cxx}"
+            cxxflags = os.environ.get("CXXFLAGS")
+            if cxxflags:
+                command += f" --cxxflags={cxxflags}"
+
         if b2_toolset != 'auto':
             command += " "+str(b2_toolset)
-        with conan.tools.files.chdir(self, self._b2_engine_dir):
+        with chdir(self, self._b2_engine_dir):
             with self._bootstrap_env():
                 self.run(command)
 
@@ -144,31 +158,23 @@ class B2Conan(ConanFile):
         if b2_toolset not in ["auto", "cxx", "cross-cxx"]:
             command += " toolset=" + str(b2_toolset)
         full_command = \
-            ("{0} --ignore-site-config " +
-             "--prefix={1} " +
+            (f"{command} --ignore-site-config " +
+             f"--prefix={self._b2_output_dir} " +
              "--abbreviate-paths " +
              "install " +
-             "b2-install-layout=portable").format(command, self._b2_output_dir)
-        with conan.tools.files.chdir(self, self._b2_dir):
+             "b2-install-layout=portable")
+        with chdir(self, self._b2_dir):
             self.run(full_command)
 
     def package(self):
-        conan.tools.files.copy(
-            self, "LICENSE.txt", dst=self._pkg_licenses_dir, src=self.source_folder)
-        conan.tools.files.copy(
-            self, "*b2", dst=self._pkg_bin_dir, src=self._b2_output_dir)
-        conan.tools.files.copy(
-            self, "*b2.exe", dst=self._pkg_bin_dir, src=self._b2_output_dir)
-        conan.tools.files.copy(
-            self, "*.jam", dst=self._pkg_bin_dir, src=self._b2_output_dir)
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*b2", dst=self._pkg_bin_dir, src=self._b2_output_dir)
+        copy(self, "*b2.exe", dst=self._pkg_bin_dir, src=self._b2_output_dir)
+        copy(self, "*.jam", dst=self._pkg_bin_dir, src=self._b2_output_dir)
 
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.bindirs = ["bin"]
-        self.buildenv_info.prepend_path("PATH", self._pkg_bin_dir)
-        self.env_info.path = [self._pkg_bin_dir]
 
-    def package_id(self):
-        del self.info.options.use_cxx_env
-        del self.info.options.toolset
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(self._pkg_bin_dir)

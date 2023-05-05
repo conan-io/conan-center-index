@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake
 from conan.tools import build
 
-class CycloneDDSTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = ["cmake", "cmake_find_package_multi"]
 

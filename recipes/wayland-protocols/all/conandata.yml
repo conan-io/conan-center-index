@@ -1,19 +1,22 @@
 sources:
+  "1.31":
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.31/downloads/wayland-protocols-1.31.tar.xz"
+    sha256: "a07fa722ed87676ec020d867714bc9a2f24c464da73912f39706eeef5219e238"
   "1.27":
-    url: "https://github.com/wayland-project/wayland-protocols/archive/1.27.tar.gz"
-    sha256: "6dd6ee86478adf4347f3b8b4f3da62dbe9e44912c9cef21cf99abfe692313df4"
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.27/downloads/wayland-protocols-1.27.tar.xz"
+    sha256: "9046f10a425d4e2a00965a03acfb6b3fb575a56503ac72c2b86821c69653375c"
   "1.26":
-    url: "https://github.com/wayland-project/wayland-protocols/archive/1.26.tar.gz"
-    sha256: "fe56386f436a84e97c3b6a61b76306f205a64425900f247ad0048174b9c32d4d"
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.26/wayland-protocols-1.26.tar.bz2"
+    sha256: "0426ae92841cad054dac8565a90c282deabb60c46a3752c37788b8a322ad12a2"
   "1.25":
-    url: "https://github.com/wayland-project/wayland-protocols/archive/1.25.tar.gz"
-    sha256: "4326e2b5e04e459ab4522e83e19bff101a3faf9b085bcf46b6cabbd392cc4458"
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.25/wayland-protocols-1.25.tar.bz2"
+    sha256: "633c9bed0efb8e773c5780d4442051264d179c154b7d1896ca3b56b5d4da4718"
   "1.24":
-    url: "https://github.com/wayland-project/wayland-protocols/archive/1.24.tar.gz"
-    sha256: "71a171f964e4fe25cede281a2939ac5298ddaba9a5dd8a217db66843a532d064"
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.24/wayland-protocols-1.24.tar.bz2"
+    sha256: "a165e2da28197b1dcf97fd9ec06b16b030bdc5de6c92162c4b09026e62cfe8f9"
   "1.23":
-    url: "https://github.com/wayland-project/wayland-protocols/archive/1.23.tar.gz"
-    sha256: "1ffd6f90eb247ff79de50ac10490ed03100572fb571cebef4df9ec74a271b2af"
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.23/wayland-protocols-1.23.tar.bz2"
+    sha256: "b860c692ff83b4bd6251dc74c579ced3a68ec0743b7af801ef3f501da3fde330"
   "1.21":
-    url: "https://github.com/wayland-project/wayland-protocols/archive/refs/tags/1.21.tar.gz"
-    sha256: "4cb4cd8c94534faf95243be957cd6b739b1a2d068218dc8f0762eac3d4707c04"
+    url: "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.21/wayland-protocols-1.21.tar.bz2"
+    sha256: "cf1a62195eb49622fc3c3eda440d0225ee49bd5aa9f1ee993c28fe0796dae783"

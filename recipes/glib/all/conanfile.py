@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -17,17 +16,20 @@ required_conan_version = ">=1.53.0"
 
 class GLibConan(ConanFile):
     name = "glib"
-    description = ("Low-level core library that forms the basis for projects such as GTK+ and GNOME. "
-                   "It provides data structure handling for C, portability wrappers, and interfaces for such runtime functionality as an event loop, threads, dynamic loading, and an object system.")
+    description = (
+        "Low-level core library that forms the basis for projects such as GTK+ and GNOME. "
+        "It provides data structure handling for C, portability wrappers, and interfaces "
+        "for such runtime functionality as an event loop, threads, dynamic loading, and an object system."
+    )
     topics = "gio", "gmodule", "gnome", "gobject", "gtk"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
     license = "LGPL-2.1-or-later"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_pcre": [True, False],
         "with_elf": [True, False],
         "with_selinux": [True, False],
         "with_mount": [True, False],
@@ -35,7 +37,6 @@ class GLibConan(ConanFile):
     default_options = {
         "shared": True,
         "fPIC": True,
-        "with_pcre": True,
         "with_elf": True,
         "with_mount": True,
         "with_selinux": True,
@@ -65,12 +66,11 @@ class GLibConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.13")
-        self.requires("libffi/3.4.3")
-        if self.options.with_pcre:
-            if Version(self.version) >= "2.73.2":
-                self.requires("pcre2/10.40")
-            else:
-                self.requires("pcre/8.45")
+        self.requires("libffi/3.4.4")
+        if Version(self.version) >= "2.73.2":
+            self.requires("pcre2/10.42")
+        else:
+            self.requires("pcre/8.45")
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
@@ -79,23 +79,18 @@ class GLibConan(ConanFile):
             self.requires("libselinux/3.3")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("libgettext/0.21")
+            self.requires("libgettext/0.21", transitive_headers=True, transitive_libs=True)
 
         if is_apple_os(self):
             self.requires("libiconv/1.17")
 
-    def validate(self):
-        if not self.info.options.with_pcre:
-            raise ConanInvalidConfiguration("option glib:with_pcre must be True for glib >= 2.69.0")
-
     def build_requirements(self):
-        self.tool_requires("meson/0.64.1")
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+        self.tool_requires("meson/1.1.0")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
@@ -239,11 +234,10 @@ class GLibConan(ConanFile):
             if is_apple_os(self):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
-        if self.options.with_pcre:
-            if Version(self.version) >= "2.73.2":
-                self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
-            else:
-                self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+        if Version(self.version) >= "2.73.2":
+            self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
+        else:
+            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
@@ -260,9 +254,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
 
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
         pkgconfig_variables = {
             'datadir': '${prefix}/res',
@@ -294,10 +286,10 @@ class GLibConan(ConanFile):
             "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
-    """remove lib prefix & change extension to .lib"""
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
     from conan.tools.files import rename
     import glob
-    if not is_msvc(conanfile):
+    if not conanfile.settings.get_safe("compiler.runtime"):
         return
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:

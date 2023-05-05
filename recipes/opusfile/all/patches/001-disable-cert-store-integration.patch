@@ -1,5 +1,3 @@
-patch taken from https://github.com/xiph/opusfile/issues/13#issuecomment-425349836 for OpenSSL 1.1.1 support
-
 diff -Nur opusfile-0.11/src/http.c opusfile-0.11-patched/src/http.c
 --- a/src/http.c	2018-09-14 23:25:45.000000000 +0200
 +++ b/src/http.c	2018-09-27 15:42:55.161531800 +0200

@@ -1,11 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
-
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
+
 
 class libsvmConan(ConanFile):
     name = "libsvm"
@@ -17,12 +19,15 @@ class libsvmConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
         }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
         }
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,27 +35,19 @@ class libsvmConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if (
-            self.settings.compiler == "Visual Studio" and
-            "MT" in self.settings.compiler.runtime and
-            self.options.shared
-        ):
-            raise ConanInvalidConfiguration(
-                f"{self.name} can not be built as shared library + runtime {self.settings.compiler.runtime}."
-            )
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+    def validate(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can not be built as shared library with Visual Studio and static runtime"
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,5 +66,9 @@ class libsvmConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["svm"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+        if not self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)

@@ -1,7 +1,8 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-import os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 
 class TestPackageConan(ConanFile):
@@ -9,17 +10,17 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def layout(self):
         cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables.update({
-            "HDF5_CXX": self.options["hdf5"].enable_cxx,
-            "HDF5_HL": self.options["hdf5"].hl,
+            "HDF5_CXX": self.dependencies["hdf5"].options.enable_cxx,
+            "HDF5_HL": self.dependencies["hdf5"].options.hl,
         })
         tc.generate()
 

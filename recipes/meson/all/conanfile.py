@@ -11,6 +11,7 @@ required_conan_version = ">=1.52.0"
 
 class MesonConan(ConanFile):
     name = "meson"
+    package_type = "application"
     description = "Meson is a project to create the best possible next-generation build system"
     topics = ("meson", "mesonbuild", "build-system")
     url = "https://github.com/conan-io/conan-center-index"

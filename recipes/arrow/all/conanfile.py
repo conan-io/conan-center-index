@@ -477,7 +477,7 @@ class ArrowConan(ConanFile):
         tc.variables["AWSSDK_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_BUILD_UTILITIES"] = bool(self.options.cli)
         tc.variables["ARROW_BUILD_INTEGRATION"] = False
-        tc.variables["ARROW_INSTALL_NAME_RPATH"] = False
+        tc.variables["ARROW_INSTALL_NAME_RPATH"] = True
         tc.variables["ARROW_BUILD_EXAMPLES"] = False
         tc.variables["ARROW_BUILD_TESTS"] = False
         tc.variables["ARROW_ENABLE_TIMING_TESTS"] = False
@@ -570,7 +570,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
             if not self.options.shared:
-                self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]            
+                self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]
 
         if self.options.get_safe("substrait", False):
             self.cpp_info.components["libarrow_substrait"].libs = [self._lib_name("arrow_substrait")]
@@ -593,7 +593,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
             if not self.options.shared:
-                self.cpp_info.components["libgandiva"].defines = ["GANDIVA_STATIC"]            
+                self.cpp_info.components["libgandiva"].defines = ["GANDIVA_STATIC"]
 
         if self._with_flight_rpc():
             self.cpp_info.components["libarrow_flight"].libs = [self._lib_name("arrow_flight")]
@@ -637,7 +637,11 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.cpp_info.components["libarrow"].requires.append("mimalloc::mimalloc")
         if self._with_re2():
-            self.cpp_info.components["libgandiva"].requires.append("re2::re2")
+            if self.options.gandiva:
+                self.cpp_info.components["libgandiva"].requires.append("re2::re2")
+            if self._parquet():
+                self.cpp_info.components["libparquet"].requires.append("re2::re2")
+            self.cpp_info.components["libarrow"].requires.append("re2::re2")
         if self._with_llvm():
             self.cpp_info.components["libgandiva"].requires.append("llvm-core::llvm-core")
         if self._with_protobuf():

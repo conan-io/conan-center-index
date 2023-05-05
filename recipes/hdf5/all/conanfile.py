@@ -1,14 +1,14 @@
 import os
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, replace_in_file, rm, rmdir, apply_conandata_patches, export_conandata_patches, save
-from conan.tools.scm import Version
-from conan.tools.build import can_run
-
 import textwrap
 
-required_conan_version = ">=1.53.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.54.0"
 
 
 class Hdf5Conan(ConanFile):
@@ -18,7 +18,7 @@ class Hdf5Conan(ConanFile):
     topics = "hdf", "data"
     homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,6 +30,7 @@ class Hdf5Conan(ConanFile):
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False],
         "parallel": [True, False],
+        "enable_unsupported": [True, False],
     }
     default_options = {
         "shared": False,
@@ -41,7 +42,14 @@ class Hdf5Conan(ConanFile):
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
+        "enable_unsupported": False
     }
+
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) < "1.14.0":
+            return "98"
+        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -50,26 +58,14 @@ class Hdf5Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if not can_run(self):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
-        if self.info.options.parallel:
-            if self.info.options.enable_cxx:
-                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
-            if self.info.options.get_safe("threadsafe"): # FIXME why can't I define the default valid as False?
-                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
-        if self.info.options.szip_support == "with_szip" and \
-                self.info.options.szip_encoding and \
-                not self.dependencies["szip"].options.enable_encoding:
-            raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
-        if self.options.enable_cxx or self.options.hl or (self.settings.os == "Windows" and not self.options.shared):
+        if not self.options.enable_cxx:
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
+        if (not self.options.enable_unsupported and (self.options.enable_cxx or self.options.hl))\
+            or (self.settings.os == "Windows" and not self.options.shared):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
@@ -87,14 +83,44 @@ class Hdf5Conan(ConanFile):
         if self.options.parallel:
             self.requires("openmpi/4.1.0")
 
+    def validate(self):
+        if not can_run(self):
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
+        if self.options.parallel and not self.options.enable_unsupported:
+            if self.options.enable_cxx:
+                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
+            if self.options.get_safe("threadsafe", False):
+                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive, forcefully allow with enable_unsupported=True")
+        if self.options.szip_support == "with_szip" and \
+                self.options.szip_encoding and \
+                not self.dependencies["szip"].options.enable_encoding:
+            raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.14.0":
+            self.tool_requires("cmake/[>=3.18 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def _inject_stdlib_flag(self, tc):
+        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+            cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
+            tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
+        return tc
 
     def generate(self):
         cmakedeps = CMakeDeps(self)
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if self.settings.get_safe("compiler.libcxx"):
+            tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
@@ -126,8 +152,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
         tc.variables["BUILD_TESTING"] = False
 
-        # FIXME is there no built-in way of doing the replace?
-        tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf5").replace("\\", "/")
+        tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
         tc.variables["HDF5_BUILD_TOOLS"] = False
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
@@ -136,10 +161,8 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if Version(self.version) >= "1.10.0":
             tc.variables["HDF5_BUILD_JAVA"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
-
 
     def build(self):
         apply_conandata_patches(self)
@@ -168,15 +191,15 @@ class Hdf5Conan(ConanFile):
             "hdf5_hl_cpp": {"component": "HL_CXX", "alias_target": "hdf5_hl_cpp", "requirements": ["hdf5_c", "hdf5_cpp", "hdf5_hl"]},
         }
 
-    def _create_cmake_module_alias_targets(self, module_file, targets, is_parallel):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                    if(TARGET {aliased} AND NOT TARGET {alias})
-                        add_library({alias} INTERFACE IMPORTED)
-                        set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                    endif()
-                """.format(alias=alias, aliased=aliased))
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
 
         # add the additional hdf5_hl_cxx target when both CXX and HL components are specified
         content += textwrap.dedent("""\
@@ -185,13 +208,21 @@ class Hdf5Conan(ConanFile):
                     set_property(TARGET hdf5::hdf5_hl_cpp PROPERTY INTERFACE_LINK_LIBRARIES HDF5::HL_CXX)
                 endif()
             """)
-        content += textwrap.dedent("set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF"))
+        save(self, module_file, content)
+
+    def _create_cmake_module_variables(self, module_file, is_parallel):
+        content = "set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF")
         save(self, module_file, content)
 
     @property
-    def _module_file_rel_path(self):
+    def _module_targets_file_rel_path(self):
         return os.path.join("lib", "cmake",
                             f"conan-official-{self.name}-targets.cmake")
+
+    @property
+    def _module_variables_file_rel_path(self):
+        return os.path.join("lib", "cmake",
+                            f"conan-official-{self.name}-variables.cmake")
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -201,12 +232,20 @@ class Hdf5Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "libhdf5.settings", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+        # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+
         # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
         components = self._components()
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {f"hdf5::{component['alias_target']}": f"HDF5::{component['component']}" for component in components.values()},
+            os.path.join(self.package_folder, self._module_targets_file_rel_path),
+            {f"hdf5::{component['alias_target']}": f"HDF5::{component['component']}" for component in components.values()}
+        )
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_variables_file_rel_path),
             self.options.get_safe("parallel", False)
         )
 
@@ -230,13 +269,14 @@ class Hdf5Conan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[component_name].names["cmake_find_package"] = component
             self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [self._module_targets_file_rel_path, self._module_variables_file_rel_path]
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "HDF5")
         self.cpp_info.set_property("cmake_target_name", "HDF5::HDF5")
         self.cpp_info.set_property("pkg_config_name", "hdf5-all-do-not-use") # to avoid conflict with hdf5_c component
+        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         components = self._components()
         add_component("hdf5_c", **components["hdf5_c"])

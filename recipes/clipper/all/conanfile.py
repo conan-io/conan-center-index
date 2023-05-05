@@ -3,17 +3,16 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class ClipperConan(ConanFile):
     name = "clipper"
     description = "Clipper is an open source freeware polygon clipping library"
-    topics = ("clipper", "clipping", "polygon")
+    license = "BSL-1.0"
+    topics = ("clipping", "polygon")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.angusj.com/delphi/clipper.php"
-    license = "BSL-1.0"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,7 +38,7 @@ class ClipperConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version])
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -47,8 +46,6 @@ class ClipperConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # TODO: can be removed if required_conan_version bumped to at least 1.54.0
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
@@ -66,6 +63,9 @@ class ClipperConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "polyclipping")
         self.cpp_info.libs = ["polyclipping"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed.
         #       Do not use these CMake names in CMakeDeps, it was a mistake,

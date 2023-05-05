@@ -8,3 +8,5 @@ sources:
 patches:
   "2.38":
     - patch_file: "patches/2.38-0001-no-texinfo.patch"
+      patch_type: conan
+      patch_description: "disable texinfo"

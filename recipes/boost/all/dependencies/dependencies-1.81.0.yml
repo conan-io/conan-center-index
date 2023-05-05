@@ -29,6 +29,7 @@ configure_options:
 - thread
 - timer
 - type_erasure
+- url
 - wave
 dependencies:
   atomic: []
@@ -149,6 +150,8 @@ dependencies:
   - prg_exec_monitor
   - test
   - test_exec_monitor
+  url:
+  - system
   wave:
   - filesystem
   - serialization
@@ -250,6 +253,8 @@ libs:
   - boost_type_erasure
   unit_test_framework:
   - boost_unit_test_framework
+  url:
+  - boost_url
   wave:
   - boost_wave
   wserialization:

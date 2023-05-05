@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -15,8 +15,8 @@ class GlazeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/stephenberry/glaze"
     topics = ("json", "memory", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
@@ -27,20 +27,25 @@ class GlazeConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "11",
-            "clang": "12",
+            "gcc": "12",
+            "clang": "12" if Version(self.version) > "1.0.0" else "13",
             "apple-clang": "13.1",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/9.1.0")
-        self.requires("fast_float/3.8.1")
-        self.requires("frozen/1.1.1")
-        self.requires("nanorange/20200505")
-        if Version(self.version) >= "0.1.5":
+        if Version(self.version) < "0.2.4":
+            self.requires("fmt/9.1.0")
+            self.requires("frozen/1.1.1")
+            self.requires("nanorange/cci.20200706")
+        if Version(self.version) < "0.2.3":
+            self.requires("fast_float/4.0.0")
+        if "0.1.5" <= Version(self.version) < "0.2.3":
             self.requires("dragonbox/1.1.3")
 
     def package_id(self):
@@ -63,16 +68,17 @@ class GlazeConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
             pattern="*.hpp",
+            excludes="glaze/frozen/*.hpp" if Version(self.version) < "0.2.4" else "",
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include"),
         )

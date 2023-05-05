@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class FlatbuffersConan(ConanFile):
@@ -14,7 +14,7 @@ class FlatbuffersConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://google.github.io/flatbuffers"
-    topics = ("flatbuffers", "serialization", "rpc", "json-parser")
+    topics = ("serialization", "rpc", "json-parser")
     description = "Memory Efficient Serialization Library"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -29,51 +29,49 @@ class FlatbuffersConan(ConanFile):
         "header_only": False,
     }
 
-    @property
-    def _has_flatc(self):
+    def _has_flatc(self, info=False):
         # don't build flatc when it makes little sense or not supported
-        return self.settings.os not in ["Android", "iOS", "watchOS", "tvOS", "Neutrino"]
+        host_os = self.info.settings.os if info else self.settings.os
+        return host_os not in ["Android", "iOS", "watchOS", "tvOS", "Neutrino"]
 
     def export_sources(self):
         copy(self, os.path.join("cmake", "FlatcTargets.cmake"), self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def build_requirements(self):
-        if Version(self.version) >= "2.0.7":
-            self.tool_requires("cmake/3.24.0")
-
     def configure(self):
         if self.options.shared or self.options.header_only:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if self.options.header_only:
             del self.options.shared
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def package_id(self):
-        if self.options.header_only and not self._has_flatc:
+        if self.info.options.header_only and not self._has_flatc(info=True):
             self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.7":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["FLATBUFFERS_BUILD_TESTS"] = False
         tc.variables["FLATBUFFERS_INSTALL"] = True
         tc.variables["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.header_only and not self.options.shared
-        tc.variables["FLATBUFFERS_BUILD_FLATC"] = self._has_flatc
+        tc.variables["FLATBUFFERS_BUILD_FLATC"] = self._has_flatc()
         tc.variables["FLATBUFFERS_STATIC_FLATC"] = False
         tc.variables["FLATBUFFERS_BUILD_FLATHASH"] = False
         tc.variables["FLATBUFFERS_BUILD_SHAREDLIB"] = not self.options.header_only and self.options.shared
@@ -156,10 +154,6 @@ class FlatbuffersConan(ConanFile):
             os.path.join(self._module_path, "BuildFlatBuffers.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-        if self._has_flatc:
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bindir}")
-            self.env_info.PATH.append(bindir)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "flatbuffers"
@@ -172,3 +166,5 @@ class FlatbuffersConan(ConanFile):
         self.cpp_info.components["libflatbuffers"].build_modules["cmake_find_package_multi"] = build_modules
         self.cpp_info.components["libflatbuffers"].set_property("cmake_file_name", f"flatbuffers::{cmake_target}")
         self.cpp_info.components["libflatbuffers"].set_property("pkg_config_name", "flatbuffers")
+        if self._has_flatc():
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

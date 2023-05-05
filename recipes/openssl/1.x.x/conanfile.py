@@ -1,13 +1,16 @@
 from conan import ConanFile, conan_version
-from conan.tools.env import Environment
-from conan.tools.build import cross_building
-from conan.tools.layout import basic_layout
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
-from conan.tools.apple import is_apple_os, XCRun
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import chdir, copy, rename, rmdir, load, save, get, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.apple import is_apple_os, XCRun
+from conan.tools.build import cross_building
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import (
+    apply_conandata_patches, chdir, copy, export_conandata_patches,
+    get, load, rename, replace_in_file, rm, rmdir, save
+)
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
 from contextlib import contextmanager
 from functools import total_ordering
 import fnmatch
@@ -18,7 +21,7 @@ import textwrap
 required_conan_version = ">=1.53.0"
 
 @total_ordering
-class OpenSSLVersion(object):
+class OpenSSLVersion:
     def __init__(self, version):
         self._pre = ""
         version_str = str(version)
@@ -220,9 +223,12 @@ class OpenSSLConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.settings.os == "Emscripten":
@@ -231,21 +237,22 @@ class OpenSSLConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if not self.win_bash:
-                self.tool_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm:
                 self.tool_requires("nasm/2.15.05")
-        if self.win_bash and not os.getenv("CONAN_BASH_PATH") and not self._use_nmake:
-            self.build_requires("msys2/cci.latest")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+            if self._use_nmake:
+                self.tool_requires("strawberryperl/5.32.1.1")
+            else:
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = AutotoolsToolchain(self)
         # workaround for random error: size too large (archive member extends past the end of the file)
         # /Library/Developer/CommandLineTools/usr/bin/ar: internal ranlib command failed
@@ -262,14 +269,12 @@ class OpenSSLConan(ConanFile):
         env.define("PERL", self._perl)
         tc.generate(env)
         gen_info = {}
-        gen_info["CFLAGS"] = tc.cflags 
+        gen_info["CFLAGS"] = tc.cflags
         gen_info["CXXFLAGS"] = tc.cxxflags
         gen_info["DEFINES"] = tc.defines
         gen_info["LDFLAGS"] = tc.ldflags
-        # Support for self.dependencies in build() method is currently restricted to `generate()` and `validate()`
-        # See https://github.com/conan-io/conan/issues/12411 for more details 
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
-            zlib_cpp_info = self.dependencies["zlib"].cpp_info
+            zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
             gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
             if self.settings.os == "Windows":
                 gen_info["zlib_lib_path"] = f"{zlib_cpp_info.libdirs[0]}/{zlib_cpp_info.libs[0]}.lib"
@@ -278,7 +283,7 @@ class OpenSSLConan(ConanFile):
         save(self, "gen_info.conf", json.dumps(gen_info))
         tc = AutotoolsDeps(self)
         tc.generate()
-          
+
     @property
     def _target_prefix(self):
         if self._full_version < "1.1.0" and self.settings.build_type == "Debug":
@@ -321,6 +326,8 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _asm_target(self):
+        # FIXME This function is broken since https://github.com/conan-io/conan-center-index/pull/791
+        # either it returns None (because the_os is not a key of the map below), or it does not return
         the_os = str(self.settings.os)
         if the_os in ["Android", "iOS", "watchOS", "tvOS"]:
             return {
@@ -530,8 +537,7 @@ class OpenSSLConan(ConanFile):
         if self._full_version >= "1.1.0":
             args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
-        if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-            args.append("--libdir=lib") # See https://github.com/openssl/openssl/blob/master/INSTALL.md#libdir
+        args.append("--libdir=lib") # See https://github.com/openssl/openssl/blob/master/INSTALL.md#libdir
 
         if self.settings.os in ["tvOS", "watchOS"]:
             args.append(" -DNO_FORK") # fork is not available on tvOS and watchOS
@@ -565,16 +571,10 @@ class OpenSSLConan(ConanFile):
                 include_path = self._adjust_path(include_path)
                 lib_path     = self._adjust_path(lib_path)
 
-                if Version(conan_version).major <2 :
-                    if self.options["zlib"].shared:
-                        args.append("zlib-dynamic")
-                    else:
-                        args.append("zlib")
+                if self.dependencies["zlib"].options.shared:
+                    args.append("zlib-dynamic")
                 else:
-                    if self.dependencies["zlib"].options.shared:
-                        args.append("zlib-dynamic")
-                    else:
-                        args.append("zlib")
+                    args.append("zlib")
 
                 args.extend(['--with-zlib-include="%s"' % include_path,
                              '--with-zlib-lib="%s"' % lib_path])
@@ -649,6 +649,10 @@ class OpenSSLConan(ConanFile):
             if self.options.get_safe("fPIC", True):
                 shared_cflag='shared_cflag => "-fPIC",'
 
+        if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
+            cflags.append("-fembed-bitcode")
+            cxxflags.append("-fembed-bitcode")
+        
         config = config_template.format(targets=targets,
                                         target=self._target,
                                         ancestor=ancestor,
@@ -672,13 +676,8 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _perl(self):
-        if self._settings_build.os == "Windows" and not self.win_bash:
-            # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
-            build_deps = (dependency.ref.name for require, dependency in self.dependencies.build.items())
-            if "strawberryperl" in build_deps:
-                return os.path.join(self.dependencies.build["strawberryperl"].package_folder, "bin", "perl.exe")
-            if hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
-                return self.user_info_build["strawberryperl"].perl
+        if self._use_nmake:
+            return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
 
     @property
@@ -729,7 +728,7 @@ class OpenSSLConan(ConanFile):
                     autotools.make()
                 else:
                     if self._full_version >= "1.1.0":
-                        self.run(f'nmake /F Makefile')
+                        self.run('nmake /F Makefile')
                     else: # nmake 1.0.2 support
                         # Note: 1.0.2 should not be used according to the OpenSSL Project
                         #       See https://www.openssl.org/source/
@@ -749,13 +748,13 @@ class OpenSSLConan(ConanFile):
                         replace_in_file(self, self._nmake_makefile, 'INSTALLTOP=\\', 'INSTALLTOP=/')
 
                         self.run(f'nmake /F {self._nmake_makefile}')
-  
+
     def _patch_install_name(self):
         if is_apple_os(self) and self.options.shared:
             old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
             new_str = '-install_name @rpath/'
             makefile = "Makefile" if self._full_version >= "1.1.1" else "Makefile.shared"
-            replace_in_file(self, makefile, old_str, new_str, strict=self.in_local_cache)
+            replace_in_file(self, makefile, old_str, new_str)
         if self._use_nmake:
             # NMAKE interprets trailing backslash as line continuation
             if self._full_version >= "1.1.0":
@@ -769,59 +768,55 @@ class OpenSSLConan(ConanFile):
 
     def package(self):
         copy(self, "*LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
-        autotools = Autotools(self)
-        args = []
-        if self._full_version >= "1.1.0":
-            target = "install_sw"
-            args.append(f"DESTDIR={self.package_folder}")
-        else: # 1.0.2 support
-            # Note: 1.0.2 should not be used according to the OpenSSL Project
-            #       See https://www.openssl.org/source/
-            if not self._use_nmake:
+        if self._use_nmake:
+            args = []
+            if self._full_version >= "1.1.0":
                 target = "install_sw"
-                args.append(f"INSTALL_PREFIX={self.package_folder}")
-            else:
+                args.append(f"DESTDIR={self.package_folder}")
+            else: # 1.0.2 support
                 target = "install"
                 args.append(f"INSTALLTOP={self.package_folder}")
                 openssldir = self.options.openssldir or self._get_default_openssl_dir()
                 args.append(f"OPENSSLDIR={os.path.join(self.package_folder, openssldir)}")
 
-        with chdir(self, self.source_folder):
-            if not self._use_nmake:
-                autotools.make(target=target, args=args)
-            else:
+            with chdir(self, self.source_folder):
                 if self._full_version >= "1.1.0":
-                    self.run(f'nmake /F Makefile {target} {" ".join(args)}')
-                else: # nmake 1.0.2 support
-                    # Note: 1.0.2 should not be used according to the OpenSSL Project
-                    #       See https://www.openssl.org/source/
-                    self.run(f'nmake /F {self._nmake_makefile} {target} {" ".join(args)}')
-
-        for root, _, files in os.walk(self.package_folder):
-            for filename in files:
-                if fnmatch.fnmatch(filename, "*.pdb"):
-                    os.unlink(os.path.join(self.package_folder, root, filename))
-        if self._use_nmake:
-            if self.settings.build_type == 'Debug' and self._full_version >= "1.1.0":
-                with chdir(self, os.path.join(self.package_folder, 'lib')):
+                    self.run(f'nmake -f Makefile {target} {" ".join(args)}')
+                else: # 1.0.2 support
+                    self.run(f'nmake -f {self._nmake_makefile} {target} {" ".join(args)}')
+            rm(self, "*.pdb", self.package_folder, recursive=True)
+            if self.settings.build_type == "Debug" and self._full_version >= "1.1.0":
+                with chdir(self, os.path.join(self.package_folder, "lib")):
                     rename(self, "libssl.lib", "libssld.lib")
                     rename(self, "libcrypto.lib", "libcryptod.lib")
-        # Old OpenSSL version family has issues with permissions.
-        # See https://github.com/conan-io/conan/issues/5831
-        if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
-            with chdir(self, os.path.join(self.package_folder, "lib")):
-                os.chmod("libssl.so.1.0.0", 0o755)
-                os.chmod("libcrypto.so.1.0.0", 0o755)
+        else:
+            autotools = Autotools(self)
+            args = []
+            target = "install_sw"
+            if self._full_version >= "1.1.0":
+                args.append(f"DESTDIR={unix_path(self, self.package_folder)}")
+            else: # 1.0.2 support
+                args.append(f"INSTALL_PREFIX={unix_path(self, self.package_folder)}")
 
-        if self.options.shared:
-            libdir = os.path.join(self.package_folder, "lib")
-            for file in os.listdir(libdir):
-                if self._is_mingw and file.endswith(".dll.a"):
-                    continue
-                if file.endswith(".a"):
-                    os.unlink(os.path.join(libdir, file))
+            with chdir(self, self.source_folder):
+                autotools.make(target=target, args=args)
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            # Old OpenSSL version family has issues with permissions.
+            # See https://github.com/conan-io/conan/issues/5831
+            if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
+                with chdir(self, os.path.join(self.package_folder, "lib")):
+                    os.chmod("libssl.so.1.0.0", 0o755)
+                    os.chmod("libcrypto.so.1.0.0", 0o755)
+
+            if self.options.shared:
+                libdir = os.path.join(self.package_folder, "lib")
+                for file in os.listdir(libdir):
+                    if self._is_mingw and file.endswith(".dll.a"):
+                        continue
+                    if file.endswith(".a"):
+                        os.unlink(os.path.join(libdir, file))
+
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path)

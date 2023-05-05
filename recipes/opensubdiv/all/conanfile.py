@@ -3,8 +3,10 @@ import os
 
 from conan import ConanFile
 from conan.tools.files import get, replace_in_file
-from conans import CMake, tools
+from conan.tools.build import check_min_cppstd
+import conan.tools.scm as tools_scm
 from conan.errors import ConanInvalidConfiguration
+from conans import CMake, tools
 
 required_conan_version = ">=1.48.0"
 
@@ -86,18 +88,25 @@ class OpenSubdivConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+            self.output.warn(
+                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
+            )
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if tools_scm.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
-                    "{} requires C++{} support. The current compiler {} {} does not support it.".format(self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version)
+                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
                 )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self._source_subfolder,
+        )
 
     @property
     def _osd_gpu_enabled(self):
@@ -114,6 +123,7 @@ class OpenSubdivConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         cmake.definitions["NO_TBB"] = not self.options.with_tbb
         cmake.definitions["NO_OPENGL"] = not self.options.with_opengl
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.get_safe("shared")
@@ -123,7 +133,9 @@ class OpenSubdivConan(ConanFile):
         cmake.definitions["NO_METAL"] = not self.options.get_safe("with_metal")
         cmake.definitions["NO_CLEW"] = not self.options.with_clew
         cmake.definitions["NO_OPENCL"] = not self.options.with_opencl
-        cmake.definitions["NO_PTEX"] = True  # Note: PTEX is for examples only, but we skip them..
+        cmake.definitions[
+            "NO_PTEX"
+        ] = True  # Note: PTEX is for examples only, but we skip them..
         cmake.definitions["NO_DOC"] = True
         cmake.definitions["NO_EXAMPLES"] = True
         cmake.definitions["NO_TUTORIALS"] = True
@@ -138,7 +150,12 @@ class OpenSubdivConan(ConanFile):
     def build(self):
         if self.settings.os == "Macos":
             path = os.path.join(self._source_subfolder, "opensubdiv", "CMakeLists.txt")
-            replace_in_file(self, path, "${CMAKE_SOURCE_DIR}/opensubdiv", "${CMAKE_SOURCE_DIR}/source_subfolder/opensubdiv")
+            replace_in_file(
+                self,
+                path,
+                "${CMAKE_SOURCE_DIR}/opensubdiv",
+                "${CMAKE_SOURCE_DIR}/source_subfolder/opensubdiv",
+            )
             if not self._osd_gpu_enabled:
                 replace_in_file(self, path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
         cmake = self._configure_cmake()
@@ -149,6 +166,17 @@ class OpenSubdivConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        for mask in [
+            "Find*.cmake",
+            "*Config*.cmake",
+            "*-config.cmake",
+            "*Targets*.cmake",
+        ]:
+            tools.remove_files_by_mask(self.package_folder, mask)
+
+        if self.options.get_safe("shared") == True:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSubdiv")
 
@@ -156,14 +184,18 @@ class OpenSubdivConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSubdiv"
 
         self.cpp_info.components["osdcpu"].libs = ["osdCPU"]
-        self.cpp_info.components["osdcpu"].set_property("cmake_target_name", "OpenSubdiv::osdcpu")
+        self.cpp_info.components["osdcpu"].set_property(
+            "cmake_target_name", "OpenSubdiv::osdcpu"
+        )
 
         if self.options.with_tbb:
             self.cpp_info.components["osdcpu"].requires = ["onetbb::onetbb"]
 
         if self._osd_gpu_enabled:
             self.cpp_info.components["osdgpu"].libs = ["osdGPU"]
-            self.cpp_info.components["osdgpu"].set_property("cmake_target_name", "OpenSubdiv::osdgpu")
+            self.cpp_info.components["osdgpu"].set_property(
+                "cmake_target_name", "OpenSubdiv::osdgpu"
+            )
             dl_required = self.options.with_opengl or self.options.with_opencl
             if self.settings.os in ["Linux", "FreeBSD"] and dl_required:
                 self.cpp_info.components["osdgpu"].system_libs = ["dl"]

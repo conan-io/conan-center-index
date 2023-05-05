@@ -2,13 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class VulkanLoaderConan(ConanFile):
@@ -68,7 +69,7 @@ class VulkanLoaderConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"vulkan-headers/{self.version}")
+        self.requires(f"vulkan-headers/{self.version}", transitive_headers=True)
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if Version(self.version) < "1.3.231" and self.options.get_safe("with_wsi_wayland"):
@@ -80,36 +81,21 @@ class VulkanLoaderConan(ConanFile):
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
         if not is_apple_os(self) and not self.options.shared:
             raise ConanInvalidConfiguration(f"Static builds are not supported on {self.settings.os}")
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < 15:
-            # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
-            raise ConanInvalidConfiguration("Visual Studio < 2017 not yet supported in this recipe")
+        # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
+        check_min_vs(self, "191")
         # TODO: to replace by some version range check
         if self.dependencies["vulkan-headers"].ref.version != self.version:
-            self.output.warn("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
-
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
+            self.output.warning("vulkan-loader should be built & consumed with the same version than vulkan-headers.")
 
     def build_requirements(self):
         if self._is_pkgconf_needed:
-            self.tool_requires("pkgconf/1.9.3")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
-        # see https://github.com/KhronosGroup/Vulkan-Loader/issues/1095#issuecomment-1352420456
-        if Version(self.version) >= "1.3.232" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if self._is_pkgconf_needed or self._is_mingw:
@@ -140,10 +126,6 @@ class VulkanLoaderConan(ConanFile):
         if self._is_pkgconf_needed:
             pkg = PkgConfigDeps(self)
             pkg.generate()
-            # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            env.vars(self).save_script("conanbuildenv_pkg_config_path")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -192,10 +174,7 @@ class VulkanLoaderConan(ConanFile):
         self.cpp_info.libs = [f"vulkan{suffix}"]
 
         # allow to properly set Vulkan_INCLUDE_DIRS in CMake like generators
-        vulkan_headers = self.dependencies["vulkan-headers"]
-        self.cpp_info.includedirs = [
-            os.path.join(vulkan_headers.package_folder, includedir) for includedir in vulkan_headers.cpp_info.includedirs
-        ]
+        self.cpp_info.includedirs = self.dependencies["vulkan-headers"].cpp_info.aggregated_components().includedirs
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread", "m"]

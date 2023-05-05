@@ -1,19 +1,16 @@
 sources:
   "2.14":
-    url: "https://github.com/mm2/Little-CMS/archive/lcms2.14.tar.gz"
-    sha256: "05869269f14e589b0b6d05a76f510c68c67fabb304904d16c6bd818abec80a83"
+    url: "https://github.com/mm2/Little-CMS/releases/download/lcms2.14/lcms2-2.14.tar.gz"
+    sha256: "28474ea6f6591c4d4cee972123587001a4e6e353412a41b3e9e82219818d5740"
   "2.13.1":
-    url: "https://github.com/mm2/Little-CMS/archive/refs/tags/lcms2.13.1.tar.gz"
-    sha256: "6f84c942ecde1b4852b5a051894502ac8c98d010acb3400dec958c6db1bc94ef"
-  "2.12":
-    url: "https://github.com/mm2/Little-CMS/archive/2.12.tar.gz"
-    sha256: "e501f1482fc424550ef3abbf86bf1c66090e1661249e89552d39ed5bf935df66"
-  "2.11":
-    url: "https://github.com/mm2/Little-CMS/archive/2.11.tar.gz"
-    sha256: "478c9c3938d7a91b1171de4616f8b04308a8676d73eadc19505b7ace41327f28"
-  "2.10":
-    url: "https://github.com/mm2/Little-CMS/archive/lcms2.10.tar.gz"
-    sha256: "f7529f90f0a9c7529c561a2c681043c10f2d30b78e6728fb44132828f89b666a"
-  "2.9":
-    url: "https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz"
-    sha256: "8e23a09dc81af856db37941a4ea26acdf6a45b0281ec5b7ee94b5a4e9f7afbf7"
+    url: "https://github.com/mm2/Little-CMS/releases/download/lcms2.13.1/lcms2-2.13.1.tar.gz"
+    sha256: "d473e796e7b27c5af01bd6d1552d42b45b43457e7182ce9903f38bb748203b88"
+patches:
+  "2.14":
+    - patch_file: "patches/2.13.1-0001-fix-msvc-import-lib.patch"
+      patch_description: "Fix msvc import lib"
+      patch_type: "portability"
+  "2.13.1":
+    - patch_file: "patches/2.13.1-0001-fix-msvc-import-lib.patch"
+      patch_description: "Fix msvc import lib"
+      patch_type: "portability"

@@ -18,18 +18,28 @@ sources:
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
     sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
 patches:
+  "1.9.4":
+    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
+      patch_description: "Enable modern compilers"
+      patch_type: "portability"
+      patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
   "1.9.2":
     - patch_file: "patches/1.9.2-0001-imported-target.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix includes"
+      patch_type: "portability"
   "1.9.1":
     - patch_file: "patches/1.9.1-0001-imported-target.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix includes"
+      patch_type: "portability"
   "1.8.20":
-    - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.8-0001-xapian.patch"
+      patch_description: "Fix xapian find_package command"
+      patch_type: "portability"
   "1.8.18":
-    - patch_file: "patches/1.8.18-0001-relocatable-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.8-0001-xapian.patch"
+      patch_description: "Fix xapian find_package command"
+      patch_type: "portability"
   "1.8.17":
-    - patch_file: "patches/1.8.17-0001-relocatable-cmake.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.8-0001-xapian.patch"
+      patch_description: "Fix xapian find_package command"
+      patch_type: "portability"

@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.56.0
+  version: 1.59.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -16,16 +16,6 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
-  check_runs:
-    - "Lint changed files (YAML files)"
-    - "Lint changed conanfile.py (v2 migration)"
-
-# Requirements to merge a given pull-request:
-# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-# * check_runs refers to notifications from GH actions
-status_checks:
-  - "license/cla"
-  - "continuous-integration/jenkins/pr-merge"
 
 slack:
   credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
@@ -33,18 +23,37 @@ slack:
 
 # Things related to Jenkins jobs
 tasks:
-  conan_v2_run_export: false
-  write_comments: true
-  detailed_status_checks: true
-  update_labels: true
+  access_request:
+    request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
+    max_inactivity_days: 0
   automatic_merge:
     reviews_required_total: 2  # Reviews that a PR needs so it can be merged
     reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
-# Temporarily disable feedback from Conan v2
-  # cci_wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
-  #   job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
-  #   timeout_seconds: 600  # Maximum time to wait for the multibranch job
-  #   merge_messages: true  # Merge messages from the multibranch job waited for
+    branches:  # PRs from automations that have these as base-branches will be merged automatically
+      - "conan-io:action-doc-toc"
+    # Requirements to merge a given pull-request:
+    # * check_runs refers to notifications from GH actions
+    # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
+    check_runs:
+      - name: "Lint changed files (YAML files)"
+      - name: "Lint changed conanfile.py (v2 migration)"
+    status_checks:
+      - name: "license/cla"
+      - name: "continuous-integration/jenkins/pr-merge"
+      - name: "c3i/conan-v2/pr-merge"
+        required_for_references: "conan_v2_ready_references.yml"
+  cci:
+    conan_v2_run_export: false
+    write_comments: true
+    detailed_status_checks: true
+    update_labels: true
+    wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
+      job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
+      timeout_seconds: 600  # Maximum time to wait for the multibranch job
+      merge_messages: true  # Merge messages from the multibranch job waited for
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
+    report_issue_append: false
 
 # Profile configurations to build packages
 configurations:
@@ -56,8 +65,8 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "gcc":
-              compiler.libcxx: [ "libstdc++11", "libstdc++" ]
-              compiler.version: [ "5", "7", "8", "9", "10" ]
+              compiler.libcxx: [ "libstdc++11" ]
+              compiler.version: [ "5", "7", "9", "10" ]
               build_type: [ "Release", "Debug" ]
   - id: linux-gcc
     epochs: [20211221, 20220120]
@@ -67,8 +76,8 @@ configurations:
         arch: ["x86_64"]
         compiler:
           - "gcc":
-              compiler.libcxx: ["libstdc++11", "libstdc++"]
-              compiler.version: ["5", "7", "8", "9", "10", "11"]
+              compiler.libcxx: [ "libstdc++11" ]
+              compiler.version: ["5", "7", "9", "10", "11"]
               build_type: ["Release", "Debug"]
   - id: linux-clang
     epochs: [0]
@@ -92,7 +101,7 @@ configurations:
               compiler.libcxx: ["libstdc++", "libc++"]
               compiler.version: ["11", "12", "13"]
               build_type: ["Release", "Debug"]
-  - id: configs/macos-clang
+  - id: macos-clang
     epochs: [0, 20211221]
     hrname: "macOS, Clang"
     content:
@@ -103,7 +112,7 @@ configurations:
               compiler.version: [ "11.0", "12.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/macos-clang
+  - id: macos-clang
     epochs: [20220120]
     hrname: "macOS, Clang"
     content:
@@ -111,10 +120,10 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "apple-clang":
-              compiler.version: [ "11.0", "12.0", "13.0"]
+              compiler.version: [ "13.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/macos-m1-clang
+  - id: macos-m1-clang
     epochs: [0, 20211221]
     hrname: "macOS, Clang (M1/arm64)"
     build_profile:
@@ -128,7 +137,7 @@ configurations:
               compiler.version: [ "12.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/macos-m1-clang
+  - id: macos-m1-clang
     epochs: [20220120]
     hrname: "macOS, Clang (M1/arm64)"
     build_profile:
@@ -139,10 +148,10 @@ configurations:
         arch: [ "armv8" ]
         compiler:
           - "apple-clang":
-              compiler.version: [ "12.0", "13.0" ]
+              compiler.version: [ "13.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/windows-visual_studio
+  - id: windows-visual_studio
     epochs: [0, 20211221, 20220120]
     hrname: "Windows, Visual Studio"
     content:
@@ -150,12 +159,12 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "Visual Studio":
-              compiler.version: [ "15", "16" ]
+              compiler.version: [ "16" ]
               build_type:
                 - "Release":
-                    compiler.runtime: [ "MT", "MD" ]
+                    compiler.runtime: [ "MD" ]
                 - "Debug":
-                    compiler.runtime: [ "MTd", "MDd" ]
+                    compiler.runtime: [ "MDd" ]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"
@@ -189,6 +198,7 @@ pod_size:
   large:
     - "pcl"
     - "duckdb"
+    - "ceres-solver"
   xlarge:
     - "llvm"
     - "opengv"

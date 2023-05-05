@@ -9,23 +9,12 @@ required_conan_version = ">=1.53.0"
 
 class GeotransConan(ConanFile):
     name = "geotrans"
-    license = (
-        "NGA GEOTRANS ToS (https://earth-info.nga.mil/php/download.php?file=wgs-terms)"
-    )
+    license = "NGA GEOTRANS ToS (https://earth-info.nga.mil/php/download.php?file=wgs-terms)"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://earth-info.nga.mil/"
     description = "MSP GEOTRANS is the NGA and DOD approved coordinate converter and datum translator."
-    topics = (
-        "geotrans",
-        "geodesic",
-        "geographic",
-        "coordinate",
-        "datum",
-        "geodetic",
-        "conversion",
-        "transformation",
-    )
-
+    topics = ("geotrans", "geodesic", "geographic", "coordinate", "datum", "geodetic", "conversion", "transformation")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,12 +41,11 @@ class GeotransConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, filename=f"geotrans-{self.version}.tgz")
 
     def generate(self):
         tc = CMakeToolchain(self)

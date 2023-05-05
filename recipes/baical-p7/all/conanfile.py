@@ -1,8 +1,11 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.53.0"
+
 
 class BaicalP7Conan(ConanFile):
     name = "baical-p7"
@@ -11,17 +14,19 @@ class BaicalP7Conan(ConanFile):
     homepage = "http://baical.net/p7.html"
     topics = ("p7", "baical", "logging", "telemetry")
     description = "Baical P7 client"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
 
-    _cmake = None
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,46 +34,39 @@ class BaicalP7Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
         if self.settings.os not in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration("P7 only supports Windows and Linux at this time")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination= self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version])
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["P7_TESTS_BUILD"] = False
-        self._cmake.definitions["P7_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["P7_EXAMPLES_BUILD"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["P7_TESTS_BUILD"] = False
+        tc.cache_variables["P7_BUILD_SHARED"] = self.options.shared
+        tc.variables["P7_EXAMPLES_BUILD"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "Headers"))
-        cmake = self._configure_cmake()
+        copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "include"), "*.cmake")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "p7"
-        self.cpp_info.names["cmake_find_package_multi"] = "p7"
-
-        if self.options.shared:
-            self.cpp_info.components["p7"].name = "p7-shared"
-            self.cpp_info.components["p7"].libs = ["p7-shared"]
-        else:
-            self.cpp_info.components["p7"].name = "p7"
-            self.cpp_info.components["p7"].libs = ["p7"]
-
-        if self.settings.os == "Linux":
-            self.cpp_info.components["p7"].system_libs .extend(["rt", "pthread"])
-        if self.settings.os == "Windows":
-            self.cpp_info.components["p7"].system_libs .append("Ws2_32")
+        self.cpp_info.libs = ["p7-shared" if self.options.shared else "p7"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["m", "rt", "pthread"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")

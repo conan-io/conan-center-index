@@ -1,4 +1,10 @@
 versions:
+  "3.15.0":
+    folder: "all"
+  "3.14.1":
+    folder: "all"
+  "3.14.0":
+    folder: "all"
   "3.12.0":
     folder: "all"
   "3.11.1":
@@ -15,11 +21,5 @@ versions:
     folder: "all"
   "3.1.1":
     folder: "all"
-  "3.1.0":
-    folder: "all"
-  "3.0.5":
-    folder: "all"
   "2.15.3":
-    folder: "all"
-  "2.14.0":
     folder: "all"

@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conans.tools import stdcpp_library
-from conan.tools.build import cross_building
+from conan.tools.build import can_run, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
@@ -10,7 +9,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class ProjConan(ConanFile):
@@ -58,24 +57,23 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.40.0")
+        self.requires("sqlite3/3.41.1", run=can_run(self))
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.86.0")
+            self.requires("libcurl/7.88.1")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("sqlite3/3.40.0")
+        if not can_run(self):
+            self.tool_requires("sqlite3/3.41.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            env = VirtualBuildEnv(self)
-            env.generate()
-        else:
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
@@ -137,10 +135,10 @@ class ProjConan(ConanFile):
             else:
                 cmake_sqlite_call = "generate_proj_db.cmake"
                 pattern = "\"${EXE_SQLITE3}\""
-            if hasattr(self, "settings_build") and cross_building(self):
-                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
-            else:
+            if can_run(self):
                 lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
+            else:
+                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
             replace_in_file(self,
                 os.path.join(self.source_folder, "data", cmake_sqlite_call),
                 f"COMMAND {pattern}",
@@ -181,9 +179,6 @@ class ProjConan(ConanFile):
         self.cpp_info.components["projlib"].set_property("cmake_target_name", f"{cmake_namespace}::proj")
         self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
 
-        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
-        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
-
         self.cpp_info.components["projlib"].libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["projlib"].system_libs.append("m")
@@ -193,9 +188,11 @@ class ProjConan(ConanFile):
             if proj_version >= "7.0.0":
                 self.cpp_info.components["projlib"].system_libs.append("shell32")
             if proj_version >= "7.1.0":
-                self.cpp_info.components["projlib"].system_libs.append("Ole32")
-        if not self.options.shared and stdcpp_library(self):
-            self.cpp_info.components["projlib"].system_libs.append(stdcpp_library(self))
+                self.cpp_info.components["projlib"].system_libs.append("ole32")
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["projlib"].system_libs.append(libcxx)
         self.cpp_info.components["projlib"].requires.extend(["nlohmann_json::nlohmann_json", "sqlite3::sqlite3"])
         if self.options.get_safe("with_tiff"):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
@@ -208,21 +205,23 @@ class ProjConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
+        # see https://proj.org/usage/environmentvars.html#envvar-PROJ_DATA
+        proj_data_env_var_name = "PROJ_LIB" if Version(self.version) < "9.1.0" else "PROJ_DATA"
         res_path = os.path.join(self.package_folder, "res")
-        self.output.info(f"Prepending to PROJ_LIB environment variable: {res_path}")
-        self.runenv_info.prepend_path("PROJ_LIB", res_path)
-
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
-        self.env_info.PROJ_LIB = res_path
-
+        self.runenv_info.prepend_path(proj_data_env_var_name, res_path)
         if self.options.build_executables:
-            self.buildenv_info.prepend_path("PROJ_LIB", res_path)
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
+            self.buildenv_info.prepend_path(proj_data_env_var_name, res_path)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
+        if Version(self.version) < "9.1.0":
+            self.env_info.PROJ_LIB.append(res_path)
+        else:
+            self.env_info.PROJ_DATA.append(res_path)
+        if self.options.build_executables:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

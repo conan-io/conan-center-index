@@ -1,18 +1,20 @@
+import glob
+import hashlib
+import os
+import shutil
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
-from conans.tools import get_gnu_triplet, sha256sum, stdcpp_library
-import glob
-import os
-import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class ICUConan(ConanFile):
@@ -23,7 +25,7 @@ class ICUConan(ConanFile):
                   "providing Unicode and Globalization support for software applications."
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("icu", "icu4c", "i see you", "unicode")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -68,13 +70,25 @@ class ICUConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def validate(self):
+        if self.options.dat_package_file:
+            if not os.path.exists(self.options.dat_package_file):
+                raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @staticmethod
+    def _sha256sum(file_path):
+        m = hashlib.sha256()
+        with open(file_path, "rb") as fh:
+            for data in iter(lambda: fh.read(8192), b""):
+                m.update(data)
+        return m.hexdigest()
+
     def package_id(self):
-        if self.options.dat_package_file:
-            dat_package_file_sha256 = sha256sum(str(self.options.dat_package_file))
-            self.info.options.dat_package_file = dat_package_file_sha256
+        if self.info.options.dat_package_file:
+            self.info.options.dat_package_file = self._sha256sum(str(self.info.options.dat_package_file))
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -83,19 +97,17 @@ class ICUConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
         if cross_building(self) and hasattr(self, "settings_build"):
-            self.tool_requires(self.ref)
+            self.tool_requires(str(self.ref))
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        if check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         if not self.options.shared:
@@ -119,22 +131,15 @@ class ICUConan(ConanFile):
         if cross_building(self):
             base_path = unix_path(self, self.dependencies.build["icu"].package_folder)
             tc.configure_args.append(f"--with-cross-build={base_path}")
-            if (not is_msvc(self)):
-                # --with-cross-build above prevents tc.generate() from setting --build option.
-                # Workaround for https://github.com/conan-io/conan/issues/12642
-                gnu_triplet = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), str(self.settings.compiler))
-                tc.configure_args.append(f"--build={gnu_triplet}")
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
-                gnu_triplet = get_gnu_triplet("Macos", str(self.settings.arch))
-                tc.configure_args.append(f"--host={gnu_triplet}")
-            elif is_msvc(self):
-                # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
-                host = get_gnu_triplet(str(self.settings.os), str(self.settings.arch), "gcc")
-                build = get_gnu_triplet(str(self._settings_build.os), str(self._settings_build.arch), "gcc")
-                tc.configure_args.extend([
-                    f"--host={host}",
-                    f"--build={build}",
-                ])
+                # ICU build scripts interpret all Apple platforms as 'darwin'.
+                # Since this can coincide with the `build` triple, we need to tweak
+                # the build triple to avoid the collision and ensure the scripts
+                # know we are cross-building.
+                host_triplet = f"{str(self.settings.arch)}-apple-darwin"
+                build_triplet = f"{str(self._settings_build.arch)}-apple"
+                tc.update_configure_args({"--host": host_triplet,
+                                          "--build": build_triplet})
         else:
             arch64 = ["x86_64", "sparcv9", "ppc64", "ppc64le", "armv8", "armv8.3", "mips64"]
             bits = "64" if self.settings.arch in arch64 else "32"
@@ -149,6 +154,8 @@ class ICUConan(ConanFile):
             env = Environment()
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
+            if cross_building(self):
+                env.define("icu_cv_host_frag", "mh-msys-msvc")
             env.vars(self).save_script("conanbuild_icu_msvc")
 
     def _patch_sources(self):
@@ -201,7 +208,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = self.version.split(".")[0]
+        vtag = Version(self.version).major
         return f"icudt{vtag}l.dat"
 
     @property
@@ -209,14 +216,13 @@ class ICUConan(ConanFile):
         data_dir_name = "icu"
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             data_dir_name += "d"
-        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, self.version)
+        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, str(self.version))
         return os.path.join(data_dir, self._data_filename)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         dll_files = glob.glob(os.path.join(self.package_folder, "lib", "*.dll"))
         if dll_files:

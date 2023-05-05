@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(lua)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
-
-
 # The following was originally taken from: https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/lua/CMakeLists.txt
 
 # Lua can be compiled as either C or C++.
@@ -17,7 +12,7 @@ conan_basic_setup()
 #     - This is a source-incompatible change because extern "C" is chosen by the including application.
 # - The lua.hpp header will not be available.
 
-SET(SOURCE_DIR ${CMAKE_SOURCE_DIR}/${SOURCE_SUBDIR} )
+SET(SOURCE_DIR ${LUA_SRC_DIR})
 
 # Build Libraries
 FILE(GLOB SRC_LIBLUA "${SOURCE_DIR}/src/*.c")

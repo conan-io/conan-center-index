@@ -1,10 +1,19 @@
 sources:
+  "1.3.0":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.3.0/bzip3-1.3.0.tar.xz"
+    sha256: "72fca01d9030e9c260e2ff8fe9d2e9f6261ea28e86adabeb6a8af3300ec390ef"
+  "1.2.3":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.3/bzip3-1.2.3.tar.xz"
+    sha256: "a6a4fa418bdff6f15be3604e8e85b5b73bf0f20e31de9603d55dc100914a111f"
+  "1.2.2":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.2/bzip3-1.2.2.tar.xz"
+    sha256: "2b82d0adcea762ac090cf9e791159894e633a37b34696bcd8c66202b23c4130b"
   "1.2.1":
-    url: "https://github.com/kspalaiologos/bzip3/archive/1.2.1.tar.gz"
-    sha256: "f2fc4c9c7679d3b120e8f44d8c4ecd00f03af9981f53e13dc0f956b5996913c9"
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.1/bzip3-1.2.1.tar.xz"
+    sha256: "4ad3aea9b9c28be102dbfeb3aec89281116784bf41b97331da88aa137bd91a27"
   "1.2.0":
-    url: "https://github.com/kspalaiologos/bzip3/archive/1.2.0.tar.gz"
-    sha256: "6f9bd935ac1e845cb49e64ad23969db914e4760dad7feec0995f5cdbd336c10d"
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.0/bzip3-1.2.0.tar.xz"
+    sha256: "f0441519321070e03708638b37bdeb9105aff8f0a5c838e45aff1b0cbe752572"
   "1.1.8":
     url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.8/bzip3-1.1.8.tar.bz2"
     sha256: "bc15d0e4599aad18d9ed71ee0f7e859af89051bf5105b0751e8ca3a26117567d"

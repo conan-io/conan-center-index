@@ -11,7 +11,15 @@ sources:
 patches:
   "1.9.3":
     - patch_file: "patches/0003-cmake-minimum-required-first-1.9.3.patch"
+      patch_description: "Move cmake_minimum_required to the top of CMakeFile.txt"
+      patch_type: conan
   "1.9.2":
     - patch_file: "patches/0001-cmake-add-shared-DEFINE_SYMBOL.patch"
+      patch_description: "Add LZ4_DLL_EXPORT to MSVC"
+      patch_type: portability
     - patch_file: "patches/0002-cmake-optional-cli.patch"
+      patch_description: "Add ability not to compile the CLI"
+      patch_type: conan
     - patch_file: "patches/0003-cmake-minimum-required-first-1.9.2.patch"
+      patch_description: "Move cmake_minimum_required to the top of CMakeFile.txt"
+      patch_type: conan

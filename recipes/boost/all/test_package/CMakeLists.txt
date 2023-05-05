@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
+if(UNIX AND NOT APPLE)
+    # use RPATH instead of RUNPATH so that
+    # transitive dependencies can be located
+    add_link_options("LINKER:--disable-new-dtags")
+endif()
+
+include(CTest)
 enable_testing()
 
 if(BOOST_NAMESPACE)
@@ -134,6 +141,15 @@ if(NOT HEADER_ONLY)
         add_test(NAME boost_numpy COMMAND numpy_exe)
         set_property(TEST boost_numpy PROPERTY ENVIRONMENT "PYTHONPATH=${Python_SITELIB}")
     endif()
+
+    if(WITH_URL)
+        find_package(Boost COMPONENTS url REQUIRED)
+        add_executable(url_exe url.cpp)
+        target_link_libraries(url_exe PRIVATE Boost::url)
+        set_property(TARGET url_exe PROPERTY CXX_STANDARD 11)
+        add_test(NAME boost_url COMMAND url_exe)
+    endif()
+
 endif()
 
 # Test header-only target

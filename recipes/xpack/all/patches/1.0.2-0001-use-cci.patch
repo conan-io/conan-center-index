@@ -1,0 +1,43 @@
+diff --git a/a/json_decoder.h b/b/json_decoder.h
+index 6d5e50c..e66fe8c 100755
+--- a/a/json_decoder.h
++++ b/b/json_decoder.h
+@@ -20,8 +20,8 @@
+ #include <fstream>
+ 
+ #include "rapidjson_custom.h"
+-#include "thirdparty/rapidjson/document.h"
+-#include "thirdparty/rapidjson/error/en.h"
++#include "rapidjson/document.h"
++#include "rapidjson/error/en.h"
+ 
+ #include "xdecoder.h"
+ 
+diff --git a/a/json_encoder.h b/b/json_encoder.h
+index 442d9e0..2be9323 100755
+--- a/a/json_encoder.h
++++ b/b/json_encoder.h
+@@ -20,8 +20,8 @@
+ #include <string>
+ 
+ #include "rapidjson_custom.h"
+-#include "thirdparty/rapidjson/prettywriter.h"
+-#include "thirdparty/rapidjson/stringbuffer.h"
++#include "rapidjson/prettywriter.h"
++#include "rapidjson/stringbuffer.h"
+ 
+ #include "xencoder.h"
+ 
+diff --git a/a/xml_decoder.h b/b/xml_decoder.h
+index d9cb4bb..91530ba 100755
+--- a/a/xml_decoder.h
++++ b/b/xml_decoder.h
+@@ -24,7 +24,7 @@
+ #include <cstdlib>
+ #include <string.h>
+ 
+-#include "thirdparty/rapidxml/rapidxml.hpp"
++#include "rapidxml/rapidxml.hpp"
+ 
+ #include "xdecoder.h"
+ 
