@@ -11,9 +11,10 @@
  
  # Lua
  if(BUILD_LUA_BINDINGS)
- 	find_package(Lua REQUIRED)
+-	find_package(Lua REQUIRED)
 -	list(APPEND LUA_BINDINGS_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
 -	list(APPEND LUA_BINDINGS_LINK_LIBS ${LUA_LIBRARIES})
++	find_package(lua REQUIRED CONFIG)
 +	list(APPEND LUA_BINDINGS_LINK_LIBS lua::lua)
  endif()
  
