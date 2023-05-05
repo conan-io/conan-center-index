@@ -48,6 +48,9 @@ class OpenclIcdLoaderConan(ConanFile):
     def requirements(self):
         self.requires(f"opencl-headers/{self.version}", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.1 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
