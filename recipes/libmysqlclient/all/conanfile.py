@@ -72,10 +72,14 @@ class LibMysqlClientCConan(ConanFile):
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.6.2")
 
-    def validate(self):
+    def validate_build(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
+
+    def validate(self):
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -85,9 +89,6 @@ class LibMysqlClientCConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
-
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
 
         # Sice 8.0.17 this doesn't support shared library on MacOS.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
@@ -210,6 +211,10 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["ENABLED_PROFILING"] = False
         tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
         tc.cache_variables["WIX_DIR"] = False
+        # Disable additional Linux distro-specific compiler checks. 
+        # The recipe already checks for minimum versions of supported
+        # compilers.
+        tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
 
         tc.cache_variables["WITH_LZ4"] = "system"
 
