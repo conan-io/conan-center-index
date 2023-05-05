@@ -115,7 +115,7 @@ class Log4cxx(ConanFile):
             tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
             tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
             tc.variables["ENABLE_FMT_LAYOUT"] = self.options.with_fmt_layout
-        if Version(self.version) > "1.0.0":
+        if Version(self.version) > "1.0.0" and self.settings.os != "Windows":
             tc.variables["LOG4CXX_ENABLE_ESMTP"] = self.options.with_smtp_appender
         tc.variables["LOG4CXX_ENABLE_ODBC"] = self.options.with_odbc_appender
         tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
