@@ -6,8 +6,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 import os
 
+required_conan_version = ">=1.55.0"
 
-required_conan_version = ">=1.53.0"
 
 class PahoMqttCppConan(ConanFile):
     name = "paho-mqtt-cpp"
@@ -83,6 +83,8 @@ class PahoMqttCppConan(ConanFile):
         tc.variables["PAHO_WITH_SSL"] = self.options.ssl
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("paho-mqtt-c", "cmake_file_name", "PahoMqttC")
+        deps.set_property("paho-mqtt-c", "cmake_target_name", "PahoMqttC::PahoMqttC")
         deps.generate()
 
     def build(self):
