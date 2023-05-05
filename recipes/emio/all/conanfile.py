@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
