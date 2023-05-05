@@ -15,7 +15,6 @@ import glob
 import re
 import json
 
-# https://llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
 projects = [
     'clang',
     'clang-tools-extra',
@@ -36,24 +35,24 @@ runtimes = [
     'openmp',
 ]
 default_projects = [
-    'clang',
-    'clang-tools-extra',
+    # 'clang',
+    # 'clang-tools-extra',
     # 'libc', # clang-14 crashes for sin/cos/tan for 13.0.0-14.0.6
-    'libclc',
-    'lld',
+    # 'libclc',
+    # 'lld',
     # TODO: lib/liblldb.so.14.0.6 / libxml2, error: undefined symbol: libiconv_open, referenced by encoding.c in libxml2.a
-    # probably because libxml2 isn't migrated to conan2, maybe components['lldbHost'].requires.append('Iconv::Iconv') ?
+    # probably because libxml2 isn't migrated to conan2, maybe components['lldbHost'].requires.append('Iconv::Iconv') or maybe Iconv is added but upper/lowercase doesn't match ?
     # 'lldb',
-    'openmp',
-    'polly',
-    'pstl',
+    # 'openmp',
+    # 'polly',
+    # 'pstl',
 ]
 default_runtimes = [
     # 'compiler-rt',  # fatal error: 'bits/libc-header-start.h' file not found
     # 'libc',
-    'libcxx',
-    'libcxxabi',
-    'libunwind',
+    # 'libcxx',
+    # 'libcxxabi',
+    # 'libunwind',
 ]
 
 
@@ -244,6 +243,11 @@ class Llvm(ConanFile):
             ', '.join(enabled_runtimes)))
 
         cmake = CMake(self)
+        # https://releases.llvm.org/13.0.0/docs/CMake.html
+        # https://releases.llvm.org/14.0.0/docs/CMake.html
+        # https://releases.llvm.org/15.0.0/docs/CMake.html
+        # https://releases.llvm.org/16.0.0/docs/CMake.html
+        # https://llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
         cmake.configure(
             cli_args=['--graphviz=graph/llvm.dot'],
             variables={
