@@ -17,11 +17,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<TARGET_NAME_IF_EXISTS:opencv_videoio>
     $<TARGET_NAME_IF_EXISTS:opencv_sfm>
 )
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 if(built_dnn)
     target_link_libraries(${PROJECT_NAME} PRIVATE opencv_dnn)
 endif()
-
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 if(built_with_ade)
     target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_WITH_ADE)
 endif()

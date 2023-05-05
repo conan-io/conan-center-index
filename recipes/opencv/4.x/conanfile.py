@@ -83,7 +83,7 @@ class OpenCVConan(ConanFile):
         "with_cufft": False,
         "with_cudnn": False,
         "with_v4l": False,
-        "with_ffmpeg": False, # Currently Blocking Conan 2.0 migration https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1487662909
+        "with_ffmpeg": True,
         "with_imgcodec_hdr": False,
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
@@ -138,8 +138,7 @@ class OpenCVConan(ConanFile):
             # Following the packager choice, ffmpeg is enabled by default when
             # supported, except on Android. See
             # https://github.com/opencv/opencv/blob/39c3334147ec02761b117f180c9c4518be18d1fa/CMakeLists.txt#L266-L268
-            self.options.with_ffmpeg = False # self.settings.os != "Android"
-            # Currently blocking v2 migration
+            self.options.with_ffmpeg = self.settings.os != "Android"
         else:
             del self.options.with_ffmpeg
 
@@ -372,9 +371,9 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                # TODO: use self.dependencies once https://github.com/conan-io/conan/issues/12728 fixed
-                ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
+            ffmpeg_cpp_info = self.dependencies["ffmpeg"].cpp_info
+            for component in ["avcodec", "avformat", "avutil", "swscale"]:
+                ffmpeg_component_version = ffmpeg_cpp_info.components[component].get_property("component_version")
                 tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
 
         tc.variables["WITH_GSTREAMER"] = False
