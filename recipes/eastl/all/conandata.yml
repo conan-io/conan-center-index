@@ -23,28 +23,18 @@ sources:
 patches:
   "3.18.00":
     - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
-      base_path: "source_subfolder"
   "3.17.06":
     - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
-      base_path: "source_subfolder"
   "3.17.03":
     - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
-      base_path: "source_subfolder"
   "3.16.07":
     - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
   "3.16.05":
     - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
   "3.16.01":
     - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
   "3.15.00":
     - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
-      base_path: "source_subfolder"
