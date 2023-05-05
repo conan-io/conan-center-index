@@ -325,6 +325,13 @@ class Llvm(ConanFile):
             os.path.exists(os.path.join(
                 package_lib_folder, f"lib{target_name}.dylib"))
 
+    def _is_shared_llvm_lib(self, target_name):
+        """Depending on llvm configuration there are static and shared libraries, so options.shared isn't correct."""
+        package_lib_folder = os.path.join(self.package_folder, "lib")
+        return os.path.exists(os.path.join(package_lib_folder, f"lib{target_name}.so")) or \
+            os.path.exists(os.path.join(
+                package_lib_folder, f"lib{target_name}.dylib"))
+
     def _package_bin(self):
         """Keep binaries which are matching recipe option keep_binaries_regex.
         Keeps also links in between, removes everything else.
@@ -468,7 +475,9 @@ class Llvm(ConanFile):
                             if not visited:
                                 current_deps.append(d)
                     elif self._is_installed_llvm_lib(current_dep):
-                        if not self.options.shared:
+                        # Because .a and .so are mixed for specific llvm configuration, check if the file is actually shared
+                        # shared files contain their internal dependencies in elf header, we dont need to handle them
+                        if not self._is_shared_llvm_lib(current_dep):
                             components[lib].append(current_dep)
                     elif current_dep in external_targets_keys:
                         components[lib].append(external_targets[current_dep])
