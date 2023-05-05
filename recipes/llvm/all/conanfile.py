@@ -545,24 +545,23 @@ class Llvm(ConanFile):
                 f"circular dependency found, see error log above")
 
         # manually fix some dependencies
-        if not self.options.shared:
-            if self.options.get_safe('with_zlib', False):
-                if not 'z' in components['LLVMSupport']:
-                    components['LLVMSupport'].append('z')
+        if self.options.get_safe('with_zlib', False):
+            if not 'z' in components['LLVMSupport']:
+                components['LLVMSupport'].append('z')
 
-            # fix: ERROR: llvm/14.0.6@...: Required package 'libxml2' not in component 'requires'
-            xml2_linking = ["LLVMWindowsManifest", "lldbHost", "c-index-test"]
-            report_xml2_issue = self.options.with_xml2
-            if self.options.with_xml2:
-                for component in xml2_linking:
-                    if component in components:
-                        components[component].append(
-                            "xml2")
-                        self.output.info(
-                            f"forced dependency to \"xml2\" for target {component}")
-                        report_xml2_issue = False
-            if report_xml2_issue:
-                raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
+        # fix: ERROR: llvm/14.0.6@...: Required package 'libxml2' not in component 'requires'
+        xml2_linking = ["LLVMWindowsManifest", "lldbHost", "c-index-test"]
+        report_xml2_issue = self.options.with_xml2
+        if self.options.with_xml2:
+            for component in xml2_linking:
+                if component in components:
+                    components[component].append(
+                        "xml2")
+                    self.output.info(
+                        f"forced dependency to \"xml2\" for target {component}")
+                    report_xml2_issue = False
+        if report_xml2_issue:
+            raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
 
         # write components.json for package_info
         components_path = os.path.join(
@@ -579,14 +578,6 @@ class Llvm(ConanFile):
     def package_info(self):
         module_subfolder = os.path.join("lib", "cmake")
         self.cpp_info.set_property("cmake_file_name", "LLVM")
-
-        if self.options.shared:
-            self.cpp_info.libs = collect_libs(self)
-            if self.settings.os == 'Linux':
-                self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
-            elif self.settings.os == 'Macos':
-                self.cpp_info.system_libs = ['m']
-            return
 
         components_path = \
             os.path.join(self.package_folder, 'lib', 'components.json')
