@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
-import os
-import sys
 
+import os
+from pathlib import PurePath
+import sys
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -9,7 +10,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["Python_EXECUTABLE"] = self._python_interpreter
+        # Used by FindPython.cmake in CMake
+        cmake.definitions["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
+        # Used by FindPythonLibsNew.cmake in pybind11
+        cmake.definitions["PYTHON_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
         cmake.configure()
         cmake.build()
 
