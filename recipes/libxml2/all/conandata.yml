@@ -23,3 +23,9 @@ sources:
   "2.9.9":
     url: "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.9.tar.xz"
     sha256: "58a5c05a2951f8b47656b676ce1017921a29f6b1419c45e3baed0d6435ba03f5"
+
+patches:
+  "2.11.1":
+    - patch_file: "patches/0001-win32-Don-t-depend-on-removed-.def-file.patch"
+      patch_type: "backport"
+      patch_source: "https://gitlab.gnome.org/GNOME/libxml2/-/commit/11a95279a93241b32839f1f796602254215be0fb"

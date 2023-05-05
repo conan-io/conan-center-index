@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, build_jobs
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rename, rm, rmdir, replace_in_file, save, chdir, mkdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file, save, chdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, NMakeDeps, NMakeToolchain
@@ -76,6 +76,9 @@ class Libxml2Conan(ConanFile):
     @property
     def _is_mingw_windows(self):
         return self.settings.compiler == "gcc" and self.settings.os == "Windows" and self._settings_build.os == "Windows"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -271,6 +274,7 @@ class Libxml2Conan(ConanFile):
                 self.run("mingw32-make -f Makefile.mingw install-dist")
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
             replace_in_file(self, os.path.join(self.source_folder, "win32", makefile),
