@@ -25,6 +25,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            with tools.environment_append({"PYTHONPATH": "lib"}):
+            pythonpath = os.path.join(self.build_folder, self.cpp.build.libdirs[0])
+            with tools.environment_append({"PYTHONPATH": pythonpath}):
                 python_module = os.path.join(self.source_folder, "..", "test_package", "test.py")
                 self.run(f"{self._python_interpreter} {python_module}", run_environment=True)
