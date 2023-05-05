@@ -22,10 +22,6 @@ class ThrustConan(ConanFile):
     options = {"device_system": ["cuda", "cpp", "omp", "tbb"]}
     default_options = {"device_system": "tbb"}
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
