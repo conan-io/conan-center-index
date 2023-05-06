@@ -16,7 +16,6 @@ required_conan_version = ">=1.54.0"
 
 class LibmemcachedConan(ConanFile):
     name = "libmemcached"
-    version = "1.0.18"
 
     # Optional metadata
     license = "BSD License"
