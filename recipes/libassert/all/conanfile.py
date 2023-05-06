@@ -11,16 +11,10 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
-
 
 class PackageConan(ConanFile):
     name = "libassert"
     description = "The most over-engineered and overpowered C++ assertion library."
-    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jeremy-rifkin/libassert"
@@ -44,8 +38,7 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
-            "clang": "9",
-            "apple-clang": "10",
+            "clang": "9"
         }
 
     def config_options(self):
@@ -60,6 +53,9 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("apple-clang not supported")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
