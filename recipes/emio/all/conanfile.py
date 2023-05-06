@@ -62,4 +62,7 @@ class EmioConan(ConanFile):
              dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        pass
+        self.cpp_info.filenames["cmake_find_package"] = "emio"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "emio"
+        self.cpp_info.names["cmake_find_package"] = "emio"
+        self.cpp_info.names["cmake_find_package_multi"] = "emio"
