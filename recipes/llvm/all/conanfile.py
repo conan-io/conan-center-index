@@ -564,6 +564,14 @@ class Llvm(ConanFile):
                     self.output.info(
                         f"forced dependency to \"xml2\" for target {component}")
                     report_xml2_issue = False
+
+            # XXX could be an issue in libxml2 recipe?
+            # ld: error: undefined symbol: libiconv_open, libiconv_close, libiconv in libxml2_la-encoding
+            component = "lldbHost"
+            if component in components:
+                components[component].append("iconv")
+                self.output.info(
+                    f"forced dependency to \"iconv\" for target {component}")
         if report_xml2_issue:
             raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
 
