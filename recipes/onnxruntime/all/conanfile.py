@@ -43,7 +43,7 @@ class OnnxRuntimeConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "8",
+            "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -88,7 +88,7 @@ class OnnxRuntimeConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                f"{self.ref} requires minimum compiler version {minimum_version}."
             )
 
     def build_requirements(self):
