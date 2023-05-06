@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -28,8 +29,18 @@ class SonicCppConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+			"gcc": "8",
+			"clang": "7",
+			"apple-clang": "12",
+		}
+
     def requirements(self):
-        if self.settings.compiler.cppstd and str(self.settings.compiler.cppstd) < "17":
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if (self.settings.compiler.cppstd and str(self.settings.compiler.cppstd) < "17") or \
+           (minimum_version and Version(self.settings.compiler.version) < minimum_version):
             self.requires("string-view-lite/1.7.0", transitive_headers=True)
 
     def package_id(self):
