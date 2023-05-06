@@ -12,10 +12,10 @@ index 89113c0..8c52d1b 100644
  
      void sort_and_dedup(literal_format(&)[format_arr_length]);
 diff --git a/src/assert.cpp b/src/assert.cpp
-index 5eb80f1..7fa8c6f 100644
+index 5eb80f1..8d52a64 100644
 --- a/src/assert.cpp
 +++ b/src/assert.cpp
-@@ -2101,7 +2101,7 @@ namespace libassert::detail {
+@@ -2101,7 +2111,7 @@ namespace libassert::detail {
      LIBASSERT_ATTR_COLD
      binary_diagnostics_descriptor::binary_diagnostics_descriptor(binary_diagnostics_descriptor&&) noexcept = default;
      LIBASSERT_ATTR_COLD binary_diagnostics_descriptor&
