@@ -1,18 +1,26 @@
-from conan import ConanFile
-from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.files import get, replace_in_file, chdir, rmdir, copy, apply_conandata_patches, export_conandata_patches
-from conan.tools.microsoft import VCVars, NMakeToolchain, NMakeDeps
-from conan.tools.microsoft.visual import is_msvc
-from conan.tools.apple import is_apple_os
-from conan.tools.scm import Version
-from conan.tools.layout import basic_layout
-from conan.tools.build import cross_building
-
 import os
 
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import (
+    apply_conandata_patches,
+    chdir,
+    copy,
+    export_conandata_patches,
+    get,
+    replace_in_file,
+    rmdir,
+)
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import NMakeDeps, NMakeToolchain, is_msvc
+from conan.tools.scm import Version
+
 required_conan_version = ">=1.55.0"
+
 
 class TkConan(ConanFile):
     name = "tk"
@@ -46,7 +54,9 @@ class TkConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
-        self.requires(f"tcl/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires(
+            f"tcl/{self.version}", transitive_headers=True, transitive_libs=True
+        )
         if self.settings.os == "Linux":
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
@@ -57,22 +67,31 @@ class TkConan(ConanFile):
 
     def build_requirements(self):
         if not is_msvc(self):
-            if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path") and not self.conf.get("tools.microsoft.bash:subsystem"):
+            if (
+                self._settings_build.os == "Windows"
+                and not self.conf.get("tools.microsoft.bash:path")
+                and not self.conf.get("tools.microsoft.bash:subsystem")
+            ):
                 self.build_requires("msys2/cci.latest")
 
     def validate(self):
         if self.dependencies["tcl"].options.shared != self.options.shared:
-            raise ConanInvalidConfiguration("The shared option of tcl and tk must have the same value")
+            raise ConanInvalidConfiguration(
+                "The shared option of tcl and tk must have the same value"
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.source_folder)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self.source_folder,
+        )
 
     def generate(self):
-
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
 
@@ -98,7 +117,9 @@ class TkConan(ConanFile):
                     continue
                 if lib.startswith("tcl{}".format("".join(self.version.split(".")[:2]))):
                     tclimplib = os.path.join(tcl_lib_path, lib)
-                elif lib.startswith("tclstub{}".format("".join(self.version.split(".")[:2]))):
+                elif lib.startswith(
+                    "tclstub{}".format("".join(self.version.split(".")[:2]))
+                ):
                     tclstublib = os.path.join(tcl_lib_path, lib)
 
             if tclimplib is None or tclstublib is None:
@@ -108,7 +129,9 @@ class TkConan(ConanFile):
             tc.extra_defines.append(f"INSTALLDIR={self.package_folder}")
             tc.extra_defines.append(f"OPTS={','.join(opts)}")
             tc.extra_defines.append(f"TCLDIR={self.dependencies['tcl'].package_folder}")
-            tc.extra_defines.append(f"TCL_LIBRARY={self.dependencies['tcl'].runenv_info.vars.get('TCL_LIBRARY')}") # replace("\\", "/"),
+            tc.extra_defines.append(
+                f"TCL_LIBRARY={self.dependencies['tcl'].runenv_info.vars.get('TCL_LIBRARY')}"
+            )
             tc.extra_defines.append(f"TCLIMPLIB={tclimplib}")
             tc.extra_defines.append(f"TCLSTUBLIB={tclstublib}")
             tc.generate()
@@ -126,14 +149,28 @@ class TkConan(ConanFile):
             yes_no = lambda v: "yes" if v else "no"
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--enable-threads")
-            tc.configure_args.append(f"--enable-symbols={yes_no(self.settings.build_type == 'Debug')}")
-            tc.configure_args.append(f"--enable-64bit={yes_no(self.settings.arch == 'x86_64')}")
+            tc.configure_args.append(
+                f"--enable-symbols={yes_no(self.settings.build_type == 'Debug')}"
+            )
+            tc.configure_args.append(
+                f"--enable-64bit={yes_no(self.settings.arch == 'x86_64')}"
+            )
             tc.configure_args.append(f"--enable-aqua={yes_no(is_apple_os(self))}")
-            tc.configure_args.append(f"--with-tcl={os.path.join(self.dependencies['tcl'].package_folder, 'lib')}")
+            tc.configure_args.append(
+                f"--with-tcl={os.path.join(self.dependencies['tcl'].package_folder, 'lib')}"
+            )
             tc.configure_args.append(f"--with-x={yes_no(self.settings.os == 'Linux')}")
-            tc.make_args.append(f"TCL_GENERIC_DIR={os.path.join(self.dependencies['tcl'].package_folder, 'include')}")
+            tc.make_args.append(
+                f"TCL_GENERIC_DIR={os.path.join(self.dependencies['tcl'].package_folder, 'include')}"
+            )
             if self.settings.os == "Windows":
-                tc.extra_defines.extend(["UNICODE", "_UNICODE", "_ATL_XP_TARGETING", ])
+                tc.extra_defines.extend(
+                    [
+                        "UNICODE",
+                        "_UNICODE",
+                        "_ATL_XP_TARGETING",
+                    ]
+                )
             tc.generate()
 
             deps = AutotoolsDeps(self)
@@ -153,7 +190,7 @@ class TkConan(ConanFile):
         if build_system is None:
             build_system = self._get_default_build_system()
         if build_system not in ["win", "unix", "macosx"]:
-            raise ConanException("Invalid build system: {}".format(build_system))
+            raise ConanException(f"Invalid build system: {build_system}")
         return os.path.join(self.source_folder, build_system)
 
     def _build_nmake(self, target="release"):
@@ -177,7 +214,10 @@ class TkConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.install()
                 # DESTDIR is only default initialized for target="install"
-                autotools.make(target="install-private-headers", args=[f"DESTDIR={self.package_folder}"])
+                autotools.make(
+                    target="install-private-headers",
+                    args=[f"DESTDIR={self.package_folder}"],
+                )
                 rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "man"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -189,28 +229,42 @@ class TkConan(ConanFile):
             replace_in_file(self, tkConfigShPath, "//", "${TK_ROOT}/")
 
     def package_info(self):
+        tk_version = Version(self.version)
+        lib_infix = f"{tk_version.major}.{tk_version.minor}"
         if is_msvc(self):
-            tk_version = Version(self.version)
-            lib_infix = "{}{}".format(tk_version.major, tk_version.minor)
             tk_suffix = "t{}{}{}".format(
                 "" if self.options.shared else "s",
                 "g" if self.settings.build_type == "Debug" else "",
                 "x" if "MD" in str(self.settings.compiler.runtime) and not self.options.shared else "",
             )
         else:
-            tk_version = Version(self.version)
-            lib_infix = "{}.{}".format(tk_version.major, tk_version.minor)
             tk_suffix = ""
-        self.cpp_info.libs = ["tk{}{}".format(lib_infix, tk_suffix), "tkstub{}".format(lib_infix)]
+        self.cpp_info.libs = [f"tk{lib_infix}{tk_suffix}", f"tkstub{lib_infix}"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "Cocoa", "Carbon", "IOKit"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = [
-                "netapi32", "kernel32", "user32", "advapi32", "userenv","ws2_32", "gdi32",
-                "comdlg32", "imm32", "comctl32", "shell32", "uuid", "ole32", "oleaut32"
+                "netapi32",
+                "kernel32",
+                "user32",
+                "advapi32",
+                "userenv",
+                "ws2_32",
+                "gdi32",
+                "comdlg32",
+                "imm32",
+                "comctl32",
+                "shell32",
+                "uuid",
+                "ole32",
+                "oleaut32",
             ]
 
-        tk_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2]))).replace("\\", "/")
+        tk_library = os.path.join(
+            self.package_folder,
+            "lib",
+            f"{self.name}{tk_version.major}.{tk_version.minor}",
+        ).replace("\\", "/")
         self.output.info(f"Setting TK_LIBRARY environment variable: {tk_library}")
         self.env_info.TK_LIBRARY = tk_library
         self.runenv_info.define("TK_LIBRARY", tk_library)
