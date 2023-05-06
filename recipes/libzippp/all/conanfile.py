@@ -8,6 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
+
 class LibZipppConan(ConanFile):
     name = "libzippp"
     description = "A simple basic C++ wrapper around the libzip library"
@@ -53,7 +54,7 @@ class LibZipppConan(ConanFile):
                 self.requires(f"libzip/{versions[1]}")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         libzippp_version = str(self.version)
