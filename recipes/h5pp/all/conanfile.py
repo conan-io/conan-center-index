@@ -59,7 +59,7 @@ class H5ppConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "1.10.0":
-            self.requires("hdf5/1.12.2")
+            self.requires("hdf5/1.12.1")
         else:
             self.requires("hdf5/1.13.1")
 
