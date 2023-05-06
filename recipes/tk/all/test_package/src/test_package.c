@@ -19,5 +19,6 @@ int main (int argc ,char *argv[]) {
     }
 
     Tcl_Finalize();
+    fprintf(stderr, "Test package success.\n");
     return EXIT_SUCCESS;
 }

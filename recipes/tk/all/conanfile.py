@@ -1,8 +1,18 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanException, ConanInvalidConfiguration, ConanExceptionInUserConanfileMethod
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.files import get, replace_in_file, chdir, rmdir, copy, apply_conandata_patches, export_conandata_patches
+from conan.tools.microsoft import VCVars, NMakeToolchain, NMakeDeps
+from conan.tools.microsoft.visual import is_msvc
+from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
+from conan.tools.layout import basic_layout
+from conan.tools.build import cross_building
+
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.55.0"
 
 class TkConan(ConanFile):
     name = "tk"
@@ -12,6 +22,7 @@ class TkConan(ConanFile):
     license = "TCL"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,24 +32,21 @@ class TkConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
-        self.requires("tcl/{}".format(self.version))
+        self.requires(f"tcl/{self.version}", transitive_headers=True, transitive_libs=True)
         if self.settings.os == "Linux":
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
@@ -48,66 +56,91 @@ class TkConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if not is_msvc(self):
+            if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path") and not self.conf.get("tools.microsoft.bash:subsystem"):
                 self.build_requires("msys2/cci.latest")
 
     def validate(self):
-        if self.options["tcl"].shared != self.options.shared:
+        if self.dependencies["tcl"].options.shared != self.options.shared:
             raise ConanInvalidConfiguration("The shared option of tcl and tk must have the same value")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self.source_folder)
 
-    def _patch_sources(self):
-        for build_system in ("unix", "win", ):
-            config_dir = self._get_configure_folder(build_system)
+    def generate(self):
 
-            if build_system != "win":
-                # When disabling 64-bit support (in 32-bit), this test must be 0 in order to use "long long" for 64-bit ints
-                # (${tcl_type_64bit} can be either "__int64" or "long long")
-                tools.replace_in_file(os.path.join(config_dir, "configure"),
-                                      "(sizeof(${tcl_type_64bit})==sizeof(long))",
-                                      "(sizeof(${tcl_type_64bit})!=sizeof(long))")
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
-            makefile_in = os.path.join(config_dir, "Makefile.in")
-            # Avoid clearing CFLAGS and LDFLAGS in the makefile
-            # tools.replace_in_file(makefile_in, "\nCFLAGS{}".format(" " if (build_system == "win" and name == "tcl") else "\t"), "\n#CFLAGS\t")
-            tools.replace_in_file(makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
-            tools.replace_in_file(makefile_in, "${CFLAGS}", "${CFLAGS} ${CPPFLAGS}")
+        if is_msvc(self):
+            # https://core.tcl.tk/tips/doc/trunk/tip/477.md
+            opts = []
+            if not self.options.shared:
+                opts.append("static")
+            if self.settings.build_type == "Debug":
+                opts.append("symbols")
+            if "MD" in str(self.settings.compiler.runtime):
+                opts.append("msvcrt")
+            else:
+                opts.append("nomsvcrt")
+            if "d" not in str(self.settings.compiler.runtime):
+                opts.append("unchecked")
+            # https://core.tcl.tk/tk/tktview?name=3d34589aa0
+            # https://wiki.tcl-lang.org/page/Building+with+Visual+Studio+2017
+            tcl_lib_path = os.path.join(self.dependencies["tcl"].package_folder, "lib")
+            tclimplib, tclstublib = None, None
+            for lib in os.listdir(tcl_lib_path):
+                if not lib.endswith(".lib"):
+                    continue
+                if lib.startswith("tcl{}".format("".join(self.version.split(".")[:2]))):
+                    tclimplib = os.path.join(tcl_lib_path, lib)
+                elif lib.startswith("tclstub{}".format("".join(self.version.split(".")[:2]))):
+                    tclstublib = os.path.join(tcl_lib_path, lib)
 
-        rules_ext_vc = os.path.join(self.source_folder, self._source_subfolder, "win", "rules-ext.vc")
-        tools.replace_in_file(rules_ext_vc,
-                              "\n_RULESDIR = ",
-                              "\n_RULESDIR = .\n#_RULESDIR = ")
-        rules_vc = os.path.join(self.source_folder, self._source_subfolder, "win", "rules.vc")
-        tools.replace_in_file(rules_vc,
-                              r"$(_TCLDIR)\generic",
-                              r"$(_TCLDIR)\include")
-        tools.replace_in_file(rules_vc,
-                              "\nTCLSTUBLIB",
-                              "\n#TCLSTUBLIB")
-        tools.replace_in_file(rules_vc,
-                              "\nTCLIMPLIB",
-                              "\n#TCLIMPLIB")
+            if tclimplib is None or tclstublib is None:
+                raise ConanException("tcl dependency misses tcl and/or tclstub library")
 
-        win_makefile_in = os.path.join(self._get_configure_folder("win"), "Makefile.in")
-        tools.replace_in_file(win_makefile_in, "\nTCL_GENERIC_DIR", "\n#TCL_GENERIC_DIR")
+            tc = NMakeToolchain(self)
+            tc.extra_defines.append(f"INSTALLDIR={self.package_folder}")
+            tc.extra_defines.append(f"OPTS={','.join(opts)}")
+            tc.extra_defines.append(f"TCLDIR={self.dependencies['tcl'].package_folder}")
+            tc.extra_defines.append(f"TCL_LIBRARY={self.dependencies['tcl'].runenv_info.vars.get('TCL_LIBRARY')}") # replace("\\", "/"),
+            tc.extra_defines.append(f"TCLIMPLIB={tclimplib}")
+            tc.extra_defines.append(f"TCLSTUBLIB={tclstublib}")
+            tc.generate()
 
-        win_rules_vc = os.path.join(self._source_subfolder, "win", "rules.vc")
-        tools.replace_in_file(win_rules_vc,
-                              "\ncwarn = $(cwarn) -WX",
-                              "\n# cwarn = $(cwarn) -WX")
-        # disable whole program optimization to be portable across different MSVC versions.
-        # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
-        tools.replace_in_file(
-            win_rules_vc,
-            "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL",
-            "# OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL")
+            deps = NMakeDeps(self)
+            deps.generate()
+        else:
+            # Inject runenv variables into buildenv
+            # This is required because tcl needs to be available when configure tries to
+            # run a test executable
+            if not cross_building(self):
+                runenv = VirtualRunEnv(self)
+                runenv.generate(scope="build")
+
+            yes_no = lambda v: "yes" if v else "no"
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--enable-threads")
+            tc.configure_args.append(f"--enable-symbols={yes_no(self.settings.build_type == 'Debug')}")
+            tc.configure_args.append(f"--enable-64bit={yes_no(self.settings.arch == 'x86_64')}")
+            tc.configure_args.append(f"--enable-aqua={yes_no(is_apple_os(self))}")
+            tc.configure_args.append(f"--with-tcl={os.path.join(self.dependencies['tcl'].package_folder, 'lib')}")
+            tc.configure_args.append(f"--with-x={yes_no(self.settings.os == 'Linux')}")
+            tc.make_args.append(f"TCL_GENERIC_DIR={os.path.join(self.dependencies['tcl'].package_folder, 'include')}")
+            if self.settings.os == "Windows":
+                tc.extra_defines.extend(["UNICODE", "_UNICODE", "_ATL_XP_TARGETING", ])
+            tc.generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _get_default_build_system(self):
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             return "macosx"
         elif self.settings.os in ("Linux", "FreeBSD"):
             return "unix"
@@ -120,116 +153,44 @@ class TkConan(ConanFile):
         if build_system is None:
             build_system = self._get_default_build_system()
         if build_system not in ["win", "unix", "macosx"]:
-            raise ConanExceptionInUserConanfileMethod("Invalid build system: {}".format(build_system))
-        return os.path.join(self.source_folder, self._source_subfolder, build_system)
+            raise ConanException("Invalid build system: {}".format(build_system))
+        return os.path.join(self.source_folder, build_system)
 
     def _build_nmake(self, target="release"):
-        # https://core.tcl.tk/tips/doc/trunk/tip/477.md
-        opts = []
-        if not self.options.shared:
-            opts.append("static")
-        if self.settings.build_type == "Debug":
-            opts.append("symbols")
-        if "MD" in str(self.settings.compiler.runtime):
-            opts.append("msvcrt")
-        else:
-            opts.append("nomsvcrt")
-        if "d" not in str(self.settings.compiler.runtime):
-            opts.append("unchecked")
-        # https://core.tcl.tk/tk/tktview?name=3d34589aa0
-        # https://wiki.tcl-lang.org/page/Building+with+Visual+Studio+2017
-        tcl_lib_path = os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib")
-        tclimplib, tclstublib = None, None
-        for lib in os.listdir(tcl_lib_path):
-            if not lib.endswith(".lib"):
-                continue
-            if lib.startswith("tcl{}".format("".join(self.version.split(".")[:2]))):
-                tclimplib = os.path.join(tcl_lib_path, lib)
-            elif lib.startswith("tclstub{}".format("".join(self.version.split(".")[:2]))):
-                tclstublib = os.path.join(tcl_lib_path, lib)
-
-        if tclimplib is None or tclstublib is None:
-            raise ConanException("tcl dependency misses tcl and/or tclstub library")
-        with tools.vcvars(self.settings):
-            tcldir = self.deps_cpp_info["tcl"].rootpath.replace("/", "\\\\")
-            self.run(
-                """nmake -nologo -f "{cfgdir}/makefile.vc" INSTALLDIR="{pkgdir}" OPTS={opts} TCLDIR="{tcldir}" TCL_LIBRARY="{tcl_library}" TCLIMPLIB="{tclimplib}" TCLSTUBLIB="{tclstublib}" {target}""".format(
-                    cfgdir=self._get_configure_folder("win"),
-                    pkgdir=self.package_folder,
-                    opts=",".join(opts),
-                    tcldir=tcldir,
-                    tclstublib=tclstublib,
-                    tclimplib=tclimplib,
-                    tcl_library=self.deps_env_info['tcl'].TCL_LIBRARY.replace("\\", "/"),
-                    target=target,
-                ), cwd=self._get_configure_folder("win"),
-            )
-
-    def _configure_autotools(self):
-        tcl_root = self.deps_cpp_info["tcl"].rootpath
-        make_args = ["TCL_GENERIC_DIR={}".format(os.path.join(tcl_root, "include")).replace("\\", "/")]
-        if self._autotools:
-            return self._autotools, make_args
-
-        tclConfigShFolder = os.path.join(tcl_root, "lib").replace("\\", "/")
-
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--with-tcl={}".format(tools.unix_path(tclConfigShFolder)),
-            "--enable-threads",
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
-            "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
-            "--with-x={}".format(yes_no(self.settings.os == "Linux")),
-            "--enable-aqua={}".format(yes_no(tools.is_apple_os(self.settings.os))),
-        ]
-
-        if self.settings.os == "Windows":
-            self._autotools.defines.extend(["UNICODE", "_UNICODE", "_ATL_XP_TARGETING", ])
-        self._autotools.libs = []
-        self._autotools.configure(configure_dir=self._get_configure_folder(), args=conf_args)
-        return self._autotools, make_args
+        self.run(f"nmake -nologo -f win/makefile.vc {target}")
 
     def build(self):
-        self._patch_sources()
-
-        if self.settings.compiler == "Visual Studio":
+        apply_conandata_patches(self)
+        if is_msvc(self):
             self._build_nmake()
         else:
-            autotools, make_args = self._configure_autotools()
-            autotools.make(args=make_args)
+            autotools = Autotools(self)
+            autotools.configure(build_script_folder=self._get_configure_folder())
+            autotools.make()
 
     def package(self):
-        self.copy(pattern="license.terms", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
+        copy(self, pattern="license.terms", src=self.source_folder, dst="licenses")
+        if is_msvc(self):
             self._build_nmake("install")
         else:
-            with tools.chdir(self.build_folder):
-                autotools, make_args = self._configure_autotools()
-                autotools.install(args=make_args)
-                autotools.make(target="install-private-headers", args=make_args)
-                tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "man"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            with chdir(self, self.build_folder):
+                autotools = Autotools(self)
+                autotools.install()
+                # DESTDIR is only default initialized for target="install"
+                autotools.make(target="install-private-headers", args=[f"DESTDIR={self.package_folder}"])
+                rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "man"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # FIXME: move to patch
         tkConfigShPath = os.path.join(self.package_folder, "lib", "tkConfig.sh")
         if os.path.exists(tkConfigShPath):
-            pkg_path = os.path.join(self.package_folder).replace('\\', '/')
-            tools.replace_in_file(tkConfigShPath,
-                                  pkg_path,
-                                  "${TK_ROOT}")
-            tools.replace_in_file(tkConfigShPath,
-                                  "\nTK_BUILD_",
-                                  "\n#TK_BUILD_")
-            tools.replace_in_file(tkConfigShPath,
-                                  "\nTK_SRC_DIR",
-                                  "\n#TK_SRC_DIR")
+            # This can only be modified after build since the value being replaced is a result
+            # of variable substitution in tkConfig.sh.in
+            replace_in_file(self, tkConfigShPath, "//", "${TK_ROOT}/")
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio":
-            tk_version = tools.Version(self.version)
+        if is_msvc(self):
+            tk_version = Version(self.version)
             lib_infix = "{}{}".format(tk_version.major, tk_version.minor)
             tk_suffix = "t{}{}{}".format(
                 "" if self.options.shared else "s",
@@ -237,7 +198,7 @@ class TkConan(ConanFile):
                 "x" if "MD" in str(self.settings.compiler.runtime) and not self.options.shared else "",
             )
         else:
-            tk_version = tools.Version(self.version)
+            tk_version = Version(self.version)
             lib_infix = "{}.{}".format(tk_version.major, tk_version.minor)
             tk_suffix = ""
         self.cpp_info.libs = ["tk{}{}".format(lib_infix, tk_suffix), "tkstub{}".format(lib_infix)]
@@ -250,9 +211,11 @@ class TkConan(ConanFile):
             ]
 
         tk_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2]))).replace("\\", "/")
-        self.output.info("Setting TK_LIBRARY environment variable: {}".format(tk_library))
+        self.output.info(f"Setting TK_LIBRARY environment variable: {tk_library}")
         self.env_info.TK_LIBRARY = tk_library
+        self.runenv_info.define("TK_LIBRARY", tk_library)
 
-        tcl_root = self.package_folder.replace("\\", "/")
-        self.output.info("Setting TCL_ROOT environment variable: {}".format(tcl_root))
-        self.env_info.TCL_ROOT = tcl_root
+        tk_root = self.package_folder.replace("\\", "/")
+        self.output.info(f"Setting TK_ROOT environment variable: {tk_root}")
+        self.env_info.TK_ROOT = tk_root
+        self.runenv_info.define("TK_ROOT", tk_root)
