@@ -17,14 +17,6 @@ class SonicCppConan(ConanFile):
     topics = ("json", "parser", "writer", "serializer", "deserializer", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     @property
     def _min_cppstd(self):
