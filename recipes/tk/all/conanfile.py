@@ -130,7 +130,7 @@ class TkConan(ConanFile):
             tc.extra_defines.append(f"OPTS={','.join(opts)}")
             tc.extra_defines.append(f"TCLDIR={self.dependencies['tcl'].package_folder}")
             tc.extra_defines.append(
-                f"TCL_LIBRARY={self.dependencies['tcl'].runenv_info.vars.get('TCL_LIBRARY')}"
+                f"TCL_LIBRARY={self.dependencies['tcl'].runenv_info.vars(self).get('TCL_LIBRARY')}"
             )
             tc.extra_defines.append(f"TCLIMPLIB={tclimplib}")
             tc.extra_defines.append(f"TCLSTUBLIB={tclstublib}")
