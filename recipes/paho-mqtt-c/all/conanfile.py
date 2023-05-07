@@ -118,7 +118,7 @@ class PahoMqttcConan(ConanFile):
                     self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(
                         ["wsock32", "uuid", "crypt32", "rpcrt4"])
         elif self.settings.os == "Linux":
-            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["anl", "c", "dl", "pthread"])
+            self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "dl", "pthread"])
         elif self.settings.os == "FreeBSD":
             self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["compat", "pthread"])
         elif self.settings.os == "Android":
