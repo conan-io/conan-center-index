@@ -38,10 +38,8 @@ class SonicCppConan(ConanFile):
 		}
 
     def requirements(self):
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if (self.settings.compiler.cppstd and str(self.settings.compiler.cppstd) < "17") or \
-           (minimum_version and Version(self.settings.compiler.version) < minimum_version):
-            self.requires("string-view-lite/1.7.0", transitive_headers=True)
+        # TODO: required string-view_lite only on __cplusplus < 201703L
+        self.requires("string-view-lite/1.7.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
