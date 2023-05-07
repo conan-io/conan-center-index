@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -84,6 +85,10 @@ class Openmvgconan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # TODO: to remove once https://github.com/conan-io/conan/issues/13560 fixed
+        if self.settings.os == "Linux":
+            VirtualRunEnv(self).generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.variables["OpenMVG_BUILD_SHARED"] = self.options.shared
         tc.variables["OpenMVG_BUILD_TESTS"] = False
