@@ -69,7 +69,7 @@ class ThriftConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.81.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_libevent:
