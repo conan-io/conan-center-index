@@ -30,7 +30,7 @@ class ThrustConan(ConanFile):
             self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
         elif self.options.device_system != "cpp":
             dev = str(self.options.device_system).upper()
-            self.output.warn(
+            self.output.warning(
                 f"Conan package for {dev} is not available,"
                 f" this package will use {dev} from system."
             )
