@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rename, rm, rmdir
-from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
+from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, is_msvc, check_min_vs, unix_path, vs_layout
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-# FIXME: Needs to be migrted to Conan v2
-from conans import AutoToolsBuildEnvironment, MSBuild
-from conans import tools as legacy_tools
 
 import glob
 import os
+import shutil
 
 required_conan_version = ">=1.55.0"
 
@@ -35,13 +35,6 @@ class LibdbConan(ConanFile):
         "with_cxx": False,
     }
 
-    generators = "visual_studio"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _mingw_build(self):
@@ -51,18 +44,14 @@ class LibdbConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            del self.options.with_cxx
+            self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.options.rm_safe("with_cxx")
 
     def configure(self):
         if self.options.shared:
@@ -85,42 +74,48 @@ class LibdbConan(ConanFile):
 
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
-                raise ConanInvalidConfiguration(f"{self.ref} does no support clang<6 with_cxx=True")
+                raise ConanInvalidConfiguration(f"{self.ref} does not support clang<6 with_cxx=True")
             if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10":
-                raise ConanInvalidConfiguration(f"{self.ref} does no support apple-clang<10 with_cxx=True")
+                raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang<10 with_cxx=True")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        else:
+            self.tool_requires("gnu-config/cci.20201022")
+
+    def layout(self):
+        if is_msvc(self):
+            vs_layout(self)
+        else:
+            basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        if is_msvc(self):
+        if not is_msvc(self):
             for subdir in [
                 "dist",
                 os.path.join("lang", "sql", "jdbc"),
                 os.path.join("lang", "sql", "odbc"),
                 os.path.join("lang", "sql", "sqlite"),
             ]:
-                for gnu_config in [
-                    self.conf.get("user.gnu-config:config_guess", check_type=str),
-                    self.conf.get("user.gnu-config:config_sub", check_type=str),
-                ]:
-                    if gnu_config:
-                        copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=os.path.join(self._source_subfolder, subdir))
+                shutil.copy(self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_sub"),
+                            os.path.join(self.source_folder, subdir, "config.sub"))
+                shutil.copy(self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_guess"),
+                            os.path.join(self.source_folder, subdir, "config.guess"))
 
-        for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
+        for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
             replace_in_file(self, file,
                                   "<PropertyGroup Label=\"Globals\">",
                                   "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
 
-        dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
+        dist_configure = os.path.join(self.source_folder, "dist", "configure")
         replace_in_file(self, dist_configure, "../$sqlite_dir", "$sqlite_dir")
         replace_in_file(self, dist_configure,
                               "\n    --disable-option-checking)",
@@ -128,30 +123,73 @@ class LibdbConan(ConanFile):
                               "\n      ;;"
                               "\n    --disable-option-checking)")
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=legacy_tools.os_info.is_windows)
-        if self.settings.compiler in ["apple-clang", "clang"] and Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
-        conf_args = [
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--enable-mingw" if self._mingw_build else "--disable-mingw",
-            "--enable-compat185",
-            "--enable-sql",
-        ]
-        if self.options.with_cxx:
-            conf_args.extend(["--enable-cxx", "--enable-stl"])
-        else:
-            conf_args.extend(["--disable-cxx", "--disable-stl"])
-
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
+    def _build_msvc(self):
+        projects = ["db", "db_sql", "db_stl"]
         if self.options.with_tcl:
-            conf_args.append("--with-tcl={}".format(unix_path(self, os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
-        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder, "dist"), args=conf_args)
+            projects.append("db_tcl")
+        msbuild = MSBuild(self)
+        upgraded = False
+        for project in projects:
+            msbuild.build(os.path.join(self.source_folder, "build_windows", "VS10", "{}.vcxproj".format(project)),
+                          build_type=self._msvc_build_type, platforms=self._msvc_platforms,
+                          upgrade_project=not upgraded)
+            upgraded = True
+
+    def generate(self):
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.generate()
+
+            deps = MSBuildDeps(self)
+
+            deps.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug")
+            tc.configure_args.append("--enable-mingw" if self._mingw_build else "--disable-mingw")
+            tc.configure_args.append("--enable-compat185")
+            tc.configure_args.append("--enable-sql")
+            if self.options.with_cxx:
+                tc.configure_args.extend(["--enable-cxx", "--enable-stl"])
+            else:
+                tc.configure_args.extend(["--disable-cxx", "--disable-stl"])
+
+            if self.options.shared:
+                tc.configure_args.extend(["--enable-shared", "--disable-static"])
+            else:
+                tc.configure_args.extend(["--disable-shared", "--enable-static"])
+
+            if self.options.with_tcl:
+                tc.configure_args.append(f"--with-tcl={os.path.join(self.dependencies['tcl'].package_folder, 'lib')}")
+            tc.generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+    def _configure_autotools(self):
+        # if self._autotools:
+        #     return self._autotools
+        # self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        # if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+        #     self._autotools.flags.append("-Wno-error=implicit-function-declaration")
+        # conf_args = [
+        #     "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
+        #     "--enable-mingw" if self._mingw_build else "--disable-mingw",
+        #     "--enable-compat185",
+        #     "--enable-sql",
+        # ]
+        # if self.options.with_cxx:
+        #     conf_args.extend(["--enable-cxx", "--enable-stl"])
+        # else:
+        #     conf_args.extend(["--disable-cxx", "--disable-stl"])
+
+        # if self.options.shared:
+        #     conf_args.extend(["--enable-shared", "--disable-static"])
+        # else:
+        #     conf_args.extend(["--disable-shared", "--enable-static"])
+        # if self.options.with_tcl:
+        #     conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
+        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self.source_folder, "dist"), args=conf_args)
         if self.settings.os == "Windows" and self.options.shared:
             replace_in_file(self, os.path.join(self.build_folder, "libtool"),
                                   "\ndeplibs_check_method=",
@@ -174,24 +212,31 @@ class LibdbConan(ConanFile):
     def _msvc_arch(self):
         return self._msvc_platforms[str(self.settings.arch)]
 
-    def _build_msvc(self):
-        projects = ["db", "db_sql", "db_stl"]
-        if self.options.with_tcl:
-            projects.append("db_tcl")
-        msbuild = MSBuild(self)
-        upgraded = False
-        for project in projects:
-            msbuild.build(os.path.join(self._source_subfolder, "build_windows", "VS10", "{}.vcxproj".format(project)),
-                          build_type=self._msvc_build_type, platforms=self._msvc_platforms,
-                          upgrade_project=not upgraded)
-            upgraded = True
+    # def _build_msvc(self):
+    #     projects = ["db", "db_sql", "db_stl"]
+    #     if self.options.with_tcl:
+    #         projects.append("db_tcl")
+    #     msbuild = MSBuild(self)
+    #     upgraded = False
+    #     for project in projects:
+    #         msbuild.build(os.path.join(self.source_folder, "build_windows", "VS10", "{}.vcxproj".format(project)),
+    #                       build_type=self._msvc_build_type, platforms=self._msvc_platforms,
+    #                       upgrade_project=not upgraded)
+    #         upgraded = True
 
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            self._build_msvc()
+            #self._build_msvc()
+            projects = ["db", "db_sql", "db_stl"]
+            if self.options.with_tcl:
+                projects.append("db_tcl")
+            msbuild = MSBuild(self)
+            for project in projects:
+                msbuild.build(sln=os.path.join(self.source_folder, "build_windows", "VS10", f"{project}.vcxproj"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure(build_script_folder=os.path.join(self.source_folder, "dist"))
             autotools.make()
 
     def package(self):
@@ -199,8 +244,8 @@ class LibdbConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         libdir = os.path.join(self.package_folder, "lib")
         if is_msvc(self):
-            build_windows = os.path.join(self._source_subfolder, "build_windows")
-            build_dir = os.path.join(self._source_subfolder, "build_windows", self._msvc_arch, self._msvc_build_type)
+            build_windows = os.path.join(self.source_folder, "build_windows")
+            build_dir = os.path.join(self.source_folder, "build_windows", self._msvc_arch, self._msvc_build_type)
             copy(self, "*.lib", src=build_dir, dst=libdir)
             copy(self, "*.dll", src=build_dir, dst=bindir)
             for fn in ("db.h", "db.cxx", "db_int.h", "dbstl_common.h"):
@@ -217,7 +262,7 @@ class LibdbConan(ConanFile):
                 rename(self, os.path.join(libdir, "{}.lib".format(msvc_lib)),
                              os.path.join(libdir, "{}.lib".format(lib)))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
 
             if self.settings.os == "Windows":
@@ -258,8 +303,8 @@ class LibdbConan(ConanFile):
         if self.options.get_safe("with_cxx"):
             libs.extend(["db_cxx", "db_stl"])
         libs.extend(["db_sql", "db"])
-        if self.settings.compiler == "Visual Studio":
-            libs = ["lib{}".format(lib) for lib in libs]
+        if is_msvc(self):
+            libs = [f"lib{libname}" for libname in libs]
         return libs
 
     def package_info(self):
@@ -268,5 +313,5 @@ class LibdbConan(ConanFile):
             self.cpp_info.defines = ["DB_USE_DLL"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
-        elif self.settings.os == "Windows" :
+        elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
