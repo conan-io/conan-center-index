@@ -47,7 +47,7 @@ class AdaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if Version(self.version) < "3.2.0":
+        if Version(self.version) <= "2.0.0":
             del self.options.shared
 
     def layout(self):
