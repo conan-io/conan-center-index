@@ -149,7 +149,7 @@ class BitserializerConan(ConanFile):
         copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        lib_suffix = "d" if self.info.settings.build_type == "Debug" else ""
+        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
 
         # cpprestjson-core
