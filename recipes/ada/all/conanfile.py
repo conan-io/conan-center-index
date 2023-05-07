@@ -47,6 +47,8 @@ class AdaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "3.2.0":
+            del self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
