@@ -1,7 +1,4 @@
 sources:
-  "1.9.5":
-    url: "https://github.com/thrust/thrust/archive/1.9.5.tar.gz"
-    sha256: "d155dc2a260fe0c75c63c185fa4c4b4c6c5b7c444fcdac7109bb71941c9603f1"
   "1.16.0":
     url: "https://github.com/thrust/thrust/archive/1.16.0.tar.gz"
     sha256: "93b9553e3ee544e05395022bea67e6d600f8f3eb680950ec7cf73c0f55162487"
