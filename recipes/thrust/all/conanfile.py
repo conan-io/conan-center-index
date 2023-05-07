@@ -27,7 +27,7 @@ class ThrustConan(ConanFile):
 
     def requirements(self):
         if self.options.device_system == "tbb":
-            self.requires("onetbb/2021.8.0", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
         elif self.options.device_system != "cpp":
             dev = str(self.options.device_system).upper()
             self.output.warn(
