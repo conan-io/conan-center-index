@@ -73,5 +73,5 @@ class SonicCppConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        if self.settings.compiler in ["gcc", "clang"]:
+        if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             self.cpp_info.cxxflags.extend(["-mavx2", "-mpclmul"])
