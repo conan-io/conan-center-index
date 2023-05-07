@@ -1,7 +1,7 @@
 sources:
-  "2.11.1":
-    url: "https://download.gnome.org/sources/libxml2/2.11/libxml2-2.11.1.tar.xz"
-    sha256: "3d39b294b856bfe3bafd5fb126e1f8487004261e78eabb8df9513e927915a995"
+  "2.11.2":
+    url: "https://download.gnome.org/sources/libxml2/2.11/libxml2-2.11.2.tar.xz"
+    sha256: "ac11e8b66176d49514bd4fa17c3fbdb3414aef64518ff9db536862e4682e2a64"
   "2.10.4":
     url: "https://download.gnome.org/sources/libxml2/2.10/libxml2-2.10.4.tar.xz"
     sha256: "ed0c91c5845008f1936739e4eee2035531c1c94742c6541f44ee66d885948d45"
@@ -23,9 +23,3 @@ sources:
   "2.9.9":
     url: "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.9.tar.xz"
     sha256: "58a5c05a2951f8b47656b676ce1017921a29f6b1419c45e3baed0d6435ba03f5"
-
-patches:
-  "2.11.1":
-    - patch_file: "patches/0001-win32-Don-t-depend-on-removed-.def-file.patch"
-      patch_type: "backport"
-      patch_source: "https://gitlab.gnome.org/GNOME/libxml2/-/commit/11a95279a93241b32839f1f796602254215be0fb"
