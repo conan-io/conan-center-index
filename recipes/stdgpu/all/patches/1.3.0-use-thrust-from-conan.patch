@@ -1,0 +1,20 @@
+Subject: [PATCH] Use Thrust from Conan
+---
+===================================================================
+diff --git a/src/stdgpu/CMakeLists.txt b/src/stdgpu/CMakeLists.txt
+--- a/src/stdgpu/CMakeLists.txt	(revision 4a707e2b138258c5a051bd06e13ccaea533988a0)
++++ b/src/stdgpu/CMakeLists.txt	(revision a5c3430536b0712f552978327c508fec6d9165ec)
+@@ -4,10 +4,11 @@
+ set(STDGPU_BUILD_CMAKE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cmake")
+ 
+ # Setup dependencies
+-find_package(thrust 1.9.2 REQUIRED MODULE)
++find_package(thrust 1.9.2 REQUIRED)
++message(STATUS "Found Thrust ${thrust_VERSION}: ${thrust_DIR}")
+ 
+ set(STDGPU_DEPENDENCIES_INIT "
+-find_dependency(thrust 1.9.2 REQUIRED MODULE)
++find_dependency(thrust 1.9.2 REQUIRED)
+ ")
+ 
+ 

@@ -1,0 +1,13 @@
+sources:
+  "1.3.0":
+    url:
+    - "https://github.com/stotko/stdgpu/archive/refs/tags/1.3.0.tar.gz"
+    sha256: "c527dabc6735d8b320b316e9a5b120d258d49c2b7ff9689c8a9b5ad474532a05"
+patches:
+  "1.3.0":
+    - patch_file: "patches/1.3.0-use-thrust-from-conan.patch"
+      patch_description: "Use Thrust from Conan"
+      patch_type: "conan"
+    - patch_file: "patches/1.3.0-unset-thrust-define.patch"
+      patch_description: "Fix repeated application of THRUST_DEVICE_SYSTEM define"
+      patch_type: "conan"
