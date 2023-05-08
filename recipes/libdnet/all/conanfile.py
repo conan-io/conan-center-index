@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import copy, get, rm, rmdir
@@ -35,15 +36,14 @@ class LibDNetConan(ConanFile):
 
 
     def layout(self):
-        basic_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        self.options.rm_safe("fPIC")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -56,43 +56,31 @@ class LibDNetConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def requirements(self):
-        self.requires("libcheck/0.15.2")
+    # def requirements(self):
+    #     self.requires("libcheck/0.15.2")
 
-    def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("libtool/2.4.7")
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
+    # def build_requirements(self):
+    #     if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+    #         self.tool_requires("pkgconf/1.9.3")
+    #     self.tool_requires("libtool/2.4.7")
+    #     if self._settings_build.os == "Windows":
+    #         self.win_bash = True
+    #         if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+    #             self.tool_requires("msys2/cci.latest")
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        tc = AutotoolsToolchain(self)
-        env = tc.environment()
-        # if is_msvc(self):
-        #     env.define("CC", "cl -nologo")
-        #     env.define("CXX", "cl -nologo")
-        #     env.define("LD", "link -nologo")
-        #     env.define("AR", "lib -nologo")
-        # if self._settings_build.os == "Windows":
-        #     # TODO: Something to fix in conan client or pkgconf recipe?
-        #     # This is a weird workaround when build machine is Windows. Here we have to inject regular
-        #     # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
-        #     env.define("PKG_CONFIG_PATH", self.generators_folder)
+        tc = CMakeToolchain(self)
+
         tc.generate()
-        pkg = PkgConfigDeps(self)
-        pkg.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        autotools = Autotools(self)
-        autotools.autoreconf()
-        autotools.configure()
-        autotools.make()
-
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+    
     def package(self):
         copy(self,"COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
