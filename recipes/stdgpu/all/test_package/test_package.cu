@@ -1,4 +1,4 @@
-// Based on https://github.com/stotko/stdgpu/blob/32e0517/examples/openmp/vector.cpp
+// Based on https://github.com/stotko/stdgpu/blob/32e0517/examples/cuda/vector.cu
 #include <thrust/copy.h>
 #include <thrust/reduce.h>
 #include <thrust/sequence.h>
@@ -11,13 +11,18 @@
 #include <cstdlib>
 #include <iostream>
 
-void insert_neighbors_with_duplicates(const int *d_input, const stdgpu::index_t n,
-                                      stdgpu::vector<int> &vec) {
-    for (stdgpu::index_t i = 0; i < n; ++i) {
-        int num = d_input[i];
-        int num_neighborhood[3] = {num - 1, num, num + 1};
-        for (int num_neighbor : num_neighborhood)
-            vec.push_back(num_neighbor);
+__global__ void insert_neighbors_with_duplicates(const int *d_input, const stdgpu::index_t n,
+                                                 stdgpu::vector<int> vec) {
+    stdgpu::index_t i = static_cast<stdgpu::index_t>(blockIdx.x * blockDim.x + threadIdx.x);
+
+    if (i >= n)
+        return;
+
+    int num = d_input[i];
+    int num_neighborhood[3] = {num - 1, num, num + 1};
+
+    for (int num_neighbor : num_neighborhood) {
+        vec.push_back(num_neighbor);
     }
 }
 
@@ -27,7 +32,11 @@ int sum_stdgpu(stdgpu::index_t n) {
 
     thrust::sequence(stdgpu::device_begin(d_input), stdgpu::device_end(d_input), 1);
 
-    insert_neighbors_with_duplicates(d_input, n, vec);
+    stdgpu::index_t threads = 32;
+    stdgpu::index_t blocks = (n + threads - 1) / threads;
+    insert_neighbors_with_duplicates<<<static_cast<unsigned int>(blocks),
+                                       static_cast<unsigned int>(threads)>>>(d_input, n, vec);
+    cudaDeviceSynchronize();
 
     auto range_vec = vec.device_range();
     int sum = thrust::reduce(range_vec.begin(), range_vec.end(), 0, thrust::plus<int>());

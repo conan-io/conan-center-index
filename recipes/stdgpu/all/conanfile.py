@@ -122,6 +122,7 @@ class StdgpuConan(ConanFile):
         if self.options.enable_contract_checks is not None:
             tc.variables["STDGPU_ENABLE_CONTRACT_CHECKS"] = self.options.enable_contract_checks
         tc.variables["STDGPU_USE_32_BIT_INDEX"] = self.options.use_32_bit_index
+        tc.preprocessor_definitions["THRUST_IGNORE_CUB_VERSION_CHECK"] = "1"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -143,18 +144,9 @@ class StdgpuConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
-        rm(self, "*[.pdb|.la]", self.package_folder)
+        rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.libs = ["stdgpu"]
 
-        if self.options.backend == "openmp":
-            if is_msvc(self) and not self.options.shared:
-                self.cpp_info.cxxflags += ["-openmp"]
-                self.cpp_info.system_libs += ["VCOMP"]
-            elif self.settings.compiler == "gcc":
-                self.cpp_info.cxxflags += ["-fopenmp"]
-                self.cpp_info.system_libs += ["gomp"]
-            elif self.settings.compiler in ("clang", "apple-clang"):
-                self.cpp_info.cxxflags += ["-Xpreprocessor", "-fopenmp"]
-                self.cpp_info.system_libs += ["omp"]
+        # self.cpp_info.defines += ["THRUST_IGNORE_CUB_VERSION_CHECK=1"]
