@@ -67,7 +67,9 @@ class BitserializerConan(ConanFile):
             del self.options.with_csv
 
     def configure(self):
-        if not self._is_header_only():
+        if self._is_header_only():
+            self.options.rm_safe("fPIC")
+        else:
             self.package_type = "static-library"
 
     def layout(self):
