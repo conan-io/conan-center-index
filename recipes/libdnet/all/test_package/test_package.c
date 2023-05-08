@@ -1,13 +1,10 @@
-#include <config.h>
+#include <dnet/dnet.h>
+#include <dnet/config.h>
+#include <dnet/err.h>
 
 #include <sys/types.h>
-
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-
-#include <dnet.h>
 
 void addr_usage(void)
 {
@@ -29,7 +26,7 @@ int main(int argc, char *argv[])
 
 		len = addr.addr_bits / 8;
 
-		if (write(STDOUT_FILENO, addr.addr_data8, len) != len)
+		if (write(1, addr.addr_data8, len) != len)
 			err(1, "write");
 	}
 	return 0;
