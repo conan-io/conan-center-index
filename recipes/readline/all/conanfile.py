@@ -5,6 +5,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualRunEnv
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.errors import ConanInvalidConfiguration
 
@@ -56,6 +57,10 @@ class ReadLineConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--with-curses={}".format("yes" if self.options.with_library == "curses" else "no"),
