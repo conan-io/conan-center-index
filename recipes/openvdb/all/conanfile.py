@@ -117,7 +117,7 @@ class OpenVDBConan(ConanFile):
             self.tool_requires("cmake/[>=3.18.0 <4.0]")
         elif Version(self.version) >= "9.0.0":
             self.tool_requires("cmake/[>=3.15.0 <4.0]")
-        elif not self._cmake_new_enough("3.12"):
+        else:
             self.tool_requires("cmake/[>=3.12.0 <4.0]")
 
     def requirements(self):
