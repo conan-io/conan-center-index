@@ -277,6 +277,8 @@ class PhysXConan(ConanFile):
             self.cpp_info.components["physxfoundation"].system_libs = ["m", "pthread", "rt"]
         elif self.settings.os == "Android":
             self.cpp_info.components["physxfoundation"].system_libs = ["log"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["physxfoundation"].system_libs = ["ws2_32"]
 
         # PhysXCommon
         self.cpp_info.components["physxcommon"].set_property("cmake_target_name", "PhysX::PhysXCommon")
