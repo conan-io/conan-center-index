@@ -97,6 +97,10 @@ class AggConan(ConanFile):
     def package_info(self):
 
         self.cpp_info.set_property("cmake_file_name", "agg")
+        self.cpp_info.filenames["cmake_find_package"]="agg"
+        self.cpp_info.filenames["cmake_find_package_multi"]="agg"
+        self.cpp_info.names["cmake_find_package"]="agg"
+        self.cpp_info.names["cmake_find_package_multi"]="agg"
 
         self.cpp_info.components["agg"].set_property("cmake_target_name", "agg::agg")
         self.cpp_info.components["agg"].libs = ["agg"]
