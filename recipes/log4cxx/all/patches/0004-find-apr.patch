@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 61c0479..5473fd1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,11 +51,13 @@ endif()
+ 
+ # Find Apache Runtime
+ option(APR_STATIC "Link to the APR static library" OFF)
+-find_package(APR REQUIRED)
++find_package(apr REQUIRED)
++set(APR_LIBRARIES apr::apr)
+ 
+ # Find Apache Runtime Utilities
+ option(APU_STATIC "Link to the APR-Util static library" OFF)
+-find_package(APR-Util REQUIRED)
++find_package(apr-util REQUIRED)
++set(APR_UTIL_LIBRARIES apr-util::apr-util)
+ 
+ find_package( Threads REQUIRED )
+ 
