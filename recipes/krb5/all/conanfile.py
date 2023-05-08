@@ -32,7 +32,7 @@ class Krb5Conan(ConanFile):
         "with_tcl": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "thread": True,
         "use_dns_realms": False,
@@ -131,9 +131,9 @@ class Krb5Conan(ConanFile):
     def _build_autotools(self):
         tools.save("skiptests", "")
 
-        with chdir(self, os.path.join(self.source_folder,"src")):
-            replace_in_file(self,"aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
+        # with chdir(self, os.path.join(self.source_folder,"src")):
+        #     replace_in_file(self,"aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
+        #     self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = Autotools(self)
         autotools.configure(os.path.join(self.source_folder,"src"))
         autotools.make()
