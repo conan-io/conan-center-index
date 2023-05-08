@@ -61,7 +61,7 @@ class H5ppConan(ConanFile):
             self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self,src_folder="src")
 
     def package_id(self):
         self.info.clear()
