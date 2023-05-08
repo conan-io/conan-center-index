@@ -42,8 +42,8 @@ class LAConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(compiler))
         if not min_version:
-            self.output.warn(f"{self.name} recipe lacks information about the "
-                             f"{compiler} compiler support.")
+            raise ConanInvalidConfiguration(f"{self.name} recipe lacks information about the "
+                            f"{compiler} compiler support.")
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
