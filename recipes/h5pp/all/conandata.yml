@@ -1,25 +1,25 @@
 sources:
-  "1.8.3":
-    sha256: 52d439a0008cb76071f0e839d15ca6a4e911a87dc779f0bbd9dc91d98ba0b52b
-    url: https://github.com/DavidAce/h5pp/archive/v1.8.3.tar.gz
-  "1.8.4":
-    sha256: 401f2014d90d9ce318e518e368e7e45fc2aa95b8e30cdc91baa41212df15b831
-    url: https://github.com/DavidAce/h5pp/archive/v1.8.4.tar.gz
-  "1.8.5":
-    sha256: 1e1a42159fccd10b1022445ea0f0690c5314e94b0fc3d5c9fa0f02b165148c18
-    url: https://github.com/DavidAce/h5pp/archive/v1.8.5.tar.gz
-  "1.8.6":
-    sha256: 39d413c9383b00a87153b9480ab6a91ba356d3f30b3598de0c0c8f7f3bd802c7
-    url: https://github.com/DavidAce/h5pp/archive/v1.8.6.tar.gz
-  "1.9.0":
-    sha256: f633b6f76ab20e1767f55068154cf8bf553e39d526ae80947388640c57ea2056
-    url: https://github.com/DavidAce/h5pp/archive/v1.9.0.tar.gz
-  "1.10.0":
-    sha256: 27a3e42ed02d8d9341229d58a517134753e1ea46dab4c40d01bb309098c32f13
-    url: https://github.com/DavidAce/h5pp/archive/v1.10.0.tar.gz
   "1.11.0":
-    sha256: 1c4171275eb50a26ed9da8055397f03a726896c4c49ad0380b16dcb13574ecff
-    url: https://github.com/DavidAce/h5pp/archive/v1.11.0.tar.gz
+    url: "https://github.com/DavidAce/h5pp/archive/v1.11.0.tar.gz"
+    sha256: "1c4171275eb50a26ed9da8055397f03a726896c4c49ad0380b16dcb13574ecff"
+  "1.10.0":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.10.0.tar.gz"
+    sha256: "27a3e42ed02d8d9341229d58a517134753e1ea46dab4c40d01bb309098c32f13"
+  "1.9.0":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.9.0.tar.gz"
+    sha256: "f633b6f76ab20e1767f55068154cf8bf553e39d526ae80947388640c57ea2056"
+  "1.8.6":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.8.6.tar.gz"
+    sha256: "39d413c9383b00a87153b9480ab6a91ba356d3f30b3598de0c0c8f7f3bd802c7"
+  "1.8.5":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.8.5.tar.gz"
+    sha256: "1e1a42159fccd10b1022445ea0f0690c5314e94b0fc3d5c9fa0f02b165148c18"
+  "1.8.4":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.8.4.tar.gz"
+    sha256: "401f2014d90d9ce318e518e368e7e45fc2aa95b8e30cdc91baa41212df15b831"
+  "1.8.3":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.8.3.tar.gz"
+    sha256: "52d439a0008cb76071f0e839d15ca6a4e911a87dc779f0bbd9dc91d98ba0b52b"
 patches:
   "1.9.0":
     - patch_file: "patches/fix-support-new-hdf5-v1.9.0.patch"
@@ -31,4 +31,3 @@ patches:
     - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
   "1.8.3":
     - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
-
