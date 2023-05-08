@@ -23,21 +23,21 @@ sources:
 patches:
   "1.9.0":
     - patch_file: "patches/fix-support-new-hdf5-v1.9.0.patch"
-    - patch_type: "bugfix"
-    - patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
+      patch_type: "bugfix"
+      patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
   "1.8.6":
     - patch_file: "patches/fix-support-new-hdf5-v1.8.6.patch"
-    - patch_type: "bugfix"
-    - patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
+      patch_type: "bugfix"
+      patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
   "1.8.5":
     - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
-    - patch_type: "bugfix"
-    - patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
+      patch_type: "bugfix"
+      patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
   "1.8.4":
     - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
-    - patch_type: "bugfix"
-    - patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
+      patch_type: "bugfix"
+      patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
   "1.8.3":
     - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
-    - patch_type: "bugfix"
-    - patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
+      patch_type: "bugfix"
+      patch_description: "Adds support for HDF5 versions later than 1.12.1 by allowing the construction of h5pp::hid types from any integral type (not just hid_t)"
