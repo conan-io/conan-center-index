@@ -4,6 +4,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.files import get
 from conan.tools.files import copy
+from conan.tools.files import apply_conandata_patches,export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -38,6 +39,9 @@ class H5ppConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if Version(self.version) < "1.10.0":
             # These dependencies are always required before h5pp 1.10.0:
@@ -50,11 +54,7 @@ class H5ppConan(ConanFile):
             del self.options.with_spdlog
 
     def requirements(self):
-        if Version(self.version) < "1.10.0":
-            self.requires("hdf5/1.12.1", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
-
+        self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
             self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
@@ -79,6 +79,7 @@ class H5ppConan(ConanFile):
     def source(self):
         get(self,**self.conan_data["sources"][self.version],
                   destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def package(self):
         if Version(self.version) < "1.9.0":

@@ -20,3 +20,15 @@ sources:
   "1.11.0":
     sha256: 1c4171275eb50a26ed9da8055397f03a726896c4c49ad0380b16dcb13574ecff
     url: https://github.com/DavidAce/h5pp/archive/v1.11.0.tar.gz
+patches:
+  "1.9.0":
+    - patch_file: "patches/fix-support-new-hdf5-v1.9.0.patch"
+  "1.8.6":
+    - patch_file: "patches/fix-support-new-hdf5-v1.8.6.patch"
+  "1.8.5":
+    - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
+  "1.8.4":
+    - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
+  "1.8.3":
+    - patch_file: "patches/fix-support-new-hdf5-v1.8.3-5.patch"
+
