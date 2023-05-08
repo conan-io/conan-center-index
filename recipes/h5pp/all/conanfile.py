@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.files import get
+from conan.tools.files import copy
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -28,10 +30,6 @@ class H5ppConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7.4",
@@ -53,14 +51,17 @@ class H5ppConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "1.10.0":
-            self.requires("hdf5/1.12.1")
+            self.requires("hdf5/1.12.1", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("hdf5/1.13.1")
+            self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
 
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
-            self.requires("eigen/3.4.0")
+            self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
-            self.requires("spdlog/1.11.0")
+            self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
+
+    def layout(self):
+        basic_layout(self)
 
     def package_id(self):
         self.info.clear()
@@ -77,15 +78,16 @@ class H5ppConan(ConanFile):
 
     def source(self):
         get(self,**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if Version(self.version) < "1.9.0":
-            includedir = os.path.join(self._source_subfolder, "h5pp", "include")
+            includedir = os.path.join(self.source_folder, "h5pp", "include")
         else:
-            includedir = os.path.join(self._source_subfolder, "include")
-        self.copy("*", src=includedir, dst="include")
+            includedir = os.path.join(self.source_folder, "include")
+        copy(self, pattern="*", src=includedir, dst=os.path.join(self.package_folder, "include"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
