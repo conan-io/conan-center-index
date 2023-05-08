@@ -79,7 +79,7 @@ class H5ppConan(ConanFile):
             if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("h5pp requires C++17, which your compiler does not support.")
         else:
-            self.output.warn("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            self.output.warning("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
         get(self,**self.conan_data["sources"][self.version],
