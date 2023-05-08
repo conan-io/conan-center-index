@@ -16,8 +16,9 @@ class H5ppConan(ConanFile):
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DavidAce/h5pp"
-    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "cpp17")
+    topics = ("hdf5", "binary", "storage", "header-only", "cpp17")
     license = "MIT"
+    package_type="header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
@@ -29,6 +30,10 @@ class H5ppConan(ConanFile):
         "with_eigen": True,
         "with_spdlog": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -68,7 +73,7 @@ class H5ppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if Version(self.settings.compiler.version) < minimum_version:
@@ -93,10 +98,18 @@ class H5ppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
+        self.cpp_info.components["h5pp_headers"].bindirs = []
+        self.cpp_info.components["h5pp_headers"].libdirs = []
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
-        self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_deps"].bindirs = []
+        self.cpp_info.components["h5pp_deps"].libdirs = []
         self.cpp_info.components["h5pp_deps"].requires = ["hdf5::hdf5"]
+        self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_flags"].bindirs = []
+        self.cpp_info.components["h5pp_flags"].libdirs = []
 
         if Version(self.version) >= "1.10.0":
             if self.options.with_eigen:
