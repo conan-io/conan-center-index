@@ -47,7 +47,7 @@ class OatppPostgresqlConan(ConanFile):
 
     def requirements(self):
         self.requires(f"oatpp/{self.version}")
-        self.requires("libpq/14.5")
+        self.requires("libpq/14.7")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
