@@ -6,7 +6,7 @@ from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.env import Environment
 from conan.tools.build import build_jobs
 from conan.errors import ConanInvalidConfiguration
-from packaging.version import Version
+from distutils.version import LooseVersion
 from shutil import which
 import os
 
@@ -124,7 +124,7 @@ class BotanConan(ConanFile):
 
         # --single-amalgamation option is no longer available
         # See also https://github.com/randombit/botan/pull/2246
-        if Version(str(self.version)) >= Version('2.14.0'):
+        if LooseVersion(str(self.version)) >= LooseVersion('2.14.0'):
             del self.options.single_amalgamation
 
     def configure(self):
@@ -154,12 +154,12 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration('{0} requires non-header-only static boost, without magic_autolink, and with these components: {1}'.format(self.name, ', '.join(self._required_boost_components)))
 
         compiler = self.settings.compiler
-        version = Version(str(self.settings.compiler.version))
+        version = LooseVersion(str(self.settings.compiler.version))
 
-        if compiler == 'msvc' and version < Version('14'):
+        if compiler == 'msvc' and version < LooseVersion('14'):
             raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
 
-        if compiler == 'gcc' and version >= Version('5') and compiler.libcxx != 'libstdc++11':
+        if compiler == 'gcc' and version >= LooseVersion('5') and compiler.libcxx != 'libstdc++11':
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
@@ -170,10 +170,10 @@ class BotanConan(ConanFile):
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
-        if Version(str(self.version)) >= Version('2.14.0') and self.options.amalgamation:
-            if (compiler == 'apple-clang' and version < Version('10')) or \
-               (compiler == 'gcc' and version < Version('8')) or \
-               (compiler == 'clang' and version < Version('7')):
+        if LooseVersion(str(self.version)) >= LooseVersion('2.14.0') and self.options.amalgamation:
+            if (compiler == 'apple-clang' and version < LooseVersion('10')) or \
+               (compiler == 'gcc' and version < LooseVersion('8')) or \
+               (compiler == 'clang' and version < LooseVersion('7')):
                 raise ConanInvalidConfiguration(
                     'botan amalgamation is not supported for {}/{}'.format(compiler, version))
 
@@ -196,7 +196,7 @@ class BotanConan(ConanFile):
             self.run(self._make_install_cmd)
 
     def package_info(self):
-        major_version = Version(self.version).major
+        major_version = self.version.split('.')[0]
         self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
         self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
         self.cpp_info.libs = ["botan" if is_msvc(self) else f"botan-{major_version}"]
