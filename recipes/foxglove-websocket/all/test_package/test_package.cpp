@@ -5,12 +5,13 @@ template<>
 void foxglove::Server<foxglove::WebSocketNoTls>::setupTlsHandler() {}
 
 int main() {
+    // Note: Server instance is only initiated here and not started. This is similar to how it's
+    // done in the websocketpp recipe.
     const auto logHandler = [](foxglove::WebSocketLogLevel, char const* msg) {
       std::cout << msg << std::endl;
     };
     foxglove::ServerOptions serverOptions;
     foxglove::Server<foxglove::WebSocketNoTls> server("example", logHandler, serverOptions);
-    server.start("127.0.0.1", 0);
-    server.stop();
+    (void)server;
     return 0;
 }

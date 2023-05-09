@@ -1,10 +1,9 @@
 #include <foxglove/websocket/server.hpp>
 
 int main() {
+    // Note: Server instance is only initiated here and not started. This is similar to how it's
+    // done in the websocketpp recipe.
     foxglove::websocket::Server server{0, "example"};
-    server.getEndpoint().set_timer(0, [&](std::error_code const& ec) {
-      server.stop();
-    });
-    server.run();
+    (void)server;
     return 0;
 }
