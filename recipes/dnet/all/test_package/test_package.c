@@ -6,6 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <io.h>
+#endif
+
 void addr_usage(void)
 {
 	fprintf(stderr, "Usage: dnet addr <address> ...\n");
