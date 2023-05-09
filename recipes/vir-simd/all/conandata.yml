@@ -2,5 +2,5 @@ sources:
   # Newer versions at the top
   "0.2.0":
     url:
-    - "https://github.com/mattkretz/vir-simd/archive/refs/tags/v0.2.0.tar.gz"
+      - "https://github.com/mattkretz/vir-simd/archive/refs/tags/v0.2.0.tar.gz"
     sha256: "197432196ec73009051188ba686124a469d75d639fc5408613b30ed2981f0b70"
