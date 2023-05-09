@@ -81,7 +81,7 @@ class SDLImageConan(ConanFile):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
         self.requires("sdl/2.26.1", transitive_headers=True)
         if self.options.with_libtiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.0")
         if self.options.with_libjpeg:
             self.requires("libjpeg/9e")
         if self.options.with_libpng:
