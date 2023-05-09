@@ -59,16 +59,16 @@ class LibniceConan(ConanFile):
                 "-o glib/*:shared=True with static runtime is not supported")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
+        self.requires("glib/2.76.2")
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/3.1.0")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.2")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
         self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("glib/2.75.2")  # for glib-mkenums
+        self.tool_requires("glib/2.76.2")  # for glib-mkenums
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
