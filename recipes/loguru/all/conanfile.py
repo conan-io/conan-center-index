@@ -16,6 +16,7 @@ class LoguruConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emilk/loguru"
     license = "Unlicense"
+    topics = ("logging", "log", "fmt")
     description = "Loguru is a C++11 logging library."
 
     options = {
