@@ -3,10 +3,10 @@ sources:
     url: "https://kerberos.org/dist/krb5/1.19/krb5-1.19.2.tar.gz"
     sha256: "10453fee4e3a8f8ce6129059e5c050b8a65dab1c257df68b99b3112eaa0cdf6a"
 patches:
-  "1.18.2":
-    - patch_file: "patches/1.18.2-0001-use-PKG_CHECK_MODULES-for-openssl.patch"
-      patch_type: "conan"
-      patch_description: "use-PKG_CHECK_MODULES-for-openssl"
-    - patch_file: "patches/1.18.2-0003-no-html+tests.patch"
+  "1.19.2":
+    - patch_file: "patches/1.19.2-0001-no-html+tests.patch"
       patch_type: "conan"
       patch_description: "no-html+tests"
+    - patch_file: "patches/1.19.2-0002-no-tests.patch"
+      patch_type: "conan"
+      patch_description: "no-tests"
