@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, patch, chdir, copy
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.microsoft.subsystems import unix_path
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.env import Environment
 from conan.tools.build import build_jobs
@@ -158,11 +159,11 @@ class BotanConan(ConanFile):
         if compiler == 'msvc' and version < Version('14'):
             raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
 
-        elif compiler == 'gcc' and version >= Version('5') and compiler.libcxx != 'libstdc++11':
+        if compiler == 'gcc' and version >= Version('5') and compiler.libcxx != 'libstdc++11':
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
-        elif compiler == 'clang' and compiler.libcxx not in ['libstdc++11', 'libc++']:
+        if compiler == 'clang' and compiler.libcxx not in ['libstdc++11', 'libc++']:
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
@@ -387,7 +388,7 @@ class BotanConan(ConanFile):
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
-        prefix = tools.unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
+        prefix = unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
 
         botan_abi = ' '.join(botan_abi_flags) if botan_abi_flags else ' '
         botan_cxx_extras = ' '.join(botan_extra_cxx_flags) if botan_extra_cxx_flags else ' '
