@@ -63,9 +63,6 @@ class CcacheConan(ConanFile):
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def build_requirements(self):
         self.tool_requires("cmake/3.25.3")
 
