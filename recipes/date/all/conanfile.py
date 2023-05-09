@@ -39,7 +39,7 @@ class DateConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+        if self.settings.os in ["iOS", "tvOS", "watchOS", "Android"]:
             self.options.use_system_tz_db = True
 
     def configure(self):
@@ -53,7 +53,7 @@ class DateConan(ConanFile):
 
     def requirements(self):
         if not self.options.header_only and not self.options.use_system_tz_db:
-            self.requires("libcurl/7.88.1")
+            self.requires("libcurl/8.0.1")
 
     def package_id(self):
         if self.info.options.header_only:

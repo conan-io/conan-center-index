@@ -14,6 +14,7 @@ class LibdwarfConan(ConanFile):
     homepage = "https://www.prevanders.net/dwarf.html"
     topics = ("debug", "dwarf", "dwarf2", "elf")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

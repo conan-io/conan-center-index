@@ -25,7 +25,7 @@ int main() {
     printf("Done!\n");
 
     printf("Creating new table...\n");
-    result = sqlite3_exec(db_instance, "CREATE TABLE package(ID INT PRIMARY KEY NOT NULL);", NULL, 0, &errmsg);
+    result = sqlite3_exec(db_instance, "CREATE TABLE IF NOT EXISTS package(ID INT PRIMARY KEY NOT NULL);", NULL, 0, &errmsg);
     if(result != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
