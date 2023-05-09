@@ -62,20 +62,20 @@ class ScreenCaptureLiteConan(ConanFile):
             self.requires("xorg/system")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.info.settings.compiler == "clang" and self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libstdc++")
 
         # Since 17.1.451, screen_capture_lite uses CGPreflightScreenCaptureAccess which is provided by macOS SDK 11 later.
         if Version(self.version) >= "17.1.451" and \
-            is_apple_os(self) and Version(self.info.settings.compiler.version) <= "11":
+            is_apple_os(self) and Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration(f"{self.ref} requires CGPreflightScreenCaptureAccess which support macOS SDK 11 later.")
 
     def build_requirements(self):
