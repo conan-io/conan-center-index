@@ -73,23 +73,23 @@ class PangoConan(ConanFile):
                 self.options["cairo"].shared = True
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("meson/0.63.2")
+        self.build_requires("pkgconf/1.9.3")
+        self.build_requires("meson/1.1.0")
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
 
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.options.with_xft:
             self.requires("libxft/2.3.4")
         if self.options.with_xft and self.options.with_fontconfig and self.options.with_freetype:
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
-            self.requires("cairo/1.17.4")
-        self.requires("harfbuzz/5.1.0")
-        self.requires("glib/2.73.3")
+            self.requires("cairo/1.17.6")
+        self.requires("harfbuzz/7.1.0")
+        self.requires("glib/2.76.2")
         self.requires("fribidi/1.0.12")
 
     def source(self):
