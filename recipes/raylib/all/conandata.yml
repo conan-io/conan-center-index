@@ -8,8 +8,6 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-enable-cmake-build-android.patch"
-    - patch_file: "patches/4.0.0-0002-cmake-do-not-corrupt-glfw-target.patch"
   "3.5.0":
     - patch_file: "patches/3.5.0-0001-enable-cmake-build-android.patch"
     - patch_file: "patches/3.5.0-0002-cmake-project.patch"
-    - patch_file: "patches/3.5.0-0003-cmake-do-not-corrupt-glfw-target.patch"

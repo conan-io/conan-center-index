@@ -68,6 +68,8 @@ class RaylibConan(ConanFile):
             tc.variables["USE_EXTERNAL_GLFW"] = "ON"
             tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
+        # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
