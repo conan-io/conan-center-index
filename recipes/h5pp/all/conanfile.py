@@ -61,7 +61,7 @@ class H5ppConan(ConanFile):
             del self.options.with_spdlog
             del self.options.with_zlib
         else:
-            self.options["hdf5"].with_zlib= self.options.with_zlib
+            self.options["hdf5"].with_zlib = self.options.with_zlib
 
     def requirements(self):
         self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
