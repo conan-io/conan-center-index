@@ -88,6 +88,8 @@ class PhysXConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+
         # Options defined in physx/compiler/public/CMakeLists.txt
         tc.cache_variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
         tc.cache_variables["PX_BUILDSNIPPETS"] = False
