@@ -207,7 +207,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
@@ -219,7 +219,8 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}")
+            # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
+            self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True)
         if self.options.with_ade:
             self.requires("ade/0.1.2a")
 
@@ -244,8 +245,7 @@ class OpenCVConan(ConanFile):
                 self.tool_requires(f"protobuf/{self._protobuf_version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
 
         get(self, **self.conan_data["sources"][self.version][1],
             destination=self._contrib_folder, strip_root=True)
@@ -371,9 +371,9 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                # TODO: use self.dependencies once https://github.com/conan-io/conan/issues/12728 fixed
-                ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
+            ffmpeg_cpp_info = self.dependencies["ffmpeg"].cpp_info
+            for component in ["avcodec", "avformat", "avutil", "swscale"]:
+                ffmpeg_component_version = ffmpeg_cpp_info.components[component].get_property("component_version")
                 tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
 
         tc.variables["WITH_GSTREAMER"] = False
@@ -540,7 +540,7 @@ class OpenCVConan(ConanFile):
             return False
         gtk_version = self.dependencies["gtk"].ref.version
         if gtk_version == "system":
-            return self.options["gtk"].version == 2
+            return self.dependencies["gtk"].options.version == 2
         else:
             return Version(gtk_version) < "3.0.0"
 
