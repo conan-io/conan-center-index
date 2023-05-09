@@ -58,11 +58,11 @@ For example, `GSL` is the name of `Guidelines Support Library` from Microsoft an
 
 ## What is the policy for naming forks?
 
-When submitting recipes, its important to pick names which clearly identifies the source. For projects which are forks of existing but diverge significantly enough
-to be unique (subject to opinion), the should be prefixed with the author or organization such as `author-name`. A good example is the [crow](https://github.com/ipkn/crow)
-which was forked [crowcpp-crow](https://github.com/CrowCpp/Crow). The original project maintain the `crow` name where as the more featured and advanced fork is `crowcpp-crow`.
+When submitting recipes, it's important to pick names which clearly identify the source. For projects which are forks of existing but diverge significantly enough
+to be unique (subject to opinion), they should be prefixed with the author or organization such as `author-name`. A good example is the [crow](https://github.com/ipkn/crow)
+which was forked [crowcpp-crow](https://github.com/CrowCpp/Crow). The original project maintains the `crow` name where as the more featured and advanced fork is `crowcpp-crow`.
 
-Forks are acceptable submissions given they have significantly divergent fro mthe upstream. This can include adding new features, updateing compiler or standard support, and actively being maintained. Changes which are not sufficient are build scripts, small bug fixes, "conan-ization" - all of these can be
+Forks are acceptable submissions given they have significantly divergent from the upstream. This can include adding new features, updating compiler or standard support, and actively being maintained. Changes which are not sufficient are build scripts, small bug fixes, "conan-ization" - all of these can be
 [applied as patches to the original](adding_packages/sources_and_patches.md).
 
 ## What is the policy on creating packages from pre-compiled binaries?
