@@ -5,7 +5,6 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.54.0"
@@ -75,7 +74,7 @@ class ScreenCaptureLiteConan(ConanFile):
 
         # Since 17.1.451, screen_capture_lite uses CGPreflightScreenCaptureAccess which is provided by macOS SDK 11 later.
         if Version(self.version) >= "17.1.451" and \
-            is_apple_os(self) and Version(self.settings.compiler.version) <= "11":
+            self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration(f"{self.ref} requires CGPreflightScreenCaptureAccess which support macOS SDK 11 later.")
 
     def build_requirements(self):
