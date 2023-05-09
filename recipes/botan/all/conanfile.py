@@ -1,9 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import get, patch, chdir, copy, mkdir
+from conan.tools.files import get, patch, chdir, copy
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.env import Environment
 from conan.tools.build import build_jobs
+from conan.errors import ConanInvalidConfiguration
 from packaging.version import Version
 from shutil import which
 import os
