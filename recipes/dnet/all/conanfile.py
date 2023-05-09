@@ -34,8 +34,14 @@ class dnetConan(ConanFile):
 
     def configure(self):
         self.options.rm_safe("fPIC")
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        try:
+            del self.settings.compiler.libcxx
+        except Exception:
+            pass
+        try:
+            del self.settings.compiler.cppstd
+        except Exception:
+            pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
