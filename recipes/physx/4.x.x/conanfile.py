@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rm, rmdir, copy, replace_in_file, save
 from conan.tools.build import valid_min_cppstd
+from conan.tools.scm import Version
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 import os
 
@@ -63,8 +64,12 @@ class PhysXConan(ConanFile):
         if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
             raise ConanInvalidConfiguration("Current os is not supported")
 
-        if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
+        if self.settings.os == "Macos":
+            if self.settings.arch not in ["x86", "x86_64"]:
+                raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
+            
+            if self.settings.os.version and Version(self.settings.os.version) < "10.14" and self.settings.compiler == "apple-clang" and valid_min_cppstd(self, 17):
+                raise ConanInvalidConfiguration("MacOS version >= 10.14 is needed due to the usage of aligned deallocation")
 
         build_type = self.settings.build_type
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
@@ -146,9 +151,6 @@ class PhysXConan(ConanFile):
     def _get_cmakemodules_subfolder(self):
         return "CMakeModules" if self.settings.os == "Windows" else "cmakemodules"
 
-    def _needs_no_aligned_allocation_patch(self):
-        return self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) < "10.14" and self.settings.compiler == "apple-clang" and valid_min_cppstd(self, 17)
-
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -159,11 +161,6 @@ class PhysXConan(ConanFile):
                               "// #error Exactly one of NDEBUG and _DEBUG needs to be defined!")
 
         physx_source_cmake_dir = os.path.join(self.source_folder, "physx", "source", "compiler", "cmake")
-
-        if self._needs_no_aligned_allocation_patch():
-            replace_in_file(self, os.path.join(physx_source_cmake_dir, "CMakeLists.txt"),
-                                  'SET(CMAKE_MODULE_PATH ${{CMAKEMODULES_PATH}})',
-                                  'SET(CMAKE_MODULE_PATH ${{CMAKEMODULES_PATH}})\nSET(CMAKE_CXX_FLAGS  "${{CMAKE_CXX_FLAGS}} -fno-aligned-allocation")')
 
         # Remove global and specifics hard-coded PIC settings
         # (conan's CMake build helper properly sets CMAKE_POSITION_INDEPENDENT_CODE
@@ -277,9 +274,6 @@ class PhysXConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PhysX")
-
-        if self._needs_no_aligned_allocation_patch():
-            self.cpp_info.cxxflags.append("-fno-aligned-allocation")
 
         # PhysXFoundation
         self.cpp_info.components["physxfoundation"].set_property("cmake_target_name", "PhysX::PhysXFoundation")
