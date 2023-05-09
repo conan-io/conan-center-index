@@ -68,8 +68,8 @@ class PhysXConan(ConanFile):
             if self.settings.arch not in ["x86", "x86_64"]:
                 raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
             
-            if self.settings.os.version and Version(self.settings.os.version) < "10.14" and self.settings.compiler == "apple-clang" and valid_min_cppstd(self, 17):
-                raise ConanInvalidConfiguration("MacOS version >= 10.14 is needed due to the usage of aligned deallocation")
+            if valid_min_cppstd(self, 17):
+                raise ConanInvalidConfiguration("{} is not supported with C++ 17. Contributions are welcome.".format(self.name))
 
         build_type = self.settings.build_type
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
