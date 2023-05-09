@@ -628,8 +628,10 @@ class Llvm(ConanFile):
                 "cmake_target_name", component)
             self.cpp_info.components[component].builddirs.append(
                 module_subfolder)
-            self.cpp_info.components[component].names["cmake_find_package"] = component
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = component
+            self.cpp_info.components[component].set_property(
+                "cmake_find_package", component)
+            self.cpp_info.components[component].set_property(
+                "cmake_find_package_multi", component)
 
             if self.options.use_llvm_cmake_files:
                 self.cpp_info.components[component].build_modules["cmake_find_package"].append(
