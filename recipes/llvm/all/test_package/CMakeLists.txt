@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
-set(CMAKE_CXX_STANDARD 14)
+# enable to print compiler output
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(LLVM REQUIRED COMPONENTS LLVMSupport)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-list(FILTER CONAN_LIBS EXCLUDE REGEX "^clang-cpp$")
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} LLVMSupport)
+
+if (llvm_build_llvm_dylib)
+    add_executable(${PROJECT_NAME}-dynlib test_package.cpp)
+    target_link_libraries(${PROJECT_NAME}-dynlib LLVM)
+endif()

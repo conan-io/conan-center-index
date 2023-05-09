@@ -1,17 +1,50 @@
-from conans import ConanFile, CMake, tools
-import os
+from conan import ConanFile
+from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake
+from conan.tools.build.cross_building import cross_building
+from conan.tools.cmake.layout import cmake_layout
+from conans.model.version import Version
+import re
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        self.build_requires("cmake/[>=3.21.3 <4.0.0]")
+        self.build_requires("ninja/[>=1.10.0 <2.0.0]")
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.check_components_exist = True
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def _llvm_version(self):
+        pattern = re.compile("^llvm/([0-9.]+)")
+        return Version(re.findall(pattern, self.tested_reference_str)[0])
+
+    def _ccpstd(self):
+        cppstd = 14
+        if self._llvm_version() >= Version(16):
+            cppstd = 17
+        return cppstd
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(variables={
+            'CMAKE_CXX_STANDARD': self._ccpstd(),
+            'llvm_build_llvm_dylib': self.dependencies[self.tested_reference_str].options.llvm_build_llvm_dylib,
+            # We could also add additional testing per project / runtime if needed
+        })
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+        if not cross_building(self, self.settings):
+            self.run("./test_package")
