@@ -26,10 +26,12 @@ class OnnxConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "disable_static_registration": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "disable_static_registration": False,
     }
 
     @property
@@ -95,6 +97,7 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.disable_static_registration
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
