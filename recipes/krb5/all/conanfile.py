@@ -113,7 +113,7 @@ class Krb5Conan(ConanFile):
         if not is_msvc(self):
             self.requires("libverto/0.3.2")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_tcl"):
             self.requires("tcl/8.6.10")
 
