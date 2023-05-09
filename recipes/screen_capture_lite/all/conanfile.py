@@ -8,7 +8,8 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
+
 
 class ScreenCaptureLiteConan(ConanFile):
     name = "screen_capture_lite"
@@ -103,7 +104,6 @@ class ScreenCaptureLiteConan(ConanFile):
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
         if Version(self.version) >= "17.1.613":
             tc.variables["BUILD_CSHARP"] = False
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
