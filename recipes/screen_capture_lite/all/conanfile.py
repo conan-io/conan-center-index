@@ -30,7 +30,7 @@ class ScreenCaptureLiteConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 20
+        return "20" if Version(self.version) < "17.1.596" else "17"
 
     @property
     def _compilers_minimum_version(self):
