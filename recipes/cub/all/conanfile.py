@@ -56,7 +56,7 @@ class CubConan(ConanFile):
     def package(self):
         copy(
             self,
-            pattern="LICENSE",
+            pattern="LICENSE.TXT",
             dst=os.path.join(self.package_folder, "licenses"),
             src=self.source_folder,
         )
