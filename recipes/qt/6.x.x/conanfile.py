@@ -8,49 +8,15 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.build import cross_building, check_min_cppstd, build_jobs, default_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conans import RunEnvironment, tools
-from conans.model import Generator
 
 required_conan_version = ">=1.55.0"
-
-
-class qt(Generator):
-    @staticmethod
-    def content_template(path, folder, os_):
-        bin_folder = "bin" if os_ == "Windows" else "libexec"
-        return textwrap.dedent(f"""\
-            [Paths]
-            Prefix = {path}
-            ArchData = {folder}/archdatadir
-            HostData = {folder}/archdatadir
-            Data = {folder}/datadir
-            Sysconf = {folder}/sysconfdir
-            LibraryExecutables = {folder}/archdatadir/{bin_folder}
-            HostLibraryExecutables = bin
-            Plugins = {folder}/archdatadir/plugins
-            Imports = {folder}/archdatadir/imports
-            Qml2Imports = {folder}/archdatadir/qml
-            Translations = {folder}/datadir/translations
-            Documentation = {folder}/datadir/doc
-            Examples = {folder}/datadir/examples""")
-
-    @property
-    def filename(self):
-        return "qt.conf"
-
-    @property
-    def content(self):
-        return qt.content_template(
-            self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/"),
-            "res",
-            self.conanfile.settings.os)
 
 
 class QtConan(ConanFile):
@@ -103,11 +69,11 @@ class QtConan(ConanFile):
         "gui": [True, False],
         "widgets": [True, False],
 
-        "device": "ANY",
-        "cross_compile": "ANY",
-        "sysroot": "ANY",
+        "device": [None, "ANY"],
+        "cross_compile": [None, "ANY"],
+        "sysroot": [None, "ANY"],
         "multiconfiguration": [True, False],
-        "disabled_features": "ANY",
+        "disabled_features": [None, "ANY"],
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -157,6 +123,10 @@ class QtConan(ConanFile):
     short_paths = True
 
     _submodules_tree = None
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _get_module_tree(self):
@@ -291,42 +261,6 @@ class QtConan(ConanFile):
 
             if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
-
-            if Version(self.version) < "6.3.0":
-                # Check if a valid python2 is available in PATH or it will failflex
-                # Start by checking if python2 can be found
-                python_exe = tools.which("python2")
-                if not python_exe:
-                    # Fall back on regular python
-                    python_exe = tools.which("python")
-
-                if not python_exe:
-                    msg = ("Python2 must be available in PATH "
-                           "in order to build Qt WebEngine")
-                    raise ConanInvalidConfiguration(msg)
-
-                # In any case, check its actual version for compatibility
-                from six import StringIO  # Python 2 and 3 compatible
-                mybuf = StringIO()
-                cmd_v = f"\"{python_exe}\" --version"
-                self.run(cmd_v, output=mybuf)
-                verstr = mybuf.getvalue().strip().split("Python ")[1]
-                if verstr.endswith("+"):
-                    verstr = verstr[:-1]
-                version = Version(verstr)
-                # >= 2.7.5 & < 3
-                v_min = "2.7.5"
-                v_max = "3.0.0"
-                if v_min <= version < v_max:
-                    msg = ("Found valid Python 2 required for QtWebengine:"
-                           f" version={mybuf.getvalue()}, path={python_exe}")
-                    self.output.success(msg)
-                else:
-                    msg = (f"Found Python 2 in path, but with invalid version {verstr}"
-                           f" (QtWebEngine requires >= {v_min} & < "
-                           f"{v_max})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
-                           f"python2(.exe)")
-                    raise ConanInvalidConfiguration(msg)
 
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
@@ -484,6 +418,10 @@ class QtConan(ConanFile):
         env = Environment()
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
+        if self._settings_build.os == "Macos":
+            dyld_path = env.vars(self).get("DYLD_LIBRARY_PATH")
+            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_path}"')
+            env.define_path("BASH_ENV", os.path.abspath("bash_env"))
 
         tc = CMakeToolchain(self, generator="Ninja")
 
@@ -768,39 +706,16 @@ class QtConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        with tools.vcvars(self) if is_msvc(self) else tools.no_op():
-            # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
-            build_env = tools.RunEnvironment(self).vars if is_msvc(self) else {}
-            build_env["MAKEFLAGS"] = f"j{build_jobs(self)}"
-            build_env["PKG_CONFIG_PATH"] = [self.build_folder]
-            if self.settings.os == "Windows":
-                if "PATH" not in build_env:
-                    build_env["PATH"] = []
-                build_env["PATH"].append(os.path.join(self.source_folder, "gnuwin32", "bin"))
-            if is_msvc(self):
-                # this avoids cmake using gcc from strawberryperl
-                build_env["CC"] = "cl"
-                build_env["CXX"] = "cl"
-            with tools.environment_append(build_env):
-
-                if self.settings.os == "Macos":
-                    save(self, ".qmake.stash" , "")
-                    save(self, ".qmake.super" , "")
-                yield
+        if self.settings.os == "Macos":
+            save(self, ".qmake.stash" , "")
+            save(self, ".qmake.super" , "")
+        yield
 
     def build(self):
         with self._build_context():
             cmake = CMake(self)
             cmake.configure()
-            if self.settings.os == "Macos":
-                dyld_library_path = ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"])
-                save(self, "bash_env", f"export DYLD_LIBRARY_PATH=\"{dyld_library_path}\"")
-            with tools.environment_append({
-                "BASH_ENV": os.path.abspath("bash_env")
-            }) if self.settings.os == "Macos" else tools.no_op():
-                with tools.run_environment(self):
-                    with tools.remove_from_path("perl") if self.settings.os == "Windows" else tools.no_op():
-                        cmake.build()
+            cmake.build()
 
     @property
     def _cmake_executables_file(self):
@@ -817,7 +732,6 @@ class QtConan(ConanFile):
         with self._build_context():
             cmake = CMake(self)
             cmake.install()
-        save(self, os.path.join(self.package_folder, "bin", "qt.conf"), qt.content_template("..", "res", self.settings.os))
         copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
@@ -938,8 +852,8 @@ class QtConan(ConanFile):
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
-        if self.options.multiconfiguration and is_msvc(self):
-            if self.settings.compiler == "Visual Studio":
+        if self.info.options.multiconfiguration and is_msvc(self):
+            if self.info.settings.compiler == "Visual Studio":
                 if "MD" in self.settings.compiler.runtime:
                     self.info.settings.compiler.runtime = "MD/MDd"
                 else:
