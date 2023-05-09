@@ -502,6 +502,16 @@ class Llvm(ConanFile):
         self.output.info(
             f'ignored these dependencies, will not propagate these to conan: {ignored_deps}')
 
+        # .so already containing .a, so clear deps of e.g. LLVM.so which are installed by LLVM itself
+        # every component which is in is available = installed
+        for shared_component in components:
+            if self._is_shared_llvm_lib(shared_component):
+                external_dependencies = []
+                for dep in components[shared_component]:
+                    if not self._is_installed_llvm_lib(current_dep):
+                        external_dependencies.append(dep)
+                components[shared_component] = external_dependencies
+
         # workaround for circular dependencies which will create errors in conan
         remove_dependencies = [
             ('lldbBreakpoint', 'lldbCore'),
