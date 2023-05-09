@@ -1,18 +1,35 @@
-from conans import tools, CMake, ConanFile
 import os
-import textwrap
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    copy,
+    get,
+    replace_in_file,
+    rm,
+    rmdir,
+)
+
+required_conan_version = ">=1.53.0"
 
 
 class LibTinsConan(ConanFile):
     name = "libtins"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/mfontanini/libtins"
     description = "High-level, multiplatform C++ network packet sniffing and crafting library."
     license = "BSD-2-Clause"
-    topics = ("pcap", "packets", "network", "packet-analyser", "packet-parsing", "libpcap", "sniffing")
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mfontanini/libtins"
+    topics = (
+        "pcap",
+        "packets",
+        "network",
+        "packet-analyser",
+        "packet-parsing",
+        "libpcap",
+        "sniffing",
+    )
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,17 +46,9 @@ class LibTinsConan(ConanFile):
         "with_dot11": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,88 +56,76 @@ class LibTinsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libpcap/1.10.1")
+        self.requires("libpcap/1.10.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_ack_tracker:
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_wpa2:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/3.1.0")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LIBTINS_BUILD_EXAMPLES"] = False
+        tc.variables["LIBTINS_BUILD_TESTS"] = False
+        tc.variables["LIBTINS_BUILD_SHARED"] = self.options.shared
+        tc.variables["LIBTINS_ENABLE_CXX11"] = True
+        tc.variables["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
+        tc.variables["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
+        tc.variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        # Use Findlibpcap.cmake from cmake_find_package
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "FIND_PACKAGE(PCAP REQUIRED)",
-                              "find_package(libpcap REQUIRED)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                              "${PCAP_LIBRARY}",
-                              "libpcap::libpcap")
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LIBTINS_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["LIBTINS_BUILD_TESTS"] = False
-
-        self._cmake.definitions["LIBTINS_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["LIBTINS_ENABLE_CXX11"] = tools.valid_min_cppstd(self, 11)
-        self._cmake.definitions["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
-        self._cmake.definitions["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
-        self._cmake.definitions["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "FIND_PACKAGE(PCAP REQUIRED)",
+            "find_package(libpcap REQUIRED)",
+        )
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+            "${PCAP_LIBRARY}",
+            "libpcap::libpcap",
+        )
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(os.path.join(self._source_subfolder, "LICENSE"), dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"libtins": "libtins::libtins"}
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
         )
+        cmake = CMake(self)
+        cmake.install()
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "libtins")
-        self.cpp_info.set_property("cmake_target_name", "libtins")
-        self.cpp_info.set_property("pkg_config_name", "libtins")
         self.cpp_info.libs = ["tins"]
+        self.cpp_info.set_property("pkg_config_name", "libtins")
+
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("TINS_STATIC")
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
