@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, copy, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -22,7 +23,7 @@ class FoonathanMemoryConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tools": [True, False],
-        "with_sizecheck":[True, False],
+        "with_sizecheck": [True, False],
     }
     default_options = {
         "shared": False,
@@ -44,11 +45,13 @@ class FoonathanMemoryConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
-        # FIXME: jenkins servers throw error with this combination
-        # quick fix until somebody can reproduce
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+    def validate_build(self):
+        # Versions older than 0.7.2 require to compile and run an executable
+        # during the build, newer versions do it differently.
+        is_older = Version(self.version) < "0.7.2"
+        if hasattr(self, "settings_build") and cross_building(self) and is_older:
+            raise ConanInvalidConfiguration(
+                "Cross building is not supported on versions older than 0.7.2")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,17 +67,29 @@ class FoonathanMemoryConan(ConanFile):
         tc.variables["FOONATHAN_MEMORY_CHECK_ALLOCATION_SIZE"] = self.options.with_sizecheck
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        current_version = Version(self.version)
+        if current_version >= "0.7.2" and current_version < "0.7.4":
+            self.output.warning("WEJ09138409238409238FLKSJDSALFKJSDFLK JLKULIUS")
+            # Remove static linking when cross-building, see:
+            # https://github.com/conan-io/conan-center-index/pull/16997#issuecomment-1508243262
+            # https://github.com/foonathan/memory/issues/162
+            replace_in_file(self, os.path.join(self.source_folder, "tool/CMakeLists.txt"), "if (CMAKE_CROSSCOMPILING)", "if (FALSE)")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "foonathan_memory", "cmake"))
+        rmdir(self, os.path.join(self.package_folder,
+              "lib", "foonathan_memory", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
@@ -103,7 +118,8 @@ class FoonathanMemoryConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "foonathan_memory")
         self.cpp_info.set_property("cmake_target_name", "foonathan_memory")
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.includedirs = [os.path.join("include", "foonathan_memory")]
+        self.cpp_info.includedirs = [
+            os.path.join("include", "foonathan_memory")]
 
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
@@ -113,5 +129,7 @@ class FoonathanMemoryConan(ConanFile):
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "foonathan_memory"
         self.cpp_info.names["cmake_find_package_multi"] = "foonathan_memory"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [
+            self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [
+            self._module_file_rel_path]

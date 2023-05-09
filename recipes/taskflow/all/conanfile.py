@@ -19,7 +19,8 @@ class TaskflowConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/taskflow/taskflow"
-    topics = ("tasking", "parallelism")
+    topics = ("tasking", "parallelism", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
 
@@ -72,8 +73,7 @@ class TaskflowConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -85,6 +85,9 @@ class TaskflowConan(ConanFile):
                   dst=os.path.join(self.package_folder, "include", "taskflow"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "Taskflow")
         self.cpp_info.set_property("cmake_target_name", "Taskflow::Taskflow")
         if self.settings.os in ["Linux", "FreeBSD"]:

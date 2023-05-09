@@ -131,7 +131,7 @@ def parse_proto_libraries(filename, source_folder, error):
         line = line.strip(",").strip("\"")
         collection.append(line)
 
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         action = None
         parsing_variable = None
         variables = {}
