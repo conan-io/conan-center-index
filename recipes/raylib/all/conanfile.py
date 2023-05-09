@@ -62,10 +62,10 @@ class RaylibConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         if self.settings.os == "Android":
             tc.variables["PLATFORM"] = "Android"
-            tc.variables["USE_EXTERNAL_GLFW"] = False
+            tc.variables["USE_EXTERNAL_GLFW"] = "OFF"
             tc.variables["OPENGL_VERSION"] = "ES 2.0"
         else:
-            tc.variables["USE_EXTERNAL_GLFW"] = True
+            tc.variables["USE_EXTERNAL_GLFW"] = "ON"
             tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
         tc.generate()
