@@ -25,10 +25,12 @@ class H5ppConan(ConanFile):
     options = {
         "with_eigen": [True, False],
         "with_spdlog": [True, False],
+        "with_zlib" : [True, False], 
     }
     default_options = {
         "with_eigen": True,
         "with_spdlog": True,
+        "with_zlib" : True,
     }
 
     @property
@@ -57,6 +59,9 @@ class H5ppConan(ConanFile):
             #     that including the headers is intentional.
             del self.options.with_eigen
             del self.options.with_spdlog
+            del self.options.with_zlib
+        else:
+            self.options["hdf5"].with_zlib= self.options.with_zlib
 
     def requirements(self):
         self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
@@ -64,6 +69,8 @@ class H5ppConan(ConanFile):
             self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
             self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "1.10.0" and self.options.with_zlib:
+            self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         basic_layout(self,src_folder="src")
@@ -119,6 +126,9 @@ class H5ppConan(ConanFile):
                 self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
+            if self.options.with_zlib:
+                self.cpp_info.components["h5pp_deps"].requires.append("zlib::zlib")
+
         else:
             self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
             self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
