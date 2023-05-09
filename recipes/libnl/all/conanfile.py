@@ -56,6 +56,12 @@ class LibNlConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # Autotools helper installs headers in the wrong location
+        #copy(self, "netlink",
+        #     src=os.path.join(self.package_folder, "include", "libnl3"),
+        #     dst=os.path.join(self.package_folder, "include"))
+        #rmdir(self, os.path.join(self.package_folder, "include", "libnl3"))
+
     def package_info(self):
         self.cpp_info.components["nl"].libs = ["nl-3"]
         self.cpp_info.components["nl"].includedirs = [os.path.join('include', 'libnl3')]
