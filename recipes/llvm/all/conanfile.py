@@ -9,6 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 from collections import defaultdict
 from conan.tools.cmake.layout import cmake_layout
 from conan.errors import ConanException
+from conans.model.version import Version
 import os
 import shutil
 import glob
@@ -37,7 +38,7 @@ runtimes = [
 default_projects = [
     # 'clang',
     # 'clang-tools-extra',
-    # 'libc', # clang-14 crashes for sin/cos/tan for 13.0.0-14.0.6
+    # 'libc', # clang-14/15 crashes in {sin,cos,tan} for llvm-{13.0.0,14.0.6} in debug, clang-15 release looks fine
     # 'libclc',
     # 'lld',
     # TODO: lib/liblldb.so.14.0.6 / libxml2, error: undefined symbol: libiconv_open, referenced by encoding.c in libxml2.a
@@ -163,17 +164,21 @@ class Llvm(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
+    # checking options before requirements are build
     def configure(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_zlib
             del self.options.with_xml2
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, '14')
 
-    def validate(self):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
+
+        for project in projects:
+            for runtime in runtimes:
+                if project == runtime and self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
+                    raise ConanInvalidConfiguration(
+                        f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
 
         if self.options.shared:
             if self.options.llvm_build_llvm_dylib:
@@ -182,20 +187,16 @@ class Llvm(ConanFile):
             self.output.warning(
                 "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
 
-        # TODO tools.Version ?
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("10"):
             raise ConanInvalidConfiguration(
                 "Compiler version too low for this package.")
 
-        if is_msvc(self) and tools.Version(self.settings.compiler.version) < "16.4":
+        if is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
-        for project in projects:
-            for runtime in runtimes:
-                if project == runtime and self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
-                    raise ConanInvalidConfiguration(
-                        f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
+    # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
+    # def validate(self):
 
     def system_requirements(self):
         # TODO test in different environments
