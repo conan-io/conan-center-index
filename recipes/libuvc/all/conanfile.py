@@ -89,7 +89,7 @@ class LibuvcConan(ConanFile):
         tc.variables["CMAKE_BUILD_TARGET"] = "Shared" if self.options.shared else "Static"
         tc.variables["LIBUVC_WITH_JPEG"] = bool(self.options.with_jpeg)
         if Version(self.version) >= "0.0.7":
-            tc.variables["BUILD_EXAMPLE "] = False
+            tc.variables["BUILD_EXAMPLE"] = False
 
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
