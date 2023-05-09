@@ -38,9 +38,6 @@ class PhysXConan(ConanFile):
 
     generators = "CMakeDeps"
 
-    def set_version(self):
-        self.version = self.version or load(self, "version.txt")
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -90,8 +87,6 @@ class PhysXConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
 
         # Options defined in physx/compiler/public/CMakeLists.txt
         tc.cache_variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
@@ -219,16 +214,18 @@ class PhysXConan(ConanFile):
 
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._get_license())
 
-        out_lib_dir = os.path.join(self.package_folder, "lib", self._get_physx_build_type())
+        cmake_installation_dir = os.path.join(self.package_folder, "lib", self._get_physx_build_type())
+        package_dst_lib_dir = os.path.join(self.package_folder, "lib")
+        package_dst_bin_dir = os.path.join(self.package_folder, "bin")
 
-        copy(self, pattern="*.a", dst="lib", src=out_lib_dir, keep_path=False)
-        copy(self, pattern="*.so", dst="lib", src=out_lib_dir, keep_path=False)
-        copy(self, pattern="*.dylib*", dst="lib", src=out_lib_dir, keep_path=False)
-        copy(self, pattern="*.lib", dst="lib", src=out_lib_dir, keep_path=False)
-        copy(self, pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
+        copy(self, pattern="*.a", dst=package_dst_lib_dir, src=cmake_installation_dir, keep_path=False)
+        copy(self, pattern="*.so", dst=package_dst_lib_dir, src=cmake_installation_dir, keep_path=False)
+        copy(self, pattern="*.dylib*", dst=package_dst_lib_dir, src=cmake_installation_dir, keep_path=False)
+        copy(self, pattern="*.lib", dst=package_dst_lib_dir, src=cmake_installation_dir, keep_path=False)
+        copy(self, pattern="*.dll", dst=package_dst_bin_dir, src=cmake_installation_dir, keep_path=False)
 
         rmdir(self, os.path.join(self.package_folder, "source"))
-        rm(self, "*.pdb", out_lib_dir, recursive=True)
+        rmdir(self, cmake_installation_dir)
 
         self._copy_external_bin()
 
@@ -247,8 +244,9 @@ class PhysXConan(ConanFile):
         compiler_version = self.settings.compiler.version
 
         if self.settings.os == "Linux" and self.settings.arch == "x86_64":
+            package_dst_lib_dir = os.path.join(self.package_folder, "lib")
             physx_gpu_dir = os.path.join(external_bin_dir, "linux.clang", physx_build_type)
-            copy(self, pattern="*PhysXGpu*.so", dst="lib", src=physx_gpu_dir, keep_path=False)
+            copy(self, pattern="*PhysXGpu*.so", dst=package_dst_lib_dir, src=physx_gpu_dir, keep_path=False)
         elif self.settings.os == "Windows" and is_msvc(self):
             physx_arch = {"x86": "x86_32", "x86_64": "x86_64"}.get(str(self.settings.arch))
             dll_info_list = [{
@@ -258,21 +256,20 @@ class PhysXConan(ConanFile):
                 "pattern": "PhysXDevice*.dll",
                 "vc_ver": {"180": "vc120", "190": "vc140", "191": "vc141"}.get(str(compiler_version), "vc142")
             }]
+            
+            package_dst_bin_dir = os.path.join(self.package_folder, "bin")
+
             for dll_info in dll_info_list:
                 dll_subdir = "win.{0}.{1}.mt".format(physx_arch, dll_info.get("vc_ver"))
                 dll_dir = os.path.join(external_bin_dir, dll_subdir, physx_build_type)
-                copy(self, pattern=dll_info.get("pattern"), dst="bin", src=dll_dir, keep_path=False)
+                copy(self, pattern=dll_info.get("pattern"), dst=package_dst_bin_dir, src=dll_dir, keep_path=False)
 
     def package_info(self):
-        physx_build_type = self._get_physx_build_type()
-
-        self.cpp_info.libdirs = [(os.path.join("lib", physx_build_type))]
         self.cpp_info.set_property("cmake_file_name", "PhysX")
 
         # PhysXFoundation
         self.cpp_info.components["physxfoundation"].set_property("cmake_target_name", "PhysX::PhysXFoundation")
         self.cpp_info.components["physxfoundation"].libs = ["PhysXFoundation"]
-        self.cpp_info.components["physxfoundation"].libdirs = [(os.path.join("lib", physx_build_type))]
         if self.settings.os == "Linux":
             self.cpp_info.components["physxfoundation"].system_libs = ["m", "pthread", "rt"]
         elif self.settings.os == "Android":
@@ -283,7 +280,6 @@ class PhysXConan(ConanFile):
         # PhysXCommon
         self.cpp_info.components["physxcommon"].set_property("cmake_target_name", "PhysX::PhysXCommon")
         self.cpp_info.components["physxcommon"].libs = ["PhysXCommon"]
-        self.cpp_info.components["physxcommon"].libdirs = [(os.path.join("lib", physx_build_type))]
         if self.settings.os == "Linux":
             self.cpp_info.components["physxcommon"].system_libs = ["m"]
         self.cpp_info.components["physxcommon"].requires = ["physxfoundation"]
@@ -291,13 +287,11 @@ class PhysXConan(ConanFile):
         # PhysXPvdSDK
         self.cpp_info.components["physxpvdsdk"].set_property("cmake_target_name", "PhysX::PhysXPvdSDK")
         self.cpp_info.components["physxpvdsdk"].libs = ["PhysXPvdSDK"]
-        self.cpp_info.components["physxpvdsdk"].libdirs = [(os.path.join("lib", physx_build_type))]
         self.cpp_info.components["physxpvdsdk"].requires = ["physxfoundation"]
 
         # PhysX
         self.cpp_info.components["physxmain"].set_property("cmake_target_name", "PhysX::PhysX")
         self.cpp_info.components["physxmain"].libs = ["PhysX"]
-        self.cpp_info.components["physxmain"].libdirs = [(os.path.join("lib", physx_build_type))]
         if self.settings.os == "Linux":
             self.cpp_info.components["physxmain"].system_libs = ["m"]
             if self.settings.arch == "x86_64":
@@ -308,19 +302,16 @@ class PhysXConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["physxtask"].set_property("cmake_target_name", "PhysX::PhysXTask")
             self.cpp_info.components["physxtask"].libs = ["PhysXTask"]
-            self.cpp_info.components["physxtask"].libdirs = [(os.path.join("lib", physx_build_type))]
             self.cpp_info.components["physxmain"].requires.append("physxtask")
 
         # PhysXCharacterKinematic
         self.cpp_info.components["physxcharacterkinematic"].set_property("cmake_target_name", "PhysX::PhysXCharacterKinematic")
         self.cpp_info.components["physxcharacterkinematic"].libs = ["PhysXCharacterKinematic"]
-        self.cpp_info.components["physxcharacterkinematic"].libdirs = [(os.path.join("lib", physx_build_type))]
         self.cpp_info.components["physxcharacterkinematic"].requires = ["physxfoundation", "physxcommon", "physxextensions"]
 
         # PhysXCooking
         self.cpp_info.components["physxcooking"].set_property("cmake_target_name", "PhysX::PhysXCooking")
         self.cpp_info.components["physxcooking"].libs = ["PhysXCooking"]
-        self.cpp_info.components["physxcooking"].libdirs = [(os.path.join("lib", physx_build_type))]
         if self.settings.os == "Linux":
             self.cpp_info.components["physxcooking"].system_libs = ["m"]
         self.cpp_info.components["physxcooking"].requires = ["physxfoundation", "physxcommon"]
@@ -328,13 +319,11 @@ class PhysXConan(ConanFile):
         # PhysXVehicle
         self.cpp_info.components["physxvehicle"].set_property("cmake_target_name", "PhysX::PhysXVehicle")
         self.cpp_info.components["physxvehicle"].libs = ["PhysXVehicle"]
-        self.cpp_info.components["physxvehicle"].libdirs = [(os.path.join("lib", physx_build_type))]
         self.cpp_info.components["physxvehicle"].requires = ["physxfoundation", "physxpvdsdk", "physxextensions"]
 
         # PhysXExtensions
         self.cpp_info.components["physxextensions"].set_property("cmake_target_name", "PhysX::PhysXExtensions")
         self.cpp_info.components["physxextensions"].libs = ["PhysXExtensions"]
-        self.cpp_info.components["physxextensions"].libdirs = [(os.path.join("lib", physx_build_type))]
         self.cpp_info.components["physxextensions"].requires = ["physxfoundation", "physxpvdsdk", "physxmain", "physxcommon"]
 
         # TODO: remove in conan v2 once cmake_find_package* removed
