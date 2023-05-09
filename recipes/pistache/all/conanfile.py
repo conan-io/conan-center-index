@@ -54,7 +54,7 @@ class PistacheConan(ConanFile):
     def requirements(self):
         self.requires("rapidjson/cci.20220822")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/3.1.0")
         if self.version != "cci.20201127":
             self.requires("date/3.0.1")
 
@@ -80,7 +80,7 @@ class PistacheConan(ConanFile):
 
     def build_requirements(self):
         if self.version != "cci.20201127":
-            self.tool_requires("meson/1.0.0")
+            self.tool_requires("meson/1.1.0")
             if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
 
