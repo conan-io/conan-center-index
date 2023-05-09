@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake
 from conan.tools.build.cross_building import cross_building
 from conan.tools.cmake.layout import cmake_layout
-import os
+from conans.model.version import Version
+import re
 
 
 class TestPackageConan(ConanFile):
@@ -25,9 +26,23 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
+    def _llvm_version(self):
+        pattern = re.compile("^llvm/([0-9.]+)")
+        return Version(re.findall(pattern, self.tested_reference_str)[0])
+
+    def _ccpstd(self):
+        cppstd = 14
+        if self._llvm_version() >= Version(16):
+            cppstd = 17
+        return cppstd
+
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(variables={
+            'CMAKE_CXX_STANDARD': self._ccpstd(),
+            'llvm_build_llvm_dylib': self.dependencies[self.tested_reference_str].options.llvm_build_llvm_dylib,
+            # We could also add additional testing per project / runtime if needed
+        })
         cmake.build()
 
     def test(self):

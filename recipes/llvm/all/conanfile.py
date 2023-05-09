@@ -174,6 +174,12 @@ class Llvm(ConanFile):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
 
+        ver = Version(self.version)
+        if ver.major < 16:
+            check_min_cppstd(self, '14')
+        elif ver.major >= 16:
+            check_min_cppstd(self, '17')
+
         for project in projects:
             for runtime in runtimes:
                 if project == runtime and self.options.get_safe('with_project_' + project, False) and self.options.get_safe('with_runtime_' + runtime, False):
