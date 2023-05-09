@@ -29,8 +29,8 @@ class VirSIMDConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "14.1",
-            "gcc": "5",
+            "msvc": "19.15",
+            "gcc": "7",
             "clang": "5",
             "apple-clang": "5.1",
         }
