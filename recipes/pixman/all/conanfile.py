@@ -54,7 +54,7 @@ class PixmanConan(ConanFile):
             raise ConanInvalidConfiguration("pixman can only be built as a static library on Windows")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
