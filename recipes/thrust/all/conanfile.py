@@ -27,9 +27,14 @@ class ThrustConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # TODO: https://github.com/conan-io/conan-center-index/pull/17484
+        # Otherwise CUB from system CUDA is used, which is not guaranteed to be compatible
+        # self.requires("cub/1.17.2", transitive_headers=True, transitive_libs=True)
+
         if self.options.device_system == "tbb":
             self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
-        elif self.options.device_system != "cpp":
+
+        if self.options.device_system in ["cuda", "omp"]:
             dev = str(self.options.device_system).upper()
             self.output.warning(
                 f"Conan package for {dev} is not available,"
