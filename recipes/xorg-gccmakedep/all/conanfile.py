@@ -29,7 +29,7 @@ class XorgGccmakedep(ConanFile):
         self.requires("xorg-macros/1.19.3")
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("pkgconf/1.9.3")
 
     def validate(self):
         if self.settings.os == "Windows":
