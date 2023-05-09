@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, copy, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, collect_libs, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -44,16 +45,13 @@ class FoonathanMemoryConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
-        # FIXME: jenkins servers throw 'ld: library not found for -lcrt0.o' error
-        # when cross building tools for Macos M1. This is most likely produced by the
-        # '-static' flag for the tool target, since this flag is not recommended by
-        # apple and should be avoided. Somebody with an Mac M1 could try to reproduce
-        # the issue and provide a patch. 
-        if hasattr(self, "settings_build") and cross_building(self) and \
-                str(self.settings.os) == "Macos" and self.options.with_tools:
+    def validate_build(self):
+        # Versions older than 0.7.2 require to compile and run an executable
+        # during the build, newer versions do it differently.
+        is_older = Version(self.version) < "0.7.2"
+        if hasattr(self, "settings_build") and cross_building(self) and is_older:
             raise ConanInvalidConfiguration(
-                "Cross building tools for Macos is not yet supported. Contributions are welcome")
+                "Cross building is not supported on versions older than 0.7.2")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,8 +67,18 @@ class FoonathanMemoryConan(ConanFile):
         tc.variables["FOONATHAN_MEMORY_CHECK_ALLOCATION_SIZE"] = self.options.with_sizecheck
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        current_version = Version(self.version)
+        if current_version >= "0.7.2" and current_version < "0.7.4":
+            self.output.warning("WEJ09138409238409238FLKSJDSALFKJSDFLK JLKULIUS")
+            # Remove static linking when cross-building, see:
+            # https://github.com/conan-io/conan-center-index/pull/16997#issuecomment-1508243262
+            # https://github.com/foonathan/memory/issues/162
+            replace_in_file(self, os.path.join(self.source_folder, "tool/CMakeLists.txt"), "if (CMAKE_CROSSCOMPILING)", "if (FALSE)")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
