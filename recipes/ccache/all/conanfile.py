@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
@@ -55,6 +55,9 @@ class CcacheConan(ConanFile):
                 "msvc": "191" if Version(self.version) < "4.6" else "192"
             }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -83,7 +86,7 @@ class CcacheConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.2")
+        self.tool_requires("cmake/3.25.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -104,6 +107,7 @@ class CcacheConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

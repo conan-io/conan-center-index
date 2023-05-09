@@ -181,7 +181,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.5.1")
         if self.options.with_nghttp2:
@@ -193,7 +193,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
             self.requires("c-ares/1.19.0")
         if self.options.get_safe("with_libpsl"):
@@ -217,6 +217,8 @@ class LibcurlConan(ConanFile):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
+            if self.settings.os in [ "tvOS", "watchOS" ]:
+                self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -243,8 +245,22 @@ class LibcurlConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
+            # autoreconf is caalled with "--force" which regenerate all files.
+            # Because we want to use a patched config.sub for tvOS/watchOS, we
+            # need to call this patch after autoreconf.
+            self._patch_autoreconf()
             autotools.configure()
             autotools.make()
+
+    def _patch_autoreconf(self):
+        # Fix config.sub for tvOS/watchOS
+        if self.settings.os in [ "tvOS", "watchOS" ]:
+            for gnu_config in [
+                    self.conf.get("user.gnu-config:config_guess", check_type=str),
+                    self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
     def _patch_sources(self):
         apply_conandata_patches(self)

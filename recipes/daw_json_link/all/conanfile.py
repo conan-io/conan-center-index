@@ -39,7 +39,7 @@ class DawJsonLinkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.85.1")
+        self.requires("daw_header_libraries/2.88.0")
         self.requires("daw_utf_range/2.2.3")
 
     def package_id(self):

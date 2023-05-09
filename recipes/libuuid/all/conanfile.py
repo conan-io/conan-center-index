@@ -28,6 +28,10 @@ class LibuuidConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _has_sys_file_header(self):
+        return self.settings.os in ["FreeBSD", "Linux", "Macos"]
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,6 +62,8 @@ class LibuuidConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = AutotoolsToolchain(self)
+        if self._has_sys_file_header:
+            tc.extra_defines.append("HAVE_SYS_FILE_H")
         if "x86" in self.settings.arch:
             tc.extra_cflags.append("-mstackrealign")
         tc.generate()
