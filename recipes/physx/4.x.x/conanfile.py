@@ -162,8 +162,8 @@ class PhysXConan(ConanFile):
 
         if self._needs_no_aligned_allocation_patch():
             replace_in_file(self, os.path.join(physx_source_cmake_dir, "CMakeLists.txt"),
-                                'SET(CMAKE_MODULE_PATH ${{CMAKEMODULES_PATH}})',
-                                'SET(CMAKE_MODULE_PATH ${{CMAKEMODULES_PATH}})\nSET(CMAKE_CXX_FLAGS  "${{CMAKE_CXX_FLAGS}} -fno-aligned-allocation")'
+                                  'SET(CMAKE_MODULE_PATH ${{CMAKEMODULES_PATH}})',
+                                  'SET(CMAKE_MODULE_PATH ${{CMAKEMODULES_PATH}})\nSET(CMAKE_CXX_FLAGS  "${{CMAKE_CXX_FLAGS}} -fno-aligned-allocation")')
 
         # Remove global and specifics hard-coded PIC settings
         # (conan's CMake build helper properly sets CMAKE_POSITION_INDEPENDENT_CODE
