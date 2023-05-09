@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.52.0"
 
@@ -62,3 +63,14 @@ class ThrustConan(ConanFile):
         self.cpp_info.libdirs = []
         dev = str(self.options.device_system).upper()
         self.cpp_info.defines = [f"THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{dev}"]
+
+        if self.options.device_system == "omp":
+            if is_msvc(self) and not self.options.shared:
+                self.cpp_info.cxxflags += ["-openmp"]
+                self.cpp_info.system_libs += ["VCOMP"]
+            elif self.settings.compiler == "gcc":
+                self.cpp_info.cxxflags += ["-fopenmp"]
+                self.cpp_info.system_libs += ["gomp"]
+            elif self.settings.compiler in ("clang", "apple-clang"):
+                self.cpp_info.cxxflags += ["-Xpreprocessor", "-fopenmp"]
+                self.cpp_info.system_libs += ["omp"]
