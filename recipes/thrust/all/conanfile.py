@@ -1,7 +1,8 @@
+import os
+
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-import os
 
 required_conan_version = ">=1.52.0"
 
@@ -48,12 +49,13 @@ class ThrustConan(ConanFile):
             dst=os.path.join(self.package_folder, "licenses"),
             src=self.source_folder,
         )
-        copy(
-            self,
-            pattern="*[.h|.inl]",
-            src=os.path.join(self.source_folder, "thrust"),
-            dst=os.path.join(self.package_folder, "include", "thrust"),
-        )
+        for pattern in ["*.h", "*.inl"]:
+            copy(
+                self,
+                pattern=pattern,
+                src=os.path.join(self.source_folder, "thrust"),
+                dst=os.path.join(self.package_folder, "include", "thrust"),
+            )
 
     def package_info(self):
         self.cpp_info.bindirs = []
