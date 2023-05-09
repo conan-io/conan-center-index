@@ -1,4 +1,7 @@
 sources:
+  "34.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v34.0.tar.gz"
+    sha256: "81dbf2fac446a0389c80e309b2060dcccd926012ce2a61621a47e3e432aee8c1"
   "32.1":
     url: "https://github.com/google/perfetto/archive/refs/tags/v32.1.tar.gz"
     sha256: "0d1088b4758b3d5f3813178c6de22386329d42407d23aa1479f20dce96e49d78"
