@@ -53,10 +53,10 @@ class CoinCbcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("coin-utils/2.11.4")
-        self.requires("coin-osi/0.108.6")
-        self.requires("coin-clp/1.17.6")
-        self.requires("coin-cgl/0.60.3")
+        self.requires("coin-utils/2.11.6")
+        self.requires("coin-osi/0.108.7")
+        self.requires("coin-clp/1.17.7")
+        self.requires("coin-cgl/0.60.6")
         if self.settings.compiler == "Visual Studio" and self.options.parallel:
             self.requires("pthreads4w/3.0.0")    
 
@@ -69,8 +69,8 @@ class CoinCbcConan(ConanFile):
         return getattr(self, "user_info_build", self.deps_user_info)
 
     def build_requirements(self):
-        self.tool_requires("gnu-config/cci.20201022")
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("gnu-config/cci.20210814")
+        self.tool_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.tool_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
