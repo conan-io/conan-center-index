@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, patch, chdir, copy, mkdir
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.env import Environment
 from conan.tools.build import build_jobs
 from packaging.version import Version
@@ -95,8 +95,8 @@ class BotanConan(ConanFile):
         return "sources"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        for p in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(p["patch_file"])
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -141,9 +141,6 @@ class BotanConan(ConanFile):
         if self.options.with_boost:
             self.requires("boost/1.79.0")
 
-    def package_info(self):
-        self.cpp_info.libs = ["botan"]
-
     @property
     def _required_boost_components(self):
         return ['coroutine', 'system']
@@ -185,8 +182,8 @@ class BotanConan(ConanFile):
         get(conanfile=self, **self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            patch(self, **patch)
+        for p in self.conan_data.get('patches', {}).get(self.version, []):
+            patch(self, **p)
         with chdir(self, self._source_subfolder):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
@@ -276,7 +273,7 @@ class BotanConan(ConanFile):
                                                                        self.settings.get_safe('os.subsystem'),
                                                                        self.settings.get_safe('arch'))
                 botan_extra_cxx_flags.append(macos_min_version)
-            macos_sdk_path = '-isysroot {}'.format(tools.XCRun(self.settings).sdk_path)
+            macos_sdk_path = '-isysroot {}'.format(XCRun(self.settings).sdk_path)
             botan_extra_cxx_flags.append(macos_sdk_path)
 
         # This is to work around botan's configure script that *replaces* its

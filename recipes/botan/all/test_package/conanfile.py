@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def requirements(self):
-        self.requires("botan/[^3.0.0]");
+        self.requires("botan/[^3.0.0]")
 
     def generate(self):
         tc = CMakeToolchain(self)
