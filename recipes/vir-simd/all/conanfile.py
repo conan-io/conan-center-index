@@ -12,8 +12,8 @@ required_conan_version = ">=1.52.0"
 
 class VirSIMDConan(ConanFile):
     name = "vir-simd"
-    description = "This project aims to provide a simple fallback for users of std::experimental::simd (Parallelism TS 2)"
-    license = "LGPL-3.0"
+    description = "A fallback std::experimental::simd (Parallelism TS 2) implementation with additional features"
+    license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mattkretz/vir-simd"
     topics = ("simd", "parallelism-ts", "cpp17", "header-only")
@@ -50,6 +50,9 @@ class VirSIMDConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} Windows support is not provided so far.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
