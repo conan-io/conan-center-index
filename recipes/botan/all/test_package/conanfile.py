@@ -1,10 +1,21 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.build import cross_building
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+
+    def requirements(self):
+        self.requires("botan/[^3.0.0]");
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -12,6 +23,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if not cross_building(self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            self.run(bin_path)
