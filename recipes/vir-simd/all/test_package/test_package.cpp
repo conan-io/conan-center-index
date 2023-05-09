@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <vir/simd.h>
-//#include <vir/simd_iota.h>
 
 namespace stdx = vir::stdx;
 
@@ -17,7 +16,6 @@ std::ostream& operator<<(std::ostream& s, const stdx::simd<T, A>& v) {
 int main(void) {
     
     using floatv = stdx::simd<float, stdx::simd_abi::fixed_size<8>>;
-    //constexpr auto a = vir::iota_v<floatv>;
     const floatv a{5};
     
     std::cout << a * 3<< std::endl;
