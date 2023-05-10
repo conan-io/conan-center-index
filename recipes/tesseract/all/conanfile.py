@@ -1,14 +1,15 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
-from conan.tools.build import cross_building
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
+from conan.tools.scm import Version
 
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
+
 
 class TesseractConan(ConanFile):
     name = "tesseract"
@@ -18,6 +19,7 @@ class TesseractConan(ConanFile):
     homepage = "https://github.com/tesseract-ocr/tesseract"
     topics = ("ocr", "image", "multimedia", "graphics")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,6 +40,29 @@ class TesseractConan(ConanFile):
         "with_libarchive": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "5.0.0" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "11": {
+                "Visual Studio": "14",
+                "msvc": "190",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "6",
+            },
+            "17": {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "11",
+            },
+        }.get(self._min_cppstd, {})
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -51,9 +76,6 @@ class TesseractConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.with_training:
-            # do not enforce failure and allow user to build with system cairo, pango, fontconfig
-            self.output.warn("*** Build with training is not yet supported, continue on your own")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -65,35 +87,21 @@ class TesseractConan(ConanFile):
             self.requires("libarchive/3.6.2")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/7.86.0")
+            self.requires("libcurl/8.0.1")
 
     def validate(self):
-        # Check compiler version
-        compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-        if Version(self.version) >= "5.0.0":
-            # 5.0.0 requires C++-17 compiler
-            minimal_version = {
-                "Visual Studio": "16",
-                "msvc": "192",
-                "gcc": "7",
-                "clang": "7",
-                "apple-clang": "11"
-            }
-        else:
-            minimal_version = {
-                "Visual Studio": "14",
-                "msvc": "190",
-                "gcc": "5",
-                "clang": "5",
-                "apple-clang": "6"
-            }
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-        elif compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(f"{self.ref} requires a {compiler} version >= {minimal_version[compiler]}, but {compiler_version} was found")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if self.options.with_training:
+            # do not enforce failure and allow user to build with system cairo, pango, fontconfig
+            self.output.warning("*** Build with training is not yet supported, continue on your own")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,20 +126,11 @@ class TesseractConan(ConanFile):
             tc.variables["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
-        tc.variables["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath.replace("\\", "/")
+        tc.variables["Leptonica_DIR"] = self.dependencies["leptonica"].package_folder.replace("\\", "/")
 
         if Version(self.version) >= "5.0.0":
             tc.variables["DISABLE_CURL"] = not self.options.with_libcurl
             tc.variables["DISABLE_ARCHIVE"] = not self.options.with_libarchive
-
-        if cross_building(self):
-            cmake_system_processor = {
-                "armv8": "aarch64",
-                "armv8.3": "aarch64",
-            }.get(str(self.settings.arch), str(self.settings.arch))
-            tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
-
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -161,17 +160,17 @@ class TesseractConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         # Official CMake imported target is:
@@ -197,10 +196,6 @@ class TesseractConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "Tesseract"
         self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
@@ -209,13 +204,14 @@ class TesseractConan(ConanFile):
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].set_property("pkg_config_name", "tesseract")
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
     @property
     def _libname(self):
         suffix = ""
         if self.settings.os == "Windows":
             v = Version(self.version)
-            suffix += "{}{}".format(v.major, v.minor)
+            suffix += f"{v.major}{v.minor}"
             if self.settings.build_type == "Debug":
                 suffix += "d"
-        return "tesseract" + suffix
+        return f"tesseract{suffix}"
