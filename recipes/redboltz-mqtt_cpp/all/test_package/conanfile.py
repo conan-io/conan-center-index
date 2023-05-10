@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def generate(self)
+    def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["TEST_ENABLE_STD_CONTAINERS"] = self.dependencies[self.tested_reference_str].options.enable_std_containers
         tc.generate()
