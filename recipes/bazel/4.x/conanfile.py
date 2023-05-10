@@ -1,10 +1,12 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import check_sha256, copy, download, rename
 import os
 
 
 class BazelConan(ConanFile):
     name = "bazel"
+    package_type = "application"
     description = "Bazel is a fast, scalable, multi-language and extensible build system."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -37,15 +39,15 @@ class BazelConan(ConanFile):
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
             if filename in ["LICENSE", self._bazel_filename]:
-                tools.download(url, filename)
-                tools.check_sha256(filename, source["sha256"])
+                download(self, url, filename)
+                check_sha256(self, filename, source["sha256"])
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")
-        self.copy(pattern=self._bazel_filename, dst="bin")
+        copy(self, pattern="LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern=self._bazel_filename, src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
         old_target_filename = os.path.join(self.package_folder, "bin", self._bazel_filename)
         new_target_filename = os.path.join(self.package_folder, "bin", "bazel" + self._program_suffix)
-        tools.rename(old_target_filename, new_target_filename)
+        rename(self, old_target_filename, new_target_filename)
         self._chmod_plus_x(new_target_filename)
 
     def package_info(self):
