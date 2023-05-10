@@ -57,7 +57,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         if self._tests_enabled:
-            self.test_requires("gtest/1.13.0")
+            self.build_requires("gtest/1.13.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
