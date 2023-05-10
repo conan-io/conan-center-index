@@ -1,0 +1,48 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -121,7 +121,6 @@ set(KTX_MAIN_SRC
+     lib/basisu/transcoder/basisu_transcoder.cpp
+     lib/basisu/transcoder/basisu_transcoder.h
+     lib/basisu/transcoder/basisu.h
+-    lib/basisu/zstd/zstd.c
+     lib/checkheader.c
+     lib/dfdutils/createdfd.c
+     lib/dfdutils/colourspaces.c
+@@ -415,11 +414,13 @@ PRIVATE
+     lib/basisu/encoder/cppspmd_type_aliases.h
+     lib/basisu/encoder/jpgd.cpp
+     lib/basisu/encoder/jpgd.h
+-    lib/basisu/encoder/lodepng.cpp
+-    lib/basisu/encoder/lodepng.h
+     lib/writer1.c
+     lib/writer2.c
+ )
++find_package(lodepng REQUIRED CONFIG)
++find_package(zstd REQUIRED CONFIG)
++target_link_libraries(ktx PRIVATE lodepng::lodepng $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
++target_link_libraries(ktx_read PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
+ target_include_directories(
+     ktx
+ PRIVATE
+--- a/tools/toktx/CMakeLists.txt
++++ b/tools/toktx/CMakeLists.txt
+@@ -28,6 +28,8 @@ PRIVATE
+ target_link_libraries(
+     toktx
+     ktx
++    lodepng::lodepng
++    $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>
+ )
+ 
+ target_compile_definitions(
+--- a/tools/toktx/pngimage.cc
++++ b/tools/toktx/pngimage.cc
+@@ -21,7 +21,7 @@
+ #include <stdexcept>
+ 
+ #include "image.hpp"
+-#include "encoder/lodepng.h"
++#include <lodepng.h>
+ #include <KHR/khr_df.h>
+ #include "dfd.h"
+ 
