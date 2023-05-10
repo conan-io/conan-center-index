@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
@@ -62,6 +62,10 @@ class CcacheConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
+        if Version(conan_version).major < 2 and \
+            self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
+            self.settings.compiler.libcxx == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, which CCI doesn't support.")
 
     def build_requirements(self):
         self.tool_requires("cmake/3.25.3")
