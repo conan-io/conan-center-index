@@ -1,11 +1,12 @@
 import os
+
 from conan import ConanFile
-from conan.tools.files import copy, get, replace_in_file, rmdir, rm
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class Mosquitto(ConanFile):
@@ -41,22 +42,21 @@ class Mosquitto(ConanFile):
         "threading": True,
     }
     generators = "CMakeDeps"
-    exports_sources = ["CMakeLists.txt"]
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.clients:
-            del self.options.cjson
+            self.options.rm_safe("cjson")
         if not self.options.broker:
-            del self.options.websockets
+            self.options.rm_safe("websockets")
         if not self.options.build_cpp:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.options.rm_safe("compiler.libcxx")
+            self.options.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
