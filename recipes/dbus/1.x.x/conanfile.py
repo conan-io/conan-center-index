@@ -25,8 +25,8 @@ class DbusConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     options = {
-        "system_socket": ["ANY"],
-        "system_pid_file": ["ANY"],
+        "system_socket": [None, "ANY"],
+        "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
         "with_glib": [True, False],
         "with_systemd": [True, False],
@@ -34,8 +34,8 @@ class DbusConan(ConanFile):
         "session_socket_dir": ["ANY"],
     }
     default_options = {
-        "system_socket": "",
-        "system_pid_file": "",
+        "system_socket": None,
+        "system_pid_file": None,
         "with_x11": False,
         "with_glib": False,
         "with_systemd": False,
@@ -104,7 +104,9 @@ class DbusConan(ConanFile):
             tc.project_options["checks"] = False
             tc.project_options["doxygen_docs"] = "disabled"
             tc.project_options["modular_tests"] = "disabled"
-            tc.project_options["session_socket_dir"] = str(self.options.session_socket_dir)
+            tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+            tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+            tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
             tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
             tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
             if self.options.get_safe("with_systemd", False):
@@ -127,13 +129,14 @@ class DbusConan(ConanFile):
             tc.variables["DBUS_WITH_GLIB"] = bool(self.options.get_safe("with_glib", False))
             tc.variables["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
             tc.variables["DBUS_DISABLE_CHECKS"] = False
+            tc.variables["DBUS_SYSTEM_BUS_DEFAULT_ADDRESS"] = str(self.options.get_safe("system_socket", ""))
 
             # Conan does not provide an EXPAT_LIBRARIES CMake variable for the Expat library.
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             tc.variables["EXPAT_LIBRARIES"] = "expat::expat"
 
             # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
-            tc.variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.session_socket_dir)
+            tc.variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.get_safe("session_socket_dir", ""))
 
             tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = False
             tc.generate()
