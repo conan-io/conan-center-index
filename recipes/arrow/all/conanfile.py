@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 import glob
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 class ArrowConan(ConanFile):
     name = "arrow"
