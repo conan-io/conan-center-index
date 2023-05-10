@@ -71,6 +71,13 @@ class LibsecretConan(ConanFile):
         if not can_run(self):
             self.tool_requires("glib/2.76.0")
 
+        if self.settings.os == "Macos":
+            # Avoid using gettext from homebrew which may be linked against
+            # a different/incompatible libiconv than the one being exposed
+            # in the runtime environment (DYLD_LIBRARY_PATH)
+            # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
+            self.tool_requires("gettext/0.21")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
