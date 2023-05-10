@@ -123,7 +123,6 @@ class ZbarConan(ConanFile):
         copy(self, "config.guess", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
 
         autotools = Autotools(self)
-        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
