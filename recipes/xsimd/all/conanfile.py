@@ -17,7 +17,7 @@ class XsimdConan(ConanFile):
     homepage = "https://github.com/xtensor-stack/xsimd"
     description = "C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)"
     topics = ("simd-intrinsics", "vectorization", "simd")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "xtl_complex": [True, False],
@@ -44,8 +44,7 @@ class XsimdConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

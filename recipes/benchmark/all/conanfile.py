@@ -18,6 +18,7 @@ class BenchmarkConan(ConanFile):
     homepage = "https://github.com/google/benchmark"
     topics = ("google", "microbenchmark")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,20 +49,9 @@ class BenchmarkConan(ConanFile):
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "1.7.1" and not self._cmake_new_enough("3.16.3"):
-            self.tool_requires("cmake/3.25.0")
+        if Version(self.version) >= "1.7.1":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

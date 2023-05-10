@@ -16,6 +16,7 @@ class DawJsonLinkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/daw_json_link"
     topics = ("json", "parse", "json-parser", "serialization", "constexpr", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
@@ -38,7 +39,7 @@ class DawJsonLinkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.85.1")
+        self.requires("daw_header_libraries/2.88.0")
         self.requires("daw_utf_range/2.2.3")
 
     def package_id(self):
@@ -54,7 +55,7 @@ class DawJsonLinkConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

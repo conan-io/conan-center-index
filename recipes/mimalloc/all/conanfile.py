@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, collect_libs
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, collect_libs
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, VCVars
+from conan.tools.scm import Version
 import os
 import shutil
 import textwrap
@@ -37,7 +37,6 @@ class MimallocConan(ConanFile):
         "inject": False,
         "single_object": False,
     }
-
 
     @property
     def _min_cppstd(self):
@@ -93,15 +92,15 @@ class MimallocConan(ConanFile):
         if  self.version in ["1.7.6", "1.7.7", "2.0.6", "2.0.7"] and \
             self.options.shared and \
             is_msvc(self) and \
-            "MD" in msvc_runtime_flag(self):
+            not is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 f"Currently, {self.ref} doesn't work properly with shared MD builds in CCI. Contributions welcomed")
 
         # Shared overriding requires dynamic runtime for MSVC:
-        if self.info.options.override and \
-           self.info.options.shared and \
+        if self.options.override and \
+           self.options.shared and \
            is_msvc(self) and \
-           "MT" in msvc_runtime_flag(self):
+           is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Dynamic runtime (MD/MDd) is required when using mimalloc as a shared library for override")
 
@@ -110,7 +109,7 @@ class MimallocConan(ConanFile):
            self.options.get_safe("inject"):
             raise ConanInvalidConfiguration("Single object is incompatible with library injection")
 
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -119,7 +118,7 @@ class MimallocConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -139,7 +138,7 @@ class MimallocConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if is_msvc(self) and self.settings.arch == "x86":
+        if is_msvc(self) and self.settings.arch == "x86" and self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "mimalloc-redirect.lib",
                             "mimalloc-redirect32.lib")
@@ -184,22 +183,17 @@ class MimallocConan(ConanFile):
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _obj_name(self):
@@ -228,7 +222,6 @@ class MimallocConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "mimalloc"
         self.cpp_info.names["cmake_find_package_multi"] = "mimalloc"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 

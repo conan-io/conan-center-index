@@ -1010,14 +1010,15 @@ class OpenCVConan(ConanFile):
         # core module dependencies
         self.requires("zlib/1.2.13")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.8.0")
+            self.requires("onetbb/2021.9.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         # dnn module dependencies
         if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}", run=can_run(self))
+            # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
+            self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True, run=can_run(self))
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.239.0")
         # gapi module dependencies
@@ -1044,7 +1045,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_openexr"):
             self.requires("openexr/3.1.5")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.0")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.0")
         if self.options.get_safe("with_gdal"):
@@ -1131,8 +1132,7 @@ class OpenCVConan(ConanFile):
             self.tool_requires(f"protobuf/{self._protobuf_version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
 
         get(self, **self.conan_data["sources"][self.version][1],
             destination=self._contrib_folder, strip_root=True)
