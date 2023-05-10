@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, load, save, rmdir
+from conan.tools.files import get, load, save, rmdir
 from conan.tools.build import check_min_cppstd
 
 
@@ -117,18 +117,16 @@ class LoguruConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "loguru")
         self.cpp_info.set_property("cmake_target_name", "loguru::loguru")
 
+        self.cpp_info.defines.append(f"LOGURU_USE_FMTLIB={self.options.with_fmt}")
         self.cpp_info.defines.append(f"LOGURU_SCOPE_TEXT_SIZE={self.options.scope_text_size}")
+        self.cpp_info.defines.append(f"LOGURU_SCOPE_TIME_PRECISION={self.options.scope_time_precision}")
         self.cpp_info.defines.append(f"LOGURU_FILENAME_WIDTH={self.options.filename_width}")
         self.cpp_info.defines.append(f"LOGURU_THREADNAME_WIDTH={self.options.threadname_width}")
-        self.cpp_info.defines.append(f"LOGURU_SCOPE_TIME_PRECISION={self.options.scope_time_precision}")
-        self.cpp_info.defines.append(f"LOGURU_USE_FMTLIB={self.options.with_fmt.value}")
-        self.cpp_info.defines.append(f"LOGURU_CATCH_SIGABRT={self.options.catch_sigabrt.value}")
-        self.cpp_info.defines.append(f"LOGURU_VERBOSE_SCOPE_ENDINGS={self.options.verbose_scope_endings.value}")
-        self.cpp_info.defines.append(f"LOGURU_REDEFINE_ASSERT={self.options.redefine_assert.value}")
-        self.cpp_info.defines.append(f"LOGURU_WITH_STREAMS={self.options.enable_streams.value}")
-        self.cpp_info.defines.append(f"LOGURU_WITH_FILEABS={self.options.enable_fileabs.value}")
-        self.cpp_info.defines.append(f"LOGURU_RTTI={self.options.with_rtti.value}")
-        self.cpp_info.defines.append(f"LOGURU_REPLACE_GLOG={self.options.replace_glog.value}")
+        self.cpp_info.defines.append(f"LOGURU_VERBOSE_SCOPE_ENDINGS={self.options.verbose_scope_endings}")
+        self.cpp_info.defines.append(f"LOGURU_REDEFINE_ASSERT={self.options.redefine_assert}")
+        self.cpp_info.defines.append(f"LOGURU_WITH_STREAMS={self.options.enable_streams}")
+        self.cpp_info.defines.append(f"LOGURU_WITH_FILEABS={self.options.enable_fileabs}")
+        self.cpp_info.defines.append(f"LOGURU_REPLACE_GLOG={self.options.replace_glog}")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl"]
