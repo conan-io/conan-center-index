@@ -18,10 +18,12 @@ class fastgltf(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "enable_small_vector": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "enable_small_vector": False,
     }

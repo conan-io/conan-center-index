@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def layout(self):
-        cmake_layout(self, src_folder='src')
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
