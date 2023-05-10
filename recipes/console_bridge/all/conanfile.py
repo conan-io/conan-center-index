@@ -1,7 +1,9 @@
+import os
+
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -25,6 +27,10 @@ class PackageConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 14
+
+    @property
     def _tests_enabled(self):
         return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
 
@@ -40,10 +46,14 @@ class PackageConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         pass
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
         if self._tests_enabled:
@@ -71,12 +81,16 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder))
 
     def package_info(self):
         self.cpp_info.libs = ["console_bridge"]
+
+        self.cpp_info.set_property("cmake_module_file_name", "console_bridge")
+        self.cpp_info.set_property("cmake_module_target_name", "console_bridge::console_bridge")
+        self.cpp_info.set_property("cmake_file_name", "console_bridge")
+        self.cpp_info.set_property("cmake_target_name", "console_bridge::console_bridge")
+        self.cpp_info.set_property("pkg_config_name", "console_bridge")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
