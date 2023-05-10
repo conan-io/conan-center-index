@@ -1,16 +1,18 @@
 from conan import ConanFile
-from conan.tools.files import get, patch, chdir, copy
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.files import get, patch, chdir, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
 from conan.tools.microsoft.subsystems import unix_path
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.env import Environment
 from conan.tools.build import build_jobs
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from distutils.version import LooseVersion
+
 from shutil import which
 import os
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.55"
 
 
 class BotanConan(ConanFile):
@@ -91,14 +93,11 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    @property
-    def _source_subfolder(self):
-        # Required to build at least 2.12.1
-        return "sources"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(p["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -124,12 +123,12 @@ class BotanConan(ConanFile):
 
         # --single-amalgamation option is no longer available
         # See also https://github.com/randombit/botan/pull/2246
-        if LooseVersion(str(self.version)) >= LooseVersion('2.14.0'):
+        if Version(self.version) >= '2.14.0':
             del self.options.single_amalgamation
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_bzip2:
@@ -154,12 +153,11 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration('{0} requires non-header-only static boost, without magic_autolink, and with these components: {1}'.format(self.name, ', '.join(self._required_boost_components)))
 
         compiler = self.settings.compiler
-        version = LooseVersion(str(self.settings.compiler.version))
+        compiler_version = Version(self.settings.compiler.version)
 
-        if compiler == 'msvc' and version < LooseVersion('14'):
-            raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
+        check_min_vs(self, 190)
 
-        if compiler == 'gcc' and version >= LooseVersion('5') and compiler.libcxx != 'libstdc++11':
+        if compiler == 'gcc' and compiler_version >= "5" and compiler.libcxx != 'libstdc++11':
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
@@ -170,10 +168,10 @@ class BotanConan(ConanFile):
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
-        if LooseVersion(str(self.version)) >= LooseVersion('2.14.0') and self.options.amalgamation:
-            if (compiler == 'apple-clang' and version < LooseVersion('10')) or \
-               (compiler == 'gcc' and version < LooseVersion('8')) or \
-               (compiler == 'clang' and version < LooseVersion('7')):
+        if Version(self.version) >= '2.14.0' and self.options.amalgamation:
+            if (compiler == 'apple-clang' and compiler_version < '10') or \
+               (compiler == 'gcc' and compiler_version < '8') or \
+               (compiler == 'clang' and compiler_version < '7'):
                 raise ConanInvalidConfiguration(
                     'botan amalgamation is not supported for {}/{}'.format(compiler, version))
 
@@ -181,12 +179,11 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def source(self):
-        get(conanfile=self, **self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
+        get(conanfile=self, **self.conan_data['sources'][self.version], strip_root=True)
 
     def build(self):
-        for p in self.conan_data.get('patches', {}).get(self.version, []):
-            patch(self, **p)
-        with chdir(self, self._source_subfolder):
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
 
