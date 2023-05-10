@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class EffceeConan(ConanFile):
@@ -10,23 +15,21 @@ class EffceeConan(ConanFile):
     homepage = "https://github.com/google/effcee/"
     description = "Effcee is a C++ library for stateful pattern matching" \
                   " of strings, inspired by LLVM's FileCheck"
-    topics = ("conan", "effcee", "strings", "algorithm", "matcher")
+    topics = ("strings", "algorithm", "matcher")
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package_multi"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,54 +37,48 @@ class EffceeConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("re2/20210601")
+        self.requires("re2/20230301", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
-        if self.settings.compiler == "Visual Studio" and \
-           self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("Visual Studio build for shared"
-                                            " library with MT runtime is not"
-                                            " supported")
+            check_min_cppstd(self, "11")
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(f"{self.ref} shared with MT runtime not supported by msvc")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["EFFCEE_BUILD_TESTING"] = False
-        self._cmake.definitions["EFFCEE_BUILD_SAMPLES"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["EFFCEE_BUILD_TESTING"] = False
+        tc.variables["EFFCEE_BUILD_SAMPLES"] = False
         if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
-                    "MD" in self.settings.compiler.runtime
+            if is_msvc(self):
+                tc.variables["EFFCEE_ENABLE_SHARED_CRT"] = not is_msvc_static_runtime(self)
             else:
                 # Do not force linkage to static libgcc and libstdc++ for MinGW
-                self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = True
+                tc.variables["EFFCEE_ENABLE_SHARED_CRT"] = True
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

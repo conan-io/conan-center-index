@@ -35,7 +35,7 @@ class ModernCppKafkaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("librdkafka/1.9.2")
+        self.requires("librdkafka/2.0.2")
 
     def package_id(self):
         self.info.clear()
@@ -65,11 +65,11 @@ class ModernCppKafkaConan(ConanFile):
         )
 
     def package_info(self):
-       self.cpp_info.set_property("cmake_file_name", "ModernCppKafka")
-       self.cpp_info.set_property("cmake_target_name", "ModernCppKafka::ModernCppKafka")
+        self.cpp_info.set_property("cmake_file_name", "ModernCppKafka")
+        self.cpp_info.set_property("cmake_target_name", "ModernCppKafka::ModernCppKafka")
 
-       self.cpp_info.names["cmake_find_package"] = "ModernCppKafka"
-       self.cpp_info.names["cmake_find_package_multi"] = "ModernCppKafka"
+        self.cpp_info.names["cmake_find_package"] = "ModernCppKafka"
+        self.cpp_info.names["cmake_find_package_multi"] = "ModernCppKafka"
 
-       if self.settings.os in ["Linux", "Macos"]:
-           self.cpp_info.system_libs.append("pthread")
+        if self.settings.os in ["Linux", "Macos"]:
+            self.cpp_info.system_libs.append("pthread")
