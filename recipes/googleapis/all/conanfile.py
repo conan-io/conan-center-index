@@ -1,20 +1,21 @@
 import os
 import functools
 import glob
-from io import StringIO
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import cmake_layout, CMake
-from conan.tools.files import apply_conandata_patches, copy, get, export_conandata_patches, copy
+from conan.tools.build import can_run, check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 
 from helpers import parse_proto_libraries
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
+
 
 class GoogleAPIS(ConanFile):
     name = "googleapis"
@@ -25,39 +26,43 @@ class GoogleAPIS(ConanFile):
     homepage = "https://github.com/googleapis/googleapis"
     topics = "google", "protos", "api"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
         }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
         }
     exports = "helpers.py"
     short_paths = True
+
+    @property
+    def _protobuf_version(self):
+        return "3.21.9"
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
-    def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)], destination=self.source_folder, strip_root=True)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        # https://github.com/conan-io/conan-center-index/pull/15601#issuecomment-1493086506
+        self.requires(f"protobuf/{self._protobuf_version}", transitive_headers=True, transitive_libs=True, run=can_run(self))
+
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration("Build with GCC 5 fails")
@@ -67,28 +72,24 @@ class GoogleAPIS(ConanFile):
         if self.options.shared and not self.dependencies["protobuf"].options.shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
-    @property
-    def _cmake_new_enough(self):
-        try:
-            import re
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+)\.(\d+)\.(\d+)', output.getvalue())
-            major, minor = int(m.group(1)), int(m.group(2))
-            assert major >= 3 and minor >= 20
-        except:
-            return False
-        else:
-            return True
-
-    def requirements(self):
-        self.requires('protobuf/3.21.4', transitive_headers=True)
-
     def build_requirements(self):
-        self.build_requires('protobuf/3.21.4')
+        if not can_run(self):
+            self.tool_requires(f"protobuf/{self._protobuf_version}")
+
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
-        if not self._cmake_new_enough:
-            self.build_requires('cmake/3.23.5')
+        self.tool_requires("cmake/[>=3.20 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
+
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     @functools.lru_cache(1)
     def _parse_proto_libraries(self):
@@ -125,8 +126,9 @@ class GoogleAPIS(ConanFile):
                 all_dict[key].is_used = False
         #  - Inconvenient macro names from usr/include/sys/syslimits.h in some macOS SDKs: GID_MAX
         #    Patched here: https://github.com/protocolbuffers/protobuf/commit/f138d5de2535eb7dd7c8d0ad5eb16d128ab221fd
-        #    as of 3.21.4 issue still exist
-        if Version(self.dependencies["protobuf"].ref.version) <= "3.21.5" and self.settings.os == "Macos" or \
+        #    https://github.com/conan-io/conan-center-index/pull/16034/files#r1159042324
+        #    This was fixed in the v22 release which starts at 4.22 for the C++ library
+        if Version(self.dependencies["protobuf"].ref.version) <= "3.21.9" and self.settings.os == "Macos" or \
             self.settings.os == "Android":
             deactivate_library("//google/storagetransfer/v1:storagetransfer_proto")
             deactivate_library("//google/storagetransfer/v1:storagetransfer_cc_proto")
@@ -187,9 +189,6 @@ class GoogleAPIS(ConanFile):
                 interface = 'LIB' if lib.srcs else 'INTERFACE'
                 f.write(f"{lib.cmake_target} {interface} {','.join(lib.cmake_deps)}\n")
 
-    def package_id(self):
-        self.info.requires["protobuf"].full_package_mode()
-
     def package_info(self):
         with open(os.path.join(self.package_folder, self._DEPS_FILE), "r", encoding="utf-8") as f:
             for line in f.read().splitlines():
@@ -198,6 +197,6 @@ class GoogleAPIS(ConanFile):
                 self.cpp_info.components[name].resdirs = ["res"]
                 if libtype == 'LIB':
                     self.cpp_info.components[name].libs = [name]
-                self.cpp_info.components[name].names["pkg_config"] = name
-                if self.settings.os == "Linux":
+                self.cpp_info.components[name].set_property("pkg_config_name", name)
+                if self.settings.os in ["Linux", "FreeBSD"]:
                     self.cpp_info.components[name].system_libs.extend(["m"])

@@ -9,6 +9,7 @@ special meaning:
 
   * [Bump dependencies](#bump-dependencies)
   * [Bump version](#bump-version)
+  * [C3I Conan2 Ready](#c3i-conan2-ready)
   * [Infrastructure](#infrastructure)
   * [Stale](#stale)
   * [Unexpected Error](#unexpected-error)

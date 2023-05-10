@@ -1,17 +1,17 @@
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.errors import ConanInvalidConfiguration
 
 class GladConan(ConanFile):
     name = "glad"
     description = "Multi-Language GL/GLES/EGL/GLX/WGL Loader-Generator based on the official specs."
-    topics = ("conan", "glad", "opengl")
+    topics = ("opengl",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Dav1dde/glad"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
-    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
 
     options = {
@@ -19,7 +19,7 @@ class GladConan(ConanFile):
         "fPIC": [True, False],
         "no_loader": [True, False],
         "spec": ["gl", "egl", "glx", "wgl"], # Name of the spec
-        "extensions": "ANY", # Path to extensions file or comma separated list of extensions, if missing all extensions are included
+        "extensions": ["ANY"], # Path to extensions file or comma separated list of extensions, if missing all extensions are included
         # if specification is gl
         "gl_profile": ["compatibility", "core"],
         "gl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "2.0",
@@ -41,7 +41,7 @@ class GladConan(ConanFile):
         "fPIC": True,
         "no_loader": False,
         "spec": "gl",
-        "extensions": "''",
+        "extensions": "",
         "gl_profile": "compatibility",
         "gl_version": "3.3",
         "gles1_version": "None",
@@ -52,15 +52,8 @@ class GladConan(ConanFile):
         "wgl_version": "None"
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,9 +61,10 @@ class GladConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
         if self.options.spec != "gl":
             del self.options.gl_profile
@@ -88,37 +82,34 @@ class GladConan(ConanFile):
         if self.options.spec != "wgl":
             del self.options.wgl_version
 
+    def validate(self):
         if self.options.spec == "wgl" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("{0} specification is not compatible with {1}".format(self.options.spec,
-                                                                                                  self.settings.os))
+            raise ConanInvalidConfiguration(f"{self.ref}:{self.options.spec} specification is not compatible with {self.settings.os}")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if "gl_profile" in self.options:
+            tc.variables["GLAD_PROFILE"] = self.options.gl_profile
+        tc.variables["GLAD_API"] = self._get_api()
+        tc.variables["GLAD_EXTENSIONS"] = self.options.extensions
+        tc.variables["GLAD_SPEC"] = self.options.spec
+        tc.variables["GLAD_NO_LOADER"] = self.options.no_loader
+        tc.variables["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
+        tc.variables["GLAD_EXPORT"] = True
+        tc.variables["GLAD_INSTALL"] = True
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if "gl_profile" in self.options:
-            self._cmake.definitions["GLAD_PROFILE"] = self.options.gl_profile
-        self._cmake.definitions["GLAD_API"] = self._get_api()
-        self._cmake.definitions["GLAD_EXTENSIONS"] = self.options.extensions
-        self._cmake.definitions["GLAD_SPEC"] = self.options.spec
-        self._cmake.definitions["GLAD_NO_LOADER"] = self.options.no_loader
-        self._cmake.definitions["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
-        self._cmake.definitions["GLAD_EXPORT"] = True
-        self._cmake.definitions["GLAD_INSTALL"] = True
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
 
     def _get_api(self):
         if self.options.spec == "gl":
@@ -135,20 +126,19 @@ class GladConan(ConanFile):
         elif self.options.spec == "wgl":
             spec_api = {"wgl": self.options.wgl_version}
 
-        api_concat = ",".join("{0}={1}".format(api_name, api_version)
+        api_concat = ",".join(f"{api_name}={api_version}".format()
                               for api_name, api_version in spec_api.items() if api_version != "None")
 
         return api_concat
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        CMake(self).install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.options.shared:
             self.cpp_info.defines = ["GLAD_GLAPI_EXPORT"]
         if self.settings.os == "Linux":

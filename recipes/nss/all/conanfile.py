@@ -36,7 +36,7 @@ class NSSConan(ConanFile):
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
         if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/3.39.3")
+            self.build_requires("sqlite3/3.41.2")
 
     def configure(self):
         self.options["nspr"].shared = True
@@ -49,8 +49,8 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.35")
-        self.requires("sqlite3/3.39.3")
-        self.requires("zlib/1.2.12")
+        self.requires("sqlite3/3.41.2")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if not self.options.shared:

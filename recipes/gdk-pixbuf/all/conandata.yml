@@ -11,10 +11,9 @@ sources:
   "2.42.6":
     url: "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.6.tar.xz"
     sha256: "c4a6b75b7ed8f58ca48da830b9fa00ed96d668d3ab4b1f723dcf902f78bde77f"
-
 patches:
   "2.42.8":
     - patch_file: "patches/define_dllmain_only_when_shared.patch"
-      patch_type: backport
+      patch_type: "portability"
       patch_description: Disable relocation when built as a static libary on Windows
       patch_source: "https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/136"
