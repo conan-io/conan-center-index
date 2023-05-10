@@ -30,7 +30,7 @@ class LoguruConan(ConanFile):
         "replace_glog": [True, False],
 
         "scope_text_size": [None, "ANY"],
-        "scope_time_precision": [None, "ANY"]
+        "scope_time_precision": [None, "ANY"],
         "filename_width": [None, "ANY"],
         "threadname_width": [None, "ANY"],
     }
