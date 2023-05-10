@@ -21,6 +21,7 @@ class AtSPI2AtkConan(ConanFile):
         "shared": False,
         "fPIC": True,
         }
+    deprecated = "at-spi2-core"
 
     _meson = None
 
