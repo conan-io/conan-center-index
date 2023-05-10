@@ -121,21 +121,12 @@ class PackageConan(ConanFile):
         return os.path.join("lib", "cmake")
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "sbepp")
-        self.cpp_info.set_property("cmake_target_name", "sbepp::sbepp")
-
         # provide sbepp::sbeppc target
         build_modules = [
             os.path.join(self._module_path, "sbeppcTargets.cmake")
         ]
         self.cpp_info.builddirs.append(self._module_path)
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "sbepp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "sbepp"
-        self.cpp_info.names["cmake_find_package"] = "sbepp"
-        self.cpp_info.names["cmake_find_package_multi"] = "sbepp"
 
         # TODO: to remove in conan v2
         if self.options.with_sbeppc:
