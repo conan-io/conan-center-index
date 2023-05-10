@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
@@ -33,6 +34,10 @@ class PackageConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 14
+
+    @property
     def _tests_enabled(self):
         return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
 
@@ -49,11 +54,15 @@ class PackageConan(ConanFile):
         self.options["tinyxml"].with_stl = True
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("tinyxml/2.6.2", transitive_headers=True, transitive_libs=True)
         self.requires("console_bridge/1.0.2")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
         if self._tests_enabled:
@@ -62,10 +71,15 @@ class PackageConan(ConanFile):
     def source(self):
         # urdfdom packages its headers separately as urdfdom_headers.
         # There is no obvious benefit of doing the same for the Conan package,
-        # so we simply merge the headers and the main source tree.
+        # so we simply merge the headers into the main source tree.
         sources = self.conan_data["sources"][self.version]
-        get(self, **sources["urdfdom_headers"], strip_root=True, destination="urdf_parser")
-        get(self, **sources["urdfdom"], strip_root=True)
+        get(
+            self,
+            **sources["urdfdom_headers"],
+            strip_root=True,
+            destination=os.path.join(self.source_folder, "urdf_parser"),
+        )
+        get(self, **sources["urdfdom"], strip_root=True, destination=self.source_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -96,13 +110,16 @@ class PackageConan(ConanFile):
             cmake.test()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
         cmake = CMake(self)
         cmake.install()
 
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", self.package_folder)
 
     def package_info(self):
         self.cpp_info.libs = [
@@ -111,6 +128,12 @@ class PackageConan(ConanFile):
             "urdfdom_sensor",
             "urdfdom_world",
         ]
+
+        self.cpp_info.set_property("cmake_module_file_name", "urdfdom")
+        self.cpp_info.set_property("cmake_module_target_name", "urdfdom::urdfdom")
+        self.cpp_info.set_property("cmake_file_name", "urdfdom")
+        self.cpp_info.set_property("cmake_target_name", "urdfdom::urdfdom")
+        self.cpp_info.set_property("pkg_config_name", "urdfdom")
 
         if not self.options.shared:
             self.cpp_info.defines.append("URDFDOM_STATIC=1")
