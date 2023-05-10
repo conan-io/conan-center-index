@@ -66,7 +66,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         if self._tests_enabled:
-            self.test_requires("gtest/1.13.0")
+            self.build_requires("gtest/1.13.0")
 
     def source(self):
         # urdfdom packages its headers separately as urdfdom_headers.
