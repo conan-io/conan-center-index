@@ -79,6 +79,9 @@ class LibdbConan(ConanFile):
         if is_msvc(self) and check_min_vs(self, "191", raise_invalid=False):
             # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
             raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
+            
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration(f"{self.ref} Macos Apple Sillicon is currently not supported. Contributions are welcomed!")
 
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
@@ -195,7 +198,7 @@ class LibdbConan(ConanFile):
         copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
         bindir = os.path.join(self.package_folder, "bin")
         libdir = os.path.join(self.package_folder, "lib")
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             build_windows = os.path.join(self._source_subfolder, "build_windows")
             build_dir = os.path.join(self._source_subfolder, "build_windows", self._msvc_arch, self._msvc_build_type)
             copy(self, "*.lib", src=build_dir, dst=libdir)
