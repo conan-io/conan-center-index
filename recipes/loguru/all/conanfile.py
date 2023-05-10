@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.error import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, load, save
 from conan.tools.build import check_min_cppstd
