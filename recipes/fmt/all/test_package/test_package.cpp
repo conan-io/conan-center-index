@@ -50,7 +50,7 @@ int main() {
     fmt::print("Euler number: {}\n", fmt::to_string(buf));
 
     const std::string date = fmt::format("The date is {}\n", Date(2012, 12, 9));
-    fmt::print(date);
+    fmt::print("{}", date);
 
     report("{} {} {}\n", "Conan", 42, 3.14159);
 
