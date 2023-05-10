@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get 
+from conan.tools.files import check_sha256, copy, download, rename
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -33,21 +33,23 @@ class BazelConan(ConanFile):
         except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of version/os/arch are not available")
     
-
     def build(self):
-        for source in self.conan_data["sources"][self.version]:
-            url = source["url"]
+        executable = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
+        license = self.conan_data["sources"][self.version]["License"]
+
+        for binary in (executable, license):
+            url = binary["url"]
+            checksum = binary["sha256"]
             filename = url[url.rfind("/") + 1:]
-            if filename in ["LICENSE", self._bazel_filename]:
-                tools.download(url, filename)
-                tools.check_sha256(filename, source["sha256"])
+            download(self, url, filename)
+            check_sha256(self, filename, checksum)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")
-        self.copy(pattern=self._bazel_filename, dst="bin")
+        copy(self, pattern="LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern=self._bazel_filename, src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))
         old_target_filename = os.path.join(self.package_folder, "bin", self._bazel_filename)
         new_target_filename = os.path.join(self.package_folder, "bin", "bazel" + self._program_suffix)
-        tools.rename(old_target_filename, new_target_filename)
+        rename(self, old_target_filename, new_target_filename)
         self._chmod_plus_x(new_target_filename)
 
     def package_info(self):

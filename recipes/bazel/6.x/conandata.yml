@@ -1,5 +1,8 @@
 sources:
   "6.1.0":
+    License:
+      url: "https://raw.githubusercontent.com/bazelbuild/bazel/6.1.0/LICENSE"
+      sha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     Windows:
       "x86_64":
         url: "https://github.com/bazelbuild/bazel/releases/download/6.1.0/bazel-6.1.0-windows-x86_64.exe"
