@@ -1,6 +1,8 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get
+from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 
 
@@ -68,6 +70,8 @@ class fastgltf(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["fastgltf"]
