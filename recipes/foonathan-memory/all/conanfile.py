@@ -71,7 +71,6 @@ class FoonathanMemoryConan(ConanFile):
         apply_conandata_patches(self)
         current_version = Version(self.version)
         if current_version >= "0.7.2" and current_version < "0.7.4":
-            self.output.warning("WEJ09138409238409238FLKSJDSALFKJSDFLK JLKULIUS")
             # Remove static linking when cross-building, see:
             # https://github.com/conan-io/conan-center-index/pull/16997#issuecomment-1508243262
             # https://github.com/foonathan/memory/issues/162
