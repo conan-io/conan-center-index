@@ -31,6 +31,7 @@ class MdnsResponderConan(ConanFile):
     }
 
     def export_sources(self):
+        # INFO: export_conandata_patches will not export optional patches
         copy(self, "*.patch", dst=os.path.join(self.export_sources_folder, "patches"), src=os.path.join(self.recipe_folder, "patches"))
 
     def configure(self):
