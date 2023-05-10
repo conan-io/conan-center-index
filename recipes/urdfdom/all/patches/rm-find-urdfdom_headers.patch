@@ -1,7 +1,0 @@
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -46,4 +46,3 @@
- set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
- 
- find_package(tinyxml REQUIRED CONFIG)
--find_package(urdfdom_headers 1.0 REQUIRED)

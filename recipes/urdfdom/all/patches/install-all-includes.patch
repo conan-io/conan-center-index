@@ -1,8 +1,0 @@
---- a/urdf_parser/CMakeLists.txt
-+++ b/urdf_parser/CMakeLists.txt
-@@ -133,4 +135,4 @@
-   FILE "urdfdomExport.cmake"
- )
- 
--INSTALL(DIRECTORY include/urdf_parser DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-+INSTALL(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
