@@ -51,6 +51,8 @@ class OnnxConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version < "1.9.0":
+            del self.options.disable_static_registration
 
     def configure(self):
         if self.options.shared:
@@ -97,7 +99,8 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.disable_static_registration
+        if self.version >= "1.9.0":
+            tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
