@@ -74,7 +74,7 @@ class LoguruConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def layout(self):
-        cmake_layout(self, src_folder='src')
+        cmake_layout(self, src_folder='.')
 
     def generate(self):
         tc = CMakeToolchain(self)
