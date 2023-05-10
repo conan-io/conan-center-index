@@ -117,9 +117,9 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.76.1", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.76.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.1.0")
+            self.requires("cfitsio/4.2.0")
         if self.options.with_cgif:
             self.requires("cgif/0.3.0")
         if self.options.with_exif:
@@ -159,7 +159,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_tiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.0")
         if self.options.with_webp:
             self.requires("libwebp/1.3.0")
         if self.options.with_zlib:
@@ -200,13 +200,13 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("librsvg recipe not available in conancenter yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.1")
+        self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if not can_run(self):
-            self.tool_requires("glib/2.76.1")
+            self.tool_requires("glib/2.76.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
