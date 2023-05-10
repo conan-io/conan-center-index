@@ -96,44 +96,7 @@ class TkConan(ConanFile):
         buildenv.generate()
 
         if is_msvc(self):
-            # https://core.tcl.tk/tips/doc/trunk/tip/477.md
-            opts = []
-            if not self.options.shared:
-                opts.append("static")
-            if self.settings.build_type == "Debug":
-                opts.append("symbols")
-            if "MD" in str(self.settings.compiler.runtime):
-                opts.append("msvcrt")
-            else:
-                opts.append("nomsvcrt")
-            if "d" not in str(self.settings.compiler.runtime):
-                opts.append("unchecked")
-            # https://core.tcl.tk/tk/tktview?name=3d34589aa0
-            # https://wiki.tcl-lang.org/page/Building+with+Visual+Studio+2017
-            tcl_lib_path = os.path.join(self.dependencies["tcl"].package_folder, "lib")
-            tclimplib, tclstublib = None, None
-            for lib in os.listdir(tcl_lib_path):
-                if not lib.endswith(".lib"):
-                    continue
-                if lib.startswith("tcl{}".format("".join(self.version.split(".")[:2]))):
-                    tclimplib = os.path.join(tcl_lib_path, lib)
-                elif lib.startswith(
-                    "tclstub{}".format("".join(self.version.split(".")[:2]))
-                ):
-                    tclstublib = os.path.join(tcl_lib_path, lib)
-
-            if tclimplib is None or tclstublib is None:
-                raise ConanException("tcl dependency misses tcl and/or tclstub library")
-
             tc = NMakeToolchain(self)
-            tc.extra_defines.append(f"INSTALLDIR={self.package_folder}")
-            tc.extra_defines.append(f"OPTS={','.join(opts)}")
-            tc.extra_defines.append(f"TCLDIR={self.dependencies['tcl'].package_folder}")
-            tc.extra_defines.append(
-                f"TCL_LIBRARY={self.dependencies['tcl'].runenv_info.vars(self).get('TCL_LIBRARY')}"
-            )
-            tc.extra_defines.append(f"TCLIMPLIB={tclimplib}")
-            tc.extra_defines.append(f"TCLSTUBLIB={tclstublib}")
             tc.generate()
 
             deps = NMakeDeps(self)
@@ -194,7 +157,49 @@ class TkConan(ConanFile):
         return os.path.join(self.source_folder, build_system)
 
     def _build_nmake(self, target="release"):
-        self.run(f"nmake -nologo -f win/makefile.vc {target}")
+        # https://core.tcl.tk/tips/doc/trunk/tip/477.md
+        opts = []
+        if not self.options.shared:
+            opts.append("static")
+        if self.settings.build_type == "Debug":
+            opts.append("symbols")
+        if "MD" in str(self.settings.compiler.runtime):
+            opts.append("msvcrt")
+        else:
+            opts.append("nomsvcrt")
+        if "d" not in str(self.settings.compiler.runtime):
+            opts.append("unchecked")
+        # https://core.tcl.tk/tk/tktview?name=3d34589aa0
+        # https://wiki.tcl-lang.org/page/Building+with+Visual+Studio+2017
+        tcl_lib_path = os.path.join(self.dependencies["tcl"].package_folder, "lib")
+        tclimplib, tclstublib = None, None
+        for lib in os.listdir(tcl_lib_path):
+            if not lib.endswith(".lib"):
+                continue
+            if lib.startswith("tcl{}".format("".join(self.version.split(".")[:2]))):
+                tclimplib = os.path.join(tcl_lib_path, lib)
+            elif lib.startswith(
+                "tclstub{}".format("".join(self.version.split(".")[:2]))
+            ):
+                tclstublib = os.path.join(tcl_lib_path, lib)
+
+        if tclimplib is None or tclstublib is None:
+            raise ConanException("tcl dependency misses tcl and/or tclstub library")
+
+        flags = {
+            "INSTALLDIR": self.package_folder,
+            "OPTS": ",".join(opts),
+            "TCLDIR": self.dependencies["tcl"].package_folder,
+            "TCL_LIBRARY": self.dependencies["tcl"].runenv_info.vars(self).get("TCL_LIBRARY"),
+            "TCLIMPLIB": tclimplib,
+            "TCLSTUBLIB": tclstublib,
+        }
+        config_dir = self._get_configure_folder("win")
+        with chdir(self, config_dir):
+            self.run(
+                f"""nmake -nologo -f makefile.vc {' '.join([f'{k}="{v}"' for k, v in flags.items()])} {target}""",
+                env="conanbuild",
+            )
 
     def build(self):
         apply_conandata_patches(self)
@@ -237,6 +242,7 @@ class TkConan(ConanFile):
         tk_version = Version(self.version)
         lib_infix = f"{tk_version.major}.{tk_version.minor}"
         if is_msvc(self):
+            lib_infix = f"{tk_version.major}{tk_version.minor}"
             tk_suffix = "t{}{}{}".format(
                 "" if self.options.shared else "s",
                 "g" if self.settings.build_type == "Debug" else "",

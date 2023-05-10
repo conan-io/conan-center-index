@@ -1,28 +1,15 @@
 Subject: [PATCH] Add windows conan compatibility
 
-* Disable whole program optimization to be portable acros different MSVC
+* Disable whole program optimization to be portable across different MSVC
   versions. See conan-io/conan-center-index#4811 and
   conan-io/conan-center-index#4094.
 ---
- win/Makefile.in  |  1 -
- win/rules-ext.vc |  9 ++-------
- win/rules.vc     | 21 ++++++---------------
- 3 files changed, 8 insertions(+), 23 deletions(-)
+ win/rules-ext.vc |  8 ++++----
+ win/rules.vc     | 23 +++++++----------------
+ 2 files changed, 11 insertions(+), 20 deletions(-)
 
-diff --git a/win/Makefile.in b/win/Makefile.in
-index 59074aa1b..4e5a429f6 100644
---- a/win/Makefile.in
-+++ b/win/Makefile.in
-@@ -90,7 +90,6 @@ TCL_BIN_DIR		= @TCL_BIN_DIR@
- # The directory containing the Tcl sources and headers appropriate
- # for this version of Tk ("srcdir" will be replaced or has already
- # been replaced by the configure script):
--TCL_GENERIC_DIR		= @TCL_SRC_DIR@/generic
- 
- # The directory containing the platform specific Tcl sources and headers
- # appropriate for this version of Tk:
 diff --git a/win/rules-ext.vc b/win/rules-ext.vc
-index 58c70fa26..5ec942364 100644
+index 58c70fa26..e7f953b4c 100644
 --- a/win/rules-ext.vc
 +++ b/win/rules-ext.vc
 @@ -37,7 +37,7 @@ macro to the name of the project makefile.
@@ -34,45 +21,29 @@ index 58c70fa26..5ec942364 100644
  
  !else
  
-@@ -49,7 +49,6 @@ _RULESDIR=$(INSTALLDIR:/=\)
+@@ -49,7 +49,7 @@ _RULESDIR=$(INSTALLDIR:/=\)
  # Locate Tcl sources
  !if [echo _RULESDIR = \> nmakehlp.out] \
     || [nmakehlp -L generic\tcl.h >> nmakehlp.out]
 -_RULESDIR = ..\..\tcl
++_RULESDIR = .
  !else
  !include nmakehlp.out
  !endif
-@@ -61,13 +60,10 @@ _RULESDIR = ..\..\tcl
+@@ -61,9 +61,9 @@ _RULESDIR = ..\..\tcl
  # Now look for the targets.vc file under the Tcl root. Note we check this
  # file and not rules.vc because the latter also exists on older systems.
  !if exist("$(_RULESDIR)\lib\nmake\targets.vc") # Building against installed Tcl
 -_RULESDIR = $(_RULESDIR)\lib\nmake
++_RULESDIR = .
  !elseif exist("$(_RULESDIR)\win\targets.vc")   # Building against Tcl sources
 -_RULESDIR = $(_RULESDIR)\win
++_RULESDIR = .
  !else
  # If we have not located Tcl's targets file, most likely we are compiling
  # against an older version of Tcl and so must use our own support files.
--_RULESDIR = .
- !endif
- 
- !if "$(_RULESDIR)" != "."
-@@ -92,7 +88,6 @@ _RULESDIR = .
- !include versions.vc
- # We have a newer version of the support files, use them
- !if ($(TCL_RULES_MAJOR) != $(OUR_RULES_MAJOR)) || ($(TCL_RULES_MINOR) < $(OUR_RULES_MINOR))
--_RULESDIR = .
- !endif
- 
- !endif # if exist("rules.vc")
-@@ -115,4 +110,4 @@ NMAKEHLPC = $(_RULESDIR)\nmakehlp.c
- !error *** Could not locate rules.vc in $(_RULESDIR)
- !endif
- 
--!endif # _RULES_EXT_VC
-\ No newline at end of file
-+!endif # _RULES_EXT_VC
 diff --git a/win/rules.vc b/win/rules.vc
-index cf80c9122..23b13740a 100644
+index cf80c9122..fe4a95dc9 100644
 --- a/win/rules.vc
 +++ b/win/rules.vc
 @@ -262,7 +262,7 @@ TCLINSTALL = 0 # Tk always builds against Tcl source, not an installed Tcl
@@ -105,23 +76,29 @@ index cf80c9122..23b13740a 100644
  
  !endif # exist(...) && ! $(NEED_TCL_SOURCE)
  
-@@ -619,7 +619,6 @@ OPTIMIZATIONS  = $(OPTIMIZATIONS) -GS
+@@ -619,7 +619,7 @@ OPTIMIZATIONS  = $(OPTIMIZATIONS) -GS
  # generated libraries only usable by the specific VC++ version that
  # created it. Requires /LTCG linker option
  !if [nmakehlp -c -GL]
 -OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL
++
  CC_GL_OPT_ENABLED = 1
  !else
  # In newer compilers -GL and -YX are incompatible.
-@@ -1090,7 +1089,6 @@ TCLLIBNAME	= $(PROJECT)$(VERSION)$(SUFX).$(EXT)
+@@ -1085,12 +1085,9 @@ STUBPREFIX      = $(PROJECT)stub
+ 
+ TCLSHNAME       = $(PROJECT)sh$(VERSION)$(SUFX).exe
+ TCLSH		= $(OUT_DIR)\$(TCLSHNAME)
+-TCLIMPLIB	= $(OUT_DIR)\$(PROJECT)$(VERSION)$(SUFX).lib
+ TCLLIBNAME	= $(PROJECT)$(VERSION)$(SUFX).$(EXT)
  TCLLIB		= $(OUT_DIR)\$(TCLLIBNAME)
  
- TCLSTUBLIBNAME	= $(STUBPREFIX)$(VERSION).lib
+-TCLSTUBLIBNAME	= $(STUBPREFIX)$(VERSION).lib
 -TCLSTUBLIB	= $(OUT_DIR)\$(TCLSTUBLIBNAME)
  TCL_INCLUDES    = -I"$(WIN_DIR)" -I"$(GENERICDIR)"
  
  !else # ! $(DOING_TCL)
-@@ -1105,12 +1103,9 @@ TCLSH		= $(_TCLDIR)\bin\tclsh$(TCL_VERSION)$(SUFX:t=).exe
+@@ -1105,12 +1102,9 @@ TCLSH		= $(_TCLDIR)\bin\tclsh$(TCL_VERSION)$(SUFX:t=).exe
  TCLSH           = $(_TCLDIR)\bin\tclsh$(TCL_VERSION)t$(SUFX:t=).exe
  !endif
  
@@ -134,7 +111,7 @@ index cf80c9122..23b13740a 100644
  !endif
  TCL_LIBRARY	= $(_TCLDIR)\lib
  TCLREGLIB	= $(_TCLDIR)\lib\tclreg13$(SUFX:t=).lib
-@@ -1124,22 +1119,19 @@ TCLSH		= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclsh$(TCL_VERSION)$(SUFX:t=).exe
+@@ -1124,18 +1118,15 @@ TCLSH		= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclsh$(TCL_VERSION)$(SUFX:t=).exe
  !if !exist($(TCLSH))
  TCLSH		= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclsh$(TCL_VERSION)t$(SUFX:t=).exe
  !endif
@@ -154,16 +131,12 @@ index cf80c9122..23b13740a 100644
  
  !endif # TCLINSTALL
  
--tcllibs = "$(TCLSTUBLIB)" "$(TCLIMPLIB)"
-+tcllibs = ""
- 
- !endif # $(DOING_TCL)
- 
-@@ -1393,7 +1385,6 @@ carch =
+@@ -1393,7 +1384,7 @@ carch =
  
  !if $(DEBUG)
  # Turn warnings into errors
 -cwarn = $(cwarn) -WX
++
  !endif
  
  INCLUDES = $(TCL_INCLUDES) $(TK_INCLUDES) $(PRJ_INCLUDES)
