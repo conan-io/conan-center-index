@@ -76,7 +76,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/72.1")
         if self.options.with_glib:
-            self.requires("glib/2.76.1", run=can_run(self))
+            self.requires("glib/2.76.2", run=can_run(self))
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -97,7 +97,11 @@ class HarfbuzzConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_glib and not can_run(self):
-            self.tool_requires("glib/2.76.1")
+            self.tool_requires("glib/2.76.2")
+        if self.settings.os == "Macos":
+            # Ensure that the gettext we use at build time is compatible
+            # with the libiconv that is transitively exposed by glib
+            self.tool_requires("gettext/0.21")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
