@@ -59,6 +59,7 @@ required_for_references:
 - bit-lite
 - bitflags
 - bitmagic
+- bitserializer
 - bitsery
 - blaze
 - blend2d
@@ -393,6 +394,7 @@ required_for_references:
 - libyuv
 - libzen
 - libzip
+- libzippp
 - lief
 - linux-syscall-support
 - lodepng
@@ -469,6 +471,7 @@ required_for_references:
 - pcre2
 - pdfgen
 - pfr
+- physx
 - picobench
 - picojson
 - pkgconf
@@ -508,6 +511,7 @@ required_for_references:
 - ruy
 - s2n
 - scnlib
+- screen_capture_lite
 - sdl
 - sdl_image
 - seadex-essentials
@@ -547,6 +551,7 @@ required_for_references:
 - tinycthread
 - tinycthreadpool
 - tinyexif
+- tinymidi
 - tinyxml2
 - tl-expected
 - tlx
@@ -580,6 +585,7 @@ required_for_references:
 - wil
 - winflexbison
 - wiringpi
+- wise_enum
 - wolfssl
 - wslay
 - wt
