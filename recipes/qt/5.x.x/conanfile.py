@@ -341,7 +341,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
@@ -349,7 +349,7 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.1")
+            self.requires("glib/2.76.2")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -359,7 +359,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/72.1")
+            self.requires("icu/73.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/7.1.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -370,7 +370,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.41.2")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
@@ -379,7 +379,7 @@ class QtConan(ConanFile):
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.22.2")
+            self.requires("openal-soft/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_x11", False):
@@ -410,7 +410,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.47.1")
+            self.requires("at-spi2-core/2.48.0")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -433,7 +433,7 @@ class QtConan(ConanFile):
             self.tool_requires("jom/1.1.3")
         if self.options.qtwebengine:
             self.tool_requires("ninja/1.11.1")
-            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("nodejs/18.15.0")
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self._settings_build.os == "Windows":
@@ -719,7 +719,7 @@ class QtConan(ConanFile):
                   ("libpq", "PSQL"),
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
-                  ("openal", "OPENAL"),
+                  ("openal-soft", "OPENAL"),
                   ("zstd", "ZSTD"),
                   ("libalsa", "ALSA"),
                   ("xkbcommon", "XKBCOMMON"),
@@ -1334,7 +1334,7 @@ Examples = bin/datadir/examples""")
             if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
-                multimedia_reqs.append("openal::openal")
+                multimedia_reqs.append("openal-soft::openal-soft")
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
             _create_module("Multimedia", multimedia_reqs)
