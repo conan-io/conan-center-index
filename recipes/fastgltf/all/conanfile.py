@@ -3,6 +3,10 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import get
 from conan.tools.build import check_min_cppstd
 
+
+required_conan_version = ">=1.59.0"
+
+
 class fastgltf(ConanFile):
     name = "fastgltf"
     license = "MIT"
@@ -35,13 +39,16 @@ class fastgltf(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         cmake_layout(self, src_folder='src')
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "17")
-
 
     def requirements(self):
         self.requires("simdjson/3.1.7")
