@@ -123,7 +123,7 @@ class CprConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.87.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libcurl/8.0.1", transitive_headers=True, transitive_libs=True)
 
     # Check if the system supports the given ssl library
     def _supports_ssl_library(self, library):
