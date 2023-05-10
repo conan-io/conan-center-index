@@ -7,7 +7,8 @@ from conan.tools.microsoft import is_msvc
 import os
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
+
 
 class WtConan(ConanFile):
     name = "wt"
@@ -225,8 +226,6 @@ class WtConan(ConanFile):
         else:
             tc.variables["CONNECTOR_FCGI"] = self.options.connector_fcgi
             tc.variables["CONNECTOR_ISAPI"] = False
-
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
