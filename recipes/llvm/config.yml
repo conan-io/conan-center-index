@@ -1,21 +1,9 @@
 versions:
-  "13.0.0":
+  "16.0.3":
     folder: all
-  "13.0.1":
-    folder: all
-  "14.0.0":
-    folder: all
-  "14.0.1":
-    folder: all
-  "14.0.2":
-    folder: all
-  "14.0.3":
-    folder: all
-  "14.0.4":
-    folder: all
-  "14.0.5":
+  "15.0.7":
     folder: all
   "14.0.6":
     folder: all
-  "15.0.0":
+  "13.0.1":
     folder: all
