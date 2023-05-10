@@ -141,7 +141,7 @@ class Mosquitto(ConanFile):
 
         if self.options.broker:
             self.cpp_info.components["mosquitto_broker"].libdirs = []
-            self.cpp_info.components["mosquitto_broker"].include_dirs = []
+            self.cpp_info.components["mosquitto_broker"].includedirs = []
             if self.options.websockets:
                 self.cpp_info.components["mosquitto_broker"].requires.append("libwebsockets::libwebsockets")
             if self.settings.os in ("FreeBSD", "Linux"):
@@ -153,7 +153,7 @@ class Mosquitto(ConanFile):
             if self.options.get_safe(option):
                 option_comp_name = "mosquitto_{}".format(option)
                 self.cpp_info.components[option_comp_name].libdirs = []
-                self.cpp_info.components[option_comp_name].include_dirs = []
+                self.cpp_info.components[option_comp_name].includedirs = []
                 self.cpp_info.components[option_comp_name].requires = ["openssl::openssl", "libmosquitto"]
                 if self.options.cjson:
                     self.cpp_info.components[option_comp_name].requires.append("cjson::cjson")
