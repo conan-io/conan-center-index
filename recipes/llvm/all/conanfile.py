@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, apply_conandata_patches, rmdir, chdir, load, collect_libs
+from conan.tools.files import get, apply_conandata_patches, rmdir, chdir, load
 from conan.tools.microsoft import is_msvc
 from conan.tools.files.copy_pattern import copy
 from conan.tools.build.cppstd import check_min_cppstd
@@ -41,15 +41,13 @@ default_projects = [
     # 'libc', # clang-14/15 crashes in {sin,cos,tan} for llvm-{13.0.0,14.0.6} in debug, clang-15 release looks fine
     # 'libclc',
     # 'lld',
-    # TODO: lib/liblldb.so.14.0.6 / libxml2, error: undefined symbol: libiconv_open, referenced by encoding.c in libxml2.a
-    # probably because libxml2 isn't migrated to conan2, maybe components['lldbHost'].requires.append('Iconv::Iconv') or maybe Iconv is added but upper/lowercase doesn't match ?
     # 'lldb',
     # 'openmp',
     # 'polly',
     # 'pstl',
 ]
 default_runtimes = [
-    # 'compiler-rt',  # fatal error: 'bits/libc-header-start.h' file not found
+    # 'compiler-rt',
     # 'libc',
     # 'libcxx',
     # 'libcxxabi',
@@ -67,7 +65,7 @@ class Llvm(ConanFile):
 
     settings = 'os', 'arch', 'compiler', 'build_type'
 
-    # XXX Conan1 dont copy source to build directory, large software opt
+    # dont copy source to build directory, large software opt
     no_copy_source = True
     short_paths = True  # XXX Conan1 short paths for windows, no longer needed for recent win10
 
@@ -146,7 +144,7 @@ class Llvm(ConanFile):
             'keep_binaries_regex': '^$',
 
             # options removed in package id
-            'use_llvm_cmake_files': False,  # XXX Should these files be used by conan at all?
+            'use_llvm_cmake_files': False,  # XXX Should these files used by conan at all?
             'clean_build_bin': True,  # prevent 40gb debug build folder
 
             # creating job pools with current free memory
@@ -164,9 +162,18 @@ class Llvm(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
+    def is_windows(self):
+        return self.settings.os == "Windows"
+
+    def is_macos(self):
+        return self.settings.os == "MacOS"
+
+    def is_linux(self):
+        return self.settings.os == "Linux"
+
     # checking options before requirements are build
     def configure(self):
-        if self.settings.os == "Windows":
+        if self.is_windows():
             del self.options.fPIC
             del self.options.with_zlib
             del self.options.with_xml2
@@ -205,11 +212,13 @@ class Llvm(ConanFile):
     # def validate(self):
 
     def system_requirements(self):
-        # TODO test in different environments
-        # TODO is printed during test, is it also checked during consume? Probably that would be an error.
-        if self.options.get_safe('with_runtime_compiler-rt', False) and Apt(self).check(["libc6-dev-i386"]):
-            raise ConanInvalidConfiguration(
-                "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
+        # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
+        if self.is_linux():
+            if self.options.get_safe('with_runtime_compiler-rt', False):
+                # apt should work for ubuntu/debian if apt is not installed this is skipped
+                if Apt(self).check(["libc6-dev-i386"]):
+                    raise ConanInvalidConfiguration(
+                        "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
 
     def requirements(self):
         if self.options.with_ffi:
@@ -426,7 +435,7 @@ class Llvm(ConanFile):
             'libffi::libffi': 'ffi',
             'ZLIB::ZLIB': 'z',
             'Iconv::Iconv': 'iconv',
-            'LibXml2::LibXml2': 'xml2',
+            'libxml2::libxml2': 'xml2',
             'pthread': 'pthread',
             'rt': "rt",
             'm': "m",

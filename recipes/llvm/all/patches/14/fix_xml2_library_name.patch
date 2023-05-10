@@ -1,0 +1,110 @@
+diff --git a/clang/CMakeLists.txt b/clang/CMakeLists.txt
+index 937a8467df1d..13c7191e51c7 100644
+--- a/clang/CMakeLists.txt
++++ b/clang/CMakeLists.txt
+@@ -214,7 +214,7 @@ if(LLVM_ENABLE_LIBXML2)
+   # code may call MSan interceptors like strlen, leading to false positives.
+   if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+     set (LIBXML2_FOUND 0)
+-    find_package(LibXml2 2.5.3 QUIET)
++    find_package(libxml2 2.5.3 QUIET)
+     if (LIBXML2_FOUND)
+       set(CLANG_HAVE_LIBXML 1)
+     endif()
+diff --git a/clang/tools/c-index-test/CMakeLists.txt b/clang/tools/c-index-test/CMakeLists.txt
+index 0ae1b4e55244..62bdb4b9a157 100644
+--- a/clang/tools/c-index-test/CMakeLists.txt
++++ b/clang/tools/c-index-test/CMakeLists.txt
+@@ -40,7 +40,7 @@ set_target_properties(c-index-test
+ 
+ # If libxml2 is available, make it available for c-index-test.
+ if (CLANG_HAVE_LIBXML)
+-  target_link_libraries(c-index-test PRIVATE LibXml2::LibXml2)
++  target_link_libraries(c-index-test PRIVATE libxml2::libxml2)
+ endif()
+ 
+ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
+diff --git a/lldb/cmake/modules/LLDBConfig.cmake b/lldb/cmake/modules/LLDBConfig.cmake
+index e12e548ad0c4..aaec051e7676 100644
+--- a/lldb/cmake/modules/LLDBConfig.cmake
++++ b/lldb/cmake/modules/LLDBConfig.cmake
+@@ -61,7 +61,7 @@ add_optional_dependency(LLDB_ENABLE_CURSES "Enable curses support in LLDB" Curse
+ add_optional_dependency(LLDB_ENABLE_LZMA "Enable LZMA compression support in LLDB" LibLZMA LIBLZMA_FOUND)
+ add_optional_dependency(LLDB_ENABLE_LUA "Enable Lua scripting support in LLDB" LuaAndSwig LUAANDSWIG_FOUND)
+ add_optional_dependency(LLDB_ENABLE_PYTHON "Enable Python scripting support in LLDB" PythonAndSwig PYTHONANDSWIG_FOUND)
+-add_optional_dependency(LLDB_ENABLE_LIBXML2 "Enable Libxml 2 support in LLDB" LibXml2 LIBXML2_FOUND VERSION 2.8)
++add_optional_dependency(LLDB_ENABLE_LIBXML2 "Enable Libxml 2 support in LLDB" libxml2 LIBXML2_FOUND VERSION 2.8)
+ add_optional_dependency(LLDB_ENABLE_FBSDVMCORE "Enable libfbsdvmcore support in LLDB" FBSDVMCore FBSDVMCore_FOUND QUIET)
+ 
+ option(LLDB_USE_SYSTEM_SIX "Use six.py shipped with system and do not install a copy of it" OFF)
+diff --git a/lldb/source/Host/CMakeLists.txt b/lldb/source/Host/CMakeLists.txt
+index 4374abca0506..df7a260696dd 100644
+--- a/lldb/source/Host/CMakeLists.txt
++++ b/lldb/source/Host/CMakeLists.txt
+@@ -136,7 +136,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "NetBSD")
+   list(APPEND EXTRA_LIBS kvm)
+ endif()
+ if (LLDB_ENABLE_LIBXML2)
+-  list(APPEND EXTRA_LIBS LibXml2::LibXml2)
++  list(APPEND EXTRA_LIBS libxml2::libxml2)
+ endif()
+ if (HAVE_LIBDL)
+   list(APPEND EXTRA_LIBS ${CMAKE_DL_LIBS})
+diff --git a/llvm/cmake/config-ix.cmake b/llvm/cmake/config-ix.cmake
+index 18d78879c968..4e5737f4c049 100644
+--- a/llvm/cmake/config-ix.cmake
++++ b/llvm/cmake/config-ix.cmake
+@@ -139,11 +139,11 @@ endif()
+ 
+ if(LLVM_ENABLE_LIBXML2)
+   if(LLVM_ENABLE_LIBXML2 STREQUAL FORCE_ON)
+-    find_package(LibXml2 REQUIRED)
++    find_package(libxml2 REQUIRED)
+   elseif(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+-    find_package(LibXml2)
++    find_package(libxml2)
+   endif()
+-  if(LibXml2_FOUND)
++  if(libxml2_FOUND)
+     # Check if libxml2 we found is usable; for example, we may have found a 32-bit
+     # library on a 64-bit system which would result in a link-time failure.
+     cmake_push_check_state()
+diff --git a/llvm/cmake/modules/LLVMConfig.cmake.in b/llvm/cmake/modules/LLVMConfig.cmake.in
+index e1540ff316f7..7ad29a22830c 100644
+--- a/llvm/cmake/modules/LLVMConfig.cmake.in
++++ b/llvm/cmake/modules/LLVMConfig.cmake.in
+@@ -75,7 +75,7 @@ endif()
+ 
+ set(LLVM_ENABLE_LIBXML2 @LLVM_ENABLE_LIBXML2@)
+ if(LLVM_ENABLE_LIBXML2)
+-  find_package(LibXml2)
++  find_package(libxml2)
+ endif()
+ 
+ set(LLVM_WITH_Z3 @LLVM_WITH_Z3@)
+diff --git a/llvm/lib/WindowsManifest/CMakeLists.txt b/llvm/lib/WindowsManifest/CMakeLists.txt
+index 8134ac8c815b..19cd38c40cd5 100644
+--- a/llvm/lib/WindowsManifest/CMakeLists.txt
++++ b/llvm/lib/WindowsManifest/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ include(GetLibraryName)
+ 
+ if(LLVM_ENABLE_LIBXML2)
+-  set(imported_libs LibXml2::LibXml2)
++  set(imported_libs libxml2::libxml2)
+ endif()
+ 
+ add_llvm_component_library(LLVMWindowsManifest
+@@ -24,10 +24,10 @@ if(LLVM_ENABLE_LIBXML2)
+   # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+   if(CMAKE_BUILD_TYPE)
+     string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION_${build_type})
++    get_property(libxml2_library TARGET libxml2::libxml2 PROPERTY LOCATION_${build_type})
+   endif()
+   if(NOT zlib_library)
+-    get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION)
++    get_property(libxml2_library TARGET libxml2::libxml2 PROPERTY LOCATION)
+   endif()
+   get_library_name(${libxml2_library} libxml2_library)
+   set_property(TARGET LLVMWindowsManifest PROPERTY LLVM_SYSTEM_LIBS ${libxml2_library})
