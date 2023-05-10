@@ -16,6 +16,7 @@ class WtConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emweb/wt"
     topics = ("server", "web", "webapp", "websocket", "cgi", "fastcgi", "orm")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
