@@ -174,9 +174,11 @@ class Llvm(ConanFile):
     # checking options before requirements are build
     def configure(self):
         if self.is_windows():
-            del self.options.fPIC
-            del self.options.with_zlib
-            del self.options.with_xml2
+            if is_msvc(self):
+                if self.options.llvm_build_llvm_dylib:
+                    raise ConanInvalidConfiguration(
+                        "Generating libLLVM is not supported on MSVC"
+                    )
 
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
@@ -333,8 +335,11 @@ class Llvm(ConanFile):
             build_script_folder=os.path.join(self.source_folder, 'llvm'))
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
-            cmake.definitions['LLVM_USE_CRT_{}'.format(build_type)] = \
-                self.settings.compiler.runtime
+            cmake._cache_variables.update(
+                {
+                    f"LLVM_USE_CRT_{build_type}": self.settings.compiler.runtime
+                }
+            )
         return cmake
 
     def _is_installed_llvm_lib(self, target_name):
