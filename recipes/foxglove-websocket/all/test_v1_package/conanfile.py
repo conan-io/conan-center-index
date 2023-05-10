@@ -10,7 +10,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["FOXGLOVE_WEBSOCKET_VERSION"] = self.deps_cpp_info["foxglove-websocket"].version
         cmake.configure()
         cmake.build()
 

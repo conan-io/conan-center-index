@@ -68,13 +68,11 @@ class FoxgloveWebSocketConan(ConanFile):
         self.requires("websocketpp/0.8.2")
 
     def layout(self):
-        if self.version >= Version("1.0.0"):
-            cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
-        if self.version >= Version("1.0.0"):
-            tc = CMakeToolchain(self)
-            tc.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -83,32 +81,17 @@ class FoxgloveWebSocketConan(ConanFile):
     def configure(self):
         self.options["websocketpp"].asio = "standalone"
 
-        if self.version < Version("1.0.0"):
-            # Header only library
-            self.options.rm_safe("shared")
-            self.options.rm_safe("fPIC")
-        elif self.options.shared:
+        if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def build(self):
-        if self.version >= Version("1.0.0"):
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        if self.version >= Version("1.0.0"):
-            cmake = CMake(self)
-            cmake.install()
-        else:
-            copy(self, "include/*.hpp", self.source_folder, self.package_folder, keep_path=True)
-            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
-        if self.version >= Version("1.0.0"):
-            self.cpp_info.libs = ["foxglove_websocket"]
-
-    def package_id(self):
-        if self.version < Version("1.0.0"):
-            # Haeder only library. Can have the same package ID as there is no ABI incompatibility.
-            self.info.clear()
+        self.cpp_info.libs = ["foxglove_websocket"]

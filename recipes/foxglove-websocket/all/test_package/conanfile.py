@@ -11,7 +11,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FOXGLOVE_WEBSOCKET_VERSION"] = self.dependencies["foxglove-websocket"].ref.version
         tc.generate()
 
     def requirements(self):
