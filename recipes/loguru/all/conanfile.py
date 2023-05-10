@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, load, save
+from conan.tools.files import copy, get, load, save, rmdir
 from conan.tools.build import check_min_cppstd
 
 
@@ -104,11 +104,12 @@ class LoguruConan(ConanFile):
         return tmp[2:tmp.find("# Inspiration", 0)].strip()
 
     def package(self):
+        save(self, os.path.join(self.package_folder, 'licenses', 'LICENSE'), self._extracted_license)
         cmake = CMake(self)
         cmake.install()
-
-        copy(self, pattern='loguru.hpp', src=self.source_folder, dst=os.path.join(self.package_folder, 'include'))
-        save(self, os.path.join(self.package_folder, 'licenses', 'LICENSE'), self._extracted_license)
+        
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["loguru"]
