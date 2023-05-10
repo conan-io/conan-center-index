@@ -103,3 +103,13 @@ index 0b7d578..62b67da 100644
  	set(LIBDIR lib${SUFFIX})
  	set(BINDIR bin${SUFFIX})
  
+@@ -119,6 +121,9 @@ install(
+ )
+ install(DIRECTORY libdwarf DESTINATION include/
+     FILES_MATCHING PATTERN "*.h")
++install(
++    FILES ${CMAKE_CURRENT_SOURCE_DIR}/dwarf.h
++    DESTINATION include/libdwarf)
+ install(
+     FILES ${CMAKE_CURRENT_SOURCE_DIR}/libdwarf.h
+     DESTINATION include/libdwarf)
