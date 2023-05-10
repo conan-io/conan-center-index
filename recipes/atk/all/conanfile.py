@@ -20,6 +20,7 @@ class AtkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.atk.org"
     license = "LGPL-2.1-or-later"
+    deprecated = "at-spi2-core"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
