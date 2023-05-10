@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.microsoft import check_min_vs
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, replace_in_file, get, copy, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, replace_in_file, get, copy, rmdir, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -46,13 +46,6 @@ class Z3Conan(ConanFile):
                 "apple-clang": "9.1",
             },
         }.get(self._min_cppstd, {})
-
-    def patch_cmake_lists(self):
-        # This function patches CMakeLists.txt to use the GMP library provided by Conan Center
-        path = os.path.join(self.source_folder, "CMakeLists.txt")
-        find = "list(APPEND Z3_DEPENDENT_LIBS GMP::GMP)"
-        repl = "list(APPEND Z3_DEPENDENT_LIBS gmp::gmp)"
-        replace_in_file(self, path, find, repl)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -104,15 +97,12 @@ class Z3Conan(ConanFile):
             tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + stdlib
         tc.generate()
         tc = CMakeDeps(self)
+        # Override the target name of the GMP library provided by Conan Center
+        if self.options.use_gmp:
+            tc.set_property("gmp", "cmake_target_name", "GMP::GMP")
         tc.generate()
 
     def build(self):
-        # Patch CMakeLists.txt for all supported Z3 versions
-        # to use the GMP library provided by Conan Center
-        # if and only if users have specified to use GMP
-        if self.options.use_gmp:
-            self.patch_cmake_lists()
-        # Then apply the patch specific to a range of Z3 versions
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
