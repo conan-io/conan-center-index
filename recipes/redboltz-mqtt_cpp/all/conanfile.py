@@ -32,7 +32,7 @@ class MqttCppConan(ConanFile):
         "with_tls":  False,
         "use_websocket":  False,
         "use_logs": True,
-        "with_tuple_any_workaround": False
+        "with_tuple_any_workaround": False,
         "mqtt_always_send_reason_code":  True,
     }
 
