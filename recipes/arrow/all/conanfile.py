@@ -505,6 +505,10 @@ class ArrowConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.options.with_brotli:
+            deps.set_property("brotli::brotlicommon", "cmake_target_name", "Brotli::brotlicommon")
+            deps.set_property("brotli::brotlienc", "cmake_target_name", "Brotli::brotlienc")
+            deps.set_property("brotli::brotlidec", "cmake_target_name", "Brotli::brotlidec")
         deps.generate()
 
     def _patch_sources(self):

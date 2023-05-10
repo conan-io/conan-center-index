@@ -2,15 +2,6 @@ diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
 index 2d7baf1..dff5b1a 100644
 --- a/cpp/CMakeLists.txt
 +++ b/cpp/CMakeLists.txt
-@@ -699,7 +699,7 @@ endif()
- 
- if(ARROW_WITH_BROTLI)
-   # Order is important for static linking
--  set(ARROW_BROTLI_LIBS Brotli::brotlienc Brotli::brotlidec Brotli::brotlicommon)
-+  set(ARROW_BROTLI_LIBS brotli::brotlienc brotli::brotlidec brotli::brotlicommon)
-   list(APPEND ARROW_LINK_LIBS ${ARROW_BROTLI_LIBS})
-   list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_BROTLI_LIBS})
-   if(Brotli_SOURCE STREQUAL "SYSTEM")
 @@ -715,10 +715,17 @@ if(ARROW_WITH_BZ2)
  endif()
  
@@ -71,18 +62,6 @@ index bc38952..62bf314 100644
      set(BOOST_SYSTEM_LIBRARY ${Boost_SYSTEM_LIBRARY})
      set(BOOST_FILESYSTEM_LIBRARY ${Boost_FILESYSTEM_LIBRARY})
    else()
-@@ -1108,9 +1108,9 @@ macro(build_brotli)
- endmacro()
- 
- if(ARROW_WITH_BROTLI)
--  resolve_dependency(Brotli PC_PACKAGE_NAMES libbrotlidec libbrotlienc)
-+  resolve_dependency(brotli PC_PACKAGE_NAMES libbrotlidec libbrotlienc)
-   # TODO: Don't use global includes but rather target_include_directories
--  get_target_property(BROTLI_INCLUDE_DIR Brotli::brotlicommon
-+  get_target_property(BROTLI_INCLUDE_DIR brotli::brotlicommon
-                       INTERFACE_INCLUDE_DIRECTORIES)
-   include_directories(SYSTEM ${BROTLI_INCLUDE_DIR})
- endif()
 @@ -1302,22 +1302,17 @@ endmacro()
  if(ARROW_NEED_GFLAGS)
    set(ARROW_GFLAGS_REQUIRED_VERSION "2.1.0")

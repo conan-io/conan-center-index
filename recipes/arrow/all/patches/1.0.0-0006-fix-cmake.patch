@@ -2,15 +2,6 @@ diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
 index 300f043..0127a7a 100644
 --- a/cpp/CMakeLists.txt
 +++ b/cpp/CMakeLists.txt
-@@ -654,7 +654,7 @@ endif()
- 
- if(ARROW_WITH_BROTLI)
-   # Order is important for static linking
--  set(ARROW_BROTLI_LIBS Brotli::brotlienc Brotli::brotlidec Brotli::brotlicommon)
-+  set(ARROW_BROTLI_LIBS brotli::brotlienc brotli::brotlidec brotli::brotlicommon)
-   list(APPEND ARROW_LINK_LIBS ${ARROW_BROTLI_LIBS})
-   list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_BROTLI_LIBS})
- endif()
 @@ -664,7 +664,7 @@ if(ARROW_WITH_BZ2)
  endif()
  
@@ -90,21 +81,6 @@ index 807e2b9..016c8db 100644
    endif()
  
    if(TARGET Boost::system)
-@@ -936,11 +928,11 @@ macro(build_brotli)
- endmacro()
- 
- if(ARROW_WITH_BROTLI)
--  resolve_dependency(Brotli)
-+  resolve_dependency(brotli)
-   # TODO: Don't use global includes but rather target_include_directories
--  get_target_property(BROTLI_INCLUDE_DIR Brotli::brotlicommon
-+  get_target_property(BROTLI_INCLUDE_DIR brotli::brotlicommon
-                       INTERFACE_INCLUDE_DIRECTORIES)
--  include_directories(SYSTEM ${BROTLI_INCLUDE_DIR})
-+  include_directories(SYSTEM ${brotli_INCLUDE_DIR})
- endif()
- 
- if(PARQUET_REQUIRE_ENCRYPTION AND NOT ARROW_PARQUET)
 @@ -1146,9 +1138,10 @@ if(ARROW_NEED_GFLAGS)
      endif()
    endif()
