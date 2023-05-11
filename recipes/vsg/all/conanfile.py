@@ -5,7 +5,6 @@ from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
-from conan.tools.env import VirtualBuildEnv
 from conans import tools
 import os
 
@@ -107,14 +106,14 @@ class VsgConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-#        rmdir(self, os.path.join(self.package_folder, "lib", "cmake/Config*"))
-
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake/Config*"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        rm(self, "Find*.cmake", os.path.join(self.package_folder, "cmake/vsg"))
-        rm(self, "*Config.cmake", os.path.join(self.package_folder, "cmake/vsg"))
+        rm(self, "Find*.cmake", os.path.join(self.package_folder, "lib/cmake/vsg"))
+        rm(self, "*Config.cmake", os.path.join(self.package_folder, "lib/cmake/vsg"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
