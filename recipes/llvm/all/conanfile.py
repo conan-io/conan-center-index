@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 from collections import defaultdict
 from conan.errors import ConanException
+from conan.tools.scm import Version
 import os
 import shutil
 import glob
@@ -171,10 +172,6 @@ class Llvm(ConanFile):
         pattern = re.compile("^(?:llvm/)?([0-9]+)")
         return int(re.findall(pattern, str(self.version))[0])
 
-    def _major_compiler_version(self):
-        pattern = re.compile("^([0-9]+)")
-        return int(re.findall(pattern, str(self.settings.compiler.version))[0])
-
     # checking options before requirements are build
     def configure(self):
         if self.is_windows():
@@ -209,11 +206,11 @@ class Llvm(ConanFile):
             self.output.warning(
                 "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
 
-        if self.settings.compiler == "gcc" and self._major_compiler_version() < 10:
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("10"):
             raise ConanInvalidConfiguration(
                 "Compiler version too low for this package.")
 
-        if is_msvc(self) and self._major_compiler_version() < 16:
+        if is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
