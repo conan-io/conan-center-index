@@ -110,9 +110,9 @@ class Mosquitto(ConanFile):
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         elif self.options.shared and self.settings.compiler == "Visual Studio":
-            copy(self, "mosquitto.lib", src=os.path.join(self.folders.build, "lib"), dst="lib")
+            copy(self, "mosquitto.lib", src=os.path.join(self.build_folder, "lib"), dst="lib")
             if self.options.build_cpp:
-                copy(self, "mosquittopp.lib", src=os.path.join(self.folders.build, "lib"), dst="lib")
+                copy(self, "mosquittopp.lib", src=os.path.join(self.build_folder, "lib"), dst="lib")
 
     def package_info(self):
         libsuffix = "" if self.options.shared else "_static"
