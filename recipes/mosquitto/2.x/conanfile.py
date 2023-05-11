@@ -75,7 +75,7 @@ class Mosquitto(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_STATIC_LIBRARIES"] = not self.options.shared
-        tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", False)
+        tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["WITH_TLS"] = self.options.ssl
         tc.variables["WITH_CLIENTS"] = self.options.clients
         if Version(self.version) < "2.0.6":
