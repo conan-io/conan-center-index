@@ -610,7 +610,8 @@ class Llvm(ConanFile):
                 self.output.info(
                     f"forced dependency to \"iconv\" for target {component}")
         if report_xml2_issue:
-            raise "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed."
+            raise ConanException(
+                "Recipe issue in llvm/*:with_xml2=True is set but no component requires it, this will only error if consumed.")
 
         # write components.json for package_info
         components_path = os.path.join(
