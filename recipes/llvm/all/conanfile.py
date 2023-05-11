@@ -289,8 +289,8 @@ class Llvm(ConanFile):
                 'LLVM_BUILD_LLVM_DYLIB': self.options.llvm_build_llvm_dylib,
                 'LLVM_DYLIB_COMPONENTS': self.options.llvm_dylib_components,
                 'LLVM_LINK_LLVM_DYLIB': self.options.llvm_link_llvm_dylib,
-                # llvm default on
-                'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False),
+                # llvm default on, if set to False: lib/libLLVMTableGenGlobalISel.so recompile with -fPIC
+                'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=True),
                 'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
                 'LLVM_ENABLE_WARNINGS': True,
                 'LLVM_ENABLE_PEDANTIC': True,
