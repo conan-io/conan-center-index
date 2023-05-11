@@ -42,26 +42,14 @@ class FlatbuffersConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
-    def build_requirements(self):
-        if Version(self.version) >= "2.0.7" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.3")
-
     def configure(self):
         if self.options.shared or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
             del self.options.shared
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         if self.info.options.header_only and not self._has_flatc(info=True):
@@ -71,8 +59,9 @@ class FlatbuffersConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.7":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -127,7 +116,7 @@ class FlatbuffersConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
