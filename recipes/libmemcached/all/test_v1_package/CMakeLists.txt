@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
-find_package(libmemcached REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
-add_executable(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-target_link_libraries(${PROJECT_NAME} libmemcached::libmemcached)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package)
+

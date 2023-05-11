@@ -11,9 +11,6 @@ import os
 
 required_conan_version = ">=1.54.0"
 
-#import pydevd_pycharm
-#pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-
 class LibmemcachedConan(ConanFile):
     name = "libmemcached"
 
@@ -21,11 +18,7 @@ class LibmemcachedConan(ConanFile):
     license = "BSD License"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libmemcached.org/"
-    description = """libmemcached is a C client library for interfacing to a memcached server. 
-    It has been designed to be light on memory usage, thread safe and to provide full access to server side methods. 
-    It also implements several command line tools: memcat, memflush, memrm, memstat, and memslap (for load generation). 
-    The library has been designed to allow for different hashing methods on keys, 
-    partitioning by keys, and to use consistent hashing for distribution."""
+    description = "libmemcached is a C client library for interfacing to a memcached server"
     topics = ("cache", "network", "cloud")
     # package_type should usually be "library" (if there is shared option)
     package_type = "library"
