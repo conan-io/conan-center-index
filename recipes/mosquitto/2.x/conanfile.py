@@ -86,7 +86,7 @@ class Mosquitto(ConanFile):
         tc.variables["WITH_APPS"] = self.options.apps
         tc.variables["WITH_PLUGINS"] = False
         tc.variables["WITH_LIB_CPP"] = self.options.build_cpp
-        tc.variables["WITH_THREADING"] = self.settings.compiler != "msvc" and self.options.threading
+        tc.variables["WITH_THREADING"] = is_msvc(self) and self.options.threading
         tc.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.options["libwebsockets"].shared
         tc.variables["DOCUMENTATION"] = False
