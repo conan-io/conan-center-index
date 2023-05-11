@@ -25,7 +25,7 @@ class ThrustConan(ConanFile):
         "device_system": ["cuda", "cpp", "omp", "tbb"],
     }
     default_options = {
-        "device_system": "tbb",
+        "device_system": "omp",
     }
 
     def layout(self):
