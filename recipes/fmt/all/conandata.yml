@@ -1,4 +1,7 @@
 sources:
+  "10.0.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/10.0.0/fmt-10.0.0.zip"
+    sha256: "4943cb165f3f587f26da834d3056ee8733c397e024145ca7d2a8a96bb71ac281"
   "9.1.0":
     url: "https://github.com/fmtlib/fmt/releases/download/9.1.0/fmt-9.1.0.zip"
     sha256: "cceb4cb9366e18a5742128cb3524ce5f50e88b476f1e54737a47ffdf4df4c996"
