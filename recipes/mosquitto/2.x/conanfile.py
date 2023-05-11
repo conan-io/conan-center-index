@@ -92,6 +92,7 @@ class Mosquitto(ConanFile):
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
         tc.variables["DOCUMENTATION"] = False
         tc.variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
+        tc.variables["CMAKE_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
