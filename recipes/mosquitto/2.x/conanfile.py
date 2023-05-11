@@ -107,18 +107,24 @@ class Mosquitto(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.example", os.path.join(self.package_folder, "res"))
         if not self.options.shared:
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+            rm(self, "mosquitto.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "mosquittopp.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll.a", os.path.join(self.package_folder, "lib"))
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         elif self.options.shared and is_msvc(self):
             copy(self, "mosquitto.lib", src=os.path.join(self.build_folder, "lib"), dst="lib")
             if self.options.build_cpp:
                 copy(self, "mosquittopp.lib", src=os.path.join(self.build_folder, "lib"), dst="lib")
 
     def package_info(self):
-        libsuffix = "" if self.options.shared else "_static"
-        self.cpp_info.components["libmosquitto"].names["pkg_config"] = "libmosquitto"
-        self.cpp_info.components["libmosquitto"].libs = ["mosquitto" + libsuffix]
+        lib_suffix = "" if self.options.shared else "_static"
+        self.cpp_info.components["libmosquitto"].set_property("pkg_config_name", "libmosquitto")
+        self.cpp_info.components["libmosquitto"].libs = [f"mosquitto{lib_suffix}"]
+        self.cpp_info.components["libmosquitto"].resdirs = ["res"]
+        if not self.options.shared:
+            self.cpp_info.components["libmosquitto"].defines = ["LIBMOSQUITTO_STATIC"]
         if self.options.ssl:
             self.cpp_info.components["libmosquitto"].requires = ["openssl::openssl"]
         if self.settings.os == "Linux":
@@ -127,8 +133,8 @@ class Mosquitto(ConanFile):
             self.cpp_info.components["libmosquitto"].system_libs = ["ws2_32"]
 
         if self.options.build_cpp:
-            self.cpp_info.components["libmosquittopp"].names["pkg_config"] = "libmosquittopp"
-            self.cpp_info.components["libmosquittopp"].libs = ["mosquittopp" + libsuffix]
+            self.cpp_info.components["libmosquittopp"].set_property("pkg_config_name", "libmosquittopp")
+            self.cpp_info.components["libmosquittopp"].libs = [f"mosquittopp{lib_suffix}"]
             self.cpp_info.components["libmosquittopp"].requires = ["libmosquitto"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libmosquittopp"].system_libs = ["pthread", "m"]
