@@ -1,0 +1,35 @@
+diff --git a/libs/log/src/text_file_backend.cpp b/src/text_file_backend.cpp
+index 8b8920e..0df9a37 100644
+--- a/libs/log/src/text_file_backend.cpp
++++ b/libs/log/src/text_file_backend.cpp
+@@ -1422,6 +1422,7 @@ BOOST_LOG_API void text_file_backend::consume(record_view const& rec, string_typ
+         rotate_file();
+     }
+
++    const unsigned int last_file_counter = m_pImpl->m_FileCounter - 1u;
+     while (!m_pImpl->m_File.is_open())
+     {
+         filesystem::path new_file_name;
+@@ -1464,6 +1465,7 @@ BOOST_LOG_API void text_file_backend::consume(record_view const& rec, string_typ
+         else
+         {
+             prev_file_name.swap(new_file_name);
++            use_prev_file_name = false;
+         }
+
+         filesystem::create_directories(new_file_name.parent_path());
+@@ -1479,9 +1481,11 @@ BOOST_LOG_API void text_file_backend::consume(record_view const& rec, string_typ
+         m_pImpl->m_FileName.swap(new_file_name);
+         m_pImpl->m_IsFirstFile = false;
+
+-        // Check the file size before invoking the open handler, as it may write more data to the file
++        // Check the file size before invoking the open handler, as it may write more data to the file.
++        // Only do this check if we haven't exhausted the file counter to avoid looping indefinitely.
+         m_pImpl->m_CharactersWritten = static_cast< std::streamoff >(m_pImpl->m_File.tellp());
+-        if (m_pImpl->m_CharactersWritten + formatted_message.size() >= m_pImpl->m_FileRotationSize)
++        if (m_pImpl->m_CharactersWritten > 0 && m_pImpl->m_CharactersWritten + formatted_message.size() >= m_pImpl->m_FileRotationSize &&
++            m_pImpl->m_FileCounter != last_file_counter)
+         {
+             // Avoid running the close handler, as we haven't run the open handler yet
+             struct close_handler_backup_guard
+

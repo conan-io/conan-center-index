@@ -65,6 +65,10 @@ patches:
     - patch_file: "patches/1.81.0-locale-fail-on-missing-backend.patch"
       patch_description: "Fails the build when there is no iconv backend"
       patch_type: "conan"
+    - patch_file: "patches/1.81.0-log-file-rotate-deadlock.patch"
+      patch_description: "Boost deadlocks when a log message exceeds log rotate size"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/log/issues/209"
   "1.80.0":
     - patch_file: "patches/1.80.0-locale-fail-on-missing-backend.patch"
       patch_description: "Fails the build when there is no iconv backend"
