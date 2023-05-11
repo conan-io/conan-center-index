@@ -1,8 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake
-from conan.tools.build.cross_building import cross_building
-from conan.tools.cmake.layout import cmake_layout
-from conans.model.version import Version
+from conan.tools.cmake import cmake_layout, CMakeDeps, CMakeToolchain, CMake
+from conan.tools.build import cross_building
 import re
 
 
@@ -26,13 +24,13 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
-    def _llvm_version(self):
-        pattern = re.compile("^llvm/([0-9.]+)")
-        return Version(re.findall(pattern, self.tested_reference_str)[0])
+    def _llvm_major_version(self):
+        pattern = re.compile("^llvm/([0-9]+)")
+        return int(re.findall(pattern, self.tested_reference_str)[0])
 
     def _ccpstd(self):
         cppstd = 14
-        if self._llvm_version() >= Version(16):
+        if self._llvm_major_version() >= 16:
             cppstd = 17
         return cppstd
 

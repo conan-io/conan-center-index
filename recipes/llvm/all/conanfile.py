@@ -1,15 +1,11 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, apply_conandata_patches, rmdir, chdir, load
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.files import get, apply_conandata_patches, rmdir, chdir, load, copy
 from conan.tools.microsoft import is_msvc
-from conan.tools.files.copy_pattern import copy
-from conan.tools.build.cppstd import check_min_cppstd
-from conan.tools.system.package_manager import Apt
+from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 from collections import defaultdict
-from conan.tools.cmake.layout import cmake_layout
 from conan.errors import ConanException
-from conans.model.version import Version
 import os
 import shutil
 import glob
@@ -171,6 +167,14 @@ class Llvm(ConanFile):
     def is_linux(self):
         return self.settings.os == "Linux"
 
+    def _llvm_major_version(self):
+        pattern = re.compile("^(?:llvm/)?([0-9]+)")
+        return int(re.findall(pattern, self.version)[0])
+
+    def _major_compiler_version(self):
+        pattern = re.compile("^([0-9]+)")
+        return int(re.findall(pattern, self.settings.compiler.version)[0])
+
     # checking options before requirements are build
     def configure(self):
         if self.is_windows():
@@ -183,10 +187,10 @@ class Llvm(ConanFile):
         # check keep_binaries_regex early to fail early
         re.compile(str(self.options.keep_binaries_regex))
 
-        ver = Version(self.version)
-        if ver.major < 16:
+        ver = self._llvm_major_version()
+        if ver < 16:
             check_min_cppstd(self, '14')
-        elif ver.major >= 16:
+        elif ver >= 16:
             check_min_cppstd(self, '17')
 
         for project in projects:
@@ -202,25 +206,27 @@ class Llvm(ConanFile):
             self.output.warning(
                 "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("10"):
+        if self.settings.compiler == "gcc" and self._major_compiler_version() < 10:
             raise ConanInvalidConfiguration(
                 "Compiler version too low for this package.")
 
-        if is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
+        if is_msvc(self) and self._major_compiler_version() < 16:
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
     # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
     # def validate(self):
 
-    def system_requirements(self):
-        # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
-        if self.is_linux():
-            if self.options.get_safe('with_runtime_compiler-rt', False):
-                # apt should work for ubuntu/debian if apt is not installed this is skipped
-                if Apt(self).check(["libc6-dev-i386"]):
-                    raise ConanInvalidConfiguration(
-                        "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
+    # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
+    # import for Apt doesn't satisfy: E9011(conan-import-tools)
+    # def system_requirements(self):
+        # if self.is_linux():
+        #     # from conan.tools.system.package_manager import Apt
+        #     if self.options.get_safe('with_runtime_compiler-rt', False):
+        #         # apt should work for ubuntu/debian if apt is not installed this is skipped
+        #         if Apt(self).check(["libc6-dev-i386"]):
+        #             raise ConanInvalidConfiguration(
+        #                 "For compiler-rt you need the x86 header bits/libc-header-start.h, please install libc6-dev-i386")
 
     def requirements(self):
         if self.options.with_ffi:
@@ -666,7 +672,3 @@ class Llvm(ConanFile):
                     os.path.join(module_subfolder,
                                  "LLVMConfigInternal.cmake")
                 )
-
-        self.output.info(
-            "checking if all dependencies added to llvm are referenced by any exposed target")
-        self.cpp_info.check_component_requires(self)

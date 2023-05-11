@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
-# enable to print compiler output
-set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 find_package(LLVM REQUIRED COMPONENTS LLVMSupport)
 
