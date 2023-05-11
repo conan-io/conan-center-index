@@ -178,6 +178,7 @@ class Llvm(ConanFile):
     # checking options before requirements are build
     def configure(self):
         if self.is_windows():
+            del self.options.fPIC  # FPIC MANAGEMENT (KB-H007)
             if is_msvc(self):
                 if self.options.llvm_build_llvm_dylib:
                     raise ConanInvalidConfiguration(
@@ -201,6 +202,7 @@ class Llvm(ConanFile):
                         f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
 
         if self.options.shared:
+            del self.options.fPIC  # FPIC MANAGEMENT (KB-H007)
             if self.options.llvm_build_llvm_dylib:
                 raise ConanInvalidConfiguration(
                     "LLVM needs static compilation for dylib.")
