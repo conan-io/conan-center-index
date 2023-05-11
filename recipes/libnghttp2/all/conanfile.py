@@ -53,7 +53,7 @@ class Nghttp2Conan(ConanFile):
             self.settings.rm_safe("compiler.libcxx")
         if not self.options.with_app:
             del self.options.with_jemalloc
-        if Version(self.version) >= "1.53.0":
+        if Version(self.version) >= "1.52.0":
             del self.options.with_asio
 
     def layout(self):
@@ -91,7 +91,6 @@ class Nghttp2Conan(ConanFile):
         tc.variables["ENABLE_HPACK_TOOLS"] = self.options.with_hpack
         tc.variables["ENABLE_APP"] = self.options.with_app
         tc.variables["ENABLE_EXAMPLES"] = False
-        tc.variables["WITH_MRUBY"] = True
         if Version(self.version) < "1.52.0":
             tc.variables["ENABLE_PYTHON_BINDINGS"] = False
         tc.variables["ENABLE_FAILMALLOC"] = False
