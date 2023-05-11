@@ -35,7 +35,6 @@ class PhysXConan(ConanFile):
         "enable_float_point_precise_math": False,
     }
 
-    no_copy_source = True
     short_paths = True
 
     generators = "CMakeDeps"
