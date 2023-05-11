@@ -106,7 +106,6 @@ class VsgConan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake/Config*"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
