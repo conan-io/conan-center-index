@@ -169,11 +169,11 @@ class Llvm(ConanFile):
 
     def _llvm_major_version(self):
         pattern = re.compile("^(?:llvm/)?([0-9]+)")
-        return int(re.findall(pattern, self.version)[0])
+        return int(re.findall(pattern, str(self.version))[0])
 
     def _major_compiler_version(self):
         pattern = re.compile("^([0-9]+)")
-        return int(re.findall(pattern, self.settings.compiler.version)[0])
+        return int(re.findall(pattern, str(self.settings.compiler.version))[0])
 
     # checking options before requirements are build
     def configure(self):
