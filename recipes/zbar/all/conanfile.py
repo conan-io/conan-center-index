@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.files import get, copy, rmdir, rm, collect_libs
+from conan.tools.files import get, copy, rmdir, rm, collect_libs, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import Environment
 from conan.tools.scm import Version
@@ -50,6 +50,9 @@ class ZbarConan(ConanFile):
         "with_jpeg": False,
         "enable_pthread": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -119,6 +122,7 @@ class ZbarConan(ConanFile):
 
 
     def build(self):
+        apply_conandata_patches(self)
         copy(self, "config.sub", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
         copy(self, "config.guess", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
 
