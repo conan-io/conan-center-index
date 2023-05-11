@@ -21,8 +21,12 @@ class ThrustConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    options = {"device_system": ["cuda", "cpp", "omp", "tbb"]}
-    default_options = {"device_system": "tbb"}
+    options = {
+        "device_system": ["cuda", "cpp", "omp", "tbb"],
+    }
+    default_options = {
+        "device_system": "tbb",
+    }
 
     def layout(self):
         basic_layout(self, src_folder="src")
