@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[]) {
   if (argc != 1) {
-    std::cerr << "Usage: bigtable\n";
+    std::cerr << "Usage: spanner\n";
     return 1;
   }
   auto const project_id =  std::string{"test-only-invalid"};

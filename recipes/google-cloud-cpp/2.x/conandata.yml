@@ -1,4 +1,7 @@
 sources:
+  "2.10.1":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v2.10.1.tar.gz"
+    sha256: "dbd8ff9cdda8b991049094c41d9125438098422658c77dc1afab524c589efeda"
   "2.5.0":
     url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v2.5.0.tar.gz"
     sha256: "ac93ef722d08bfb220343bde2f633c7c11f15e34ec3ecd0a57dbd3ff729cc3a6"
@@ -12,5 +15,12 @@ patches:
       patch_description: "Fix problems with INTERFACE proto libraries"
       patch_type: backport
     - patch_file: "patches/2.5.0/003-use-conan-msvc-runtime.patch"
+      patch_description: "Let Conan select the MSVC runtime"
+      patch_type: conan
+  "2.10.1":
+    - patch_file: "patches/2.10.1/001-use-googleapis-conan-package.patch"
+      patch_description: "Use Conan package for googleapis"
+      patch_type: conan
+    - patch_file: "patches/2.10.1/002-use-conan-msvc-runtime.patch"
       patch_description: "Let Conan select the MSVC runtime"
       patch_type: conan

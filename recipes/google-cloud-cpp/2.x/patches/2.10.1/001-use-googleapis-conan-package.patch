@@ -1,0 +1,51 @@
+diff --git a/cmake/CompileProtos.cmake b/cmake/CompileProtos.cmake
+index 9f12300..0e68683 100644
+--- a/cmake/CompileProtos.cmake
++++ b/cmake/CompileProtos.cmake
+@@ -371,21 +371,11 @@ function (google_cloud_cpp_proto_library libname)
+         return()
+     endif ()
+ 
+-    if (${_opt_LOCAL_INCLUDE})
+-        google_cloud_cpp_generate_proto(
+-            proto_sources ${_opt_UNPARSED_ARGUMENTS} LOCAL_INCLUDE
+-            PROTO_PATH_DIRECTORIES ${_opt_PROTO_PATH_DIRECTORIES})
+-    else ()
+-        google_cloud_cpp_generate_proto(
+-            proto_sources ${_opt_UNPARSED_ARGUMENTS} PROTO_PATH_DIRECTORIES
+-            ${_opt_PROTO_PATH_DIRECTORIES})
+-    endif ()
+-
+     add_library(${libname} ${proto_sources})
+     target_compile_features(${libname} PUBLIC cxx_std_14)
+     set_property(TARGET ${libname} PROPERTY PROTO_SOURCES
+                                             ${_opt_UNPARSED_ARGUMENTS})
+-    target_link_libraries(${libname} PUBLIC gRPC::grpc++ gRPC::grpc
++    target_link_libraries(${libname} PUBLIC gRPC::grpc++ gRPC::grpc googleapis::googleapis
+                                             protobuf::libprotobuf)
+     # We want to treat the generated code as "system" headers so they get
+     # ignored by the more aggressive warnings.
+diff --git a/external/googleapis/CMakeLists.txt b/external/googleapis/CMakeLists.txt
+index c771da0..5f7b7c5 100644
+--- a/external/googleapis/CMakeLists.txt
++++ b/external/googleapis/CMakeLists.txt
+@@ -99,11 +99,6 @@ include(EnableWerror)
+ # patch this value.  Setting the value in a single place makes such patching
+ # easier.
+ set(EXTERNAL_GOOGLEAPIS_PREFIX "${PROJECT_BINARY_DIR}/external/googleapis")
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${EXTERNAL_GOOGLEAPIS_PREFIX}/src/googleapis_download"
+-    PARENT_SCOPE)
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${EXTERNAL_GOOGLEAPIS_PREFIX}/src/googleapis_download")
+ 
+ # Include the functions to compile proto files and maintain proto libraries.
+ include(CompileProtos)
+@@ -196,7 +191,6 @@ function (external_googleapis_add_library proto)
+ endfunction ()
+ 
+ function (external_googleapis_set_version_and_alias short_name)
+-    add_dependencies("google_cloud_cpp_${short_name}" googleapis_download)
+     set_target_properties(
+         "google_cloud_cpp_${short_name}"
+         PROPERTIES EXPORT_NAME google-cloud-cpp::${short_name}

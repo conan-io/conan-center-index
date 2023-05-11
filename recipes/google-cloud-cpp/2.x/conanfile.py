@@ -149,108 +149,120 @@ class GoogleCloudCppConan(ConanFile):
 
     _GOOGLEAPIS_VERSIONS = {
         "2.5.0": "cci.20221108",
+        "2.10.1": "cci.20230501",
     }
 
     _GA_COMPONENTS_BASE = {"bigquery", "bigtable", "iam", "pubsub", "spanner", "storage"}
+    _GA_COMPONENTS_VERSION_2_5_0 = {
+        "accessapproval",
+        "accesscontextmanager",
+        "apigateway",
+        "apigeeconnect",
+        "appengine",
+        "artifactregistry",
+        "asset",
+        "assuredworkloads",
+        "automl",
+        "baremetalsolution",
+        "batch",
+        "beyondcorp",
+        "billing",
+        "binaryauthorization",
+        "certificatemanager",
+        "channel",
+        "cloudbuild",
+        "composer",
+        "connectors",
+        "contactcenterinsights",
+        "container",
+        "containeranalysis",
+        "datacatalog",
+        "datamigration",
+        "dataplex",
+        "dataproc",
+        "datastream",
+        "debugger",
+        "deploy",
+        "dialogflow_cx",
+        "dialogflow_es",
+        "dlp",
+        "documentai",
+        "edgecontainer",
+        "eventarc",
+        "filestore",
+        "functions",
+        "gameservices",
+        "gkehub",
+        "iap",
+        "ids",
+        "iot",
+        "kms",
+        "language",
+        "logging",
+        "managedidentities",
+        "memcache",
+        "monitoring",
+        "networkconnectivity",
+        "networkmanagement",
+        "notebooks",
+        "optimization",
+        "orgpolicy",
+        "osconfig",
+        "oslogin",
+        "policytroubleshooter",
+        "privateca",
+        "profiler",
+        "recommender",
+        "redis",
+        "resourcemanager",
+        "resourcesettings",
+        "retail",
+        "run",
+        "scheduler",
+        "secretmanager",
+        "securitycenter",
+        "servicecontrol",
+        "servicedirectory",
+        "servicemanagement",
+        "serviceusage",
+        "shell",
+        "speech",
+        "storagetransfer",
+        "talent",
+        "tasks",
+        "texttospeech",
+        "tpu",
+        "trace",
+        "translate",
+        "video",
+        "videointelligence",
+        "vision",
+        "vmmigration",
+        "vmwareengine",
+        "vpcaccess",
+        "webrisk",
+        "websecurityscanner",
+        "workflows",
+    }
+    _GA_COMPONENTS_VERSION_2_10_1 = {
+        'advisorynotifications',
+        'alloydb',
+        'apikeys',
+        'confidentialcomputing',
+        'gkemulticloud',
+        'sql',
+        'storageinsights',
+    }
     _GA_COMPONENTS_VERSION = {
-        '2.5.0': {
-            "accessapproval",
-            "accesscontextmanager",
-            "apigateway",
-            "apigeeconnect",
-            "appengine",
-            "artifactregistry",
-            "asset",
-            "assuredworkloads",
-            "automl",
-            "baremetalsolution",
-            "batch",
-            "beyondcorp",
-            "billing",
-            "binaryauthorization",
-            "certificatemanager",
-            "channel",
-            "cloudbuild",
-            "composer",
-            "connectors",
-            "contactcenterinsights",
-            "container",
-            "containeranalysis",
-            "datacatalog",
-            "datamigration",
-            "dataplex",
-            "dataproc",
-            "datastream",
-            "debugger",
-            "deploy",
-            "dialogflow_cx",
-            "dialogflow_es",
-            "dlp",
-            "documentai",
-            "edgecontainer",
-            "eventarc",
-            "filestore",
-            "functions",
-            "gameservices",
-            "gkehub",
-            "iap",
-            "ids",
-            "iot",
-            "kms",
-            "language",
-            "logging",
-            "managedidentities",
-            "memcache",
-            "monitoring",
-            "networkconnectivity",
-            "networkmanagement",
-            "notebooks",
-            "optimization",
-            "orgpolicy",
-            "osconfig",
-            "oslogin",
-            "policytroubleshooter",
-            "privateca",
-            "profiler",
-            "recommender",
-            "redis",
-            "resourcemanager",
-            "resourcesettings",
-            "retail",
-            "run",
-            "scheduler",
-            "secretmanager",
-            "securitycenter",
-            "servicecontrol",
-            "servicedirectory",
-            "servicemanagement",
-            "serviceusage",
-            "shell",
-            "speech",
-            "storagetransfer",
-            "talent",
-            "tasks",
-            "texttospeech",
-            "tpu",
-            "trace",
-            "translate",
-            "video",
-            "videointelligence",
-            "vision",
-            "vmmigration",
-            "vmwareengine",
-            "vpcaccess",
-            "webrisk",
-            "websecurityscanner",
-            "workflows",
-        },
+        '2.5.0': _GA_COMPONENTS_VERSION_2_5_0,
+        '2.10.1': _GA_COMPONENTS_VERSION_2_10_1,
     }
 
     def _components(self):
         result = self._GA_COMPONENTS_BASE
-        for v in sorted(self._GA_COMPONENTS_VERSION.keys()):
+        for v in self._GA_COMPONENTS_VERSION.keys():
             if v > Version(self):
-                break
+                continue
             result = result.union(self._GA_COMPONENTS_VERSION[v])
         # Some protos do not compile due to inconvenient system macros clashing with proto enum values.
         # Protobuf can workaround these problems, but the current version in Conan index (protobuf/3.21.4)
@@ -274,11 +286,31 @@ class GoogleCloudCppConan(ConanFile):
         rmdir(self, path=os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, path=os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    _INTERFACE_COMPONENTS = {
+        'dialogflow_es_protos',
+        'logging_types_protos',
+        'speech_protos',
+        'texttospeech_protos',
+    }
     def _add_proto_component(self, component):
         PROTOS_SHARED_REQUIRES=["googleapis::googleapis", "grpc::grpc++", "grpc::_grpc", "protobuf::libprotobuf"]
         self.cpp_info.components[component].requires = PROTOS_SHARED_REQUIRES
-        self.cpp_info.components[component].libs = [f"google_cloud_cpp_{component}"]
         self.cpp_info.components[component].names["pkg_config"] = f"google_cloud_cpp_{component}"
+        # Starting with 2.10.1 a small number of `*_protos` libraries require
+        # special treatment to avoid ODR violations
+        if Version(self) >= '2.10.1' and component == 'dialogflow_es_protos':
+            self.cpp_info.components[component].libs = ['google_cloud_cpp_cloud_dialogflow_v2_protos']
+            return
+        if Version(self) >= '2.10.1' and component == 'logging_types_protos':
+            self.cpp_info.components[component].libs = ['google_cloud_cpp_logging_type_type_protos']
+            return
+        if Version(self) >= '2.10.1' and component == 'speech_protos':
+            self.cpp_info.components[component].libs = ['google_cloud_cpp_cloud_speech_protos']
+            return
+        if Version(self) >= '2.10.1' and component == 'texttospeech_protos':
+            self.cpp_info.components[component].libs = ['google_cloud_cpp_cloud_texttospeech_protos']
+            return
+        self.cpp_info.components[component].libs = [f"google_cloud_cpp_{component}"]
 
     def _add_grpc_component(self, component, protos, extra=None):
         SHARED_REQUIRES=["grpc_utils", "common", "grpc::grpc++", "grpc::_grpc", "protobuf::libprotobuf", "abseil::absl_memory"]
