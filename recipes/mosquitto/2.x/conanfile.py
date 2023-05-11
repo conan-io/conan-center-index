@@ -64,7 +64,7 @@ class Mosquitto(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("cjson"):
             self.requires("cjson/1.7.14")
         if self.options.get_safe("websockets"):
@@ -89,7 +89,7 @@ class Mosquitto(ConanFile):
         tc.variables["WITH_LIB_CPP"] = self.options.build_cpp
         tc.variables["WITH_THREADING"] = not is_msvc(self) and self.options.threading
         tc.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
-        tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.options["libwebsockets"].shared
+        tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
         tc.variables["DOCUMENTATION"] = False
         tc.variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
         tc.generate()
