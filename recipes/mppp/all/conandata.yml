@@ -10,6 +10,9 @@ patches:
     - patch_file: "patches/0.27-0001-disable-warning-error.patch"
       patch_description: "disable the flag for treats warning as errors"
       patch_type: "portability"
+    - patch_file: "patches/0.27-0002-remove-fmt-version.patch"
+      patch_description: "remove fmt version number from find_package"
+      patch_type: "conan"
   "0.26":
     - patch_file: "patches/0.26-0001-disable-warning-error.patch"
       patch_description: "disable the flag for treats warning as errors"

@@ -69,7 +69,7 @@ class MpppConan(ConanFile):
         if self.options.with_boost:
             self.requires("boost/1.81.0")
         if self.options.get_safe("with_fmt"):
-            self.requires("fmt/9.1.0")
+            self.requires("fmt/10.0.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
