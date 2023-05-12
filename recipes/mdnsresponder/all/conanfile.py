@@ -26,7 +26,7 @@ class MdnsResponderConan(ConanFile):
     }
     default_options = {
         "with_opt_patches": False,
-        "use_tls": True,
+        "use_tls": False,
         "unicast_disabled": False,
     }
 
@@ -64,7 +64,7 @@ class MdnsResponderConan(ConanFile):
         # though works OK with VS 2015 and VS 2019, and works with VS 2017 in my local environment
         if is_msvc(self) and (Version(self.settings.compiler.version) == "15" or "1910" <= Version(self.settings.compiler.version) <= "1916"):
             raise ConanInvalidConfiguration("Visual Studio 2017 is not supported in CCI (yet).")
-        if not self.dependencies["mbedtls"].options.shared:
+        if self.options.use_tls and (not self.dependencies["mbedtls"].options.shared):
             raise ConanInvalidConfiguration("The dependency 'mbedtls' must be built as a shared library.")
 
     def source(self):
