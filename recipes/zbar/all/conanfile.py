@@ -2,12 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.files import get, copy, rmdir, rm, collect_libs, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import Environment
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
-
 import os
 
 required_conan_version = ">=1.53.0"
@@ -18,7 +17,7 @@ class ZbarConan(ConanFile):
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://zbar.sourceforge.net/"
-    topics = ("zbar", "bar codes")
+    topics = ("zbar", "barcode", "scanner", "decoder", "reader", "bar")
     description = "ZBar is an open source software suite for reading bar codes\
                    from various sources, such as video streams, image files and raw intensity sensors"
     settings = "os", "compiler", "build_type", "arch"
@@ -78,12 +77,12 @@ class ZbarConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        self.build_requires("gnu-config/cci.20210814")
+        self.tool_requires("gnu-config/cci.20210814")
         if Version(self.version) >= "0.22":
-            self.build_requires("automake/1.16.5")
-            self.build_requires("gettext/0.21")
-            self.build_requires("pkgconf/1.7.4")
-            self.build_requires("libtool/2.4.6")
+            self.tool_requires("automake/1.16.5")
+            self.tool_requires("gettext/0.21")
+            self.tool_requires("pkgconf/1.7.4")
+            self.tool_requires("libtool/2.4.6")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -141,9 +140,8 @@ class ZbarConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "zbar"
+        self.cpp_info.libs = ["zbar"]
         self.cpp_info.set_property("pkg_config_name", "zbar")
-        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ("FreeBSD", "Linux") and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
         if is_apple_os(self):
