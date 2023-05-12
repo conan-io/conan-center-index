@@ -1,5 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, check_sha256, unzip
+from urllib.parse import urlparse
+import urllib.request
 import os
 
 
@@ -28,8 +30,16 @@ class ArmGnuToolchain(ConanFile):
     def build(self):
         download_info = self.conan_data["sources"][self.version][str(
             self.settings.os)][str(self.settings.arch)]
-        get(self, download_info["url"], strip_root=True,
-            sha256=download_info["sha256"])
+        url = download_info["url"]
+        url = url + "?rev=" + download_info["rev"]
+        url = url + "&hash=" + download_info["hash"]
+        filename = os.path.basename(urlparse(url).path)
+
+        # using urlretrieve over conan.tools.files.get because get results in
+        # a 405 forbidden error whereas urlretrieve does not
+        urllib.request.urlretrieve(url, filename)
+        check_sha256(self, filename, download_info["sha256"])
+        unzip(self, filename, strip_root=True)
 
         '''
         NOTE: I'm not sure how exactly I should go about handling this:
