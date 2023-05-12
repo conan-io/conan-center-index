@@ -41,7 +41,7 @@ class MdnsResponderConan(ConanFile):
 
     def requirements(self):
         if self.options.use_tls:
-            self.requires("mbedtls/2.25.0")
+            self.requires("mbedtls/3.2.1")
 
     def layout(self):
         basic_layout(self, src_folder="src")
