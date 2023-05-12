@@ -134,33 +134,6 @@ class QtConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and is_msvc(self):
-            self.tool_requires("jom/1.1.3")
-        if self.options.qtwebengine:
-            self.tool_requires("ninja/1.11.1")
-            self.tool_requires("nodejs/16.3.0")
-            self.tool_requires("gperf/3.1")
-            # gperf, bison, flex, python >= 2.7.5 & < 3
-            if self.settings.os != "Windows":
-                self.tool_requires("bison/3.8.2")
-                self.tool_requires("flex/2.6.4")
-            else:
-                self.tool_requires("winflexbison/2.5.24")
-
-        if self.options.qtwayland:
-            self.tool_requires("wayland/1.21.0")
-        if self.options.with_doubleconversion:
-            self.tool_requires("double-conversion/3.2.1")
-        if self.options.get_safe("with_icu", False):
-            self.tool_requires("icu/72.1")
-        if self.options.with_pcre2:
-            self.tool_requires("pcre2/10.42")
-        if self.options.with_zstd:
-            self.tool_requires("zstd/1.5.5")
-        if self.options.with_glib:
-            self.tool_requires("glib/2.76.1")
-
     def validate_build(self):
         if self.options.qtwebengine:
             # Check if a valid python2 is available in PATH or it will failflex
@@ -368,7 +341,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
@@ -376,7 +349,7 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.1")
+            self.requires("glib/2.76.2")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -386,7 +359,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/72.1")
+            self.requires("icu/73.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/7.1.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -397,7 +370,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.41.2")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
@@ -406,7 +379,7 @@ class QtConan(ConanFile):
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.22.2")
+            self.requires("openal-soft/1.22.2")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_x11", False):
@@ -437,9 +410,39 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.47.1")
+            self.requires("at-spi2-core/2.48.0")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
+
+    def package_id(self):
+        del self.info.options.cross_compile
+        del self.info.options.sysroot
+        if self.info.options.multiconfiguration:
+            if self.info.settings.compiler == "Visual Studio":
+                if "MD" in self.info.settings.compiler.runtime:
+                    self.info.settings.compiler.runtime = "MD/MDd"
+                else:
+                    self.info.settings.compiler.runtime = "MT/MTd"
+            elif self.info.settings.compiler == "msvc":
+                self.info.settings.compiler.runtime_type = "Release/Debug"
+        if self.info.settings.os == "Android":
+            del self.info.options.android_sdk
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and is_msvc(self):
+            self.tool_requires("jom/1.1.3")
+        if self.options.qtwebengine:
+            self.tool_requires("ninja/1.11.1")
+            self.tool_requires("nodejs/18.15.0")
+            self.tool_requires("gperf/3.1")
+            # gperf, bison, flex, python >= 2.7.5 & < 3
+            if self._settings_build.os == "Windows":
+                self.tool_requires("winflexbison/2.5.24")
+            else:
+                self.tool_requires("bison/3.8.2")
+                self.tool_requires("flex/2.6.4")
+        if self.options.qtwayland:
+            self.tool_requires("wayland/1.21.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -464,18 +467,27 @@ class QtConan(ConanFile):
         ms.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate()
-        vre = VirtualRunEnv(self)
-        vre.generate()
+        if not cross_building(self):
+            vre = VirtualRunEnv(self)
+            vre.generate(scope="build")
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
         if self._settings_build.os == "Macos":
-            save(self, "bash_env", 'export DYLD_LIBRARY_PATH="%s"' % env.vars(self).get("DYLD_LIBRARY_PATH"))
+            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
+            dyld_library_path = "$DYLD_LIBRARY_PATH"
+            dyld_library_path_build = vbe.vars().get("DYLD_LIBRARY_PATH")
+            if dyld_library_path_build:
+                dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
+            if not cross_building(self):
+                dyld_library_path_host = vre.vars().get("DYLD_LIBRARY_PATH")
+                if dyld_library_path_host:
+                    dyld_library_path = f"{dyld_library_path_host}:{dyld_library_path}"
+            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
-        envvars = env.vars(self)
-        envvars.save_script("my_env_file")
+        env.vars(self).save_script("conan_qt_env_file")
 
     def _make_program(self):
         if is_msvc(self):
@@ -530,7 +542,7 @@ class QtConan(ConanFile):
 
         elif self.settings.os == "WindowsStore":
             if is_msvc(self):
-                if self.settings.compiler == "Visual Studio":
+                if str(self.settings.compiler) == "Visual Studio":
                     msvc_version = str(self.settings.compiler.version)
                 else:
                     msvc_version = {
@@ -707,7 +719,7 @@ class QtConan(ConanFile):
                   ("libpq", "PSQL"),
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
-                  ("openal", "OPENAL"),
+                  ("openal-soft", "OPENAL"),
                   ("zstd", "ZSTD"),
                   ("libalsa", "ALSA"),
                   ("xkbcommon", "XKBCOMMON"),
@@ -939,20 +951,6 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
-
-    def package_id(self):
-        del self.info.options.cross_compile
-        del self.info.options.sysroot
-        if self.info.options.multiconfiguration and is_msvc(self):
-            if self.info.settings.compiler == "Visual Studio":
-                if "MD" in self.info.settings.compiler.runtime:
-                    self.info.settings.compiler.runtime = "MD/MDd"
-                else:
-                    self.info.settings.compiler.runtime = "MT/MTd"
-            else:
-                self.info.settings.compiler.runtime_type = "Release/Debug"
-        if self.info.settings.os == "Android":
-            del self.info.options.android_sdk
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
@@ -1336,7 +1334,7 @@ Examples = bin/datadir/examples""")
             if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
-                multimedia_reqs.append("openal::openal")
+                multimedia_reqs.append("openal-soft::openal-soft")
             if self.options.get_safe("with_pulseaudio", False):
                 multimedia_reqs.append("pulseaudio::pulse")
             _create_module("Multimedia", multimedia_reqs)
@@ -1432,7 +1430,7 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
                 if self.options.widgets:
-                    self.cpp_info.components["qtWidgets"].system_libs.append("UxTheme")
+                    self.cpp_info.components["qtWidgets"].system_libs.append("uxtheme")
                     self.cpp_info.components["qtWidgets"].system_libs.append("dwmapi")
                 if self.options.get_safe("qtwinextras"):
                     self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
