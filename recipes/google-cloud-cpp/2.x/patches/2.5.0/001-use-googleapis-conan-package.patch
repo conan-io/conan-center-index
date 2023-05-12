@@ -1,0 +1,1279 @@
+diff --git a/cmake/CompileProtos.cmake b/cmake/CompileProtos.cmake
+index 366edba..4eb5ea3 100644
+--- a/cmake/CompileProtos.cmake
++++ b/cmake/CompileProtos.cmake
+@@ -362,20 +362,10 @@ function (google_cloud_cpp_proto_library libname)
+         return()
+     endif ()
+ 
+-    if (${_opt_LOCAL_INCLUDE})
+-        google_cloud_cpp_generate_proto(
+-            proto_sources ${_opt_UNPARSED_ARGUMENTS} LOCAL_INCLUDE
+-            PROTO_PATH_DIRECTORIES ${_opt_PROTO_PATH_DIRECTORIES})
+-    else ()
+-        google_cloud_cpp_generate_proto(
+-            proto_sources ${_opt_UNPARSED_ARGUMENTS} PROTO_PATH_DIRECTORIES
+-            ${_opt_PROTO_PATH_DIRECTORIES})
+-    endif ()
+-
+     add_library(${libname} ${proto_sources})
+     set_property(TARGET ${libname} PROPERTY PROTO_SOURCES
+                                             ${_opt_UNPARSED_ARGUMENTS})
+-    target_link_libraries(${libname} PUBLIC gRPC::grpc++ gRPC::grpc
++    target_link_libraries(${libname} PUBLIC gRPC::grpc++ gRPC::grpc googleapis::googleapis
+                                             protobuf::libprotobuf)
+     # We want to treat the generated code as "system" headers so they get
+     # ignored by the more aggressive warnings.
+diff --git a/external/googleapis/CMakeLists.txt b/external/googleapis/CMakeLists.txt
+index ad2bd4b..28bf016 100644
+--- a/external/googleapis/CMakeLists.txt
++++ b/external/googleapis/CMakeLists.txt
+@@ -16,24 +16,6 @@
+ 
+ include(GoogleapisConfig)
+ 
+-set(GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL
+-    "https://github.com/googleapis/googleapis/archive/${_GOOGLE_CLOUD_CPP_GOOGLEAPIS_COMMIT_SHA}.tar.gz"
+-    "https://storage.googleapis.com/cloud-cpp-community-archive/com_google_googleapis/${_GOOGLE_CLOUD_CPP_GOOGLEAPIS_COMMIT_SHA}.tar.gz"
+-)
+-set(GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL_HASH
+-    "${_GOOGLE_CLOUD_CPP_GOOGLEAPIS_SHA256}")
+-if (GOOGLE_CLOUD_CPP_OVERRIDE_GOOGLEAPIS_URL)
+-    set(GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL
+-        ${GOOGLE_CLOUD_CPP_OVERRIDE_GOOGLEAPIS_URL})
+-endif ()
+-if (GOOGLE_CLOUD_CPP_OVERRIDE_GOOGLEAPIS_URL_HASH)
+-    set(GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL_HASH
+-        "${GOOGLE_CLOUD_CPP_OVERRIDE_GOOGLEAPIS_URL_HASH}")
+-endif ()
+-
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+-
+ set(EXTERNAL_GOOGLEAPIS_PROTO_FILES
+     # cmake-format: sort
+     "google/api/annotations.proto"
+@@ -113,32 +95,6 @@ foreach (file IN LISTS protolists)
+     endforeach ()
+ endforeach ()
+ 
+-include(ExternalProject)
+-
+-externalproject_add(
+-    googleapis_download
+-    EXCLUDE_FROM_ALL ON
+-    PREFIX "${PROJECT_BINARY_DIR}/external/googleapis"
+-    URL ${GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL}
+-    URL_HASH SHA256=${GOOGLE_CLOUD_CPP_GOOGLEAPIS_URL_HASH}
+-    PATCH_COMMAND
+-        ""
+-        # ~~~
+-        # Scaffolding for patching googleapis after download. For example:
+-        #   PATCH_COMMAND
+-        #       patch
+-        #       -p1
+-        #       --input=/workspace/external/googleapis.patch
+-        # NOTE: This should only be used while developing with a new
+-        # protobuf message. No changes to `PATCH_COMMAND` should ever be
+-        # committed to the main branch.
+-        # ~~~
+-    CONFIGURE_COMMAND ""
+-    BUILD_COMMAND ""
+-    INSTALL_COMMAND ""
+-    BUILD_BYPRODUCTS ${EXTERNAL_GOOGLEAPIS_BYPRODUCTS}
+-    LOG_DOWNLOAD OFF)
+-
+ # Sometimes (this happens often with vcpkg) protobuf is installed in a non-
+ # standard directory. We need to find out where, and then add that directory to
+ # the search path for protos.
+@@ -187,7 +143,6 @@ function (external_googleapis_add_library proto)
+ endfunction ()
+ 
+ function (external_googleapis_set_version_and_alias short_name)
+-    add_dependencies("google_cloud_cpp_${short_name}" googleapis_download)
+     set_target_properties(
+         "google_cloud_cpp_${short_name}"
+         PROPERTIES EXPORT_NAME google-cloud-cpp::${short_name}
+diff --git a/google/cloud/accessapproval/CMakeLists.txt b/google/cloud/accessapproval/CMakeLists.txt
+index 43af932..e297251 100644
+--- a/google/cloud/accessapproval/CMakeLists.txt
++++ b/google/cloud/accessapproval/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::accessapproval_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/accesscontextmanager/CMakeLists.txt b/google/cloud/accesscontextmanager/CMakeLists.txt
+index 9ff4ce8..3c96472 100644
+--- a/google/cloud/accesscontextmanager/CMakeLists.txt
++++ b/google/cloud/accesscontextmanager/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::accesscontextmanager_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/apigateway/CMakeLists.txt b/google/cloud/apigateway/CMakeLists.txt
+index 5764bd3..517eb1e 100644
+--- a/google/cloud/apigateway/CMakeLists.txt
++++ b/google/cloud/apigateway/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::apigateway_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/apigeeconnect/CMakeLists.txt b/google/cloud/apigeeconnect/CMakeLists.txt
+index 17bd60f..af353aa 100644
+--- a/google/cloud/apigeeconnect/CMakeLists.txt
++++ b/google/cloud/apigeeconnect/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::apigeeconnect_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/apikeys/CMakeLists.txt b/google/cloud/apikeys/CMakeLists.txt
+index 9359474..6410175 100644
+--- a/google/cloud/apikeys/CMakeLists.txt
++++ b/google/cloud/apikeys/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::apikeys_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/appengine/CMakeLists.txt b/google/cloud/appengine/CMakeLists.txt
+index 154a058..6136505 100644
+--- a/google/cloud/appengine/CMakeLists.txt
++++ b/google/cloud/appengine/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::appengine_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/artifactregistry/CMakeLists.txt b/google/cloud/artifactregistry/CMakeLists.txt
+index 43d5f07..53184d4 100644
+--- a/google/cloud/artifactregistry/CMakeLists.txt
++++ b/google/cloud/artifactregistry/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::artifactregistry_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/asset/CMakeLists.txt b/google/cloud/asset/CMakeLists.txt
+index dc33c07..6924523 100644
+--- a/google/cloud/asset/CMakeLists.txt
++++ b/google/cloud/asset/CMakeLists.txt
+@@ -31,8 +31,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_EXTRA_INCLUDES
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/assuredworkloads/CMakeLists.txt b/google/cloud/assuredworkloads/CMakeLists.txt
+index a081c00..01332c6 100644
+--- a/google/cloud/assuredworkloads/CMakeLists.txt
++++ b/google/cloud/assuredworkloads/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::assuredworkloads_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/automl/CMakeLists.txt b/google/cloud/automl/CMakeLists.txt
+index c890e5e..f711f54 100644
+--- a/google/cloud/automl/CMakeLists.txt
++++ b/google/cloud/automl/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::automl_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/baremetalsolution/CMakeLists.txt b/google/cloud/baremetalsolution/CMakeLists.txt
+index df02616..f4cbee4 100644
+--- a/google/cloud/baremetalsolution/CMakeLists.txt
++++ b/google/cloud/baremetalsolution/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::baremetalsolution_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/batch/CMakeLists.txt b/google/cloud/batch/CMakeLists.txt
+index 03a1a3d..9645386 100644
+--- a/google/cloud/batch/CMakeLists.txt
++++ b/google/cloud/batch/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::batch_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/beyondcorp/CMakeLists.txt b/google/cloud/beyondcorp/CMakeLists.txt
+index e8eea05..24b9a98 100644
+--- a/google/cloud/beyondcorp/CMakeLists.txt
++++ b/google/cloud/beyondcorp/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::beyondcorp_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/billing/CMakeLists.txt b/google/cloud/billing/CMakeLists.txt
+index 54c45e6..4c928e6 100644
+--- a/google/cloud/billing/CMakeLists.txt
++++ b/google/cloud/billing/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::billing_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/binaryauthorization/CMakeLists.txt b/google/cloud/binaryauthorization/CMakeLists.txt
+index 9f8cd45..48363e2 100644
+--- a/google/cloud/binaryauthorization/CMakeLists.txt
++++ b/google/cloud/binaryauthorization/CMakeLists.txt
+@@ -32,8 +32,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_EXTRA_INCLUDES
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/certificatemanager/CMakeLists.txt b/google/cloud/certificatemanager/CMakeLists.txt
+index 84a25b0..f4bae6d 100644
+--- a/google/cloud/certificatemanager/CMakeLists.txt
++++ b/google/cloud/certificatemanager/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::certificatemanager_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/channel/CMakeLists.txt b/google/cloud/channel/CMakeLists.txt
+index ed6967b..ac19559 100644
+--- a/google/cloud/channel/CMakeLists.txt
++++ b/google/cloud/channel/CMakeLists.txt
+@@ -35,8 +35,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::channel_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/cloudbuild/CMakeLists.txt b/google/cloud/cloudbuild/CMakeLists.txt
+index 8f30f40..04d6a82 100644
+--- a/google/cloud/cloudbuild/CMakeLists.txt
++++ b/google/cloud/cloudbuild/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::cloudbuild_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/composer/CMakeLists.txt b/google/cloud/composer/CMakeLists.txt
+index cde8542..c9af9d1 100644
+--- a/google/cloud/composer/CMakeLists.txt
++++ b/google/cloud/composer/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::composer_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/connectors/CMakeLists.txt b/google/cloud/connectors/CMakeLists.txt
+index aef9110..cfd986f 100644
+--- a/google/cloud/connectors/CMakeLists.txt
++++ b/google/cloud/connectors/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::connectors_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/contactcenterinsights/CMakeLists.txt b/google/cloud/contactcenterinsights/CMakeLists.txt
+index 03b74ed..3f8831c 100644
+--- a/google/cloud/contactcenterinsights/CMakeLists.txt
++++ b/google/cloud/contactcenterinsights/CMakeLists.txt
+@@ -30,8 +30,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/container/CMakeLists.txt b/google/cloud/container/CMakeLists.txt
+index 20a6c8b..dedca21 100644
+--- a/google/cloud/container/CMakeLists.txt
++++ b/google/cloud/container/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::container_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/containeranalysis/CMakeLists.txt b/google/cloud/containeranalysis/CMakeLists.txt
+index 7548de3..e2486d2 100644
+--- a/google/cloud/containeranalysis/CMakeLists.txt
++++ b/google/cloud/containeranalysis/CMakeLists.txt
+@@ -30,8 +30,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_EXTRA_INCLUDES
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/datacatalog/CMakeLists.txt b/google/cloud/datacatalog/CMakeLists.txt
+index 7e80060..dd20ab2 100644
+--- a/google/cloud/datacatalog/CMakeLists.txt
++++ b/google/cloud/datacatalog/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::datacatalog_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/datamigration/CMakeLists.txt b/google/cloud/datamigration/CMakeLists.txt
+index ee95f1a..1772e90 100644
+--- a/google/cloud/datamigration/CMakeLists.txt
++++ b/google/cloud/datamigration/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::datamigration_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/dataplex/CMakeLists.txt b/google/cloud/dataplex/CMakeLists.txt
+index c83e390..079242e 100644
+--- a/google/cloud/dataplex/CMakeLists.txt
++++ b/google/cloud/dataplex/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::dataplex_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/dataproc/CMakeLists.txt b/google/cloud/dataproc/CMakeLists.txt
+index ed180ca..e8c5912 100644
+--- a/google/cloud/dataproc/CMakeLists.txt
++++ b/google/cloud/dataproc/CMakeLists.txt
+@@ -32,8 +32,6 @@ find_package(absl CONFIG REQUIRED)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/datastream/CMakeLists.txt b/google/cloud/datastream/CMakeLists.txt
+index 7ecfd1f..2a7c100 100644
+--- a/google/cloud/datastream/CMakeLists.txt
++++ b/google/cloud/datastream/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::datastream_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/debugger/CMakeLists.txt b/google/cloud/debugger/CMakeLists.txt
+index 8c299f3..3fae60d 100644
+--- a/google/cloud/debugger/CMakeLists.txt
++++ b/google/cloud/debugger/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::debugger_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/deploy/CMakeLists.txt b/google/cloud/deploy/CMakeLists.txt
+index 73c0d68..9181cb8 100644
+--- a/google/cloud/deploy/CMakeLists.txt
++++ b/google/cloud/deploy/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::deploy_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/dialogflow_cx/CMakeLists.txt b/google/cloud/dialogflow_cx/CMakeLists.txt
+index 90c70e3..4aead59 100644
+--- a/google/cloud/dialogflow_cx/CMakeLists.txt
++++ b/google/cloud/dialogflow_cx/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::dialogflow_cx_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/dialogflow_es/CMakeLists.txt b/google/cloud/dialogflow_es/CMakeLists.txt
+index 0ddf345..fad8716 100644
+--- a/google/cloud/dialogflow_es/CMakeLists.txt
++++ b/google/cloud/dialogflow_es/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::dialogflow_es_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/dlp/CMakeLists.txt b/google/cloud/dlp/CMakeLists.txt
+index 67c6329..f6eaa27 100644
+--- a/google/cloud/dlp/CMakeLists.txt
++++ b/google/cloud/dlp/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::dlp_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/documentai/CMakeLists.txt b/google/cloud/documentai/CMakeLists.txt
+index 00bc94b..42fd1e1 100644
+--- a/google/cloud/documentai/CMakeLists.txt
++++ b/google/cloud/documentai/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::documentai_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/edgecontainer/CMakeLists.txt b/google/cloud/edgecontainer/CMakeLists.txt
+index 4cacb9a..08a2f2e 100644
+--- a/google/cloud/edgecontainer/CMakeLists.txt
++++ b/google/cloud/edgecontainer/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::edgecontainer_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/eventarc/CMakeLists.txt b/google/cloud/eventarc/CMakeLists.txt
+index d5e2854..fe37f94 100644
+--- a/google/cloud/eventarc/CMakeLists.txt
++++ b/google/cloud/eventarc/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::eventarc_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/filestore/CMakeLists.txt b/google/cloud/filestore/CMakeLists.txt
+index 1f5a0e8..0ae2d00 100644
+--- a/google/cloud/filestore/CMakeLists.txt
++++ b/google/cloud/filestore/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::filestore_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/functions/CMakeLists.txt b/google/cloud/functions/CMakeLists.txt
+index ec9ebcd..50d9fc7 100644
+--- a/google/cloud/functions/CMakeLists.txt
++++ b/google/cloud/functions/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::functions_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/gameservices/CMakeLists.txt b/google/cloud/gameservices/CMakeLists.txt
+index 30d81ff..0b9cf8c 100644
+--- a/google/cloud/gameservices/CMakeLists.txt
++++ b/google/cloud/gameservices/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::gameservices_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/gkehub/CMakeLists.txt b/google/cloud/gkehub/CMakeLists.txt
+index 1747a18..d71c854 100644
+--- a/google/cloud/gkehub/CMakeLists.txt
++++ b/google/cloud/gkehub/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::gkehub_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/grafeas/CMakeLists.txt b/google/cloud/grafeas/CMakeLists.txt
+index 2ed9350..33ba5fd 100644
+--- a/google/cloud/grafeas/CMakeLists.txt
++++ b/google/cloud/grafeas/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::grafeas_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/iap/CMakeLists.txt b/google/cloud/iap/CMakeLists.txt
+index a22e9b0..4c78edb 100644
+--- a/google/cloud/iap/CMakeLists.txt
++++ b/google/cloud/iap/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::iap_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/ids/CMakeLists.txt b/google/cloud/ids/CMakeLists.txt
+index 4724bf2..fc73ea3 100644
+--- a/google/cloud/ids/CMakeLists.txt
++++ b/google/cloud/ids/CMakeLists.txt
+@@ -27,8 +27,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::ids_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/iot/CMakeLists.txt b/google/cloud/iot/CMakeLists.txt
+index 3619b82..1874025 100644
+--- a/google/cloud/iot/CMakeLists.txt
++++ b/google/cloud/iot/CMakeLists.txt
+@@ -27,8 +27,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::iot_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/kms/CMakeLists.txt b/google/cloud/kms/CMakeLists.txt
+index 14a2ef3..59a3596 100644
+--- a/google/cloud/kms/CMakeLists.txt
++++ b/google/cloud/kms/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::kms_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/language/CMakeLists.txt b/google/cloud/language/CMakeLists.txt
+index 123ef3c..add8dbc 100644
+--- a/google/cloud/language/CMakeLists.txt
++++ b/google/cloud/language/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::language_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/managedidentities/CMakeLists.txt b/google/cloud/managedidentities/CMakeLists.txt
+index 674ce03..b5e4bfa 100644
+--- a/google/cloud/managedidentities/CMakeLists.txt
++++ b/google/cloud/managedidentities/CMakeLists.txt
+@@ -31,8 +31,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::managedidentities_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/memcache/CMakeLists.txt b/google/cloud/memcache/CMakeLists.txt
+index 8a0ad6b..2fafadc 100644
+--- a/google/cloud/memcache/CMakeLists.txt
++++ b/google/cloud/memcache/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::memcache_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/monitoring/CMakeLists.txt b/google/cloud/monitoring/CMakeLists.txt
+index e021974..346a1a6 100644
+--- a/google/cloud/monitoring/CMakeLists.txt
++++ b/google/cloud/monitoring/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::monitoring_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/networkconnectivity/CMakeLists.txt b/google/cloud/networkconnectivity/CMakeLists.txt
+index 4ca5e45..ffe44d2 100644
+--- a/google/cloud/networkconnectivity/CMakeLists.txt
++++ b/google/cloud/networkconnectivity/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::networkconnectivity_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/networkmanagement/CMakeLists.txt b/google/cloud/networkmanagement/CMakeLists.txt
+index 3fe12a5..d94db72 100644
+--- a/google/cloud/networkmanagement/CMakeLists.txt
++++ b/google/cloud/networkmanagement/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::networkmanagement_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/notebooks/CMakeLists.txt b/google/cloud/notebooks/CMakeLists.txt
+index 4cc76ea..2508e4b 100644
+--- a/google/cloud/notebooks/CMakeLists.txt
++++ b/google/cloud/notebooks/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::notebooks_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/optimization/CMakeLists.txt b/google/cloud/optimization/CMakeLists.txt
+index 474c28a..e37eb3f 100644
+--- a/google/cloud/optimization/CMakeLists.txt
++++ b/google/cloud/optimization/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::optimization_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/orgpolicy/CMakeLists.txt b/google/cloud/orgpolicy/CMakeLists.txt
+index b6935e6..8fe4286 100644
+--- a/google/cloud/orgpolicy/CMakeLists.txt
++++ b/google/cloud/orgpolicy/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::orgpolicy_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/osconfig/CMakeLists.txt b/google/cloud/osconfig/CMakeLists.txt
+index 7b5dfe5..19f88a1 100644
+--- a/google/cloud/osconfig/CMakeLists.txt
++++ b/google/cloud/osconfig/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::osconfig_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/oslogin/CMakeLists.txt b/google/cloud/oslogin/CMakeLists.txt
+index 1092f6f..87410cf 100644
+--- a/google/cloud/oslogin/CMakeLists.txt
++++ b/google/cloud/oslogin/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::oslogin_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/policytroubleshooter/CMakeLists.txt b/google/cloud/policytroubleshooter/CMakeLists.txt
+index aa934d5..9f0bb42 100644
+--- a/google/cloud/policytroubleshooter/CMakeLists.txt
++++ b/google/cloud/policytroubleshooter/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::policytroubleshooter_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/privateca/CMakeLists.txt b/google/cloud/privateca/CMakeLists.txt
+index 5ba62ac..b47750d 100644
+--- a/google/cloud/privateca/CMakeLists.txt
++++ b/google/cloud/privateca/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::privateca_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/profiler/CMakeLists.txt b/google/cloud/profiler/CMakeLists.txt
+index b1388dc..d2fe3b2 100644
+--- a/google/cloud/profiler/CMakeLists.txt
++++ b/google/cloud/profiler/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::profiler_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/pubsublite/CMakeLists.txt b/google/cloud/pubsublite/CMakeLists.txt
+index 12b2b33..2ec80d0 100644
+--- a/google/cloud/pubsublite/CMakeLists.txt
++++ b/google/cloud/pubsublite/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::pubsublite_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/recommender/CMakeLists.txt b/google/cloud/recommender/CMakeLists.txt
+index b44cd96..26fdfb5 100644
+--- a/google/cloud/recommender/CMakeLists.txt
++++ b/google/cloud/recommender/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::recommender_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/redis/CMakeLists.txt b/google/cloud/redis/CMakeLists.txt
+index 9387bbd..c3bbd0e 100644
+--- a/google/cloud/redis/CMakeLists.txt
++++ b/google/cloud/redis/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::redis_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/resourcemanager/CMakeLists.txt b/google/cloud/resourcemanager/CMakeLists.txt
+index d445a8f..2689c33 100644
+--- a/google/cloud/resourcemanager/CMakeLists.txt
++++ b/google/cloud/resourcemanager/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::resourcemanager_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/resourcesettings/CMakeLists.txt b/google/cloud/resourcesettings/CMakeLists.txt
+index afac58e..c0b4359 100644
+--- a/google/cloud/resourcesettings/CMakeLists.txt
++++ b/google/cloud/resourcesettings/CMakeLists.txt
+@@ -32,8 +32,6 @@ find_package(absl CONFIG REQUIRED)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/retail/CMakeLists.txt b/google/cloud/retail/CMakeLists.txt
+index cbda24a..da3b066 100644
+--- a/google/cloud/retail/CMakeLists.txt
++++ b/google/cloud/retail/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::retail_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/run/CMakeLists.txt b/google/cloud/run/CMakeLists.txt
+index f771798..7906713 100644
+--- a/google/cloud/run/CMakeLists.txt
++++ b/google/cloud/run/CMakeLists.txt
+@@ -27,8 +27,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::run_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/scheduler/CMakeLists.txt b/google/cloud/scheduler/CMakeLists.txt
+index d4e2310..eeaae20 100644
+--- a/google/cloud/scheduler/CMakeLists.txt
++++ b/google/cloud/scheduler/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::scheduler_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/secretmanager/CMakeLists.txt b/google/cloud/secretmanager/CMakeLists.txt
+index f33f9bf..949f929 100644
+--- a/google/cloud/secretmanager/CMakeLists.txt
++++ b/google/cloud/secretmanager/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::secretmanager_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/securitycenter/CMakeLists.txt b/google/cloud/securitycenter/CMakeLists.txt
+index e482223..bad25ac 100644
+--- a/google/cloud/securitycenter/CMakeLists.txt
++++ b/google/cloud/securitycenter/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::securitycenter_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/servicecontrol/CMakeLists.txt b/google/cloud/servicecontrol/CMakeLists.txt
+index b2f6362..c1c55f3 100644
+--- a/google/cloud/servicecontrol/CMakeLists.txt
++++ b/google/cloud/servicecontrol/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::servicecontrol_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/servicedirectory/CMakeLists.txt b/google/cloud/servicedirectory/CMakeLists.txt
+index a66c216..527201a 100644
+--- a/google/cloud/servicedirectory/CMakeLists.txt
++++ b/google/cloud/servicedirectory/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::servicedirectory_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/servicemanagement/CMakeLists.txt b/google/cloud/servicemanagement/CMakeLists.txt
+index 96b1a0b..c9981ae 100644
+--- a/google/cloud/servicemanagement/CMakeLists.txt
++++ b/google/cloud/servicemanagement/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::servicemanagement_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/serviceusage/CMakeLists.txt b/google/cloud/serviceusage/CMakeLists.txt
+index f9b199a..fddb936 100644
+--- a/google/cloud/serviceusage/CMakeLists.txt
++++ b/google/cloud/serviceusage/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::serviceusage_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/shell/CMakeLists.txt b/google/cloud/shell/CMakeLists.txt
+index 178b8bc..a7181f6 100644
+--- a/google/cloud/shell/CMakeLists.txt
++++ b/google/cloud/shell/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::shell_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/speech/CMakeLists.txt b/google/cloud/speech/CMakeLists.txt
+index 4cc2e0a..3f52437 100644
+--- a/google/cloud/speech/CMakeLists.txt
++++ b/google/cloud/speech/CMakeLists.txt
+@@ -39,8 +39,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::speech_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/storagetransfer/CMakeLists.txt b/google/cloud/storagetransfer/CMakeLists.txt
+index fd8a5ae..163e9b4 100644
+--- a/google/cloud/storagetransfer/CMakeLists.txt
++++ b/google/cloud/storagetransfer/CMakeLists.txt
+@@ -38,8 +38,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::storagetransfer_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/talent/CMakeLists.txt b/google/cloud/talent/CMakeLists.txt
+index 574023e..405dc48 100644
+--- a/google/cloud/talent/CMakeLists.txt
++++ b/google/cloud/talent/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::talent_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/tasks/CMakeLists.txt b/google/cloud/tasks/CMakeLists.txt
+index 3b5678e..026f9b1 100644
+--- a/google/cloud/tasks/CMakeLists.txt
++++ b/google/cloud/tasks/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::tasks_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/texttospeech/CMakeLists.txt b/google/cloud/texttospeech/CMakeLists.txt
+index 0fdc54a..840e8d4 100644
+--- a/google/cloud/texttospeech/CMakeLists.txt
++++ b/google/cloud/texttospeech/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::texttospeech_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/tpu/CMakeLists.txt b/google/cloud/tpu/CMakeLists.txt
+index 2666b6b..cdaf519 100644
+--- a/google/cloud/tpu/CMakeLists.txt
++++ b/google/cloud/tpu/CMakeLists.txt
+@@ -27,8 +27,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::tpu_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/trace/CMakeLists.txt b/google/cloud/trace/CMakeLists.txt
+index 99a04f5..80d4c1b 100644
+--- a/google/cloud/trace/CMakeLists.txt
++++ b/google/cloud/trace/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::trace_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/translate/CMakeLists.txt b/google/cloud/translate/CMakeLists.txt
+index f8a0394..6a44718 100644
+--- a/google/cloud/translate/CMakeLists.txt
++++ b/google/cloud/translate/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::translate_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/video/CMakeLists.txt b/google/cloud/video/CMakeLists.txt
+index b1b2628..df98ae4 100644
+--- a/google/cloud/video/CMakeLists.txt
++++ b/google/cloud/video/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::video_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/videointelligence/CMakeLists.txt b/google/cloud/videointelligence/CMakeLists.txt
+index 1963d27..4638ddc 100644
+--- a/google/cloud/videointelligence/CMakeLists.txt
++++ b/google/cloud/videointelligence/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::videointelligence_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/vision/CMakeLists.txt b/google/cloud/vision/CMakeLists.txt
+index b23e737..004b803 100644
+--- a/google/cloud/vision/CMakeLists.txt
++++ b/google/cloud/vision/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::vision_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/vmmigration/CMakeLists.txt b/google/cloud/vmmigration/CMakeLists.txt
+index aa88701..e799a3b 100644
+--- a/google/cloud/vmmigration/CMakeLists.txt
++++ b/google/cloud/vmmigration/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::vmmigration_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/vmwareengine/CMakeLists.txt b/google/cloud/vmwareengine/CMakeLists.txt
+index 55adb2f..79c0f53 100644
+--- a/google/cloud/vmwareengine/CMakeLists.txt
++++ b/google/cloud/vmwareengine/CMakeLists.txt
+@@ -38,8 +38,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::vmwareengine_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/vpcaccess/CMakeLists.txt b/google/cloud/vpcaccess/CMakeLists.txt
+index 5ce47b7..dc7454e 100644
+--- a/google/cloud/vpcaccess/CMakeLists.txt
++++ b/google/cloud/vpcaccess/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::vpcaccess_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/webrisk/CMakeLists.txt b/google/cloud/webrisk/CMakeLists.txt
+index 5be0ce7..5d3123f 100644
+--- a/google/cloud/webrisk/CMakeLists.txt
++++ b/google/cloud/webrisk/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::webrisk_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/websecurityscanner/CMakeLists.txt b/google/cloud/websecurityscanner/CMakeLists.txt
+index e21608e..c95230e 100644
+--- a/google/cloud/websecurityscanner/CMakeLists.txt
++++ b/google/cloud/websecurityscanner/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::websecurityscanner_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+diff --git a/google/cloud/workflows/CMakeLists.txt b/google/cloud/workflows/CMakeLists.txt
+index 76c239a..aef6492 100644
+--- a/google/cloud/workflows/CMakeLists.txt
++++ b/google/cloud/workflows/CMakeLists.txt
+@@ -29,8 +29,6 @@ set(GOOGLE_CLOUD_CPP_DOXYGEN_DEPS google-cloud-cpp::workflows_protos)
+ 
+ include(GoogleCloudCppCommon)
+ 
+-set(EXTERNAL_GOOGLEAPIS_SOURCE
+-    "${PROJECT_BINARY_DIR}/external/googleapis/src/googleapis_download")
+ find_path(PROTO_INCLUDE_DIR google/protobuf/descriptor.proto)
+ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")

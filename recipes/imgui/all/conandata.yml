@@ -1,4 +1,7 @@
 sources:
+  "1.89.4":
+    url: "https://github.com/ocornut/imgui/archive/v1.89.4.tar.gz"
+    sha256: "69f1e83adcab3fdd27b522f5075f407361b0d3875e3522b13d33bc2ae2c7d48c"
   "1.89.3":
     url: "https://github.com/ocornut/imgui/archive/v1.89.3.tar.gz"
     sha256: "3b665fadd5580b7ef494d5d8bb1c12b2ec53ee723034caf43332956381f5d631"

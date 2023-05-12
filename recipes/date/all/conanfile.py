@@ -1,7 +1,7 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, apply_conandata_patches, export_conandata_patches, copy
-from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 
 import os
@@ -14,8 +14,7 @@ class DateConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/HowardHinnant/date"
     description = "A date and time library based on the C++11/14/17 <chrono> header"
-    topics = ("date", "datetime", "timezone",
-              "calendar", "time", "iana-database")
+    topics = ("datetime", "timezone", "calendar", "time", "iana-database")
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -40,32 +39,32 @@ class DateConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+        if self.settings.os in ["iOS", "tvOS", "watchOS", "Android"]:
             self.options.use_system_tz_db = True
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        if self.options.shared or self.options.header_only:
+            self.options.rm_safe("fPIC")
         if self.options.header_only:
             del self.options.shared
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if not self.options.header_only and not self.options.use_system_tz_db:
-            self.requires("libcurl/7.78.0")
-
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            self.requires("libcurl/8.0.1")
 
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,7 +80,6 @@ class DateConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
-
 
     def build(self):
         apply_conandata_patches(self)
