@@ -23,8 +23,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        print(self.options)
-        print(self.options["llvm/14.0.6"])
         cmake.configure(defs={
             'CMAKE_CXX_STANDARD': self._ccpstd(),
             # 'llvm_build_llvm_dylib': self.options[self.tested_reference_str].llvm_build_llvm_dylib,
