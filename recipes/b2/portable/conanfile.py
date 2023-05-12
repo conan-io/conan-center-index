@@ -137,6 +137,15 @@ class B2Conan(ConanFile):
                                         kv.split('=')[1].strip(), 'Auxiliary', 'Build', 'vcvars32.bat')
                                     command += '"'+b2_vcvars+'" && '
         command += "build" if use_windows_commands else "./build.sh"
+
+        if self.options.use_cxx_env:
+            cxx = os.environ.get("CXX")
+            if cxx:
+                command += f" --cxx={cxx}"
+            cxxflags = os.environ.get("CXXFLAGS")
+            if cxxflags:
+                command += f" --cxxflags={cxxflags}"
+
         if b2_toolset != 'auto':
             command += " "+str(b2_toolset)
         with chdir(self, self._b2_engine_dir):
