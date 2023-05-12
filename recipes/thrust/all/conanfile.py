@@ -71,3 +71,5 @@ class ThrustConan(ConanFile):
         self.cpp_info.libdirs = []
         dev = str(self.options.device_system).upper()
         self.cpp_info.defines = [f"THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{dev}"]
+        # Since CUB and Thrust are provided separately, their versions are not guaranteed to match
+        self.cpp_info.defines += ["THRUST_IGNORE_CUB_VERSION_CHECK=1"]
