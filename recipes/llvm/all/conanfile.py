@@ -273,9 +273,7 @@ class Llvm(ConanFile):
         # https://releases.llvm.org/15.0.0/docs/CMake.html
         # https://releases.llvm.org/16.0.0/docs/CMake.html
         # https://llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
-        cmake.configure(
-            cli_args=['--graphviz=graph/llvm.dot'],
-            variables={
+        cmake_definitions = {
                 'BUILD_SHARED_LIBS': self.options.shared,
                 'LIBOMP_ENABLE_SHARED': self.options.shared,
                 # cmake RPATH handling https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling#default-rpath-settings
@@ -338,15 +336,19 @@ class Llvm(ConanFile):
                 'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
                 'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
                 'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
-            },
-            build_script_folder=os.path.join(self.source_folder, 'llvm'))
+            }
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
-            cmake._cache_variables.update(
+            cmake_definitions.update(
                 {
                     f"LLVM_USE_CRT_{build_type}": self.settings.compiler.runtime
                 }
             )
+        cmake.configure(
+            cli_args=['--graphviz=graph/llvm.dot'],
+            variables=cmake_definitions,
+            build_script_folder=os.path.join(self.source_folder, 'llvm'))
+
         return cmake
 
     def _is_installed_llvm_lib(self, target_name):
