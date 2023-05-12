@@ -137,7 +137,8 @@ class Llvm(ConanFile):
             'with_z3': False,
             'with_ffi': False,
             'with_zlib': True,
-            'with_xml2': True,
+            # XXX default True, issues with liblldb.so and conan: Findlibxml2.cmake not provided
+            'with_xml2': False,
             'keep_binaries_regex': '^$',
 
             # options removed in package id
