@@ -41,6 +41,7 @@ required_for_references:
 - avir
 - aws-c-common
 - aws-c-compression
+- aws-c-sdkutils
 - aws-checksums
 - b2
 - b64
@@ -59,6 +60,7 @@ required_for_references:
 - bit-lite
 - bitflags
 - bitmagic
+- bitserializer
 - bitsery
 - blaze
 - blend2d
@@ -232,6 +234,7 @@ required_for_references:
 - fxdiv
 - g3log
 - gamma
+- gdbm
 - gdcm
 - gdk-pixbuf
 - gemmlowp
@@ -296,6 +299,7 @@ required_for_references:
 - jwt-cpp
 - kangaru
 - kmod
+- ktx
 - kuba-zip
 - lcms
 - ldns
@@ -337,6 +341,7 @@ required_for_references:
 - libiconv
 - libjpeg
 - libjpeg-turbo
+- libkml
 - liblsl
 - libltc
 - libmodbus
@@ -356,6 +361,7 @@ required_for_references:
 - libpqxx
 - libpsl
 - libqrencode
+- librdkafka
 - librealsense
 - libressl
 - librttopo
@@ -393,6 +399,7 @@ required_for_references:
 - libyuv
 - libzen
 - libzip
+- libzippp
 - lief
 - linux-syscall-support
 - lodepng
@@ -469,6 +476,7 @@ required_for_references:
 - pcre2
 - pdfgen
 - pfr
+- physx
 - picobench
 - picojson
 - pkgconf
@@ -508,18 +516,21 @@ required_for_references:
 - ruy
 - s2n
 - scnlib
+- screen_capture_lite
 - sdl
 - sdl_image
 - seadex-essentials
 - semimap
 - sentry-breakpad
 - serd
+- sfml
 - shield
 - sigslot
 - simdjson
 - simdutf
 - snappy
 - soci
+- sophus
 - soplex
 - soxr
 - span-lite
@@ -536,6 +547,7 @@ required_for_references:
 - string-view-lite
 - symengine
 - tabulate
+- taocpp-json
 - taocpp-pegtl
 - taskflow
 - tcb-span
@@ -544,9 +556,11 @@ required_for_references:
 - tensorpipe
 - termcap
 - threadpool
+- thrift
 - tinycthread
 - tinycthreadpool
 - tinyexif
+- tinymidi
 - tinyxml2
 - tl-expected
 - tlx
@@ -570,6 +584,7 @@ required_for_references:
 - vtu11
 - vulkan-headers
 - vulkan-loader
+- vulkan-memory-allocator
 - vulkan-validationlayers
 - wasmtime
 - wasmtime-cpp
@@ -580,6 +595,7 @@ required_for_references:
 - wil
 - winflexbison
 - wiringpi
+- wise_enum
 - wolfssl
 - wslay
 - wt
