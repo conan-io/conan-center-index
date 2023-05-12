@@ -427,7 +427,7 @@ class Llvm(ConanFile):
         copy(self,
              "LICENSE.TXT",
              src=os.path.join(self.source_folder, "clang"),
-             dst="licenses",
+             dst=os.path.join(self.package_folder, "licenses"),
              keep_path=False,
              )
 
