@@ -83,7 +83,8 @@ class MdnsResponderConan(ConanFile):
         ]
         if not self.options.use_tls:
             build_args.append("tls=no")
-        if self.settings.build_type == "Debug":
+        #FIXME: 878.200.35 and 1310.140.1 will fail to compile when DEBUG=1
+        if self.settings.build_type == "Debug" and Version(self.version) != "878.200.35" and Version(self.version) != "1310.140.1":
             build_args.append("DEBUG=1")
         if self.options.unicast_disabled:
             build_args.append("unicast_disabled=y")
