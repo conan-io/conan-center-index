@@ -148,5 +148,3 @@ class StdgpuConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["stdgpu"]
-
-        # self.cpp_info.defines += ["THRUST_IGNORE_CUB_VERSION_CHECK=1"]
