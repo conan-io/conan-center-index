@@ -6,7 +6,6 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
 from conan.tools.files import copy, get, load, rmdir, collect_libs
 from conan.tools.scm import Version
-from conan.tools.system import package_manager
 
 required_conan_version = ">=1.55.0"
 
@@ -53,22 +52,6 @@ class OpenblasConan(ConanFile):
             f"Unable to select runtime for Fortran {fortran_id} "
             f"and C++ {self.settings.compiler} {self.settings.compiler.version}")
         return None
-
-    @property
-    def _fortran_package_ver(self):
-        if self.info.settings.os in ["Linux"]:
-            if self.info.options.build_lapack == "gfortran":
-                if self.settings.compiler == "gcc":
-                    compiler_v = Version(self.settings.compiler.version).major
-                    if compiler_v > "8":
-                        return "5"
-                    elif compiler_v in ["5", "6", "7"]:
-                        return {"5": "3", "6": "3", "7": "4"}.get(compiler_v)
-                if self.settings.compiler == "clang":
-                    if Version(self.settings.compiler.version).major > "8":
-                        return "5"
-
-        return ""
 
     @property
     def _openmp_runtime(self):
@@ -129,52 +112,6 @@ class OpenblasConan(ConanFile):
     def build_requirements(self):
         if self.options.build_lapack and self.settings.os == "Windows":
             self.tool_requires("ninja/1.11.1")
-
-    def system_requirements(self):
-        apt = package_manager.Apt(self)
-        dnf = package_manager.Dnf(self)
-        pacman = package_manager.PacMan(self)
-        # pkg = package_manager.Pkg(self) # TODO
-        yum = package_manager.Yum(self)
-        zypper = package_manager.Zypper(self)
-
-        if self.info.options.build_lapack == "gfortran":
-            apt.install([f"libgfortran{self._fortran_package_ver}"], update=True, check=True)
-            dnf.install(["libgfortran"], update=True, check=True)
-            pacman.install(["gcc-libs"], update=True, check=True)
-            yum.install(["libgfortran"], update=True, check=True)
-            zypper.install([f"libgfortran{self._fortran_package_ver}"], update=True, check=True)
-            # pkg.install([""], update=True, check=True)  # TBD
-
-        if self.info.options.use_openmp:
-            openmp_rt = ""
-            openmp_rt_ver = ""
-            if self.info.settings.compiler == "gcc":
-                openmp_rt = "libgomp"
-                openmp_rt_ver = "1"
-                openmp_rt_ver_dnf = "1"
-                openmp_rt_ver_zypper = "1"
-                openmp_pacman = "gcc-libs"
-
-            if self.info.settings.compiler == "clang":
-                openmp_rt = "libomp"
-                openmp_rt_ver = "5"
-                openmp_rt_ver_dnf = ""
-                openmp_rt_ver_zypper = f"{Version(self.info.settings.compiler.version).major}-devel"
-                openmp_pacman = "openmp"
-
-            if self.info.settings.compiler == "intel-cc":
-                openmp_pacman = "intel-oneapi-openmp"
-
-            if self.info.settings.compiler in ["gcc", "clang"]:
-                apt.install([f"{openmp_rt}{openmp_rt_ver}"], update=True, check=True)
-                dnf.install([f"{openmp_rt}{openmp_rt_ver_dnf}"], update=True, check=True)
-                yum.install([f"{openmp_rt}"], update=True, check=True)
-                zypper.install([f"{openmp_rt}{openmp_rt_ver_zypper}"], update=True, check=True)
-                # pkg.install([""], update=True, check=True) # TBD
-
-            if self.info.settings.compiler in ["gcc", "clang", "intel-cc"]:
-                pacman.install([openmp_pacman], update=True, check=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
