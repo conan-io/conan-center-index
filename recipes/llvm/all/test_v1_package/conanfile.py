@@ -5,7 +5,7 @@ import re
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake_find_package"
 
     def build_requirements(self):
         self.build_requires("cmake/[>=3.21.3 <4.0.0]")
@@ -25,11 +25,9 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(defs={
             'CMAKE_CXX_STANDARD': self._ccpstd(),
-            # 'llvm_build_llvm_dylib': self.options[self.tested_reference_str].llvm_build_llvm_dylib,
         })
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            self.run("./test_package")
