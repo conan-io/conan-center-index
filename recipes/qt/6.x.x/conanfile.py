@@ -244,11 +244,8 @@ class QtConan(ConanFile):
         if Version(self.version) >= "6.4.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("apple-clang >= 12 required by qt >= 6.4.0")
 
-        if Version(self.version) >= "6.3.0" and self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
+        if self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, or to libc++")
-
-        if Version(self.version) < "6.3.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= "11":
-            raise ConanInvalidConfiguration("Qt lower then 6.3.0 needs to be compiled for gcc with a version lower then 11")
 
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
@@ -580,12 +577,11 @@ class QtConan(ConanFile):
         # patching in source method because of no_copy_source attribute
 
         apply_conandata_patches(self)
-        if Version(self.version) >= "6.2.0":
-            for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-                replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                                      "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                                      "  if (enable_precompiled_headers) {\n    if (false) {"
-                                      )
+        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+            replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                  "  if (enable_precompiled_headers) {\n    if (false) {"
+                                  )
 
         replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtInternalTargets.cmake"),
                               "-Zc:wchar_t",
@@ -596,12 +592,10 @@ class QtConan(ConanFile):
                 os.remove(file)
 
         # workaround QTBUG-94356
-        if Version(self.version) >= "6.1.1":
-            zlib_file_name = "FindWrapSystemZLIB.cmake" if Version(self.version) >= "6.3.1" else "FindWrapZLIB.cmake"
-            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", zlib_file_name), '"-lz"', 'ZLIB::ZLIB')
-            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.cmake"),
-                "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
-                "")
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "FindWrapSystemZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.cmake"),
+            "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
+            "")
         if Version(self.version) <= "6.4.0":
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
@@ -861,11 +855,6 @@ class QtConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime_type = "Release/Debug"
 
-    @property
-    def _has_positioning(self):
-        return (self.options.get_safe("qtlocation") and Version(self.version) < "6.2.2") or \
-            (self.options.get_safe("qtpositioning") and Version(self.version) >= "6.2.2")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt6")
 
@@ -950,22 +939,16 @@ class QtConan(ConanFile):
 
         _create_module("Core", core_reqs)
         if self.settings.os == "Windows":
-            if Version(self.version) >= "6.3.0":
-                self.cpp_info.components["qtCore"].system_libs.append("authz")
+            self.cpp_info.components["qtCore"].system_libs.append("authz")
         if is_msvc(self):
-            if Version(self.version) >= "6.3.0":
-                self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
-            if Version(self.version) >= "6.2.0":
-                self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
-                self.cpp_info.components["qtCore"].system_libs.append("synchronization")
-            if Version(self.version) >= "6.2.1":
-                self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
+            self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
+            self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
+            self.cpp_info.components["qtCore"].system_libs.append("synchronization")
+            self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
-        if Version(self.version) < "6.1.0":
-            self.cpp_info.components["qtCore"].libs.append(f"Qt6Core_qobject{libsuffix}")
         if self.options.with_dbus:
             _create_module("DBus", ["dbus::dbus"])
         if self.options.gui:
@@ -1070,7 +1053,7 @@ class QtConan(ConanFile):
             _create_module("Core5Compat", [])
 
         # since https://github.com/qt/qtdeclarative/commit/4fb84137f1c0a49d64b8bef66fef8a4384cc2a68
-        qt_quick_enabled = self.options.gui and (Version(self.version) < "6.2.0" or self.options.qtshadertools)
+        qt_quick_enabled = self.options.gui and self.options.qtshadertools
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
@@ -1107,8 +1090,7 @@ class QtConan(ConanFile):
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if (self.options.get_safe("qtquickcontrols2") or \
-            (self.options.qtdeclarative and Version(self.version) >= "6.2.0")) and qt_quick_enabled:
+        if (self.options.get_safe("qtquickcontrols2") or self.options.qtdeclarative ) and qt_quick_enabled:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
@@ -1213,7 +1195,7 @@ class QtConan(ConanFile):
                 _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
                 _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
-        if self._has_positioning:
+        if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
             _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
             _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
@@ -1250,7 +1232,7 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebengine") and qt_quick_enabled:
             webenginereqs = ["Gui", "Quick", "WebChannel"]
-            if self._has_positioning:
+            if self.options.get_safe("qtpositioning"):
                 webenginereqs.append("Positioning")
             if self.settings.os == "Linux":
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \
