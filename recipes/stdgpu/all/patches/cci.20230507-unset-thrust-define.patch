@@ -1,0 +1,23 @@
+Subject: [PATCH] Unset THRUST_DEVICE_SYSTEM
+---
+===================================================================
+diff --git a/src/stdgpu/cuda/CMakeLists.txt b/src/stdgpu/cuda/CMakeLists.txt
+--- a/src/stdgpu/cuda/CMakeLists.txt	(revision a5c3430536b0712f552978327c508fec6d9165ec)
++++ b/src/stdgpu/cuda/CMakeLists.txt	(revision 198a8ae55490572dd8fa411af07b64d9c0796f11)
+@@ -28,5 +28,3 @@
+ target_compile_features(stdgpu PUBLIC cuda_std_17)
+ 
+-target_compile_definitions(stdgpu PUBLIC THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_CUDA)
+-
+ target_link_libraries(stdgpu PUBLIC CUDA::cudart)
+
+===================================================================
+diff --git a/src/stdgpu/openmp/CMakeLists.txt b/src/stdgpu/openmp/CMakeLists.txt
+--- a/src/stdgpu/openmp/CMakeLists.txt	(revision a5c3430536b0712f552978327c508fec6d9165ec)
++++ b/src/stdgpu/openmp/CMakeLists.txt	(revision 198a8ae55490572dd8fa411af07b64d9c0796f11)
+@@ -25,5 +25,3 @@
+ endif()
+ 
+-target_compile_definitions(stdgpu PUBLIC THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP)
+-
+ target_link_libraries(stdgpu PUBLIC OpenMP::OpenMP_CXX)
