@@ -711,18 +711,13 @@ class QtConan(ConanFile):
 
         return None
 
-    @contextmanager
-    def _build_context(self):
+    def build(self):
         if self.settings.os == "Macos":
             save(self, ".qmake.stash" , "")
             save(self, ".qmake.super" , "")
-        yield
-
-    def build(self):
-        with self._build_context():
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     @property
     def _cmake_executables_file(self):
@@ -736,9 +731,11 @@ class QtConan(ConanFile):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
     def package(self):
-        with self._build_context():
-            cmake = CMake(self)
-            cmake.install()
+        if self.settings.os == "Macos":
+            save(self, ".qmake.stash" , "")
+            save(self, ".qmake.super" , "")
+        cmake = CMake(self)
+        cmake.install()
         copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
