@@ -92,7 +92,7 @@ class Mosquitto(ConanFile):
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
         tc.variables["DOCUMENTATION"] = False
         tc.variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
-        tc.variables["CMAKE_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
@@ -102,22 +102,25 @@ class Mosquitto(ConanFile):
 
     def package(self):
         for license_file in ("LICENSE.txt", "edl-v10", "epl-v20"):
-            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+            copy(self, license_file, self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.example", os.path.join(self.package_folder, "res"))
+        package_lib_folder = os.path.join(self.package_folder, "lib")
         if not self.options.shared:
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
-            rm(self, "mosquitto.lib", os.path.join(self.package_folder, "lib"))
-            rm(self, "mosquittopp.lib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll.a", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+            rm(self, "mosquitto.lib", package_lib_folder)
+            rm(self, "mosquittopp.lib", package_lib_folder)
+            rm(self, "*.dll.a", package_lib_folder)
+            rm(self, "*.so*", package_lib_folder)
+            rm(self, "*.dylib", package_lib_folder)
         elif self.options.shared and is_msvc(self):
-            copy(self, "mosquitto.lib", src=os.path.join(self.build_folder, "lib"), dst="lib")
+            lib_folder = os.path.join(self.build_folder, "lib", str(self.settings.build_type))
+            copy(self, "mosquitto.lib", lib_folder, package_lib_folder)
             if self.options.build_cpp:
-                copy(self, "mosquittopp.lib", src=os.path.join(self.build_folder, "lib"), dst="lib")
+                libpp_folder = os.path.join(self.build_folder, "lib", "cpp", str(self.settings.build_type))
+                copy(self, "mosquittopp.lib", libpp_folder, package_lib_folder)
 
     def package_info(self):
         lib_suffix = "" if self.options.shared else "_static"
