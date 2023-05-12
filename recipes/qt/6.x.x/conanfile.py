@@ -9,7 +9,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
-from conan.tools.env import VirtualBuildEnv, Environment
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
@@ -411,13 +411,26 @@ class QtConan(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
+        if not cross_building(self):
+            vre = VirtualRunEnv(self)
+            vre.generate(scope="build")
         # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
         if self._settings_build.os == "Macos":
-            dyld_path = env.vars(self).get("DYLD_LIBRARY_PATH")
-            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_path}"')
+            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
+            dyld_library_path = "$DYLD_LIBRARY_PATH"
+            dyld_library_path_build = vbe.vars().get("DYLD_LIBRARY_PATH")
+            if dyld_library_path_build:
+                dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
+            if not cross_building(self):
+                dyld_library_path_host = vre.vars().get("DYLD_LIBRARY_PATH")
+                if dyld_library_path_host:
+                    dyld_library_path = f"{dyld_library_path_host}:{dyld_library_path}"
+            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
 
         tc = CMakeToolchain(self, generator="Ninja")
