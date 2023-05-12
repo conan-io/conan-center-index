@@ -579,6 +579,20 @@ class QtConan(ConanFile):
 
         tc.generate()
 
+    def package_id(self):
+        del self.info.options.cross_compile
+        del self.info.options.sysroot
+        if self.info.options.multiconfiguration:
+            if self.info.settings.compiler == "Visual Studio":
+                if "MD" in self.info.settings.compiler.runtime:
+                    self.info.settings.compiler.runtime = "MD/MDd"
+                else:
+                    self.info.settings.compiler.runtime = "MT/MTd"
+            elif self.info.settings.compiler == "msvc":
+                self.info.settings.compiler.runtime_type = "Release/Debug"
+        if self.info.settings.os == "Android":
+            del self.info.options.android_sdk
+
     def source(self):
         destination = self.source_folder
         if self.settings.os == "Windows":
@@ -852,18 +866,6 @@ class QtConan(ConanFile):
                     APPEND PROPERTY INTERFACE_LINK_LIBRARIES "$<${entrypoint_conditions}:${QT_CMAKE_EXPORT_NAMESPACE}::EntryPointPrivate>"
                 )""")
             save(self, os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
-
-    def package_id(self):
-        del self.info.options.cross_compile
-        del self.info.options.sysroot
-        if self.info.options.multiconfiguration and is_msvc(self):
-            if self.info.settings.compiler == "Visual Studio":
-                if "MD" in self.settings.compiler.runtime:
-                    self.info.settings.compiler.runtime = "MD/MDd"
-                else:
-                    self.info.settings.compiler.runtime = "MT/MTd"
-            else:
-                self.info.settings.compiler.runtime_type = "Release/Debug"
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt6")
