@@ -290,6 +290,9 @@ class QtConan(ConanFile):
         if cross_building(self):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
+        if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
+            raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -324,7 +327,6 @@ class QtConan(ConanFile):
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.41.1")
-            self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
@@ -465,7 +467,7 @@ class QtConan(ConanFile):
             tc.variables["INPUT_openssl"] = "no"
         else:
             tc.variables["HAVE_openssl"] = "ON"
-            if self.options["openssl"].shared:
+            if self.dependencies["openssl"].options.shared:
                 tc.variables["INPUT_openssl"] = "runtime"
                 tc.variables["QT_FEATURE_openssl_runtime"] = "ON"
             else:
