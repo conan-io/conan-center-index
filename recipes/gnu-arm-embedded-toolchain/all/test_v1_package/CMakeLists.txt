@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_TOOLCHAIN_FILE ../toolchain.cmake)
 

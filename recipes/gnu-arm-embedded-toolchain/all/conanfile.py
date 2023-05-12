@@ -6,15 +6,16 @@ import os
 required_conan_version = ">=1.50.0"
 
 
-class GnuArmEmbeddedToolchain(ConanFile):
-    name = "gnu-arm-embedded-toolchain"
+class ArmGnuToolchain(ConanFile):
+    name = "arm-gnu-toolchain"
     license = "GPL-3.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
     description = ("Conan installer for the GNU Arm Embedded Toolchain")
-    topics = ("ARM", "cortex", "cortex-m", "cortex-m0", "cortex-m0+",
-              "cortex-m1", "cortex-m3", "cortex-m4", "cortex-m4f", "cortex-m7",
-              "cortex-m23", "cortex-m55", "cortex-m35p", "cortex-m33")
+    topics = ("gcc", "compiler", "embedded", "ARM", "cortex", "cortex-m",
+              "cortex-m0", "cortex-m0+", "cortex-m1", "cortex-m3", "cortex-m4",
+              "cortex-m4f", "cortex-m7", "cortex-m23", "cortex-m55",
+              "cortex-m35p", "cortex-m33")
     settings = "os", "arch"
     short_paths = True
 
