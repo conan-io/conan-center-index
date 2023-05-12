@@ -104,7 +104,6 @@ class Llvm(ConanFile):
 
             # options removed in package id
             'use_llvm_cmake_files': [True, False],
-            'clean_build_bin': [True, False],
             'ram_per_compile_job': ['ANY'],
             'ram_per_link_job': ['ANY'],
         },
@@ -141,10 +140,9 @@ class Llvm(ConanFile):
             'with_xml2': False,
             'keep_binaries_regex': '^$',
 
-            # options removed in package id
-            'use_llvm_cmake_files': False,  # XXX Should these files used by conan at all?
-            'clean_build_bin': True,  # prevent 40gb debug build folder
-
+            ## options removed in package id
+            # XXX Should these files used by conan at all?
+            'use_llvm_cmake_files': False,
             # creating job pools with current free memory
             'ram_per_compile_job': '2000',
             'ram_per_link_job': '14000',
@@ -418,10 +416,6 @@ class Llvm(ConanFile):
                 else:
                     shutil.rmtree(ignore_path)
 
-        # remove binaries from build, in debug builds these can take 40gb of disk space but are fast to recreate
-        if self.options.clean_build_bin:
-            rmdir(self, os.path.join(self.build_folder, 'bin'))
-
     def package(self):
         cmake = self._cmake_configure()
         cmake.install()
@@ -624,7 +618,6 @@ class Llvm(ConanFile):
 
     def package_id(self):
         del self.info.options.use_llvm_cmake_files
-        del self.info.options.clean_build_bin
         del self.info.options.ram_per_compile_job
         del self.info.options.ram_per_link_job
 
