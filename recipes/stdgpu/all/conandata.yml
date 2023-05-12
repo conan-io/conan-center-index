@@ -1,7 +1,9 @@
 sources:
+  "cci.20230507":
+    url: "https://github.com/stotko/stdgpu/archive/32e05173d82a1a4f28bb7d9d59b17b122f315dd8.zip"
+    sha256: "ff3a79b045a98882edde5bc5bd19674db1465cee8ed357df9a6b9e52f9395861"
   "1.3.0":
-    url:
-    - "https://github.com/stotko/stdgpu/archive/refs/tags/1.3.0.tar.gz"
+    url: "https://github.com/stotko/stdgpu/archive/refs/tags/1.3.0.tar.gz"
     sha256: "c527dabc6735d8b320b316e9a5b120d258d49c2b7ff9689c8a9b5ad474532a05"
 patches:
   "1.3.0":
