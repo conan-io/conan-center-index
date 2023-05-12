@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.files import get, copy, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -119,7 +119,6 @@ class ZbarConan(ConanFile):
             env.define("NM", "nm")
             env.vars(self).save_script("conanbuild_macos_nm")
 
-
     def build(self):
         apply_conandata_patches(self)
         copy(self, "config.sub", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
@@ -138,6 +137,7 @@ class ZbarConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["zbar"]
