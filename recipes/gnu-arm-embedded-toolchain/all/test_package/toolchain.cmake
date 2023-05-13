@@ -5,7 +5,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 # Target definition
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR ARM)
-
 set(TOOLCHAIN arm-none-eabi)
 
 # Perform compiler test with static library

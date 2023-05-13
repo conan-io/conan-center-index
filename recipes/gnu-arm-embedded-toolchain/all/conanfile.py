@@ -35,7 +35,9 @@ class ArmGnuToolchain(ConanFile):
         return self.conan_data.get("sources", {}).get(version, {}).get("license")
 
     def validate(self):
-        if not self.download_info:
+        if str(self.settings.os) == "baremetal":
+            return
+        elif not self.download_info:
             raise ConanException(
                 "This package is not available for this operating system and architecture.")
 
@@ -88,10 +90,6 @@ class ArmGnuToolchain(ConanFile):
         self.conf_info.define(
             "tools.cmake.cmaketoolchain:system_processor", "ARM")
         self.conf_info.define("tools.build.cross_building:can_run", False)
-
-        tc_path = os.path.join(self.package_folder, "toolchain.cmake")
-        self.conf_info.append(
-            "tools.cmake.cmaketoolchain:user_toolchain", [tc_path])
 
         self.conf_info.define("tools.build:compiler_executables", {
             "c": "arm-none-eabi-gcc",
