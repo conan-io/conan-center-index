@@ -159,6 +159,7 @@ class GoogleAPIS(ConanFile):
         # Fortunately this library is not used by any downstream packages
         # (grpc-protos, or google-cloud-cpp), and it is only "beta" at the
         # moment. Simply disable it for now.
+        deactivate_library("//google/cloud/lifesciences/v2beta:lifesciences_proto")
         deactivate_library("//google/cloud/lifesciences/v2beta:lifesciences_cc_proto")
 
         return proto_libraries
