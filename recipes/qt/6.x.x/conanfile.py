@@ -192,15 +192,15 @@ class QtConan(ConanFile):
             del self.options.opengl
             del self.options.with_vulkan
             del self.options.with_freetype
-            del self.options.with_fontconfig
+            self.options.rm_safe("with_fontconfig")
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
             del self.options.with_md4c
-            del self.options.with_x11
+            self.options.rm_safe("with_x11")
 
         if not self.options.get_safe("qtmultimedia"):
-            del self.options.with_libalsa
+            self.options.rm_safe("with_libalsa")
             del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
