@@ -29,6 +29,11 @@ class ArmGnuToolchain(ConanFile):
         arch = str(self.settings.arch)
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
+    @property
+    def license_info(self):
+        version = self.version
+        return self.conan_data.get("sources", {}).get(version, {}).get("license")
+
     def validate(self):
         if not self.download_info:
             raise ConanException(
@@ -49,15 +54,9 @@ class ArmGnuToolchain(ConanFile):
         check_sha256(self, filename, self.download_info["sha256"])
         unzip(self, filename, strip_root=True)
 
-        '''
-        NOTE: I'm not sure how exactly I should go about handling this:
-        The link is:
-        https://developer.arm.com/GetEula?Id=<ID>
-
-        But it returns a number of licenses concatenated together as HTML.
-        '''
-        # get(self, self.conan_data["sources"]
-        #     [self.version]["License"])
+        license_base_url = "https://developer.arm.com/GetEula?Id="
+        license_url = license_base_url + self.license_info["id"]
+        urllib.request.urlretrieve(license_url, "LICENSE")
 
     def package(self):
         destination = os.path.join(self.package_folder, "bin/")
@@ -75,17 +74,14 @@ class ArmGnuToolchain(ConanFile):
         copy(self, pattern="share/*", src=self.build_folder,
              dst=destination, keep_path=True)
 
-        # license_dir = os.path.join(self.package_folder, "license/")
-        # self.copy(pattern="GetEula*", src=self.build_folder,
-        #           dst=license_dir, keep_path=True)
+        license_dir = os.path.join(self.package_folder, "license/")
+        copy(self, pattern="LICENSE*", src=self.build_folder,
+             dst=license_dir, keep_path=True)
 
     def package_info(self):
-        # Add bin directory to PATH
         bin_folder = os.path.join(self.package_folder, "bin/bin")
-
-        self.buildenv_info.append_path("PATH", bin_folder)
-
         self.cpp_info.bindirs = [bin_folder]
+        self.buildenv_info.append_path("PATH", bin_folder)
 
         self.conf_info.define(
             "tools.cmake.cmaketoolchain:system_name", "GENERIC")
