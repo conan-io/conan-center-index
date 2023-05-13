@@ -38,6 +38,12 @@ sources:
 patches:
   "2.0.6":
     - patch_file: "patches/0004-no-flatc-execution-build-time.patch"
+      patch_description: "No flatc execution during build time"
+      patch_type: "conan"
   "2.0.5":
     - patch_file: "patches/0002-apple-no-universal-build.patch"
+      patch_description: "Don't use universal2 architecture"
+      patch_type: "bugfix"
     - patch_file: "patches/0003-no-flatc-execution-build-time.patch"
+      patch_description: "No flatc execution during build time"
+      patch_type: "conan"
