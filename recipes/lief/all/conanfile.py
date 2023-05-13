@@ -139,8 +139,8 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_OPT_EXTERNAL_SPAN"] = True
         if Version(self.version) >= "0.13.0":
             tc.variables["LIEF_INSTALL"] = True
-            tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0]
-            tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0]
+            tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
+            tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
         tc.generate()
 
         deps = CMakeDeps(self)
