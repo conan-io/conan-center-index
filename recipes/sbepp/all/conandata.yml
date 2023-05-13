@@ -1,4 +1,4 @@
 sources:
-  "1.0.0":
-    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.0.0.tar.gz"
-    sha256: "42f58509346b3e44714a3e505c1fddabaa99f1fe74b76f8d2d7e0e1f307974c0"
+  "1.0.1":
+    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.0.1.tar.gz"
+    sha256: "c8ee54df0ae670bd7508a48947da6c6987eeb72481f1ab8cc05b8d4d03aaec8b"

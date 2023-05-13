@@ -20,12 +20,10 @@ class PackageConan(ConanFile):
     topics = ("trading", "fix", "sbe")
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_sbeppc": [True, False],
-        "allow_clang_11": [None, True, False]
+        "with_sbeppc": [True, False]
     }
     default_options = {
-        "with_sbeppc": True,
-        "allow_clang_11": None
+        "with_sbeppc": True
     }
 
     @property
@@ -49,12 +47,6 @@ class PackageConan(ConanFile):
                 "clang": "3.3",
                 "apple-clang": "9.4"
             }
-
-    def config_options(self):
-        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
-            del self.options.allow_clang_11
-        else:
-            self.output.warn("allow_clang_11 option will be removed in the future when CCI will support clang 11.")
 
     def export_sources(self):
         copy(self, os.path.join("cmake", "sbeppcTargets.cmake"),
@@ -84,9 +76,6 @@ class PackageConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-        # CCI Clang 11 image is broken because it provides very old libstdc++ which doesn't have <filesystem>
-        if self.options.with_sbeppc and str(self.settings.compiler) == "clang" and str(self.settings.compiler.version) == "11" and not self.options.allow_clang_11:
-            raise ConanInvalidConfiguration("Clang 11 is not currently supported by CCI, set `allow_clang_11` to `True` to enable it")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
