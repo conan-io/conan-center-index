@@ -1,5 +1,3 @@
-from contextlib import contextmanager
-
 import configparser
 import glob
 import os
