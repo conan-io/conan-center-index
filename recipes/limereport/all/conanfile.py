@@ -28,7 +28,8 @@ class LimereportConan(ConanFile):
         "qt:qtquickcontrols": True,
         "qt:qtquickcontrols2": True,
         "qt:qtsvg": True,
-        "qt:qttools": True
+        "qt:qttools": True,
+        "qt:shared" : True
     }
 
     def config_options(self):
@@ -56,12 +57,12 @@ class LimereportConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.build_requires("libpng/1.6.38")
+        self.build_requires("libpng/1.6.39")
         if self.options.with_zint:
             self.build_requires("zint/2.10.0")
 
     def requirements(self):
-        self.requires("qt/5.15.7")
+        self.requires("qt/5.15.8")
 
 
     def source(self):
@@ -70,12 +71,13 @@ class LimereportConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIMEREPORT_STATIC"] = not self.options.shared
+        tc.cache_variables["LIMEREPORT_STATIC"] = not self.options.shared
         if is_msvc(self):
             tc.variables["WINDOWS_BUILD"] = True
         qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
         if qt_major == 6: 
-            tc.variables["USE_QT6"] = True
+            tc.cache_variables["USE_QT6"] = True
+        tc.cache_variables["ENABLE_ZINT"] = self.options.with_zint
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

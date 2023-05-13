@@ -1,4 +1,4 @@
 sources:
-  "1.6.9":
-    url: "https://github.com/fralx/LimeReport/archive/d354c8f4c9812704c68e8e107b892fa6ea25e742.tar.gz"
-    sha256: 559a144ceb47c3baf86049338009cb57a2539c3c48d3464c99890da46d54d35e
+  "1.7.4":
+    url: "https://github.com/fralx/LimeReport/archive/refs/tags/1.7.4.tar.gz"
+    sha256: 5e16ffa4f1f6c9175ef00be95029d5dda57287236ef8529582e1df1366c8dc30

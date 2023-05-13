@@ -6,7 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -17,7 +17,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["QT_VERSION"] = self.dependencies["qt"].ref.version
         tc.generate()
 
     def build(self):
