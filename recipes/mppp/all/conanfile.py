@@ -61,7 +61,7 @@ class MpppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gmp/6.2.1")
+        self.requires("gmp/6.2.1", transitive_headers=True)
         if self.options.with_mpfr:
             self.requires("mpfr/4.1.0")
         if self.options.with_mpc:
