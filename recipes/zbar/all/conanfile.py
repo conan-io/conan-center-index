@@ -2,9 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, copy, rmdir, rm, export_conandata_patches, apply_conandata_patches
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -66,6 +66,7 @@ class ZbarConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("libiconv/1.17")
         if self.options.with_jpeg:
             self.requires("libjpeg/9e")
         if self.options.with_imagemagick:
@@ -74,8 +75,6 @@ class ZbarConan(ConanFile):
             self.requires("gtk/4.7.0")
         if self.options.with_qt:
             self.requires("qt/5.15.9")
-        if Version(self.version) >= "0.22":
-            self.requires("libiconv/1.17")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -89,10 +88,11 @@ class ZbarConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
         if Version(self.version) >= "0.22":
             self.tool_requires("gettext/0.21")
             self.tool_requires("libtool/2.4.7")
-            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -100,6 +100,9 @@ class ZbarConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
@@ -115,12 +118,14 @@ class ZbarConan(ConanFile):
             f"--with-jpeg={yes_no(self.options.with_jpeg)}",
             f"--enable-pthread={yes_no(self.options.enable_pthread)}",
         ])
-        tc.generate()
+        env = tc.environment()
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             # ./libtool: eval: line 961: syntax error near unexpected token `|'
-            env = Environment()
             env.define("NM", "nm")
-            env.vars(self).save_script("conanbuild_macos_nm")
+        tc.generate(env)
+
+        AutotoolsDeps(self).generate()
+        PkgConfigDeps(self).generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -153,5 +158,3 @@ class ZbarConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "zbar")
         if self.settings.os in ("FreeBSD", "Linux") and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
-        if is_apple_os(self):
-            self.cpp_info.system_libs = ["iconv"]
