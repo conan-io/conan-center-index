@@ -66,23 +66,22 @@ class ZbarConan(ConanFile):
 
     def requirements(self):
         if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_imagemagick:
             self.requires("imagemagick/7.0.11-14")
         if self.options.with_gtk:
             self.requires("gtk/4.7.0")
         if self.options.with_qt:
-            self.requires("qt/5.15.5")
+            self.requires("qt/5.15.9")
         if Version(self.version) >= "0.22":
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         if Version(self.version) >= "0.22":
-            self.tool_requires("automake/1.16.5")
             self.tool_requires("gettext/0.21")
-            self.tool_requires("pkgconf/1.7.4")
-            self.tool_requires("libtool/2.4.6")
+            self.tool_requires("libtool/2.4.7")
+            self.tool_requires("pkgconf/1.9.3")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -125,7 +124,7 @@ class ZbarConan(ConanFile):
         copy(self, "config.guess", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
 
         autotools = Autotools(self)
-        if Version(self.version) > "0.10":
+        if Version(self.version) >= "0.22":
             autotools.autoreconf()
         autotools.configure()
         autotools.make()
