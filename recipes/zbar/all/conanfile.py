@@ -17,10 +17,11 @@ class ZbarConan(ConanFile):
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://zbar.sourceforge.net/"
-    topics = ("zbar", "barcode", "scanner", "decoder", "reader", "bar")
+    topics = ("barcode", "scanner", "decoder", "reader", "bar")
     description = "ZBar is an open source software suite for reading bar codes\
                    from various sources, such as video streams, image files and raw intensity sensors"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
