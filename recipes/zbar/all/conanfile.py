@@ -2,11 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import Environment
-from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -98,6 +98,9 @@ class ZbarConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
