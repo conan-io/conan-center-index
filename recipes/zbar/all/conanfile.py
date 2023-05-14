@@ -121,8 +121,14 @@ class ZbarConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        copy(self, "config.sub", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
-        copy(self, "config.guess", src=self.source_folder, dst=os.path.join(self.source_folder, "config"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config),
+                           src=os.path.dirname(gnu_config),
+                           dst=os.path.join(self.source_folder, "config"))
 
         autotools = Autotools(self)
         if Version(self.version) >= "0.22":
