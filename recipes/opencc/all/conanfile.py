@@ -17,17 +17,11 @@ class OpenCCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        # "use_system_marisa": [True, False],
-        # "use_system_rapidjson": [True, False],
-        # "use_system_tclap": [True, False],
         "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        # "use_system_marisa": False,
-        # "use_system_rapidjson": False,
-        # "use_system_tclap": False,
         "tools": True,
     }
 
@@ -57,13 +51,10 @@ class OpenCCConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    # def requirements(self):
-    #     if self.options.use_system_marisa:
-    #         self.requires("marisa-trie/0.2.6")
-    #     if self.options.use_system_rapidjson:
-    #         self.requires("rapidjson/1.1.0")
-    #     if self.options.tools and self.options.use_system_tclap:
-    #         self.requires("tclap/1.2.4")
+    def requirements(self):
+        self.requires("marisa/0.2.6")
+        self.requires("rapidjson/cci.20220822")
+        self.requires("tclap/1.2.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -80,10 +71,9 @@ class OpenCCConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
         self._cmake.definitions["BUILD_PYTHON"] = False
-
-        # self._cmake.definitions["USE_SYSTEM_MARISA"] = self.options.use_system_marisa
-        # self._cmake.definitions["USE_SYSTEM_RAPIDJSON"] = self.options.use_system_rapidjson
-        # self._cmake.definitions["USE_SYSTEM_TCLAP"] = self.options.use_system_tclap
+        self._cmake.definitions["USE_SYSTEM_MARISA"] = True
+        self._cmake.definitions["USE_SYSTEM_RAPIDJSON"] = True
+        self._cmake.definitions["USE_SYSTEM_TCLAP"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -100,6 +90,7 @@ class OpenCCConan(ConanFile):
                   src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "opencc")
@@ -113,6 +104,7 @@ class OpenCCConan(ConanFile):
         self.cpp_info.libs = ["opencc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        self.cpp_info.requires = ["marisa::marisa", "rapidjson::rapidjson", "tclap::tclap"]
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")

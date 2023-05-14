@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d2ae987..466345b 100644
+index d407e99..dc8a39f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -21,10 +21,12 @@ cmake_minimum_required(VERSION 2.8)
@@ -15,10 +15,11 @@ index d2ae987..466345b 100644
  option(ENABLE_GTEST "Build all tests." OFF)
  option(ENABLE_BENCHMARK "Build benchmark tests." OFF)
  option(ENABLE_DARTS "Build DartsDict (ocd format)." ON)
-@@ -77,10 +79,11 @@ endif()
+@@ -76,11 +78,11 @@ endif()
+ 
  ######## Directory
  
- set (DIR_PREFIX ${CMAKE_INSTALL_PREFIX})
+-set (DIR_PREFIX ${CMAKE_INSTALL_PREFIX})
 -set (DIR_INCLUDE ${DIR_PREFIX}/include/)
 -set (DIR_SHARE ${DIR_PREFIX}/share/)
 -set (DIR_ETC ${DIR_PREFIX}/etc/)
@@ -31,7 +32,7 @@ index d2ae987..466345b 100644
  
  if (DEFINED SHARE_INSTALL_PREFIX)
    set (DIR_SHARE ${SHARE_INSTALL_PREFIX})
-@@ -111,7 +114,7 @@ configure_file(
+@@ -111,7 +113,7 @@ configure_file(
  
  install(
    FILES
@@ -51,7 +52,7 @@ index 93ff260..188609e 100644
 -Cflags: -I${includedir}/opencc
 +Cflags: -I${includedir}
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 11d14e4..b560f5d 100644
+index c0a0b10..d6979df 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -5,12 +5,18 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
