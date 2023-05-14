@@ -77,22 +77,22 @@ class ZbarConan(ConanFile):
         if Version(self.version) >= "0.22":
             self.requires("libiconv/1.17")
 
-    def build_requirements(self):
-        self.tool_requires("gnu-config/cci.20210814")
-        if Version(self.version) >= "0.22":
-            self.tool_requires("gettext/0.21")
-            self.tool_requires("libtool/2.4.7")
-            self.tool_requires("pkgconf/1.9.3")
-
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
         if is_apple_os(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
         if self.options.with_xv:            #TODO add when available
-            self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
+            self.output.warning("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
         if Version(self.version) >= "0.22" and cross_building(self):
             raise ConanInvalidConfiguration(f"{self.ref} can't be built on cross building environment currently because autopoint(part of gettext) doesn't execute correctly.")
+
+    def build_requirements(self):
+        self.tool_requires("gnu-config/cci.20210814")
+        if Version(self.version) >= "0.22":
+            self.tool_requires("gettext/0.21")
+            self.tool_requires("libtool/2.4.7")
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
