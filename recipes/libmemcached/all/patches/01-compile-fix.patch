@@ -120,22 +120,6 @@ index fdfa021..8c03d35 100644
 -}
 -
 -#endif // HAVE_HTONLL
-diff --git a/libmemcached-1.0/memcached.h b/libmemcached-1.0/memcached.h
-index bc16e73..dcee395 100644
---- a/libmemcached-1.0/memcached.h
-+++ b/libmemcached-1.0/memcached.h
-@@ -43,7 +43,11 @@
- #endif
- 
- #ifdef __cplusplus
-+#ifdef _LIBCPP_VERSION
- #  include <cinttypes>
-+#else
-+#  include <tr1/cinttypes>
-+#endif
- #  include <cstddef>
- #  include <cstdlib>
- #else
 diff --git a/libmemcached/byteorder.cc b/libmemcached/byteorder.cc
 index 9f11aa8..f167822 100644
 --- a/libmemcached/byteorder.cc
