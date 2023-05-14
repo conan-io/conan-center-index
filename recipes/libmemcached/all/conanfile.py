@@ -95,4 +95,5 @@ class LibmemcachedConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["memcached"]
+        self.cpp_info.system_libs = ["m"]
 
