@@ -1,12 +1,9 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    get,
-    copy,
-    rm,
-)
+from conan.tools.files import get, copy, rm
 
 required_conan_version = ">=1.53.0"
 
@@ -28,6 +25,10 @@ class EmbagConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def export_sources(self):
         copy(
@@ -52,6 +53,10 @@ class EmbagConan(ConanFile):
         self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
         self.requires("lz4/1.9.4", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -11,6 +11,7 @@ set_target_properties(embag PROPERTIES
     # embag does not export any symbols otherwise
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
+target_compile_features(embag PUBLIC cxx_std_11)
 target_link_libraries(embag PUBLIC
     Boost::iostreams
     Boost::headers
