@@ -14,7 +14,7 @@ required_conan_version = ">=1.54.0"
 class UvwConan(ConanFile):
     name = "uvw"
     description = "Header-only, event based, tiny and easy to use libuv wrapper in modern C++."
-    topics = ("uvw", "libuv", "io", "networking", "header-only",)
+    topics = ("libuv", "io", "networking", "header-only",)
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skypjack/uvw"
