@@ -232,7 +232,7 @@ class QtConan(ConanFile):
             check_min_cppstd(self, 17)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
+            self.output.warning("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
@@ -553,7 +553,7 @@ class QtConan(ConanFile):
             if xplatform_val:
                 tc.variables["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
             else:
-                self.output.warn(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
+                self.output.warning(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
         if self.options.cross_compile:
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
 
@@ -805,7 +805,7 @@ class QtConan(ConanFile):
                     exe_path = path_
                     break
             if not exe_path:
-                self.output.warn(f"Could not find path to {target}{extension}")
+                self.output.warning(f"Could not find path to {target}{extension}")
             filecontents += textwrap.dedent(f"""\
                 if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
                     add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
