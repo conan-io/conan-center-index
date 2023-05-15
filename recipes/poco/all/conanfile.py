@@ -86,15 +86,6 @@ class PocoConan(ConanFile):
             del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
-        if Version(self.version) < "1.9.0":
-            del self.options.enable_encodings
-        if Version(self.version) < "1.10.0":
-            del self.options.enable_data_mysql
-            del self.options.enable_data_postgresql
-            del self.options.enable_jwt
-        if Version(self.version) < "1.11.0":
-            del self.options.enable_activerecord
-            del self.options.enable_activerecord_compiler
         if Version(self.version) < "1.12.0":
             del self.options.enable_prometheus
 
@@ -131,10 +122,7 @@ class PocoConan(ConanFile):
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
-            if Version(self.version) < "1.11.0":
-                self.requires("openssl/1.1.1t", transitive_headers=True)
-            else:
-                self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("enable_data_postgresql"):
@@ -182,8 +170,6 @@ class PocoConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
-        if Version(self.version) < "1.10.1":
-            tc.variables["POCO_STATIC"] = not self.options.shared
         for comp in self._poco_component_tree.values():
             if comp.option:
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
@@ -213,8 +199,7 @@ class PocoConan(ConanFile):
         # Disable automatic linking on MSVC
         tc.preprocessor_definitions["POCO_NO_AUTOMATIC_LIBS"] = "1"
         # Picked up from conan v1 CMake wrapper, don't know the rationale
-        if Version(self.version) >= "1.11.0":
-            tc.preprocessor_definitions["XML_DTD"] = "1"
+        tc.preprocessor_definitions["XML_DTD"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
