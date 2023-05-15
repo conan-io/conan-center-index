@@ -3,13 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    copy,
-    get,
-    replace_in_file,
-    rm,
-    rmdir,
-)
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -94,15 +88,18 @@ class LibTinsConan(ConanFile):
             os.path.join(self.source_folder, "CMakeLists.txt"),
             "FIND_PACKAGE(PCAP REQUIRED)",
             "find_package(libpcap REQUIRED)",
+            strict=True,
         )
         replace_in_file(
             self,
             os.path.join(self.source_folder, "src", "CMakeLists.txt"),
             "${PCAP_LIBRARY}",
             "libpcap::libpcap",
+            strict=True,
         )
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
