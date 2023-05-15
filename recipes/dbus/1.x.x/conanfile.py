@@ -69,7 +69,7 @@ class DbusConan(ConanFile):
     def requirements(self):
         self.requires("expat/2.5.0")
         if self.options.with_glib:
-            self.requires("glib/2.76.0")
+            self.requires("glib/2.76.2")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/252.4")
         if self.options.with_selinux:
@@ -87,7 +87,7 @@ class DbusConan(ConanFile):
 
     def build_requirements(self):
         if self._meson_available:
-            self.tool_requires("meson/1.0.0")
+            self.tool_requires("meson/1.1.0")
         if self._meson_available or self.options.get_safe("with_systemd"):
             if not self.conf.get("tools.gnu:pkg_config",check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
