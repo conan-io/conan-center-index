@@ -69,7 +69,7 @@ class FastDDSConan(ConanFile):
 
     def requirements(self):
         self.requires("tinyxml2/9.0.0")
-        self.requires("asio/1.27.0")
+        self.requires("asio/1.28.0")
         self.requires("fast-cdr/1.0.27", transitive_headers=True, transitive_libs=True)
         self.requires("foonathan-memory/0.7.3")
         if self.options.with_ssl:
@@ -91,7 +91,8 @@ class FastDDSConan(ConanFile):
             raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        if Version(self.version) >= "2.7.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
