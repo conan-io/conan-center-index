@@ -84,9 +84,3 @@ class GKlibConan(ConanFile):
             self.cpp_info.defines.append("USE_GKREGEX")
         if is_msvc(self):
             self.cpp_info.defines.append("__thread=__declspec(thread)")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "GKLIB"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "gklib"
-        self.cpp_info.names["cmake_find_package"] = "GKLIB"
-        self.cpp_info.names["cmake_find_package_multi"] = "gklib"
