@@ -25,6 +25,7 @@ class OpenblasConan(ConanFile):
         "use_thread": [True, False],
         "use_openmp": [True, False],
         "dynamic_arch": [True, False],
+        "with_avx512": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,6 +34,7 @@ class OpenblasConan(ConanFile):
         "use_thread": True,
         "use_openmp": False,
         "dynamic_arch": False,
+        "with_avx512": False,
     }
     package_type = "library"
     short_paths = True
@@ -146,11 +148,7 @@ class OpenblasConan(ConanFile):
         # don't, may lie to consumer, /MD or /MT is managed by conan
         tc.variables["MSVC_STATIC_CRT"] = False
 
-        # Env variable escape hatch for enabling AVX512
-        no_avx512 = environ.get("NO_AVX512")
-        if no_avx512 is None:
-            no_avx512 = True
-        tc.variables["NO_AVX512"] = no_avx512
+        tc.variables["NO_AVX512"] = not self.options.with_avx512
 
         tc.generate()
 
