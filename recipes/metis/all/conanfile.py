@@ -65,7 +65,6 @@ class METISConan(ConanFile):
         tc.variables["METIS_IDX64"] = self.options.with_64bit_types
         tc.variables["METIS_REAL64"] = self.options.with_64bit_types
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        tc.variables["GKLIB_PATH"] = path.join(self.source_folder, "GKlib")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -86,18 +85,9 @@ class METISConan(ConanFile):
         self.cpp_info.libs = ["metis"]
         self.cpp_info.requires.append("gklib::gklib")
 
-        self.cpp_info.set_property("cmake_file_name", "metis")
-        self.cpp_info.set_property("cmake_target_name", "metis::metis")
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         if is_msvc(self) or self._is_mingw:
             self.cpp_info.defines.append("USE_GKREGEX")
         if is_msvc(self):
             self.cpp_info.defines.append("__thread=__declspec(thread)")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "METIS"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "metis"
-        self.cpp_info.names["cmake_find_package"] = "METIS"
-        self.cpp_info.names["cmake_find_package_multi"] = "metis"
