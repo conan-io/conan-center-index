@@ -78,9 +78,6 @@ class GKlibConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["GKlib"]
 
-        self.cpp_info.set_property("cmake_file_name", "gklib")
-        self.cpp_info.set_property("cmake_target_name", "gklib::gklib")
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         if is_msvc(self) or self._is_mingw:
