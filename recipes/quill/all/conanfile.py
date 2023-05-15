@@ -35,6 +35,10 @@ class QuillConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return "17" if Version(self.version) >= "2.0.0" else "14"
+
+    @property
     def _compilers_minimum_versions(self):
         return {
             "14":
@@ -65,10 +69,7 @@ class QuillConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.6.3":
-            self.requires("fmt/9.1.0", transitive_headers=True)
-        else:
-            self.requires("fmt/7.1.3", transitive_headers=True)
+        self.requires("fmt/10.0.0", transitive_headers=True)
 
     def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]
@@ -76,18 +77,16 @@ class QuillConan(ConanFile):
         if not any(arch in str(self.settings.arch) for arch in supported_archs):
             raise ConanInvalidConfiguration(f"{self.settings.arch} is not supported by {self.ref}")
 
-        cxx_std = "17" if Version(self.version) >= "2.0.0" else "14"
-
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, cxx_std)
+            check_min_cppstd(self, self._min_cppstd)
 
-        compilers_minimum_version = self._compilers_minimum_versions[cxx_std]
+        compilers_minimum_version = self._compilers_minimum_versions[self._min_cppstd]
         minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{cxx_std}, which your compiler does not support.")
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
         else:
-            self.output.warning(f"{self.ref} requires C++{cxx_std}. Your compiler is unknown. Assuming it supports C++{cxx_std}.")
+            self.output.warning(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
         if Version(self.version) >= "2.0.0" and \
             self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
