@@ -62,8 +62,8 @@ class METISConan(ConanFile):
         tc.variables["METIS_INSTALL"] = True
         tc.variables["ASSERT"] = self.settings.build_type == "Debug"
         tc.variables["ASSERT2"] = self.settings.build_type == "Debug"
-        tc.variables["METIS_IDX64"] = self.with_64bit_types
-        tc.variables["METIS_REAL64"] = self.with_64bit_types
+        tc.variables["METIS_IDX64"] = self.options.with_64bit_types
+        tc.variables["METIS_REAL64"] = self.options.with_64bit_types
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["GKLIB_PATH"] = path.join(self.source_folder, "GKlib")
         tc.generate()
