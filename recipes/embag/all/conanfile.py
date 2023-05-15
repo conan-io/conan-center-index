@@ -28,7 +28,7 @@ class EmbagConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 14
 
     def export_sources(self):
         copy(
