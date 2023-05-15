@@ -37,17 +37,13 @@ class UvwConan(ConanFile):
 
     @property
     def _required_libuv_version(self):
-        # uvw is bound to a particular libuv version which is part of the release archive name
-        match = re.match(r".*libuv[_-]v([0-9]+\.[0-9]+).*", self.conan_data["sources"][self.version]["url"])
-        if not match:
-            raise ConanException(f"{self.ref} does not know what version of libuv to use as a dependency")
-        return match.group(1)
+        return self.conan_data["sources"][self.version]["libuv_version"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"libuv/[~{self._required_libuv_version}]")
+        self.requires(f"libuv/{self._required_libuv_version}")
 
     def package_id(self):
         self.info.clear()
@@ -61,7 +57,7 @@ class UvwConan(ConanFile):
             raise ConanInvalidConfiguration("{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
 
     def package(self):
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
