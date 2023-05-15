@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm
+from conan.tools.files import get, copy, rm, replace_in_file
 
 required_conan_version = ">=1.53.0"
 
@@ -67,7 +67,17 @@ class EmbagConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        # Disable a C++11 workaround that is broken on MSVC
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "lib", "util.h"),
+            "#if __cplusplus < 201402L",
+            "#if false",
+        )
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
