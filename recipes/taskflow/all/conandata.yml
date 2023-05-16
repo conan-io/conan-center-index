@@ -1,4 +1,7 @@
 sources:
+  "3.6.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.6.0.tar.gz"
+    sha256: "5a1cd9cf89f93a97fcace58fd73ed2fc8ee2053bcb43e047acb6bc121c3edf4c"
   "3.5.0":
     url: "https://github.com/taskflow/taskflow/archive/v3.5.0.tar.gz"
     sha256: "33c44e0da7dfda694d2b431724d6c8fd25a889ad0afbb4a32e8da82e2e9c2a92"

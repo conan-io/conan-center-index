@@ -62,7 +62,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - CMake: 3.15.7, 3.18.2 (same version expected after all use [new docker images](https://github.com/conan-io/conan-docker-tools/tree/master/modern))
 - Compilers:
   - GCC versions: 5, 7, 9, 10, 11
-  - Clang versions: 11, 12, 13
+  - Clang versions: 12, 13
 - C++ Standard Library (`libcxx`):
   - GCC compiler: `libstdc++`, `libstdc++11`
   - Clang compiler: `libstdc++`, `libc++`
