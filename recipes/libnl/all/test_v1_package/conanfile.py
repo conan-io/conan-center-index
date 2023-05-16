@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class NetlinkTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
@@ -14,5 +14,5 @@ class NetlinkTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join(self.build_folder, "bin", "show_links")
+            bin_path = os.path.join(self.build_folder, "bin", "test_package")
             self.run(bin_path, cwd=self.source_folder, run_environment=True)
