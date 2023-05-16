@@ -59,6 +59,8 @@ class PackageConan(ConanFile):
     def package_id(self):
         if not self.info.options.with_sbeppc:
             self.info.clear()
+        else:
+            del self.info.settings.compiler
 
     def requirements(self):
         if self.options.with_sbeppc:
