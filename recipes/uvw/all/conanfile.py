@@ -36,7 +36,14 @@ class UvwConan(ConanFile):
 
     @property
     def _required_libuv_version(self):
-        return self.conan_data["sources"][self.version]["libuv_version"]
+        return {
+            "2.12.1": "1.44.2",
+            "2.11.0": "1.43.0",
+            "2.10.0": "1.42.0",
+            "2.9.0": "1.41.0",
+            "2.8.0": "1.40.0",
+            "2.6.0": "1.38.1",
+        }[self.version]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -56,7 +63,7 @@ class UvwConan(ConanFile):
             raise ConanInvalidConfiguration("{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
