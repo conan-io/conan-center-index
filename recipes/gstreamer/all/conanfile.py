@@ -5,7 +5,7 @@ from conan.tools.files import chdir, copy, get, rename, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
 import glob
@@ -76,8 +76,7 @@ class GStreamerConan(ConanFile):
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
         tc = MesonToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14") \
-            or (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "190"):
+        if is_msvc(self) and not check_min_vs(self, "190", raise_invalid=False):
             tc.project_options["c_std"] = "c99"
         tc.project_options["tools"] = "disabled"
         tc.project_options["examples"] = "disabled"

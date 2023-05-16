@@ -15,4 +15,4 @@ class TestPackageV1Conan(ConanFile):
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            self.run(f"GST_DEBUG=8 timeout --kill-after=10s 5s {bin_path}", run_environment=True)
+            self.run(bin_path, run_environment=True)

@@ -23,12 +23,6 @@ class TestPackageConan(ConanFile):
         cmake_deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()
-
-        # Debug only, do not merge
-        env = Environment()
-        env.define("GST_DEBUG", "8")
-        env.vars(self, scope="run").save_script("gst_debug_run")
-
         runenv = VirtualRunEnv(self)
         runenv.generate()
 
@@ -40,5 +34,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            # Debug only, do not merge
-            self.run(f"timeout --kill-after=10s 5s {bin_path}", env="conanrun")
+            self.run(bin_path, env="conanrun")
