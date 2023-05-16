@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
-from conans import tools
 import os
 
 required_conan_version = ">=1.53.0"
@@ -92,7 +91,6 @@ class VsgConan(ConanFile):
         deps = CMakeDeps(self)
 
         deps.generate()
-        tc = CMakeToolchain(self)   
 
     def build(self):
         cmake = CMake(self)
@@ -115,7 +113,7 @@ class VsgConan(ConanFile):
         rm(self, "*Config.cmake", os.path.join(self.package_folder, "lib/cmake/vsg"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
 
         self.cpp_info.set_property("cmake_file_name", "vsg")
         self.cpp_info.set_property("cmake_target_name", "vsg::vsg")
