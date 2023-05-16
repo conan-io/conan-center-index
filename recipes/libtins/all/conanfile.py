@@ -123,6 +123,9 @@ class LibTinsConan(ConanFile):
         self.cpp_info.libs = ["tins"]
         self.cpp_info.set_property("pkg_config_name", "libtins")
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("TINS_STATIC")
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
