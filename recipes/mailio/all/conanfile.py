@@ -84,6 +84,8 @@ class MailioConan(ConanFile):
         tc.variables["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.variables["MAILIO_BUILD_DOCUMENTATION"] = False
         tc.variables["MAILIO_BUILD_EXAMPLES"] = False
+        if Version(self.version) >= "0.22.0":
+            tc.variables["MAILIO_BUILD_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
