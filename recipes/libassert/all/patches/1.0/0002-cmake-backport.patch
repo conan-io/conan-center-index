@@ -28,7 +28,7 @@ index b3cd118..0bb5de8 100644
      
  option(ASSERT_DECOMPOSE_BINARY_LOGICAL "Enables expression decomposition of && and ||" OFF)
  option(ASSERT_LOWERCASE "Enables assert alias for ASSERT" OFF)
-@@ -43,7 +51,31 @@ set_target_properties(assert
+@@ -43,7 +51,32 @@ set_target_properties(assert
  
  target_link_libraries(assert PRIVATE asserts_library_warnings)
  
@@ -48,6 +48,7 @@ index b3cd118..0bb5de8 100644
 +    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +  )
 +
 +  install(

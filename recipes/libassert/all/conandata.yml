@@ -12,8 +12,15 @@ sources:
 patches:
   "1.1":
     - patch_file: "patches/1.1/0001-fix-max_line_number_width-miscalculation.patch"
+      patch_type: "bugfix"
     - patch_file: "patches/1.1/0002-binary_diagnostics_descriptor-noexcept.patch"
+      patch_type: "bugfix"
+    - patch_file: "patches/1.1/0003-cmake-windows.patch"
+      patch_type: "bugfix"
   "1.0":
     - patch_file: "patches/1.0/0001-add-cstring-include.patch"
+      patch_type: "bugfix"
     - patch_file: "patches/1.0/0002-cmake-backport.patch"
+      patch_type: "portability"
     - patch_file: "patches/1.0/0003-fix-max_line_number_width-miscalculation.patch"
+      patch_type: "bugfix"
