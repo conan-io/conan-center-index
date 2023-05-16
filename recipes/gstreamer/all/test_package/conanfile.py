@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.gnu import PkgConfigDeps
 import os
 
@@ -28,6 +28,9 @@ class TestPackageConan(ConanFile):
         env = Environment()
         env.define("GST_DEBUG", "8")
         env.vars(self, scope="run").save_script("gst_debug_run")
+
+        runenv = VirtualRunEnv(self)
+        runenv.generate()
 
     def build(self):
         cmake = CMake(self)
