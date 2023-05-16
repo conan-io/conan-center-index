@@ -23,7 +23,6 @@ class Libxml2Conan(ConanFile):
     topics = "xml", "parser", "validation"
     homepage = "https://gitlab.gnome.org/GNOME/libxml2/-/wikis/"
     license = "MIT"
-    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     # from ./configure and ./win32/configure.js
     default_options = {
