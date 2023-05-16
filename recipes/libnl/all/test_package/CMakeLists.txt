@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-project(netlink_example C)
+project(test_package C)
 
 find_package(libnl CONFIG REQUIRED)
 
-add_executable(show_links show_links.c)
-target_link_libraries(show_links libnl::nl libnl::nl-route libnl::nl-genl libnl::nl-nf libnl::nl-cli libnl::nl-idiag)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME}.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE libnl::nl libnl::nl-route libnl::nl-genl libnl::nl-nf libnl::nl-cli libnl::nl-idiag)
