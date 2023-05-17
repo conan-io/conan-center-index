@@ -1,0 +1,12 @@
+sources:
+  "0.47":
+    url: "https://sourceforge.net/projects/mingw/files/MinGW/Extension/pexports/pexports-0.47/pexports-0.47-mingw32-src.tar.xz/download"
+    sha256: "fe12853979bd7335aa771c934ddee913c987554f9dc11266262b7fd68e0aa884"
+patches:
+  "0.47":
+    - patch_file: "patches/0001-add-help.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-MSVC-stack-overflow.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-MSVC-x86.patch"
+      base_path: "source_subfolder"

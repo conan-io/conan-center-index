@@ -1,0 +1,135 @@
+--- a/microprofile.h
++++ b/microprofile.h
+@@ -179,6 +179,7 @@
+ #define MicroProfileGpuInitD3D11(pDevice,pDeviceContext) do{}while(0)
+ #define MicroProfileGpuShutdown() do{}while(0)
+ #define MicroProfileGpuInitGL() do{}while(0)
++#define MicroProfileInitGLCallbacks(cbs) do{}while(0)
+ #define MicroProfileSetCurrentNodeD3D12(nNode) do{}while(0)
+ #define MicroProfilePlatformMarkersGetEnabled() 0
+ #define MicroProfilePlatformMarkersSetEnabled(bEnabled) do{}while(0)
+@@ -192,9 +193,13 @@
+ 
+ #include <stdint.h>
+ 
++#ifdef MICROPROFILE_EXPORT
++#include "microprofile.export.h"
++#else
+ #ifndef MICROPROFILE_API
+ #define MICROPROFILE_API
+ #endif
++#endif
+ 
+ #ifdef MICROPROFILE_PS4
+ #include "microprofile_ps4.h"
+@@ -481,6 +486,7 @@
+ struct MicroProfile;
+ struct MicroProfileThreadLogGpu;
+ struct MicroProfileScopeStateC;
++struct MicroProfileGLCallbacks;
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -682,6 +688,7 @@
+ #if MICROPROFILE_GPU_TIMERS_GL
+ #define MICROPROFILE_GL_MAX_QUERIES (8<<10)
+ MICROPROFILE_API void MicroProfileGpuInitGL();
++MICROPROFILE_API void MicroProfileInitGLCallbacks(const MicroProfileGLCallbacks* cbs);
+ #endif
+ 
+ 
+@@ -752,6 +759,16 @@
+ 		}
+ 	}
+ };
++
++#include <functional>
++struct MicroProfileGLCallbacks
++{
++    std::function<void(uint32_t, uint32_t*)> genQueriesCb;
++    std::function<void(uint32_t, const uint32_t*)> deleteQueriesCb;
++    std::function<void(uint32_t, uint32_t)> queryCounterCb;
++    std::function<void(uint32_t, uint32_t, uint64_t*)> getQueryObject64Cb;
++    std::function<void(uint32_t, int64_t*)> getInteger64Cb;
++};
+ #endif //__cplusplus
+ #endif //enabled
+ 
+--- a/microprofile.cpp
++++ b/microprofile.cpp
+@@ -952,6 +952,7 @@
+ 	int							GpuQueue;
+ 	MicroProfileThreadLogGpu* 	pGpuGlobal;
+ 	MicroProfileGpuTimerState* 	pGPU;
++    MicroProfileGLCallbacks	    glCallbacks;
+ 
+ };
+ 
+@@ -4835,6 +4836,7 @@
+ }
+ 
+ #if MICROPROFILE_MINIZ
++#include <miniz/miniz.h>
+ #ifndef MICROPROFILE_COMPRESS_BUFFER_SIZE
+ #define MICROPROFILE_COMPRESS_BUFFER_SIZE (256<<10)
+ #endif
+@@ -8711,29 +8713,37 @@
+  	vkQueueSubmit(S.pGPU->Queues[nGpu], 1, &SubmitInfo, Fence);
+ 	vkWaitForFences(Device, 1, &Fence, 1, (uint64_t)-1);
+ 	*pOutGpu = 0;
+-	vkGetQueryPoolResults(Device, S.pGPU->QueryPool[nGpu], MICROPROFILE_VULKAN_MAX_QUERIES, 1, 8, pOutGpu, 8, VK_QUERY_RESULT_64_BIT);	
++	vkGetQueryPoolResults(Device, S.pGPU->QueryPool[nGpu], MICROPROFILE_VULKAN_MAX_QUERIES, 1, 8, pOutGpu, 8, VK_QUERY_RESULT_64_BIT);
+ 	*pOutCPU = MP_TICK();
+ 	return 1;
+ }
+ #elif MICROPROFILE_GPU_TIMERS_GL
++#define GL_TIMESTAMP	0x8E28
++#define GL_QUERY_RESULT 0x8866
++
++void MicroProfileInitGLCallbacks(const MicroProfileGLCallbacks* cbs)
++{
++	S.glCallbacks = *cbs;
++}
++
+ void MicroProfileGpuInitGL()
+ {
+ 	S.pGPU = MP_ALLOC_OBJECT(MicroProfileGpuTimerState);
+ 	S.pGPU->GLTimerPos = 0;
+-	glGenQueries(MICROPROFILE_GL_MAX_QUERIES, &S.pGPU->GLTimers[0]);		
++	S.glCallbacks.genQueriesCb(MICROPROFILE_GL_MAX_QUERIES, &S.pGPU->GLTimers[0]);
+ }
+ 
+ uint32_t MicroProfileGpuInsertTimeStamp(void* pContext)
+ {
+ 	uint32_t nIndex = (S.pGPU->GLTimerPos+1)%MICROPROFILE_GL_MAX_QUERIES;
+-	glQueryCounter(S.pGPU->GLTimers[nIndex], GL_TIMESTAMP);
++	S.glCallbacks.queryCounterCb(S.pGPU->GLTimers[nIndex], GL_TIMESTAMP);
+ 	S.pGPU->GLTimerPos = nIndex;
+ 	return nIndex;
+ }
+ uint64_t MicroProfileGpuGetTimeStamp(uint32_t nKey)
+ {
+ 	uint64_t result;
+-	glGetQueryObjectui64v(S.pGPU->GLTimers[nKey], GL_QUERY_RESULT, &result);
++	S.glCallbacks.getQueryObject64Cb(S.pGPU->GLTimers[nKey], GL_QUERY_RESULT, &result);
+ 	return result;
+ }
+ 
+@@ -8745,7 +8755,7 @@
+ int MicroProfileGetGpuTickReference(int64_t* pOutCpu, int64_t* pOutGpu)
+ {
+ 	int64_t nGpuTimeStamp;
+-	glGetInteger64v(GL_TIMESTAMP, &nGpuTimeStamp);
++	S.glCallbacks.getInteger64Cb(GL_TIMESTAMP, &nGpuTimeStamp);
+ 	if(nGpuTimeStamp)
+ 	{
+ 		*pOutCpu = MP_TICK();
+@@ -8785,7 +8795,7 @@
+ 
+ void MicroProfileGpuShutdown()
+ {
+-	glDeleteQueries(MICROPROFILE_GL_MAX_QUERIES, &S.pGPU->GLTimers[0]);
++	S.glCallbacks.deleteQueriesCb(MICROPROFILE_GL_MAX_QUERIES, &S.pGPU->GLTimers[0]);
+ 	MP_FREE(S.pGPU);
+ }
+ 

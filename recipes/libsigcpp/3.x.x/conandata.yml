@@ -1,0 +1,12 @@
+sources:
+  "3.0.7":
+    url: "https://ftp.gnome.org/pub/GNOME/sources/libsigc++/3.0/libsigc++-3.0.7.tar.xz"
+    sha256: "bfbe91c0d094ea6bbc6cbd3909b7d98c6561eea8b6d9c0c25add906a6e83d733"
+  "3.0.0":
+    url: "https://ftp.gnome.org/pub/GNOME/sources/libsigc++/3.0/libsigc++-3.0.0.tar.xz"
+    sha256: "50a0855c1eb26e6044ffe888dbe061938ab4241f96d8f3754ea7ead38ab8ed06"
+patches:
+  "3.0.7":
+    - patch_file: "patches/3.0.7-0001-libsigcpp.patch"
+  "3.0.0":
+    - patch_file: "patches/3.0.0-0001-libsigcpp.patch"

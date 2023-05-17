@@ -1,0 +1,31 @@
+sources:
+  "5.2.0":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v5.2.0.tar.gz"
+    sha256: "49afe765fe4e8ddf134ebf2862a698b8d0dd8dc724d4300e09e5bf7da9e4cbfb"
+  "5.1.0":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v5.1.0.tar.gz"
+    sha256: "de22ddf2c99079ed2385baa554a997b15ae17b039d6d108f68e25e1b3bbf76b6"
+  "5.0.0":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v5.0.0.tar.gz"
+    sha256: "0df7948bc6f4d219c60f51179355599938cab5b713335c2ea48d1d38be1b69dc"
+  "4.2.0":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.2.0.zip"
+    sha256: "18aeb755a875015a2e182d4c575cc46a041bdfb699937c5174d94534517e4708"
+  "4.1.1":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.1.1.zip"
+    sha256: "ca425c97eb871400de4bd2307ddaf3c557c9c1bae50d6a0db6507d72f435830c"
+  "4.1.0":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.1.0.zip"
+    sha256: "8356bc76077fea354e83ffcd506096797137af10b292809c6b7843a8fbd084e3"
+  "4.0.1":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.0.1.zip"
+    sha256: "4b3c6a876ebca2a4dcf23a556d3c3d4da2284e4ce1d2bbdf335df7f86b03fd28"
+patches:
+  "5.1.0":
+    - patch_file: "patches/gcc_11_1_0.patch"
+      patch_description: "Fix for GCC-111"
+      patch_type: "portability"
+  "4.1.0":
+    - patch_file: "patches/gcc_4.9_5_fix.patch"
+      patch_description: "Fix for GCC-495"
+      patch_type: "portability"

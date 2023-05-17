@@ -1,0 +1,37 @@
+--- a/CMakeFilters.cmake
++++ b/CMakeFilters.cmake
+@@ -52,10 +52,10 @@
+       find_package (ZLIB NAMES ${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+       if (NOT ZLIB_FOUND)
+         find_package (ZLIB) # Legacy find
+-        if (ZLIB_FOUND)
+-          set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${ZLIB_LIBRARIES})
+-          set (LINK_COMP_SHARED_LIBS ${LINK_COMP_SHARED_LIBS} ${ZLIB_LIBRARIES})
+-        endif ()
++      endif ()
++      if (ZLIB_FOUND)
++        set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${ZLIB_LIBRARIES})
++        set (LINK_COMP_SHARED_LIBS ${LINK_COMP_SHARED_LIBS} ${ZLIB_LIBRARIES})
+       endif ()
+     endif ()
+     if (ZLIB_FOUND)
+@@ -102,10 +102,15 @@
+   if (NOT SZIP_USE_EXTERNAL)
+     find_package (SZIP NAMES ${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+     if (NOT SZIP_FOUND)
+-      find_package (SZIP) # Legacy find
+-      if (SZIP_FOUND)
+-        set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${SZIP_LIBRARIES})
+-        set (LINK_COMP_SHARED_LIBS ${LINK_COMP_SHARED_LIBS} ${SZIP_LIBRARIES})
++      find_package (szip CONFIG REQUIRED)
++    endif ()
++    if (SZIP_FOUND)
++      if (TARGET szip-shared)
++         set (LINK_COMP_SHARED_LIBS ${LINK_COMP_SHARED_LIBS} szip-shared)
++         set (LINK_COMP_LIBS ${LINK_COMP_LIBS} szip-shared)
++      else ()
++         set (LINK_COMP_SHARED_LIBS ${LINK_COMP_SHARED_LIBS} szip-static)
++         set (LINK_COMP_LIBS ${LINK_COMP_LIBS} szip-static)
+       endif ()
+     endif ()
+   endif ()

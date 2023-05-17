@@ -1,0 +1,9 @@
+versions:
+  "4.1.1":
+    folder: "all"
+  "3.9":
+    folder: "all"
+  "3.5.1":
+    folder: "all"
+  "1.0.0-rc1":
+    folder: "all"

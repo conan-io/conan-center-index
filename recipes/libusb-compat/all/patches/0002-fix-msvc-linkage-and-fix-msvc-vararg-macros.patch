@@ -1,0 +1,208 @@
+--- libusb/core.c
++++ libusb/core.c
+@@ -28,6 +28,11 @@
+ 
+ #include <libusb.h>
+ 
++#define WIN32_LEAN_AND_MEAN
++#ifdef _MSC_VER
++#include <windows.h>
++#endif
++
+ #include "usb.h"
+ #include "usbi.h"
+ 
+@@ -55,25 +60,61 @@
+ };
+ 
+ #ifdef ENABLE_LOGGING
++#ifdef _MSC_VER
++#define _usbi_log(level, ...) usbi_log(level, __FUNCTION__, __VA_ARGS__)
++#else
+ #define _usbi_log(level, fmt...) usbi_log(level, __FUNCTION__, fmt)
++#endif
+ #else
+-#define _usbi_log(level, fmt...)
++#define _usbi_log(level, ...)
+ #endif
+ 
+ #ifdef ENABLE_DEBUG_LOGGING
++#ifdef _MSC_VER
++#define usbi_dbg(...) _usbi_log(LOG_LEVEL_DEBUG, __VA_ARGS__)
++#else
+ #define usbi_dbg(fmt...) _usbi_log(LOG_LEVEL_DEBUG, fmt)
++#endif
+ #else
+-#define usbi_dbg(fmt...)
++#define usbi_dbg(...)
+ #endif
+ 
++#ifdef _MSC_VER
++#define usbi_info(...) _usbi_log(LOG_LEVEL_INFO, __VA_ARGS__)
++#define usbi_warn(...) _usbi_log(LOG_LEVEL_WARNING, __VA_ARGS__)
++#define usbi_err(...) _usbi_log(LOG_LEVEL_ERROR, __VA_ARGS__)
++#else
+ #define usbi_info(fmt...) _usbi_log(LOG_LEVEL_INFO, fmt)
+ #define usbi_warn(fmt...) _usbi_log(LOG_LEVEL_WARNING, fmt)
+ #define usbi_err(fmt...) _usbi_log(LOG_LEVEL_ERROR, fmt)
++#endif
+ 
+ API_EXPORTED struct usb_bus *usb_busses = NULL;
+ 
+ #define compat_err(e) -(errno=libusb_to_errno(e))
+ 
++#ifdef _MSC_VER
++BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
++     switch(fdwReason) {
++     case DLL_PROCESS_ATTACH:
++#ifdef LIBUSB_1_0_SONAME
++        libusb_dl_init ();
++#endif
++        break;
++     case DLL_PROCESS_DETACH:
++        if (ctx) {
++            libusb_exit (ctx);
++            ctx = NULL;
++        }
++#ifdef LIBUSB_1_0_SONAME
++        libusb_dl_exit ();
++#endif
++        break;
++     }
++     return TRUE;
++}
++
++#else
+ #ifdef LIBUSB_1_0_SONAME
+ static void __attribute__ ((constructor)) _usb_init (void)
+ {
+@@ -91,6 +132,7 @@
+ 	libusb_dl_exit ();
+ #endif
+ }
++#endif
+ 
+ static int libusb_to_errno(int result)
+ {
+--- libusb/usb.h
++++ libusb/usb.h
+@@ -26,7 +26,9 @@
+ #ifndef USB_H
+ #define USB_H
+ 
++#if !defined(_MSC_VER)
+ #include <unistd.h>
++#endif
+ #include <stdlib.h>
+ #include <limits.h>
+ 
+@@ -45,6 +47,20 @@
+ #include <stdint.h>
+ #endif
+ 
++#if defined(_WIN32)
++#if defined(LIBUSB_COMPAT_EXPORT)
++#define USB_COMPAT_EXPORTED __declspec(dllexport)
++#elif !defined(LIBUSB_COMPAT_STATIC)
++#define USB_COMPAT_EXPORTED __declspec(dllimport)
++#else
++#define USB_COMPAT_EXPORTED
++#endif
++#else
++#define USB_COMPAT_EXPORTED
++#endif
++
++
++
+ /*
+  * USB spec information
+  *
+@@ -289,7 +305,7 @@
+ typedef struct usb_dev_handle usb_dev_handle;
+ 
+ /* Variables */
+-extern struct usb_bus *usb_busses;
++USB_COMPAT_EXPORTED extern struct usb_bus *usb_busses;
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -298,52 +314,52 @@
+ /* Function prototypes */
+ 
+ /* usb.c */
+-usb_dev_handle *usb_open(struct usb_device *dev);
+-int usb_close(usb_dev_handle *dev);
+-int usb_get_string(usb_dev_handle *dev, int index, int langid, char *buf,
++USB_COMPAT_EXPORTED usb_dev_handle *usb_open(struct usb_device *dev);
++USB_COMPAT_EXPORTED int usb_close(usb_dev_handle *dev);
++USB_COMPAT_EXPORTED int usb_get_string(usb_dev_handle *dev, int index, int langid, char *buf,
+ 	size_t buflen);
+-int usb_get_string_simple(usb_dev_handle *dev, int index, char *buf,
++USB_COMPAT_EXPORTED int usb_get_string_simple(usb_dev_handle *dev, int index, char *buf,
+ 	size_t buflen);
+ 
+ /* descriptors.c */
+-int usb_get_descriptor_by_endpoint(usb_dev_handle *udev, int ep,
++USB_COMPAT_EXPORTED int usb_get_descriptor_by_endpoint(usb_dev_handle *udev, int ep,
+ 	unsigned char type, unsigned char index, void *buf, int size);
+-int usb_get_descriptor(usb_dev_handle *udev, unsigned char type,
++USB_COMPAT_EXPORTED int usb_get_descriptor(usb_dev_handle *udev, unsigned char type,
+ 	unsigned char index, void *buf, int size);
+ 
+ /* <arch>.c */
+-int usb_bulk_write(usb_dev_handle *dev, int ep, const char *bytes, int size,
++USB_COMPAT_EXPORTED int usb_bulk_write(usb_dev_handle *dev, int ep, const char *bytes, int size,
+ 	int timeout);
+-int usb_bulk_read(usb_dev_handle *dev, int ep, char *bytes, int size,
++USB_COMPAT_EXPORTED int usb_bulk_read(usb_dev_handle *dev, int ep, char *bytes, int size,
+ 	int timeout);
+-int usb_interrupt_write(usb_dev_handle *dev, int ep, const char *bytes,
++USB_COMPAT_EXPORTED int usb_interrupt_write(usb_dev_handle *dev, int ep, const char *bytes,
+ 	int size, int timeout);
+-int usb_interrupt_read(usb_dev_handle *dev, int ep, char *bytes, int size,
++USB_COMPAT_EXPORTED int usb_interrupt_read(usb_dev_handle *dev, int ep, char *bytes, int size,
+         int timeout);
+-int usb_control_msg(usb_dev_handle *dev, int requesttype, int request,
++USB_COMPAT_EXPORTED int usb_control_msg(usb_dev_handle *dev, int requesttype, int request,
+ 	int value, int index, char *bytes, int size, int timeout);
+-int usb_set_configuration(usb_dev_handle *dev, int configuration);
+-int usb_claim_interface(usb_dev_handle *dev, int interface);
+-int usb_release_interface(usb_dev_handle *dev, int interface);
+-int usb_set_altinterface(usb_dev_handle *dev, int alternate);
+-int usb_resetep(usb_dev_handle *dev, unsigned int ep);
+-int usb_clear_halt(usb_dev_handle *dev, unsigned int ep);
+-int usb_reset(usb_dev_handle *dev);
++USB_COMPAT_EXPORTED int usb_set_configuration(usb_dev_handle *dev, int configuration);
++USB_COMPAT_EXPORTED int usb_claim_interface(usb_dev_handle *dev, int interface);
++USB_COMPAT_EXPORTED int usb_release_interface(usb_dev_handle *dev, int interface);
++USB_COMPAT_EXPORTED int usb_set_altinterface(usb_dev_handle *dev, int alternate);
++USB_COMPAT_EXPORTED int usb_resetep(usb_dev_handle *dev, unsigned int ep);
++USB_COMPAT_EXPORTED int usb_clear_halt(usb_dev_handle *dev, unsigned int ep);
++USB_COMPAT_EXPORTED int usb_reset(usb_dev_handle *dev);
+ 
+ #define LIBUSB_HAS_GET_DRIVER_NP 1
+-int usb_get_driver_np(usb_dev_handle *dev, int interface, char *name,
++USB_COMPAT_EXPORTED int usb_get_driver_np(usb_dev_handle *dev, int interface, char *name,
+ 	unsigned int namelen);
+ #define LIBUSB_HAS_DETACH_KERNEL_DRIVER_NP 1
+-int usb_detach_kernel_driver_np(usb_dev_handle *dev, int interface);
++USB_COMPAT_EXPORTED int usb_detach_kernel_driver_np(usb_dev_handle *dev, int interface);
+ 
+-char *usb_strerror(void);
++USB_COMPAT_EXPORTED char *usb_strerror(void);
+ 
+-void usb_init(void);
+-void usb_set_debug(int level);
+-int usb_find_busses(void);
+-int usb_find_devices(void);
+-struct usb_device *usb_device(usb_dev_handle *dev);
+-struct usb_bus *usb_get_busses(void);
++USB_COMPAT_EXPORTED void usb_init(void);
++USB_COMPAT_EXPORTED void usb_set_debug(int level);
++USB_COMPAT_EXPORTED int usb_find_busses(void);
++USB_COMPAT_EXPORTED int usb_find_devices(void);
++USB_COMPAT_EXPORTED struct usb_device *usb_device(usb_dev_handle *dev);
++USB_COMPAT_EXPORTED struct usb_bus *usb_get_busses(void);
+ 
+ #ifdef __cplusplus
+ }

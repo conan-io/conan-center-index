@@ -1,0 +1,34 @@
+d61c3c6a ("ncurses 6.2 - patch 20200711", 2020-07-12)
+
+--- a/ncurses/curses.priv.h
++++ b/ncurses/curses.priv.h
+@@ -2343,7 +2343,7 @@ extern NCURSES_EXPORT(int) _nc_eventlist_timeout(_nc_eventlist *);
+  */
+ #if USE_WIDEC_SUPPORT
+ 
+-#if defined(_WIN32)
++#if defined(_WIN32) && !defined(_MSC_VER)
+ /*
+  * MinGW has wide-character functions, but they do not work correctly.
+  */
+--- a/ncurses/widechar/lib_cchar.c
++++ b/ncurses/widechar/lib_cchar.c
+@@ -35,6 +35,7 @@
+ */
+ 
+ #include <curses.priv.h>
++#include <wchar.h>
+ 
+ MODULE_ID("$Id: lib_cchar.c,v 1.33 2020/02/02 23:34:34 tom Exp $")
+ 
+--- a/ncurses/widechar/widechars.c
++++ b/ncurses/widechar/widechars.c
+@@ -33,7 +33,7 @@
+ 
+ MODULE_ID("$Id: widechars.c,v 1.7 2020/02/02 23:34:34 tom Exp $")
+ 
+-#if defined(_WIN32)
++#if defined(_WIN32) && !defined(_MSC_VER)
+ /*
+  * MinGW has wide-character functions, but they do not work correctly.
+  */

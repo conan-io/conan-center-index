@@ -1,0 +1,20 @@
+Workaround for install step on Windows where symlinks might be not supported.
+This leads to the following error:
+CMake error : failed to create symbolic link ... : operation not permitted
+--- a/c++/src/capnp/CMakeLists.txt
++++ b/c++/src/capnp/CMakeLists.txt
+@@ -188,8 +188,12 @@ if(NOT CAPNP_LITE)
+ 
+   install(TARGETS capnp_tool capnpc_cpp capnpc_capnp ${INSTALL_TARGETS_DEFAULT_ARGS})
+ 
+-  # Symlink capnpc -> capnp
+-  install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\")")
++  if(WIN32)
++    install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E copy \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnp${CMAKE_EXECUTABLE_SUFFIX}\" \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\")")
++  else()
++    # Symlink capnpc -> capnp
++    install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\")")
++  endif()
+ endif()  # NOT CAPNP_LITE
+ 
+ # Tests ========================================================================

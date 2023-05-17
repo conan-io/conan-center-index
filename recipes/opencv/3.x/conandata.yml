@@ -1,0 +1,20 @@
+sources:
+  "3.4.17":
+    - url: "https://github.com/opencv/opencv/archive/refs/tags/3.4.17.tar.gz"
+      sha256: "1353eec67849aadb20df71d8bae18b83708e18fc5da080fe5efeabb1e99b2ee8"
+    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/3.4.17.tar.gz"
+      sha256: "2b4d3e91a5767a1ae4f4e2a71b0a93c9ec744755763653a650e40ace8f7b9a1b"
+  "3.4.12":
+    - url: "https://github.com/opencv/opencv/archive/3.4.12.tar.gz"
+      sha256: "c8919dfb5ead6be67534bf794cb0925534311f1cd5c6680f8164ad1813c88d13"
+    - url: "https://github.com/opencv/opencv_contrib/archive/3.4.12.tar.gz"
+      sha256: "b207024589674dd2efc7c25740ef192ee4f3e0783e773e2d49a198c37e3e7570"
+patches:
+  "3.4.17":
+    - patch_file: "patches/3.4.17-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+  "3.4.12":
+    - patch_file: "patches/3.4.12-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"

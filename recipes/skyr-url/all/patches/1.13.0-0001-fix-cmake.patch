@@ -1,0 +1,38 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b63ddc2..c87ced9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -101,8 +101,9 @@ endif()
+ install(TARGETS ${skyr_TARGETS}
+         EXPORT ${PROJECT_NAME}-targets
+         INCLUDES DESTINATION "${CMAKE_INSTALL_DATADIR}"
+-        ARCHIVE DESTINATION lib
+-        LIBRARY DESTINATION lib)
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ install(EXPORT ${PROJECT_NAME}-targets
+         DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}"
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1bb02fa..f21f2c3 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -14,7 +14,7 @@ configure_file(
+ # skyr-url
+ #################################################
+ 
+-add_library(skyr-url STATIC)
++add_library(skyr-url)
+ 
+ target_sources(skyr-url
+     PRIVATE
+@@ -136,7 +136,7 @@ target_link_libraries(
+         skyr-url
+         PUBLIC
+         tl::expected
+-        range-v3
++        range-v3::range-v3
+         PRIVATE
+         $<${libcxx}:c++>
+ )

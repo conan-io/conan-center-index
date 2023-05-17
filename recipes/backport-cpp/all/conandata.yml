@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/bitwizeshift/BackportCpp/archive/v1.2.0.tar.gz"
+    sha256: "8efded40a1d0e6674824336499d8706043a62bd8ae8aef62210c8c215f710b84"

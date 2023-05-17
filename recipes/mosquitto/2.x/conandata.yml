@@ -1,0 +1,25 @@
+sources:
+  "2.0.15":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.15.tar.gz"
+    sha256: "26dc3f1758b00c1725a0e4dd32f40c61f374375717f09b6af2bac62c5b44f1eb"
+  "2.0.14":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.14.tar.gz"
+    sha256: "c0ce97b1911d1769ccfd65da237e919fd7eaa60209fd190c113d63fbd0c40347"
+  "2.0.12":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.12.tar.gz"
+    sha256: "b4995d1505f5643d98ff9a921e0399437fc95c4f0c92693cfe28401baf1fed21"
+  "2.0.11":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.11.tar.gz"
+    sha256: "0d46f0cbfa98c353ea9562a9e1219f60b9530463ae98b68fbe9bc828fcf9dbbc"
+  "2.0.10":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.10.tar.gz"
+    sha256: "448e7cf4b422501c0ce7cb33caa8f31ac350118ce9fc5101db852c1f49a7d096"
+  "2.0.7":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.7.tar.gz"
+    sha256: "bd3387259c0db991eb83b13b90fb4c22486cbcad801f826f805066a32ae244f3"
+  "2.0.5":
+    url: "https://github.com/eclipse/mosquitto/archive/v2.0.5.tar.gz"
+    sha256: "733b3e62c4cc41d54acb6ed18a4b585564b32a9e560bcf8165ed30d9043780c5"
+  "2.0.3":
+    url: https://github.com/eclipse/mosquitto/archive/v2.0.3.tar.gz
+    sha256: "a0b02ebb32e6bb09da1c15a32eac2332bd803ddbb5129be2d6d584af601adee5"

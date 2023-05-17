@@ -1,0 +1,11 @@
+--- a/CUnit/Headers/CUnit.h.in
++++ b/CUnit/Headers/CUnit.h.in
+@@ -101,7 +101,7 @@
+ #  else
+ #    define CU_EXPORT
+ #  endif
+-#  ifdef _MSC_VER
++#  if defined(_MSC_VER) && _MSC_VER < 1900
+ #    define snprintf _snprintf
+ #  endif
+ #else

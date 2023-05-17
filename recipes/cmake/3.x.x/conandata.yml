@@ -1,0 +1,22 @@
+sources:
+  "3.19.8":
+    url: https://github.com/Kitware/CMake/releases/download/v3.19.8/cmake-3.19.8.tar.gz
+    sha256: 09b4fa4837aae55c75fb170f6a6e2b44818deba48335d1969deddfbb34e30369
+  "3.20.6":
+    url: https://github.com/Kitware/CMake/releases/download/v3.20.6/cmake-3.20.6.tar.gz
+    sha256: a0bd485e1a38dd13c0baec89d5f4adbf61c7fd32fddb38eabc69a75bc0b65d72
+  "3.21.7":
+    url: https://github.com/Kitware/CMake/releases/download/v3.21.7/cmake-3.21.7.tar.gz
+    sha256: 3523c4a5afc61ac3d7c92835301cdf092129c9b672a6ee17e68c92e928c1375a
+  "3.22.6":
+    url: https://github.com/Kitware/CMake/releases/download/v3.22.6/cmake-3.22.6.tar.gz
+    sha256: 73933163670ea4ea95c231549007b0c7243282293506a2cf4443714826ad5ec3
+  "3.23.5":
+    url: "https://github.com/Kitware/CMake/releases/download/v3.23.5/cmake-3.23.5.tar.gz"
+    sha256: "f2944cde7a140b992ba5ccea2009a987a92413762250de22ebbace2319a0f47d"
+  "3.24.3":
+    url: "https://github.com/Kitware/CMake/releases/download/v3.24.3/cmake-3.24.3.tar.gz"
+    sha256: "b53aa10fa82bff84ccdb59065927b72d3bee49f4d86261249fc0984b3b367291"
+  "3.25.2":
+    url: "https://github.com/Kitware/CMake/releases/download/v3.25.2/cmake-3.25.2.tar.gz"
+    sha256: "c026f22cb931dd532f648f087d587f07a1843c6e66a3dfca4fb0ea21944ed33c"

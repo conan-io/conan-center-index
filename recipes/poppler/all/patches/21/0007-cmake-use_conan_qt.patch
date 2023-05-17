@@ -1,0 +1,70 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 16e3070..fba2259 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -42,8 +42,10 @@ string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VER
+ set(POPPLER_MICRO_VERSION "0")
+ set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${POPPLER_MICRO_VERSION}")
+ 
+-set(CMAKE_CXX_STANDARD 14)
+-set(CMAKE_CXX_EXTENSIONS OFF)
++if(NOT CMAKE_CXX_SANDARD)
++  set(CMAKE_CXX_STANDARD 14)
++  set(CMAKE_CXX_EXTENSIONS OFF)
++endif()
+ set(CMAKE_C_STANDARD 11)
+ set(CMAKE_C_EXTENSIONS OFF)
+ set(CMAKE_LINK_DEPENDS_NO_SHARED TRUE)
+@@ -162,24 +164,12 @@ else()
+ endif()
+ 
+ if (ENABLE_QT5)
+-  find_package(Qt5Core 5.9)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
+-  find_package(Qt5Gui)
+-  find_package(Qt5Xml)
+-  find_package(Qt5Widgets)
+-  find_package(Qt5Test)
+-  if (NOT (Qt5Core_FOUND AND Qt5Gui_FOUND AND Qt5Xml_FOUND AND Qt5Widgets_FOUND AND Qt5Test_FOUND))
+-    message("-- Package Qt5Core or Qt5Gui or Qt5Xml or Qt5Widgets or Qt5Test not found")
+-    set(ENABLE_QT5 OFF)
+-  endif()
++  find_package(qt 5.5 COMPONENTS Core Gui Xml Widgets Test REQUIRED)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
+ endif()
+ 
+ if (ENABLE_QT6)
+   SET(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
+-  find_package(Qt6 COMPONENTS Core Gui Widgets Test QUIET)
+-  if (NOT (Qt6Core_FOUND AND Qt6Gui_FOUND AND Qt6Widgets_FOUND AND Qt6Test_FOUND))
+-    message("-- Package Qt6Core or Qt6Gui or Qt6Widgets or Qt6Test not found")
+-    set(ENABLE_QT6 OFF)
+-  endif()
++  find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED)
+ endif()
+ 
+ # Check for Cairo rendering backend
+diff --git a/qt5/src/CMakeLists.txt b/qt5/src/CMakeLists.txt
+index 01d3e3e..dc1c662 100644
+--- a/qt5/src/CMakeLists.txt
++++ b/qt5/src/CMakeLists.txt
+@@ -43,7 +43,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
+     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
+     set_target_properties(poppler-qt5 PROPERTIES SUFFIX "-${POPPLER_QT5_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ endif()
+-target_link_libraries(poppler-qt5 poppler Qt5::Core Qt5::Gui Qt5::Xml CONAN_PKG::freetype)
++target_link_libraries(poppler-qt5 poppler CONAN_PKG::qt CONAN_PKG::freetype)
+ if(MSVC)
+ target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
+ endif()
+diff --git a/qt6/src/CMakeLists.txt b/qt6/src/CMakeLists.txt
+index 6337173..f275c92 100644
+--- a/qt6/src/CMakeLists.txt
++++ b/qt6/src/CMakeLists.txt
+@@ -43,7 +43,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
+     get_target_property(POPPLER_QT6_SOVERSION poppler-qt6 SOVERSION)
+     set_target_properties(poppler-qt6 PROPERTIES SUFFIX "-${POPPLER_QT6_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ endif()
+-target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui CONAN_PKG::freetype})
++target_link_libraries(poppler-qt6 poppler CONAN_PKG::qt CONAN_PKG::freetype})
+ if(MSVC)
+ target_link_libraries(poppler-qt6 poppler ${poppler_LIBS})
+ endif()

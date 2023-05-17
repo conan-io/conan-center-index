@@ -1,0 +1,29 @@
+sources:
+  "3.0.1":
+    url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.1.tar.gz"
+    sha256: "7a390f200f0ccd207e8cff6757e04817c1a0aec3e327b006b7eb451c57ee3538"
+  "3.0.0":
+    url: "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "87bba2eaf0ebc7ec539e5e62fc317cb80671a337c1fb1b84cb9e4d42c6dbebe3"
+  "2.4.1":
+    url: "https://github.com/HowardHinnant/date/archive/refs/tags/v2.4.1.tar.gz"
+    sha256: "98907d243397483bd7ad889bf6c66746db0d7d2a39cc9aacc041834c40b65b98"
+patches:
+  "3.0.1":
+    - patch_file: "patches/cmake-3.0.1.patch"
+      patch_description: "Disable string view to workaround clang 5 not having it"
+      patch_type: "portability"
+  "3.0.0":
+    - patch_file: "patches/cmake-3.0.0.patch"
+      patch_description: "Disable string view to workaround clang 5 not having it"
+      patch_type: "portability"
+  "2.4.1":
+    - patch_file: "patches/0001-fix-uwp.patch"
+      patch_description: "Fix Universal Windows Platform (UWP) unhandled exception support. See https://github.com/microsoft/vcpkg/pull/8151#issuecomment-531175393."
+      patch_type: "portability"
+    - patch_file: "patches/cmake.patch"
+      patch_description: "Add libcurl target for conan compatibility"
+      patch_type: "conan"
+    - patch_file: "patches/string_view.patch"
+      patch_description: "Disable string view to workaround clang 5 not having it"
+      patch_type: "portability"

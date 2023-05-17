@@ -1,0 +1,41 @@
+From fad30ccb4e31d66dd196aae0897788ecab02de07 Mon Sep 17 00:00:00 2001
+From: Maxime Gervais <gervais.maxime@gmail.com>
+Date: Tue, 5 Apr 2022 15:16:12 +0200
+Subject: [PATCH] CMake: remove use of LOCATION property
+
+Signed-off-by: Maxime Gervais <gervais.maxime@gmail.com>
+---
+ Project/CMake/CMakeLists.txt | 12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/Project/CMake/CMakeLists.txt b/Project/CMake/CMakeLists.txt
+index 5c49030d6..5e061c4a3 100644
+--- a/Project/CMake/CMakeLists.txt
++++ b/Project/CMake/CMakeLists.txt
+@@ -56,10 +56,8 @@ if (NOT BUILD_ZLIB)
+   find_package(ZLIB REQUIRED)
+ else()
+   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib)
+-  get_target_property(ZLIB_LIBRARIES zlibstatic LOCATION)
+   if(NOT BUILD_SHARED_LIBS)
+-    get_filename_component(ZLIB_LIBRARIES ${ZLIB_LIBRARIES} NAME)
+-    set(ZLIB_LIBRARIES "${LIB_INSTALL_DIR}/${ZLIB_LIBRARIES}")
++    set(ZLIB_LIBRARIES "${LIB_INSTALL_DIR}/$<TARGET_LINKER_FILE_NAME:zlibstatic>")
+   endif()
+   if(UNIX AND BUILD_SHARED_LIBS)
+     target_compile_options(zlibstatic PRIVATE -fPIC)
+@@ -405,13 +403,7 @@ endif()
+ target_link_libraries(mediainfo ${ZenLib_LIBRARY} ${ZLIB_LIBRARIES})
+ 
+ if(MSVC AND BUILD_SHARED_LIBS)
+-  get_target_property(LOCATION mediainfo LOCATION_DEBUG)
+-  string(REGEX REPLACE "\\.[^.]*$" ".pdb" LOCATION "${LOCATION}")
+-  install(FILES ${LOCATION} DESTINATION ${BIN_INSTALL_DIR} CONFIGURATIONS Debug)
+-
+-  get_target_property(LOCATION mediainfo LOCATION_RELWITHDEBINFO)
+-  string(REGEX REPLACE "\\.[^.]*$" ".pdb" LOCATION "${LOCATION}")
+-  install(FILES ${LOCATION} DESTINATION ${BIN_INSTALL_DIR} CONFIGURATIONS RelWithDebInfo)
++  install(FILES $<TARGET_PDB_FILE:mediainfo> DESTINATION ${BIN_INSTALL_DIR} OPTIONAL)
+ endif()
+ 
+ if (APPLE)

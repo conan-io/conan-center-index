@@ -1,0 +1,10 @@
+submodules:
+  "1.2.1":
+    "deps/netcode":
+      sha256: 1e566e533f9bf89000bde5c29ab3c7fbe73a6b4f3a099257ad2ae626bbe591df
+      url: https://github.com/networkprotocol/netcode/archive/b5173ce38ad33147d5f136f8b361ec0388efec67.zip
+      destination: "netcode.io"
+    "deps/reliable":
+      sha256: fdfda89fa84075efe19ef364ca63bb12caf2d823e7cb23df821924ed9efdd50a
+      url: https://github.com/networkprotocol/reliable/archive/7daaef586446bb7162c358b5c0666802e1e8c8db.zip
+      destination: "reliable.io"

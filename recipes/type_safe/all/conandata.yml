@@ -1,0 +1,7 @@
+sources:
+  "0.2.2":
+    url: "https://github.com/foonathan/type_safe/archive/v0.2.2.tar.gz"
+    sha256: "34d97123fb9bca04a333565c4a2498425d602ec0c759de4be1b8cfae77d05823"
+  '0.2.1':
+    url: https://github.com/foonathan/type_safe/archive/v0.2.1.zip
+    sha256: 1c941f7ecd5e17e80773a2d8c9c905f552cc80417f8006ade7e9fa3525ff1b55

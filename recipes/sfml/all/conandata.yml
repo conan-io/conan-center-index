@@ -1,0 +1,22 @@
+sources:
+  "2.5.1":
+    url: "https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip"
+    sha256: "bf1e0643acb92369b24572b703473af60bac82caf5af61e77c063b779471bb7f"
+patches:
+  "2.5.1":
+    - patch_file: "patches/0001-cmake-robust-find-deps.patch"
+      patch_description: "Robust discovery of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/0002-allow-non-x86-64-macos.patch"
+      patch_description: "Allow compilation for macOS arm"
+      patch_type: "portability"
+    - patch_file: "patches/0003-allow-shared-MT.patch"
+      patch_description: "Allow to build shared SFML with MT runtime"
+      patch_type: "portability"
+    - patch_file: "patches/0004-fix-ios.patch"
+      patch_description: "Fix iOS detection logic in CMakeLists"
+      patch_type: "portability"
+    - patch_file: "patches/0005-remove-auto-ptr.patch"
+      patch_description: "Remove usage of auto_ptr to allow compilation with C++17 standard"
+      patch_type: "portability"
+      patch_source: "https://github.com/SFML/SFML/commit/bf92efe9a4035fee0258386173d53556aa196e49"

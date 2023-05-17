@@ -1,0 +1,223 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,8 +3,8 @@
+ # Suppress warning about WIN32 no longer being defined on Cygwin:
+ SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
+ 
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT(CFITSIO)
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+ 
+ # Allow @rpath token in target install name on Macs.
+ # See "cmake --help-policy CMP0042" for more information.
+@@ -12,12 +12,14 @@ IF(POLICY CMP0042)
+   CMAKE_POLICY(SET CMP0042 NEW)
+ ENDIF()
+ 
+-INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
+-INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
++INCLUDE(CheckSymbolExists)
++INCLUDE(CheckCSourceCompiles)
+ 
+ # Allow the developer to select if Dynamic or Static libraries are built
+ OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+ OPTION (USE_PTHREADS "Thread-safe build (using pthreads)" OFF)
++OPTION(CFITSIO_USE_SSE2 "Enable use of instructions in the SSE2 extended instruction set" OFF)
++OPTION(CFITSIO_USE_SSSE3 "Enable use of instructions in the SSSE3 extended instruction set" OFF)
+ 
+ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
+ set (LIB_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
+@@ -55,12 +57,19 @@ IF (BUILD_SHARED_LIBS)
+ ENDIF (BUILD_SHARED_LIBS)
+ 
+ 
+-FILE(GLOB H_FILES "*.h")
++SET(H_FILES fitsio.h fitsio2.h longnam.h)
++SET(LINK_LIBS "")
+ 
+ IF (USE_PTHREADS)
+-    FIND_PACKAGE(pthreads REQUIRED)
+-    INCLUDE_DIRECTORIES(${PTHREADS_INCLUDE_DIR})
+-    ADD_DEFINITIONS(-D_REENTRANT)
++    SET(CMAKE_THREAD_PREFER_PTHREAD TRUE)
++    SET(THREADS_PREFER_PTHREAD_FLAG TRUE)
++    FIND_PACKAGE(Threads REQUIRED)
++    IF(CMAKE_USE_PTHREADS_INIT)
++        LIST(APPEND LINK_LIBS "Threads::Threads")
++    ELSE()
++        find_package(pthreads4w REQUIRED CONFIG)
++        LIST(APPEND LINK_LIBS "pthreads4w::pthreads4w")
++    ENDIF()
+ ENDIF()
+ 
+ # Math library (not available in MSVC or MINGW)
+@@ -71,35 +80,36 @@ ELSE()
+ ENDIF()
+ 
+ # Support for remote file drivers is not implemented for native Windows:
+-IF (NOT MSVC)
++IF (NOT WIN32)
+     # Find library needed for gethostbyname:
+-    CHECK_FUNCTION_EXISTS("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
+-    IF(NOT CMAKE_HAVE_GETHOSTBYNAME)
+-       CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_HAVE_GETHOSTBYNAME)
+-    ENDIF()
++    CHECK_SYMBOL_EXISTS(gethostbyname "netdb.h" CMAKE_HAVE_GETHOSTBYNAME)
+ 
+     # Find library needed for connect:
+-    CHECK_FUNCTION_EXISTS("connect" CMAKE_HAVE_CONNECT)
+-    IF(NOT CMAKE_HAVE_CONNECT)
+-       CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_HAVE_CONNECT)
+-    ENDIF()
++    CHECK_SYMBOL_EXISTS(connect "sys/types.h;sys/socket.h" CMAKE_HAVE_CONNECT)
+ 
+     # Define HAVE_NET_SERVICES if gethostbyname & connect were found:
+     IF (CMAKE_HAVE_GETHOSTBYNAME AND CMAKE_HAVE_CONNECT)
+         ADD_DEFINITIONS(-DHAVE_NET_SERVICES)
++        CHECK_SYMBOL_EXISTS(fmemopen "stdio.h" HAVE_FMEMOPEN)
++        IF(HAVE_FMEMOPEN)
++            ADD_DEFINITIONS(-DHAVE_FMEMOPEN)
++        ENDIF()
+     ENDIF ()
+ 
+     # Find curl library, for HTTPS support:
+-    FIND_PACKAGE(CURL)
+-    IF (CURL_FOUND)
+-        INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
+-        ADD_DEFINITIONS(-DCFITSIO_HAVE_CURL)
++    OPTION(UseCurl "UseCurl" ON)
++    IF (UseCurl)
++        FIND_PACKAGE(CURL)
++        IF (CURL_FOUND)
++            LIST(APPEND LINK_LIBS "CURL::libcurl")
++            ADD_DEFINITIONS(-DCFITSIO_HAVE_CURL)
++        ENDIF()
+     ENDIF()
+ ENDIF()
+ 
+ SET(SRC_FILES
+     buffers.c cfileio.c checksum.c
+-    drvrfile.c drvrmem.c drvrnet.c
++    drvrfile.c drvrmem.c drvrnet.c drvrsmem.c
+     editcol.c edithdu.c eval_f.c eval_l.c eval_y.c
+     f77_wrap1.c f77_wrap2.c f77_wrap3.c f77_wrap4.c
+     fits_hcompress.c fits_hdecompress.c fitscore.c
+@@ -123,27 +133,99 @@ SET(SRC_FILES
+ 
+ # Only include zlib source files if we are building a shared library.
+ # Users will need to link their executable with zlib independently.
+-IF (BUILD_SHARED_LIBS)
+-    set(SRC_FILES ${SRC_FILES}
+-        zlib/adler32.c zlib/crc32.c zlib/deflate.c zlib/infback.c
+-        zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c
+-        zlib/uncompr.c zlib/zutil.c
+-        )
++find_package(ZLIB REQUIRED)
++LIST(APPEND LINK_LIBS "ZLIB::ZLIB")
++
++IF(CFITSIO_USE_SSE2)
++    IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
++       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
++       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
++        ADD_COMPILE_OPTIONS(-msse2)
++    ENDIF()
++    IF(MSVC)
++        ADD_DEFINITIONS(-D__SSE2__=1)
++    ENDIF()
++ENDIF()
++
++IF(CFITSIO_USE_SSSE3)
++    IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
++       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
++       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
++        ADD_COMPILE_OPTIONS(-mssse3)
++    ENDIF()
++    IF(MSVC)
++        ADD_DEFINITIONS(-D__SSE2__=1 -D__SSSE3__=1)
++    ENDIF()
++ENDIF()
++
++OPTION(CFITSIO_USE_BZIP2 "Enable bzip2 support" OFF)
++IF(CFITSIO_USE_BZIP2)
++    FIND_PACKAGE(BZip2 REQUIRED)
++    LIST(APPEND LINK_LIBS "BZip2::BZip2")
++    ADD_DEFINITIONS(-DHAVE_BZIP2=1)
++ENDIF()
++
++# Test for the unix ftruncate function
++CHECK_SYMBOL_EXISTS(ftruncate "unistd.h" HAVE_FTRUNCATE)
++IF(HAVE_FTRUNCATE)
++    ADD_DEFINITIONS(-DHAVE_FTRUNCATE)
++ENDIF()
++
++# Check is System V IPC is supported on this machine
++CHECK_C_SOURCE_COMPILES("
++#include <sys/ipc.h>
++#include <sys/shm.h>
++#include <sys/sem.h>
++int main() {
++  shmat(0,0,0);
++  shmdt(0);
++  shmget(0, 0, 0);
++  semget(0, 0, 0);
++  return 0;
++}" HAVE_SHMEM_SERVICES)
++IF(HAVE_SHMEM_SERVICES)
++    ADD_DEFINITIONS(-DHAVE_SHMEM_SERVICES)
++
++    # Some systems define flock_t, for others we have to define it ourselves
++    CHECK_C_SOURCE_COMPILES("
++    #include <sys/flock.h>
++    int main() {
++      flock_t filler;
++      return 0;
++    }" HAVE_FLOCK_T)
++    IF(HAVE_FLOCK_T)
++        ADD_DEFINITIONS(-DHAVE_FLOCK_T)
++    ENDIF()
++
++    # Check union semun
++    CHECK_C_SOURCE_COMPILES("
++    #include <sys/ipc.h>
++    #include <sys/shm.h>
++    #include <sys/sem.h>
++    int main() {
++      union semun filler;
++      return 0;
++    }" HAVE_UNION_SEMUN)
++    IF(HAVE_UNION_SEMUN)
++        ADD_DEFINITIONS(-DHAVE_UNION_SEMUN)
++    ENDIF()
+ ENDIF()
+ 
+ ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${H_FILES} ${SRC_FILES})
+-TARGET_LINK_LIBRARIES(${LIB_NAME} ${PTHREADS_LIBRARY} ${M_LIB} ${CURL_LIBRARIES})
++TARGET_LINK_LIBRARIES(${LIB_NAME} ${LINK_LIBS} ${M_LIB})
++if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
++    TARGET_COMPILE_OPTIONS(${LIB_NAME} PRIVATE -Wno-error=implicit-function-declaration)
++endif()
+ 
+ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION} SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION})
+-install(TARGETS ${LIB_NAME} DESTINATION ${LIB_DESTINATION})
+ install(TARGETS ${LIB_NAME}
+                             RUNTIME DESTINATION bin
+                             LIBRARY DESTINATION lib
+                             ARCHIVE DESTINATION lib)
+ install(FILES ${H_FILES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
+ 
+-# Only build test code and executables if building a shared library:
+-IF (BUILD_SHARED_LIBS)
++# Do not build test code and executables:
++IF (FALSE)
+ 
+     ENABLE_TESTING()
+ 
+@@ -173,7 +255,7 @@ IF (BUILD_SHARED_LIBS)
+       set_target_properties(FPack Funpack PROPERTIES LINK_FLAGS "setargv.obj")
+     endif(MSVC)
+ 
+-ENDIF(BUILD_SHARED_LIBS)
++ENDIF()
+ 
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cfitsio.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/cfitsio.pc @ONLY)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cfitsio.pc DESTINATION lib/pkgconfig/)

@@ -1,0 +1,42 @@
+From 322a40e54b4cc1296a405c7fbf920101397d7f37 Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alx.manpages@gmail.com>
+Date: Tue, 2 Feb 2021 20:29:05 -0500
+Subject: [PATCH] Update CMakeLists.txt
+
+---
+ lang/c++/CMakeLists.txt | 12 ------------
+ 1 file changed, 12 deletions(-)
+
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index 4a1ac660..0d1ec70e 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -161,10 +161,6 @@ target_link_libraries (avrogencpp avrocpp_s ${Boost_LIBRARIES} ${SNAPPY_LIBRARIE
+ enable_testing()
+ 
+ macro (unittest name)
+-    add_executable (${name} test/${name}.cc)
+-    target_link_libraries (${name} avrocpp ${Boost_LIBRARIES} ${SNAPPY_LIBRARIES})
+-    add_test (NAME ${name} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${name})
+ endmacro (unittest)
+ 
+ unittest (buffertest)
+@@ -180,14 +176,6 @@ unittest (AvrogencppTests)
+ unittest (CompilerTests)
+ unittest (AvrogencppTestReservedWords)
+ 
+-add_dependencies (AvrogencppTestReservedWords cpp_reserved_words_hh)
+-
+-add_dependencies (AvrogencppTests bigrecord_hh bigrecord_r_hh bigrecord2_hh
+-    tweet_hh
+-    union_array_union_hh union_map_union_hh union_conflict_hh
+-    recursive_hh reuse_hh circulardep_hh tree1_hh tree2_hh crossref_hh
+-    primitivetypes_hh empty_record_hh)
+-
+ include (InstallRequiredSystemLibraries)
+ 
+ set (CPACK_PACKAGE_FILE_NAME "avrocpp-${AVRO_VERSION_MAJOR}")
+-- 
+2.32.0.rc0
+

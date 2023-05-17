@@ -1,0 +1,18 @@
+--- CMakeLists.txt	2021-03-08 15:56:55.000000000 -0300
++++ CMakeLists_fix.txt	2021-03-09 22:08:29.715545030 -0300
+@@ -11,13 +11,11 @@
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ set(CMAKE_AUTOMOC ON)
+ 
+-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+ option(QARCHIVE_STATIC "Static Build of QArchive" ON)
+ 
+ # Find the QtCore library and libarchive.
+-find_package(LibArchive)
+-find_package(Qt5Core)
++find_package(LibArchive REQUIRED)
++find_package(Qt5 REQUIRED COMPONENTS Core)
+ 
+ # cmake macros used
+ include(GNUInstallDirs)

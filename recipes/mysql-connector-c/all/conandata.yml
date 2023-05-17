@@ -1,0 +1,14 @@
+sources:
+  "6.1.11":
+    sha256: c8664851487200162b38b6f3c8db69850bd4f0e4c5ff5a6d161dbfb5cb76b6c4
+    url: "http://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-6.1.11-src.tar.gz"
+patches:
+  "6.1.11":
+    - patch_file: "patches/001-20028_all_mysql-5.6-gcc7.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002-mysql_config.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-cmake-install-standard-locations.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/004-cmake-install-typo.patch"
+      base_path: "source_subfolder"

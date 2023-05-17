@@ -1,0 +1,18 @@
+sources:
+  "0.40.0":
+    url: "https://www.cairographics.org/releases/pixman-0.40.0.tar.gz"
+    sha256: "6d200dec3740d9ec4ec8d1180e25779c00bc749f94278c8b9021f5534db223fc"
+  "0.38.4":
+    url: "https://www.cairographics.org/releases/pixman-0.38.4.tar.gz"
+    sha256: "da66d6fd6e40aee70f7bd02e4f8f76fc3f006ec879d346bae6a723025cfbdde7"
+patches:
+  "0.40.0":
+    - patch_file: "patches/0001-incompatible-pointer-types.patch"
+      patch_description: "backport fix for clang build"
+      patch_type: "portability"
+      patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/48"
+  "0.38.4":
+    - patch_file: "patches/0002-meson-build.patch"
+      patch_description: "backport meson build files from 0.40.0 to fix windows build"
+      patch_type: "portability"
+      patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/tree/pixman-0.40.0"

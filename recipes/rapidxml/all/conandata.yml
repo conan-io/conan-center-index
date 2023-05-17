@@ -1,0 +1,10 @@
+sources:
+  "1.13":
+    url: "https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip/download"
+    sha256: "c3f0b886374981bb20fabcf323d755db4be6dba42064599481da64a85f5b3571"
+patches:
+  "1.13":
+    - patch_file: "patches/1.13-fix-template-compile-issue.patch"
+      patch_description: "Fix compilation issue: call to function 'print_declaration_node' that is neither visible in the template definition nor found by argument-dependent lookup"
+      patch_type: "portability"
+      patch_source: "https://sourceforge.net/p/rapidxml/bugs/16/"

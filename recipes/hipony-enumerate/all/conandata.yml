@@ -1,0 +1,10 @@
+sources:
+  "2.4.1":
+    url: "https://github.com/hipony/enumerate/archive/v2.4.1.tar.gz"
+    sha256: "a071f6014711dcd09e752cd042651d96f2917925ff743208064ebd0d6bdc4e55"
+  "2.4.0":
+    url: "https://github.com/hipony/enumerate/archive/v2.4.0.tar.gz"
+    sha256: "21ee64fc3b1fda25356df0ee0e0292b529bb9b99931ee2b388222d2f498d7a45"
+  "2.2.1":
+    url: "https://github.com/hipony/enumerate/archive/refs/tags/v2.2.1.zip"
+    sha256: "0b6e208007fc0cdffe7f23686faddf5c2bc06f6794bacf2e612197e1e54140e7"

@@ -1,0 +1,25 @@
+From 639f47769d63caa605523497a73c50587738d508 Mon Sep 17 00:00:00 2001
+From: "R. Andrew Ohana" <rao@esi-group.com>
+Date: Tue, 29 Sep 2020 08:54:31 -0700
+Subject: [PATCH 5/5] use JPEG target for plugin
+
+this fixes building against a static libjpeg on windows
+---
+ src/osgPlugins/jpeg/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/osgPlugins/jpeg/CMakeLists.txt b/src/osgPlugins/jpeg/CMakeLists.txt
+index 2d290a29d..93fc4756f 100644
+--- a/src/osgPlugins/jpeg/CMakeLists.txt
++++ b/src/osgPlugins/jpeg/CMakeLists.txt
+@@ -5,6 +5,6 @@ SET(TARGET_SRC
+     ReaderWriterJPEG.cpp
+ )
+ 
+-SET(TARGET_LIBRARIES_VARS JPEG_LIBRARIES )
++SET(TARGET_EXTERNAL_LIBRARIES JPEG::JPEG )
+ #### end var setup  ###
+ SETUP_PLUGIN(jpeg)
+-- 
+2.21.0.windows.1
+

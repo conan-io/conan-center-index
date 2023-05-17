@@ -1,0 +1,13 @@
+sources:
+  "1.11.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.11.0.tar.gz"
+    sha256: "ca5cae8d6cac15dae0ec63b21d6ad3530070650f68076f3a4a862ca293a858bb"
+  "1.10.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.10.0.tar.gz"
+    sha256: "697f91700237dbae2326b90469be32b876b2b44888302afbc7aceb68bcfe8224"
+  "1.9.2":
+    url: "https://github.com/gabime/spdlog/archive/v1.9.2.tar.gz"
+    sha256: "6fff9215f5cb81760be4cc16d033526d1080427d236e86d70bb02994f85e3d38"
+  "1.8.5":
+    url: "https://github.com/gabime/spdlog/archive/v1.8.5.tar.gz"
+    sha256: "944d0bd7c763ac721398dca2bb0f3b5ed16f67cef36810ede5061f35a543b4b8"

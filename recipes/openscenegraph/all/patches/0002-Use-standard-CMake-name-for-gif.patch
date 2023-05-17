@@ -1,0 +1,54 @@
+From 17ad9caac56282e89d0e6a62c9564b99e2736225 Mon Sep 17 00:00:00 2001
+From: "R. Andrew Ohana" <rao@esi-group.com>
+Date: Thu, 17 Sep 2020 16:51:45 -0700
+Subject: [PATCH 2/5] Use standard CMake name for gif
+
+---
+ CMakeLists.txt                    | 2 +-
+ src/osgPlugins/CMakeLists.txt     | 2 +-
+ src/osgPlugins/gif/CMakeLists.txt | 4 ++--
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0ef2edd33..5e0c8f349 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -813,7 +813,7 @@ ENDIF(BUILD_OSG_EXAMPLES AND NOT ANDROID)
+ # can use Quicktime.
+ IF(NOT ANDROID)
+     IF(NOT APPLE)
+-        FIND_PACKAGE(GIFLIB)
++        FIND_PACKAGE(GIF)
+         FIND_PACKAGE(JPEG)
+         FIND_PACKAGE(PNG)
+         FIND_PACKAGE(TIFF)
+diff --git a/src/osgPlugins/CMakeLists.txt b/src/osgPlugins/CMakeLists.txt
+index 812550412..2a88684b5 100644
+--- a/src/osgPlugins/CMakeLists.txt
++++ b/src/osgPlugins/CMakeLists.txt
+@@ -108,7 +108,7 @@ ENDIF()
+ IF(OPENEXR_FOUND AND ZLIB_FOUND AND OSG_CPP_EXCEPTIONS_AVAILABLE)
+     ADD_PLUGIN_DIRECTORY(exr)
+ ENDIF()
+-IF(GIFLIB_FOUND)
++IF(GIF_FOUND)
+     ADD_PLUGIN_DIRECTORY(gif)
+ ENDIF()
+ IF(PNG_FOUND AND OSG_CPP_EXCEPTIONS_AVAILABLE)
+diff --git a/src/osgPlugins/gif/CMakeLists.txt b/src/osgPlugins/gif/CMakeLists.txt
+index 642339af1..0db0296cc 100644
+--- a/src/osgPlugins/gif/CMakeLists.txt
++++ b/src/osgPlugins/gif/CMakeLists.txt
+@@ -1,7 +1,7 @@
+-INCLUDE_DIRECTORIES( ${GIFLIB_INCLUDE_DIR} )
++INCLUDE_DIRECTORIES( ${GIF_INCLUDE_DIR} )
+ 
+ SET(TARGET_SRC ReaderWriterGIF.cpp )
+-SET(TARGET_LIBRARIES_VARS GIFLIB_LIBRARY )
++SET(TARGET_LIBRARIES_VARS GIF_LIBRARY )
+ #### end var setup  ###
+ SETUP_PLUGIN(gif)
+ 
+-- 
+2.21.0.windows.1
+

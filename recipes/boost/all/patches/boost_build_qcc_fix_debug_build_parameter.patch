@@ -1,0 +1,22 @@
+diff --git a/tools/build/src/tools/qcc.jam b/tools/build/src/tools/qcc.jam
+index 155b1ac3..64274e65 100644
+--- a/tools/build/src/tools/qcc.jam
++++ b/tools/build/src/tools/qcc.jam
+@@ -48,7 +48,7 @@ generators.register-c-compiler qcc.compile.asm : ASM : OBJ : <toolset>qcc ;
+ 
+ 
+ # Declare flags for compilation.
+-toolset.flags qcc.compile OPTIONS <debug-symbols>on : -gstabs+ ;
++toolset.flags qcc.compile OPTIONS <debug-symbols>on : -g ;
+ 
+ # Declare flags and action for compilation.
+ toolset.flags qcc.compile OPTIONS <optimization>off : -O0 ;
+@@ -164,7 +164,7 @@ generators.override qcc.searched-lib-generator : searched-lib-generator ;
+ 
+ # Declare flags for linking.
+ # First, the common flags.
+-toolset.flags qcc.link OPTIONS <debug-symbols>on : -gstabs+ ;
++toolset.flags qcc.link OPTIONS <debug-symbols>on : -g ;
+ toolset.flags qcc.link OPTIONS <profiling>on : -p ;
+ toolset.flags qcc.link OPTIONS <linkflags> ;
+ toolset.flags qcc.link LINKPATH <library-path> ;

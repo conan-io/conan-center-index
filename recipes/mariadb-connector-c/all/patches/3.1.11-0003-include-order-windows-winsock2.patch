@@ -1,0 +1,18 @@
+--- a/libmariadb/secure/schannel_certs.c
++++ b/libmariadb/secure/schannel_certs.c
+@@ -33,7 +33,6 @@
+ #define _WIN32_WINNT 0x0601
+ #endif
+ 
+-#include "schannel_certs.h"
+ #include <malloc.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -41,6 +40,7 @@
+ #include <ws2tcpip.h>
+ #include <winhttp.h>
+ #include <assert.h>
++#include "schannel_certs.h"
+ #include "win32_errmsg.h"
+ 
+  /*

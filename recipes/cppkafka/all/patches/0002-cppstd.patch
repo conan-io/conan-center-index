@@ -1,0 +1,20 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,7 +28,6 @@ if (NOT CMAKE_CXX_FLAGS)
+         add_definitions("-DNOGDI=1")
+         add_definitions("-DNOMINMAX=1")
+     else()
+-        set(CMAKE_CXX_FLAGS "-std=c++11 -Wall")
+     endif()
+ endif()
+ 
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -36,6 +36,7 @@ set(NAMESPACE           "${PROJECT_NAME}::")
+ set(TARGET_EXPORT_NAME  ${PROJECT_NAME}Targets)
+ 
+ add_library(${TARGET_NAME} ${CPPKAFKA_LIBRARY_TYPE} ${SOURCES})
++target_compile_features(${TARGET_NAME} PUBLIC cxx_std_11)
+ target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/cppkafka>)
+ set_target_properties(${TARGET_NAME} PROPERTIES
+         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_INSTALL_LIBDIR}"

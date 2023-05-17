@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES C CXX)
+
+enable_testing()
+
+option(BUILD_NO_CHANGES "Build no_changes sources" ON)
+option(BUILD_INCLUDE_OVERRIDE "Build include_override sources" ON)
+option(BUILD_MI_API "Build mi_api sources" ON)
+
+find_package(mimalloc REQUIRED CONFIG)
+if(TARGET mimalloc-static)
+    set(MIMALLOC_LIBS mimalloc-static)
+else()
+    set(MIMALLOC_LIBS mimalloc)
+endif()
+
+if(BUILD_NO_CHANGES)
+    add_executable(no_changes no_changes.c)
+    target_link_libraries(no_changes PRIVATE ${MIMALLOC_LIBS})
+    target_compile_features(no_changes PRIVATE c_std_11)
+    add_test(NAME no_changes COMMAND no_changes)
+
+    add_executable(no_changes_cpp no_changes.cpp)
+    target_link_libraries(no_changes_cpp PRIVATE ${MIMALLOC_LIBS})
+    target_compile_features(no_changes_cpp PRIVATE cxx_std_17)
+    add_test(NAME no_changes_cpp COMMAND no_changes_cpp)
+endif()
+
+if(BUILD_INCLUDE_OVERRIDE)
+    add_executable(include_override include_override.c)
+    target_link_libraries(include_override PRIVATE ${MIMALLOC_LIBS})
+    target_compile_features(include_override PRIVATE c_std_11)
+    add_test(NAME include_override COMMAND include_override)
+
+    add_executable(include_override_cpp include_override.cpp)
+    target_link_libraries(include_override_cpp PRIVATE ${MIMALLOC_LIBS})
+    target_compile_features(include_override_cpp PRIVATE cxx_std_17)
+    add_test(NAME include_override_cpp COMMAND include_override_cpp)
+endif()
+
+if(BUILD_MI_API)
+    add_executable(mi_api mi_api.c)
+    target_link_libraries(mi_api PRIVATE ${MIMALLOC_LIBS})
+    target_compile_features(mi_api PRIVATE c_std_11)
+    add_test(NAME mi_api COMMAND mi_api)
+
+    add_executable(mi_api_cpp mi_api.cpp)
+    target_link_libraries(mi_api_cpp PRIVATE ${MIMALLOC_LIBS})
+    target_compile_features(mi_api_cpp PRIVATE cxx_std_17)
+    add_test(NAME mi_api_cpp COMMAND mi_api_cpp)
+endif()

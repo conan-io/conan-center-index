@@ -1,0 +1,127 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bd8cb34..9c4cfe0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,7 +68,8 @@ if(NOT WIN32)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+ endif()
+ 
+-cmake_minimum_required(VERSION 3.16.3)
++## TODO: dirty fix.
++cmake_minimum_required(VERSION 3.15)
+ if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER 3.4)
+   cmake_policy(SET CMP0063 NEW)
+ endif()
+@@ -144,26 +145,26 @@ if(BUILD_LITE)
+ endif()
+ 
+ if(PREFER_EXTERNAL_LZ4)
+-    find_package(LZ4)
++    find_package(lz4)
+ else()
+     message(STATUS "Using LZ4 internal sources.")
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+     if(PREFER_EXTERNAL_ZLIB)
+-        find_package(ZLIB_NG)
+-        if (ZLIB_NG_FOUND)
++        find_package(zlib-ng)
++        if (zlib-ng_FOUND)
+             set(HAVE_ZLIB_NG TRUE)
+         else()
+             find_package(ZLIB)
+         endif()
+ 
+-        if(NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++        if(NOT (zlib-ng_FOUND OR ZLIB_FOUND))
+             message(STATUS "No ZLIB found.  Using ZLIB-NG internal sources.")
+         endif()
+     endif()
+ 
+-    if (NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++    if (0)
+         message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
+         set(HAVE_ZLIB_NG TRUE)
+         add_definitions(-DZLIB_COMPAT)
+@@ -184,7 +185,7 @@ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+     if(PREFER_EXTERNAL_ZSTD)
+-        find_package(ZSTD)
++        find_package(zstd)
+         if(NOT ZSTD_FOUND)
+           message(STATUS "No ZSTD library found.  Using internal sources.")
+         endif()
+diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
+index 7f3eac6..c7afecd 100644
+--- a/blosc/CMakeLists.txt
++++ b/blosc/CMakeLists.txt
+@@ -10,16 +10,16 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
+ 
+ # includes
+ set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
+-if(LZ4_FOUND)
+-    set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${LZ4_INCLUDE_DIR})
++if(lz4_FOUND)
++    set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${lz4_INCLUDE_DIR})
+ else()
+     set(LZ4_LOCAL_DIR ${INTERNAL_LIBS}/lz4-1.9.3)
+     set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${LZ4_LOCAL_DIR})
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+-    if(ZLIB_NG_FOUND)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZLIB_NG_INCLUDE_DIR})
++    if(zlib-ng_FOUND)
++        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${zlib-ng_INCLUDE_DIR})
+     elseif(ZLIB_FOUND)
+         set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
+     else()
+@@ -29,8 +29,8 @@ if(NOT DEACTIVATE_ZLIB)
+ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+-    if(ZSTD_FOUND)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
++    if(zstd_FOUND)
++        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${zstd_INCLUDE_DIR})
+     else()
+         set(ZSTD_LOCAL_DIR ${INTERNAL_LIBS}/zstd-1.5.2)
+         set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZSTD_LOCAL_DIR}
+@@ -90,8 +90,8 @@ else()
+     endif()
+ endif()
+ 
+-if(LZ4_FOUND)
+-    set(LIBS ${LIBS} ${LZ4_LIBRARY})
++if(lz4_FOUND)
++    set(LIBS ${LIBS} ${lz4_LIBRARIES})
+ else()
+     file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
+     set(SOURCES ${SOURCES} ${LZ4_FILES})
+@@ -99,10 +99,10 @@ else()
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+-    if(ZLIB_NG_FOUND)
+-        set(LIBS ${LIBS} ${ZLIB_NG_LIBRARY})
++    if(zlib-ng_FOUND)
++        set(LIBS ${LIBS} ${zlib-ng_LIBRARIES})
+     elseif(ZLIB_FOUND)
+-        set(LIBS ${LIBS} ${ZLIB_LIBRARY})
++        set(LIBS ${LIBS} ${ZLIB_LIBRARIES})
+     else()
+         set(ZLIB_LOCAL_DIR ${INTERNAL_LIBS}/${ZLIB_NG_DIR})
+         file(GLOB ZLIB_FILES ${ZLIB_LOCAL_DIR}/*.c)
+@@ -112,8 +112,8 @@ if(NOT DEACTIVATE_ZLIB)
+ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+-    if(ZSTD_FOUND)
+-        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
++    if(zstd_FOUND)
++        set(LIBS ${LIBS} ${zstd_LIBRARIES})
+     else()
+         # Enable assembly code only when not using MSVC *and* x86 is there
+         if((NOT MSVC) AND COMPILER_SUPPORT_SSE2)   # if SSE2 is here, this is an x86 platform

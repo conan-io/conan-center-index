@@ -1,0 +1,17 @@
+# see issue https://github.com/jbeder/yaml-cpp/pull/847
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b230b9e..35dfdca 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,9 +24,8 @@ option(YAML_BUILD_SHARED_LIBS "Build yaml-cpp shared library" ${BUILD_SHARED_LIB
+ cmake_dependent_option(YAML_CPP_BUILD_TESTS
+   "Enable yaml-cpp tests" ON
+   "BUILD_TESTING;CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
+-cmake_dependent_option(YAML_CPP_INSTALL
+-  "Enable generation of yaml-cpp install targets" ON
+-  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
++option(YAML_CPP_INSTALL
++  "Enable generation of yaml-cpp install targets" ON)
+ cmake_dependent_option(YAML_MSVC_SHARED_RT
+   "MSVC: Build yaml-cpp with shared runtime libs (/MD)" ON
+   "MSVC" OFF)

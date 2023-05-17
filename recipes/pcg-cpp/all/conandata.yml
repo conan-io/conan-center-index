@@ -1,0 +1,7 @@
+sources:
+  "cci.20220409":
+    url: "https://github.com/imneme/pcg-cpp/archive/428802d1a5634f96bcd0705fab379ff0113bcf13.tar.gz"
+    sha256: "79f23706ed0cbc1bb57ea35d50d0abed66898b8f7b0bcf2aaecdfd234863b060"
+  "cci.20210406":
+    url: "https://github.com/imneme/pcg-cpp/archive/ffd522e7188bef30a00c74dc7eb9de5faff90092.tar.gz"
+    sha256: "81e4ab1936971627e6cc49fba279d0891b657d4397fc7940f6e751a37e4fdc94"

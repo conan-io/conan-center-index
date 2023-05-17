@@ -1,0 +1,25 @@
+
+--- include/nc_mingw.h
++++ include/nc_mingw.h
+@@ -62,6 +62,10 @@
+ 
+ #include <ncurses_dll.h>
+ 
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ NCURSES_EXPORT(int) _nc_gettimeofday(struct timeval *, void *);
+ 
+ #undef HAVE_GETTIMEOFDAY
+@@ -75,6 +79,10 @@
+ #define wcwidth(ucs) _nc_wcwidth((wchar_t)(ucs))
+ NCURSES_EXPORT(int) _nc_wcwidth(wchar_t);
+ 
++#ifdef __cplusplus
++}
++#endif
++
+ #endif /* _WIN32 */
+ 
+ #endif /* NC_MINGW_H */

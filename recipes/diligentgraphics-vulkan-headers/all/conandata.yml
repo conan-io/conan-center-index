@@ -1,0 +1,4 @@
+sources:
+  "cci.20211005":
+    url: "https://github.com/DiligentGraphics/Vulkan-Headers/archive/fa27a13cf74080df2ad421a788299db1276f17a7.zip"
+    sha256: "c4af8476d8ac788c5d7fea9fc74c982a64e280c592c5c68fe65e3119f40ed58e"

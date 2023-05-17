@@ -1,0 +1,4 @@
+sources:
+  "0.11.4":
+    sha256: d995598482221587ff6753d2a8da6ac74ff0fa79fbea29ccee196f295834531d
+    url: https://github.com/urcu/userspace-rcu/archive/refs/tags/v0.11.4.tar.gz

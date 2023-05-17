@@ -1,0 +1,23 @@
+--- a/Source/Common/CMakeLists.txt
++++ b/Source/Common/CMakeLists.txt
+@@ -68,18 +68,8 @@ CHECK_CXX_SOURCE_COMPILES(
+   "\#include <string>\n#include <codecvt>\n#include <locale>\nint main() { std::u16string u16; std::string utf8 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16); }"
+   GDCM_HAVE_CODECVT)
+ if(GDCM_USE_SYSTEM_OPENSSL)
+-set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES}
+-  ${CMAKE_DL_LIBS} # FIXME ??
+-  )
+-CHECK_CXX_SOURCE_COMPILES(
+-  #  "\#include <openssl/cms.h>\nint main() { CMS_add0_recipient_key(0); return 0;}"
+-  #HAVE_CMS_RECIPIENT_KEY)
+-    "\#include <openssl/cms.h>\nint main() { CMS_add0_recipient_password(0,0,0,0,0,0,0); return 0;}"
+-  GDCM_HAVE_CMS_RECIPIENT_PASSWORD)
+-CHECK_CXX_SOURCE_COMPILES(
+-    "\#include <openssl/bio.h>\nint main() { const void*mem; int len; BIO_new_mem_buf(mem, len); }"
+-    OPENSSL_HAS_CONST_VOID_BIO_NEW_MEM_BUF)
++  set(GDCM_HAVE_CMS_RECIPIENT_PASSWORD ON CACHE INTERNAL "")
++  set(OPENSSL_HAS_CONST_VOID_BIO_NEW_MEM_BUF ON CACHE INTERNAL "")
+ endif()
+ 
+ #-----------------------------------------------------------------------------

@@ -1,0 +1,19 @@
+versions:
+  "2.0.15":
+    folder: "2.x"
+  "2.0.14":
+    folder: "2.x"
+  "2.0.12":
+    folder: "2.x"
+  "2.0.11":
+    folder: "2.x"
+  "2.0.10":
+    folder: "2.x"
+  "2.0.7":
+    folder: "2.x"
+  "2.0.5":
+    folder: "2.x"
+  "2.0.3":
+    folder: "2.x"
+  "1.6.12":
+    folder: "1.x"

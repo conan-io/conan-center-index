@@ -1,0 +1,10 @@
+sources:
+  "0.10.0":
+    url: "https://libbsd.freedesktop.org/releases/libbsd-0.10.0.tar.xz"
+    sha256: "34b8adc726883d0e85b3118fa13605e179a62b31ba51f676136ecb2d0bc1a887"
+patches:
+  "0.10.0":
+    - patch_file: "patches/0001-support-macosx.patch"
+      patch_description: "Enables building on MacOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/NixOS/nixpkgs/blob/1016bfcff1df163aff75d908df1e00f897a29b9b/pkgs/development/libraries/libbsd/darwin.patch"

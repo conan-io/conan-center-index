@@ -1,0 +1,11 @@
+--- core/src/DecodeHints.h
++++ core/src/DecodeHints.h
+@@ -167,7 +167,7 @@
+ 		FLAG_COUNT
+ 	};
+ 
+-	static_assert(FLAG_COUNT < 8 * sizeof(_flags), "HintFlag overflow");
++	static_assert(FLAG_COUNT < 8 * sizeof(decltype(_flags)), "HintFlag overflow");
+ 
+ 	bool getFlag(int f) const {
+ 		return (_flags & (1 << f)) != 0;

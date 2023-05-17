@@ -1,0 +1,72 @@
+--- a/contrib/curl/lib/select.h
++++ b/contrib/curl/lib/select.h
+@@ -36,7 +36,8 @@
+
+ #if !defined(HAVE_STRUCT_POLLFD) && \
+     !defined(HAVE_SYS_POLL_H) && \
+-    !defined(HAVE_POLL_H)
++    !defined(HAVE_POLL_H)  && \
++    !defined(POLLIN)
+
+ #define POLLIN      0x01
+ #define POLLPRI     0x02
+--- src/host/os_isdir.c
++++ src/host/os_isdir.c
+@@ -9,7 +9,7 @@
+ #include "premake.h"
+ 
+ #ifdef _WIN32
+-#include <Windows.h>
++#include <windows.h>
+ #endif
+ 
+ int os_isdir(lua_State* L)
+--- src/host/os_uuid.c
++++ src/host/os_uuid.c
+@@ -7,7 +7,7 @@
+ #include "premake.h"
+ 
+ #if PLATFORM_WINDOWS
+-#include <Objbase.h>
++#include <objbase.h>
+ #endif
+ 
+ 
+--- build/gmake.windows/Premake5.make
++++ build/gmake.windows/Premake5.make
+@@ -22,7 +22,7 @@
+   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra
+   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra -fno-stack-protector
+   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+-  LIBS += bin/x86/Release/lua-lib.lib bin/x86/Release/zip-lib.lib bin/x86/Release/zlib-lib.lib bin/x86/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32
++  LIBS += bin/x86/Release/lua-lib.lib bin/x86/Release/zip-lib.lib bin/x86/Release/zlib-lib.lib bin/x86/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion -lcrypt32
+   LDDEPS += bin/x86/Release/lua-lib.lib bin/x86/Release/zip-lib.lib bin/x86/Release/zlib-lib.lib bin/x86/Release/curl-lib.lib
+   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -flto -s
+   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+@@ -49,7 +49,7 @@ ifeq ($(config),release_x64)
+   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra
+   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra -fno-stack-protector
+   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+-  LIBS += bin/x64/Release/lua-lib.lib bin/x64/Release/zip-lib.lib bin/x64/Release/zlib-lib.lib bin/x64/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32
++  LIBS += bin/x64/Release/lua-lib.lib bin/x64/Release/zip-lib.lib bin/x64/Release/zlib-lib.lib bin/x64/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion -lcrypt32
+   LDDEPS += bin/x64/Release/lua-lib.lib bin/x64/Release/zip-lib.lib bin/x64/Release/zlib-lib.lib bin/x64/Release/curl-lib.lib
+   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -flto -s
+   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+@@ -76,7 +76,7 @@
+   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
+   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
+   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+-  LIBS += bin/x86/Debug/lua-lib.lib bin/x86/Debug/zip-lib.lib bin/x86/Debug/zlib-lib.lib bin/x86/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32
++  LIBS += bin/x86/Debug/lua-lib.lib bin/x86/Debug/zip-lib.lib bin/x86/Debug/zlib-lib.lib bin/x86/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion -lcrypt32
+   LDDEPS += bin/x86/Debug/lua-lib.lib bin/x86/Debug/zip-lib.lib bin/x86/Debug/zlib-lib.lib bin/x86/Debug/curl-lib.lib
+   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32
+   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+@@ -103,7 +103,7 @@
+   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
+   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
+   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+-  LIBS += bin/x64/Debug/lua-lib.lib bin/x64/Debug/zip-lib.lib bin/x64/Debug/zlib-lib.lib bin/x64/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32
++  LIBS += bin/x64/Debug/lua-lib.lib bin/x64/Debug/zip-lib.lib bin/x64/Debug/zlib-lib.lib bin/x64/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion -lcrypt32
+   LDDEPS += bin/x64/Debug/lua-lib.lib bin/x64/Debug/zip-lib.lib bin/x64/Debug/zlib-lib.lib bin/x64/Debug/curl-lib.lib
+   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
+   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)

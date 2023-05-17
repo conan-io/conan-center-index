@@ -1,0 +1,25 @@
+versions:
+  "3.41.2":
+    folder: all
+  "3.41.1":
+    folder: all
+  "3.40.1":
+    folder: all
+  "3.40.0":
+    folder: all
+  "3.39.4":
+    folder: all
+  "3.39.3":
+    folder: all
+  "3.39.2":
+    folder: all
+  "3.39.1":
+    folder: all
+  "3.39.0":
+    folder: all
+  "3.38.5":
+    folder: all
+  "3.37.2":
+    folder: all
+  "3.36.0":
+    folder: all

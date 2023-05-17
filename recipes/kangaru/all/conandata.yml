@@ -1,0 +1,10 @@
+sources:
+  "4.3.0":
+    url: "https://github.com/gracicot/kangaru/archive/refs/tags/v4.3.0.tar.gz"
+    sha256: "98a0d7f2e5ac65d93fe83615ead1627fab2237b173e18151fb68d50234ed6eaf"
+  "4.2.4":
+    url: "https://github.com/gracicot/kangaru/archive/refs/tags/v4.2.4.tar.gz"
+    sha256: "0ef74825d98165c26919ce01026533b6594faa584ea93c2f275e1f275bda9dc5"
+patches:
+  "4.2.4":
+    - patch_file: "patches/fix-cmake.patch"

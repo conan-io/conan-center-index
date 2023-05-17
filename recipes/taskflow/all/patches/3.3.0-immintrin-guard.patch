@@ -1,0 +1,18 @@
+diff --git a/taskflow/utility/os.hpp b/taskflow/utility/os.hpp
+index b3e88d1..6a7facc 100644
+--- a/taskflow/utility/os.hpp
++++ b/taskflow/utility/os.hpp
+@@ -118,10 +118,10 @@
+   #define TF_CACHELINE_SIZE 64
+ #endif
+
+-//----------------------------------------------------------------------------- 
++//-----------------------------------------------------------------------------
+ // pause
+-//----------------------------------------------------------------------------- 
+-#if __has_include (<immintrin.h>)
++//-----------------------------------------------------------------------------
++#if (defined(__i386__) || defined(__x86_64__)) && __has_include (<immintrin.h>)
+   #define TF_HAS_MM_PAUSE 1
+   #include <immintrin.h>
+ #endif

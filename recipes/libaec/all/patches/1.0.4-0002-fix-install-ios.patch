@@ -1,0 +1,10 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -53,7 +53,6 @@ install(FILES libaec.h szlib.h ${PROJECT_BINARY_DIR}/libaec_Export.h
+   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+   COMPONENT headers)
+ install(TARGETS aec_client
+-  RUNTIME
+   DESTINATION ${CMAKE_INSTALL_BINDIR}
+   COMPONENT applications)
+ 

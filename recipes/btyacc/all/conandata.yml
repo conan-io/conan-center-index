@@ -1,0 +1,4 @@
+sources:
+  "3.0":
+    sha256: "ce89b9121895aa29e9fd609f23eb8e0727912745a4d41aa7ad42984ef83f05c7"
+    url: https://github.com/ChrisDodd/btyacc/archive/0256b69f36f01877f1f4e76f80a5f561beabcfef.zip

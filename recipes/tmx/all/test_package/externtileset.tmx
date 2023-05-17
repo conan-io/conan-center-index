@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="28" height="18" tilewidth="32" tileheight="32" infinite="0" backgroundcolor="#ffff7f" nextlayerid="5" nextobjectid="5">
+ <properties>
+  <property name="alt" type="file" value="b64zlib.tmx"/>
+  <property name="bool_false" type="bool" value="false"/>
+  <property name="bool_true" type="bool" value="true"/>
+  <property name="colour" type="color" value="#cc1a1a1a"/>
+  <property name="multilines">foo
+bar
+baz</property>
+  <property name="pi" type="float" value="3.14"/>
+  <property name="xml" value="libxml2"/>
+ </properties>
+ <tileset firstgid="1" source="tileset.tsx"/>
+ <group id="1" name="Group">
+  <imagelayer id="2" name="Image">
+   <image source="bg.jpg" width="896" height="576"/>
+   <properties>
+    <property name="alt" value="rainbow"/>
+   </properties>
+  </imagelayer>
+  <layer id="3" name="Layer" width="28" height="18" tintcolor="#000000">
+   <data encoding="csv">
+5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,5,5,
+5,5,3,6,6,3,3,3,1,1,1,1,1,3,1,1,1,1,1,1,3,3,3,4,4,3,1,3,
+8,3,3,6,6,6,3,3,3,3,3,3,1,1,1,3,3,3,3,1,1,1,1,4,1,1,1,3,
+8,3,3,6,6,6,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,3,
+8,3,6,6,6,6,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
+8,3,6,6,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9,9,9,3,3,3,3,3,3,3,
+8,3,6,3,3,3,9,9,9,9,9,9,3,3,3,3,9,9,9,3,9,9,3,3,3,3,2,3,
+8,3,3,3,9,9,9,3,3,3,3,9,3,3,3,9,9,3,3,3,3,9,9,3,3,3,2,3,
+8,3,3,9,9,3,3,3,3,3,3,9,3,3,3,3,3,3,3,3,3,3,9,9,3,3,2,3,
+8,3,3,9,9,3,3,7,7,3,3,9,9,3,3,3,3,3,7,7,3,3,3,9,3,3,2,3,
+8,3,3,3,9,3,3,7,7,3,3,3,9,9,3,3,3,3,7,7,3,3,3,9,3,3,2,3,
+8,3,3,3,9,9,3,3,3,4,4,4,4,4,4,4,3,3,3,3,3,9,3,9,3,3,2,3,
+3,3,3,3,3,9,9,3,3,5,5,5,5,5,5,5,3,3,3,3,3,3,3,9,3,3,2,3,
+3,3,3,3,3,3,9,9,3,6,6,6,6,6,6,6,9,9,9,9,3,3,3,9,3,3,2,3,
+3,3,3,3,3,3,3,9,9,7,7,7,7,7,7,7,3,3,3,3,3,3,9,9,3,3,2,3,
+3,3,3,3,3,3,3,3,3,8,8,8,8,8,8,8,3,3,3,3,9,9,9,3,3,3,2,2,
+3,5,3,3,3,3,3,3,3,3,3,9,9,9,9,9,9,9,9,9,9,3,3,3,3,3,5,5,
+5,5,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,5
+</data>
+  </layer>
+ </group>
+ <objectgroup color="#aa0000" id="4" name="Objects">
+  <object id="1" name="square" type="spawn" x="128" y="128" width="192" height="192" rotation="22.5"/>
+  <object id="2" name="polygon" x="492" y="325">
+   <polygon points="20,-5 -44,-197 180,-229"/>
+  </object>
+  <object id="3" name="polyline" x="174" y="477">
+   <polyline points="-14,3 50,-61 114,3 178,-61 242,3 306,-61 370,3"/>
+  </object>
+  <object id="4" name="ellipse" x="672" y="352" width="160" height="160">
+   <ellipse/>
+  </object>
+  <object id="5" name="text" x="4" y="0" width="110" height="20" rotation="10">
+   <text wrap="1" color="#ff0000" bold="1" italic="1">Hello World</text>
+  </object>
+ </objectgroup>
+</map>

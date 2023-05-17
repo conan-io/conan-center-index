@@ -1,0 +1,31 @@
+sources:
+  "2.3.5":
+    url: "https://github.com/sammycage/lunasvg/archive/v2.3.5.tar.gz"
+    sha256: "350ff56aa1acdedefe2ad8a4241a9fb8f9b232868adc7bd36dfb3dbdd57e2e93"
+  "2.3.4":
+    url: "https://github.com/sammycage/lunasvg/archive/v2.3.4.tar.gz"
+    sha256: "1933bf3fcdec81a1c17702b3c6efb00b9e3380e3fcea508f4ee4b11b0d2e45c0"
+  "2.3.2":
+    url: "https://github.com/sammycage/lunasvg/archive/v2.3.2.tar.gz"
+    sha256: "12abe6865dd030adfac70c30592eaa25c4e34fa81379e5149b0186282721f40c"
+  "2.3.1":
+    url: "https://github.com/sammycage/lunasvg/archive/refs/tags/v2.3.1.tar.gz"
+    sha256: "6492bf0f51982f5382f83f1a42f247bb1bbcbaef4a15963bbd53073cd4944a25"
+
+patches:
+  "2.3.5":
+    - patch_file: "patches/2.3.5-0001-fix-cmake.patch"
+      patch_description: "use external plutovg and fix installation path for conan"
+      patch_type: "conan"
+  "2.3.4":
+    - patch_file: "patches/2.3.1-0001-fix-cmake.patch"
+      patch_description: "use external plutovg and fix installation path for conan"
+      patch_type: "conan"
+  "2.3.2":
+    - patch_file: "patches/2.3.1-0001-fix-cmake.patch"
+      patch_description: "use external plutovg and fix installation path for conan"
+      patch_type: "conan"
+  "2.3.1":
+    - patch_file: "patches/2.3.1-0001-fix-cmake.patch"
+      patch_description: "use external plutovg and fix installation path for conan"
+      patch_type: "conan"

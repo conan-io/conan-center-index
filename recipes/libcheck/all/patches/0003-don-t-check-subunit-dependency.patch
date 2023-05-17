@@ -1,0 +1,12 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -393,7 +393,7 @@
+   ADD_DEFINITIONS(-DHAVE_LIBRT=1)
+ endif (HAVE_LIBRT)
+ 
+-check_library_exists(subunit subunit_test_start "" HAVE_SUBUNIT)
++option(HAVE_SUBUNIT "Do you have subunit" ON)
+ if (HAVE_SUBUNIT)
+   set(SUBUNIT "subunit")
+   set(ENABLE_SUBUNIT 1)
+

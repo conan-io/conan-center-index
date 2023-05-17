@@ -1,0 +1,13 @@
+sources:
+  "2.13":
+    url: "https://github.com/JWasm/JWasm/archive/2.13.tar.gz"
+    sha256: "82bc14860ec1d0552daeffbd202f83f9bba6a2756056b5e21ef81fabdb8e83a4"
+patches:
+  "2.13":
+    - patch_file: "patches/0001-2.13-fix-fatal-errors-msvc.patch"
+      patch_description: "Fix 64-bit MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/Baron-von-Riedesel/JWasm/pull/10"
+    - patch_file: "patches/0002-fix-cmake.patch"
+      patch_description: "Fix CMake to add an install target & honor vc runtime"
+      patch_type: "compatibility"

@@ -1,0 +1,7 @@
+sources:
+  "20191207":
+    url: "https://github.com/dnwrnr/sgp4/archive/f5cb54b382a5b4787432ab5b9a1e83de1a224610.zip"
+    sha256: "e8ce05b5e62ffe81e2e07020ac693cb5f3eb7dd90587e9c2203639564c030495"
+patches:
+  "20191207":
+    - patch_file: "patches/fix-cmake-files.patch"

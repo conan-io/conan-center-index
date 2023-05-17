@@ -1,0 +1,5 @@
+versions:
+  "1.9.5":
+    folder: all
+  "1.9.4":
+    folder: all

@@ -1,0 +1,9 @@
+--- interpreter/llvm/src/lib/Support/CMakeLists.txt
++++ interpreter/llvm/src/lib/Support/CMakeLists.txt
+@@ -148,5 +148,5 @@
+   ${Backtrace_INCLUDE_DIRS}
+   LINK_LIBS ${system_libs}
+   )
+-
++target_link_libraries(LLVMSupport PRIVATE ZLIB::ZLIB)
+ set_property(TARGET LLVMSupport PROPERTY LLVM_SYSTEM_LIBS "${system_libs}")

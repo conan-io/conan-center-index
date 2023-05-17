@@ -1,0 +1,60 @@
+--- Makefile
++++ Makefile
+@@ -682,7 +682,7 @@
+ LIB_OBJ= hosts_access.o options.o shell_cmd.o rfc931.o eval.o \
+ 	hosts_ctl.o refuse.o percent_x.o clean_exit.o $(AUX_OBJ) \
+ 	$(FROM_OBJ) fix_options.o socket.o tli.o workarounds.o \
+-	update.o misc.o diag.o percent_m.o myvsyslog.o
++	update.o misc.o diag.o percent_m.o myvsyslog.o severity.o
+ 
+ FROM_OBJ= fromhost.o
+ 
+--- miscd.c
++++ miscd.c
+@@ -40,8 +40,8 @@
+ #include "patchlevel.h"
+ #include "tcpd.h"
+ 
+-int     allow_severity = SEVERITY;	/* run-time adjustable */
+-int     deny_severity = LOG_WARNING;	/* ditto */
++//int     allow_severity = SEVERITY;	/* run-time adjustable */
++//int     deny_severity = LOG_WARNING;	/* ditto */
+ 
+ main(argc, argv)
+ int     argc;
+diff --git a/source/source_subfolder/scaffold.c b/source/source_subfolder/scaffold.c
+index 2fb3efb..24657c0 100644
+--- scaffold.c
++++ scaffold.c
+@@ -34,8 +34,8 @@
+  /*
+   * These are referenced by the options module and by rfc931.c.
+   */
+-int     allow_severity = SEVERITY;
+-int     deny_severity = LOG_WARNING;
++//int     allow_severity = SEVERITY;
++//int     deny_severity = LOG_WARNING;
+ int     rfc931_timeout = RFC931_TIMEOUT;
+ 
+ /* dup_hostent - create hostent in one memory block */
+new file mode 100644
+--- /dev/null
++++ severity.c
+@@ -0,0 +1,4 @@
++#include <syslog.h>
++
++int allow_severity = SEVERITY;
++int deny_severity = LOG_WARNING;
+--- try-from.c
++++ try-from.c
+@@ -34,8 +34,8 @@
+ 
+ #include "tcpd.h"
+ 
+-int     allow_severity = SEVERITY;	/* run-time adjustable */
+-int     deny_severity = LOG_WARNING;	/* ditto */
++//int     allow_severity = SEVERITY;	/* run-time adjustable */
++//int     deny_severity = LOG_WARNING;	/* ditto */
+ 
+ int main(argc, argv)
+ int     argc;

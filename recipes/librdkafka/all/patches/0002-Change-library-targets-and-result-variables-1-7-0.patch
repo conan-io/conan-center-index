@@ -1,0 +1,37 @@
+From 994ad21e1a136e11d1dc5870d991b034e41e6a4c Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alejandro.colomar@exfo.com>
+Date: Sun, 30 May 2021 11:08:36 +0200
+Subject: [PATCH] Change library targets and result variables
+
+---
+ src/CMakeLists.txt | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 6e24a238..4379c060 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -198,9 +198,7 @@ if(WITH_ZLIB)
+ endif()
+ 
+ if(WITH_ZSTD)
+-  target_link_libraries(rdkafka PRIVATE ${ZSTD_LIBRARY})
+-  target_include_directories(rdkafka PRIVATE ${ZSTD_INCLUDE_DIR})
+-  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
++  target_link_libraries(rdkafka PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
+ endif()
+ 
+ if(WITH_SSL)
+@@ -239,8 +237,7 @@ if(WITH_LIBDL)
+ endif()
+ 
+ if(WITH_LZ4_EXT)
+-  target_include_directories(rdkafka PRIVATE ${LZ4_INCLUDE_DIRS})
+-  target_link_libraries(rdkafka PUBLIC LZ4::LZ4)
++  target_link_libraries(rdkafka PUBLIC lz4::lz4)
+ endif()
+ 
+ if(WIN32)
+-- 
+2.32.0.rc0
+

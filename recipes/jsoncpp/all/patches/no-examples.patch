@@ -1,0 +1,7 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -228,4 +228,3 @@ add_subdirectory( src )
+ add_subdirectory( include )
+ 
+ #install the example
+-add_subdirectory( example )

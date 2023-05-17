@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.4)
+project(mujs LANGUAGES C)
+
+file(GLOB MUJS_SRC ${MUJS_SRC_DIR}/js*.c ${MUJS_SRC_DIR}/utf*.c ${MUJS_SRC_DIR}/regexp.c)
+
+add_library(${PROJECT_NAME} ${MUJS_SRC})
+set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+find_library(M_LIB m)
+if(M_LIB)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${M_LIB})
+endif()
+
+include(GNUInstallDirs)
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(FILES ${MUJS_SRC_DIR}/mujs.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

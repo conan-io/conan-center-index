@@ -1,0 +1,8 @@
+sources:
+  "cci.20210118":
+    url: "https://github.com/ianlancetaylor/libbacktrace/archive/dedbe13fda00253fe5d4f2fb812c909729ed5937.tar.gz"
+    sha256: "dc8c167f48f3de5ae318c528b26b72f300edb6e33744e55394674fd4b7cdd21d"
+patches:
+  "cci.20210118":
+    - patch_file: "patches/0001-pointer-arithmetic.patch"
+    - patch_file: "patches/0002-msvc-unistd-alternative.patch"

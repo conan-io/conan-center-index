@@ -1,0 +1,36 @@
+--- configure.ac
++++ configure.ac
+@@ -11,2 +11,2 @@
+-ac_sys_system=`uname -s`
+-AC_MSG_RESULT($ac_sys_system)
++AC_CANONICAL_HOST
++ac_sys_system=$ac_cv_host
+@@ -204,2 +204,8 @@
+ case $ac_sys_system in
++    *windows*|*w64*)
++        LIBNAME="libmpdec.dll"
++        LIBSONAME="libmpdec.2.dll"
++        LIBSHARED="libmpdec.2.5.1.dll"
++        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
++        ;;
+-    darwin*|Darwin*)
++    *darwin*|*Darwin*)
+@@ -232,2 +238,8 @@
+ case $ac_sys_system in
++    *windows*|*w64*)
++        LIBNAME="libmpdec.dll"
++        LIBSONAME="libmpdec.2.dll"
++        LIBSHARED="libmpdec.2.5.1.dll"
++        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
++        ;;
+-    darwin*|Darwin*)
++    *darwin*|*Darwin*)
+@@ -546,7 +558,7 @@
+         case $CC in
+             *gcc*|*clang*) # icc >= 11.0 works as well
+                 case $ac_sys_system in
+-                    darwin*|Darwin*)
++                    *darwin*|*Darwin*)
+                     ;;
+                 *)
+                     DETECTED_MACHINE="ppro"

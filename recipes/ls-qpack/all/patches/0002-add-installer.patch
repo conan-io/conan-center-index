@@ -1,0 +1,23 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 670ea97..f2dd257 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -100,3 +100,18 @@ endif()
+ if(LSQPACK_BIN)
+     add_subdirectory(bin)
+ endif()
++
++include(GNUInstallDirs)
++
++install(
++    TARGETS ls-qpack
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++
++install(FILES lsqpack.h DESTINATION include)
++
++if(WIN32)
++    install(DIRECTORY wincompat DESTINATION include)
++endif()

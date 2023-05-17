@@ -1,0 +1,7 @@
+sources:
+  "5.2.1":
+    url: "https://downloads.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz"
+    sha256: "31da5562f44c5f15d63340a09a4fd62b48c45620cd302f77a6d9acf0077879bd"
+patches:
+  "5.2.1":
+    - patch_file: "patches/0001-msvc-unistd.patch"

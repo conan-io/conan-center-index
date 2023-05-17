@@ -1,0 +1,15 @@
+sources:
+  "2.71":
+    sha256: "431075ad0bf529ef13cb41e9042c542381103e80015686222b8a9d4abef42a1c"
+    url: "https://ftp.gnu.org/gnu/autoconf/autoconf-2.71.tar.gz"
+patches:
+  "2.71":
+    - patch_file: "patches/2.71-0001-relocatable-autoconf.patch"
+      patch_description: "Replace instances where absolute paths are embedded the generated files"
+      patch_type: "conan"
+    - patch_file: "patches/2.71-0002-no-perl-path-in-shebang.patch"
+      patch_description: "Avoid build machine's perl path to be embedded the generated files"
+      patch_type: "conan"
+    - patch_file: "patches/2.71-0003-disable-man-regeneration.patch"
+      patch_description: "Disable man regeneration"
+      patch_type: "conan"

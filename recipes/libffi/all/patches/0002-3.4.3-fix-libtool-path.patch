@@ -1,0 +1,20 @@
+--- configure
++++ configure
+@@ -9940,7 +9940,7 @@
+ LIBTOOL_DEPS=$ltmain
+
+ # Always use our own libtool.
+-LIBTOOL='$(SHELL) $(top_builddir)/libtool'
++LIBTOOL='$(SHELL) $(top_builddir)/libtool.sh'
+
+
+
+@@ -10032,7 +10032,7 @@
+ esac
+
+ # Global variables:
+-ofile=libtool
++ofile=libtool.sh
+ can_build_shared=yes
+
+ # All known linkers require a '.a' archive for static linking (except MSVC and

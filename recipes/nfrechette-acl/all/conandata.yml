@@ -1,0 +1,22 @@
+sources:
+  "1.3.5":
+    url: "https://github.com/nfrechette/acl/archive/v1.3.5.tar.gz"
+    sha256: "06112ad5dc6b586124cc7b22ff6979ea1de9b69abefcd94d43556e20617355a1"
+  "2.0.0":
+    url: "https://github.com/nfrechette/acl/archive/v2.0.0.tar.gz"
+    sha256: "c5b44c063efbee6fb5753d0070e37215162d5d47f047fa033024750d9dbb6cdc"
+  "2.0.1":
+    url: "https://github.com/nfrechette/acl/archive/v2.0.1.tar.gz"
+    sha256: "aeab843b03ba15edd886472d96cdbe06e7c7142a0d54f0bf08a4f30693b9dad7"
+  "2.0.2":
+    url: "https://github.com/nfrechette/acl/archive/v2.0.2.tar.gz"
+    sha256: "d91c7942b4cbc6e8123a9964c1a68eec2778c75dc741c10ea9fede382d831649"
+  "2.0.3":
+    url: "https://github.com/nfrechette/acl/archive/v2.0.3.tar.gz"
+    sha256: "2cc0a6fd8f74ba7fee9177f6b7794bfdc22a27f5b00aa684ba52d60f0f8b3460"
+  "2.0.5":
+    url: "https://github.com/nfrechette/acl/archive/v2.0.5.tar.gz"
+    sha256: "edd255a3ffcdb102b960922069d1ec9ae5fed561bca3bb6ee73224562f76fa36"
+  "2.0.6":
+    url: "https://github.com/nfrechette/acl/archive/v2.0.6.tar.gz"
+    sha256: "595575d3470eb3a4a572f7c5cb986ea2205ea1271ca3b32b864c569659106311"

@@ -1,0 +1,4 @@
+sources:
+  "10.32.01":
+    sha256: 668cbc6d2c0a065bb6abe8494d5a1bb3549a14cd956a44a2df9095045623ea47
+    url: https://github.com/jpcre2/jpcre2/archive/refs/tags/10.32.01.tar.gz

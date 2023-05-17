@@ -1,0 +1,19 @@
+sources:
+  "5.0.4":
+    sha256: e82096c03ccb31200f02a5b9bd0a5e9ea07840351987dca55aae99a8d5823f59
+    url: https://github.com/CGAL/cgal/releases/download/v5.0.4/CGAL-5.0.4.tar.xz
+  "5.1.5":
+    sha256: b1bb8a6053aa12baa5981aef20a542cd3e617a86826963fb8fb6852b1a0da97c
+    url: https://github.com/CGAL/cgal/releases/download/v5.1.5/CGAL-5.1.5.tar.xz
+  "5.2.4":
+    sha256: 7f792c59d067e41a073bcee5d615f4276f9ccd2b5e7d359093cc36149fda14c3
+    url: https://github.com/CGAL/cgal/releases/download/v5.2.4/CGAL-5.2.4.tar.xz
+  "5.3.2":
+    sha256: af917dbc550388ebcb206f774e610fbdb914d95a4b2932fa952279129103852b
+    url: https://github.com/CGAL/cgal/releases/download/v5.3.2/CGAL-5.3.2.tar.xz
+  "5.5":
+    sha256: 98ac395ca08aacf38b7a8170a822b650aedf10355df41dd0e4bfb238408e08a6
+    url: https://github.com/CGAL/cgal/releases/download/v5.5/CGAL-5.5.tar.xz
+  "5.5.1":
+    sha256: 091630def028facdcaf00eb5b68ad79eddac1b855cca6e87eef18a031566edfc
+    url: https://github.com/CGAL/cgal/releases/download/v5.5.1/CGAL-5.5.1.tar.xz

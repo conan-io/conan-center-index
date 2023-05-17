@@ -1,0 +1,26 @@
+From bb2c4e80928e8221a31c3631f5a802c7b022aebd Mon Sep 17 00:00:00 2001
+From: Sergey Bobrenok <bobrofon@gmail.com>
+Date: Sun, 29 Aug 2021 12:02:23 +0300
+Subject: [PATCH 1/2] Make.Rules: Remove hardcoded -fPIC
+
+Signed-off-by: Sergey Bobrenok <bobrofon@gmail.com>
+---
+ Make.Rules | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Make.Rules b/Make.Rules
+index cc6f95b..91099c6 100644
+--- a/Make.Rules
++++ b/Make.Rules
+@@ -52,7 +52,7 @@ GOMAJOR=0
+ # Compilation specifics
+ 
+ KERNEL_HEADERS := $(topdir)/libcap/include/uapi
+-IPATH += -fPIC -I$(KERNEL_HEADERS) -I$(topdir)/libcap/include
++IPATH += -I$(KERNEL_HEADERS) -I$(topdir)/libcap/include
+ 
+ CC := $(CROSS_COMPILE)gcc
+ DEFINES := -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+-- 
+2.31.1
+

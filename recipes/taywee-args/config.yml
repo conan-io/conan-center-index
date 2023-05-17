@@ -1,0 +1,21 @@
+versions:
+  "6.4.6":
+    folder: all
+  "6.4.4":
+    folder: all
+  "6.4.2":
+    folder: all
+  "6.4.1":
+    folder: all
+  "6.3.0":
+    folder: all
+  "6.2.7":
+    folder: all
+  "6.2.6":
+    folder: all
+  "6.2.5":
+    folder: all
+  "6.2.4":
+    folder: all
+  "6.2.3":
+    folder: all

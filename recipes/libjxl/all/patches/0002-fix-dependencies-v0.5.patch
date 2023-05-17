@@ -1,0 +1,106 @@
+--- a/lib/jxl.cmake
++++ b/lib/jxl.cmake
+@@ -328,7 +328,7 @@ if (JPEGXL_ENABLE_SKCMS)
+   list(APPEND JPEGXL_INTERNAL_FLAGS -DJPEGXL_ENABLE_SKCMS=1)
+   list(APPEND JPEGXL_INTERNAL_LIBS skcms)
+ else ()
+-  list(APPEND JPEGXL_INTERNAL_LIBS lcms2)
++  list(APPEND JPEGXL_INTERNAL_LIBS ${CONAN_LIBS_LCMS})
+ endif ()
+ 
+ if (NOT JPEGXL_ENABLE_TRANSCODE_JPEG)
+@@ -353,8 +353,6 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ target_include_directories(jxl_dec-obj PUBLIC
+   ${PROJECT_SOURCE_DIR}
+   ${CMAKE_CURRENT_SOURCE_DIR}/include
+-  $<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>
+-  $<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>
+ )
+ target_compile_definitions(jxl_dec-obj PUBLIC
+   ${OBJ_COMPILE_DEFINITIONS}
+@@ -371,8 +369,6 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ target_include_directories(jxl_enc-obj PUBLIC
+   ${PROJECT_SOURCE_DIR}
+   ${CMAKE_CURRENT_SOURCE_DIR}/include
+-  $<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>
+-  $<TARGET_PROPERTY:brotlicommon-static,INTERFACE_INCLUDE_DIRECTORIES>
+ )
+ target_compile_definitions(jxl_enc-obj PUBLIC
+   ${OBJ_COMPILE_DEFINITIONS}
+@@ -381,23 +377,6 @@ if (JPEGXL_ENABLE_PROFILER)
+ target_link_libraries(jxl_enc-obj PUBLIC jxl_profiler)
+ endif()
+ 
+-#TODO(lode): don't depend on CMS for the core library
+-if (JPEGXL_ENABLE_SKCMS)
+-  target_include_directories(jxl_enc-obj PRIVATE
+-    $<TARGET_PROPERTY:skcms,INCLUDE_DIRECTORIES>
+-  )
+-  target_include_directories(jxl_dec-obj PRIVATE
+-    $<TARGET_PROPERTY:skcms,INCLUDE_DIRECTORIES>
+-  )
+-else ()
+-  target_include_directories(jxl_enc-obj PRIVATE
+-    $<TARGET_PROPERTY:lcms2,INCLUDE_DIRECTORIES>
+-  )
+-  target_include_directories(jxl_dec-obj PRIVATE
+-    $<TARGET_PROPERTY:lcms2,INCLUDE_DIRECTORIES>
+-  )
+-endif ()
+-
+ # Headers for exporting/importing public headers
+ include(GenerateExportHeader)
+ # TODO(deymo): Add these visibility properties to the static dependencies of
+@@ -416,9 +395,6 @@ set_target_properties(jxl_enc-obj PROPERTIES
+   VISIBILITY_INLINES_HIDDEN 1
+   DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD
+ )
+-generate_export_header(jxl_enc-obj
+-  BASE_NAME JXL
+-  EXPORT_FILE_NAME include/jxl/jxl_export.h)
+ target_include_directories(jxl_enc-obj PUBLIC
+     ${CMAKE_CURRENT_BINARY_DIR}/include)
+ 
+@@ -496,9 +472,8 @@ if (((NOT DEFINED "${TARGET_SUPPORTS_SHARED_LIBS}") OR
+ add_library(jxl SHARED
+   $<TARGET_OBJECTS:jxl_dec-obj>
+   $<TARGET_OBJECTS:jxl_enc-obj>)
+-strip_static(JPEGXL_INTERNAL_SHARED_LIBS JPEGXL_INTERNAL_LIBS)
+ target_link_libraries(jxl PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+-target_link_libraries(jxl PRIVATE ${JPEGXL_INTERNAL_SHARED_LIBS})
++target_link_libraries(jxl PRIVATE ${JPEGXL_INTERNAL_LIBS})
+ # Shared library include path contains only the "include/" paths.
+ target_include_directories(jxl PUBLIC
+   "${CMAKE_CURRENT_SOURCE_DIR}/include"
+@@ -507,13 +482,13 @@ set_target_properties(jxl PROPERTIES
+   VERSION ${JPEGXL_LIBRARY_VERSION}
+   SOVERSION ${JPEGXL_LIBRARY_SOVERSION}
+   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
++  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
++  DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD)
+ 
+ # Public shared decoder library.
+ add_library(jxl_dec SHARED $<TARGET_OBJECTS:jxl_dec-obj>)
+-strip_static(JPEGXL_DEC_INTERNAL_SHARED_LIBS JPEGXL_DEC_INTERNAL_LIBS)
+ target_link_libraries(jxl_dec PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+-target_link_libraries(jxl_dec PRIVATE ${JPEGXL_DEC_INTERNAL_SHARED_LIBS})
++target_link_libraries(jxl_dec PRIVATE ${JPEGXL_DEC_INTERNAL_LIBS})
+ # Shared library include path contains only the "include/" paths.
+ target_include_directories(jxl_dec PUBLIC
+   "${CMAKE_CURRENT_SOURCE_DIR}/include"
+@@ -549,8 +524,14 @@ install(TARGETS jxl
+ else()
+ add_library(jxl ALIAS jxl-static)
+ add_library(jxl_dec ALIAS jxl_dec-static)
++set_target_properties(jxl-static PROPERTIES
++  DEFINE_SYMBOL JXL_INTERNAL_LIBRARY_BUILD)
+ endif()  # TARGET_SUPPORTS_SHARED_LIBS AND NOT JPEGXL_STATIC
+ 
++generate_export_header(jxl
++  BASE_NAME JXL
++  EXPORT_FILE_NAME include/jxl/jxl_export.h)
++
+ # Add a pkg-config file for libjxl.
+ set(JPEGXL_LIBRARY_REQUIRES
+     "libhwy libbrotlicommon libbrotlienc libbrotlidec")

@@ -1,0 +1,16 @@
+sources:
+  "0.21.0":
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.21.0.tar.gz"
+    sha256: "8f58dfc8bcbe01224c788f22c544c27611e3c411ed5a2097488fbb32a3c0fb3d"
+  "0.20.0":
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.20.0.tar.gz"
+    sha256: "073d6b1ff891444b54a01c2a3f17074fd612f9e2e14d9ebd61863c70737b1882"
+patches:
+  "0.21.0":
+    - patch_file: "patches/0.21.0-adapt-cmakelists.patch"
+      patch_description: "fix install path"
+      patch_type: "conan"
+  "0.20.0":
+    - patch_file: "patches/0.20.0-adapt-cmakelists.patch"
+      patch_description: "fix install path"
+      patch_type: "conan"

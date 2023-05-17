@@ -1,0 +1,20 @@
+sources:
+  "0.2.15":
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.2.15.tar.gz"
+    sha256: "4ff2ada07ede3c6afa4b8e6e20de541e717038307f29b38c27efa7c4d875ee26"
+  "0.2.12":
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.2.12.tar.gz"
+    sha256: "cc4ebfe715d8df5b9e3f4a3ce9b67d5f480017a7ebbbfa1d5e64ea53ec672580"
+  "0.2.11":
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.2.11.tar.gz"
+    sha256: "4818b8d3fe02016fcfdd033c1e9d8f6be07ccaeb38664fe8c31c0fd153ea56e6"
+  "0.2.7":
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.2.7.tar.gz"
+    sha256: "bb5c94cdff70c1985fb0b5f30d81756cedb5a3c3075d37f7e1e2b34e2a33c8c0"
+  "0.1.5":
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.1.5.tar.gz"
+    sha256: "f1b423a487b5d6dca118bfc0d0c6cc596dc476b282258a3228e73a8f730422d4"
+patches:
+  "0.1.5":
+    - patch_file: "patches/0001-disable-tests-bin.patch"
+    - patch_file: "patches/0002-use-PROJECT_SOURCE_DIR.patch"

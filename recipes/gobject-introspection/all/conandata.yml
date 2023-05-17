@@ -1,0 +1,19 @@
+sources:
+  "1.72.0":
+    sha256: "02fe8e590861d88f83060dd39cda5ccaa60b2da1d21d0f95499301b186beaabc"
+    url: "https://download.gnome.org/sources/gobject-introspection/1.72/gobject-introspection-1.72.0.tar.xz"
+  "1.70.0":
+    url: "https://download.gnome.org/sources/gobject-introspection/1.70/gobject-introspection-1.70.0.tar.xz"
+    sha256: "902b4906e3102d17aa2fcb6dad1c19971c70f2a82a159ddc4a94df73a3cafc4a"
+  "1.69.0":
+    url: "https://download.gnome.org/sources/gobject-introspection/1.69/gobject-introspection-1.69.0.tar.xz"
+    sha256: "c668cbe4a3aad7539e2cf669ab576ce7fbadac6890472f4095ca215dbbebee99"
+  "1.68.0":
+    url: "https://download.gnome.org/sources/gobject-introspection/1.68/gobject-introspection-1.68.0.tar.xz"
+    sha256: "d229242481a201b84a0c66716de1752bca41db4133672cfcfb37c93eb6e54a27"
+  "1.67.1":
+    url: "https://download.gnome.org/sources/gobject-introspection/1.67/gobject-introspection-1.67.1.tar.xz"
+    sha256: "9635184d668794609f9fe661c5bde11c106385d26c3babe291c24e3655987e47"
+  "1.66.1":
+    url: "https://download.gnome.org/sources/gobject-introspection/1.66/gobject-introspection-1.66.1.tar.xz"
+    sha256: "dd44a55ee5f426ea22b6b89624708f9e8d53f5cc94e5485c15c87cb30e06161d"

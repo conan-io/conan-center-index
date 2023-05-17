@@ -1,0 +1,41 @@
+index ca6dff2..ba015d2 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,7 +16,6 @@ option(BUILD_CTL "Build drogon_ctl" ${BUILD_PROGRAMS})
+ option(BUILD_EXAMPLES "Build examples" ${BUILD_PROGRAMS})
+ option(BUILD_ORM "Build orm" ON)
+ option(COZ_PROFILING "Use coz for profiling" OFF)
+-option(BUILD_SHARED_LIBS "Build drogon as a shared lib" OFF)
+ option(BUILD_DOC "Build Doxygen documentation" OFF)
+ option(BUILD_BROTLI "Build Brotli" ON)
+ 
+@@ -106,7 +105,6 @@ target_include_directories(
+     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/orm_lib/inc>
+     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/nosql_lib/redis/inc>
+     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/trantor>
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/exports>
+     $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>)
+ 
+@@ -116,9 +114,8 @@ if (WIN32)
+         PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/mman-win32>)
+ endif (WIN32)
+ 
+-add_subdirectory(trantor)
+-
+-target_link_libraries(${PROJECT_NAME} PUBLIC trantor)
++find_package(Trantor REQUIRED)
++target_link_libraries(${PROJECT_NAME} PUBLIC Trantor::Trantor)
+ 
+ if(${CMAKE_SYSTEM_NAME} STREQUAL "Haiku")
+     target_link_libraries(${PROJECT_NAME} PRIVATE network)
+@@ -177,7 +174,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+ endif ()
+ 
+ if(NEED_BOOST_FS)
+-    find_package(Boost 1.49.0 COMPONENTS filesystem system REQUIRED)
++    # TODO: component specified find_package is always failed. Need to fix it.
++    find_package(Boost 1.49.0 REQUIRED)
+     message(STATUS "Using Boost filesytem::path")
+     message(STATUS "Boost include dir: " ${Boost_INCLUDE_DIR})
+     include_directories(${BOOST_INCLUDE_DIRS})

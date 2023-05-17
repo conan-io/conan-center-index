@@ -1,0 +1,4 @@
+sources:
+  "1.2.2":
+    sha256: 9e7811621c86444d6c4f47f822eaee713039b04ab38fb9ad652046e4ab4f647c
+    url: https://github.com/taocpp/operators/archive/1.2.2.tar.gz

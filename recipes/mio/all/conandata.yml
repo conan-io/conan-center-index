@@ -1,0 +1,11 @@
+sources:
+  "cci.20201220":
+    url: "https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz"
+    sha256: "056ae59d63c5d7f34dd90510adf2996ef1c4c17ec2b26ba9c9cb9974025b2c2c"
+  "cci.20230303":
+    url: "https://github.com/mandreyel/mio/archive/8b6b7d878c89e81614d05edca7936de41ccdd2da.tar.gz"
+    sha256: "86248113BB2F1484F9CD44A260FE09BEAA911307073C6F21FA9E765588D54B4B"
+patches:
+  "cci.20201220":
+    - patch_file: "patches/0001-fix-include-windows.patch"
+      patch_source: "https://github.com/mandreyel/mio/pull/73"

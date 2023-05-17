@@ -1,0 +1,72 @@
+--- /dev/null
++++ dumpbin_nm.py
+@@ -0,0 +1,28 @@
++#!/usr/bin/env python3
++
++import re
++import subprocess
++import sys
++#print(open(sys.argv[1], "rb").read())
++#output = subprocess.check_output(["dumpbin", "-nologo", "-symbols"] + sys.argv[1:], stderr=subprocess.STDOUT, text=True, shell=True)
++output = subprocess.check_output("dumpbin -nologo -symbols {}".format(sys.argv[1]), stderr=subprocess.STDOUT, shell=True)
++output = output.decode()
++for line in output.splitlines():
++    d = re.split("[ |]+", line.strip())
++    if len(d) == 6:
++        try:
++            int(d[0])
++        except ValueError:
++            continue
++
++        section = d[-1]
++        if section == ".file":
++            continue
++        elif section == ".data":
++            stype = "d"
++        elif section == ".text":
++            stype = "t"
++        else:
++            stype = "D"
++        offset = d[1]
++        print("{} {} {}".format(offset, stype, section))
+--- /dev/null
++++ yasm_wrapper.sh
+@@ -0,0 +1,38 @@
++#!/bin/sh
++asmopts=()
++setoutput=
++calculated_output=
++source=
++while test $# -gt 0; do
++    case "$1" in
++        *.s | *.S | *.asm | *.ASM)
++            calculated_output=$(echo -n "$1" | sed -e 's/\.asm$/.obj/g' | sed -e 's/\.ASM/.obj/g' | sed -e 's/\.s/.obj/g' | sed -e 's/\.S/.obj/g')
++            source="$1"
++            ;;
++        -o)
++            asmopts+=("$1")
++            shift
++            setoutput="$1"
++            asmopts+=("$1")
++            ;;
++        -O*)
++            ;;
++        -MT | -MD | -MTd | -MDd)
++            ;;
++        -D*)
++            asmopts+=("$1")
++            ;;
++        *)
++            asmopts+=("$1")
++            ;;
++    esac
++    shift
++done
++
++if [ "$setoutput" == "" ] && [ "$calculated_output" != "" ]; then
++    asmopts+=("-o")
++    asmopts+=("$calculated_output")
++fi
++
++echo "Executing yasm ${asmopts[@]} $source"
++exec yasm ${asmopts[@]} "$source"

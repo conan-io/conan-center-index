@@ -1,0 +1,15 @@
+versions:
+  "3.6.0":
+    folder: all
+  "3.5.0":
+    folder: all
+  "3.4.0":
+    folder: all
+  "3.3.0":
+    folder: all
+  "3.1.2":
+    folder: all
+  "3.1.1":
+    folder: all
+  "2.0.1":
+    folder: all

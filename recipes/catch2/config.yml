@@ -1,0 +1,27 @@
+versions:
+  "3.3.2":
+    folder: 3.x.x
+  "3.3.1":
+    folder: 3.x.x
+  "3.3.0":
+    folder: 3.x.x
+  "3.2.1":
+    folder: 3.x.x
+  "3.2.0":
+    folder: 3.x.x
+  "3.1.0":
+    folder: 3.x.x
+  "3.0.1":
+    folder: 3.x.x
+  "2.13.10":
+    folder: 2.x.x
+  "2.13.9":
+    folder: 2.x.x
+  "2.13.8":
+    folder: 2.x.x
+  "2.13.7":
+    folder: 2.x.x
+  "2.12.4":
+    folder: 2.x.x
+  "2.11.3":
+    folder: 2.x.x

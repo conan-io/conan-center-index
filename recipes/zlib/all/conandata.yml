@@ -1,0 +1,34 @@
+sources:
+  "1.2.13":
+    url:
+      - "https://zlib.net/fossils/zlib-1.2.13.tar.gz"
+      - "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz"
+    sha256: "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
+  "1.2.12":
+    url: "https://zlib.net/fossils/zlib-1.2.12.tar.gz"
+    sha256: "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9"
+  "1.2.11":
+    url: "https://zlib.net/fossils/zlib-1.2.11.tar.gz"
+    sha256: "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1"
+patches:
+  "1.2.13":
+    - patch_file: "patches/1.2.13/0001-Fix-cmake.patch"
+    - patch_file: "patches/1.2.x/0002-gzguts-xcode12-compile-fix.patch"
+  "1.2.12":
+    - patch_file: "patches/1.2.x/0001-fix-cmake.patch"
+    - patch_file: "patches/1.2.x/0002-gzguts-xcode12-compile-fix.patch"
+    - patch_file: "patches/1.2.x/0004-Fix-a-bug-when-getting-a-gzip-header-extra-field-wit.patch"
+      patch_description: "CVE-2022-37434: Fix a bug when getting a gzip header extra field with inflate()"
+      patch_type: "vulnerability"
+      patch_source: "https://github.com/madler/zlib/commit/eff308af425b67093bab25f80f1ae950166bece1"
+      sha256: "15e3c177dc2a034a22e02490a97ba5b1719aae3f8129a06c16d727b661d1650f"
+    - patch_file: "patches/1.2.x/0005-Fix-extra-field-processing-bug-that-dereferences-NUL.patch"
+      patch_description: "CVE-2022-37434: Fix extra field processing bug that dereferences NULL state->head"
+      patch_type: "vulnerability"
+      patch_source: "https://github.com/madler/zlib/commit/1eb7682f845ac9e9bf9ae35bbfb3bad5dacbd91d"
+      sha256: "cdd69eb3251728b1875c8ecae6427b50aa750b4045ef984ab79b6c07b7e6dd3a"
+  "1.2.11":
+    - patch_file: "patches/1.2.x/0001-fix-cmake.patch"
+    - patch_file: "patches/1.2.x/0002-gzguts-xcode12-compile-fix.patch"
+    # https://github.com/madler/zlib/issues/268
+    - patch_file: "patches/1.2.x/0003-gzguts-fix-widechar-condition.patch"

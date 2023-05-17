@@ -1,0 +1,14 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -95,10 +95,10 @@
+ # 2020-05-25 PH added a check for Intel CET
+ # 2020-12-03 PH altered the definition of pcre2test as suggested by Daniel
+ 
+-PROJECT(PCRE2 C)
+ 
+ # Increased minimum to 2.8.5 to support GNUInstallDirs.
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
++PROJECT(PCRE2 C)
+ 
+ # Set policy CMP0026 to avoid warnings for the use of LOCATION in
+ # GET_TARGET_PROPERTY. This should no longer be required.

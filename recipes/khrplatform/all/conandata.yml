@@ -1,0 +1,4 @@
+sources:
+  "cci.20200529":
+    url: "https://github.com/KhronosGroup/EGL-Registry/raw/f636b23410dd4db5055dffbe499f4754013759d5/api/KHR/khrplatform.h"
+    sha256: "e206a6931f98ffe1c5c7ece69c4f94bbe1c9279243f40cbe7782848a0d3fa2de"

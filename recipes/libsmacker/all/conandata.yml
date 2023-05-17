@@ -1,0 +1,7 @@
+sources:
+  "1.1.1r35":
+    url: "https://sourceforge.net/projects/libsmacker/files/libsmacker-1.1/libsmacker-1.1.1r35.tar.gz"
+    sha256: "bb9c22c02ecda189a3389c9340a0eb6a8f287aa257099b54c3d9e1802a454630"
+patches:
+  "1.1.1r35":
+    - patch_file: "patches/0001-install-header.patch"

@@ -1,0 +1,37 @@
+diff --git a/physx/source/compiler/cmake/linux/PhysX.cmake b/physx/source/compiler/cmake/linux/PhysX.cmake
+index 48a4e53a..c4565e4a 100644
+--- a/physx/source/compiler/cmake/linux/PhysX.cmake
++++ b/physx/source/compiler/cmake/linux/PhysX.cmake
+@@ -89,13 +89,12 @@ IF(NV_USE_GAMEWORKS_OUTPUT_DIRS)
+ 	ENDIF()
+ 	SET(PHYSX_GPU_SHARED_LIB_NAME_DEF PX_PHYSX_GPU_SHARED_LIB_NAME=libPhysXGpu_${BITNESS_STRING}.so)
+ ELSE()
+-	SET(CONFIG_STRING $<$<CONFIG:debug>:DEBUG>$<$<CONFIG:checked>:CHECKED>$<$<CONFIG:profile>:PROFILE>)
+ 	IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+-		SET(BITNESS_STRING "x64")
++		SET(BITNESS_STRING "64")
+ 	ELSE()
+-		SET(BITNESS_STRING "x86")
++		SET(BITNESS_STRING "32")
+ 	ENDIF()
+-	SET(PHYSX_GPU_SHARED_LIB_NAME_DEF PX_PHYSX_GPU_SHARED_LIB_NAME=libPhysXGpu${CONFIG_STRING}_${BITNESS_STRING}.so)
++	SET(PHYSX_GPU_SHARED_LIB_NAME_DEF PX_PHYSX_GPU_SHARED_LIB_NAME=libPhysXGpu_${BITNESS_STRING}.so)
+ ENDIF()
+ 
+ SET(PHYSX_COMPILE_DEFS
+diff --git a/physx/source/compiler/cmake/windows/PhysX.cmake b/physx/source/compiler/cmake/windows/PhysX.cmake
+index 6abd6f39..7f44cf02 100644
+--- a/physx/source/compiler/cmake/windows/PhysX.cmake
++++ b/physx/source/compiler/cmake/windows/PhysX.cmake
+@@ -112,9 +112,8 @@ IF(NV_USE_GAMEWORKS_OUTPUT_DIRS)
+ 	SET(BITNESS_STRING $<$<BOOL:${CMAKE_CL_64}>:64>$<$<NOT:${CMAKE_CL_64}>:32>)
+ 	SET(PHYSX_GPU_SHARED_LIB_NAME_DEF PX_PHYSX_GPU_SHARED_LIB_NAME=PhysXGpu_${BITNESS_STRING}.dll)
+ ELSE()
+-	SET(CONFIG_STRING $<$<CONFIG:debug>:DEBUG>$<$<CONFIG:checked>:CHECKED>$<$<CONFIG:profile>:PROFILE>)
+-	SET(BITNESS_STRING $<$<BOOL:${CMAKE_CL_64}>:x64>$<$<NOT:${CMAKE_CL_64}>:x86>)
+-	SET(PHYSX_GPU_SHARED_LIB_NAME_DEF PX_PHYSX_GPU_SHARED_LIB_NAME=PhysXGpu${CONFIG_STRING}_${BITNESS_STRING}.dll)
++	SET(BITNESS_STRING $<$<BOOL:${CMAKE_CL_64}>:64>$<$<NOT:${CMAKE_CL_64}>:32>)
++	SET(PHYSX_GPU_SHARED_LIB_NAME_DEF PX_PHYSX_GPU_SHARED_LIB_NAME=PhysXGpu_${BITNESS_STRING}.dll)
+ ENDIF()
+ 
+ IF(NOT PX_GENERATE_STATIC_LIBRARIES)

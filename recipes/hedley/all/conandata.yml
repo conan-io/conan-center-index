@@ -1,0 +1,4 @@
+sources:
+  "15":
+    url: "https://github.com/nemequ/hedley/archive/refs/tags/v15.tar.gz"
+    sha256: "e91c71b58f59d08c7b8289be8f687866863d934dfaa528e4be30b178139ae863"

@@ -1,0 +1,4 @@
+sources:
+  "cci.20210215":
+    url: "https://github.com/kokke/tiny-regex-c/archive/98d0bf28278b2230f95b7ba39744cb29b806f03a.zip"
+    sha256: "27191a4cbf6008a60a3177cf782b0ec31891a884844813ae959329d1d0ec5828"

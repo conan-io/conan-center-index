@@ -1,0 +1,46 @@
+--- a/src/libqhullcpp/QhullUser.cpp
++++ b/src/libqhullcpp/QhullUser.cpp
+@@ -11,6 +11,7 @@
+ #include "libqhullcpp/QhullError.h"
+ 
+ #include <iostream>
++#include <stdint.h>
+ 
+ using std::cerr;
+ using std::endl;
+@@ -98,7 +99,7 @@ captureOff()
+         throw QhullError(10080, "Qhull error: QhullUser::captureOn not call before QhullUser::captureOff for QhullUser 0x%llx", 0, 0, 0.0, this);
+     }
+     if(qh()->cpp_user!=this){
+-        throw QhullError(10081, "Qhull error: conflicting QhullUser (0x%llx) for QhullUser::captureOff().  Does not match 'this' (0x...%X)", int((uintptr_t)this), 0, 0.0, qh()->cpp_user);
++        throw QhullError(10081, "Qhull error: conflicting QhullUser (0x%llx) for QhullUser::captureOff().  Does not match 'this' (0x...%X)", int(0xffff&(intptr_t)this), 0, 0.0, qh()->cpp_user);
+     }
+     qh()->cpp_user= NULL;
+ }//captureOff
+--- a/src/libqhullcpp/QhullUser.h
++++ b/src/libqhullcpp/QhullUser.h
+@@ -36,8 +36,8 @@ namespace orgQhull{
+ #//!\name Fields
+         QhullQh *       qh_qh;          //!< QhullQh/qhT for access to libqhull_r
+         void *          previous_user;  //!< previous qh.cpp_user, restored on deconstruction
+-        std::vector< std::vector< double>> doubles_vector;  //! vectors for capturing ints and doubles
+-        std::vector< std::vector< int>> ints_vector;
++        std::vector< std::vector< double> > doubles_vector;  //! vectors for capturing ints and doubles
++        std::vector< std::vector< int> > ints_vector;
+         std::vector< int>               fprintf_ints;
+         std::vector< double>            fprintf_doubles;
+         std::vector< int>               fprintf_codes;
+@@ -77,11 +77,11 @@ namespace orgQhull{
+         void            clearIntsVector() { ints_vector.clear(); }
+         const std::vector< int> &codes() const { return fprintf_codes; }
+         int             delaunayDim() const { return delaunay_dim; }
+-        const std::vector< std::vector< double>> &doublesVector() const { return doubles_vector; }
++        const std::vector< std::vector< double> > &doublesVector() const { return doubles_vector; }
+         const std::vector< double> &doubles() const { return fprintf_doubles; }
+         int             firstCode() const { return (fprintf_codes.size() == 0 ? -1 : fprintf_codes[0]); }
+         const std::vector< int> &ints() const { return fprintf_ints; }
+-        const std::vector< std::vector< int>> &intsVector() const { return ints_vector; }
++        const std::vector< std::vector< int> > &intsVector() const { return ints_vector; }
+         int             numDoubles() const { return (int)doubles_vector.size();  }
+         int             numFacets() const { return num_facets; }
+         int             numInts() const { return (int)ints_vector.size(); }

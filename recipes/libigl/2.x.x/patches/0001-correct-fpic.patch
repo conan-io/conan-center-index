@@ -1,0 +1,17 @@
+diff --git a/cmake/libigl.cmake b/cmake/libigl.cmake
+index 6de1b418..0cc75fcd 100644
+--- a/cmake/libigl.cmake
++++ b/cmake/libigl.cmake
+@@ -96,11 +96,6 @@ if(BUILD_SHARED_LIBS)
+   set_target_properties(igl_common PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+-if(UNIX AND NOT HUNTER_ENABLED)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+-endif()
+-
+ if(HUNTER_ENABLED)
+   hunter_add_package(Eigen)
+   find_package(Eigen3 CONFIG REQUIRED)
+

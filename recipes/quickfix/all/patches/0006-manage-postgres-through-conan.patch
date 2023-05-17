@@ -1,0 +1,25 @@
+From 96e595483cc068530d306b851080499931770562 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Sun, 14 Jun 2020 22:44:09 -0300
+Subject: [PATCH 6/8] manage postgres through conan
+
+---
+ CMakeLists.txt | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8789432c..4392bd55 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,8 +46,6 @@ add_definitions("-DHAVE_MYSQL=1")
+ endif()
+ 
+ if(HAVE_POSTGRESQL)
+-find_package(PostgreSQL REQUIRED)
+-include_directories(${PostgreSQL_INCLUDE_DIRS})
+ 
+ message("-- Building with POSTGRESQL")
+ add_definitions("-DHAVE_POSTGRESQL=1")
+-- 
+2.25.0
+

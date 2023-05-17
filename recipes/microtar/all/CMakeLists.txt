@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.4)
+project(microtar LANGUAGES C)
+
+include(GNUInstallDirs)
+
+add_library(microtar ${MICROTAR_SRC_DIR}/src/microtar.c)
+set_target_properties(microtar PROPERTIES
+    PUBLIC_HEADER "${MICROTAR_SRC_DIR}/src/microtar.h"
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
+install(
+    TARGETS microtar
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)

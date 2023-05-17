@@ -1,0 +1,121 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b2bc2a1..6b2d5ac 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -190,6 +190,7 @@ set (BUILD_SOURCE_DIR ${CMAKE_BINARY_DIR})
+ 
+ include (MakeDistFiles)
+ 
++if(FALSE)
+ add_custom_target(hugo_dir
+     COMMAND ${CMAKE_COMMAND} -E make_directory hugo
+ )
+@@ -245,22 +246,20 @@ add_custom_target(format-lint
+ add_custom_target(docs
+     DEPENDS hugo doxygen-current
+ )
++endif()
+ 
+ set(THIRD_PARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party)
+-
+-enable_testing()
++set(MONGO_CXX_PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
++set(MONGO_CXX_PROJECT_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_subdirectory(src)
+ 
+-add_subdirectory(examples EXCLUDE_FROM_ALL)
+-
+-add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+-
+ # Implement 'dist' target
+ #
+ # CMake does not implement anything like 'dist' from autotools.
+ # This implementation is based on the one in GnuCash.
+ 
++if(FALSE)
+ add_subdirectory (cmake)
+ add_subdirectory (data)
+ add_subdirectory (docs)
+@@ -356,4 +355,4 @@ endif ()
+ if (CMAKE_GENERATOR_TOOLSET)
+    message (STATUS "\tinstance: ${CMAKE_GENERATOR_TOOLSET}")
+ endif ()
+-
++endif()
+diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
+index 7c79f45..0fcb305 100644
+--- a/src/bsoncxx/CMakeLists.txt
++++ b/src/bsoncxx/CMakeLists.txt
+@@ -71,7 +71,7 @@ set(BSONCXX_VERSION_NO_EXTRA ${BSONCXX_VERSION_MAJOR}.${BSONCXX_VERSION_MINOR}.$
+ set(BSONCXX_VERSION ${BSONCXX_VERSION_NO_EXTRA}${BSONCXX_VERSION_EXTRA})
+ message ("bsoncxx version: ${BSONCXX_VERSION}")
+ set(BSONCXX_INLINE_NAMESPACE "v${BSONCXX_ABI_VERSION}")
+-set(BSONCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/bsoncxx/${BSONCXX_INLINE_NAMESPACE}" CACHE INTERNAL "")
++set(BSONCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE INTERNAL "")
+ 
+ set(LIBBSON_REQUIRED_VERSION 1.13.0)
+ set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
+@@ -79,7 +79,8 @@ set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
+ set(bsoncxx_pkg_dep "")
+ 
+ # Attempt to find libbson by new package name (without lib).
+-find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} QUIET)
++find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} REQUIRED)
++set(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND TRUE)
+ 
+ if(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND)
+   message ("found libbson version ${bson-${LIBBSON_REQUIRED_ABI_VERSION}_VERSION}")
+@@ -139,8 +140,8 @@ set(bsoncxx_sources
+ )
+ 
+ include_directories(
+-    ${CMAKE_SOURCE_DIR}/src
+-    ${CMAKE_BINARY_DIR}/src
++    ${MONGO_CXX_PROJECT_DIR}/src
++    ${MONGO_CXX_PROJECT_BIN_DIR}/src
+ )
+ 
+ if(BSONCXX_POLY_USE_BOOST)
+@@ -204,8 +205,6 @@ if(BSONCXX_BUILD_STATIC)
+ endif()
+ bsoncxx_install("${bsoncxx_target_list}" "${bsoncxx_pkg_dep}")
+ 
+-add_subdirectory(test)
+-
+ set_local_dist (src_bsoncxx_DIST_local
+    CMakeLists.txt
+    array/element.cpp
+diff --git a/src/mongocxx/CMakeLists.txt b/src/mongocxx/CMakeLists.txt
+index f67ae35..c997f25 100644
+--- a/src/mongocxx/CMakeLists.txt
++++ b/src/mongocxx/CMakeLists.txt
+@@ -27,7 +27,7 @@ set(MONGOCXX_VERSION_NO_EXTRA ${MONGOCXX_VERSION_MAJOR}.${MONGOCXX_VERSION_MINOR
+ set(MONGOCXX_VERSION ${MONGOCXX_VERSION_NO_EXTRA}${MONGOCXX_VERSION_EXTRA})
+ message ("mongocxx version: ${MONGOCXX_VERSION}")
+ set(MONGOCXX_INLINE_NAMESPACE "v${MONGOCXX_ABI_VERSION}")
+-set(MONGOCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/mongocxx/${MONGOCXX_INLINE_NAMESPACE}" CACHE INTERNAL "")
++set(MONGOCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/" CACHE INTERNAL "")
+ 
+ set(LIBMONGOC_REQUIRED_VERSION 1.17.0)
+ set(LIBMONGOC_REQUIRED_ABI_VERSION 1.0)
+@@ -163,8 +163,8 @@ set(mongocxx_sources
+ )
+ 
+ include_directories(
+-    ${CMAKE_SOURCE_DIR}/src
+-    ${CMAKE_BINARY_DIR}/src
++    ${MONGO_CXX_PROJECT_DIR}/src
++    ${MONGO_CXX_PROJECT_BIN_DIR}/src
+ )
+ 
+ # We define both the normal libraries and the testing-only library.  The testing-only
+@@ -231,8 +231,6 @@ if(MONGOCXX_BUILD_STATIC)
+ endif()
+ mongocxx_install("${mongocxx_target_list}" "${mongocxx_pkg_dep}")
+ 
+-add_subdirectory(test)
+-
+ set_local_dist (src_mongocxx_DIST_local
+    CMakeLists.txt
+    bulk_write.cpp

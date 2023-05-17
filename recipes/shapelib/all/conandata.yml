@@ -1,0 +1,14 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/OSGeo/shapelib/archive/v1.5.0.zip"
+    sha256: "673b00ef6caef254fe16d831b982e6bbed7397615c57b9ed92cf8b59017dd06b"
+patches:
+  "1.5.0":
+    - patch_file: "patches/0001-cmake-minimum-required.patch"
+      patch_description: "Place the cmake_minimum_required call before the project command"
+      patch_source: "https://github.com/OSGeo/shapelib/pull/45"
+      patch_type: "portability"
+    - patch_file: "patches/0002-build-testing.patch"
+      patch_description: "Use the standard BUILD_TESTING variable to control building tests"
+      patch_source: "https://github.com/OSGeo/shapelib/pull/46"
+      patch_type: "portability"

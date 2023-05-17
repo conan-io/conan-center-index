@@ -1,7 +1,36 @@
-# Byte-compiled / optimized / DLL files
+# Conan specific
+**/test_package/build/
+**/test_package/build-*/
+**/test_package/test_output/
+conan.lock
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
+build/
+
+# CMake
+CMakeUserPresets.json
+
+# IDEs
+.idea
+.vs
+.vscode
+.project
+.pydevproject
+.settings/
+.ropeproject/
+.devcontainer/
+## emacs
+*~
+
+# Byte-compiled / optimized / DLL files / Cache
 __pycache__/
+**/test_package/__pycache__/
+*.pyc
 *.py[cod]
 *$py.class
+tmp/
+.DS_Store
 
 # C extensions
 *.so
@@ -94,11 +123,18 @@ venv.bak/
 .spyderproject
 .spyproject
 
-# Rope project settings
-.ropeproject
-
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
+
+# scons build files
+*.dblite
+
+# vim temp files
+.*.sw?
+.sw?
+Session.vim
+*~
+.undodir

@@ -1,0 +1,26 @@
+sources:
+  "3.6.7":
+    url: "https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz"
+    sha256: "7c58298e3e8d60232ee6fc8408cfadd14463cc11a3c4ca4c59af5988c7e9710a"
+  "3.6.6":
+    url: "https://dicom.offis.de/download/dcmtk/dcmtk366/dcmtk-3.6.6.tar.gz"
+    sha256: "6859c62b290ee55677093cccfd6029c04186d91cf99c7642ae43627387f3458e"
+  "3.6.5":
+    url: "https://dicom.offis.de/download/dcmtk/dcmtk365/dcmtk-3.6.5.tar.gz"
+    sha256: "a05178665f21896dbb0974106dba1ad144975414abd760b4cf8f5cc979f9beb9"
+patches:
+  "3.6.7":
+    - patch_file: "patches/cmake-patching-3-6-7.patch"
+      base_path: "source_subfolder"
+      patch_type: conan
+      patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
+  "3.6.6":
+    - patch_file: "patches/0002-cmake-use-conan-packages.patch"
+      base_path: "source_subfolder"
+      patch_type: conan
+      patch_description: "Don't ignore dependencies that can't be found; patch some variable names"
+  "3.6.5":
+    - patch_file: "patches/0001-cmake-use-conan-packages.patch"
+      base_path: "source_subfolder"
+      patch_type: conan
+      patch_description: "Don't ignore dependencies that can't be found; patch some variable names"

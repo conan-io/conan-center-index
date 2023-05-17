@@ -1,0 +1,9 @@
+sources:
+  "cci.20221115":
+    url: "https://github.com/jedisct1/libhydrogen/archive/580da280c59f72ca67e56333f5122f8ef040c74d.tar.gz"
+    sha256: "cf52deeb31f83302acfc784e9dab4b93e9c13e77aad3f629cf0761d30cae7e72"
+patches:
+  "cci.20221115":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "CMake: Use C99 or higher, avoid to inject arch specific flags, fix dll install & don't build tests"
+      patch_type: "portability"

@@ -1,0 +1,9 @@
+--- a/dll/CMakeLists.txt
++++ b/dll/CMakeLists.txt
+@@ -3,6 +3,5 @@ set(LASZIP_API_SOURCES
+     laszip_api.c
+ )
+ 
+-LASZIP_ADD_LIBRARY(${LASZIP_API_LIB_NAME} ${LASZIP_API_SOURCES})
+ LASZIP_ADD_INCLUDES("laszip" "${LASZIP_HEADERS_DIR}/laszip_api.h" ${LASZIP_API_VERSION_H})
+ 

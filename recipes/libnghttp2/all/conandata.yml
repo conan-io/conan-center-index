@@ -1,0 +1,72 @@
+sources:
+  "1.53.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.53.0/nghttp2-1.53.0.tar.xz"
+    sha256: "b867184254e5a29b0ba68413aa14f8b0ce1142a371761374598dec092dabb809"
+  "1.51.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.51.0/nghttp2-1.51.0.tar.xz"
+    sha256: "66aa76d97c143f42295405a31413e5e7d157968dad9f957bb4b015b598882e6b"
+  "1.50.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.50.0/nghttp2-1.50.0.tar.xz"
+    sha256: "af24007e34c18c782393a1dc3685f8fd5b50283e90a9191d25488eb50aa2c825"
+  "1.49.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.49.0/nghttp2-1.49.0.tar.xz"
+    sha256: "b0cfd492bbf0b131c472e8f6501c9f4ee82b51b68130f47b278c0b7c9848a66e"
+  "1.48.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.48.0/nghttp2-1.48.0.tar.xz"
+    sha256: "47d8f30ee4f1bc621566d10362ca1b3ac83a335c63da7144947c806772d016e4"
+  "1.47.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.47.0/nghttp2-1.47.0.tar.xz"
+    sha256: "68271951324554c34501b85190f22f2221056db69f493afc3bbac8e7be21e7cc"
+  "1.46.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.46.0/nghttp2-1.46.0.tar.xz"
+    sha256: "1a68cc4a5732afb735baf50aaac3cb3a6771e49f744bd5db6c49ab5042f12a43"
+  "1.45.1":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.45.1/nghttp2-1.45.1.tar.xz"
+    sha256: "abdc4addccadbc7d89abe27c4d6427d78e57d139f69c1f45749227393c68bf79"
+  "1.43.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.43.0/nghttp2-1.43.0.tar.xz"
+    sha256: "f7d54fa6f8aed29f695ca44612136fa2359013547394d5dffeffca9e01a26b0f"
+  "1.42.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.42.0/nghttp2-1.42.0.tar.xz"
+    sha256: "c5a7f09020f31247d0d1609078a75efadeccb7e5b86fc2e4389189b1b431fe63"
+  "1.40.0":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.40.0/nghttp2-1.40.0.tar.xz"
+    sha256: "09fc43d428ff237138733c737b29fb1a7e49d49de06d2edbed3bc4cdcee69073"
+  "1.39.2":
+    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.xz"
+    sha256: "a2d216450abd2beaf4e200c168957968e89d602ca4119338b9d7ab059fd4ce8b"
+patches:
+  "1.49.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.48.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.47.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.46.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.45.1":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.43.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.42.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+  "1.40.0":
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"
+    - patch_file: "patches/1.40.0-remove-static-suffix.patch"
+      patch_type: "backport"
+      patch_source: https://github.com/curl/curl/pull/7515#issuecomment-890320856
+      patch_description: >-
+        Fix the breaking change that was introduced in 1.40.0 and made optional
+        in 1.40.1
+  "1.39.2":
+    - patch_file: "patches/fix-addNghttp2IncludesPathCMake.patch"
+    - patch_file: "patches/fix-findJemalloc.cmake"
+    - patch_file: "patches/fix-findLibevent.cmake"

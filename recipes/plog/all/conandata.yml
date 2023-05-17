@@ -1,0 +1,7 @@
+sources:
+  "1.1.9":
+    url: "https://github.com/SergiusTheBest/plog/archive/1.1.9.tar.gz"
+    sha256: "058315b9ec9611b659337d4333519ab4783fad3f2f23b1cc7bb84d977ea38055"
+  "1.1.5":
+    url: "https://github.com/SergiusTheBest/plog/archive/1.1.5.tar.gz"
+    sha256: "6c80b4701183d2415bec927e1f5ca9b1761b3b5c65d3e09fb29c743e016d5609"

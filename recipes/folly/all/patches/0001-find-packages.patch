@@ -1,0 +1,93 @@
+diff --git a/CMake/FindLibsodium.cmake b/CMake/FindLibsodium.cmake
+index 18d4d0c..2b3cd2a 100644
+--- a/CMake/FindLibsodium.cmake
++++ b/CMake/FindLibsodium.cmake
+@@ -15,7 +15,7 @@
+ find_path(LIBSODIUM_INCLUDE_DIR NAMES sodium.h)
+ mark_as_advanced(LIBSODIUM_INCLUDE_DIR)
+ 
+-find_library(LIBSODIUM_LIBRARY NAMES sodium)
++find_library(LIBSODIUM_LIBRARY NAMES sodium libsodium PATHS ${CONAN_LIBSODIUM_ROOT})
+ mark_as_advanced(LIBSODIUM_LIBRARY)
+ 
+ include(FindPackageHandleStandardArgs)
+diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
+index 048e1cd..da3ab8e 100644
+--- a/CMake/folly-deps.cmake
++++ b/CMake/folly-deps.cmake
+@@ -36,19 +36,19 @@ find_package(DoubleConversion MODULE REQUIRED)
+ list(APPEND FOLLY_LINK_LIBRARIES ${DOUBLE_CONVERSION_LIBRARY})
+ list(APPEND FOLLY_INCLUDE_DIRECTORIES ${DOUBLE_CONVERSION_INCLUDE_DIR})
+ 
+-find_package(Gflags MODULE)
+-set(FOLLY_HAVE_LIBGFLAGS ${LIBGFLAGS_FOUND})
+-list(APPEND FOLLY_LINK_LIBRARIES ${LIBGFLAGS_LIBRARY})
+-list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBGFLAGS_INCLUDE_DIR})
+-list(APPEND CMAKE_REQUIRED_LIBRARIES ${LIBGFLAGS_LIBRARY})
+-list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBGFLAGS_INCLUDE_DIR})
+-
+-find_package(Glog MODULE)
++find_package(gflags MODULE REQUIRED)
++set(FOLLY_HAVE_LIBGFLAGS ${GFLAGS_FOUND})
++list(APPEND FOLLY_LINK_LIBRARIES ${CONAN_LIBS_GFLAGS})
++list(APPEND FOLLY_INCLUDE_DIRECTORIES ${CONAN_INCLUDE_DIRS_GFLAGS})
++list(APPEND CMAKE_REQUIRED_LIBRARIES ${gflags_LIBRARY})
++list(APPEND CMAKE_REQUIRED_INCLUDES ${gflags_INCLUDE_DIR})
++
++find_package(glog MODULE)
+ set(FOLLY_HAVE_LIBGLOG ${GLOG_FOUND})
+ list(APPEND FOLLY_LINK_LIBRARIES ${GLOG_LIBRARY})
+ list(APPEND FOLLY_INCLUDE_DIRECTORIES ${GLOG_INCLUDE_DIR})
+ 
+-find_package(LibEvent MODULE REQUIRED)
++find_package(Libevent MODULE REQUIRED)
+ list(APPEND FOLLY_LINK_LIBRARIES ${LIBEVENT_LIB})
+ list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBEVENT_INCLUDE_DIR})
+ 
+diff --git a/build/fbcode_builder/CMake/FindGflags.cmake b/build/fbcode_builder/CMake/FindGflags.cmake
+index 246ceac..385605e 100644
+--- a/build/fbcode_builder/CMake/FindGflags.cmake
++++ b/build/fbcode_builder/CMake/FindGflags.cmake
+@@ -48,8 +48,13 @@ if (gflags_FOUND)
+ else()
+   FIND_PATH(LIBGFLAGS_INCLUDE_DIR gflags/gflags.h)
+ 
+-  FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_staticd)
+-  FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags gflags_static)
++  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
++     FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_nothreads_staticd gflags_nothreads_static_debug PATHS ${CONAN_GFLAGS_ROOT})
++     FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags gflags_nothreads_static PATHS ${CONAN_GFLAGS_ROOT})
++  else()
++    FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflags gflags_nothreads_debug PATHS ${CONAN_GFLAGS_ROOT})
++    FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags_nothreads gflags PATHS ${CONAN_GFLAGS_ROOT})
++  endif()
+ 
+   INCLUDE(SelectLibraryConfigurations)
+   SELECT_LIBRARY_CONFIGURATIONS(LIBGFLAGS)
+diff --git a/build/fbcode_builder/CMake/FindGlog.cmake b/build/fbcode_builder/CMake/FindGlog.cmake
+index a589b2e..15aef75 100644
+--- a/build/fbcode_builder/CMake/FindGlog.cmake
++++ b/build/fbcode_builder/CMake/FindGlog.cmake
+@@ -8,8 +8,7 @@
+ 
+ include(FindPackageHandleStandardArgs)
+ 
+-find_library(GLOG_LIBRARY glog
+-  PATHS ${GLOG_LIBRARYDIR})
++find_library(GLOG_LIBRARY glog glogd PATHS ${CONAN_GLOG_ROOT})
+ 
+ find_path(GLOG_INCLUDE_DIR glog/logging.h
+   PATHS ${GLOG_INCLUDEDIR})
+diff --git a/build/fbcode_builder/CMake/FindLibEvent.cmake b/build/fbcode_builder/CMake/FindLibEvent.cmake
+index dd11ebd..9ef0807 100644
+--- a/build/fbcode_builder/CMake/FindLibEvent.cmake
++++ b/build/fbcode_builder/CMake/FindLibEvent.cmake
+@@ -50,7 +50,7 @@ if (TARGET event)
+   endif()
+ else()
+   find_path(LIBEVENT_INCLUDE_DIR event.h PATHS ${LibEvent_INCLUDE_PATHS})
+-  find_library(LIBEVENT_LIB NAMES event PATHS ${LibEvent_LIB_PATHS})
++  find_library(LIBEVENT_LIB NAMES event libevent PATHS ${CONAN_LIBEVENT_ROOT})
+ 
+   if (LIBEVENT_LIB AND LIBEVENT_INCLUDE_DIR)
+     set(LibEvent_FOUND TRUE)

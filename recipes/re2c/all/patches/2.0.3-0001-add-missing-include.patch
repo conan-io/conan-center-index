@@ -1,0 +1,11 @@
+--- src/compile.cc
++++ src/compile.cc
+@@ -4,7 +4,7 @@
+ #include <ostream>
+ #include <string>
+ #include <vector>
+-
++#include <cctype>
+ #include "src/adfa/adfa.h"
+ #include "src/codegen/code.h"
+ #include "src/compile.h"

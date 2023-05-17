@@ -1,0 +1,17 @@
+sources:
+  "3.100":
+    url: "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz"
+    sha256: "ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
+patches:
+  "3.100":
+    - patch_file: "patches/6410.patch"
+      patch_type: "backport"
+      patch_description: "bug tracker item #487: v3.100 breaks Windows compatibility"
+      patch_source: "https://sourceforge.net/p/lame/svn/commit_browser -- [r6410]"
+    - patch_file: "patches/6416.patch"
+      patch_type: "backport"
+      patch_description: "lame patches ticket #75: Fix for completing svn-r6410"
+      patch_source: "https://sourceforge.net/p/lame/svn/commit_browser -- [r6410]"
+    - patch_file: "patches/android.patch"
+      patch_type: "portability"
+      patch_description: "Add __ANDROID__ test to one bit"

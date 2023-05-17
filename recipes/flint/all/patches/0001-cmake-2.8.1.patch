@@ -1,0 +1,63 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2616d0669..6fa4cf5f7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,7 +46,10 @@ endif()
+ # pthread configuration
+ 
+ if(MSVC)
+-    find_package(PThreads REQUIRED)
++    #find_package(PThreads REQUIRED)
++    set(PThreads_FOUND TRUE)
++    set(PThreads_LIBRARIES "${CONAN_LIBS_PTHREADS4W}")
++    set(PThreads_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_PTHREADS4W}")
+     set(FLINT_USES_PTHREAD ON CACHE BOOL "Use POSIX Threads.")
+ else()
+     option(CMAKE_THREAD_PREFER_PTHREAD "Prefer pthreads" yes)
+@@ -101,9 +104,9 @@ set(HEADERS
+ )
+ 
+ foreach (build_dir IN LISTS BUILD_DIRS TEMPLATE_DIRS)
+-    file(GLOB TEMP RELATIVE "${CMAKE_SOURCE_DIR}" "${build_dir}/*.c")
++    file(GLOB TEMP RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${build_dir}/*.c")
+     list(APPEND SOURCES ${TEMP})
+-    file(GLOB TEMP RELATIVE "${CMAKE_SOURCE_DIR}" "${build_dir}/*.h")
++    file(GLOB TEMP RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${build_dir}/*.h")
+     list(APPEND HEADERS ${TEMP})
+ endforeach ()
+ 
+@@ -112,7 +115,7 @@ execute_process(
+ "
+ from os.path import join
+ 
+-with open(join('${CMAKE_SOURCE_DIR}','qadic', 'CPimport.txt')) as fin:
++with open(join('${CMAKE_CURRENT_SOURCE_DIR}','qadic', 'CPimport.txt')) as fin:
+     with open('CPimport.h.in', 'w+') as fout:
+         while True:
+             l = fin.readline()
+@@ -212,14 +215,14 @@ endif()
+ set(TEMP ${HEADERS})
+ set(HEADERS )
+ foreach(header IN LISTS TEMP)
+-    if(EXISTS ${CMAKE_SOURCE_DIR}/${header})
++    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${header})
+         list(APPEND HEADERS ${header})
+     else()
+-        list(APPEND HEADERS ${CMAKE_BINARY_DIR}/${header})  
++        list(APPEND HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${header})
+     endif()
+ endforeach()
+ 
+-file(GLOB TEMP "${CMAKE_SOURCE_DIR}/*.h")
++file(GLOB TEMP "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+ list(APPEND HEADERS ${TEMP})
+ 
+ add_library(flint ${SOURCES})
+@@ -236,6 +239,7 @@ endif()
+ target_include_directories(flint PUBLIC 
+     ${CMAKE_CURRENT_SOURCE_DIR} ${GMP_INCLUDE_DIRS} ${MPFR_INCLUDE_DIRS}
+     ${CMAKE_CURRENT_BINARY_DIR} ${PThreads_INCLUDE_DIRS}
++    ${CMAKE_BINARY_DIR}
+     ${NTL_INCLUDE_DIR}
+ )
+ 

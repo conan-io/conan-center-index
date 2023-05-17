@@ -1,0 +1,78 @@
+sources:
+  "1.2.2":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.2.tar.gz"
+    sha256: "8065a10c2d70b561f48475dedb118e643176527b162d6e439fa127270c2a07dd"
+  "1.2.1":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.1.tar.gz"
+    sha256: "4742df8f35473c5a737f2b120ae06aa6b9e8a7a3753b88932e501b06b1d17ea8"
+  "1.2.0":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "6e7af2dad0530b2b404480dbe437ca4670c6615cc2ec6cf6a20ed04d9d75e0bd"
+  "1.1.11":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.11.tar.gz"
+    sha256: "938ea0ba13c6538b0ee505ab391a3020f206ab9d29c869f20dd19318a4ee8997"
+  "1.1.10":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.10.tar.gz"
+    sha256: "fac11c2501195c9ce042103685c7778e35484562e6c084963a22072dd0a602e0"
+  "1.1.9":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.9.tar.gz"
+    sha256: "ea455a14decb85ec4bc66ffd2b963492afa7b53297b7064a11ca47ca8d2464ea"
+  "1.1.8":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.8.tar.gz"
+    sha256: "f316c814d0cb6d60a0e8ad164d8cafa64010dee9dd41748b038b6b67fa40f08a"
+  "1.1.6":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.6.tar.gz"
+    sha256: "b60df3ac93b943eb14377019445533b5c451fffd6b1df86187b1b9ac7d6dba6b"
+  "1.1.5":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.5.tar.gz"
+    sha256: "2cdcb8dbf2acdcd8cbe70b109dadc05a901038c84970afbe4863e5e23f33deae"
+  "1.1.4":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.4.tar.gz"
+    sha256: "f9bba6d3bf3648e7685c247cb6d126d62508af614bc549cedd5859a7da64967e"
+  "1.1.1":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.1.tar.gz"
+    sha256: "cd1712c571d4155f4143c435c8551a5cb8cbb311ad7fff03595322ab971682c0"
+  "1.1.0":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.0.tar.gz"
+    sha256: "0538fa1c23ddae495c7f82ccd0db90790a90b7017a258ca7575fbae8021f3058"
+patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-fix-version-number-icd-json.patch"
+      patch_description: "Fix api_version in MoltenVK_icd.json"
+      patch_type: "portability"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1747"
+  "1.1.11":
+    - patch_file: "patches/1.1.11-0001-vulkan-alias-private-extern.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "portability"
+  "1.1.10":
+    - patch_file: "patches/1.1.8-0002-vulkan-alias-private-extern.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "portability"
+  "1.1.9":
+    - patch_file: "patches/1.1.8-0002-vulkan-alias-private-extern.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "portability"
+  "1.1.8":
+    - patch_file: "patches/1.1.8-0001-allow-c++11-std.patch"
+      patch_description: "Allow to compile with C++11"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.8-0002-vulkan-alias-private-extern.patch"
+      patch_description: "Fix vulkan alias symbols when vulkan symbols are hidden"
+      patch_type: "portability"
+  "1.1.6":
+    - patch_file: "patches/1.1.6-0001-allow-c++11-std.patch"
+      patch_description: "Allow to compile with C++11"
+      patch_type: "portability"
+  "1.1.5":
+    - patch_file: "patches/1.1.5-0001-allow-c++11-std.patch"
+      patch_description: "Allow to compile with C++11"
+      patch_type: "portability"
+  "1.1.1":
+    - patch_file: "patches/1.1.0-0001-fix-spirv-cross-includes.patch"
+      patch_description: "Use spirv-cross include convention"
+      patch_type: "conan"
+  "1.1.0":
+    - patch_file: "patches/1.1.0-0001-fix-spirv-cross-includes.patch"
+      patch_description: "Use spirv-cross include convention"
+      patch_type: "conan"

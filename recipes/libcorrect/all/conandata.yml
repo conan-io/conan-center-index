@@ -1,0 +1,8 @@
+sources:
+  "20181010":
+    url: "https://github.com/quiet/libcorrect/archive/f5a28c74fba7a99736fe49d3a5243eca29517ae9.tar.gz"
+    sha256: 5a4305aabe6c7d5b58f6677c41c54ad5e8d9003f7a5998f7344d93534e4c5760
+patches:
+  "20181010":
+    - patch_file: "patches/0001-Support-CMake-BUILD_SHARED_LIBS.patch"
+    - patch_file: "patches/0002-Export-symbols-for-windows.patch"

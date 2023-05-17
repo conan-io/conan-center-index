@@ -1,0 +1,95 @@
+sources:
+  "20230125.3":
+    url: "https://github.com/abseil/abseil-cpp/archive/20230125.3.tar.gz"
+    sha256: "5366D7E7FA7BA0D915014D387B66D0D002C03236448E1BA9EF98122C13B35C36"
+  "20230125.2":
+    url: "https://github.com/abseil/abseil-cpp/archive/20230125.2.tar.gz"
+    sha256: "9a2b5752d7bfade0bdeee2701de17c9480620f8b237e1964c1b9967c75374906"
+  "20230125.1":
+    url: "https://github.com/abseil/abseil-cpp/archive/20230125.1.tar.gz"
+    sha256: "81311c17599b3712069ded20cca09a62ab0bf2a89dfa16993786c8782b7ed145"
+  "20230125.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20230125.0.tar.gz"
+    sha256: "3ea49a7d97421b88a8c48a0de16c16048e17725c7ec0f1d3ea2683a2a75adc21"
+  "20220623.1":
+    url: "https://github.com/abseil/abseil-cpp/archive/20220623.1.tar.gz"
+    sha256: "91ac87d30cc6d79f9ab974c51874a704de9c2647c40f6932597329a282217ba8"
+  "20220623.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20220623.0.tar.gz"
+    sha256: "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602"
+  "20211102.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20211102.0.tar.gz"
+    sha256: "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4"
+  "20210324.2":
+    url: "https://github.com/abseil/abseil-cpp/archive/20210324.2.tar.gz"
+    sha256: "59b862f50e710277f8ede96f083a5bb8d7c9595376146838b9580be90374ee1f"
+  "20200923.3":
+    url: "https://github.com/abseil/abseil-cpp/archive/20200923.3.tar.gz"
+    sha256: "ebe2ad1480d27383e4bf4211e2ca2ef312d5e6a09eba869fd2e8a5c5d553ded2"
+  "20200225.3":
+    url: "https://github.com/abseil/abseil-cpp/archive/20200225.3.tar.gz"
+    sha256: "66d4d009050f39c104b03f79bdca9d930c4964016f74bf24867a43fbdbd00d23"
+patches:
+  "20230125.3":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+  "20230125.2":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+  "20230125.1":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+  "20230125.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+  "20220623.1":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+    - patch_file: "patches/0005-has-unique-object-representations.patch"
+      patch_description: "Workaround bug in GCC 7.2"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1250"
+      patch_type: "portability"
+  "20220623.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+    - patch_file: "patches/0005-has-unique-object-representations.patch"
+      patch_description: "Workaround bug in GCC 7.2"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1250"
+      patch_type: "portability"
+  "20211102.0":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+  "20210324.2":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+    - patch_file: "patches/0004-cpp-standard-20210324.patch"
+      patch_description: "define absl cpp standard(C++11)"
+      patch_type: "portability"
+  "20200923.3":
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+    - patch_file: "patches/0004-cpp-standard-20200923.patch"
+      patch_description: "define absl cpp standard(C++11)"
+      patch_type: "portability"
+  "20200225.3":
+    - patch_file: "patches/0001-cmake-install.patch"
+      patch_description: "make ABSL_ENABLE_INSTALL option"
+      patch_type: "conan"
+    - patch_file: "patches/0002-missing-numeric_limits.h.patch"
+      patch_description: "include limits.h"
+      patch_type: "portability"
+    - patch_file: "patches/0003-absl-string-libm.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+    - patch_file: "patches/0004-cpp-standard-20200225.patch"
+      patch_description: "define absl cpp standard(C++11)"
+      patch_type: "portability"

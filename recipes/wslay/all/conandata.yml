@@ -1,0 +1,8 @@
+sources:
+  "1.1.1":
+    url: "https://github.com/tatsuhiro-t/wslay/archive/release-1.1.1.tar.gz"
+    sha256: "7b9f4b9df09adaa6e07ec309b68ab376c0db2cfd916613023b52a47adfda224a"
+patches:
+  "1.1.1":
+    - patch_file: "patches/0001-msvc-support.patch"
+    - patch_file: "patches/0002-cmake-install-shared-artifacts.patch"

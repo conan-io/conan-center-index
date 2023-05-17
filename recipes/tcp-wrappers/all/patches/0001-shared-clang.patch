@@ -1,0 +1,55 @@
+- Add support for building a shared library
+- Fix error for clang8
+--- Makefile
++++ Makefile
+@@ -677,7 +677,7 @@ CFLAGS	= -O -DFACILITY=$(FACILITY) $(ACCESS) $(PARANOID) $(NETGROUP) \
+ 	-DREAL_DAEMON_DIR=\"$(REAL_DAEMON_DIR)\" $(STYLE) $(KILL_OPT) \
+ 	-DSEVERITY=$(SEVERITY) -DRFC931_TIMEOUT=$(RFC931_TIMEOUT) \
+ 	$(UCHAR) $(TABLES) $(STRINGS) $(TLI) $(EXTRA_CFLAGS) $(DOT) \
+-	$(VSYSLOG) $(HOSTNAME) $(IPV6)
++	$(VSYSLOG) $(HOSTNAME) $(IPV6) $(ENV_CFLAGS)
+ 
+ LIB_OBJ= hosts_access.o options.o shell_cmd.o rfc931.o eval.o \
+ 	hosts_ctl.o refuse.o percent_x.o clean_exit.o $(AUX_OBJ) \
+@@ -697,7 +697,14 @@ KIT	= README miscd.c tcpd.c fromhost.c hosts_access.c shell_cmd.c \
+ 	refuse.c tcpdchk.8 setenv.c inetcf.c inetcf.h scaffold.c \
+ 	scaffold.h tcpdmatch.8 README.NIS
+ 
+-LIB	= libwrap.a
++ALIB	= libwrap.a
++SHLIB	= libwrap${SHEXT}
++
++ifdef shared
++LIB	= $(SHLIB)
++else
++LIB	= $(ALIB)
++endif
+ 
+ all other: config-check tcpd tcpdmatch try-from safe_finger tcpdchk
+ 
+@@ -715,8 +722,12 @@ cflags: config-check
+ 
+ $(LIB):	$(LIB_OBJ)
+ 	rm -f $(LIB)
++ifdef shared
++	$(CC) -shared $(LDFLAGS) -o $(LIB) $(LIB_OBJ)
++else
+ 	$(AR) $(ARFLAGS) $(LIB) $(LIB_OBJ)
+ 	-$(RANLIB) $(LIB)
++endif
+ 
+ tcpd:	tcpd.o $(LIB)
+ 	$(CC) $(CFLAGS) -o $@ tcpd.o $(LIB) $(LIBS)
+--- tcpd.h
++++ tcpd.h
+@@ -157,8 +157,8 @@ extern char *skip_ipv6_addrs();		/* skip over colons in IPv6 addrs */
+ 
+ /* Global variables. */
+ 
+-extern int allow_severity;		/* for connection logging */
+-extern int deny_severity;		/* for connection logging */
++extern int allow_severity __attribute__ ((weak));		/* for connection logging */
++extern int deny_severity __attribute__ ((weak));		/* for connection logging */
+ extern char *hosts_allow_table;		/* for verification mode redirection */
+ extern char *hosts_deny_table;		/* for verification mode redirection */
+ extern int hosts_access_verbose;	/* for verbose matching mode */

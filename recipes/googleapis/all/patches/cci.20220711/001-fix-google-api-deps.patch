@@ -1,0 +1,19 @@
+diff --git a/google/api/BUILD.bazel b/google/api/BUILD.bazel
+index ebb9ba8..7188218 100644
+--- a/google/api/BUILD.bazel
++++ b/google/api/BUILD.bazel
+@@ -580,12 +580,12 @@ cc_proto_library(
+ 
+ cc_proto_library(
+     name = "monitoring_cc_proto",
+-    deps = ["monitoring_proto"],
++    deps = [":monitoring_proto"],
+ )
+ 
+ cc_proto_library(
+     name = "quota_cc_proto",
+-    deps = ["quota_proto"],
++    deps = [":quota_proto"],
+ )
+ 
+ cc_proto_library(

@@ -1,0 +1,11 @@
+--- similarity_search/src/CMakeLists.txt
++++ similarity_search/src/CMakeLists.txt
+@@ -53,6 +53,8 @@
+ install(TARGETS NonMetricSpaceLib   
+   ARCHIVE DESTINATION lib
+   LIBRARY DESTINATION lib
++  RUNTIME DESTINATION bin
++  INCLUDES DESTINATION include
+   COMPONENT library
+ )
+ 

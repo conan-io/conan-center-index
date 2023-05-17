@@ -1,0 +1,10 @@
+sources:
+  "4.2.15":
+    url: "https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.15/src/hdf-4.2.15.tar.gz"
+    sha256: "dbeeef525af7c2d01539906c28953f0fdab7dba603d1bc1ec4a5af60d002c459"
+patches:
+  "4.2.15":
+    - patch_file: "patches/fix-export-macro.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-missing-unistd-include.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bf603b0..6229f02 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -282,7 +282,7 @@ install(
+         InstallTargets
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/static
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/jinja2cpp
+ )
+ 
+diff --git a/src/helpers.h b/src/helpers.h
+index 3af280f..a6a3205 100644
+--- a/src/helpers.h
++++ b/src/helpers.h
+@@ -32,12 +32,21 @@ struct MultiStringLiteral
+ #endif
+     }
+ 
++#if defined(_MSC_VER) && (_MSC_VER <= 1900)
++    template<typename CharT>
++    auto GetValueStr() const
++    {
++        auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
++        return std::basic_string<CharT>(this->*memPtr);
++    }
++#else
+     template<typename CharT>
+     constexpr auto GetValueStr() const
+     {
+         constexpr auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
+         return std::basic_string<CharT>(this->*memPtr);
+     }
++#endif
+ 
+     template<typename CharT, const char* MultiStringLiteral::*, const wchar_t* MultiStringLiteral::*>
+     struct SelectMemberPtr;

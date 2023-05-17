@@ -1,0 +1,7 @@
+sources:
+  "cci.20180601":
+    url: "https://github.com/rogersce/cnpy/archive/4e8810b1a8637695171ed346ce68f6984e585ef4.tar.gz"
+    sha256: "5120abc54a564efa92c642cc0199cc4fd3f345901157de9fbbdcedbb34d28d8a"
+patches:
+  "cci.20180601":
+    - patch_file: "patches/0001-fix-cmake.patch"

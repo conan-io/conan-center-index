@@ -1,0 +1,13 @@
+diff --git a/configure b/configure
+index d88c47c..827c01a 100755
+--- a/configure
++++ b/configure
+@@ -6842,7 +6842,7 @@ $as_echo "$lt_cv_ld_force_load" >&6; }
+ 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
+ 	10.[012][,.]*)
+ 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
+-	10.*)
++	*)
+ 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
+       esac
+     ;;

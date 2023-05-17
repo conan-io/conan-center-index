@@ -1,0 +1,70 @@
+From c76d2f6e997d84d81b0b22e0bd3afdaf7acfe3b3 Mon Sep 17 00:00:00 2001
+From: Allan Sandfeld Jensen <allan.jensen@qt.io>
+Date: Wed, 13 Oct 2021 12:36:02 +0200
+Subject: [PATCH] Fix build with Win10 21H1 SDK and Win11 SDK
+
+Different parts are not fully defined
+
+Task-number: QTBUG-96533
+Change-Id: I4fcb795cea33c519ee082aa69a63660e581a2759
+Reviewed-by: Allan Sandfeld Jensen <allan.jensen@qt.io>
+---
+ chromium/media/gpu/windows/d3d11_av1_accelerator.cc |  2 ++
+ chromium/sandbox/win/src/process_mitigations.h      | 13 +++++++++----
+ 2 files changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/chromium/media/gpu/windows/d3d11_av1_accelerator.cc b/chromium/media/gpu/windows/d3d11_av1_accelerator.cc
+index 8d2d808ed2a..a4d3a79d7c5 100644
+--- a/chromium/media/gpu/windows/d3d11_av1_accelerator.cc
++++ b/chromium/media/gpu/windows/d3d11_av1_accelerator.cc
+@@ -15,6 +15,7 @@
+ #include "media/gpu/codec_picture.h"
+ #include "media/gpu/windows/d3d11_picture_buffer.h"
+ 
++#if !defined(NTDDI_WIN10_FE) // Windows 10.0.20348.0
+ // These are from <dxva.h> in a newer SDK than the one Chrome ships with. They
+ // should be deleted once Chrome switches to the updated SDK; they have been
+ // copied from: https://www.microsoft.com/en-us/download/details.aspx?id=101577
+@@ -279,6 +280,7 @@ typedef struct _DXVA_Tile_AV1 {
+   UCHAR Reserved8Bits;
+ } DXVA_Tile_AV1, *LPDXVA_Tile_AV1;
+ #pragma pack(pop)
++#endif // !defined(NTDDI_WIN10_FE)
+ 
+ namespace media {
+ 
+diff --git a/chromium/sandbox/win/src/process_mitigations.h b/chromium/sandbox/win/src/process_mitigations.h
+index 3b511fe2bd9..72b314c335e 100644
+--- a/chromium/sandbox/win/src/process_mitigations.h
++++ b/chromium/sandbox/win/src/process_mitigations.h
+@@ -12,21 +12,26 @@
+ #include "sandbox/win/src/security_level.h"
+ 
+ // This will be defined in an upcoming Windows SDK release
+-#ifndef COMPONENT_KTM
++#ifndef PROC_THREAD_ATTRIBUTE_MACHINE_TYPE
+ 
++#ifndef COMPONENT_KTM
+ #define COMPONENT_KTM 0x01
+ #define COMPONENT_VALID_FLAGS (COMPONENT_KTM)
+-#define ProcThreadAttributeComponentFilter 26
+ 
+ typedef struct _COMPONENT_FILTER {
+   ULONG ComponentFlags;
+ } COMPONENT_FILTER, *PCOMPONENT_FILTER;
++#endif // COMPONENT_KTM
+ 
++#define ProcThreadAttributeComponentFilter 26
++#endif  // PROC_THREAD_ATTRIBUTE_MACHINE_TYPE
++
++// This seems to remain undefined in newer SDKs
++#ifndef PROC_THREAD_ATTRIBUTE_COMPONENT_FILTER
+ #define PROC_THREAD_ATTRIBUTE_COMPONENT_FILTER                              \
+   ProcThreadAttributeValue(ProcThreadAttributeComponentFilter, FALSE, TRUE, \
+                            FALSE)
+-
+-#endif  // COMPONENT_KTM
++#endif
+ 
+ namespace sandbox {
+ 

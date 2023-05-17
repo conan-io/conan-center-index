@@ -1,0 +1,63 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,6 @@
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-set(CMAKE_CXX_FLAGS_DEBUG --coverage)
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+ option(ENABLE_TEST "Enable tests?" ON)
+@@ -14,13 +13,6 @@
+ option(BUILD_SHARED_LIBS "Build vault as a shared library" ON)
+ option(INSTALL "Run install targets" ON)
+
+-find_package(CURL)
+-if (CURL_FOUND)
+-  include_directories(${CURL_INCLUDE_DIR})
+-else (CURL_FOUND)
+-  message(FATAL_ERROR "CURL not found")
+-endif (CURL_FOUND)
+-
+ include(GNUInstallDirs)
+ include_directories("${PROJECT_SOURCE_DIR}/lib")
+
+@@ -120,11 +112,20 @@
+
+ target_include_directories(vault PRIVATE src)
+
++OPTION(UseCurl "UseCurl" ON)
++IF (UseCurl)
++    FIND_PACKAGE(CURL)
++    IF (CURL_FOUND)
++        target_link_libraries(vault CURL::libcurl)
++    ENDIF()
++ENDIF()
++
+ if(LINK_CURL)
+   target_link_libraries(vault curl)
+ endif(LINK_CURL)
+
+ if (ENABLE_COVERAGE)
++  set(CMAKE_CXX_FLAGS_DEBUG --coverage)
+   target_link_libraries(vault gcov)
+ endif ()
+
+@@ -155,7 +156,7 @@
+           "${CMAKE_CURRENT_BINARY_DIR}/libvaultConfigVersion.cmake"
+           DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libvault")
+
+-  configure_file(vault.pc.in vault.pc @ONLY)
++        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/vault.pc.in" "${CMAKE_BINARY_DIR}/vault.pc" @ONLY)
+   install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
+           DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ endif (INSTALL)
+@@ -176,7 +177,7 @@
+   target_include_directories(libvault_test PRIVATE include)
+
+   target_link_libraries(libvault_test vault)
+-  target_link_libraries(libvault_test curl)
++  target_link_libraries(libvault_test CURL::libcurl)
+   target_link_libraries(libvault_test Catch2::Catch2)
+
+   include(CTest)

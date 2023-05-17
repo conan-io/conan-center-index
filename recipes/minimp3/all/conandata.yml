@@ -1,0 +1,7 @@
+sources:
+  "20200304":
+    url: "https://github.com/lieff/minimp3/archive/55da78cbeea5fb6757f8df672567714e1e8ca3e9.zip"
+    sha256: "108074684c080a34f0d08f23a709128ea518d48651c8381bce91b73b29185479"
+  "20200221":
+    url: "https://github.com/lieff/minimp3/archive/9229f280ad475a434d7592255dc01534db65504f.zip"
+    sha256: "263dd1b9538780ae5489dddb4ab0397aa2d2c6ea7783bef4c7a0aad9555569ec"

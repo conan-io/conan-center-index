@@ -1,0 +1,131 @@
+diff --git a/AssetLoader/CMakeLists.txt b/AssetLoader/CMakeLists.txt
+--- a/AssetLoader/CMakeLists.txt
++++ b/AssetLoader/CMakeLists.txt
+@@ -34,13 +34,8 @@ source_group("interface" FILES ${INTERFACE})
+ 
+ target_link_libraries(Diligent-AssetLoader 
+ PRIVATE 
+-    Diligent-BuildSettings
+-    Diligent-Common
+-    Diligent-PlatformInterface
+-    Diligent-GraphicsEngineInterface
+-    Diligent-GraphicsAccessories
+-    Diligent-GraphicsTools
+     Diligent-TextureLoader
++    diligent-core::diligent-core
+ )
+ 
+ if (TARGET draco)
+diff --git a/HLSL2GLSLConverter/CMakeLists.txt b/HLSL2GLSLConverter/CMakeLists.txt
+--- a/HLSL2GLSLConverter/CMakeLists.txt
++++ b/HLSL2GLSLConverter/CMakeLists.txt
+@@ -33,12 +33,7 @@ target_compile_definitions(HLSL2GLSLConverter PRIVATE UNICODE)
+ 
+ target_link_libraries(HLSL2GLSLConverter 
+ PRIVATE 
+-    Diligent-BuildSettings 
+-    Diligent-TargetPlatform
+-    Diligent-Common
+-    Diligent-GraphicsTools
+-    Diligent-HLSL2GLSLConverterLib 
+-    Diligent-GraphicsEngineOpenGL-static
++    diligent-core::diligent-core
+ )
+ 
+ source_group("source" FILES ${SOURCE})
+diff --git a/Imgui/CMakeLists.txt b/Imgui/CMakeLists.txt
+--- a/Imgui/CMakeLists.txt
++++ b/Imgui/CMakeLists.txt
+@@ -106,13 +106,8 @@ source_group("imGuIZMO.quat" FILES ${IMGUIZMO_QUAT_SOURCE})
+ 
+ target_link_libraries(Diligent-Imgui
+ PRIVATE
+-    Diligent-BuildSettings
+-    Diligent-Common
+-    Diligent-PlatformInterface
+-    Diligent-GraphicsEngineInterface
+-    Diligent-GraphicsAccessories
+-    Diligent-GraphicsTools
+-    imgui::imgui
++     diligent-core::diligent-core
++     imgui::imgui
+ )
+ 
+ set_target_properties(Diligent-Imgui PROPERTIES
+diff --git a/NativeApp/Android/ndk_helper/CMakeLists.txt b/NativeApp/Android/ndk_helper/CMakeLists.txt
+--- a/NativeApp/Android/ndk_helper/CMakeLists.txt
++++ b/NativeApp/Android/ndk_helper/CMakeLists.txt
+@@ -29,7 +29,7 @@ PUBLIC
+ 
+ target_link_libraries(NDKHelper 
+ PRIVATE 
+-	Diligent-BuildSettings
++        diligent-core::diligent-core
+ PUBLIC
+     native_app_glue
+ )
+diff --git a/NativeApp/CMakeLists.txt b/NativeApp/CMakeLists.txt
+--- a/NativeApp/CMakeLists.txt
++++ b/NativeApp/CMakeLists.txt
+@@ -432,8 +432,7 @@ PUBLIC
+ 
+ target_link_libraries(Diligent-NativeAppBase 
+ PRIVATE 
+-    Diligent-BuildSettings
+-    Diligent-Common
++    diligent-core::diligent-core
+ )
+ 
+ if(PLATFORM_WIN32)
+diff --git a/NativeApp/Linux/CMakeLists.txt b/NativeApp/Linux/CMakeLists.txt
+--- a/NativeApp/Linux/CMakeLists.txt
++++ b/NativeApp/Linux/CMakeLists.txt
+@@ -20,7 +20,7 @@ source_group("interface" FILES ${INTERFACE})
+ 
+ target_link_libraries(XCBKeySyms 
+ PRIVATE 
+-    Diligent-BuildSettings
++    diligent-core::diligent-core
+     xcb
+ )
+ 
+diff --git a/TextureLoader/CMakeLists.txt b/TextureLoader/CMakeLists.txt
+--- a/TextureLoader/CMakeLists.txt
++++ b/TextureLoader/CMakeLists.txt
+@@ -44,16 +44,12 @@ source_group("include" FILES ${INCLUDE})
+ source_group("interface" FILES ${INTERFACE})
+ 
+ target_link_libraries(Diligent-TextureLoader 
+-PRIVATE 
+-    Diligent-BuildSettings 
+-    Diligent-Common 
+-    Diligent-PlatformInterface 
+-    Diligent-GraphicsEngineInterface 
+-    Diligent-GraphicsAccessories
+-    Diligent-GraphicsTools
+-    LibPng 
+-    LibTiff 
+-    ZLib
++PRIVATE
++    diligent-core::diligent-core
++    JPEG::JPEG
++    PNG::PNG
++    TIFF::TIFF
++    ZLIB::ZLIB
+ )
+ 
+ if (NOT DILIGENT_EXTERNAL_LIBJPEG)
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -1,10 +1,5 @@
+ cmake_minimum_required (VERSION 3.6)
+ 
+-add_subdirectory(libjpeg-9a)
+-add_subdirectory(libtiff)
+-add_subdirectory(zlib-1.2.8)
+-add_subdirectory(lpng-1.6.17)
+-
+ set(LICENSE_INSTALL_PATH "Licenses/ThirdParty/${DILIGENT_TOOLS_DIR}")
+ 
+ install(FILES libjpeg-9a/README DESTINATION ${LICENSE_INSTALL_PATH} RENAME libjpeg-readme.txt)

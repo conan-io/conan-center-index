@@ -1,0 +1,14 @@
+build: don't link bison against libreadline
+Reported by Paul Smith <psmith@gnu.org>.
+https://lists.gnu.org/r/bug-bison/2020-10/msg00001.html
+
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -3456,7 +3456,6 @@
+   $(LIB_SETLOCALE_NULL)                         \
+   $(LIBICONV)                                   \
+   $(LIBINTL)                                    \
+-  $(LIBREADLINE)                                \
+   $(LIBTEXTSTYLE)
+
+ @ENABLE_YACC_TRUE@nodist_bin_SCRIPTS = src/yacc

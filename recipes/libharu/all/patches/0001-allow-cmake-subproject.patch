@@ -1,0 +1,82 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,3 +1,5 @@
++cmake_minimum_required(VERSION 3.10)
++
+ # CMakeLists.txt
+ #
+ # Copyright (C) 2008  Werner Smekal
+@@ -31,11 +33,8 @@
+ set(LIBHPDF_DESCRIPTION "libHaru is a free, cross platform, open source library for generating PDF files.")
+ set(LIBHPDF_PACKAGE_NAME "libHaru-${LIBHPDF_VERSION}-${COMPILER_LABEL}")
+ 
+-# we want cmake version 2.4.8 at least
+-cmake_minimum_required(VERSION 2.4.8 FATAL_ERROR)
+-
+ # Location where the haru cmake build system first looks for cmake modules
+-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
++list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+ 
+ # set library name, msvc does not append 'lib' automatically
+ if(MSVC)
+@@ -110,7 +109,7 @@
+ if(MSVC_VERSION GREATER 1399)
+   add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE)
+ endif(MSVC_VERSION GREATER 1399)
+-include_directories(${CMAKE_SOURCE_DIR}/include)
++include_directories(${PROJECT_SOURCE_DIR}/include)
+ 
+ 
+ # these are options
+@@ -149,16 +148,16 @@
+ 
+ # create hpdf_config.h
+ configure_file(
+-  ${CMAKE_SOURCE_DIR}/include/hpdf_config.h.cmake
+-  ${CMAKE_BINARY_DIR}/include/hpdf_config.h
++  ${PROJECT_SOURCE_DIR}/include/hpdf_config.h.cmake
++  ${PROJECT_BINARY_DIR}/include/hpdf_config.h
+ )
+-include_directories(${CMAKE_BINARY_DIR}/include)
++include_directories(${PROJECT_BINARY_DIR}/include)
+ 
+ # create DevPackage file
+ if(DEVPAK)
+   configure_file(
+-    ${CMAKE_SOURCE_DIR}/libharu.DevPackage.cmake
+-    ${CMAKE_BINARY_DIR}/libharu.DevPackage
++    ${PROJECT_SOURCE_DIR}/libharu.DevPackage.cmake
++    ${PROJECT_BINARY_DIR}/libharu.DevPackage
+   )
+ endif(DEVPAK)
+ # =======================================================================
+@@ -203,7 +202,7 @@
+     include/hpdf_pdfa.h
+     include/hpdf_3dmeasure.h
+     include/hpdf_exdata.h
+-    ${CMAKE_BINARY_DIR}/include/hpdf_config.h
++    ${PROJECT_BINARY_DIR}/include/hpdf_config.h
+ )
+ 
+ # install header files
+@@ -215,7 +214,7 @@
+   install(DIRECTORY if DESTINATION .)
+ endif(NOT DEVPAK)
+ if(DEVPAK)
+-  install(FILES ${CMAKE_BINARY_DIR}/libharu.DevPackage DESTINATION .)
++  install(FILES ${PROJECT_BINARY_DIR}/libharu.DevPackage DESTINATION .)
+ endif(DEVPAK)
+ 
+ # =======================================================================
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -79,7 +79,7 @@
+     LIBRARY DESTINATION lib
+     RUNTIME DESTINATION bin
+   )
+-  if(WIN32 AND NOT CYGWIN)
++  if(0)
+ 		foreach(addlib ${ADDITIONAL_LIBRARIES})
+ 			install(FILES ${addlib} DESTINATION lib)
+ 		endforeach(addlib)
+ 

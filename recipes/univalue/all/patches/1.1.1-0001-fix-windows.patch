@@ -1,0 +1,89 @@
+--- configure.ac
++++ configure.ac
+@@ -42,14 +42,14 @@
+ AC_SUBST(LIBUNIVALUE_REVISION)
+ AC_SUBST(LIBUNIVALUE_AGE)
+
+-LT_INIT
++LT_INIT([win32-dll])
+ LT_LANG([C++])
+
+-case $host in
+-  *mingw*)
+-    LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"
+-  ;;
+-esac
++#case $host in
++#  *mingw*)
++#    LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"
++#  ;;
++#esac
+
+ BUILD_EXEEXT=
+ case $build in
+diff -ur source/source_subfolder/Makefile.am source_modified/source_subfolder/Makefile.am
+--- Makefile.am
++++ Makefile.am
+@@ -34,6 +34,8 @@
+ 	@echo Updating $<
+ 	$(AM_V_at)$(GENBIN) > lib/univalue_escapes.h
+
++if FALSE
++
+ noinst_PROGRAMS = $(TESTS) test/test_json
+
+ TEST_DATA_DIR=test
+@@ -58,6 +60,8 @@
+ test_object_CXXFLAGS = -I$(top_srcdir)/include
+ test_object_LDFLAGS = -static $(LIBTOOL_APP_LDFLAGS)
+
++endif
++
+ TEST_FILES = \
+ 	$(TEST_DATA_DIR)/fail10.json \
+ 	$(TEST_DATA_DIR)/fail11.json \
+--- include/univalue.h
++++ include/univalue.h
+@@ -16,7 +16,19 @@
+
+ #include <utility>        // std::pair
+
+-class UniValue {
++#ifdef _WIN32
++# ifdef EXPORT_DLL
++#  define UNIVALUE_API __declspec(dllexport)
++# elif defined(UNIVALUE_SHARED)
++#  define UNIVALUE_API __declspec(dllimport)
++# endif
++#endif
++
++#ifndef UNIVALUE_API
++# define UNIVALUE_API
++#endif
++
++UNIVALUE_API class UniValue {
+ public:
+     enum VType { VNULL, VOBJ, VARR, VSTR, VNUM, VBOOL, };
+
+@@ -215,9 +215,9 @@
+     JTOK_STRING,
+ };
+
+-extern enum jtokentype getJsonToken(std::string& tokenVal,
++UNIVALUE_API extern enum jtokentype getJsonToken(std::string& tokenVal,
+                                     unsigned int& consumed, const char *raw, const char *end);
+-extern const char *uvTypeName(UniValue::VType t);
++UNIVALUE_API extern const char *uvTypeName(UniValue::VType t);
+
+ static inline bool jsonTokenIsValue(enum jtokentype jtt)
+ {
+@@ -252,8 +252,8 @@
+     // not reached
+ }
+
+-extern const UniValue NullUniValue;
++UNIVALUE_API extern const UniValue NullUniValue;
+
+ const UniValue& find_value( const UniValue& obj, const std::string& name);
+
+ #endif // __UNIVALUE_H__

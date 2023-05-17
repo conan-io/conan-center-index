@@ -1,0 +1,17 @@
+conan-center-index/recipes/apr/all/patches/0004-1.3.9-scons-python-spaces.patch
+
+This corrects build failure if python is in a path with spaces,
+e.g. the default system-wide C:\Program Files\Python39
+
+The patch is a cherry-pick from upstream r1809132
+--- SConstruct.orig	2021-04-21 11:31:44.866021500 -0500
++++ SConstruct	2021-04-21 11:50:22.148062300 -0500
+@@ -159,7 +159,7 @@
+ 
+ env.Append(BUILDERS = {
+     'GenDef' : 
+-      Builder(action = sys.executable + ' build/gen_def.py $SOURCES > $TARGET',
++      Builder(action = '"%s" build/gen_def.py $SOURCES > $TARGET' % (sys.executable,),
+               suffix='.def', src_suffix='.h')
+   })
+ 

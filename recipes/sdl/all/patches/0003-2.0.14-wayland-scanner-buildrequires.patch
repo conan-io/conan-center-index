@@ -1,0 +1,23 @@
+--- a/cmake/sdlchecks.cmake
++++ b/cmake/sdlchecks.cmake
+@@ -593,9 +593,10 @@ endmacro()
+ # - HAVE_DLOPEN opt
+ macro(CheckWayland)
+   if(VIDEO_WAYLAND)
+-    pkg_check_modules(WAYLAND wayland-client wayland-scanner wayland-egl wayland-cursor egl xkbcommon)
++    pkg_check_modules(WAYLAND wayland-client wayland-egl wayland-cursor egl xkbcommon)
+ 
+     if(WAYLAND_FOUND)
++      if(0)
+       execute_process(
+         COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=wayland_scanner wayland-scanner
+         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+@@ -607,6 +608,8 @@ macro(CheckWayland)
+       if(NOT WAYLAND_SCANNER_RC EQUAL 0)
+         set(WAYLAND_FOUND FALSE)
+       endif()
++      endif()
++      set(WAYLAND_SCANNER "wayland-scanner")
+     endif()
+ 
+     if(WAYLAND_FOUND)

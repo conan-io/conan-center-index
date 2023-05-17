@@ -1,0 +1,20 @@
+sources:
+  "8.2.0":
+    cmake:
+      url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_2_0.tar.gz"
+      sha256: "f41f6a32b1177c094c3ef97423916713c902d0ac26cbee30ec70b1e8ab0e6fba"
+    source:
+      url: "https://github.com/noloader/cryptopp-pem/archive/refs/tags/CRYPTOPP_8_2_0.tar.gz"
+      sha256: "7da8feaa201e3da79e56bbf1f400f963cb9c5b357f71d395d34cfc91bb3a7e4b"
+patches:
+  "8.2.0":
+    - patch_file: "patches/fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/rename-output-library.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/link-to-cryptopp.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/remove-cryptopp-sources-from-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/use-cryptopp-include-from-conan.patch"
+      base_path: "source_subfolder"

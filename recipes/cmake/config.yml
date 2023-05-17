@@ -1,0 +1,17 @@
+versions:
+  "3.19.8":
+    folder: "binary"
+  "3.20.6":
+    folder: "binary"
+  "3.21.7":
+    folder: "binary"
+  "3.22.6":
+    folder: "binary"
+  "3.23.5":
+    folder: "binary"
+  "3.24.4":
+    folder: "binary"
+  "3.25.3":
+    folder: "binary"
+  "3.26.3":
+    folder: "binary"

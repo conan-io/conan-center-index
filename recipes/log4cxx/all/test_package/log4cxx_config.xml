@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <!-- Output log messages to the system console. -->
+  <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n" />
+    </layout>
+  </appender>
+  <!-- Also output log messages to the log file. -->
+  <appender name="FileAppender" class="org.apache.log4j.FileAppender">
+    <param name="file" value="LogFile.log" />
+    <param name="append" value="true" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d %-5p %C{2} (%F:%L) - %m%n" />
+    </layout>
+  </appender>
+  <root>
+    <priority value="all" />
+    <appender-ref ref="ConsoleAppender" />
+    <appender-ref ref="FileAppender" />
+  </root>
+</log4j:configuration>

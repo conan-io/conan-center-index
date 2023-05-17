@@ -1,0 +1,102 @@
+diff --git a/src/manipulators/csmanip.cpp b/src/manipulators/csmanip.cpp
+index 064c7ba..6363226 100644
+--- a/src/manipulators/csmanip.cpp
++++ b/src/manipulators/csmanip.cpp
+@@ -208,7 +208,7 @@ namespace osm
+    {
+     if( generic_map.find( feat_string ) == generic_map.end() ) 
+      {
+-      throw agr::runtime_error_func( generic_map.at( "error" ), feat_string, "is not supported!" );
++      throw agr::except_error_func( generic_map.at( "error" ), feat_string, "is not supported!" );
+      }
+     return generic_map.at( feat_string );
+    }
+@@ -228,7 +228,7 @@ namespace osm
+    {
+     if( generic_map.find( feat_string ) == generic_map.end() ) 
+      {
+-      throw agr::runtime_error_func( generic_map.at( "error" ).first, feat_string, "is not supported!" );
++      throw agr::except_error_func( generic_map.at( "error" ).first, feat_string, "is not supported!" );
+      }
+     else
+      {
+@@ -255,7 +255,7 @@ namespace osm
+    {
+     if( rst.find( reset_string ) == rst.end() ) 
+      {
+-      throw agr::runtime_error_func( rst.at( "error" ), reset_string, "is not supported!" );
++      throw agr::except_error_func( rst.at( "error" ), reset_string, "is not supported!" );
+      } 
+     return rst.at( reset_string );
+    }
+@@ -295,4 +295,4 @@ namespace osm
+             std::to_string( g ) + ";"s +
+             std::to_string( b ) + "m"s;
+    }
+- }
+\ No newline at end of file
++ }
+diff --git a/src/progressbar/progress_bar.cpp b/src/progressbar/progress_bar.cpp
+index 485009f..b12aee4 100644
+--- a/src/progressbar/progress_bar.cpp
++++ b/src/progressbar/progress_bar.cpp
+@@ -163,16 +163,16 @@ namespace osm
+        }
+       else if( styles_map_.at( type ).find( style ) == styles_map_.at( type ).end() )
+        {
+-        throw agr::runtime_error_func( "Inserted ProgressBar style", style, "is not supported for this type!" );
++        throw agr::except_error_func( "Inserted ProgressBar style", style, "is not supported for this type!" );
+        }
+       else
+        {
+-        throw agr::runtime_error_func( "Inserted ProgressBar type", type, "is not supported!" );
++        throw agr::except_error_func( "Inserted ProgressBar type", type, "is not supported!" );
+        }
+      }
+     catch ( std::out_of_range const& exception )
+      {
+-      throw agr::runtime_error_func( "Inserted ProgressBar type", type, "is not supported!" );
++      throw agr::except_error_func( "Inserted ProgressBar type", type, "is not supported!" );
+      }
+    }
+ 
+@@ -201,15 +201,15 @@ namespace osm
+      }
+     else if( styles_map_.at( "indicator" ).find( style_p ) == styles_map_.at( "indicator" ).end() )
+      {
+-      throw agr::runtime_error_func( "Inserted indicator style", style_p, "is not supported for this type!" );
++      throw agr::except_error_func( "Inserted indicator style", style_p, "is not supported for this type!" );
+      }
+     else if( styles_map_.at( "loader" ).find( style_l ) == styles_map_.at( "loader" ).end() )
+      {
+-      throw agr::runtime_error_func( "Inserted loader style", style_l, "is not supported for this type!" );
++      throw agr::except_error_func( "Inserted loader style", style_l, "is not supported for this type!" );
+      }
+     else
+      {
+-      throw agr::runtime_error_func( "Inserted ProgressBar type", type, "is not supported!" );
++      throw agr::except_error_func( "Inserted ProgressBar type", type, "is not supported!" );
+      }
+    }
+ 
+@@ -834,11 +834,11 @@ namespace osm
+       }
+      else if( styles_map_.at( type ).find( style ) != styles_map_.at( type ).end() )
+       {
+-       throw agr::runtime_error_func( "Inserted ProgressBar style", style, "is already available!" ); 
++       throw agr::except_error_func( "Inserted ProgressBar style", style, "is already available!" );
+       }
+      else
+       {
+-       throw agr::runtime_error_func( "Inserted ProgressBar type", type, "is already available!" );
++       throw agr::except_error_func( "Inserted ProgressBar type", type, "is already available!" );
+       }
+     }
+   
+@@ -869,4 +869,4 @@ namespace osm
+    * 
+    */
+   BOOST_PP_SEQ_FOR_EACH( PROGRESSBAR, _, ARGS( int, long, long long, double, long double, float ) );
+- }
+\ No newline at end of file
++ }

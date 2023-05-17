@@ -1,0 +1,7 @@
+sources:
+  "1.7.3":
+    url: "https://github.com/hyperrealm/libconfig/archive/refs/tags/v1.7.3.tar.gz"
+    sha256: "68757e37c567fd026330c8a8449aa5f9cac08a642f213f2687186b903bd7e94e"
+  "1.7.2":
+    url: "https://github.com/hyperrealm/libconfig/archive/refs/tags/v1.7.2.tar.gz"
+    sha256: "f67ac44099916ae260a6c9e290a90809e7d782d96cdd462cac656ebc5b685726"

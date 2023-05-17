@@ -1,0 +1,13 @@
+versions:
+  "1.9.4":
+    folder: "all"
+  "1.9.2":
+    folder: "all"
+  "1.9.1":
+    folder: "all"
+  "1.8.20":
+    folder: "all"
+  "1.8.18":
+    folder: "all"
+  "1.8.17":
+    folder: "all"

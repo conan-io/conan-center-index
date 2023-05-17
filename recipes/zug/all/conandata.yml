@@ -1,0 +1,4 @@
+sources:
+  "cci.20220125":
+    url: "https://github.com/arximboldi/zug/archive/deb266f4c7c35d325de7eb3d033f06e0809495f2.tar.gz"
+    sha256: "4b36442059899b8570336ff9e2901f62fd58b839c9e3ff5d35497454e2324625"

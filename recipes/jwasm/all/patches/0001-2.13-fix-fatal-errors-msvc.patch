@@ -1,0 +1,21 @@
+--- main.c
++++ main.c
+@@ -69,7 +69,7 @@ int main( int argc, char **argv )
+     /* v2.11: _findfirst/next/close() handle, should be of type intptr_t.
+      * since this type isn't necessarily defined, type long is used as substitute.
+      */
+-    long    fh;
++    intptr_t    fh;
+     const char *pfn;
+     int     dirsize;
+     struct  _finddata_t finfo;
+--- parser.c
++++ parser.c
+@@ -2794,6 +2794,7 @@ ret_code ParseLine( struct asm_tok tokenarray[] )
+               Token_Count, GetCurrOffset() ));
+
+     i = 0;
++    oldofs = 0;
+
+     /* Does line start with a code label? */
+     if ( tokenarray[0].token == T_ID && ( tokenarray[1].token == T_COLON || tokenarray[1].token == T_DBL_COLON ) ) {

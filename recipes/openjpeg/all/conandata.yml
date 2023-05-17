@@ -1,0 +1,15 @@
+sources:
+  "2.5.0":
+    url: "https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.0.tar.gz"
+    sha256: "0333806d6adecc6f7a91243b2b839ff4d2053823634d4f6ed7a59bc87409122a"
+  "2.4.0":
+    url: "https://github.com/uclouvain/openjpeg/archive/v2.4.0.tar.gz"
+    sha256: "8702ba68b442657f11aaeb2b338443ca8d5fb95b0d845757968a7be31ef7f16d"
+  "2.3.1":
+    url: "https://github.com/uclouvain/openjpeg/archive/v2.3.1.tar.gz"
+    sha256: "63f5a4713ecafc86de51bfad89cc07bb788e9bba24ebbf0c4ca637621aadb6a9"
+patches:
+  "2.4.0":
+    - patch_file: "patches/0001-relocatable-shared-macos-2.4.0.patch"
+  "2.3.1":
+    - patch_file: "patches/0001-relocatable-shared-macos-2.3.1.patch"

@@ -1,0 +1,4 @@
+sources:
+  "19.00":
+    url: https://www.7-zip.org/a/7z1900-src.7z
+    sha256: "9ba70a5e8485cf9061b30a2a84fe741de5aeb8dd271aab8889da0e9b3bf1868e"

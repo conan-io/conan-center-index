@@ -1,0 +1,61 @@
+sources:
+  "4.3.0":
+    sha256: 138c90b66edb0a28e225705a2cbf897a8cef5f87e68befc748f8e6808e21628a
+    url: https://github.com/bfgroup/b2/archive/4.3.0.tar.gz
+  "4.4.0":
+    sha256: fa4079370644110604895ff08057fe2eff3289bcffdaec55fcdf43ea33ff25a8
+    url: https://github.com/bfgroup/b2/archive/4.4.0.tar.gz
+  "4.4.1":
+    sha256: 4fb15abd994968a24868c13502f080c4a28b20f59831acf9eabd64a3b257554f
+    url: https://github.com/bfgroup/b2/archive/4.4.1.tar.gz
+  "4.4.2":
+    sha256: 575e59b89191a6a6780d7165cae3222b8a7a1e7d5e8165b3524eefe32fc3de46
+    url: https://github.com/bfgroup/b2/archive/4.4.2.tar.gz
+  "4.5.0":
+    url: "https://github.com/bfgroup/b2/archive/4.5.0.tar.gz"
+    sha256: "39c3b51bf9c5f32b1c249d2d405274976b166e1bdca1fc5205b595f1cb5dbac3"
+  "4.6.0":
+    url: "https://github.com/bfgroup/b2/archive/4.6.0.tar.gz"
+    sha256: "3a308e0f79a039d8a9495b375f3292f5163000c19caa79c5687e4cb5b1938b49"
+  "4.6.1":
+    url: "https://github.com/bfgroup/b2/archive/4.6.1.tar.gz"
+    sha256: "a3f3323eaeb2c27d7a3ca86842665c6c3bc3d93cc626ba362ae6d0c5a7bfbe2c"
+  "4.7.0":
+    url: "https://github.com/bfgroup/b2/archive/4.7.0.tar.gz"
+    sha256: "82c2eb92d6ab2bd447646568ac8430c316cbd2a1819c108136224498c0abed84"
+  "4.7.1":
+    url: "https://github.com/bfgroup/b2/archive/4.7.1.tar.gz"
+    sha256: "30844184ded3217c090b76e6e051c3ac663ea63bd19e1b727b05c54411cac867"
+  "4.7.2":
+    url: "https://github.com/bfgroup/b2/archive/4.7.2.tar.gz"
+    sha256: "70883f8ed82efc49f425f1961a82e961cefdbca3a28581cb57b405bd7516677f"
+  "4.8.0":
+    url: "https://github.com/bfgroup/b2/archive/4.8.0.tar.gz"
+    sha256: "2f18951d4cc267a810e44fc483b747d489e30ed42ee6d9e7c5e19de750ee5cd2"
+  "4.8.1":
+    url: "https://github.com/bfgroup/b2/archive/4.8.1.tar.gz"
+    sha256: "8ecff1025df9473d91a0d116af3e32be6fba6e57d4ea962e033ff1678609d668"
+  "4.8.2":
+    url: "https://github.com/bfgroup/b2/archive/4.8.2.tar.gz"
+    sha256: "220edfbd5022394c5dc264dfdd8bf6d3ec53b784db87461026bb23ea9d9ec4bd"
+  "4.9.0":
+    url: "https://github.com/bfgroup/b2/archive/4.9.0.tar.gz"
+    sha256: "7c614e41f10e004c7539c75c60f7b2df26a61fe35058e9021f8fd5049c97a255"
+  "4.9.1":
+    url: "https://github.com/bfgroup/b2/archive/4.9.1.tar.gz"
+    sha256: "81e49dc85e956c3e708bdd02fcfe0b9f406fca8edca54c75c94ebd6c322ed587"
+  "4.9.2":
+    url: "https://github.com/bfgroup/b2/archive/4.9.2.tar.gz"
+    sha256: "7e1a135b308999d2a65fce3eba8f4ffb41ca82ae133f8494cc42cbca63c890de"
+  "4.9.3":
+    url: "https://github.com/bfgroup/b2/archive/4.9.3.tar.gz"
+    sha256: "4524b8ecf138a9087aa24b8889c44ea7ae9f2d373acc9535d72fb048c213e1b9"
+  "4.9.4":
+    url: "https://github.com/bfgroup/b2/releases/download/4.9.4/b2-4.9.4.tar.bz2"
+    sha256: "1996d8098955ad3fdecab242d784afaef0fba80dd5d2ef0b3a41592e26772312"
+  "4.9.5":
+    url: "https://github.com/bfgroup/b2/releases/download/4.9.5/b2-4.9.5.tar.bz2"
+    sha256: "f81bea44601613f633d3311341f3f63594608537bf38d7073b877ec1edb2760a"
+  "4.9.6":
+    url: "https://github.com/bfgroup/b2/releases/download/4.9.6/b2-4.9.6.tar.bz2"
+    sha256: "10c1344c751fcf5a1f9ec6f52c02626cfbf78a4806f7817949b115e107bbbc5f"

@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "http://mpir.org/mpir-3.0.0.zip"
+    sha256: "6277d3cc36ff39c98e4d4cc17b46b5a6ff42a22d30a4130b2d49255f98dd8c1f"

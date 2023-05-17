@@ -1,0 +1,41 @@
+diff --git a/libjbig/jbig.h b/libjbig/jbig.h
+index 214105a..a4f7781 100644
+--- a/libjbig/jbig.h
++++ b/libjbig/jbig.h
+@@ -246,24 +246,26 @@ struct jbg_dec_state {
+  * Under VISUALC we have single threaded static libraries, or
+  * multi-threaded DLLs using the multithreaded runtime DLLs.
+  **/
+- 
+-#if defined(_MT) && defined(_DLL) && !defined(_JBIGDLL_) && !defined(_LIB)
+-#   define _JBIGDLL_
++
++#if defined(_MSC_VER)
++#   if defined(jbig_EXPORTS)
++#       define SHARED_EXPORT_PREFIX __declspec(dllexport)
++#   else
++#       define SHARED_EXPORT_PREFIX __declspec(dllimport)
++#   endif
++#else
++#   define SHARED_EXPORT_PREFIX
+ #endif
+ #if defined(_JBIGDLL_)
+-#   if defined(_VISUALC_)
++#   if defined(_MSC_VER)
+ #       pragma warning( disable : 4273 )
+ #   endif
+-#   if !defined(_JBIGLIB_)
+-#       define JBIGEXPORT __declspec(dllimport)
+-#   else
+-#       define JBIGEXPORT __declspec(dllexport)
+-#   endif
++#   define JBIGEXPORT SHARED_EXPORT_PREFIX
+ #else
+ #   define JBIGEXPORT
+ #endif
+ 
+-#if defined(_VISUALC_)
++#if defined(_MSC_VER)
+ #   pragma warning( disable : 4018 )
+ #   pragma warning( disable : 4244 )
+ #   pragma warning( disable : 4142 )

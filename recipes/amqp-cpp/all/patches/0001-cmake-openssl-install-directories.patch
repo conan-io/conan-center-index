@@ -1,0 +1,23 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -88,7 +88,10 @@
+     #add_library(${PROJECT_NAME} STATIC ${SRCS})
+     add_library(${PROJECT_NAME} STATIC ${src_MAIN} ${src_LINUX_TCP})
+ endif()
+-
++if(AMQP-CPP_LINUX_TCP)
++find_package(OpenSSL REQUIRED)
++target_link_libraries(${PROJECT_NAME} OpenSSL::SSL OpenSSL::Crypto)
++endif()
+ # install rules
+ # ------------------------------------------------------------------------------------------------------
+ 
+@@ -97,7 +99,7 @@
+     install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+             ARCHIVE DESTINATION lib
+             LIBRARY DESTINATION lib
+-            RUNTIME DESTINATION lib
++            RUNTIME DESTINATION bin
+     )
+ else()
+     # copy static lib

@@ -1,0 +1,12 @@
+sources:
+  "2.5.2":
+    url: "http://downloads.sourceforge.net/freetype/ftjam-2.5.2.tar.gz"
+    sha256: "a5d456f65477d77936e1726f5f803a2e6def18a6c6fccf5ea8528926c136abc8"
+patches:
+  "2.5.2":
+    - patch_file: "patches/0001-jam-2.5-overflow.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-msvc-mingw-fix-makefile.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-missing-includes.patch"
+      base_path: "source_subfolder"

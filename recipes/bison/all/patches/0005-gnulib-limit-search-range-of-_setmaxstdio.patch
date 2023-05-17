@@ -1,0 +1,38 @@
+This avoid showing a `Assertion Failed Dialog Box` during configure and running bison with the assertion failur:
+
+```
+Expression: new_maximum >= _IOB_ENTRIES && new_maximum <= _NHANDLE_
+```
+
+msdn documentation of _setmaxstdio at 
+https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setmaxstdio
+
+Summary:
+maximum of 8192 is a hard upper limit for the number of simultaneously open files accessed through the C run-time library.
+
+Kudos to @SSE4 for finding the rootcause at
+https://github.com/conan-io/conan-center-index/pull/2334#issuecomment-668171405
+
+
+--- lib/getdtablesize.c
++++ lib/getdtablesize.c
+@@ -79,12 +79,18 @@ getdtablesize (void)
+          freed when we call _setmaxstdio with the original value.  */
+       int orig_max_stdio = _getmaxstdio ();
+       unsigned int bound;
+-      for (bound = 0x10000; _setmaxstdio_nothrow (bound) < 0; bound = bound / 2)
++#ifdef _MSC_VER
++#    define BOUND_START 0x2000
++#else
++#    define BOUND_START 0x10000
++#endif
++      for (bound = BOUND_START; _setmaxstdio_nothrow (bound) < 0; bound = bound / 2)
+         ;
+       _setmaxstdio_nothrow (orig_max_stdio);
+       dtablesize = bound;
+     }
+   return dtablesize;
++#undef BOUND_START
+ }
+ 
+ #else

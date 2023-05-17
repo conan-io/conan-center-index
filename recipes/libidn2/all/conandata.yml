@@ -1,0 +1,8 @@
+sources:
+  "2.3.0":
+    url: "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.0.tar.gz"
+    sha256: "e1cb1db3d2e249a6a3eb6f0946777c2e892d5c5dc7bd91c74394fc3a01cab8b5"
+patches:
+  "2.3.0":
+    - patch_file: "patches/0001-no-versioning-of-symbols.patch"
+      base_path: "source_subfolder"

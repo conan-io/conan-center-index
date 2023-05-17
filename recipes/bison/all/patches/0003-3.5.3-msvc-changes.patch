@@ -1,0 +1,261 @@
+src/parse-gram.y and src/scan-gram.l should be modified as well,
+but aren't to avoid a dependency on a already-built flex and bison.
+
+--- src/location.c
++++ src/location.c
+@@ -25,9 +25,13 @@
+ #include <mbswidth.h>
+ #include <quotearg.h>
+ #include <stdio.h>    /* fileno */
++#ifndef _WIN32
+ #include <sys/ioctl.h>
++#endif
+ #include <sys/stat.h> /* fstat */
++#ifndef _WIN32
+ #include <termios.h>
++#endif
+ 
+ #ifdef WINSIZE_IN_PTEM
+ # include <sys/stream.h>
+--- src/parse-gram.c
++++ src/parse-gram.c
+@@ -991,7 +991,7 @@ tron (yyo);
+ 
+     case 43: /* "character literal"  */
+ #line 217 "src/parse-gram.y"
+-         { fputs (char_name (((*yyvaluep).CHAR)), yyo); }
++         { fputs (char_name (((*yyvaluep).CHAR_LITERAL)), yyo); }
+ #line 996 "src/parse-gram.c"
+         break;
+ 
+@@ -1027,7 +1027,7 @@ tron (yyo);
+ 
+     case 56: /* "integer"  */
+ #line 234 "src/parse-gram.y"
+-         { fprintf (yyo, "%d", ((*yyvaluep).INT)); }
++         { fprintf (yyo, "%d", ((*yyvaluep).INTEGER)); }
+ #line 1032 "src/parse-gram.c"
+         break;
+ 
+@@ -2216,13 +2216,13 @@ yyreduce:
+ 
+   case 12:
+ #line 330 "src/parse-gram.y"
+-                                   { expected_sr_conflicts = (yyvsp[0].INT); }
++                                   { expected_sr_conflicts = (yyvsp[0].INTEGER); }
+ #line 2221 "src/parse-gram.c"
+     break;
+ 
+   case 13:
+ #line 331 "src/parse-gram.y"
+-                                   { expected_rr_conflicts = (yyvsp[0].INT); }
++                                   { expected_rr_conflicts = (yyvsp[0].INTEGER); }
+ #line 2227 "src/parse-gram.c"
+     break;
+ 
+@@ -2775,7 +2775,7 @@ yyreduce:
+ 
+   case 102:
+ #line 679 "src/parse-gram.y"
+-    { grammar_current_rule_dprec_set ((yyvsp[0].INT), (yylsp[0])); }
++    { grammar_current_rule_dprec_set ((yyvsp[0].INTEGER), (yylsp[0])); }
+ #line 2780 "src/parse-gram.c"
+     break;
+ 
+@@ -2787,13 +2787,13 @@ yyreduce:
+ 
+   case 104:
+ #line 683 "src/parse-gram.y"
+-    { grammar_current_rule_expect_sr ((yyvsp[0].INT), (yylsp[0])); }
++    { grammar_current_rule_expect_sr ((yyvsp[0].INTEGER), (yylsp[0])); }
+ #line 2792 "src/parse-gram.c"
+     break;
+ 
+   case 105:
+ #line 685 "src/parse-gram.y"
+-    { grammar_current_rule_expect_rr ((yyvsp[0].INT), (yylsp[0])); }
++    { grammar_current_rule_expect_rr ((yyvsp[0].INTEGER), (yylsp[0])); }
+ #line 2798 "src/parse-gram.c"
+     break;
+ 
+@@ -2860,9 +2860,9 @@ yyreduce:
+           complain_indent (&loc, complaint, &indent,
+                            _("definition of %s"), var);
+         }
+-      (yyval.id) = symbol_get (char_name ((yyvsp[0].CHAR)), (yylsp[0]));
++      (yyval.id) = symbol_get (char_name ((yyvsp[0].CHAR_LITERAL)), (yylsp[0]));
+       symbol_class_set ((yyval.id), token_sym, (yylsp[0]), false);
+-      symbol_user_token_number_set ((yyval.id), (yyvsp[0].CHAR), (yylsp[0]));
++      symbol_user_token_number_set ((yyval.id), (yyvsp[0].CHAR_LITERAL), (yylsp[0]));
+     }
+ #line 2868 "src/parse-gram.c"
+     break;
+--- src/parse-gram.h
++++ src/parse-gram.h
+@@ -122,7 +122,7 @@ extern int gram_debug;
+     BRACED_CODE = 40,
+     BRACED_PREDICATE = 41,
+     BRACKETED_ID = 42,
+-    CHAR = 43,
++    CHAR_LITERAL = 43,
+     COLON = 44,
+     EPILOGUE = 45,
+     EQUAL = 46,
+@@ -135,7 +135,7 @@ extern int gram_debug;
+     TAG = 53,
+     TAG_ANY = 54,
+     TAG_NONE = 55,
+-    INT = 56,
++    INTEGER = 56,
+     PERCENT_PARAM = 57,
+     PERCENT_UNION = 58,
+     PERCENT_EMPTY = 59
+@@ -162,7 +162,7 @@ union GRAM_STYPE
+   /* code_props_type  */
+   code_props_type code_props_type;
+   /* "integer"  */
+-  int INT;
++  int INTEGER;
+   /* int.opt  */
+   int yytype_81;
+   /* named_ref.opt  */
+@@ -226,7 +226,7 @@ union GRAM_STYPE
+   /* variable  */
+   uniqstr variable;
+   /* "character literal"  */
+-  unsigned char CHAR;
++  unsigned char CHAR_LITERAL;
+   /* value  */
+   value_type value;
+ #line 233 "src/parse-gram.h"
+--- src/reader.c
++++ src/reader.c
+@@ -803,7 +803,7 @@ check_and_convert_grammar (void)
+ 
+      $accept: %start $end.  */
+   {
+-    symbol_list *p = symbol_list_sym_new (accept, empty_loc);
++    symbol_list *p = symbol_list_sym_new (bison_accept, empty_loc);
+     p->rhs_loc = grammar->rhs_loc;
+     p->next = symbol_list_sym_new (startsymbol, empty_loc);
+     p->next->next = symbol_list_sym_new (endtoken, empty_loc);
+--- src/reduce.c
++++ src/reduce.c
+@@ -160,9 +160,9 @@ inaccessable_symbols (void)
+   bitset Pp = bitset_create (nrules, BITSET_FIXED);
+ 
+   /* If the start symbol isn't useful, then nothing will be useful. */
+-  if (bitset_test (N, accept->content->number - ntokens))
++  if (bitset_test (N, bison_accept->content->number - ntokens))
+     {
+-      bitset_set (V, accept->content->number);
++      bitset_set (V, bison_accept->content->number);
+ 
+       while (1)
+         {
+@@ -301,7 +301,7 @@ nonterminals_reduce (void)
+       for (item_number *rhsp = rules[r].rhs; 0 <= *rhsp; ++rhsp)
+         if (ISVAR (*rhsp))
+           *rhsp = symbol_number_as_item_number (nterm_map[*rhsp - ntokens]);
+-    accept->content->number = nterm_map[accept->content->number - ntokens];
++    bison_accept->content->number = nterm_map[bison_accept->content->number - ntokens];
+   }
+ 
+   nsyms -= nuseless_nonterminals;
+@@ -381,7 +381,7 @@ reduce_grammar (void)
+     {
+       reduce_print ();
+ 
+-      if (!bitset_test (N, accept->content->number - ntokens))
++      if (!bitset_test (N, bison_accept->content->number - ntokens))
+         complain (&startsymbol_loc, fatal,
+                   _("start symbol %s does not derive any sentence"),
+                   startsymbol->tag);
+--- src/scan-gram.c
++++ src/scan-gram.c
+@@ -2223,12 +2223,12 @@ YY_RULE_SETUP
+ case 65:
+ YY_RULE_SETUP
+ #line 308 "/Users/akim/src/gnu/bison/src/scan-gram.l"
+-RETURN_VALUE (INT, scan_integer (yytext, 10, *loc));
++RETURN_VALUE (INTEGER, scan_integer (yytext, 10, *loc));
+ 	YY_BREAK
+ case 66:
+ YY_RULE_SETUP
+ #line 309 "/Users/akim/src/gnu/bison/src/scan-gram.l"
+-RETURN_VALUE (INT, scan_integer (yytext, 16, *loc));
++RETURN_VALUE (INTEGER, scan_integer (yytext, 16, *loc));
+ 	YY_BREAK
+ /* Identifiers may not start with a digit.  Yet, don't silently
+      accept "1FOO" as "1 FOO".  */
+@@ -2575,21 +2575,21 @@ YY_RULE_SETUP
+ {
+     STRING_FINISH;
+     loc->start = token_start;
+-    val->CHAR = last_string[0];
++    val->CHAR_LITERAL = last_string[0];
+ 
+     /* FIXME: Eventually, make these errors.  */
+     if (last_string[0] == '\0')
+     {
+       complain (loc, Wother, _("empty character literal"));
+       /* '\0' seems dangerous even if we are about to complain.  */
+-      val->CHAR = '\'';
++      val->CHAR_LITERAL = '\'';
+     }
+     else if (last_string[1] != '\0')
+       complain (loc, Wother,
+                 _("extra characters in character literal"));
+     STRING_FREE;
+     BEGIN INITIAL;
+-    return CHAR;
++    return CHAR_LITERAL;
+   }
+ 	YY_BREAK
+ case 95:
+--- src/symtab.c
++++ src/symtab.c
+@@ -52,7 +52,7 @@ static semantic_type **semantic_types_sorted = NULL;
+ symbol *errtoken = NULL;
+ symbol *undeftoken = NULL;
+ symbol *endtoken = NULL;
+-symbol *accept = NULL;
++symbol *bison_accept = NULL;
+ symbol *startsymbol = NULL;
+ location startsymbol_loc;
+ 
+@@ -843,9 +843,9 @@ symbols_new (void)
+                                    symbol_free);
+ 
+   /* Construct the accept symbol. */
+-  accept = symbol_get ("$accept", empty_loc);
+-  accept->content->class = nterm_sym;
+-  accept->content->number = nvars++;
++  bison_accept = symbol_get ("$accept", empty_loc);
++  bison_accept->content->class = nterm_sym;
++  bison_accept->content->number = nvars++;
+ 
+   /* Construct the error token */
+   errtoken = symbol_get ("error", empty_loc);
+--- src/symtab.h
++++ src/symtab.h
+@@ -248,7 +248,7 @@ extern symbol *endtoken;
+ /** The genuine start symbol.
+ 
+    $accept: start-symbol $end */
+-extern symbol *accept;
++extern symbol *bison_accept;
+ 
+ /** The user start symbol. */
+ extern symbol *startsymbol;
+--- src/ielr.c
++++ src/ielr.c
+@@ -429,7 +429,7 @@
+              check all predecessors' goto follows for the LHS.  */
+           if (item_number_is_rule_number (ritem[s->items[item] - 2]))
+             {
+-              aver (lhs != accept->content->number);
++              aver (lhs != bison_accept->content->number);
+               for (state **predecessor = predecessors[s->number];
+                    *predecessor;
+                    ++predecessor)

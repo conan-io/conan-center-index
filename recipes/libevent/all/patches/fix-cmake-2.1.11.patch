@@ -1,0 +1,39 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,7 +46,7 @@ set(EVENT__LIBRARY_TYPE DEFAULT CACHE STRING
+ 
+ project(libevent C)
+ 
+-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
++list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
+ string(REGEX MATCH "SunOS" SOLARIS "${CMAKE_SYSTEM_NAME}")
+ 
+ 
+@@ -946,7 +946,6 @@ endif()
+ # library exists for historical reasons; it contains the contents of
+ # both libevent_core and libevent_extra. You shouldn’t use it; it may
+ # go away in a future version of Libevent.
+-add_event_library(event SOURCES ${SRC_CORE} ${SRC_EXTRA})
+ 
+ set(WIN32_GETOPT)
+ if (WIN32)
+--- a/cmake/AddEventLibrary.cmake
++++ b/cmake/AddEventLibrary.cmake
+@@ -127,7 +127,7 @@ macro(add_event_library LIB_NAME)
+                 COMMAND ${CMAKE_COMMAND} -E create_symlink
+                     "$<TARGET_FILE_NAME:${LIB_NAME}_shared>"
+                     "${LIB_LINK_NAME}"
+-                WORKING_DIRECTORY "lib")
++                WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+         endif()
+ 
+         list(APPEND LIBEVENT_SHARED_LIBRARIES "${LIB_NAME}_shared")
+@@ -145,7 +145,7 @@ macro(add_event_library LIB_NAME)
+         EXPORT LibeventTargets
+         LIBRARY DESTINATION "lib" COMPONENT lib
+         ARCHIVE DESTINATION "lib" COMPONENT lib
+-        RUNTIME DESTINATION "lib" COMPONENT lib
++        RUNTIME DESTINATION "bin" COMPONENT lib
+         PUBLIC_HEADER DESTINATION "include/event2"
+         COMPONENT dev
+     )

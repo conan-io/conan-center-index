@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.4)
+project(cpp-optparse LANGUAGES CXX)
+
+include(GNUInstallDirs)
+
+add_library(OptionParser ${CPP_OPTPARSE_SRC_DIR}/OptionParser.cpp)
+set_target_properties(OptionParser PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+install(TARGETS OptionParser
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(FILES ${CPP_OPTPARSE_SRC_DIR}/OptionParser.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

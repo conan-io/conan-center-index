@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9200634..c1cca12 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,12 +21,12 @@ endif()
+ 
+ project(Luau LANGUAGES CXX C)
+ add_library(Luau.Common INTERFACE)
+-add_library(Luau.Ast STATIC)
+-add_library(Luau.Compiler STATIC)
+-add_library(Luau.Analysis STATIC)
+-add_library(Luau.CodeGen STATIC)
+-add_library(Luau.VM STATIC)
+-add_library(isocline STATIC)
++add_library(Luau.Ast)
++add_library(Luau.Compiler)
++add_library(Luau.Analysis)
++add_library(Luau.CodeGen)
++add_library(Luau.VM)
++add_library(isocline)
+ 
+ if(LUAU_BUILD_CLI)
+     add_executable(Luau.Repl.CLI)

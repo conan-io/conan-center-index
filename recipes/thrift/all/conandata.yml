@@ -1,0 +1,44 @@
+sources:
+  "0.17.0":
+    url: "https://github.com/apache/thrift/archive/v0.17.0.tar.gz"
+    sha256: "f5888bcd3b8de40c2c2ab86896867ad9b18510deb412cba3e5da76fb4c604c29"
+  "0.16.0":
+    url: "https://github.com/apache/thrift/archive/refs/tags/v0.16.0.tar.gz"
+    sha256: "df2931de646a366c2e5962af679018bca2395d586e00ba82d09c0379f14f8e7b"
+  "0.15.0":
+    url: "https://github.com/apache/thrift/archive/refs/tags/v0.15.0.tar.gz"
+    sha256: "32d2f18aa9be114619ee54e1abc3bb497febb2a8aa917894c20bae21185fac15"
+  "0.14.2":
+    url: "https://github.com/apache/thrift/archive/v0.14.2.tar.gz"
+    sha256: "f966cdac6bb8d149a9950a761e6ee6f3b22d5a6073da43a333d3468f159ebeaa"
+  "0.14.1":
+    url: "https://github.com/apache/thrift/archive/refs/tags/v0.14.1.tar.gz"
+    sha256: "5ae1c4d16452a22eaf9d802ba7489907147c2b316ff38c9758918552fae5132c"
+  "0.13.0":
+    url: "https://github.com/apache/thrift/archive/0.13.0.tar.gz"
+    sha256: "8469c8d72c684c6de72ddf55fc65d1c10868a576e7dc4d1f4a21a59814b97110"
+patches:
+  "0.17.0":
+    - patch_file: "patches/cmake-0.16.0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+  "0.16.0":
+    - patch_file: "patches/cmake-0.16.0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+  "0.15.0":
+    - patch_file: "patches/cmake-0.15.0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+  "0.14.2":
+    - patch_file: "patches/cmake-0.14.1.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+  "0.14.1":
+    - patch_file: "patches/cmake-0.14.1.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+  "0.13.0":
+    - patch_file: "patches/cmake-0.13.0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"

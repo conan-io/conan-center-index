@@ -1,0 +1,30 @@
+sources:
+  "1.15.2":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.2.tar.xz"
+    sha256: "7e640803084af59f5e477b7ded11fd888b5380910a895c51ca3aedd63c0626ca"
+  "1.15.0":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.0.tar.xz"
+    sha256: "5073c8cb9ad20226647bb38f4965182b762a6e1f595ccdc8e59411014bfd640a"
+  "1.14.0":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.14.0.tar.xz"
+    sha256: "ccd7cce37596e0a19558fd6648d1272ab43f011d80c8635aea8fd0bad58aebd4"
+  "1.12.20":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.12.20.tar.gz"
+    sha256: "f77620140ecb4cdc67f37fb444f8a6bea70b5b6461f12f1cbe2cec60fa7de5fe"
+patches:
+  "1.15.2":
+    - patch_file: "patches/0003-meson-monotonic-clock-check.patch"
+      patch_type: "portability"
+      patch_description: "Fix detection of necessary monotonic clock functions in pthread"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/352"
+  "1.15.0":
+    - patch_file: "patches/0003-meson-monotonic-clock-check.patch"
+      patch_type: "portability"
+      patch_description: "Fix detection of necessary monotonic clock functions in pthread"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/352"
+  "1.12.20":
+    - patch_file: "patches/0001-cmake-project.patch"
+    - patch_file: "patches/0002-cmake_configure_checks_list_separator.patch"
+      patch_type: "portability"
+      url: "https://gitlab.freedesktop.org/dbus/dbus/-/commit/8cd1c2155252938ed38d2612e4d054c7fc0244c3.patch"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/issues/324"

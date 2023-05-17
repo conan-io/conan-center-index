@@ -1,0 +1,28 @@
+sources:
+  "1.13":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.13.tar.gz"
+    sha256: "053d5320097334767486c6e33d01dd1b1c6224eac82aac2d720f4ec456d8c50b"
+  "1.12":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.12.tar.gz"
+    sha256: "2c429bb26256b49bfed2510aef1e5fa9321b27fe4cf226c9ece9a5867150974f"
+  "1.11":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.11.tar.gz"
+    sha256: "e086c9e886cf786a091f5aac05250f9ea836488bd799f327f87e95c8f4247cc6"
+  "1.10":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.10.tar.gz"
+    sha256: "13047916886298c11fb97a4145e24753847f4dd674423cd5e3c572ccc34fad22"
+  "1.9":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.9.tar.gz"
+    sha256: "dcbe3f35b6447a4b867d1acc9c64545b8d4483c9f7df390035489fa41f145b80"
+  "1.8":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.8.tar.gz"
+    sha256: "65f4b00c234bc526c3143bb93ed811803fb761cdf25370a378632c8478375938"
+  "1.7":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.7.tar.gz"
+    sha256: "a2c16bbfbc3efcddd004e6fb2dd86e664966163b3f70a030b2bb70a89015130b"
+  "1.6":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.6.tar.gz"
+    sha256: "d0856911ab0a36b4c7ceba254c39651bbe5b8daec5127a03634e16434bb5e583"
+  "1.5":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.5.tar.gz"
+    sha256: "66c09ed6539e64cc8b7a5130172e33605ae42ee57be26bd523e7d820b230bbd1"

@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -169,7 +169,7 @@
+ ################################################################################
+ # Find Python
+ ################################################################################
+-find_package(PythonInterp REQUIRED)
++find_package(PythonInterp 3 REQUIRED)
+ message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+
+ ################################################################################

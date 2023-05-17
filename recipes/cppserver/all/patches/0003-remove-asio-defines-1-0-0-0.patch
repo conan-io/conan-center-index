@@ -1,0 +1,13 @@
+diff --git a/include/server/asio/asio.h b/include/server/asio/asio.h
+index 8ad4d6bc..b8cb7030 100644
+--- a/include/server/asio/asio.h
++++ b/include/server/asio/asio.h
+@@ -26,8 +26,6 @@
+ 
+ #else
+ 
+-#define ASIO_STANDALONE
+-#define ASIO_SEPARATE_COMPILATION
+ #define ASIO_NO_WIN32_LEAN_AND_MEAN
+ 
+ #if defined(_MSC_VER)

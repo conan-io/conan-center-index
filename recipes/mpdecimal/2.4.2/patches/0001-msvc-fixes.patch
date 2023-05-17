@@ -1,0 +1,34 @@
+--- libmpdec/Makefile.vc
++++ libmpdec/Makefile.vc
+@@ -45,25 +45,25 @@
+ !if "$(DLL)" == "1"
+ BFLAGS= /DBUILD_DLL
+ UFLAGS= /DUSE_DLL
+-LFLAGS= $(LFLAGS) /DLL /MANIFEST
++LFLAGS= $(LFLAGS) /DLL /MANIFEST $(CONAN_LDFLAGS)
+ BUILDLIB = $(LIBSHARED)
+ USELIB = $(LIBIMPORT)
+ !if "$(DEBUG)" == "1"
+-OPT = /MDd /Od /Zi
++OPT = /Od /Zi
+ !else
+-OPT = /MD /Ox /GS /EHsc
++OPT = /Ox /GS /EHsc
+ !endif
+ !else
+ BUILDLIB = $(LIBSTATIC)
+ USELIB = $(LIBSTATIC)
+ !if "$(DEBUG)" == "1"
+-OPT = /MTd /Od /Zi
++OPT = /Od /Zi
+ !else
+-OPT = /MT /Ox /GS /EHsc
++OPT = /Ox /GS /EHsc
+ !endif
+ !endif
+ 
+-CFLAGS = /W3 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT)
++CFLAGS = /W3 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT) $(CONAN_CFLAGS)
+ 
+ 
+ default: $(BUILDLIB) runtest

@@ -1,0 +1,4 @@
+sources:
+  "0.12.1":
+    url: https://github.com/eerimoq/dbg-macro/archive/0.12.1.tar.gz
+    sha256: 8567730747c8f18cf01748819ebd178bcd9f9ca54431e124b9fda9f0616db751

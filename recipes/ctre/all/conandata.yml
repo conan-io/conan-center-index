@@ -1,0 +1,31 @@
+sources:
+  "3.7.2":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.7.2.tar.gz"
+    sha256: "0711a6f97496e010f72adab69839939a9e50ba35ad87779e422ae3ff3b0edfc3"
+  "3.7.1":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.7.1.tar.gz"
+    sha256: "d00d7eaa0e22f2fdaa947a532b81b6fc35880acf4887b50a5ac9bfb7411ced03"
+  "3.7":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.7.tar.gz"
+    sha256: "12be2a37f7fe39c489f646d3faee534f965871fd998258162962f36a19a455ef"
+  "3.6":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.6.tar.gz"
+    sha256: "82633af08edff556f1401e1cf247e44eeef50f0588202731fddab183e9fda6d0"
+  "3.5":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.5.tar.gz"
+    sha256: "94b5cbf90057b252119e9a0ce459e3b488decb98e57163b00a6c7c494cd0761e"
+  "3.4.1":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.4.1.tar.gz"
+    sha256: "c4a1a88b8c4a8c267507a3da3707f29a2b7c1f722e27d695296f152501a414ab"
+  "3.3.4":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.3.4.tar.gz"
+    sha256: "8161f0d3100fc690590f475aa9acb70163ed7f2922e35e13136dececc52c49a9"
+  "3.2":
+    url: https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.2.tar.gz
+    sha256: d4e734e3dd501f741424aceb5198f5ebbc35c624335c99f7e202a9ecb31cd3e6
+  "3.1":
+    url: https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.1.tar.gz
+    sha256: c209ab0533b56a4fbbc7959e10c91c89fe2c9cb1725b64ed52be272a534a1d83
+  "2.10":
+    url: https://github.com/hanickadot/compile-time-regular-expressions/archive/v2.10.tar.gz
+    sha256: 2e166b672c5a733b5448bb9fc83db54d92852c39e3e19097b79307cc6a327c31

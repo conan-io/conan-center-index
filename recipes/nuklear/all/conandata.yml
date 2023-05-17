@@ -1,0 +1,22 @@
+sources:
+  "4.10.1":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/refs/tags/4.10.1.tar.gz"
+    sha256: "a7bd28477e00be6768e9b8cc3a406bc67b2d32d3a023b1e44868e8c566a7eb2f"
+  "4.06.1":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/74a4df4eb965150ede86fefa6c147476541078a4.zip"
+    sha256: "d654b50b524f5f7db8cd742bff5ab6bcd42a9dd785d44429267cc3d5f5742b06"
+  "4.03.1":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/d9ddd1810f8e43911c06f4f86eab3053db757adc.zip"
+    sha256: "2e45e564825a34910733fb09e9adc153043facb65bc9c42b93ea6ea404dcf50f"
+  "4.02.1":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/9f0bca461b028c1f8b638beeba1859045ebe1ac3.zip"
+    sha256: "d21faaff664a17e1c381dd82be31506f00c7998a428efb69210f3e49398625ac"
+  "4.01.9":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/e08d7b418fed2c2971a9b878a4e0340ebc8c4c8a.zip"
+    sha256: "3dc8947ee774fa86716198db84188b6e42f6910863097161e27a3370d00aeb27"
+  "4.01.7":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/82d85e94e19258fb52ea042c7002770aac69bdf8.zip"
+    sha256: "d20ef0304ae960724a5f12b01089b262727f6609efdd46f8f1386d4c1a8aacaa"
+  "4.01.5":
+    url: "https://github.com/Immediate-Mode-UI/Nuklear/archive/bb7c2519a3981de793617eeca975ba8edec29971.zip"
+    sha256: "176c24720f27e06008fcea02ae78389afe3aff314929169900f86cdd2ab4736f"

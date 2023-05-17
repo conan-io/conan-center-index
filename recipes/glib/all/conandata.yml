@@ -1,0 +1,37 @@
+sources:
+  "2.76.2":
+    url: "https://download.gnome.org/sources/glib/2.76/glib-2.76.2.tar.xz"
+    sha256: "24f3847857b1d8674cdb0389a36edec0f13c666cd3ce727ecd340eb9da8aca9e"
+  "2.76.1":
+    url: "https://download.gnome.org/sources/glib/2.76/glib-2.76.1.tar.xz"
+    sha256: "43dc0f6a126958f5b454136c4398eab420249c16171a769784486e25f2fda19f"
+  "2.76.0":
+    url: "https://download.gnome.org/sources/glib/2.76/glib-2.76.0.tar.xz"
+    sha256: "525bb703b807142e1aee5ccf222c344e8064b21c0c45677ef594e587874c6797"
+  "2.75.3":
+    url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.3.tar.xz"
+    sha256: "7c517d0aff456c35a039bce8a8df7a08ce95a8285b09d1849f8865f633f7f871"
+  "2.75.2":
+    url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.2.tar.xz"
+    sha256: "360d6fb75202c0eb0d07f0ab812b19b526f1c05ccc0a8ed7e5d2c988616d343a"
+  "2.75.1":
+    url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.1.tar.xz"
+    sha256: "96fd22355a542cca96c31082f2d09b72cb5a3454b6ea60c1be17c987a18a6b93"
+  "2.75.0":
+    url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.0.tar.xz"
+    sha256: "6dde8e55cc4a2c83d96797120b08bcffb5f645b2e212164ae22d63c40e0e6360"
+  "2.74.1":
+    url: "https://download.gnome.org/sources/glib/2.74/glib-2.74.1.tar.xz"
+    sha256: "0ab981618d1db47845e56417b0d7c123f81a3427b2b9c93f5a46ff5bbb964964"
+  "2.73.3":
+    url: "https://download.gnome.org/sources/glib/2.73/glib-2.73.3.tar.xz"
+    sha256: "df1a2b841667d6b48b2ef6969ebda4328243829f6e45866726f806f90f64eead"
+  "2.72.4":
+    url: "https://download.gnome.org/sources/glib/2.72/glib-2.72.4.tar.xz"
+    sha256: "8848aba518ba2f4217d144307a1d6cb9afcc92b54e5c13ac1f8c4d4608e96f0e"
+patches:
+  "2.73.3":
+    - patch_file: "patches/0001-2.73.3-clang-static-assert.patch"
+      patch_type: bugfix
+      patch_description: fix for clang compilation
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2898

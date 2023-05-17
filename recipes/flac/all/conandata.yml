@@ -1,0 +1,16 @@
+sources:
+  "1.4.2":
+    url: "https://github.com/xiph/flac/releases/download/1.4.2/flac-1.4.2.tar.xz"
+    sha256: "e322d58a1f48d23d9dd38f432672865f6f79e73a6f9cc5a5f57fcaa83eb5a8e4"
+  "1.3.3":
+    url: "https://github.com/xiph/flac/archive/1.3.3.tar.gz"
+    sha256: "668cdeab898a7dd43cf84739f7e1f3ed6b35ece2ef9968a5c7079fe9adfe1689"
+patches:
+  "1.4.2":
+    - patch_file: "patches/fix-cmake-1.4.2.patch"
+      patch_description: "Adapts find_package commands and install destination paths in CMakeLists.txt files."
+      patch_type: "conan"
+  "1.3.3":
+    - patch_file: "patches/fix-cmake-1.3.3.patch"
+      patch_description: "Various adaptations in CMakeLists.txt files to improve compatibility with Conan."
+      patch_type: "conan"

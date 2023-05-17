@@ -1,0 +1,34 @@
+sources:
+  "3.13.5":
+    url: "https://github.com/embree/embree/archive/refs/tags/v3.13.5.tar.gz"
+    sha256: "b8c22d275d9128741265537c559d0ea73074adbf2f2b66b0a766ca52c52d665b"
+  "3.13.3":
+    url: "https://github.com/embree/embree/archive/refs/tags/v3.13.3.tar.gz"
+    sha256: "74ec785afb8f14d28ea5e0773544572c8df2e899caccdfc88509f1bfff58716f"
+  "3.13.1":
+    url: "https://github.com/embree/embree/archive/refs/tags/v3.13.1.tar.gz"
+    sha256: "00dbd852f19ae2b95f5106dd055ca4b304486436ced0ccf842aec4e38a4df425"
+  "3.12.0":
+    url: "https://github.com/embree/embree/archive/refs/tags/v3.12.0.tar.gz"
+    sha256: "f3646977c45a9ece1fb0cfe107567adcc645b1c77c27b36572d0aa98b888190c"
+patches:
+  "3.13.5":
+    - patch_file: "patches/3.13.x-0001-cmake-minimum-required.patch"
+      patch_description: "CMake: Fix position of cmake_minimum_required()"
+      patch_type: "portability"
+      patch_source: "https://github.com/embree/embree/pull/406"
+  "3.13.3":
+    - patch_file: "patches/3.13.x-0001-cmake-minimum-required.patch"
+      patch_description: "CMake: Fix position of cmake_minimum_required()"
+      patch_type: "portability"
+      patch_source: "https://github.com/embree/embree/pull/406"
+  "3.13.1":
+    - patch_file: "patches/3.13.x-0001-cmake-minimum-required.patch"
+      patch_description: "CMake: Fix position of cmake_minimum_required()"
+      patch_type: "portability"
+      patch_source: "https://github.com/embree/embree/pull/406"
+  "3.12.0":
+    - patch_file: "patches/3.12.x-0001-cmake-minimum-required.patch"
+      patch_description: "CMake: Fix position of cmake_minimum_required()"
+      patch_type: "portability"
+      patch_source: "https://github.com/embree/embree/pull/406"

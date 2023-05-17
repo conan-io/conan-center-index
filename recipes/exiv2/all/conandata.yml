@@ -1,0 +1,21 @@
+sources:
+  "0.27.5":
+    url: "https://github.com/Exiv2/exiv2/releases/download/v0.27.5/exiv2-0.27.5-Source.tar.gz"
+    sha256: "35a58618ab236a901ca4928b0ad8b31007ebdc0386d904409d825024e45ea6e2"
+  "0.27.4":
+    url: "https://github.com/Exiv2/exiv2/releases/download/v0.27.4/exiv2-0.27.4-Source.tar.gz"
+    sha256: "84366dba7c162af9a7603bcd6c16f40fe0e9af294ba2fd2f66ffffb9fbec904e"
+patches:
+  "0.27.5":
+    - patch_file: "patches/0001-link-0.27.5.patch"
+    - patch_file: "patches/0003-fix-ios.patch"
+    - patch_file: "patches/0004-find-expat.patch"
+      patch_description: "enforce usage of FindEXPAT.cmake"
+      patch_type: "conan"
+  "0.27.4":
+    - patch_file: "patches/0001-link.patch"
+    - patch_file: "patches/0002-fpic.patch"
+    - patch_file: "patches/0003-fix-ios.patch"
+    - patch_file: "patches/0004-find-expat.patch"
+      patch_description: "enforce usage of FindEXPAT.cmake"
+      patch_type: "conan"

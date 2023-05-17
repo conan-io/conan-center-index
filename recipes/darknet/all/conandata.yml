@@ -1,0 +1,8 @@
+sources:
+  cci.20180914:
+    url: "https://github.com/pjreddie/darknet/archive/61c9d02ec461e30d55762ec7669d6a1d3c356fb2.tar.gz"
+    sha256: "a1993ba2628b1be81ab14f8ef81de6c00a298b316c64ca96bebef2b0f40c3967"
+patches:
+  cci.20180914:
+    - patch_file: "patches/include_conan_flags.patch"
+      base_path: "source_subfolder"

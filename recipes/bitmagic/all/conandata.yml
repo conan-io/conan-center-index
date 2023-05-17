@@ -1,0 +1,25 @@
+sources:
+  "7.12.3":
+    url: "https://github.com/tlk00/BitMagic/archive/refs/tags/v7.12.3.tar.gz"
+    sha256: "5e59507a01a8295bb57aebcf557a4a25b992244736f7924300cdb9635f1b2780"
+  "7.11.2":
+    url: "https://github.com/tlk00/BitMagic/archive/refs/tags/v7.11.2.tar.gz"
+    sha256: "09faf5b9da4e0cee4947e05b7af0bd834e63e90c8877c115b719b4f390709a6f"
+  "7.10.3":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.10.3.tar.gz"
+    sha256: "164aae4f52f35f3a0e4a596611efcd1494a9be5489be494c6a440e5a83f17460"
+  "7.9.3":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.9.3.tar.gz"
+    sha256: "fa1799f702dac47148dc8e2672957b1fc5be440d043ef2c4d275c04b434182e1"
+  "7.8.0":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.8.0.tar.gz"
+    sha256: "78e1d2ba81ad14595c976ecb0e8d18a9b652dfe8e394964f94bd98cc8164391b"
+  "7.7.7":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.7.7.tar.gz"
+    sha256: "9f645a2aa18566462733d592f8f44c9bb283a2df52701474f620d20cee4c9e92"
+  "7.6.0":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.6.0.tar.gz"
+    sha256: "eebe39e15fc7c14d2c5aad5f07bf2c8ddf79bffafef2e748470f35d3555cf6a9"
+  "7.5.0":
+    url: "https://github.com/tlk00/BitMagic/archive/refs/tags/v7.5.0.tar.gz"
+    sha256: "dec7d316baf3be9cb058d9da302a7e4cb694ac429d4bd29138c24b1b0157a9e8"

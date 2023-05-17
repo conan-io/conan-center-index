@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7efcf7b..c083efd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 3.2)
+ 
+ project(Fruit VERSION 3.6.0 LANGUAGES CXX)
+ 
+-set(FRUIT_IS_BEING_BUILT_BY_CONAN FALSE CACHE BOOL "This is set in Conan builds.")
+-if("${FRUIT_IS_BEING_BUILT_BY_CONAN}")
+-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+-  conan_basic_setup()
+-endif()
+-
+ if (POLICY CMP0054)
+     cmake_policy(SET CMP0054 NEW)
+ endif()
+@@ -125,19 +119,6 @@ include(GNUInstallDirs)
+ add_subdirectory(configuration)
+ add_subdirectory(src)
+ 
+-if(NOT "${FRUIT_IS_BEING_BUILT_BY_CONAN}")
+-  if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+-    # Do not exclude these from "make all" in debug mode, they must build.
+-    add_subdirectory(examples)
+-    add_subdirectory(tests)
+-  else()
+-    add_subdirectory(examples EXCLUDE_FROM_ALL)
+-    add_subdirectory(tests)
+-  endif()
+-
+-  add_subdirectory(extras EXCLUDE_FROM_ALL)
+-endif()
+-
+ install(DIRECTORY include/fruit/
+   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fruit
+   FILES_MATCHING PATTERN "*.h")

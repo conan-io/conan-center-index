@@ -1,0 +1,27 @@
+--- src/mpfr.h
++++ src/mpfr.h
+@@ -290,16 +290,15 @@ typedef enum {
+ # endif
+ #endif
+ 
+-/* Support for WINDOWS Dll:
+-   Check if we are inside a MPFR build, and if so export the functions.
+-   Otherwise does the same thing as GMP */
+-#if defined(__MPFR_WITHIN_MPFR) && __GMP_LIBGMP_DLL
+-# define __MPFR_DECLSPEC __GMP_DECLSPEC_EXPORT
+-#else
+-# ifndef __GMP_DECLSPEC
+-#  define __GMP_DECLSPEC
++/* Support for WINDOWS Dll */
++#if defined(MPFR_DLL)
++# if defined(__MPFR_WITHIN_MPFR)
++#  define __MPFR_DECLSPEC __GMP_DECLSPEC_EXPORT
++# else
++#  define __MPFR_DECLSPEC __GMP_DECLSPEC_IMPORT
+ # endif
+-# define __MPFR_DECLSPEC __GMP_DECLSPEC
++#else
++# define __MPFR_DECLSPEC
+ #endif
+ 
+ /* Use MPFR_DEPRECATED to mark MPFR functions, types or variables as

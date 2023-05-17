@@ -1,0 +1,38 @@
+diff --git a/builds/msvc/properties/DebugLIB.props b/builds/msvc/properties/DebugLIB.props
+index c5f10128..86eb0449 100644
+--- a/builds/msvc/properties/DebugLIB.props
++++ b/builds/msvc/properties/DebugLIB.props
+@@ -12,10 +12,10 @@
+   
+   <ItemDefinitionGroup>
+     <ClCompile>
+-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+       <LinkIncremental>true</LinkIncremental>
+     </ClCompile>
+   </ItemDefinitionGroup>
+ 
+-</Project>
+\ No newline at end of file
++</Project>
+diff --git a/builds/msvc/properties/Release.props b/builds/msvc/properties/Release.props
+index 1c5415bc..1f754ca5 100644
+--- a/builds/msvc/properties/Release.props
++++ b/builds/msvc/properties/Release.props
+@@ -14,7 +14,7 @@
+   <ItemDefinitionGroup>
+     <ClCompile>
+       <AdditionalOptions>/Oy- %(AdditionalOptions)</AdditionalOptions>
+-      <!--<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>-->
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
+       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+@@ -38,4 +38,4 @@
+     </ClCompile>
+   </ItemDefinitionGroup>
+ 
+-</Project>
+\ No newline at end of file
++</Project>

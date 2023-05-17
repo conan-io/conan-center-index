@@ -1,0 +1,13 @@
+sources:
+  "3.7.8":
+    url:
+      - "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/gnutls-3.7.8.tar.xz"
+      - "http://www.ring.gr.jp/pub/net/gnupg/gnutls/v3.7/gnutls-3.7.8.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.7/gnutls-3.7.8.tar.xz"
+    sha256: "c58ad39af0670efe6a8aee5e3a8b2331a1200418b64b7c51977fb396d4617114"
+patches:
+  "3.7.8":
+    - patch_description: "Fix Mac OS build when linking to libtasn1"
+      patch_type: "portability"
+      patch_source: "https://github.com/xbmc/inputstream.ffmpegdirect/blob/Matrix/depends/common/gnutls/03-undo-libtasn1-cisdigit.patch"
+      patch_file: "patches/0001-fix-isdigit.patch"

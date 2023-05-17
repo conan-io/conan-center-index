@@ -1,0 +1,58 @@
+Description: Fix bug in C++/Parser Expat support.
+Author: Jörg Frings-Fürst <debian@jff-webhosting.net>
+Origin: http://scm.codesynthesis.com/?p=xsd/xsd.git;a=commit;h=94cba986108a0e0f42295572ca42c356d59328d7
+        http://scm.codesynthesis.com/?p=xsd/xsd.git;a=commit;h=0e5fab0664fb36c6253dfd7bb86d8985d1b349ef
+Last-Update: 2016-04-10
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: trunk/xsd/libxsd/xsd/cxx/parser/expat/elements.hxx
+===================================================================
+--- a/xsd/libxsd/xsd/cxx/parser/expat/elements.hxx
++++ b/xsd/libxsd/xsd/cxx/parser/expat/elements.hxx
+@@ -51,7 +51,9 @@ namespace xsd
+           }
+         };
+ 
+-        typedef std::unique_ptr<XML_ParserStruct> parser_auto_ptr;
++        typedef
++        std::unique_ptr<XML_ParserStruct, parser_deleter>
++        parser_auto_ptr;
+ #else
+         // Simple auto pointer for Expat's XML_Parser object.
+         //
+Index: trunk/xsd/libxsd/xsd/cxx/parser/expat/elements.txx
+===================================================================
+--- a/xsd/libxsd/xsd/cxx/parser/expat/elements.txx
++++ b/xsd/libxsd/xsd/cxx/parser/expat/elements.txx
+@@ -279,13 +279,14 @@ namespace xsd
+         {
+           parser_auto_ptr parser (XML_ParserCreateNS (0, XML_Char (' ')));
+ 
+-          if (parser == 0)
++          if (parser.get () == 0)
+             throw std::bad_alloc ();
+ 
+           if (system_id || public_id)
+-            parse_begin (parser, system_id ? *system_id : *public_id, eh);
++            parse_begin (
++             parser.get (), system_id ? *system_id : *public_id, eh);
+           else
+-            parse_begin (parser, eh);
++            parse_begin (parser.get (), eh);
+ 
+           // Temporarily unset the exception failbit. Also clear the
+           // fail bit when we reset the old state if it was caused
+@@ -309,9 +310,10 @@ namespace xsd
+               //
+               break;
+             }
+-
+-            if (XML_Parse (
+-                  parser, buf, is.gcount (), is.eof ()) == XML_STATUS_ERROR)
++            if (XML_Parse (parser.get (),
++                           buf,
++                           is.gcount (),
++                           is.eof ()) == XML_STATUS_ERROR)
+             {
+               r = false;
+               break;

@@ -1,0 +1,17 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/syoyo/tinyexr/archive/v1.0.1.tar.gz"
+    sha256: "4dbbd8c7d17597ad557518de5eb923bd02683d26d0de765f9224e8d57d121677"
+  "1.0.0":
+    url: "https://github.com/syoyo/tinyexr/archive/v1.0.0.tar.gz"
+    sha256: "d9d135a835916655057ad58fdabe17f4ae7047a0b15e20e891dab4e563275b68"
+patches:
+  "1.0.1":
+    - patch_file: "patches/1.0.1-0001-fix-SaveEXRNPartImageToMemory.patch"
+      patch_description: "fix compilation error with use_zfp"
+      patch_type: "backport"
+      patch_source: "https://github.com/syoyo/tinyexr/issues/188"
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-use-conan-deps.patch"
+      patch_description: "use conan recipes, fix namespace issue"
+      patch_type: "conan"

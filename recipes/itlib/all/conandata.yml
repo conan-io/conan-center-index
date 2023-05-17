@@ -1,0 +1,34 @@
+sources:
+  "1.9.1":
+    url: "https://github.com/iboB/itlib/archive/v1.9.1.tar.gz"
+    sha256: "3d87b841d85dc30fac2a5157955d685c37fd32a5ecff2e9df330b147fdc3da39"
+  "1.9.0":
+    url: "https://github.com/iboB/itlib/archive/v1.9.0.tar.gz"
+    sha256: "62b8c01f208a39c22462cde285dd84c60a8141cfbbc94f5fc1d991685a724228"
+  "1.8.3":
+    url: "https://github.com/iboB/itlib/archive/v1.8.3.tar.gz"
+    sha256: "2323e2abf5827651097c563a19d8f82c7fd222a8740ff3421681da967b59277e"
+  "1.8.2":
+    url: "https://github.com/iboB/itlib/archive/v1.8.2.tar.gz"
+    sha256: "2b4d206ed0de31a4e6042fada0aa7cee54c95220d98666381f0402046e95304f"
+  "1.8.1":
+    url: "https://github.com/iboB/itlib/archive/v1.8.1.tar.gz"
+    sha256: "7a8619073d0bbd5a5cea0ee9bb1b3b749348cbab1d12e4e0c234215f26388aef"
+  "1.8.0":
+    url: "https://github.com/iboB/itlib/archive/v1.8.0.tar.gz"
+    sha256: "70b6493b0cc3a720ffd48e98e3f009e8d94003380800bf07e61f167e813a9add"
+  "1.7.0":
+    url: "https://github.com/iboB/itlib/archive/v1.7.0.tar.gz"
+    sha256: "9a27138cfa8554eb69436bb1afacfafc5a3888b6e05f9124b2d20da7ab55b723"
+  "1.6.3":
+    url: "https://github.com/iboB/itlib/archive/v1.6.3.tar.gz"
+    sha256: "d2e320d9218269c421407d6df819ca0bfae3ea5bc897b341b9babaedc0b7103f"
+  "1.5.2":
+    url: "https://github.com/iboB/itlib/archive/v1.5.2.tar.gz"
+    sha256: "9ebff09fcdc873d2b01d8a2d0de2a7d7bd11844ef632f80ec5041f78bdc6ddec"
+  "1.4.5":
+    url: "https://github.com/iboB/itlib/archive/v1.4.5.tar.gz"
+    sha256: "f1d3533014433316475b6196cd2b1890bb42db1ae3059616538788712e1a33aa"
+  "1.3.0":
+    url: "https://github.com/iboB/itlib/archive/v1.3.0.tar.gz"
+    sha256: "d3af2ea3cf0dae63fe1e186af79562e584bfb86bf02f358cab9675662fb9b5ef"

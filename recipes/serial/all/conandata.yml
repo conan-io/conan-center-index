@@ -1,0 +1,4 @@
+sources:
+  1.2.1:
+    sha256: 0c2a789ce485a83ed640c777a7d1cd1256976890ece4c126f93751a08643917a
+    url: https://github.com/wjwwood/serial/archive/1.2.1.tar.gz

@@ -1,0 +1,10 @@
+sources:
+  "0.8":
+    url: "https://github.com/dmlc/dlpack/archive/v0.8.tar.gz"
+    sha256: "cf965c26a5430ba4cc53d61963f288edddcd77443aa4c85ce722aaf1e2f29513"
+  "0.6":
+    url: "https://github.com/dmlc/dlpack/archive/v0.6.tar.gz"
+    sha256: "ce7715108623c011aa1e01afb32e218ddbdf66492494d7e718a78ac41010b77a"
+  "0.4":
+    url: "https://github.com/dmlc/dlpack/archive/v0.4.tar.gz"
+    sha256: "d0a533189ecd45a033b72e276fccaa2122cfd76de125e0a5e126bdea0fec2d24"

@@ -1,0 +1,24 @@
+sources:
+  "1.15.1":
+    url: "https://github.com/quickfix/quickfix/archive/v1.15.1.tar.gz"
+    sha256: "1c4322a68704526ca3d1f213e7b0dcd30e067a8815be2a79b2ab1197ef70dcf7"
+patches:
+  "1.15.1":
+    - patch_file: "patches/0001-Fix-build-for-C-17-replace-throw-.-with-EXCEPT.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-except-copy.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-condition-for-using-tr1-namespace.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-remove-tests-from-compilatin-unit-performance-and-ac.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-inc.-required-CMake-version-add-conan-basic-setup-an.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0006-manage-postgres-through-conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0007-add-support-to-static-libraries-for-non-windows-buil.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0008-manage-mysql-through-conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0009-downgrade-cmake-minimum-required.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,10 @@
+sources:
+  "6.0.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/c-6.0.0/msgpack-c-6.0.0.tar.gz"
+    sha256: "3654f5e2c652dc52e0a993e270bb57d5702b262703f03771c152bba51602aeba"
+  "5.0.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/c-5.0.0/msgpack-c-5.0.0.tar.gz"
+    sha256: "eb6d77f32dbaaae9174d96cacfe02af30bf1ea329c45018074cd95ac6e6fa6e5"
+  "4.0.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/c-4.0.0/msgpack-c-4.0.0.tar.gz"
+    sha256: "420fe35e7572f2a168d17e660ef981a589c9cbe77faa25eb34a520e1fcc032c8"

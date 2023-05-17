@@ -1,0 +1,219 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -52,14 +52,7 @@ set (LIBKEA_PACKAGE_BUGREPORT "petebunting@mac.com")
+ set (LIBKEA_PACKAGE "LibKEA")
+ set (LIBKEA_COPYRIGHT_YEAR 2013)
+ 
+-if(MSVC)
+-    # set Name of C++ library
+-    # this forces it to be libkea on Windows with VC
+-    set(LIBKEA_LIB_NAME libkea)
+-else()
+-    # set Name of C++ library
+-    set(LIBKEA_LIB_NAME kea)
+-endif()
++set(LIBKEA_LIB_NAME kea)
+ 
+ include(CMakeDependentOption)
+ # CMake global option valiable
+@@ -195,11 +188,11 @@ endif(MSVC)
+ 
+ ###############################################################################
+ # Setup configure file
+-configure_file ( "${PROJECT_HEADER_DIR}/kea-config.h.in" "${CMAKE_BINARY_DIR}/${PROJECT_HEADER_DIR}/libkea/kea-config.h" )
++configure_file ( "${PROJECT_HEADER_DIR}/kea-config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/libkea/kea-config.h" )
+ if(MSVC)
+-    configure_file ( "${PROJECT_TOOLS_DIR}/kea-config.bat.in" "${CMAKE_BINARY_DIR}/${PROJECT_BINARY_DIR}/kea-config.bat" )
++    configure_file ( "${PROJECT_TOOLS_DIR}/kea-config.bat.in" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_BINARY_DIR}/kea-config.bat" )
+ else()
+-    configure_file ( "${PROJECT_TOOLS_DIR}/kea-config.in" "${CMAKE_BINARY_DIR}/${PROJECT_BINARY_DIR}/kea-config" )
++    configure_file ( "${PROJECT_TOOLS_DIR}/kea-config.in" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_BINARY_DIR}/kea-config" )
+ endif(MSVC)
+ ###############################################################################
+ 
+@@ -213,7 +206,7 @@ endif(MSVC)
+ # Build library
+ 
+ include_directories ("${PROJECT_HEADER_DIR}")
+-include_directories ("${CMAKE_BINARY_DIR}/${PROJECT_HEADER_DIR}")
++include_directories ("${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_HEADER_DIR}")
+ include_directories(${HDF5_INCLUDE_DIRS})
+ add_subdirectory ("${PROJECT_SOURCE_DIR}")
+ if (LIBKEA_WITH_GDAL)
+@@ -234,7 +227,7 @@ if(MSVC)
+ else()
+     install (FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_BINARY_DIR}/kea-config" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+ endif(MSVC)    
+-install (FILES "${CMAKE_BINARY_DIR}/${PROJECT_HEADER_DIR}/libkea/kea-config.h" DESTINATION include/libkea)
++install (FILES "${CMAKE_CURRENT_BINARY_DIR}/include/libkea/kea-config.h" DESTINATION include/libkea)
+ ###############################################################################
+ 
+ ###############################################################################
+--- a/include/libkea/KEAAttributeTable.h
++++ b/include/libkea/KEAAttributeTable.h
+@@ -98,7 +98,7 @@ namespace kealib{
+         void   *p;
+     } VarLenFieldHDF;
+     
+-    class DllExport KEAAttributeTable
++    class KEA_EXPORT KEAAttributeTable
+     {
+     public:
+         KEAAttributeTable(KEAATTType keaAttType);
+--- a/include/libkea/KEAAttributeTableFile.h
++++ b/include/libkea/KEAAttributeTableFile.h
+@@ -43,7 +43,7 @@
+ 
+ namespace kealib{
+        
+-    class DllExport KEAAttributeTableFile : public KEAAttributeTable
++    class KEA_EXPORT KEAAttributeTableFile : public KEAAttributeTable
+     {
+     public:
+         KEAAttributeTableFile(H5::H5File *keaImgIn, const std::string &bandPathBaseIn, size_t numRowsIn, size_t chunkSizeIn, unsigned int deflateIn=KEA_DEFLATE);
+--- a/include/libkea/KEAAttributeTableInMem.h
++++ b/include/libkea/KEAAttributeTableInMem.h
+@@ -43,7 +43,7 @@
+ 
+ namespace kealib{
+        
+-    class DllExport KEAAttributeTableInMem : public KEAAttributeTable
++    class KEA_EXPORT KEAAttributeTableInMem : public KEAAttributeTable
+     {
+     public:
+         KEAAttributeTableInMem();
+--- a/include/libkea/KEACommon.h
++++ b/include/libkea/KEACommon.h
+@@ -38,15 +38,7 @@
+ 
+ #include "H5Cpp.h"
+ 
+-// mark all exported classes/functions with DllExport to have
+-// them exported by Visual Studio
+-#ifndef DllExport
+-    #ifdef _MSC_VER
+-        #define DllExport   __declspec( dllexport )
+-    #else
+-        #define DllExport
+-    #endif
+-#endif
++#include "libkea/kea_export.h"
+ 
+ // MSVC 2008 uses different names....
+ #ifdef _MSC_VER
+--- a/include/libkea/KEAException.h
++++ b/include/libkea/KEAException.h
+@@ -37,7 +37,7 @@
+ 
+ namespace kealib
+ {    
+-	class DllExport KEAException : public std::exception
++	class KEA_EXPORT KEAException : public std::exception
+ 	{
+     public:
+         KEAException() : exception() {msgs = "A KEAException has been created.";};
+@@ -49,7 +49,7 @@ namespace kealib
+         std::string msgs;
+ 	};
+     
+-    class DllExport KEAIOException : public KEAException
++    class KEA_EXPORT KEAIOException : public KEAException
+ 	{
+     public:
+         KEAIOException() : KEAException("KEAIOException has been created."){};
+@@ -58,7 +58,7 @@ namespace kealib
+         ~KEAIOException() throw() {};
+ 	};
+     
+-    class DllExport KEAATTException : public KEAException
++    class KEA_EXPORT KEAATTException : public KEAException
+ 	{
+     public:
+         KEAATTException() : KEAException("KEAATTException has been created."){};
+--- a/include/libkea/KEAImageIO.h
++++ b/include/libkea/KEAImageIO.h
+@@ -45,7 +45,7 @@
+ 
+ namespace kealib{
+         
+-    class DllExport KEAImageIO
++    class KEA_EXPORT KEAImageIO
+     {
+     public:
+         KEAImageIO();
+@@ -171,7 +171,7 @@ namespace kealib{
+ }
+ 
+ // returns the current KEA version as a double
+-extern "C" DllExport double get_kealibversion();
++extern "C" KEA_EXPORT double get_kealibversion();
+ 
+ #endif
+ 
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -30,34 +30,37 @@ source_group("include_kea" FILES ${LIBKEA_H})
+ ###############################################################################
+ # Build, link and install library
+ add_library(${LIBKEA_LIB_NAME} ${LIBKEA_CPP} ${LIBKEA_H} )
+-target_link_libraries(${LIBKEA_LIB_NAME} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
++target_link_libraries(${LIBKEA_LIB_NAME} ${CONAN_LIBS})
+ 
+-if(BUILD_SHARED_LIBS)
+-    SET_TARGET_PROPERTIES(${LIBKEA_LIB_NAME}
+-            PROPERTIES
+-            SOVERSION ${LIBKEA_VERSION_MAJOR}.${LIBKEA_VERSION_MINOR}
+-            VERSION ${LIBKEA_VERSION}
+-            CLEAN_DIRECT_OUTPUT 1)
+-else()
+-    SET_TARGET_PROPERTIES(${LIBKEA_LIB_NAME}
+-            PROPERTIES
+-            OUTPUT_NAME "${LIBKEA_LIB_NAME}"
+-            PREFIX "lib"
+-            VERSION ${LIBKEA_VERSION}
+-            CLEAN_DIRECT_OUTPUT 1)
++include(GenerateExportHeader)
++generate_export_header(${LIBKEA_LIB_NAME}
++  EXPORT_MACRO_NAME KEA_EXPORT
++  EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/include/libkea/kea_export.h
++)
++target_include_directories(${LIBKEA_LIB_NAME} PUBLIC
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
++  $<INSTALL_INTERFACE:include>
++)
++set_target_properties(${LIBKEA_LIB_NAME}
++  PROPERTIES
++    CXX_VISIBILITY_PRESET hidden
++    VISIBILITY_INLINES_HIDDEN 1
++    PREFIX "lib"
++    IMPORT_PREFIX "lib"
++    SOVERSION ${LIBKEA_VERSION_MAJOR}.${LIBKEA_VERSION_MINOR}
++    VERSION ${LIBKEA_VERSION}
++)
++if(MSVC AND NOT BUILD_SHARED_LIBS)
++  set_target_properties(${LIBKEA_LIB_NAME} PROPERTIES OUTPUT_NAME "libkea")
+ endif()
+ add_library(Kealib INTERFACE)
+ target_link_libraries(Kealib INTERFACE "${LIBKEA_LIB_NAME}")
+-target_include_directories(Kealib INTERFACE
+-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+-                             $<INSTALL_INTERFACE:include/kealib>)
+ ###############################################################################
+ 
+ ###############################################################################
+ # Testing
+ # exe needs to be in 'src' otherwise it doesn't work
+-add_executable (test1 ${CMAKE_SOURCE_DIR}/src/tests/test1.cpp)
+-target_link_libraries (test1 ${LIBKEA_LIB_NAME})
+ 
+ ###############################################################################
+ # Set target properties
+@@ -76,5 +79,6 @@ install (TARGETS ${LIBKEA_LIB_NAME}
+           RUNTIME DESTINATION bin
+           LIBRARY DESTINATION lib
+           ARCHIVE DESTINATION lib)
+-install (FILES ${LIBKEA_H} DESTINATION include/libkea)
++install (FILES ${LIBKEA_H} ${CMAKE_CURRENT_BINARY_DIR}/include/libkea/kea_export.h
++          DESTINATION include/libkea)
+ ###############################################################################

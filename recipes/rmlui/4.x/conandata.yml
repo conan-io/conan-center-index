@@ -1,0 +1,37 @@
+sources:
+  "4.0":
+    sha256: "39b542e326d5ff2e3dd1782080cc5de2d21d15f70b9321714938824b2b37bc30"
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/4.0.zip"
+  "4.1":
+    sha256: "85e934e8ec6fd06c337c1e0e42880bf92ac2a4c326fb69eb76e09699450ca708"
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/4.1.zip"
+  "4.2":
+    sha256: "56917a27c5389b2a46018b19ffed117ea6f191461d22dc213d362bcd6abc77a1"
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/4.2.zip"
+  "4.3":
+    sha256: "5b378647137e74b7c89dfebb0ea6f173bc83372f7268104b99c420cfc9652a01"
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/4.3.zip"
+  "4.4":
+    url: "https://github.com/mikke89/RmlUi/archive/4.4.tar.gz"
+    sha256: "9e45176e47154616253c4e5c78368f4af4b4379278b73066c3fb5a338f9c655a"
+patches:
+  "4.0":
+    - patch_file: "patches/4.0-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"
+  "4.1":
+    - patch_file: "patches/4.1-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"
+  "4.2":
+    - patch_file: "patches/4.2-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"
+  "4.3":
+    - patch_file: "patches/4.3-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"
+  "4.4":
+    - patch_file: "patches/4.4-fix-cmake-targets-and-config.patch"
+      patch_description: "Make external libraries work when provided by conan and remove the generation of a config file"
+      patch_type: "conan"

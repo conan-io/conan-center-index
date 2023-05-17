@@ -1,0 +1,11 @@
+versions:
+  "5.2.3":
+    folder: all
+  "5.2.2":
+    folder: all
+  "5.2.1":
+    folder: all
+  "5.2.0":
+    folder: all
+  "5.1.0":
+    folder: all

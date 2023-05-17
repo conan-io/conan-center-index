@@ -1,0 +1,10 @@
+sources:
+  "2.8.3":
+    url: "https://github.com/taocpp/PEGTL/archive/2.8.3.tar.gz"
+    sha256: "88b8e4ded6ea1f3f2223cc3e37072e2db1e123b90d36c309816341ae9d966723"
+  "2.8.2":
+    url: "https://github.com/taocpp/PEGTL/archive/2.8.2.tar.gz"
+    sha256: "1d7db20502125a75fbb583c7020038d4faeb6812de504147b23b3db4ef329ca3"
+  "2.8.1":
+    url: "https://github.com/taocpp/PEGTL/archive/2.8.1.tar.gz"
+    sha256: "d23f81a60896cdd8c2ce0d1b31737fe0e1137915ba3fdb4f366ae1a997a1bce6"

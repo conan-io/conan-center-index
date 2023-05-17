@@ -1,0 +1,7 @@
+sources:
+  "cci.20220923":
+    url: https://github.com/GIPdA/runtimeqml/archive/3ae5dadcf6548a2e59e83c21d84fd50575df79bf.zip
+    sha256: "18bf63ab2692e6cb8ed6e0dbfcd2390dc65769eaed43b66c4da9dd7a55598603"
+  "cci.20211220":
+    url: https://github.com/GIPdA/runtimeqml/archive/ac0cbfc49ae215dd0df5ac8ecb79ca7008de5486.zip
+    sha256: "57c6d50f0fd281c0984daae65f3559942f58d11de8ff406c150d54fd7ff0d076"

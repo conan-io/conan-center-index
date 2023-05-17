@@ -1,0 +1,18 @@
+sources:
+  "1.16":
+    url: "https://github.com/civetweb/civetweb/archive/v1.16.tar.gz"
+    sha256: "f0e471c1bf4e7804a6cfb41ea9d13e7d623b2bcc7bc1e2a4dd54951a24d60285"
+  "1.15":
+    url: "https://github.com/civetweb/civetweb/archive/v1.15.tar.gz"
+    sha256: "90a533422944ab327a4fbb9969f0845d0dba05354f9cacce3a5005fa59f593b9"
+  "1.14":
+    url: "https://github.com/civetweb/civetweb/archive/v1.14.tar.gz"
+    sha256: "d02d7ab091c8b4edf21fc13a03c6db08a8a8b8605e35e0073251b9d88443c653"
+  "1.13":
+    url: "https://github.com/civetweb/civetweb/archive/v1.13.tar.gz"
+    sha256: "a7ccc76c2f1b5f4e8d855eb328ed542f8fe3b882a6da868781799a98f4acdedc"
+patches:
+  "1.14":
+    - patch_file: "patches/0001-fix-install-bundle.patch"
+  "1.13":
+    - patch_file: "patches/0001-fix-install-bundle.patch"

@@ -1,0 +1,11 @@
+--- a/libmp3lame/util.c
++++ b/libmp3lame/util.c
+@@ -911,7 +911,7 @@
+         mask &= ~(_EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID);
+         _FPU_SETCW(mask);
+     }
+-# elif defined(__linux__)
++# elif defined(__linux__) && !defined(__ANDROID__)
+     {
+
+ #  include <fpu_control.h>

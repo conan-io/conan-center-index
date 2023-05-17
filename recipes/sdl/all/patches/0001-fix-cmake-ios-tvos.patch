@@ -1,0 +1,26 @@
+see https://github.com/libsdl-org/SDL/commit/471d3c363e654c7ad10782f50cb47e639c0646c3
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -131,6 +131,8 @@ elseif(APPLE)
+     set(MACOSX TRUE)
+   elseif(CMAKE_SYSTEM_NAME MATCHES ".*tvOS.*")
+     set(TVOS TRUE)
++  elseif(CMAKE_SYSTEM_NAME MATCHES ".*iOS.*")
++    set(IOS TRUE)
+   endif()
+   # TODO: iOS?
+ elseif(CMAKE_SYSTEM_NAME MATCHES "BeOS.*")
+@@ -1668,7 +1670,11 @@ elseif(APPLE)
+     message_error("SDL_FILE must be enabled to build on MacOS X")
+   endif()
+ 
+-  file(GLOB MISC_SOURCES ${SDL2_SOURCE_DIR}/src/misc/macosx/*.m)
++  if(IOS OR TVOS)
++    file(GLOB MISC_SOURCES ${SDL2_SOURCE_DIR}/src/misc/ios/*.m)
++  else()
++    file(GLOB MISC_SOURCES ${SDL2_SOURCE_DIR}/src/misc/macosx/*.m)
++  endif()
+   set(SOURCE_FILES ${SOURCE_FILES} ${MISC_SOURCES})
+   set(HAVE_SDL_MISC TRUE)
+ 

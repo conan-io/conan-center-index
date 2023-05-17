@@ -1,0 +1,29 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -80,15 +80,11 @@ file(MAKE_DIRECTORY "${LASZIP_OUTPUT_BIN_DIR}")
+ # per http://www.cmake.org/Wiki/CMake_RPATH_handling
+ SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+ SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+ IF (APPLE)
+     SET(MACOSX_RPATH ON)
+ endif()
+ LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
+     "${CMAKE_INSTALL_PREFIX}/${LASZIP_LIB_INSTALL_DIR}" isSystemDir)
+-IF("${isSystemDir}" STREQUAL "-1")
+-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LASZIP_LIB_INSTALL_DIR}")
+-ENDIF("${isSystemDir}" STREQUAL "-1")
+ 
+ # wipe lib/ drectory on clean. It will have plugins that could be out of date
+ # in the next build
+--- a/cmake/macros.cmake
++++ b/cmake/macros.cmake
+@@ -71,8 +71,6 @@ macro(LASZIP_ADD_LIBRARY _name)
+         LIBRARY DESTINATION ${LASZIP_LIB_INSTALL_DIR}
+         ARCHIVE DESTINATION ${LASZIP_LIB_INSTALL_DIR})
+     if (APPLE)
+-        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR
+-            "@executable_path/../lib")
+     endif()
+ endmacro(LASZIP_ADD_LIBRARY)
+ 

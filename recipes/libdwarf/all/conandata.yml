@@ -1,0 +1,19 @@
+sources:
+  "0.5.0":
+    url: "https://www.prevanders.net/libdwarf-0.5.0.tar.xz"
+    sha256: "11fa822c60317fa00e1a01a2ac9e8388f6693e8662ab72d352c5f50c7e0112a9"
+  "20191104":
+    url: "https://www.prevanders.net/libdwarf-20191104.tar.gz"
+    sha256: "45f50a966314421b7dab525859853616df6c9680f0ccf2f44b030c505236eaba"
+patches:
+  "0.5.0":
+    - patch_file: "patches/0.5.0-0001-fix-cmake.patch"
+      patch_description: "use cci package, remove lib64/bin64 install folders"
+      patch_type: "conan"
+    - patch_file: "patches/0.5.0-0001-fix-DW_API.patch"
+      patch_description: "fix DW_API definition"
+      patch_type: "portability"
+  "20191104":
+    - patch_file: "patches/20191104-0001-patch.patch"
+      patch_description: "use cci package, remove lib64/bin64 install folders"
+      patch_type: "conan"

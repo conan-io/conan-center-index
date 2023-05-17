@@ -1,0 +1,25 @@
+sources:
+  "2.0.0":
+    url: "https://github.com/vahancho/erkir/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "98d095adcf0f2f11e3ba345bd5bbe890568cde69de9680b2c2a424f0008453ac"
+  "1.0.0":
+    url: "https://github.com/vahancho/erkir/archive/refs/tags/1.0.0.tar.gz"
+    sha256: "0bc5122fe2fef0f9036de275483af7f8adb947f6e8dd63fc18ac085ef31e9421"
+patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0001-remove-specify-architecture.patch"
+      patch_description: "fix supported architectures limited to x86/x86_64"
+      patch_type: "conan"
+    - patch_file: "patches/2.0.0-0002-fix-cmake.patch"
+      patch_description: "disable shared and fPIC options"
+      patch_type: "conan"
+    - patch_file: "patches/2.0.0-0003-fix-erkir_export.patch"
+      patch_description: "define ERKIR_EXPORT as empty on static build"
+      patch_type: "conan"
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-remove-testing.patch"
+      patch_description: "stop executing test codes"
+      patch_type: "conan"
+    - patch_file: "patches/1.0.0-0002-export-symbols.patch"
+      patch_description: "export all symbols on windows"
+      patch_type: "backport"

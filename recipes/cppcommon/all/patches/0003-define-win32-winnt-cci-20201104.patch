@@ -1,0 +1,21 @@
+The change present here is handled upstream by this CMake module:
+
+https://github.com/chronoxor/CppCMakeScripts/blob/1.0.0.0/SetPlatformFeatures.cmake
+
+Even if it sets _WIN32_WINNT to _WIN32_WINNT_WIN10, here a less strict definiton is chosen (_WIN32_WINNT_VISTA).
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ad3d53aa8..d4dcbf8b5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -74,6 +74,10 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
+ list(APPEND INSTALL_TARGETS cppcommon)
+ list(APPEND LINKLIBS cppcommon)
+ 
++if(WIN32 AND NOT MSVC)
++  target_compile_definitions (cppcommon PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_VISTA)
++endif()
++
+ # Additional module components: benchmarks, examples, plugins, tests, tools and install
+ if(NOT CPPCOMMON_MODULE)
+ 

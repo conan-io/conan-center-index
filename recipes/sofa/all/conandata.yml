@@ -1,0 +1,13 @@
+sources:
+  "20210512":
+    url: "http://www.iausofa.org/2021_0512_C/sofa_c-20210512.tar.gz"
+    sha256: "3362baba47ce965af1fc6a3141052a0e1f643d186e8deca83df1ea97455bb2fd"
+  "20210125_a":
+    url: "http://www.iausofa.org/2021_0125_C/sofa_c-20210125_a.tar.gz"
+    sha256: "5eef8e167cfa71ebe0367abf8b3d73a0b6d264cff5bf35e0e7c733cc5b09d51d"
+  "20200721":
+    url: "http://www.iausofa.org/2020_0721_C/sofa_c-20200721.tar.gz"
+    sha256: "b10453f20567341171a455e8e1c70a2a7d4a61864aebf19f6fc746734a22efae"
+  "20190722":
+    url: "http://www.iausofa.org/2019_0722_C/sofa_c-20190722.tar.gz"
+    sha256: "a7063a140fdc78909f4d5ddf6b30143f9f60bfed7d5141047072515f51fa8647"

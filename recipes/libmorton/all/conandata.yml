@@ -1,0 +1,22 @@
+sources:
+  "0.2.11":
+    url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.11.tar.gz"
+    sha256: "3650ce8eb3deee28bc580e5bb1594fe07f7a33aa2531490bf09b5ab8207d55f6"
+  "0.2.10":
+    url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.10.tar.gz"
+    sha256: "5f4a8dbf350222b0bec35ad1bee6b76fa22e16ea364e1e80ca47d8f5a7210d6f"
+  "0.2.9":
+    url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.9.tar.gz"
+    sha256: "a3c86360a6cb97bfcad60216d44f30870e9d20c6f62610c4617a74bf678c9cc8"
+  "0.2.7":
+    url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.7.tar.gz"
+    sha256: "02bf640732750a5db638991b9f63049252f9656ef52a00d30d2a90df542b9ecf"
+  "0.2.6":
+    url: "https://github.com/Forceflow/libmorton/archive/v0.2.6.tar.gz"
+    sha256: "466e31af19b49399426a860107f7fe9336ee784e46e49070959b3ac300f0d90d"
+  "0.2.5":
+    url: "https://github.com/Forceflow/libmorton/archive/v0.2.5.tar.gz"
+    sha256: "744c64e598a753928b7b643347ab36d89ddc36e786453028238aa8f3515399f6"
+patches:
+  "0.2.5":
+    - patch_file: "patches/missing-includes.patch"

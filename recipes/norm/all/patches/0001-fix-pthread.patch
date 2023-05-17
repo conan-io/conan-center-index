@@ -1,0 +1,18 @@
+--- a/protolib/CMakeLists.txt
++++ b/protolib/CMakeLists.txt
+@@ -92,6 +92,7 @@ if(LibXml2_FOUND)
+ 	list(APPEND PUBLIC_HEADER_FILES include/protoXml.h)
+ 	list(APPEND COMMON_SOURCE_FILES ${COMMON}/protoXml.cpp)
+ endif()
++list(APPEND PLATFORM_LIBS Threads::Threads)
+ 
+ if(PROTOKIT_ENABLE_WX)
+         find_package(wxWidgets REQUIRED COMPONENTS core base)
+@@ -203,7 +204,6 @@ if(MSVC)
+ 	list(APPEND PLATFORM_FLAGS /EHsc)
+ elseif(UNIX)
+ 	list(APPEND PLATFORM_DEFINITIONS UNIX _FILE_OFFSET_BITS=64)
+-	list(APPEND PLATFORM_LIBS pthread)
+ 	list(APPEND PLATFORM_SOURCE_FILES 	src/unix/unixNet.cpp 
+ 										src/unix/unixSerial.cpp 
+ 										src/unix/unixVif.cpp

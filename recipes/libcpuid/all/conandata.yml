@@ -1,0 +1,14 @@
+sources:
+  "0.5.1":
+    url: "https://github.com/anrieff/libcpuid/archive/v0.5.1.tar.gz"
+    sha256: "36d62842ef43c749c0ba82237b10ede05b298d79a0e39ef5fd1115ba1ff8e126"
+  "0.5.0":
+    url: "https://github.com/anrieff/libcpuid/archive/v0.5.0.tar.gz"
+    sha256: "49893f31475510aa0ebe2ad3a29fad95e2a592cc5f48451c95271c536f89a157"
+patches:
+  "0.5.1":
+    - patch_file: "patches/0.5.0-cmake-fixes.patch"
+      base_path: "source_subfolder"
+  "0.5.0":
+    - patch_file: "patches/0.5.0-cmake-fixes.patch"
+      base_path: "source_subfolder"

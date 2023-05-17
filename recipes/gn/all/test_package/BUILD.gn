@@ -1,0 +1,22 @@
+
+executable("test_package") {
+    sources = ["test_package.cpp"]
+
+    deps = [
+        ":test_shared",
+        ":test_static",
+    ]
+}
+
+shared_library("test_shared") {
+    defines = ["TEST_SHARED_BUILD"]
+    sources = [
+        "test_shared.cpp",
+    ]
+}
+
+static_library("test_static") {
+    sources = [
+        "test_static.cpp",
+    ]
+}

@@ -1,0 +1,22 @@
+--- util/BUILD.gn
++++ util/BUILD.gn
+@@ -662,8 +662,8 @@ crashpad_static_library("net") {
+         deps += [ "//third_party/boringssl" ]
+       } else {
+         libs = [
+-          "crypto",
+           "ssl",
++          "crypto",
+         ]
+       }
+     }
+@@ -708,8 +708,8 @@ if (!crashpad_is_android && !crashpad_is_ios) {
+         deps += [ "//third_party/boringssl" ]
+       } else {
+         libs = [
+-          "crypto",
+           "ssl",
++          "crypto",
+         ]
+       }
+     }

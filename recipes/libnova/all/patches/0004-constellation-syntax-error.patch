@@ -1,0 +1,20 @@
+--- a/src/libnova/constellation.h
++++ b/src/libnova/constellation.h
+@@ -19,6 +19,8 @@
+ #ifndef _LN_CONSTELLATION_H
+ #define _LN_CONSTELLATION_H
+ 
++#include <libnova/ln_types.h>
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+@@ -31,7 +33,7 @@ extern "C" {
+ * \ingroup constellations
+ * \brief Returns name of the constellation at the given position
+ */
+-const char* LIBNOVA_EXPORT ln_get_constellation(struct ln_equ_posn *position);
++const char LIBNOVA_EXPORT *ln_get_constellation(struct ln_equ_posn *position);
+ 
+ #ifdef __cplusplus
+ };

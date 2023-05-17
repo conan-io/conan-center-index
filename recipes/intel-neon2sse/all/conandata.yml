@@ -1,0 +1,4 @@
+sources:
+  "cci.20210225":
+    url: "https://github.com/intel/ARM_NEON_2_x86_SSE/archive/a1652fd5253afbf3e39357b012974f93511f6108.tar.gz"
+    sha256: "a795f7e20b7bc4cec4a23bc54af2af3333c0c4b84c4fe2479642aa391e35844f"

@@ -1,0 +1,28 @@
+From 74b4fbb92b654a9483ef3ff64b708fda46bd7b2b Mon Sep 17 00:00:00 2001
+From: Falko Axmann <code@falkoaxmann.de>
+Date: Sun, 12 Jan 2020 12:43:00 +0100
+Subject: [PATCH] Handle ASAN flag properly in CMakeLists.txt
+
+Because of a typo ("else" instead of "elseif"), the
+BUILD_WITH_ADDRESS_SANITIZE option was ignored and on
+Linux, anyrpc would always be built with ASAN enabled.
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cfeb604..87991bb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -63,7 +63,7 @@ if (MSVC)
+     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc" )
+ elseif (MINGW)
+     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -U__STRICT_ANSI__" )
+-else (BUILD_WITH_ADDRESS_SANITIZE)
++elseif (BUILD_WITH_ADDRESS_SANITIZE)
+     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer" )
+     SET( ASAN_LIBRARY asan )
+ endif ()
+-- 
+2.36.1.windows.1
+

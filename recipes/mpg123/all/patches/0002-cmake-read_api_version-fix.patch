@@ -1,0 +1,10 @@
+--- a/ports/cmake/cmake/read_api_version.cmake
++++ b/ports/cmake/cmake/read_api_version.cmake
+@@ -1,6 +1,6 @@
+ function(read_api_version project_version api_version outapi_version synapi_version )
+ 
+-    file( READ "${CMAKE_SOURCE_DIR}/../../configure.ac" configure_ac )
++    file( READ "${CMAKE_CURRENT_SOURCE_DIR}/../../configure.ac" configure_ac )
+ 
+     string( REGEX MATCH "AC_INIT\\(\\[mpg123\\], \\[([0-9\\.]+)" result ${configure_ac} )
+     set( ${project_version} ${CMAKE_MATCH_1} PARENT_SCOPE )

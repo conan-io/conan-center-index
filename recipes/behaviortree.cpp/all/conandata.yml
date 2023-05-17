@@ -1,0 +1,28 @@
+sources:
+  "4.0.1":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.0.1.tar.gz"
+    sha256: "71544f72abea8e8c246b016b7e8d87d96f731c8aa96698058d8e69d40e56f9b9"
+  "3.7.0":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/3.7.0.tar.gz"
+    sha256: "ab0d8ac1a0df4dd43cf45da8a784bab7fdedf711bd0e227f7ed071f79b0c7b5c"
+  "3.5.6":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/3.5.6.tar.gz"
+    sha256: "543c428602b5acb7c5666aee34feb532e18ce7200870a79b23ff9aed17ee84c4"
+patches:
+  "4.0.1":
+    - patch_file: "patches/4.0.1-0001-remove-fpic.patch"
+    - patch_file: "patches/4.0.1-0002-find-zmq.patch"
+    - patch_file: "patches/4.0.1-0003-no-werror.patch"
+    - patch_file: "patches/3.5.6-0005-stdc-format.patch"
+    - patch_file: "patches/3.5.6-0005-stdc-format.patch"
+  "3.7.0":
+    - patch_file: "patches/3.7.0-0001-remove-fpic.patch"
+    - patch_file: "patches/3.7.0-0002-find-zmq.patch"
+    - patch_file: "patches/3.7.0-0003-no-werror.patch"
+    - patch_file: "patches/3.5.6-0005-stdc-format.patch"
+  "3.5.6":
+    - patch_file: "patches/3.5.6-0001-remove-fpic.patch"
+    - patch_file: "patches/3.5.6-0002-find-zmq.patch"
+    - patch_file: "patches/3.5.6-0003-no-werror.patch"
+    - patch_file: "patches/3.5.6-0004-win-sigaction.patch"
+    - patch_file: "patches/3.5.6-0005-stdc-format.patch"

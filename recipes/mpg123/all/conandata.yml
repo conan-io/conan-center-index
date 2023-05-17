@@ -1,0 +1,25 @@
+sources:
+  "1.31.2":
+    url:
+      - "https://sourceforge.net/projects/mpg123/files/mpg123/1.31.2/mpg123-1.31.2.tar.bz2"
+      - "https://www.mpg123.de/download/mpg123-1.31.2.tar.bz2"
+    sha256: "b17f22905e31f43b6b401dfdf6a71ed11bb7d056f68db449d70b9f9ae839c7de"
+  "1.29.3":
+    url:
+      - "https://sourceforge.net/projects/mpg123/files/mpg123/1.29.3/mpg123-1.29.3.tar.bz2"
+      - "https://www.mpg123.de/download/mpg123-1.29.3.tar.bz2"
+    sha256: "963885d8cc77262f28b77187c7d189e32195e64244de2530b798ddf32183e847"
+  "1.26.4":
+    url:
+      - "https://sourceforge.net/projects/mpg123/files/mpg123/1.26.4/mpg123-1.26.4.tar.bz2"
+      - "https://www.mpg123.de/download/mpg123-1.26.4.tar.bz2"
+    sha256: "081991540df7a666b29049ad870f293cfa28863b36488ab4d58ceaa7b5846454"
+
+patches:
+  "1.31.2":
+    - patch_file: "patches/0001-msvc-export-symbols.patch"
+  "1.26.4":
+    - patch_file: "patches/0001-msvc-export-symbols.patch"
+  "1.29.3":
+    - patch_file: "patches/0001-msvc-export-symbols.patch"
+    - patch_file: "patches/0002-cmake-read_api_version-fix.patch"

@@ -1,0 +1,40 @@
+sources:
+  "2.5.0":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_5_0/expat-2.5.0.tar.xz"
+    sha256: "ef2420f0232c087801abf705e89ae65f6257df6b7931d37846a193ef2e8cdcbe"
+  "2.4.9":
+    sha256: "6e8c0728fe5c7cd3f93a6acce43046c5e4736c7b4b68e032e9350daa0efc0354"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_9/expat-2.4.9.tar.xz"
+  "2.4.8":
+    sha256: "f79b8f904b749e3e0d20afeadecf8249c55b2e32d4ebb089ae378df479dcaf25"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_8/expat-2.4.8.tar.xz"
+  "2.4.7":
+    sha256: "9875621085300591f1e64c18fd3da3a0eeca4a74f884b9abac2758ad1bd07a7d"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_7/expat-2.4.7.tar.xz"
+  "2.4.6":
+    sha256: "de55794b7a9bc214852fdc075beaaecd854efe1361597e6268ee87946951289b"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_6/expat-2.4.6.tar.xz"
+  "2.4.5":
+    sha256: "f2af8fc7cdc63a87920da38cd6d12cb113c3c3a3f437495b1b6541e0cff32579"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_5/expat-2.4.5.tar.xz"
+  "2.4.4":
+    sha256: "b5d25d6e373351c2ed19b562b4732d01d2589ac8c8e9e7962d8df1207cc311b8"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_4/expat-2.4.4.tar.xz"
+  "2.4.3":
+    sha256: "b1f9f1b1a5ebb0acaa88c9ff79bfa4e145823b78aa5185e5c5d85f060824778a"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_3/expat-2.4.3.tar.xz"
+  "2.4.2":
+    sha256: "a2fb692e8e610406168296f25ba500ae8ce22cb4c8947a8689894d744b6deb02"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_2/expat-2.4.2.tar.gz"
+  "2.4.1":
+    sha256: "a00ae8a6b96b63a3910ddc1100b1a7ef50dc26dceb65ced18ded31ab392f132b"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_1/expat-2.4.1.tar.gz"
+  "2.3.0":
+    sha256: "89df123c62f2c2e2b235692d9fe76def6a9ab03dbe95835345bf412726eb1987"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_3_0/expat-2.3.0.tar.gz"
+  "2.2.10":
+    sha256: "bf42d1f52371d23684de36cc6d2f0f1acd02de264d1105bdc17792bbeb7e7ceb"
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.gz"
+patches:
+  "2.3.0":
+    - patch_file: "patches/0001-2.3.0-relax-vs-restriction.patch"

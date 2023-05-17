@@ -1,0 +1,156 @@
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/Binder.h b/Data/MySQL/include/Poco/Data/MySQL/Binder.h
+index 82fa617..dd7bf60 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/Binder.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/Binder.h
+@@ -22,7 +22,7 @@
+ #include "Poco/Data/AbstractBinder.h"
+ #include "Poco/Data/LOB.h"
+ #include "Poco/Data/MySQL/MySQLException.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/MySQL.h b/Data/MySQL/include/Poco/Data/MySQL/MySQL.h
+index 6ddcd39..7f4cd22 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/MySQL.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/MySQL.h
+@@ -19,7 +19,7 @@
+ 
+ 
+ #include "Poco/Foundation.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ //
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/MySQLException.h b/Data/MySQL/include/Poco/Data/MySQL/MySQLException.h
+index 67692df..2d28da3 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/MySQLException.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/MySQLException.h
+@@ -20,7 +20,7 @@
+ 
+ #include "Poco/Data/MySQL/MySQL.h"
+ #include "Poco/Data/DataException.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ #include <typeinfo>
+ #include <string>
+ 
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/ResultMetadata.h b/Data/MySQL/include/Poco/Data/MySQL/ResultMetadata.h
+index 3a45387..9361dcf 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/ResultMetadata.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/ResultMetadata.h
+@@ -19,7 +19,7 @@
+ 
+ 
+ #include "Poco/Data/MetaColumn.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ #include <vector>
+ 
+ 
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/SessionHandle.h b/Data/MySQL/include/Poco/Data/MySQL/SessionHandle.h
+index 4f65ae5..f9df7ad 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/SessionHandle.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/SessionHandle.h
+@@ -19,7 +19,7 @@
+ 
+ 
+ #include "Poco/Data/MySQL/MySQLException.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/StatementExecutor.h b/Data/MySQL/include/Poco/Data/MySQL/StatementExecutor.h
+index 6767b68..55f0991 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/StatementExecutor.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/StatementExecutor.h
+@@ -19,7 +19,7 @@
+ 
+ 
+ #include "Poco/Data/MySQL/MySQLException.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/include/Poco/Data/MySQL/Utility.h b/Data/MySQL/include/Poco/Data/MySQL/Utility.h
+index 79c13c3..4fba2c9 100644
+--- a/Data/MySQL/include/Poco/Data/MySQL/Utility.h
++++ b/Data/MySQL/include/Poco/Data/MySQL/Utility.h
+@@ -20,7 +20,7 @@
+ 
+ #include "Poco/Data/MySQL/MySQL.h"
+ #include "Poco/Data/Session.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/src/Connector.cpp b/Data/MySQL/src/Connector.cpp
+index b90abab..43e2432 100644
+--- a/Data/MySQL/src/Connector.cpp
++++ b/Data/MySQL/src/Connector.cpp
+@@ -16,7 +16,7 @@
+ #include "Poco/Data/MySQL/SessionImpl.h"
+ #include "Poco/Data/SessionFactory.h"
+ #include "Poco/Exception.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/src/MySQLException.cpp b/Data/MySQL/src/MySQLException.cpp
+index bffdaae..d8fe137 100644
+--- a/Data/MySQL/src/MySQLException.cpp
++++ b/Data/MySQL/src/MySQLException.cpp
+@@ -18,7 +18,7 @@
+ 
+ 
+ #include "Poco/Data/MySQL/MySQLException.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ #include <stdio.h>
+ 
+ 
+diff --git a/Data/MySQL/src/StatementExecutor.cpp b/Data/MySQL/src/StatementExecutor.cpp
+index b7e8dbc..d1b512d 100644
+--- a/Data/MySQL/src/StatementExecutor.cpp
++++ b/Data/MySQL/src/StatementExecutor.cpp
+@@ -14,7 +14,7 @@
+ 
+ #include "Poco/Data/MySQL/StatementExecutor.h"
+ #include "Poco/Format.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/src/Utility.cpp b/Data/MySQL/src/Utility.cpp
+index 84e5cfc..b711901 100644
+--- a/Data/MySQL/src/Utility.cpp
++++ b/Data/MySQL/src/Utility.cpp
+@@ -15,7 +15,7 @@
+ 
+ 
+ #include "Poco/Data/MySQL/Utility.h"
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ 
+ 
+ namespace Poco {
+diff --git a/Data/MySQL/testsuite/src/SQLExecutor.cpp b/Data/MySQL/testsuite/src/SQLExecutor.cpp
+index 27beb6f..1987659 100644
+--- a/Data/MySQL/testsuite/src/SQLExecutor.cpp
++++ b/Data/MySQL/testsuite/src/SQLExecutor.cpp
+@@ -29,7 +29,7 @@
+ #include <Winsock2.h>
+ #endif
+ 
+-#include <mysql/mysql.h>
++#include <mysql.h>
+ #include <iostream>
+ #include <limits>
+ 

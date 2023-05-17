@@ -1,0 +1,32 @@
+sources:
+  "2.2.7.0":
+    url: "https://github.com/OpenImageIO/oiio/archive/Release-2.2.7.0.tar.gz"
+    sha256: "857ac83798d6d2bda5d4d11a90618ff19486da2e5a4c4ff022c5976b5746fe8c"
+  "2.2.18.0":
+    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.2.18.0.tar.gz"
+    sha256: "72597619f09b60cc2afc18f378b40fbec62701112957f43cff162dd9a52a26ce"
+  "2.3.7.2":
+    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.3.7.2.tar.gz"
+    sha256: "829c05d17610f1156c2a777310f4709b81f3a302fd11e3999ea4a865a5b4a5d3"
+  "2.4.7.1":
+    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.4.7.1.tar.gz"
+    sha256: "fd298f71e44c6776863db4b37c4a1388dba0d2eb37378afea95ab07a7cd6ecd4"
+patches:
+  "2.2.7.0":
+    - patch_file: "patches/2.2.7.0-cmake-targets.patch"
+      base_path: "source_subfolder"
+  "2.2.18.0":
+    - patch_file: "patches/2.2.18.0-cmake-targets.patch"
+      base_path: "source_subfolder"
+  "2.3.7.2":
+    - patch_file: "patches/2.3.7.2-cmake-targets.patch"
+      base_path: "source_subfolder"
+  "2.4.7.1":
+    - patch_file: "patches/2.4.7.1-cmake-targets.patch"
+      base_path: "source_subfolder"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.7.1-fix-msvc2017.patch"
+      base_path: "source_subfolder"
+      patch_description: "Fix compile error with MSVC 2017"
+      patch_type: "official"

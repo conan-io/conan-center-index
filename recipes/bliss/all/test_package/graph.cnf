@@ -1,0 +1,8 @@
+c An example graph.
+p edge 4 5
+n 2 1
+e 1 2
+e 4 1
+e 2 3
+e 2 4
+e 3 4

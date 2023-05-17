@@ -1,0 +1,45 @@
+versions:
+  "1.28.0":
+    folder: all
+  "1.27.0":
+    folder: all
+  "1.26.0":
+    folder: all
+  "1.24.0":
+    folder: all
+  "1.23.0":
+    folder: all
+  "1.22.1":
+    folder: all
+  "1.22.0":
+    folder: all
+  "1.21.0":
+    folder: all
+  "1.20.0":
+    folder: all
+  "1.19.2":
+    folder: all
+  "1.19.1":
+    folder: all
+  "1.19.0":
+    folder: all
+  "1.18.2":
+    folder: all
+  "1.18.1":
+    folder: all
+  "1.18.0":
+    folder: all
+  "1.17.0":
+    folder: all
+  "1.16.1":
+    folder: all
+  "1.16.0":
+    folder: all
+  "1.14.1":
+    folder: all
+  "1.14.0":
+    folder: all
+  "1.13.0":
+    folder: all
+  "1.12.2":
+    folder: all

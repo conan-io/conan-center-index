@@ -1,0 +1,11 @@
+--- lua/lua_ucl.c
++++ lua/lua_ucl.c
+@@ -28,7 +28,7 @@
+ #include "ucl.h"
+ #include "ucl_internal.h"
+ #include "lua_ucl.h"
+-#include <strings.h>
++#include <string.h>
+ 
+ /***
+  * @module ucl

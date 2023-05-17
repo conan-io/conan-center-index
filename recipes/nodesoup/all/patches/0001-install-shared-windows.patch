@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -31,7 +31,7 @@
+   TARGETS nodesoup
+   EXPORT nodesoup-targets
+   LIBRARY DESTINATION lib
+-  ARCHIVE DESTINATION lib
++  ARCHIVE DESTINATION lib RUNTIME DESTINATION bin
+   INCLUDES
+   DESTINATION include
+   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nodesoup)

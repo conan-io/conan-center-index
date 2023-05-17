@@ -1,0 +1,12 @@
+sources:
+  "1.1":
+    url: "https://github.com/dlbeer/quirc/archive/v1.1.tar.gz"
+    sha256: "5102ccb57639cb355642c1f8af0d815026c948d85d99bf9b86be5746e759f8e6"
+  "1.0":
+    url: "https://github.com/dlbeer/quirc/archive/v1.0.tar.gz"
+    sha256: "91bba64ffca5b84aa953b88d5f5ccc9507275345c200fd581dca24fbf66b3706"
+patches:
+  "1.1":
+    - patch_file: "patches/remove-c99-features.patch"
+  "1.0":
+    - patch_file: "patches/replace-vla.patch"

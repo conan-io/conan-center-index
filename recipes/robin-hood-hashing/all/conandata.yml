@@ -1,0 +1,39 @@
+sources:
+  "3.11.5":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.11.5.tar.gz"
+    sha256: "3693e44dda569e9a8b87ce8263f7477b23af448a3c3600c8ab9004fe79c20ad0"
+  "3.11.4":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.11.4.tar.gz"
+    sha256: "99d3624069a0b06df2675b4ba9d2ebac1a1236dbc52326cd6f31ca056c24eb89"
+  "3.11.3":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.11.3.tar.gz"
+    sha256: "dcf2b7fa9ef9dd0c67102d94c28e8df3effbe1845e0ed1f31f4772ca5e857fc4"
+  "3.11.1":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.11.1.tar.gz"
+    sha256: "31143d316b49e29b57773e720ec9ac3f7a8223dc7710329b566c874c69e1d087"
+  "3.9.1":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.9.1.tar.gz"
+    sha256: "d6d15546a58d170717b2be5311425f80dc06f087a0885bd95de61a727bf9adef"
+  "3.8.0":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.8.0.tar.gz"
+    sha256: "422a0727b07cd495bf90ecbb15d4aa64e209f0accc8eba51a121843fd32abaf9"
+  "3.7.0":
+    url: "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.7.0.tar.gz"
+    sha256: "1c4a107865becbabc0da337f9cf06f3aa6112f733efcbed0703238362a25b330"
+patches:
+  "3.11.1":
+    - patch_file: "patches/3.11.1-0001-fix-missing-limits-include.patch"
+      patch_description: "Add missing limits include"
+      patch_type: "portability"
+  "3.9.1":
+    - patch_file: "patches/3.9.1-0001-fix-missing-limits-include.patch"
+      patch_description: "Add missing limits include"
+      patch_type: "portability"
+  "3.8.0":
+    - patch_file: "patches/3.8.0-0001-fix-missing-limits-include.patch"
+      patch_description: "Add missing limits include"
+      patch_type: "portability"
+  "3.7.0":
+    - patch_file: "patches/3.7.0-0001-fix-missing-limits-include.patch"
+      patch_description: "Add missing limits include"
+      patch_type: "portability"

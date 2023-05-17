@@ -1,0 +1,14 @@
+diff --git a/Makefile b/Makefile
+index 2bb01e2..200ca73 100644
+--- a/Makefile
++++ b/Makefile
+@@ -63,6 +63,9 @@ lib/libbase64.o: $(OBJS)
+ 	$(LD) -r -o $@ $^
+ 	$(OBJCOPY) --keep-global-symbols=lib/exports.txt $@
+ 
++lib/libbase64.a: $(OBJS)
++	$(AR) rc $@ $^
++
+ lib/config.h:
+ 	@echo "#define HAVE_AVX2   $(HAVE_AVX2)"    > $@
+ 	@echo "#define HAVE_NEON32 $(HAVE_NEON32)" >> $@

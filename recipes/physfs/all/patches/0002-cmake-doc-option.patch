@@ -1,0 +1,20 @@
+from https://github.com/icculus/physfs/pull/10
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -220,6 +220,7 @@ install(TARGETS ${PHYSFS_INSTALL_TARGETS}
+         ARCHIVE DESTINATION lib${LIB_SUFFIX})
+ install(FILES src/physfs.h DESTINATION include)
+ 
++if(PHYSFS_BUILD_DOCS)
+ find_package(Doxygen)
+ if(DOXYGEN_FOUND)
+     set(PHYSFS_OUTPUT_DOXYFILE "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
+@@ -243,6 +244,7 @@ if(DOXYGEN_FOUND)
+ else()
+     message(STATUS "Doxygen not found. You won't be able to build documentation.")
+ endif()
++endif()
+ 
+ if(UNIX)
+     set(PHYSFS_TARBALL "${CMAKE_CURRENT_SOURCE_DIR}/../physfs-${PHYSFS_VERSION}.tar.bz2")

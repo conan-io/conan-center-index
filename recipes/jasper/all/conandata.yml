@@ -1,0 +1,41 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
+    sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
+  "3.0.6":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-3.0.6/jasper-3.0.6.tar.gz"
+    sha256: "169be004d91f6940c649a4f854ada2755d4f35f62b0555ce9e1219c778cffc09"
+  "2.0.33":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-2.0.33/jasper-2.0.33.tar.gz"
+    sha256: "28d28290cc2eaf70c8756d391ed8bcc8ab809a895b9a67ea6e89da23a611801a"
+patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "3.0.6":
+    - patch_file: "patches/3.0.6-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.6-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.6-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "2.0.33":
+    - patch_file: "patches/2.0.33-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/2.0.33-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"

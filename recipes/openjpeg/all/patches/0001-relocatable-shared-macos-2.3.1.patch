@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -154,7 +154,7 @@ if(NOT OPENJPEG_INSTALL_PACKAGE_DIR)
+   set(OPENJPEG_INSTALL_PACKAGE_DIR "${OPENJPEG_INSTALL_LIB_DIR}/${OPENJPEG_INSTALL_SUBDIR}")
+ endif()
+ 
+-if (APPLE)
++if (0)
+ 	list(APPEND OPENJPEG_LIBRARY_PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${OPENJPEG_INSTALL_LIB_DIR}")
+ 	option(OPJ_USE_DSYMUTIL "Call dsymutil on binaries after build." OFF)
+ endif()

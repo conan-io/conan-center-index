@@ -1,0 +1,9 @@
+versions:
+  "7.06":
+    folder: all
+  "7.03":
+    folder: all
+  "7.00":
+    folder: all
+  "6.25":
+    folder: all

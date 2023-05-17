@@ -1,0 +1,10 @@
+sources:
+  "2.4.2":
+    sha256: "83c628b90f009470981cf084c5418329c88b19835d8af3691b930afccb7d79c7"
+    url: "http://www.bytereef.org/software/mpdecimal/releases/mpdecimal-2.4.2.tar.gz"
+patches:
+  "2.4.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-msvc-fixes.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-disable-vcstdint-h-vs2015.patch"

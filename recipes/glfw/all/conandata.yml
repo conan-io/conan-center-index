@@ -1,0 +1,32 @@
+sources:
+  "3.3.8":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.8/glfw-3.3.8.zip"
+    sha256: "4d025083cc4a3dd1f91ab9b9ba4f5807193823e565a5bcf4be202669d9911ea6"
+  "3.3.7":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.7/glfw-3.3.7.zip"
+    sha256: "4ef0c544a8ace9a6cd0e0aef8250090f89fea1bf96e9fc1d9d6f76386c290c9c"
+  "3.3.6":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.6/glfw-3.3.6.zip"
+    sha256: "45537305d44c0a9f3612d4ec4a48414547cf854bff3ed613078f7ec648a12781"
+  "3.3.5":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.5/glfw-3.3.5.zip"
+    sha256: "98a8639cfcd4f9ed2748cfa531c217e0364b64884b43e3336c62c58802eaa34f"
+  "3.3.4":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.zip"
+    sha256: "bbd2c42c660b725e9755eb417e40b373f0d4c03138c9b2e210d02cd308bd99cd"
+  "3.3.3":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.3/glfw-3.3.3.zip"
+    sha256: "723087ad45b40cd333be7d1a2cd5e09a28facb7f3acdb69f3e5613bd20543977"
+  "3.3.2":
+    url: "https://github.com/glfw/glfw/releases/download/3.3.2/glfw-3.3.2.zip"
+    sha256: "08a33a512f29d7dbf78eab39bd7858576adcc95228c9efe8e4bc5f0f3261efc7"
+patches:
+  "3.3.2":
+    - patch_file: "patches/3.3.2-0001-fix-objc-cmake3.19+.patch"
+      patch_description: "Fix ObjC handling while using recent CMake versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/glfw/glfw/commit/3327050ca66ad34426a82c217c2d60ced61526b7"
+    - patch_file: "patches/3.3.2-0002-macos-relocatable.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/glfw/glfw/commit/5a15d8a7842fbc4b5260eac2335a6691bca9be4b"

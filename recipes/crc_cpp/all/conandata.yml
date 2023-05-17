@@ -1,0 +1,13 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/AshleyRoll/crc_cpp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "035ed616e0662eddbe7db7c920faaef99bbeb8953ebf98c3bb76cb81a2c4de2b"
+  "1.0.1":
+    url: "https://github.com/AshleyRoll/crc_cpp/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "865a0e110bf7e94061ceef1683947a7788b54f932c7ce3848edc89d36e1aea26"
+  "1.1.0":
+    url: "https://github.com/AshleyRoll/crc_cpp/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "50e46e3c44eb39809f6697b253f7b36c089642d7b7f2ebe2f75adf23c50676be"
+  "1.2.0":
+    url: "https://github.com/AshleyRoll/crc_cpp/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "508a609d9ef12c3088ed17a8ed820c965161a36dd90738c7358333fbfbe96af5"

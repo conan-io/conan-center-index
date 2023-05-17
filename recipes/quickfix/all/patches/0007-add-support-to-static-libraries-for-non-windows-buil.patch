@@ -1,0 +1,42 @@
+From ede1a5d292edb46253ffc6996fab8679e7f87a43 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Mon, 15 Jun 2020 00:01:26 -0300
+Subject: [PATCH 7/8] add support to static libraries for non windows builds
+
+---
+ CMakeLists.txt         | 1 +
+ src/C++/CMakeLists.txt | 6 +++++-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4392bd55..44b8349e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,6 +21,7 @@ include(QuickfixPlatformSettings)
+ include(QuickfixPrebuildSetup)
+ 
+ # Call cmake with-DHAVE_SSL=ON to compile with SSL. Similarly for others.
++option(BUILD_SHARED_LIBS "Build shared libraries")
+ option(HAVE_SSL "Build with SSL")
+ option(HAVE_MYSQL "Build with MySQL")
+ option(HAVE_POSTGRESQL "Build with PostgreSQL")
+diff --git a/src/C++/CMakeLists.txt b/src/C++/CMakeLists.txt
+index 07774c97..9cde5428 100644
+--- a/src/C++/CMakeLists.txt
++++ b/src/C++/CMakeLists.txt
+@@ -67,7 +67,11 @@ if (WIN32)
+   set_target_properties (${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX d)
+   target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} ${PostgreSQL_LIBRARIES} ws2_32)
+ else()
+-  add_library(${PROJECT_NAME} SHARED  ${quickfix_SOURCES})
++  if (BUILD_SHARED_LIBS)
++    add_library(${PROJECT_NAME} SHARED ${quickfix_SOURCES})
++  else()
++    add_library(${PROJECT_NAME} STATIC ${quickfix_SOURCES})
++  endif()
+   target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} ${PostgreSQL_LIBRARIES} pthread)
+ endif()
+ 
+-- 
+2.25.0
+

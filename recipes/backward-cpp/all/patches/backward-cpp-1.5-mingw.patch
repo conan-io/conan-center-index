@@ -1,0 +1,16 @@
+--- backward.hpp
++++ backward.hpp
+@@ -313,1 +313,1 @@
+-#include <BaseTsd.h>
++#include <basetsd.h>
+@@ -317,1 +317,1 @@
+-#include <Windows.h>
++#include <windows.h>
+@@ -320,1 +320,1 @@
+-#include <Psapi.h>
++#include <psapi.h>
+@@ -4017,2 +4017,2 @@
+-    set_terminate(&terminator);
+-    set_unexpected(&terminator);
++    std::set_terminate(&terminator);
++    std::set_unexpected(&terminator);

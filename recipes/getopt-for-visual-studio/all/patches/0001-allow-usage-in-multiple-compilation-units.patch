@@ -1,0 +1,59 @@
+--- getopt.h
++++ getopt.h
+@@ -56,7 +56,7 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-#pragma warning(disable:4996);
++#pragma warning(disable:4996)
+ 
+ #define __GETOPT_H__
+ 
+@@ -76,13 +76,13 @@ extern "C" {
+ #define	REPLACE_GETOPT		/* use this getopt as the system getopt(3) */
+ 
+ #ifdef REPLACE_GETOPT
+-int	opterr = 1;		/* if error message should be printed */
+-int	optind = 1;		/* index into parent argv vector */
+-int	optopt = '?';		/* character checked for validity */
+-#undef	optreset		/* see getopt.h */
++static int	opterr = 1;		/* if error message should be printed */
++static int	optind = 1;		/* index into parent argv vector */
++static int	optopt = '?';	/* character checked for validity */
++#undef	optreset		    /* see getopt.h */
+ #define	optreset		__mingw_optreset
+-int	optreset;		/* reset getopt */
+-char    *optarg;		/* argument associated with option */
++static int	optreset;		/* reset getopt */
++static char    *optarg;		/* argument associated with option */
+ #endif
+ 
+ //extern int optind;		/* index of first non-option in argv      */
+@@ -216,7 +216,7 @@ permute_args(int panonopt_start, int panonopt_end, int opt_end,
+  *
+  * [eventually this will replace the BSD getopt]
+  */
+-int
++static int
+ getopt(int nargc, char * const *nargv, const char *options)
+ {
+ 
+@@ -610,7 +610,7 @@ start:
+  * getopt_long --
+  *	Parse argc/argv argument vector.
+  */
+-int
++static int
+ getopt_long(int nargc, char * const *nargv, const char *options,
+     const struct option *long_options, int *idx)
+ {
+@@ -623,7 +623,7 @@ getopt_long(int nargc, char * const *nargv, const char *options,
+  * getopt_long_only --
+  *	Parse argc/argv argument vector.
+  */
+-int
++static int
+ getopt_long_only(int nargc, char * const *nargv, const char *options,
+     const struct option *long_options, int *idx)
+ {
+ 

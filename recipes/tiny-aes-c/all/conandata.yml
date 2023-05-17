@@ -1,0 +1,9 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/kokke/tiny-AES-c/archive/v1.0.0.tar.gz"
+    sha256: "61fd99ac95df30e9ab39d6cdd41e88909b2eaf9b9806f23aa235485ac0bed2fd"
+patches:
+  "1.0.0":
+    - patch_file: "patches/0001-cmake-install.patch"
+      patch_description: "CMake: add install target"
+      patch_type: "conan"

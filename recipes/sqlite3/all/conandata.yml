@@ -1,0 +1,37 @@
+sources:
+  "3.41.2":
+    url: "https://sqlite.org/2023/sqlite-amalgamation-3410200.zip"
+    sha256: "01df06a84803c1ab4d62c64e995b151b2dbcf5dbc93bbc5eee213cb18225d987"
+  "3.41.1":
+    url: "https://sqlite.org/2023/sqlite-amalgamation-3410100.zip"
+    sha256: "df0d54bf246521360c8148f64e7e5ad07a4665b4f902339e844f4c493d535ff5"
+  "3.40.1":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3400100.zip"
+    sha256: "49112cc7328392aa4e3e5dae0b2f6736d0153430143d21f69327788ff4efe734"
+  "3.40.0":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3400000.zip"
+    sha256: "7c23eb51409315738c930a222cf7cd41518ae5823c41e60a81b93a07070ef22a"
+  "3.39.4":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390400.zip"
+    sha256: "9c99955b21d2374f3a385d67a1f64cbacb1d4130947473d25c77ad609c03b4cd"
+  "3.39.3":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390300.zip"
+    sha256: "a89db3030d229d860ae56a8bac50ac9761434047ae886e47e7c8f9f428fa98ad"
+  "3.39.2":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390200.zip"
+    sha256: "87775784f8b22d0d0f1d7811870d39feaa7896319c7c20b849a4181c5a50609b"
+  "3.39.1":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390100.zip"
+    sha256: "f2ce17bca51b376de4fcb9d0dc174c52f472a34c29aa1ccc774f27467cc63ed7"
+  "3.39.0":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3390000.zip"
+    sha256: "35109dd6e4f062f4d76b48bd7614eec35abae9d2da70351c7ef936876b064b5f"
+  "3.38.5":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3380500.zip"
+    sha256: "bebb039b748441e3d25d71d11f7a4a33f5df11f318ec18fa7f343d2083755e2c"
+  "3.37.2":
+    url: "https://sqlite.org/2022/sqlite-amalgamation-3370200.zip"
+    sha256: "cb25df0fb90b77be6660f6ace641bbea88f3d0441110d394ce418f35f7561bb0"
+  "3.36.0":
+    url: "https://sqlite.org/2021/sqlite-amalgamation-3360000.zip"
+    sha256: "999826fe4c871f18919fdb8ed7ec9dd8217180854dd1fe21eea96aed36186729"

@@ -1,0 +1,4 @@
+sources:
+  "2.0.8":
+    url: "https://github.com/CPPAlliance/NuDB/archive/2.0.8.tar.gz"
+    sha256: "9b71903d8ba111cd893ab064b9a8b6ac4124ed8bd6b4f67250205bc43c7f13a8"

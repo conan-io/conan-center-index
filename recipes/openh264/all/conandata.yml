@@ -1,0 +1,38 @@
+sources:
+  "2.3.1":
+    url: "https://github.com/cisco/openh264/archive/refs/tags/v2.3.1.tar.gz"
+    sha256: "453afa66dacb560bc5fd0468aabee90c483741571bca820a39a1c07f0362dc32"
+  "2.1.1":
+    url: "https://github.com/cisco/openh264/archive/v2.1.1.tar.gz"
+    sha256: "af173e90fce65f80722fa894e1af0d6b07572292e76de7b65273df4c0a8be678"
+  "1.7.0":
+    url: "https://github.com/cisco/openh264/archive/v1.7.0.tar.gz"
+    sha256: "9c07c38d7de00046c9c52b12c76a2af7648b70d05bd5460c8b67f6895738653f"
+patches:
+  "2.3.1":
+    - patch_file: "patches/2.3.1-0001-platform-android.mk.patch"
+      patch_type: "portability"
+      patch_description: "Android Fix"
+    - patch_file: "patches/2.3.1-0002-macos-relocatable-shared.patch"
+      patch_type: "portability"
+      patch_description: "Macos relocatable shared fix"
+  "2.1.1":
+    - patch_file: "patches/2.1.1-0001-platform-android.mk.patch"
+      patch_type: "portability"
+      patch_description: "Android Fix"
+    - patch_file: "patches/2.1.1-0002-macos-relocatable-shared.patch"
+      patch_type: "portability"
+      patch_description: "Macos relocatable shared fix"
+    - patch_file: "patches/1.7.0-0004-mingw-override-CC-CXX-AR-from-env.patch"
+      patch_type: "portability"
+      patch_description: "Mingw Override CC CXX AR from env Fix"
+  "1.7.0":
+    - patch_file: "patches/1.7.0-0001-platform-android.mk.patch"
+      patch_type: "portability"
+      patch_description: "Android Fix"
+    - patch_file: "patches/1.7.0-0002-macos-relocatable-shared.patch"
+      patch_type: "portability"
+      patch_description: "Macos relocatable shared fix"
+    - patch_file: "patches/1.7.0-0004-mingw-override-CC-CXX-AR-from-env.patch"
+      patch_type: "portability"
+      patch_description: "Mingw Override CC CXX AR from env Fix"

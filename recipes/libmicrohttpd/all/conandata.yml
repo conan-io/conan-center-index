@@ -1,0 +1,9 @@
+sources:
+  "0.9.75":
+    url: "https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.75.tar.gz"
+    sha256: "9278907a6f571b391aab9644fd646a5108ed97311ec66f6359cebbedb0a4e3bb"
+patches:
+  "0.9.75":
+    - patch_file: "patches/0.9.75-0001-allow-release-with-debug-runtime.patch"
+      patch_description: "Allow to build Release with Debug runtime"
+      patch_type: "conan"

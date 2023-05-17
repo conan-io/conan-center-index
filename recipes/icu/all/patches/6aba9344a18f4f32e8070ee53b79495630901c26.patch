@@ -1,0 +1,22 @@
+From 6aba9344a18f4f32e8070ee53b79495630901c26 Mon Sep 17 00:00:00 2001
+From: "Shane F. Carr" <sffc@google.com>
+Date: Fri, 24 Apr 2020 19:23:40 -0500
+Subject: [PATCH] ICU-21081 Make U_ASSERT C++14 compatible
+
+---
+ source/common/uassert.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source/common/uassert.h b/source/common/uassert.h
+index 15cd55c8734..afd31eeffd9 100644
+--- a/source/common/uassert.h
++++ b/source/common/uassert.h
+@@ -32,7 +32,7 @@
+ #   include <assert.h>
+ #   define U_ASSERT(exp) assert(exp)
+ #elif U_CPLUSPLUS_VERSION
+-#   define U_ASSERT(exp) void()
++#   define U_ASSERT(exp) (void)0
+ #else
+ #   define U_ASSERT(exp)
+ #endif

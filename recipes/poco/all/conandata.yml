@@ -1,0 +1,82 @@
+sources:
+  "1.12.4":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.4-release.tar.gz"
+    sha256: "71ef96c35fced367d6da74da294510ad2c912563f12cd716ab02b6ed10a733ef"
+  "1.12.3":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.3-release.tar.gz"
+    sha256: "3b2056ddef17164b896cda0613e2f2b3d6b857f49c3e464b5d0f655017f2231d"
+  "1.12.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.2-release.tar.gz"
+    sha256: "30442ccb097a0074133f699213a59d6f8c77db5b2c98a7c1ad9c5eeb3a2b06f3"
+  "1.12.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.1-release.tar.gz"
+    sha256: "debc6d5d5eb946bb14e47cffc33db4fffb4f11765f34f8db04e71e866d1af8f9"
+  "1.12.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.0-release.tar.gz"
+    sha256: "33b5acd5a09a9466c2710f6f2e3bd2492dd3372b655ea83f62520ac8fc213631"
+  "1.11.3":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.3-release.tar.gz"
+    sha256: "fb5e8e70c7dbc8f3b59ec8560140a267b4eaf06ee519dc21f312d0eb195cba37"
+  "1.11.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.2-release.tar.gz"
+    sha256: "9774651a02e4cfa79fc43b7db617e45d353ede00b7be8afd0e74e6afb23d3793"
+  "1.11.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.1-release.tar.gz"
+    sha256: "2412a5819a239ff2ee58f81033bcc39c40460d7a8b330013a687c8c0bd2b4ac0"
+  "1.11.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.11.0-release.tar.gz"
+    sha256: "8a7bfd0883ee95e223058edce8364c7d61026ac1882e29643822ce9b753f3602"
+  "1.10.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.10.1-release.tar.gz"
+    sha256: "44592a488d2830c0b4f3bfe4ae41f0c46abbfad49828d938714444e858a00818"
+  "1.10.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.10.0-release.tar.gz"
+    sha256: "8047800d5a965d3177e614b4a4a162381e2638220b24d1d15ff5d6cac1738be8"
+  "1.9.4":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.9.4-release.tar.gz"
+    sha256: "367014cdbcfe9df8f1d746239902149d2398af9b49ba2c1aaaa88616fd538f61"
+  "1.9.3":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.9.3-release.tar.gz"
+    sha256: "73b9dfd1f57106eefb9b451d223579281acfb50b031424e9d0c6486ebb824d01"
+  "1.8.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.8.1-release.tar.gz"
+    sha256: "43cc469c01d1f799efc51e2bfde6ffdf467b98a8a0901e6b33db86958619b3af"
+patches:
+  "1.12.4":
+    - patch_file: patches/1.12.4.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.12.3":
+    - patch_file: patches/1.12.3.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.12.2":
+    - patch_file: patches/1.12.2.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.12.1":
+    - patch_file: patches/1.12.1.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.12.0":
+    - patch_file: patches/1.12.0.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.11.3":
+    - patch_file: patches/1.11.1.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.11.2":
+    - patch_file: patches/1.11.1.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.11.1":
+    - patch_file: patches/1.11.1.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.11.0":
+    - patch_file: patches/1.11.0.patch
+    - patch_file: patches/0002-mysql-include.patch
+  "1.10.1":
+    - patch_file: patches/1.10.1.patch
+  "1.10.0":
+    - patch_file: patches/1.10.0.patch
+    - patch_file: patches/1.10.0-set-missing-cmake-variable.patch
+  "1.9.4":
+    - patch_file: patches/1.9.2.patch
+  "1.9.3":
+    - patch_file: patches/1.9.2.patch
+  "1.8.1":
+    - patch_file: patches/1.8.1.patch

@@ -1,0 +1,14 @@
+diff --git a/src/Makefile b/src/Makefile
+index f56465d..a6838bc 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -312,9 +312,6 @@ ifeq (,$(shell $(TARGET_CC) -o /dev/null -c -x c /dev/null -fno-stack-protector
+   TARGET_XCFLAGS+= -fno-stack-protector
+ endif
+ ifeq (Darwin,$(TARGET_SYS))
+-  ifeq (,$(MACOSX_DEPLOYMENT_TARGET))
+-    export MACOSX_DEPLOYMENT_TARGET=10.4
+-  endif
+   TARGET_STRIP+= -x
+   TARGET_XSHLDFLAGS= -dynamiclib -single_module -undefined dynamic_lookup -fPIC
+   TARGET_DYNXLDOPTS=

@@ -1,0 +1,233 @@
+--- Win32.cf
++++ Win32.cf
+@@ -24,7 +24,7 @@
+ #define CpuDefines -D_X86_
+ #endif
+ /* brain-damaged windows headers will not compile with -Za */
+-#define StandardDefines -DWIN32 -DWIN32_LEAN_AND_MEAN -D_DLL -D_MT -D__STDC__ CpuDefines
++#define StandardDefines -DWIN32 -DWIN32_LEAN_AND_MEAN -D_DLL -D_MT -D__STDC__
+ #if CompilerMajorVersion < 4
+ #define DefaultCCOptions -nologo -batch -G4 -W2
+ #else
+--- Win32.rules
++++ Win32.rules
+@@ -16,17 +16,17 @@
+ #define ShLibIncludeFile <WinLib.tmpl>
+ #define SharedLibraryLoadFlags -dll
+ #define PositionIndependentCFlags /**/
+-
+-.c.obj:
+-	$(CC) -c $*.c @<<
+-	$(CFLAGS)
+-<<
++.SUFFIXES:
++.SUFFIXES: .obj
++.SUFFIXES: .c
++.c.obj :
++	$(CC) -c $< $(CFLAGS) -o $@
+ 
+ #if HasCplusplus
+-.CCsuf.obj:
+-	$(CXX) -c $*.CCsuf @<<
+-	$(CFLAGS)
+-<<
++.SUFFIXES: .CCsuf
++.CCsuf.obj :
++	$(CXX) -c @< $(CFLAGS) -o $@
++
+ #endif
+ 
+ #define ProgramTargetName(target) target.exe
+@@ -36,40 +42,40 @@
+ #define RemoveFile(file) if exist file $(RM) file
+ 
+ #define RemoveFiles(files) @$(MAKE) $(MFLAGS) -f <<			@@\
+-.SUFFIXES:								@@\
+ 									@@\
+-all: files								@@\
++									@@\
++all:: files								@@\
+ 	!for %%i in ( Avoid.Error $$** ) do if exist %%i $(RM) %%i	@@\
+ 									@@\
+-Avoid.Error files:							@@\
+-<<
++Avoid.Error files::							@@\
++
+ 
+ #define MakeDir(dir) -$(MKDIRHIER) dir
+ 
+ #define ObjectCompile(options) RemoveFile($@)				@@\
+ 	$(CC) -c $*.c @<<						@@\
+ 	$(CFLAGS) options						@@\
+-<<
++
+ 
+ #define LibObjCompile(dir,options) RemoveFiles($@ dir\$@)		@@\
+ 	$(CC) -c  $*.c @<<						@@\
+ 	$(CCOPTIONS) $(ALLDEFINES) options				@@\
+-<<									@@\
++									@@\
+ 	$(MV) $@ dir\$@
+ 
+ #define BuildIncludesTop(srclist,dstsubdir,dstupdir)			@@\
+ includes:: srclist							@@\
+ 	MakeDir($(BUILDINCDIR:/=\))					@@\
+ 	@$(MAKE) $(MFLAGS) -f <<					@@\
+-.SUFFIXES:								@@\
+ 									@@\
+-all: srclist								@@\
++									@@\
++all:: srclist								@@\
+ 	cd $(BUILDINCDIR:/=\)						@@\
+ 	!RemoveFile($$**)						@@\
+ 	!$(LN) $(BUILDINCTOP:/=\)\$(CURRENT_DIR:/=\)\$$** .		@@\
+ 									@@\
+-Avoid.Error srclist:							@@\
+-<<
++Avoid.Error srclist::							@@\
++
+ 
+ #define BuildIncludes(srclist,dstsubdir,dstupdir)			@@\
+ XVARdef0 = $(BUILDINCDIR)/dstsubdir					@@\
+@@ -78,15 +78,15 @@
+ includes:: srclist							@@\
+ 	MakeDir($(XVARuse0:/=\))					@@\
+ 	@$(MAKE) -A $(MFLAGS) -f <<					@@\
+-.SUFFIXES:								@@\
+ 									@@\
+-all: srclist								@@\
++									@@\
++all:: srclist								@@\
+ 	cd $(XVARuse0:/=\)						@@\
+ 	!RemoveFile($$**)						@@\
+ 	!$(LN) $(XVARuse1:/=\)\$$** .					@@\
+ 									@@\
+-Avoid.Error srclist:							@@\
+-<<
++Avoid.Error srclist::							@@\
++
+ 
+ #define LinkFileList(step,list,dir,sub)					@@\
+ XVARdef0 = dir								@@\
+@@ -179,7 +179,7 @@
+ 
+ #define MakeLibrary(libname,objlist) $(AR) @<<				@@\
+ -out:libname objlist							@@\
+-<<
++
+ 
+ #define LinkSourceFile(src,dir)						@@\
+ XVARdef0 = dir/src							@@\
+@@ -268,7 +274,7 @@ ProgramTargetName($(IMAKE)):						@@\
+ 	cd $(IMAKESRC:/=\)						@@\
+ 	if exist Makefile $(MAKE) all					@@\
+ 	if not exist Makefile $(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)" @@\
+-<<
++
+ #endif
+ 
+ #ifndef UseInstalled
+@@ -279,7 +279,7 @@
+ 	<<tmp.bat							@@\
+ 	cd $(DEPENDSRC:/=\)						@@\
+ 	$(MAKE)								@@\
+-<<
++
+ #endif
+ 
+ #define	DependTarget()							@@\
+@@ -288,7 +288,7 @@
+ depend::								@@\
+ 	$(DEPEND:/=\) @<<						@@\
+ $(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- $(SRCS)		@@\
+-<<
++
+ 
+ #define	DependTarget3(srcs1,srcs2,srcs3)				@@\
+ DependDependency()							@@\
+@@ -296,10 +296,10 @@
+ depend::								@@\
+ 	$(DEPEND:/=\) @<<						@@\
+ $(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- srcs1 srcs2 srcs3	@@\
+-<<
++
+ 
+ #define ForceSubdirs(dirs)						@@\
+-Avoid.Error dirs: FRC							@@\
++Avoid.Error dirs:: FRC							@@\
+ 	@cd $@								@@\
+ 	@echo making all in $(CURRENT_DIR)/$@...			@@\
+ 	$(MAKE) $(MFLAGS) PassCDebugFlags all				@@\
+@@ -313,17 +313,17 @
+ 									@@\
+ target::								@@\
+ 	@$(MAKE) -A $(MFLAGS) -f <<					@@\
+-.SUFFIXES:								@@\
+ 									@@\
+-all: $(XVARuse0:/=\)							@@\
+ 									@@\
+-Avoid.Error $(XVARuse0:/=\):						@@\
++all:: $(XVARuse0:/=\)							@@\
++									@@\
++Avoid.Error $(XVARuse0:/=\)::						@@\
+ 	cd $(XVARuse1)@							@@\
+ 	RMoveToBakFile(Makefile)					@@\
+ 	ImakeSubCmdHelper -DTOPDIR=../$(TOP) -DCURDIR=$(CURRENT_DIR)/$(XVARuse1)@ @@\
+ 	$(MAKE) $(MFLAGS) Makefiles					@@\
+ 	cd ..								@@\
+-<<
++
+ 
+ #ifdef UseInstalled
+ # define ImakeSubCmdHelper $(IMAKE_CMD)
+@@ -338,16 +338,16 @@
+ 									@@\
+ name::									@@\
+ 	@$(MAKE) -A $(MFLAGS) -f <<					@@\
+-.SUFFIXES:								@@\
+ 									@@\
+-all: $(XVARuse0:/=\)							@@\
+ 									@@\
+-Avoid.Error $(XVARuse0:/=\):						@@\
++all:: $(XVARuse0:/=\)							@@\
++									@@\
++Avoid.Error $(XVARuse0:/=\)::						@@\
+ 	cd $(XVARuse1)@							@@\
+ 	@echo verb in $(CURRENT_DIR)/$(XVARuse1)@...			@@\
+ 	$(MAKE) $(MFLAGS) flags subname					@@\
+ 	cd ..								@@\
+-<<
++
+ 
+ #define UnsharedLibReferences(varname,libname,libsource)		@@\
+ Concat3(DEP,varname,LIB) = _UseCat($(USRLIBDIR)/,libsource/,libname.lib) @@\
+@@ -381,9 +381,9 @@
+ 	$(PREPROCESSCMD) -I. <<CppTmpFile.c @<< >$@			@@\
+ 	XCOMM define $(XFAKEVAR)COMM XCOMM				@@\
+ 	XCOMM include <src>						@@\
+-<<									@@\
++									@@\
+ 	defs								@@\
+-<<									@@\
++									@@\
+ 									@@\
+ clean::									@@\
+ 	RemoveFiles(dst)
+@@ -421,7 +421,7 @@
+ 
+ #define MakeDLL(libname,solist) $(LD) @<<				@@\
+ $(SHLIBLDFLAGS) -out:libname.dll libname.exp solist			@@\
+-<<
++
+ 
+ #define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+ AllTarget(libname.dll)							@@\
+@@ -449,7 +449,7 @@
+ #define ObjectCplusplusCompile(options) RemoveFile($@)			@@\
+ 	$(CXX) -c $*.CCsuf @<<						@@\
+ 	$(CFLAGS) options						@@\
+-<<
++
+ 
+ #define CplusplusLinkRule LinkRule
+ 

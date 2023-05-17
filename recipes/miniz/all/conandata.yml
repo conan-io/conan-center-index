@@ -1,0 +1,18 @@
+sources:
+  "3.0.2":
+    url: "https://github.com/richgel999/miniz/archive/refs/tags/3.0.2.tar.gz"
+    sha256: "c4b4c25a4eb81883448ff8924e6dba95c800094a198dc9ce66a292ac2ef8e018"
+  "3.0.1":
+    url: "https://github.com/richgel999/miniz/archive/refs/tags/3.0.1.tar.gz"
+    sha256: "53c29ed75bf1a9dd838349982ec8890f95269c422b17399d3880fd2d0f703af8"
+  "2.2.0":
+    url: "https://github.com/richgel999/miniz/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "bd1136d0a1554520dcb527a239655777148d90fd2d51cf02c36540afc552e6ec"
+  "2.1.0":
+    url: "https://github.com/richgel999/miniz/archive/2.1.0.tar.gz"
+    sha256: "95f9b23c92219ad2670389a23a4ed5723b7329c82c3d933b7047673ecdfc1fea"
+patches:
+  "2.1.0":
+    - patch_file: "patches/2.1.0/001-remove-examples.patch"
+    - patch_file: "patches/2.1.0/002-fix-shared-windows.patch"
+    - patch_file: "patches/2.1.0/003-include-miniz_zip.patch"

@@ -1,0 +1,17 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 5522b29..1e9700b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -62,10 +62,10 @@ target_include_directories(
+ target_link_libraries(${PROJECT_NAME} PRIVATE cn-cbor::cn-cbor)
+ 
+ if(COSE_C_USE_MBEDTLS)
+-  target_link_libraries(${PROJECT_NAME} PRIVATE mbedtls)
++  target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::mbedtls)
+ else()
+   target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+-  target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENSSL_LIBRARIES})
++  target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl)
+ endif()
+ 
+ if(MSVC)

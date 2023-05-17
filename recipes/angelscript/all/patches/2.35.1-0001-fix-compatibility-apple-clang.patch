@@ -1,0 +1,18 @@
+--- a/angelscript/source/as_callfunc_arm64_gcc.S
++++ b/angelscript/source/as_callfunc_arm64_gcc.S
+@@ -50,6 +50,7 @@
+ .global CallARM64Float
+ .global CallARM64
+ 
++#if !defined(__MACH__)
+ .type GetHFAReturnDouble, %function
+ .type GetHFAReturnFloat, %function
+ .type CallARM64Ret128, %function
+@@ -57,6 +58,7 @@
+ .type CallARM64Double, %function
+ .type CallARM64Float, %function
+ .type CallARM64, %function
++#endif
+ 
+ .align  2
+ GetHFAReturnDouble:

@@ -1,0 +1,7 @@
+sources:
+  "2010.04.30":
+    url: "https://mattmccutchen.net/bigint/bigint-2010.04.30.tar.bz2"
+    sha256: "05fb838472b8f06c30cd11d58e6d911dd54d8413338c4d3d77dd4e52fed6dacc"
+patches:
+  "2010.04.30":
+    - patch_file: "patches/0001-deprecation-wanings.patch"

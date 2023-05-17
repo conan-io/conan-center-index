@@ -1,0 +1,12 @@
+sources:
+  "1.1.6":
+    url: "https://github.com/NVIDIAGameWorks/NvCloth/archive/refs/heads/1.1.6.zip"
+    sha256: "fe29af2e8783383d2ede8fb23a51ce9a5c59fa016e8a1d68af45a69a1828e042"
+patches:
+  "1.1.6":
+    - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-CallbackFix.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-PsAllocator.patch"
+      base_path: "source_subfolder"

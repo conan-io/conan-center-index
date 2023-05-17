@@ -1,0 +1,9 @@
+versions:
+  "3.3.0":
+    folder: "all"
+  "3.2.3":
+    folder: "all"
+  "3.0.3":
+    folder: "all"
+  "2.20.6":
+    folder: "all"

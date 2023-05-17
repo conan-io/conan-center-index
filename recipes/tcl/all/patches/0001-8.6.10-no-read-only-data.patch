@@ -1,0 +1,21 @@
+--- tools/installData.tcl
++++ tools/installData.tcl
+@@ -33,18 +33,13 @@
+ 	    file copy -force $f [file join $d2 $ftail]
+ 	    if {$::tcl_platform(platform) eq {unix}} {
+ 		file attributes [file join $d2 $ftail] -permissions 0644
+-	    } else {
+-		file attributes [file join $d2 $ftail] -readonly 1
+ 	    }
+ 	}
+     }
+ 
+     if {$::tcl_platform(platform) eq {unix}} {
+ 	file attributes $d2 -permissions 0755
+-    } else {
+-	file attributes $d2 -readonly 1
+     }
+-
+ }
+ 
+ copyDir [file normalize [lindex $argv 0]] [file normalize [lindex $argv 1]]

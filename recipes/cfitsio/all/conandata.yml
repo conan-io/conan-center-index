@@ -1,0 +1,38 @@
+sources:
+  "4.2.0":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.2.0.tar.gz"
+    sha256: "ef9881973ecb9fe55732a4c1bb5ca96e63b624728f6319556939e0fe25f495e8"
+  "4.1.0":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.1.0.tar.gz"
+    sha256: "748994dd1c819b88567e3539ea1f0ec2dd39fc0ed2884c033afa3da66efb5f4e"
+  "4.0.0":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.0.0.tar.gz"
+    sha256: "88735b69bb017ee92823b9e7ee14efeae2e57fb6c00503ed3aa2820e850a7b5e"
+  "3.490":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.49.tar.gz"
+    sha256: "8cc4beddd0ff389fb81bde9c181e0e3c419c15ec8a66df201ff4619a93715558"
+  "3.480":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.48.tar.gz"
+    sha256: "fc369363616753fa4dbe9bf28fa7e49cc1b057081229d89b52087d85ef303314"
+  "3.470":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.47.tar.gz"
+    sha256: "985606e058403c073a68d95be74e9696f0ded9414520784457a1d4cba8cca7e2"
+patches:
+  "4.2.0":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-4.2.0.patch"
+  "4.1.0":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-4.1.0.patch"
+  "4.0.0":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-4.0.0.patch"
+  "3.490":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-3.490.patch"
+  "3.480":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-3.470.patch"
+  "3.470":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-3.470.patch"

@@ -1,0 +1,11 @@
+--- Makefile.in
++++ Makefile.in
+@@ -615,7 +615,7 @@
+ @LIBFFI_BUILD_VERSIONED_SHLIB_FALSE@libffi_version_dep = 
+ @LIBFFI_BUILD_VERSIONED_SHLIB_GNU_TRUE@@LIBFFI_BUILD_VERSIONED_SHLIB_TRUE@libffi_version_dep = libffi.map
+ @LIBFFI_BUILD_VERSIONED_SHLIB_SUN_TRUE@@LIBFFI_BUILD_VERSIONED_SHLIB_TRUE@libffi_version_dep = libffi.map-sun
+-libffi_version_info = -version-info `grep -v '^\#' $(srcdir)/libtool-version`
++libffi_version_info = -avoid-version
+ libffi_la_LDFLAGS = -no-undefined $(libffi_version_info) $(libffi_version_script) $(LTLDFLAGS) $(AM_LTLDFLAGS)
+ libffi_la_DEPENDENCIES = $(libffi_la_LIBADD) $(libffi_version_dep)
+ AM_CPPFLAGS = -I. -I$(top_srcdir)/include -Iinclude -I$(top_srcdir)/src

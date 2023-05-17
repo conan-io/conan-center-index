@@ -1,0 +1,28 @@
+sources:
+  "0.6.5":
+    sha256: "37A69482517C8976CB48CD271DA8C6BA92E07EE2AB2BDD7CAEF4C8158AF77359"
+    url: "https://github.com/Neargye/magic_enum/archive/v0.6.5.tar.gz"
+  "0.6.6":
+    sha256: "1033f9a9315023feebb48f20d5a572149ec72c1e95a52bcf7042a412ff9d2e28"
+    url: "https://github.com/Neargye/magic_enum/archive/v0.6.6.tar.gz"
+  "0.7.0":
+    sha256: "4fe6627407a656d0d73879c0346b251ccdcfb718c37bef5410ba172c7c7d5f9a"
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.0.tar.gz"
+  "0.7.1":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.1.tar.gz"
+    sha256: "11bb590dd055194e92936fa4d0652084c14bd23ac8e4b5a02271b6259a05cec9"
+  "0.7.2":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.2.tar.gz"
+    sha256: "a77895ebc684f7a4dd2e4e06529b22e9ae694037f6dee0753d3ce0bbcd5b3e38"
+  "0.7.3":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.3.tar.gz"
+    sha256: "b8d0cd848546fee136dc1fa4bb021a1e4dc8fe98e44d8c119faa3ef387636bf7"
+  "0.8.0":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.8.0.tar.gz"
+    sha256: "5e7680e877dd4cf68d9d0c0e3c2a683b432a9ba84fc1993c4da3de70db894c3c"
+  "0.8.1":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.8.1.tar.gz"
+    sha256: "6b948d1680f02542d651fc82154a9e136b341ce55c5bf300736b157e23f9df11"
+  "0.8.2":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.8.2.tar.gz"
+    sha256: "62bd7034bbbfc3d7806001767d5775ab42f3ff33bb38366e1ceb21102f0dff9a"

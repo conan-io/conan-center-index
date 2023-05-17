@@ -1,0 +1,34 @@
+sources:
+  "3.1.4":
+    url: "https://github.com/SanderMertens/flecs/archive/v3.1.4.tar.gz"
+    sha256: "cc73d529ddc47891fc16c7dd965ca9c4239d1caccae024c81364bf3d49286fe0"
+  "3.1.3":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v3.1.3.tar.gz"
+    sha256: "52da12a8bae260be21bf29d97af622241efd822737d0a15e551cd92e30abd5c9"
+  "3.1.2":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v3.1.2.tar.gz"
+    sha256: "1fe4f78b44f2ded1355179a8395bb254fbd8a9db88b9f8ecd890472d60acf723"
+  "3.1.1":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v3.1.1.tar.gz"
+    sha256: "f31edfa258b90d086c311ad5ccc60e8e1ab0448aa10856d96e9e503cc15c1c63"
+  "3.1.0":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v3.1.0.tar.gz"
+    sha256: "67e7cf4ff2abe661d9269b9d7f52ec7c39192f22e69bab638f27ef4337c12905"
+  "3.0.4":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v3.0.4.tar.gz"
+    sha256: "370e2bf1bd9fd6dc79b515887e7f048be676b0d95e23d43b2c8b76a5e645c8f4"
+  "3.0.1":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v3.0.1.tar.gz"
+    sha256: "a7c80dea0677721f83433623169cd4094c48270022c19adedac28331d546b539"
+  "2.4.8":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v2.4.8.tar.gz"
+    sha256: "9a8040a197e4b5e032524bc7183f68faa7b2f759c67b983b40018a7726561cac"
+  "2.4.7":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v2.4.7.tar.gz"
+    sha256: "ef3952fee5b83991fbd9aa77212c45171393b2dfd14001b2d1c7b97861934afa"
+  "2.4.6":
+    url: "https://github.com/SanderMertens/flecs/archive/refs/tags/v2.4.6.tar.gz"
+    sha256: "e74798d4b387c85272b05ee574d991cbe1fb844680a1fc3d68818a02b5f59299"
+  "2.3.2":
+    url: "https://github.com/SanderMertens/flecs/archive/v2.3.2.tar.gz"
+    sha256: "ff2690953941b3f08d4e934e299fa8902e46ce8532edd176388d467ace33eebf"

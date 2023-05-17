@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+tab_width = 4
+trim_trailing_whitespace = true
+
+[*.py]
+max_line_length = 200
+
+[*.yml]
+tab_width = 2
+
+[{Makefile,Makefile.am,Makefile.in}]
+indent_style = tab
+
+[*.{diff,patch}]
+trim_trailing_whitespace = false

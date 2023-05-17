@@ -1,0 +1,59 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -90,7 +90,7 @@ if(APPLE)
+ endif()
+ 
+ add_subdirectory(src)
+-add_subdirectory(examples)
++#add_subdirectory(examples)
+ 
+ if(ARGTABLE3_ENABLE_TESTS)
+   enable_testing()
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -44,7 +44,7 @@
+ endif()
+ 
+ add_definitions(-D_XOPEN_SOURCE=700)
+-
++if(BUILD_SHARED_LIBS)
+ if(WIN32)
+   set(COMPANY_NAME "The Argtable3 Project")
+   set(FILE_DESC "ANSI C command-line parsing library")
+@@ -62,13 +62,13 @@
+   add_library(argtable3 SHARED ${ARGTABLE3_SRC_FILES})
+ endif()
+ target_include_directories(argtable3 PRIVATE ${PROJECT_SOURCE_DIR}/src)
+-
+-add_library(argtable3_static STATIC ${ARGTABLE3_SRC_FILES})
+-target_include_directories(argtable3 PRIVATE ${PROJECT_SOURCE_DIR}/src)
+-
+-set_target_properties(argtable3 argtable3_static PROPERTIES
++set_target_properties(argtable3 PROPERTIES
+   VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+   SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
++target_include_directories(argtable3 PRIVATE ${PROJECT_SOURCE_DIR}/src)
++else()
++add_library(argtable3_static STATIC ${ARGTABLE3_SRC_FILES})
++endif()
+ 
+ include(GNUInstallDirs)
+ if(UNIX OR MSYS OR MINGW)
+@@ -76,14 +76,16 @@
+ elseif(WIN32)
+   set(ARGTABLE3_INSTALL_CMAKEDIR "cmake")
+ endif()
+-
++if(BUILD_SHARED_LIBS)
+ install(TARGETS argtable3
+   EXPORT ${ARGTABLE3_PACKAGE_NAME}Config
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++else()
+ install(TARGETS argtable3_static
+   EXPORT ${ARGTABLE3_PACKAGE_NAME}Config  
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++endif()
+ install(FILES "${PROJECT_SOURCE_DIR}/src/argtable3.h" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ install(EXPORT ${ARGTABLE3_PACKAGE_NAME}Config DESTINATION ${ARGTABLE3_INSTALL_CMAKEDIR})

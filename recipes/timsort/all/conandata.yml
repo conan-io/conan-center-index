@@ -1,0 +1,25 @@
+sources:
+  "1.2.0":
+    sha256: 3a189cb8717efbf0442da1d62109b7e881c158ab8167f8997e79cdb3a2cd7c9a
+    url: https://github.com/timsort/cpp-TimSort/archive/v1.2.0.tar.gz
+  "1.2.1":
+    sha256: 4f32285926330c97290b102c92c4ae8c308f46f70488d383595ae5f191e1de55
+    url: https://github.com/timsort/cpp-TimSort/archive/v1.2.1.tar.gz
+  "1.2.2":
+    sha256: 594a5e59248accd1caa6a9e0f145d91ed9cf5bf1044d46684df1e866a534ee76
+    url: https://github.com/timsort/cpp-TimSort/archive/v1.2.2.tar.gz
+  "1.3.0":
+    sha256: 25fe8338ac053c09662d62bbcaab981e478054a75b9422c1a652e580026713f0
+    url: https://github.com/timsort/cpp-TimSort/archive/v1.3.0.tar.gz
+  "2.0.0":
+    sha256: 6cb23b0efb83e1d4f6eab58cddd35b36ca49cd927a46294575b9c0d304a2e833
+    url: https://github.com/timsort/cpp-TimSort/archive/v2.0.0.tar.gz
+  "2.0.1":
+    sha256: 5c7fe16ca8ead3a86691cb64c373b9ca634add6b6539254baa58f4e254e865c6
+    url: https://github.com/timsort/cpp-TimSort/archive/v2.0.1.tar.gz
+  "2.0.2":
+    sha256: df15ac2cea751e573979ff97966f2b3d5d9c35a819c43d9944756974e069b2d7
+    url: https://github.com/timsort/cpp-TimSort/archive/v2.0.2.tar.gz
+  "2.1.0":
+    sha256: b16606f85316d9a3cfde638c02dd9ce23324b0a904bb020e4ad2497cb8cf9ebd
+    url: https://github.com/timsort/cpp-TimSort/archive/v2.1.0.tar.gz

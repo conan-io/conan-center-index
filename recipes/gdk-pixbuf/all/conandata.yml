@@ -1,0 +1,19 @@
+sources:
+  "2.42.10":
+    url: "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.10.tar.xz"
+    sha256: "ee9b6c75d13ba096907a2e3c6b27b61bcd17f5c7ebeab5a5b439d2f2e39fe44b"
+  "2.42.9":
+    url: "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.9.tar.xz"
+    sha256: "28f7958e7bf29a32d4e963556d241d0a41a6786582ff6a5ad11665e0347fc962"
+  "2.42.8":
+    url: "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.8.tar.xz"
+    sha256: "84acea3acb2411b29134b32015a5b1aaa62844b19c4b1ef8b8971c6b0759f4c6"
+  "2.42.6":
+    url: "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.6.tar.xz"
+    sha256: "c4a6b75b7ed8f58ca48da830b9fa00ed96d668d3ab4b1f723dcf902f78bde77f"
+patches:
+  "2.42.8":
+    - patch_file: "patches/define_dllmain_only_when_shared.patch"
+      patch_type: "portability"
+      patch_description: Disable relocation when built as a static libary on Windows
+      patch_source: "https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/136"

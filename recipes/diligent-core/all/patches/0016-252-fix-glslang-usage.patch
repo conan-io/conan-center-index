@@ -1,0 +1,28 @@
+diff --git a/Graphics/ShaderTools/CMakeLists.txt b/Graphics/ShaderTools/CMakeLists.txt
+index c2dd85f3..cc83e707 100644
+--- a/Graphics/ShaderTools/CMakeLists.txt
++++ b/Graphics/ShaderTools/CMakeLists.txt
+@@ -150,8 +150,8 @@ if(ENABLE_SPIRV)
+     if (${USE_GLSLANG})
+         target_link_libraries(Diligent-ShaderTools
+         PRIVATE
+-            SPIRV
+-            glslang
++            SPIRV-Tools-opt
++            glslang::SPIRV glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OSDependent glslang::OGLCompiler glslang::HLSL
+         )
+     endif()
+ endif()
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index 86606aeb..f2d84497 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -60,7 +60,7 @@ if (VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         set(THIRD_PARTY_LIBS SPIRV-Tools-static SPIRV-Tools-opt)
+     endif()
+ 
+-    if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang))
++    if (NOT ${DILIGENT_NO_GLSLANG} AND (NOT TARGET glslang::glslang))
+         set(ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Do not build glslang binaries")
+         set(ENABLE_SPVREMAPPER OFF CACHE BOOL "Do not build SPIRV remapper")
+         set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip glslang installation")

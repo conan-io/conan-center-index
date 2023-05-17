@@ -1,0 +1,65 @@
+diff --git a/configure b/configure
+index cbbaf77..f723154 100755
+--- a/configure
++++ b/configure
+@@ -18836,60 +18836,6 @@ fi
+   fi
+ fi
+ 
+-# Thread testing
+-
+-# We have to run the thread test near the end so we have all our symbols
+-# defined.  Cross compiling throws a warning.
+-#
+-if test "$enable_thread_safety" = yes; then
+-if test "$PORTNAME" != "win32"
+-then
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking thread safety of required library functions" >&5
+-$as_echo_n "checking thread safety of required library functions... " >&6; }
+-
+-_CFLAGS="$CFLAGS"
+-_LIBS="$LIBS"
+-CFLAGS="$CFLAGS $PTHREAD_CFLAGS -DIN_CONFIGURE"
+-LIBS="$LIBS $PTHREAD_LIBS"
+-if test "$cross_compiling" = yes; then :
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: maybe" >&5
+-$as_echo "maybe" >&6; }
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
+-*** Skipping thread test program because of cross-compile build.
+-*** Run the program in src/test/thread on the target machine.
+-" >&5
+-$as_echo "$as_me: WARNING:
+-*** Skipping thread test program because of cross-compile build.
+-*** Run the program in src/test/thread on the target machine.
+-" >&2;}
+-else
+-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-#include "$srcdir/src/test/thread/thread_test.c"
+-_ACEOF
+-if ac_fn_c_try_run "$LINENO"; then :
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+-$as_echo "yes" >&6; }
+-else
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+-$as_echo "no" >&6; }
+-  as_fn_error $? "thread test program failed
+-This platform is not thread-safe.  Check the file 'config.log' or compile
+-and run src/test/thread/thread_test for the exact reason.
+-Use --disable-thread-safety to disable thread safety." "$LINENO" 5
+-fi
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+-  conftest.$ac_objext conftest.beam conftest.$ac_ext
+-fi
+-
+-CFLAGS="$_CFLAGS"
+-LIBS="$_LIBS"
+-else
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *** skipping thread test on Win32" >&5
+-$as_echo "$as_me: WARNING: *** skipping thread test on Win32" >&2;}
+-fi
+-fi
+-
+ # If compiler will take -Wl,--as-needed (or various platform-specific
+ # spellings thereof) then add that to LDFLAGS.  This is much easier than
+ # trying to filter LIBS to the minimum for each executable.

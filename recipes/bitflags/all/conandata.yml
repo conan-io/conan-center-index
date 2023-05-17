@@ -1,0 +1,4 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/m-peko/bitflags/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: 1ea19e03e05e8e78faf0126a1a100e591467828bc816224e9cda330b104e69b5

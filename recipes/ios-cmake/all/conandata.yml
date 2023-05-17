@@ -1,0 +1,13 @@
+sources:
+  "3.1.2":
+    url: "https://github.com/leetal/ios-cmake/archive/3.1.2.zip"
+    sha256: "040f7de9a1b418540e1463d1c6fcd11e338ab723b9b4b660b7e7a2997f0a119b"
+  "4.0.0":
+    url: "https://github.com/leetal/ios-cmake/archive/4.0.0.zip"
+    sha256: "2e0dcf00cd46ae808d85666ce4ce38ecd8875925588647295d41e97c874ad0b3"
+  "4.1.1":
+    url: "https://github.com/leetal/ios-cmake/archive/4.1.1.zip"
+    sha256: "4011d4b363f5905041c424d11b185e99eb516c9d1c5f6d193b1d9a4b6907500e"
+  "4.2.0":
+    url: "https://github.com/leetal/ios-cmake/archive/4.2.0.zip"
+    sha256: "abcae0619751dd46d825f0f341d9a5c1a13bbe8fa84f9a62f09652087f64f87f"

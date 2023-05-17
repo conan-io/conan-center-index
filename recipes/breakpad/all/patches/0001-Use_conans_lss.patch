@@ -1,0 +1,258 @@
+diff --color -ur Makefile.in Makefile.in
+--- Makefile.in	2021-05-21 15:56:41.000000000 -0300
++++ Makefile.in	2021-05-27 18:57:23.986912433 -0300
+@@ -2082,7 +2082,7 @@
+ HEADERS = $(includec_HEADERS) $(includecl_HEADERS) \
+ 	$(includeclc_HEADERS) $(includecldwc_HEADERS) \
+ 	$(includeclh_HEADERS) $(includeclm_HEADERS) \
+-	$(includegbc_HEADERS) $(includelss_HEADERS) \
++	$(includegbc_HEADERS) \
+ 	$(includep_HEADERS)
+ am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+ # Read a list of newline-separated strings from the standard input,
+@@ -9718,7 +9718,7 @@
+ 	install-includeclHEADERS install-includeclcHEADERS \
+ 	install-includecldwcHEADERS install-includeclhHEADERS \
+ 	install-includeclmHEADERS install-includegbcHEADERS \
+-	install-includelssHEADERS install-includepHEADERS \
++	iinstall-includepHEADERS \
+ 	install-pkgconfigDATA
+ 
+ install-dvi: install-dvi-am
+@@ -10084,7 +10084,7 @@
+ 	install-includeclHEADERS install-includeclcHEADERS \
+ 	install-includecldwcHEADERS install-includeclhHEADERS \
+ 	install-includeclmHEADERS install-includegbcHEADERS \
+-	install-includelssHEADERS install-includepHEADERS install-info \
++	iinstall-includepHEADERS install-info \
+ 	install-info-am install-libLIBRARIES install-libexecPROGRAMS \
+ 	install-man install-pdf install-pdf-am install-pkgconfigDATA \
+ 	install-ps install-ps-am install-strip installcheck \
+diff --color -ur src/client/linux/crash_generation/crash_generation_client.cc src/client/linux/crash_generation/crash_generation_client.cc
+--- src/client/linux/crash_generation/crash_generation_client.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/crash_generation/crash_generation_client.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -37,7 +37,7 @@
+ 
+ #include "common/linux/eintr_wrapper.h"
+ #include "common/linux/ignore_ret.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/client/linux/handler/exception_handler.cc src/client/linux/handler/exception_handler.cc
+--- src/client/linux/handler/exception_handler.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/handler/exception_handler.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -95,7 +95,7 @@
+ #include "client/linux/minidump_writer/linux_dumper.h"
+ #include "client/linux/minidump_writer/minidump_writer.h"
+ #include "common/linux/eintr_wrapper.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ #if defined(__ANDROID__)
+ #include "linux/sched.h"
+diff --color -ur src/client/linux/handler/exception_handler_unittest.cc src/client/linux/handler/exception_handler_unittest.cc
+--- src/client/linux/handler/exception_handler_unittest.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/handler/exception_handler_unittest.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -50,7 +50,7 @@
+ #include "common/linux/linux_libc_support.h"
+ #include "common/tests/auto_tempdir.h"
+ #include "common/using_std_string.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ #include "google_breakpad/processor/minidump.h"
+ 
+ using namespace google_breakpad;
+diff --color -ur src/client/linux/log/log.cc src/client/linux/log/log.cc
+--- src/client/linux/log/log.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/log/log.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -33,7 +33,7 @@
+ #include <android/log.h>
+ #include <dlfcn.h>
+ #else
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ #endif
+ 
+ namespace logger {
+diff --color -ur src/client/linux/minidump_writer/cpu_set.h src/client/linux/minidump_writer/cpu_set.h
+--- src/client/linux/minidump_writer/cpu_set.h	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/cpu_set.h	2021-05-27 18:57:23.990912414 -0300
+@@ -35,7 +35,7 @@
+ #include <string.h>
+ 
+ #include "common/linux/linux_libc_support.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/client/linux/minidump_writer/directory_reader.h src/client/linux/minidump_writer/directory_reader.h
+--- src/client/linux/minidump_writer/directory_reader.h	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/directory_reader.h	2021-05-27 18:57:23.990912414 -0300
+@@ -38,7 +38,7 @@
+ #include <string.h>
+ 
+ #include "common/linux/linux_libc_support.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/client/linux/minidump_writer/line_reader.h src/client/linux/minidump_writer/line_reader.h
+--- src/client/linux/minidump_writer/line_reader.h	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/line_reader.h	2021-05-27 18:57:23.990912414 -0300
+@@ -35,7 +35,7 @@
+ #include <string.h>
+ 
+ #include "common/linux/linux_libc_support.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/client/linux/minidump_writer/linux_dumper.cc src/client/linux/minidump_writer/linux_dumper.cc
+--- src/client/linux/minidump_writer/linux_dumper.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/linux_dumper.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -51,7 +51,7 @@
+ #include "common/linux/memory_mapped_file.h"
+ #include "common/linux/safe_readlink.h"
+ #include "google_breakpad/common/minidump_exception_linux.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ #if defined(__ANDROID__)
+ 
+diff --color -ur src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
+--- src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -39,7 +39,7 @@
+ #include <unistd.h>
+ 
+ #include "common/scoped_ptr.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ #if defined(__ARM_EABI__)
+ #define TID_PTR_REGISTER "r3"
+diff --color -ur src/client/linux/minidump_writer/linux_ptrace_dumper.cc src/client/linux/minidump_writer/linux_ptrace_dumper.cc
+--- src/client/linux/minidump_writer/linux_ptrace_dumper.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/linux_ptrace_dumper.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -57,7 +57,7 @@
+ #include "client/linux/minidump_writer/directory_reader.h"
+ #include "client/linux/minidump_writer/line_reader.h"
+ #include "common/linux/linux_libc_support.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ // Suspends a thread by attaching to it.
+ static bool SuspendThread(pid_t pid) {
+diff --color -ur src/client/linux/minidump_writer/minidump_writer.cc src/client/linux/minidump_writer/minidump_writer.cc
+--- src/client/linux/minidump_writer/minidump_writer.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/minidump_writer.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -77,7 +77,7 @@
+ #include "common/linux/linux_libc_support.h"
+ #include "common/minidump_type_helper.h"
+ #include "google_breakpad/common/minidump_format.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace {
+ 
+diff --color -ur src/client/linux/minidump_writer/proc_cpuinfo_reader.h src/client/linux/minidump_writer/proc_cpuinfo_reader.h
+--- src/client/linux/minidump_writer/proc_cpuinfo_reader.h	2021-05-21 15:56:41.000000000 -0300
++++ src/client/linux/minidump_writer/proc_cpuinfo_reader.h	2021-05-27 18:57:23.990912414 -0300
+@@ -36,7 +36,7 @@
+ 
+ #include "client/linux/minidump_writer/line_reader.h"
+ #include "common/linux/linux_libc_support.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/client/minidump_file_writer.cc src/client/minidump_file_writer.cc
+--- src/client/minidump_file_writer.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/client/minidump_file_writer.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -41,7 +41,7 @@
+ #include "common/linux/linux_libc_support.h"
+ #include "common/string_conversion.h"
+ #if defined(__linux__) && __linux__
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ #endif
+ 
+ #if defined(__ANDROID__)
+diff --color -ur src/common/linux/file_id.cc src/common/linux/file_id.cc
+--- src/common/linux/file_id.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/common/linux/file_id.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -46,7 +46,7 @@
+ #include "common/linux/linux_libc_support.h"
+ #include "common/linux/memory_mapped_file.h"
+ #include "common/using_std_string.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/common/linux/memory_mapped_file.cc src/common/linux/memory_mapped_file.cc
+--- src/common/linux/memory_mapped_file.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/common/linux/memory_mapped_file.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -40,7 +40,7 @@
+ #include <unistd.h>
+ 
+ #include "common/memory_range.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/common/linux/safe_readlink.cc src/common/linux/safe_readlink.cc
+--- src/common/linux/safe_readlink.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/common/linux/safe_readlink.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -32,7 +32,7 @@
+ 
+ #include <stddef.h>
+ 
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace google_breakpad {
+ 
+diff --color -ur src/common/memory_allocator.h src/common/memory_allocator.h
+--- src/common/memory_allocator.h	2021-05-21 15:56:41.000000000 -0300
++++ src/common/memory_allocator.h	2021-05-27 18:57:23.990912414 -0300
+@@ -47,7 +47,7 @@
+ #define sys_munmap munmap
+ #define MAP_ANONYMOUS MAP_ANON
+ #else
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ #endif
+ 
+ namespace google_breakpad {
+diff --color -ur src/processor/testdata/linux_test_app.cc src/processor/testdata/linux_test_app.cc
+--- src/processor/testdata/linux_test_app.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/processor/testdata/linux_test_app.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -46,7 +46,7 @@
+ #include <string>
+ 
+ #include "client/linux/handler/exception_handler.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ 
+ namespace {
+ 
+diff --color -ur src/tools/linux/md2core/minidump-2-core.cc src/tools/linux/md2core/minidump-2-core.cc
+--- src/tools/linux/md2core/minidump-2-core.cc	2021-05-21 15:56:41.000000000 -0300
++++ src/tools/linux/md2core/minidump-2-core.cc	2021-05-27 18:57:23.990912414 -0300
+@@ -52,7 +52,7 @@
+ #include "common/using_std_string.h"
+ #include "google_breakpad/common/breakpad_types.h"
+ #include "google_breakpad/common/minidump_format.h"
+-#include "third_party/lss/linux_syscall_support.h"
++#include <linux_syscall_support.h>
+ #include "tools/linux/md2core/minidump_memory_range.h"
+ 
+ #if ULONG_MAX == 0xffffffffffffffff

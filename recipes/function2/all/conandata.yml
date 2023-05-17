@@ -1,0 +1,13 @@
+sources:
+  "4.2.2":
+    url: "https://github.com/Naios/function2/archive/refs/tags/4.2.2.tar.gz"
+    sha256: "f755cb79712dfb9ceefcf7f7ff3225f7c99d22a164dae109044dbfad55d7111e"
+  "4.2.1":
+    url: "https://github.com/Naios/function2/archive/4.2.1.tar.gz"
+    sha256: "dfaf12f6cc4dadc4fc7051af7ac57be220c823aaccfd2fecebcb45a0a03a6eb0"
+  "4.2.0":
+    url: "https://github.com/Naios/function2/archive/4.2.0.tar.gz"
+    sha256: "fd1194b236e55f695c3a0c17f2440d6965b800c9309d0d5937e0185bcfe7ae6e"
+  "4.1.0":
+    sha256: "C3AAEAF93BF90C0F4505A18F1094B51FE28881CE202C3BF78EC4EFB336C51981"
+    url: "https://github.com/Naios/function2/archive/4.1.0.tar.gz"

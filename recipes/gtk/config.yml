@@ -1,0 +1,19 @@
+versions:
+    "system":
+        folder: "system"
+    "4.7.0":
+        folder: all
+    "4.6.2":
+        folder: all
+    "4.4.0":
+        folder: all
+    "4.3.2":
+        folder: all
+    "4.2.1":
+        folder: all
+    "4.1.2":
+        folder: all
+    "4.0.2":
+        folder: all
+    "3.24.24":
+        folder: all

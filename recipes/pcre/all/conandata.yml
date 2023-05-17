@@ -1,0 +1,17 @@
+sources:
+  "8.45":
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.bz2"
+    sha256: "4dae6fdcd2bb0bb6c37b5f97c33c2be954da743985369cddac3546e3218bffb8"
+  "8.44":
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.44/pcre-8.44.tar.bz2"
+    sha256: "19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
+  "8.41":
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.41/pcre-8.41.tar.bz2"
+    sha256: "e62c7eac5ae7c0e7286db61ff82912e1c0b7a0c13706616e94a7dd729321b530"
+patches:
+  "8.45":
+    - patch_file: "patches/0001-fix-cmake-8.45.patch"
+  "8.44":
+    - patch_file: "patches/0001-fix-cmake-8.41.patch"
+  "8.41":
+    - patch_file: "patches/0001-fix-cmake-8.41.patch"

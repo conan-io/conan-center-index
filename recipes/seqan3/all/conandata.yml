@@ -1,0 +1,4 @@
+sources:
+  "3.1.0":
+    url: https://github.com/seqan/seqan3/releases/download/3.1.0/seqan3-3.1.0-Source.tar.xz
+    sha256: 0b37b1c3450e19c0ebe42c052c3f87babb8074bd772f10a553949c312c285726

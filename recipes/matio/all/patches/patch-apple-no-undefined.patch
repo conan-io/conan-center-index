@@ -1,0 +1,17 @@
+--- a/cmake/src.cmake
++++ b/cmake/src.cmake
+@@ -37,8 +37,12 @@ if(STDINT_MSVC)
+ endif()
+ 
+ if(NOT MSVC)
+-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--retain-symbols-file,${PROJECT_SOURCE_DIR}/src/matio.sym")
++    if(APPLE)
++        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
++    else()
++        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
++        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--retain-symbols-file,${PROJECT_SOURCE_DIR}/src/matio.sym")
++    endif()
+ endif()
+ 
+ if(MATIO_SHARED)

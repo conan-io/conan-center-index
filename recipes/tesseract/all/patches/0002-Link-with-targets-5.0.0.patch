@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cf554090..98e0f843 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -696,7 +696,7 @@ if(OpenMP_CXX_FOUND)
+     target_link_libraries(libtesseract PUBLIC OpenMP::OpenMP_CXX)
+ endif()
+ if(LibArchive_FOUND)
+-    target_link_libraries(libtesseract PUBLIC ${LibArchive_LIBRARIES})
++    target_link_libraries(libtesseract PUBLIC LibArchive::LibArchive)
+ endif(LibArchive_FOUND)
+ if(CURL_FOUND)
+     if(NOT "${CURL_LIBRARIES}")
+@@ -722,7 +722,7 @@ if (SW_BUILD)
+     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/TesseractTargets.cmake "include(${CMAKE_CURRENT_BINARY_DIR}/cppan.cmake)\n")
+     export(TARGETS libtesseract APPEND FILE ${CMAKE_CURRENT_BINARY_DIR}/TesseractTargets.cmake NAMESPACE Tesseract::)
+ else()
+-    target_link_libraries       (libtesseract PUBLIC ${Leptonica_LIBRARIES})
++    target_link_libraries       (libtesseract PUBLIC leptonica)
+     export(TARGETS libtesseract FILE ${CMAKE_CURRENT_BINARY_DIR}/TesseractTargets.cmake NAMESPACE Tesseract::)
+ endif()
+ 

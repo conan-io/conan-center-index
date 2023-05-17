@@ -1,0 +1,27 @@
+--- Makefile.am
++++ Makefile.am
+@@ -1,9 +1,9 @@
+ ACLOCAL_AMFLAGS = -I m4
+ 
+ if ENABLE_CLIENT_ONLY 
+-SUBDIRS = safe_c_stub src java/jni example/client example/client-simple example/client-brski
++SUBDIRS = safe_c_stub src
+ else 
+-SUBDIRS = safe_c_stub src java/jni example/client example/client-simple example/server example/proxy example/client-brski
++SUBDIRS = safe_c_stub src
+ endif
+ 
+ EXTRA_DIST = autogen.sh example/util LICENSE README.brski $(srcdir)/build.gradle $(srcdir)/example/build_examples.gradle
+--- Makefile.in
++++ Makefile.in
+@@ -334,8 +334,8 @@ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ ACLOCAL_AMFLAGS = -I m4
+-@ENABLE_CLIENT_ONLY_FALSE@SUBDIRS = safe_c_stub src java/jni example/client example/client-simple example/server example/proxy example/client-brski
+-@ENABLE_CLIENT_ONLY_TRUE@SUBDIRS = safe_c_stub src java/jni example/client example/client-simple example/client-brski
++@ENABLE_CLIENT_ONLY_FALSE@SUBDIRS = safe_c_stub src
++@ENABLE_CLIENT_ONLY_TRUE@SUBDIRS = safe_c_stub src
+ EXTRA_DIST = autogen.sh example/util LICENSE README.brski $(srcdir)/build.gradle $(srcdir)/example/build_examples.gradle
+ all: all-recursive
+ 

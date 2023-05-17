@@ -1,0 +1,16 @@
+sources:
+  "2.8.2":
+    url: "https://github.com/DigitalInBlue/Celero/archive/v2.8.2.tar.gz"
+    sha256: "7d2131ba27ca5343b31f1e04777ed3e666e2ad7f785e79c960c872fc48cd5f88"
+  "2.6.0":
+    url: "https://github.com/DigitalInBlue/Celero/archive/v2.6.0.tar.gz"
+    sha256: "a5b72da254f81d42369382ba3157229b6b32ebbb670a22b185f80db95535e66e"
+patches:
+  "2.8.2":
+    - patch_file: "patches/0004-2.8.2-missing-include.patch"
+    - patch_file: "patches/0005-drop-runtime.patch"
+  "2.6.0":
+    - patch_file: "patches/0001-cmake-install-pic-cxx-standard-sytem-libs.patch"
+    - patch_file: "patches/0002-lowercase-include-system-libs-windows.patch"
+    - patch_file: "patches/0003-typo-declspec.patch"
+    - patch_file: "patches/0004-2.6.0-missing-include.patch"

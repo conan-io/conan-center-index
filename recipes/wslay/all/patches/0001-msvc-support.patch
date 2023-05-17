@@ -1,0 +1,74 @@
+diff --git a/.gitignore b/.gitignore
+index 189ef71..227efd3 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,7 +11,6 @@ missing
+ autom4te.cache/
+ config.guess
+ config.h
+-config.h.in
+ config.log
+ config.status
+ config.sub
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 026be11..c59404e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,6 +18,10 @@ option(WSLAY_SHARED "Build shared version of the library" OFF)
+ option(WSLAY_EXAMPLES "Build examples" OFF)
+ option(WSLAY_TESTS "Build tests" OFF)
+ 
++if(WSLAY_SHARED)
++    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
++endif()
++
+ add_subdirectory(lib)
+ if(WSLAY_EXAMPLES)
+ 	add_subdirectory(examples)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 4af972e..96b5392 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -8,7 +8,9 @@ set(PACKAGE_VERSION "1.0.1-DEV")
+ set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/includes)
+ set(GEN_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/includes)
+ 
+-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pedantic-errors -Wno-long-long")
++if(NOT MSVC)
++    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-long-long")
++endif()
+ 
+ include(CheckIncludeFile)
+ include(TestBigEndian)
+@@ -40,10 +42,16 @@ set(WSLAY_TARGETS)
+ if(WSLAY_STATIC)
+ 	add_library(wslay STATIC ${SOURCES} ${HEADERS})
+ 	list(APPEND WSLAY_TARGETS wslay)
++    if(MSVC)
++        target_link_libraries(wslay PUBLIC ws2_32)
++    endif()
+ endif()
+ if(WSLAY_SHARED)
+ 	add_library(wslay_shared SHARED ${SOURCES} ${HEADERS})
+ 	list(APPEND WSLAY_TARGETS wslay_shared)
++    if(MSVC)
++        target_link_libraries(wslay_shared PUBLIC ws2_32)
++    endif()
+ endif()
+ 
+ foreach(target ${WSLAY_TARGETS})
+diff --git a/lib/includes/wslay/wslay.h b/lib/includes/wslay/wslay.h
+index 2fde81a..81d3e03 100644
+--- a/lib/includes/wslay/wslay.h
++++ b/lib/includes/wslay/wslay.h
+@@ -33,6 +33,10 @@ extern "C" {
+ #include <stdlib.h>
+ #include <sys/types.h>
+ 
++#ifdef _MSC_VER
++#include <BaseTsd.h>
++typedef SSIZE_T ssize_t;
++#endif
+ 
+ /*
+  * wslay/wslayver.h is generated from wslay/wslayver.h.in by

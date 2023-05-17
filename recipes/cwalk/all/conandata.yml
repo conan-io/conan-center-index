@@ -1,0 +1,32 @@
+sources:
+  "1.2.7":
+    url: "https://github.com/likle/cwalk/archive/v1.2.7.tar.gz"
+    sha256: "ae424ec30830c970412e34d9092eaa6131d91af289cdad0ad66a7b1c58e768e7"
+  "1.2.6":
+    url: "https://github.com/likle/cwalk/archive/v1.2.6.tar.gz"
+    sha256: "4e7c0e9e30e93343ebc9d5dc3ffc1703b3abb05baf8d8a3ab05a75b69a65a3ef"
+  "1.2.5":
+    url: "https://github.com/likle/cwalk/archive/v1.2.5.tar.gz"
+    sha256: "55a24deb602a7bee822e48bda50e454d102649a8cb064300a6dabc8f0405646f"
+  "1.2.2":
+    url: "https://github.com/likle/cwalk/archive/v1.2.2.zip"
+    sha256: "62094c2bb8882fd57fe7ea00fb196e6065b363e8ca57f9c693c19f4912747d88"
+  "1.1.0":
+    url: "https://github.com/likle/cwalk/archive/v1.1.0.zip"
+    sha256: "44be1392d96bcbc66fb24e1ec5ecab273ee5add6ad8e2bab97552284db228e2e"
+  "1.0.0":
+    url: "https://github.com/likle/cwalk/archive/v1.0.0.zip"
+    sha256: "9ff6d85f88e7fe4877698afb40745d301491c1d3fca96f08d1622f5fe3494182"
+patches:
+  "1.2.7":
+    - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+  "1.2.6":
+    - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+  "1.2.5":
+    - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+  "1.2.2":
+    - patch_file: "patches/0001-fix-cmake-1.2.2.patch"
+  "1.1.0":
+    - patch_file: "patches/0001-fix-cmake-1.1.0.patch"
+  "1.0.0":
+    - patch_file: "patches/0001-fix-cmake-1.0.0.patch"

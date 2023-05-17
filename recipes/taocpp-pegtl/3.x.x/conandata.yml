@@ -1,0 +1,22 @@
+sources:
+  "3.2.7":
+    url: "https://github.com/taocpp/PEGTL/archive/3.2.7.tar.gz"
+    sha256: "d6cd113d8bd14e98bcbe7b7f8fc1e1e33448dc359e8cd4cca30e034ec2f0642d"
+  "3.2.6":
+    url: "https://github.com/taocpp/PEGTL/archive/refs/tags/3.2.6.tar.gz"
+    sha256: "0ad229e47e5e865c90788bb9865447804c72dcb171b7402f6f0fe8c78f3b2035"
+  "3.2.5":
+    url: "https://github.com/taocpp/PEGTL/archive/refs/tags/3.2.5.tar.gz"
+    sha256: "4ecefe4151b14684a944dde57e68c98e00224e5fea055c263e1bfbed24a99827"
+  "3.2.1":
+    url: "https://github.com/taocpp/PEGTL/archive/3.2.1.tar.gz"
+    sha256: "af33818352bc0b73c66aa9bc037735ce43d471533f1078ee828ba7e09962847d"
+  "3.2.0":
+    url: "https://github.com/taocpp/PEGTL/archive/3.2.0.tar.gz"
+    sha256: "3816d1a26afc04513df172678444377e0e35b9473f1f7ff85189589b831298f1"
+  "3.1.0":
+    url: "https://github.com/taocpp/PEGTL/archive/3.1.0.tar.gz"
+    sha256: "591685fa4a0dc99869688a7bd01c84d750bee180dd3625a91f84e2c7b0486059"
+  "3.0.0":
+    url: "https://github.com/taocpp/PEGTL/archive/3.0.0.tar.gz"
+    sha256: "b47af025450f5c12251cd831f90deab666e18a8029f3dbffb32672b0450af902"

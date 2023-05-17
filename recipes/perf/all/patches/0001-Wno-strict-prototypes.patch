@@ -1,0 +1,14 @@
+diff --git a/tools/perf/util/Build b/tools/perf/util/Build
+--- tools/perf/util/Build
++++ tools/perf/util/Build
+@@ -255,9 +255,9 @@
+ 
+ bison_flags := -DYYENABLE_NLS=0
+ BISON_GE_35 := $(shell expr $(shell $(BISON) --version | grep bison | sed -e 's/.\+ \([0-9]\+\).\([0-9]\+\)/\1\2/g') \>\= 35)
+ ifeq ($(BISON_GE_35),1)
+-  bison_flags += -Wno-unused-parameter -Wno-nested-externs -Wno-implicit-function-declaration -Wno-switch-enum
++  bison_flags += -Wno-unused-parameter -Wno-nested-externs -Wno-implicit-function-declaration -Wno-switch-enum -Wno-strict-prototypes
+ else
+   bison_flags += -w
+ endif
+ CFLAGS_parse-events-bison.o += $(bison_flags)
