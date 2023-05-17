@@ -4,7 +4,7 @@ from conan.tools.files import symlinks, rmdir, get, replace_in_file, rename, chd
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuild, is_msvc
+from conan.tools.microsoft import MSBuild, is_msvc, MSBuildToolchain, VCVars
 import os
 
 
