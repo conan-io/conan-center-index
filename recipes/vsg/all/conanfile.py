@@ -16,6 +16,7 @@ class VsgConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vulkanscenegraph.org"
     topics = ("vulkan", "scenegraph", "graphics", "3d")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,13 +54,12 @@ class VsgConan(ConanFile):
         self.requires("vulkan-loader/1.3.204.0", transitive_headers=True)
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
         
         if is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
+            raise ConanInvalidConfiguration(f"{self.name} does not support MSVC static runtime (MT/MTd) configurations, only dynamic runtime (MD/MDd) is supported")
             
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
@@ -75,7 +75,6 @@ class VsgConan(ConanFile):
         if self.version == "1.0.3":
             self.run("git clone https://github.com/vsg-dev/glslang.git src/glslang")
             self.run("cd src/glslang && git reset --hard e4075496f6895ce6b747a6690ba13fa3836a93e5")
-        
         
         
     def generate(self):
