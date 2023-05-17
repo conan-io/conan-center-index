@@ -25,8 +25,8 @@ class ArmGnuToolchain(ConanFile):
     @property
     def download_info(self):
         version = self.version
-        os = str(self.settings.os)
-        arch = str(self.settings.arch)
+        os = str(self.settings_build.os)
+        arch = str(self.settings_build.arch)
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
     @property
@@ -90,7 +90,6 @@ class ArmGnuToolchain(ConanFile):
         self.conf_info.define(
             "tools.cmake.cmaketoolchain:system_processor", "ARM")
         self.conf_info.define("tools.build.cross_building:can_run", False)
-
         self.conf_info.define("tools.build:compiler_executables", {
             "c": "arm-none-eabi-gcc",
             "cpp": "arm-none-eabi-g++",
