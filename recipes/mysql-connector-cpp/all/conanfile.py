@@ -12,7 +12,7 @@ class mysql_connector_cxxRecipe(ConanFile):
     url = "https://github.com/samuaz/libmysqlcppconn-conan"
     homepage = "https://dev.mysql.com/doc/connector-cpp/8.0"
     description = "A Conan package for MySQL Connector/C++ with OpenSSL, Boost, and libmysqlclient"
-    topics = ("conan", "mysql", "connector", "cpp", "openssl", "boost", "libmysqlclient", "jdbc", "static")
+    topics = ("mysql", "connector", "cpp", "openssl", "boost", "libmysqlclient", "jdbc", "static")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
