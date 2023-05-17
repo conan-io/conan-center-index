@@ -160,6 +160,12 @@ class MdnsResponderConan(ConanFile):
             tc.generate()
             tc = AutotoolsDeps(self)
             tc.generate()
+        elif is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.configuration = "Debug" if self.settings.build_type == "Debug" else "Release"
+            tc.generate()
+            tc = VCVars(self)
+            tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
