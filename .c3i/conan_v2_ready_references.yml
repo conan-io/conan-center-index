@@ -475,6 +475,7 @@ required_for_references:
 - paho-mqtt-cpp
 - patchelf
 - pcapplusplus
+- pcg-cpp
 - pcre
 - pcre2
 - pdfgen
