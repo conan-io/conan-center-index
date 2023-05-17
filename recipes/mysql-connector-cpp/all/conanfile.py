@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 
-class mysql_connector_cxxRecipe(ConanFile):
+class MysqlConnectorCPPRecipe(ConanFile):
     name = "mysql-connector-cpp"
     license = "GPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -19,7 +19,7 @@ class mysql_connector_cxxRecipe(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) >= "8.0.27" else "11"
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
