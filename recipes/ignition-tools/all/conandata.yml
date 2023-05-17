@@ -1,7 +1,7 @@
 sources:
   "1.4.0":
     url: "https://github.com/ignitionrobotics/ign-tools/archive/refs/tags/ignition-tools_1.4.0.tar.gz"
-    sha256: "fa3f7984ebb8f412133ea93368395adce426ae36c715a9f94f9509af7dac3b03"
+    sha256: "8ceebefcd1977dc2e26beede347a9c06d851b89ec0fd7d5c86126f43a49ac178"
 patches:
   "1.4.0":
     - base_path: "source_subfolder"
