@@ -15,7 +15,7 @@ class mysql_connector_cxxRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = ("boost/1.81.0", "openssl/1.1.1t", "libmysqlclient/8.0.31")
+    requires = ("boost/1.81.0", "openssl/[>=1.1 <4]", "libmysqlclient/8.0.31")
 
     @property
     def _min_cppstd(self):
