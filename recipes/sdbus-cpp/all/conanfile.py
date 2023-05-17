@@ -55,7 +55,7 @@ class SdbusCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libsystemd/251.4")
+        self.requires("libsystemd/253.3")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -72,9 +72,9 @@ class SdbusCppConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("pkgconf/1.9.3")
         if self.options.with_code_gen:
-            self.tool_requires("expat/2.4.8")
+            self.tool_requires("expat/2.5.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
