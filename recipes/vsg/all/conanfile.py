@@ -50,7 +50,7 @@ class VsgConan(ConanFile):
             self.options.rm_safe("fPIC")
        
     def requirements(self):
-        self.requires("vulkan-loader/1.3.204.0")
+        self.requires("vulkan-loader/1.3.204.0", transitive_headers=True)
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
