@@ -81,7 +81,7 @@ class VsgConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 1 if self.options.shader_compiler else 0
         tc.variables["VSG_MAX_DEVICES"] = self.options.max_devices
