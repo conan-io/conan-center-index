@@ -57,7 +57,7 @@ class GRPCProto(ConanFile):
        # protobuf symbols are exposed from generated structures
        # https://github.com/conan-io/conan-center-index/pull/16185#issuecomment-1501174215
         self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True, run=can_run(self))
-        self.requires("googleapis/cci.20230501")
+        self.requires("googleapis/[>=cci.20221108]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
