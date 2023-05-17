@@ -62,7 +62,12 @@ class GrpcConan(ConanFile):
 
     @property
     def _cxxstd_required(self):
-        return 14 if Version(self.version) >= "1.47" else 11
+        if Version(self.version) >= "1.54":
+            return 17
+        elif Version(self.version) >= "1.47":
+            return 14
+        else:
+            return 11
 
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -324,7 +329,7 @@ class GrpcConan(ConanFile):
                     "upb", "abseil::absl_base", "abseil::absl_memory",
                     "abseil::absl_status", "abseil::absl_str_format",
                     "abseil::absl_strings", "abseil::absl_synchronization",
-                    "abseil::absl_time", "abseil::absl_optional",
+                    "abseil::absl_time", "abseil::absl_optional", "abseil::absl_flags",
                 ],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
