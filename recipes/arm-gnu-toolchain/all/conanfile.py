@@ -30,9 +30,9 @@ class ArmGnuToolchain(ConanFile):
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
     @property
-    def license_info(self):
+    def license_id(self):
         version = self.version
-        return self.conan_data.get("sources", {}).get(version, {}).get("license")
+        return self.conan_data.get("sources", {}).get(version, {}).get("license_id")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -49,6 +49,10 @@ class ArmGnuToolchain(ConanFile):
         pass
 
     def build(self):
+        license_base_url = "https://developer.arm.com/GetEula?Id="
+        license_url = license_base_url + self.license_id
+        urllib.request.urlretrieve(license_url, "LICENSE")
+
         url = self.download_info["url"]
         url = url + "?rev=" + self.download_info["rev"]
         url = url + "&hash=" + self.download_info["hash"]
@@ -59,10 +63,6 @@ class ArmGnuToolchain(ConanFile):
         urllib.request.urlretrieve(url, filename)
         check_sha256(self, filename, self.download_info["sha256"])
         unzip(self, filename, strip_root=True)
-
-        license_base_url = "https://developer.arm.com/GetEula?Id="
-        license_url = license_base_url + self.license_info["id"]
-        urllib.request.urlretrieve(license_url, "LICENSE")
 
     def package(self):
         destination = os.path.join(self.package_folder, "bin/")
@@ -85,9 +85,10 @@ class ArmGnuToolchain(ConanFile):
              dst=license_dir, keep_path=True)
 
     def package_info(self):
-        # bin_folder = os.path.join(self.package_folder, "bin/bin")
-        # self.cpp_info.bindirs = [bin_folder]
-        # self.buildenv_info.append_path("PATH", bin_folder)
+        bin_folder = os.path.join(self.package_folder, "bin/bin")
+        self.cpp_info.bindirs = [bin_folder]
+        self.buildenv_info.append_path("PATH", bin_folder)
+
         self.conf_info.define(
             "tools.cmake.cmaketoolchain:system_name", "GENERIC")
         self.conf_info.define(

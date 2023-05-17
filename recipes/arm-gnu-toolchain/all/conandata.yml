@@ -1,7 +1,6 @@
 sources:
   "11.3.0":
-    "license":
-      id: "ff19df33-da82-491a-ab50-c605d4589a26"
+    "license_id": "ff19df33-da82-491a-ab50-c605d4589a26"
     "Linux":
       "x86_64":
         url: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz"
@@ -26,8 +25,7 @@ sources:
         rev: "82f0e95b5a7740d9899e6ce375df8106"
         hash: "E8C79FCFC43534AC1D691CBEE00F34D0"
   "12.2.1":
-    "license":
-      id: "2821586b-44d0-4e75-a06d-4279cd97eaae"
+    "license_id": "2821586b-44d0-4e75-a06d-4279cd97eaae"
     "Linux":
       "x86_64":
         url: "https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz"

@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_TOOLCHAIN_FILE ../test_package/toolchain.cmake)
 
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR ARM)
-
 project(test_package LANGUAGES CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
