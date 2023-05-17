@@ -8,8 +8,7 @@ from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 class mysql_connector_cxxRecipe(ConanFile):
     name = "mysql-connector-cpp"
     license = "GPL-2.0"
-    author = "Samuel Aazcona <samuel@gmail.com>"
-    url = "https://github.com/samuaz/libmysqlcppconn-conan"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://dev.mysql.com/doc/connector-cpp/8.0"
     description = "A Conan package for MySQL Connector/C++ with OpenSSL, Boost, and libmysqlclient"
     topics = ("mysql", "connector", "cpp", "openssl", "boost", "libmysqlclient", "jdbc", "static")
