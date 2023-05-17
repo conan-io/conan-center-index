@@ -58,7 +58,7 @@ class VsgConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
         
-        if is_msvc(self) and self.settings.compiler.runtime in ["MTd", "MT"]:
+        if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.name} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
             
         if not is_msvc(self):
