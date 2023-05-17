@@ -10,6 +10,7 @@ class TurtleConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mat007/turtle"
     license = "BSL-1.0"
+    package_type = "header-library"
 
     def requirements(self):
         self.requires("boost/1.81.0")
