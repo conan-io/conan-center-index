@@ -56,7 +56,9 @@ class GStreamerConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.1.0")
-        self.tool_requires("glib/2.76.2")
+        # Avoid issues when glib is shared by default but all its dependencies are static
+        # please see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
+        self.tool_requires("glib/2.76.2", options={"shared": False})
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
