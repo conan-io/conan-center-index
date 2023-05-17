@@ -4,8 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import can_run
 
-
-class mysql_connector_cxxTestConan(ConanFile):
+class MysqlConnectorCPPRecipeTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
 
