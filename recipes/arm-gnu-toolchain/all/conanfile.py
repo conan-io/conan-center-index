@@ -15,11 +15,11 @@ class ArmGnuToolchain(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
     description = ("Conan installer for the GNU Arm Embedded Toolchain")
-    topics = ("gcc", "compiler", "embedded", "ARM", "cortex", "cortex-m",
+    topics = ("gcc", "compiler", "embedded", "arm", "cortex", "cortex-m",
               "cortex-m0", "cortex-m0+", "cortex-m1", "cortex-m3", "cortex-m4",
               "cortex-m4f", "cortex-m7", "cortex-m23", "cortex-m55",
               "cortex-m35p", "cortex-m33")
-    settings = "os", "arch"
+    settings = "os", "arch", 'compiler', 'build_type'
     short_paths = True
 
     @property
@@ -33,6 +33,10 @@ class ArmGnuToolchain(ConanFile):
     def license_info(self):
         version = self.version
         return self.conan_data.get("sources", {}).get(version, {}).get("license")
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def validate(self):
         if str(self.settings.os) == "baremetal":
@@ -81,10 +85,9 @@ class ArmGnuToolchain(ConanFile):
              dst=license_dir, keep_path=True)
 
     def package_info(self):
-        bin_folder = os.path.join(self.package_folder, "bin/bin")
-        self.cpp_info.bindirs = [bin_folder]
-        self.buildenv_info.append_path("PATH", bin_folder)
-
+        # bin_folder = os.path.join(self.package_folder, "bin/bin")
+        # self.cpp_info.bindirs = [bin_folder]
+        # self.buildenv_info.append_path("PATH", bin_folder)
         self.conf_info.define(
             "tools.cmake.cmaketoolchain:system_name", "GENERIC")
         self.conf_info.define(
