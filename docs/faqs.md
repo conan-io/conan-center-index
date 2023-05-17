@@ -35,7 +35,7 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
-  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
+  * [What's the policy on version ranges?](#whats-the-policy-on-version-ranges)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
@@ -369,9 +369,10 @@ need to modify your project if the recipe changes the binaries, flags,... it pro
 To isolate from these changes there are different strategies you can follow.
 Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
-## Why are version ranges not allowed?
+## What's the policy on version ranges?
 
-See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
+Version ranges are currently allowed on a handful of dependencies, but not for general use.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for additional details.
 
 ## How to consume a graph of shared libraries?
 
