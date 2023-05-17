@@ -173,7 +173,7 @@ class BotanConan(ConanFile):
                (compiler == 'gcc' and compiler_version < '8') or \
                (compiler == 'clang' and compiler_version < '7'):
                 raise ConanInvalidConfiguration(
-                    'botan amalgamation is not supported for {}/{}'.format(compiler, version))
+                    'botan amalgamation is not supported for {}/{}'.format(compiler, compiler_version))
 
         if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
             raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
@@ -188,9 +188,9 @@ class BotanConan(ConanFile):
             self.run(self._make_cmd)
 
     def package(self):
-        copy(self, pattern='license.txt', dst='licenses', src=self._source_subfolder)
-        with chdir(self, self._source_subfolder):
-            self.run(self._make_install_cmd)
+        copy(self, pattern='license.txt', dst='licenses', src='.')
+	#with chdir(self, self._source_subfolder):
+	#self.run(self._make_install_cmd)
 
     def package_info(self):
         major_version = self.version.split('.')[0]
@@ -385,7 +385,7 @@ class BotanConan(ConanFile):
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
-        prefix = unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
+        prefix = unix_path(path=self.package_folder) if self._is_mingw_windows else self.package_folder
 
         botan_abi = ' '.join(botan_abi_flags) if botan_abi_flags else ' '
         botan_cxx_extras = ' '.join(botan_extra_cxx_flags) if botan_extra_cxx_flags else ' '
