@@ -30,9 +30,10 @@ class ArmGnuToolchain(ConanFile):
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
     @property
-    def license_id(self):
-        version = self.version
-        return self.conan_data.get("sources", {}).get(version, {}).get("license_id")
+    def license_url(self):
+        license_id = "ff19df33-da82-491a-ab50-c605d4589a26"
+        license_base_url = "https://developer.arm.com/GetEula?Id="
+        return license_base_url + license_id
 
     def package_id(self):
         del self.info.settings.compiler
@@ -49,9 +50,7 @@ class ArmGnuToolchain(ConanFile):
         pass
 
     def build(self):
-        license_base_url = "https://developer.arm.com/GetEula?Id="
-        license_url = license_base_url + self.license_id
-        urllib.request.urlretrieve(license_url, "LICENSE")
+        urllib.request.urlretrieve(self.license_url, "LICENSE")
 
         url = self.download_info["url"]
         url = url + "?rev=" + self.download_info["rev"]
