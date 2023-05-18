@@ -163,6 +163,7 @@ class GLibConan(ConanFile):
             src=os.path.join(self.package_folder, "share"),
             dst=os.path.join(self.package_folder, "res"),
         )
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
