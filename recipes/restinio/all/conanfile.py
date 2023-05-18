@@ -46,7 +46,7 @@ class RestinioConan(ConanFile):
         else:
             self.requires("fmt/8.1.1")
 
-        self.requires("expected-lite/0.5.0")
+        self.requires("expected-lite/0.6.2")
         self.requires("optional-lite/3.5.0")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/2.0.0")
@@ -58,15 +58,15 @@ class RestinioConan(ConanFile):
                 self.requires("asio/1.16.1")
         else:
             if Version(self.version) >= "0.6.9":
-                self.requires("boost/1.78.0")
+                self.requires("boost/1.81.0")
             else:
                 self.requires("boost/1.73.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/1.1.1t")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
         if self.options.with_pcre == 1:
             self.requires("pcre/8.45")
