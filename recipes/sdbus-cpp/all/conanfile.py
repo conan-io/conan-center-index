@@ -18,6 +18,7 @@ class SdbusCppConan(ConanFile):
     description = "High-level C++ D-Bus library for Linux designed" \
                   " to provide easy-to-use yet powerful API in modern C++"
     topics = ("dbus", "sd-bus", "sdbus-c++")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
