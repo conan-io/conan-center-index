@@ -11,6 +11,9 @@ sources:
       "x86_64":
         url: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-darwin-x86_64-arm-none-eabi.tar.xz"
         sha256: "826353d45e7fbaa9b87c514e7c758a82f349cb7fc3fd949423687671539b29cf"
+      "armv8":
+        url: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-darwin-x86_64-arm-none-eabi.tar.xz"
+        sha256: "826353d45e7fbaa9b87c514e7c758a82f349cb7fc3fd949423687671539b29cf"
     "Windows":
       "x86_64":
         url: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-mingw-w64-i686-arm-none-eabi.zip"
