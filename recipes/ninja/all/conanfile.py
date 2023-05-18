@@ -30,6 +30,8 @@ class NinjaConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
+            # Link C++ library statically on Linux so that it can run on systems
+            # with an older C++ runtime
             tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static-libstdc++ -static-libgcc"
         tc.generate()
 
