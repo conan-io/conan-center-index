@@ -8,7 +8,6 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
-import shutil
 
 
 required_conan_version = ">=1.53.0"
@@ -160,9 +159,9 @@ class GLibConan(ConanFile):
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "libexec"))
-        shutil.move(
-            os.path.join(self.package_folder, "share"),
-            os.path.join(self.package_folder, "res"),
+        copy(self, pattern="*",
+            src=os.path.join(self.package_folder, "share"),
+            dst=os.path.join(self.package_folder, "res"),
         )
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
