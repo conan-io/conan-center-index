@@ -1,4 +1,7 @@
 sources:
+  "0.7.4":
+    url: "https://github.com/randy408/libspng/archive/refs/tags/v0.7.4.tar.gz"
+    sha256: "47ec02be6c0a6323044600a9221b049f63e1953faf816903e7383d4dc4234487"
   "0.7.3":
     url: "https://github.com/randy408/libspng/archive/refs/tags/v0.7.3.tar.gz"
     sha256: "a50cadbe808ffda1a7fab17d145f52a23b163f34b3eb3696c7ecb5a52340fc1d"
@@ -6,6 +9,10 @@ sources:
     url: "https://github.com/randy408/libspng/archive/refs/tags/v0.7.2.tar.gz"
     sha256: "4acf25571d31f540d0b7ee004f5461d68158e0a13182505376805da99f4ccc4e"
 patches:
+  "0.7.4":
+    - patch_file: "patches/0.7.4-0001-allow-miniz.patch"
+      patch_description: "add miniz option which is written in docs/BUILD.md"
+      patch_type: "portability"
   "0.7.3":
     - patch_file: "patches/0.7.3-0001-fix-dll-install.patch"
       patch_description: "fix install path"
