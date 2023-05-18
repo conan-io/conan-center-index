@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -53,20 +53,25 @@ class PackageConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            automake_conf = self.dependencies.build["automake"].conf_info
-            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
-            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", "lib -nologo")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+            # INFO: It's not able to find lib math on Windows without passing its path.
+            env.define("MATHLIB", os.path.join(self.dependencies.build["msys2"].package_folder, "usr", "lib", "libm.a"))
             env.vars(self).save_script("conanbuild_msvc")
 
+    def _patch_sources(self):
+        if is_msvc(self):
+            # INFO: MAWK_RAND_MAX is not defined when building on Windows. Use system RAND_MAX instead.
+            replace_in_file(self, os.path.join(self.source_folder, 'bi_funct.c'), 'MAWK_RAND_MAX', 'RAND_MAX')
+
     def build(self):
+        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
