@@ -2,6 +2,16 @@
 # cmake modules visible
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+# Skip Working compiler test which tends to fail in CMake due to it using build
+# target architecture flags and not host architecture flags.
+set(CMAKE_CXX_COMPILER_WORKS TRUE)
+set(CMAKE_C_COMPILER_WORKS TRUE)
+
+# Need to force system to GENERIC & ARM as leaving this to Conan will result in
+# pollution from host profile settings
+set(CMAKE_SYSTEM_NAME "GENERIC")
+set(CMAKE_SYSTEM_PROCESSOR "ARM")
+
 # Target definition
 set(TOOLCHAIN arm-none-eabi)
 

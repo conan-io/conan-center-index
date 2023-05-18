@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, check_sha256, unzip
+from conan.tools.files import get, copy
 from conan.errors import ConanException
-from urllib.parse import urlparse
 import urllib.request
 import os
 
@@ -20,13 +19,14 @@ class ArmGnuToolchain(ConanFile):
               "cortex-m4f", "cortex-m7", "cortex-m23", "cortex-m55",
               "cortex-m35p", "cortex-m33")
     settings = "os", "arch", 'compiler', 'build_type'
+    exports_sources = "toolchain.cmake"
     short_paths = True
 
     @property
     def download_info(self):
         version = self.version
-        os = str(self.settings_build.os)
-        arch = str(self.settings_build.arch)
+        os = str(self.settings.os)
+        arch = str(self.settings.arch)
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
     @property
@@ -40,9 +40,7 @@ class ArmGnuToolchain(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        if str(self.settings.os) == "baremetal":
-            return
-        elif not self.download_info:
+        if not self.download_info:
             raise ConanException(
                 "This package is not available for this operating system and architecture.")
 
@@ -50,18 +48,13 @@ class ArmGnuToolchain(ConanFile):
         pass
 
     def build(self):
+        get(self,
+            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
+            strip_root=True)
+
+        # The below command is used instead of get() to get past 403 Forbidden
+        # issues
         urllib.request.urlretrieve(self.license_url, "LICENSE")
-
-        url = self.download_info["url"]
-        url = url + "?rev=" + self.download_info["rev"]
-        url = url + "&hash=" + self.download_info["hash"]
-        filename = os.path.basename(urlparse(url).path)
-
-        # using urlretrieve over conan.tools.files.get because get results in
-        # a 405 forbidden error whereas urlretrieve does not
-        urllib.request.urlretrieve(url, filename)
-        check_sha256(self, filename, self.download_info["sha256"])
-        unzip(self, filename, strip_root=True)
 
     def package(self):
         destination = os.path.join(self.package_folder, "bin/")
@@ -79,11 +72,17 @@ class ArmGnuToolchain(ConanFile):
         copy(self, pattern="share/*", src=self.build_folder,
              dst=destination, keep_path=True)
 
-        license_dir = os.path.join(self.package_folder, "license/")
+        license_dir = os.path.join(self.package_folder, "licenses/")
         copy(self, pattern="LICENSE*", src=self.build_folder,
              dst=license_dir, keep_path=True)
 
+        resource_dir = os.path.join(self.package_folder, "res/")
+        copy(self, pattern="toolchain.cmake", src=self.build_folder,
+             dst=resource_dir, keep_path=True)
+
     def package_info(self):
+        self.cpp_info.includedirs = []
+
         bin_folder = os.path.join(self.package_folder, "bin/bin")
         self.cpp_info.bindirs = [bin_folder]
         self.buildenv_info.append_path("PATH", bin_folder)
@@ -98,3 +97,6 @@ class ArmGnuToolchain(ConanFile):
             "cpp": "arm-none-eabi-g++",
             "asm": "arm-none-eabi-as",
         })
+
+        f = os.path.join(self.package_folder, "res/toolchain.cmake")
+        self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)

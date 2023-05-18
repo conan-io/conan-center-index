@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(CMAKE_TOOLCHAIN_FILE ../test_package/toolchain.cmake)
+# Required because Conan does not emit `set(CMAKE_SYSTEM_NAME "GENERIC")` or
+# `set(CMAKE_SYSTEM_PROCESSOR "ARM")` causing host flags to be leacked to CMake
+# in the conan_toolchain.cmake
+set(CMAKE_TOOLCHAIN_FILE ../toolchain.cmake)
 
 project(test_package LANGUAGES CXX)
 
