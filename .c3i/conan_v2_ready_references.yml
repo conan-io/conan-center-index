@@ -353,6 +353,7 @@ required_for_references:
 - libmp3lame
 - libmysqlclient
 - libnabo
+- libnghttp2
 - libnop
 - libnova
 - libnuma
@@ -475,6 +476,7 @@ required_for_references:
 - paho-mqtt-cpp
 - patchelf
 - pcapplusplus
+- pcg-cpp
 - pcre
 - pcre2
 - pdfgen
