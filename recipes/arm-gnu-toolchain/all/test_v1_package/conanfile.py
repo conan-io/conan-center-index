@@ -1,9 +1,13 @@
 from conans import ConanFile, CMake
 
 
-class LibhalTestPackageConan(ConanFile):
+class TestPackageV1Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = ("cmake", "cmake_find_package_multi")
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualBuildEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
