@@ -4,7 +4,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class SophusConan(ConanFile):
@@ -15,7 +15,7 @@ class SophusConan(ConanFile):
     homepage = "https://strasdat.github.io/Sophus/"
     license = "MIT"
     no_copy_source = True
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_fmt": [True, False],
@@ -25,11 +25,11 @@ class SophusConan(ConanFile):
     }
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
-        if self.options.with_fmt and Version(self.version) >= Version("22.10"):
-            self.requires("fmt/9.1.0")
-        elif self.options.with_fmt and Version(self.version) >= Version("22.04.1"):
-            self.requires("fmt/8.1.1")
+        self.requires("eigen/3.4.0", transitive_headers=True)
+        if self.options.with_fmt and Version(self.version) >= Version("1.22.10"):
+            self.requires("fmt/9.1.0", transitive_headers=True)
+        elif self.options.with_fmt and Version(self.version) >= Version("1.22.4"):
+            self.requires("fmt/8.1.1", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
@@ -56,12 +56,6 @@ class SophusConan(ConanFile):
         self.cpp_info.resdirs = []
         if not self.options.with_fmt:
             self.cpp_info.defines.append("SOPHUS_USE_BASIC_LOGGING=1")
-
-        # TODO: remove this block if required_conan_version changed to 1.51.1 or higher
-        #       (see https://github.com/conan-io/conan/pull/11790)
-        self.cpp_info.requires = ["eigen::eigen"]
-        if self.options.with_fmt and Version(self.version) >= Version("22.04.1"):
-            self.cpp_info.requires.append("fmt::fmt")
 
         # TODO: to remove in conan v2 once cmake_find_package* generator removed
         self.cpp_info.names["cmake_find_package"] = "Sophus"
