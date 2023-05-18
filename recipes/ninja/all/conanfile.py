@@ -29,6 +29,8 @@ class NinjaConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static-libstdc++ -static-libgcc"
         tc.generate()
 
     def build(self):
