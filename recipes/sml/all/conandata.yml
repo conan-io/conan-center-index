@@ -1,4 +1,8 @@
 sources:
+  "1.1.8":
+    url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.8.tar.gz"
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  # 1.1.7 was a buggy release hotfixed by 1.1.8 a few hours after its release
   "1.1.6":
     url: "https://github.com/boost-ext/sml/archive/refs/tags/v1.1.6.tar.gz"
     sha256: "08a6d80eb9aa6ee4e462c1b802b9d7db8a39758746565f13cc4d2459ed49a29e"
