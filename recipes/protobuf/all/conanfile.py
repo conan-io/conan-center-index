@@ -72,7 +72,7 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if Version(self.version) >= "3.22.0":
-            self.requires("abseil/20230125.1", transitive_headers=True)
+            self.requires("abseil/20230125.3", transitive_headers=True)
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):

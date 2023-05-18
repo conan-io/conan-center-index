@@ -1,7 +1,7 @@
 sources:
-  "3.22.2":
-    url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.22.2.tar.gz"
-    sha256: "2118051b4fb3814d59d258533a4e35452934b1ddb41230261c9543384cbb4dfc"
+  "3.23.1":
+    url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.23.1.tar.gz"
+    sha256: "7ca4b5e78bbb03f06068e32647539981b8c33551abdd2a2c0f82ac14ddfc44b9"
   "3.21.9":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.9.tar.gz"
     sha256: "1add10f9bd92775b91f326da259f243881e904dd509367d5031d4c782ba82810"
