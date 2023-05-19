@@ -2,20 +2,21 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibuvConan(ConanFile):
     name = "libuv"
+    description = "A multi-platform support library with a focus on asynchronous I/O"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libuv.org"
-    description = "A multi-platform support library with a focus on asynchronous I/O"
-    topics = ("libuv", "asynchronous", "io", "networking", "multi-platform")
-
+    topics = ("asynchronous", "io", "networking", "multi-platform")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,18 +36,9 @@ class LibuvConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -56,12 +48,13 @@ class LibuvConan(ConanFile):
             check_min_vs(self, "190")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LIBUV_BUILD_TESTS"] = False
+        if Version(self.version) >= "1.45.0":
+            tc.variables["LIBUV_BUILD_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
@@ -102,7 +95,7 @@ class LibuvConan(ConanFile):
 
     @property
     def _target_lib_name(self):
-        return "uv" if self.options.shared else "uv_a"
+        return "uv" if self.options.shared or Version(self.version) >= "1.45.0" else "uv_a"
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libuv")
