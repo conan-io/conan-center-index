@@ -23,7 +23,6 @@ class Libxml2Conan(ConanFile):
     topics = "xml", "parser", "validation"
     homepage = "https://gitlab.gnome.org/GNOME/libxml2/-/wikis/"
     license = "MIT"
-
     settings = "os", "arch", "compiler", "build_type"
     # from ./configure and ./win32/configure.js
     default_options = {
@@ -86,7 +85,7 @@ class Libxml2Conan(ConanFile):
         if Version(self.version) >= "2.10.3":
             del self.options.docbook
         if Version(self.version) >= "2.11.0":
-            delattr(self.options, "run-debug")
+            self.options.rm_safe("run-debug")
 
     def configure(self):
         if self.options.shared:
