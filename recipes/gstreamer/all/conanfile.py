@@ -191,18 +191,23 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstcoretracers"].libdirs = [gst_plugin_path]
 
         if self.options.shared:
-            self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
-            self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
+            self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
         gstreamer_root = self.package_folder
-        self.output.info(f"Creating GSTREAMER_ROOT env var : {gstreamer_root}")
-        self.env_info.GSTREAMER_ROOT = gstreamer_root
         gst_plugin_scanner = "gst-plugin-scanner.exe" if self.settings.os == "Windows" else "gst-plugin-scanner"
         gst_plugin_scanner = os.path.join(self.package_folder, "bin", "gstreamer-1.0", gst_plugin_scanner)
-        self.output.info(f"Creating GST_PLUGIN_SCANNER env var : {gst_plugin_scanner}")
+        self.runenv_info.define_path("GSTREAMER_ROOT", gstreamer_root)
+        self.runenv_info.define_path("GST_PLUGIN_SCANNER", gst_plugin_scanner)
+        if self.settings.arch == "x86":
+            self.runenv_info.define_path("GSTREAMER_ROOT_X86", gstreamer_root)
+        elif self.settings.arch == "x86_64":
+            self.runenv_info.define_path("GSTREAMER_ROOT_X86_64", gstreamer_root)
+
+        # TODO: remove the following when only Conan 2.0 is supported
+        if self.options.shared:
+            self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
+        self.env_info.GSTREAMER_ROOT = gstreamer_root
         self.env_info.GST_PLUGIN_SCANNER = gst_plugin_scanner
         if self.settings.arch == "x86":
-            self.output.info(f"Creating GSTREAMER_ROOT_X86 env var : {gstreamer_root}")
             self.env_info.GSTREAMER_ROOT_X86 = gstreamer_root
         elif self.settings.arch == "x86_64":
-            self.output.info(f"Creating GSTREAMER_ROOT_X86_64 env var : {gstreamer_root}")
             self.env_info.GSTREAMER_ROOT_X86_64 = gstreamer_root
