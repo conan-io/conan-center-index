@@ -115,8 +115,7 @@ class GTestConan(ConanFile):
 
         if self.settings.compiler.get_safe("runtime"):
             tc.variables["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc" or self.options.disable_pthreads:
-            tc.variables["gtest_disable_pthreads"] = True
+        tc.variables["gtest_disable_pthreads"] = self.options.disable_pthreads
         if Version(self.version) < "1.12.0":
             # Relocatable shared lib on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
