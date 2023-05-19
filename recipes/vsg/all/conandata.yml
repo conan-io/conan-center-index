@@ -8,4 +8,4 @@ sources:
 glslang:
   "1.0.3":
     url: "https://github.com/vsg-dev/glslang.git"
-    branch: "VSG-1.0.x"  
+    branch: "VSG-1.0.x"
