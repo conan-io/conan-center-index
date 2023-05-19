@@ -15,9 +15,9 @@ class SevenZipConan(ConanFile):
     name = "7zip"
     url = "https://github.com/conan-io/conan-center-index"
     description = "7-Zip is a file archiver with a high compression ratio"
-    license = ("LGPL-2.1", "BSD-3-Clause", "Unrar")
+    license = ("LGPL-2.1-or-later", "BSD-3-Clause", "Unrar")
     homepage = "https://www.7-zip.org"
-    topics = ("7zip", "zip", "compression", "decompression")
+    topics = ("archive", "compression", "decompression", "zip")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
