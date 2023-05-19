@@ -28,7 +28,7 @@ class VsgConan(ConanFile):
         "shared": False,
         "shader_compiler": True,
         "max_devices" : 1,
-        "fPIC": True,  
+        "fPIC": True,
     }
 
     @property
@@ -49,7 +49,7 @@ class VsgConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-       
+
     def requirements(self):
         self.requires("vulkan-loader/1.3.239.0", transitive_headers=True)
 
@@ -57,10 +57,10 @@ class VsgConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
-        
+
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.name} does not support MSVC static runtime (MT/MTd) configurations, only dynamic runtime (MD/MDd) is supported")
-            
+
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
             if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
@@ -70,7 +70,7 @@ class VsgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-        
+
         if "glslang" in self.conan_data and self.version in self.conan_data["glslang"]:
             git = Git(self)
             clone_args = ['--depth', '1', '--branch', self.conan_data["glslang"][self.version]["branch"]]
@@ -96,7 +96,7 @@ class VsgConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        
+
         cmake = CMake(self)
         cmake.install()
 
