@@ -346,6 +346,7 @@ required_for_references:
 - liblsl
 - libltc
 - liblzf
+- libmikmod
 - libmodbus
 - libmodplug
 - libmorton
