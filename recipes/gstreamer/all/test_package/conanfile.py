@@ -26,6 +26,11 @@ class TestPackageConan(ConanFile):
         runenv = VirtualRunEnv(self)
         runenv.generate()
 
+        # Print debug information from gstreamer at runtime
+        env = Environment()
+        env.define("GST_DEBUG", "7")
+        env.vars(self, scope="run").save_script("conanrun_gstdebug")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
