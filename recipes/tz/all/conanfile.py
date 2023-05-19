@@ -19,6 +19,9 @@ class TzConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("mawk/1.3.4-20230404")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
