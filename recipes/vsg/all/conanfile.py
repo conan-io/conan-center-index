@@ -70,11 +70,12 @@ class VsgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
-        if "glslang" in self.conan_data and self.version in self.conan_data["glslang"]:
-            git = Git(self)
-            clone_args = ['--depth', '1', '--branch', self.conan_data["glslang"][self.version]["branch"]]
-            git.clone(url= self.conan_data["glslang"][self.version]["url"], args=clone_args, target ="src/glslang")
+        if self.version in ["1.0.3"]:
+          git = Git(self)
+          glslang_url = "https://github.com/vsg-dev/glslang.git"
+          glslang_branch = "VSG-1.0.x"
+          clone_args = ['--depth', '1', '--branch', glslang_branch]
+          git.clone(url= glslang_url, args=clone_args, target ="src/glslang")
 
     def generate(self):
         tc = CMakeToolchain(self)
