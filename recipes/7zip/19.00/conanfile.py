@@ -21,6 +21,10 @@ class SevenZipConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
