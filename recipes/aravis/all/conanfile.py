@@ -64,7 +64,7 @@ class AravisConan(ConanFile):
 
     def requirements(self):
         self.requires("glib/2.76.2")
-        self.requires("libxml2/2.11.3")
+        self.requires("libxml2/2.11.4")
         self.requires("zlib/1.2.13")
         if self.options.usb:
             self.requires("libusb/1.0.26")
