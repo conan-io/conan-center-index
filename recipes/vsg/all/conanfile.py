@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, rm, rmdir, collect_libs
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 import os
 
@@ -70,13 +70,12 @@ class VsgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-        #Working around submodules
-        #TODO: semantic versioning
-        if self.version == "1.0.3":
-            self.run("git clone https://github.com/vsg-dev/glslang.git src/glslang")
-            self.run("cd src/glslang && git reset --hard e4075496f6895ce6b747a6690ba13fa3836a93e5")
         
-        
+        if "glslang" in self.conan_data and self.version in self.conan_data["glslang"]:
+            git = Git(self)
+            clone_args = ['--depth', '1', '--branch', self.conan_data["glslang"][self.version]["branch"]]
+            git.clone(url= self.conan_data["glslang"][self.version]["url"], args=clone_args, target ="src/glslang")
+
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
@@ -84,7 +83,6 @@ class VsgConan(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 1 if self.options.shader_compiler else 0
         tc.variables["VSG_MAX_DEVICES"] = self.options.max_devices
-   
         tc.generate()
 
         deps = CMakeDeps(self)

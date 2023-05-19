@@ -5,3 +5,7 @@ sources:
   "1.0.3":
     url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/refs/tags/VulkanSceneGraph-1.0.3.tar.gz"
     sha256: "84aa1d445ecdd2702843f8f01e760d4db32c2ab3fe8c5d6122f8a83b67a50e36"
+glslang:
+  "1.0.3":
+      url: "https://github.com/vsg-dev/glslang.git"
+      branch: "VSG-1.0.x"  
