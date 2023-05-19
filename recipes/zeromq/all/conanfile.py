@@ -22,7 +22,7 @@ class ZeroMQConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "encryption": [None, "none", "libsodium", "tweetnacl"], # None for conan v1 compat, use "none" in conan v2 for no encryption
+        "encryption": [False, "libsodium", "tweetnacl"],
         "with_norm": [True, False],
         "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"],
         "with_draft_api": [True, False],
@@ -71,7 +71,7 @@ class ZeroMQConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_CURVE"] = self.options.encryption == "libsodium" or self.options.encryption == "tweetnacl"
+        tc.variables["ENABLE_CURVE"] = bool(self.options.encryption)
         tc.variables["WITH_LIBSODIUM"] = self.options.encryption == "libsodium"
         tc.variables["ZMQ_BUILD_TESTS"] = False
         tc.variables["WITH_PERF_TOOL"] = False
