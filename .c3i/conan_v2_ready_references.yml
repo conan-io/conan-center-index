@@ -41,6 +41,7 @@ required_for_references:
 - avir
 - aws-c-common
 - aws-c-compression
+- aws-c-sdkutils
 - aws-checksums
 - b2
 - b64
@@ -233,6 +234,7 @@ required_for_references:
 - fxdiv
 - g3log
 - gamma
+- gdbm
 - gdcm
 - gdk-pixbuf
 - gemmlowp
@@ -265,6 +267,7 @@ required_for_references:
 - gtk
 - gurkenlaeufer
 - h3
+- h5pp
 - harfbuzz
 - hdf5
 - hdrhistogram-c
@@ -342,6 +345,8 @@ required_for_references:
 - libkml
 - liblsl
 - libltc
+- liblzf
+- libmikmod
 - libmodbus
 - libmodplug
 - libmorton
@@ -349,6 +354,7 @@ required_for_references:
 - libmp3lame
 - libmysqlclient
 - libnabo
+- libnghttp2
 - libnop
 - libnova
 - libnuma
@@ -461,6 +467,7 @@ required_for_references:
 - openjpeg
 - openmesh
 - openssl
+- opensubdiv
 - optional-lite
 - opus
 - opusfile
@@ -470,6 +477,7 @@ required_for_references:
 - paho-mqtt-cpp
 - patchelf
 - pcapplusplus
+- pcg-cpp
 - pcre
 - pcre2
 - pdfgen
@@ -521,12 +529,14 @@ required_for_references:
 - semimap
 - sentry-breakpad
 - serd
+- sfml
 - shield
 - sigslot
 - simdjson
 - simdutf
 - snappy
 - soci
+- sophus
 - soplex
 - soxr
 - span-lite
@@ -580,6 +590,7 @@ required_for_references:
 - vtu11
 - vulkan-headers
 - vulkan-loader
+- vulkan-memory-allocator
 - vulkan-validationlayers
 - wasmtime
 - wasmtime-cpp
@@ -617,6 +628,7 @@ required_for_references:
 - yajl
 - yaml-cpp
 - yasm
+- zbar
 - zeromq
 - zfp
 - zimg

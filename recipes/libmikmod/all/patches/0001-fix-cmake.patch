@@ -1,8 +1,16 @@
-avoid building shared lib when shared=False,
-and a fix to install .dlls correctly on Windows
---- "CMakeLists.txt"	2017-04-07 16:55:00.000000000 +0200
-+++ CMakeLists.txt	2017-07-21 20:01:33.330845600 +0200
-@@ -389,12 +391,6 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,8 +23,8 @@
+ #
+ # (This copyright notice applies only to this file)
+ 
+-PROJECT(libmikmod C)
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
++PROJECT(libmikmod C)
+ LIST(APPEND CMAKE_MODULE_PATH "${libmikmod_SOURCE_DIR}/cmake")
+ 
+ SET(LIBMIKMOD_MAJOR_VERSION 3)
+@@ -389,12 +389,6 @@ REPLACE_FUNCTIONS_FROMDIR(MIKMOD_LIB_MODULES
  
  SET (LIBMIKMOD_LIBS)
  
@@ -15,7 +23,7 @@ and a fix to install .dlls correctly on Windows
  IF (ENABLE_STATIC)
      ADD_LIBRARY (mikmod-static
          STATIC
-@@ -410,16 +406,22 @@
+@@ -410,16 +404,21 @@ IF (ENABLE_STATIC)
          ${LIBMIKMOD_LIBS}
          PROPERTIES CLEAN_DIRECT_OUTPUT 1
      )
@@ -42,11 +50,10 @@ and a fix to install .dlls correctly on Windows
 +        )
 +    ENDIF(WIN32)
 +ENDIF (ENABLE_STATIC)
-+
  
  IF(DISABLE_HQMIXER)
    SET(NO_HQMIXER 1)
-@@ -854,6 +856,7 @@
+@@ -854,6 +853,7 @@ INSTALL(
      TARGETS ${LIBMIKMOD_LIBS}
      LIBRARY DESTINATION "lib${LIB_SUFFIX}"
      ARCHIVE DESTINATION "lib${LIB_SUFFIX}"
