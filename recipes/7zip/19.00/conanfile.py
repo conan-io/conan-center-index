@@ -64,7 +64,7 @@ class SevenZipConan(ConanFile):
         else:
             tc = AutotoolsToolchain(self)
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                tc.environment().define("IS_MINGW")
+                tc.environment().define("IS_MINGW", "1")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
@@ -111,6 +111,6 @@ class SevenZipConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.path.append(bin_path)
-        
+
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
