@@ -65,8 +65,7 @@ class TestPackageConan(ConanFile):
             # system libraries that are incompatible with Conan-provided ones. 
             # When `conanrun` is enabled, DYLD_LIBRARY_PATH will also apply
             # to ctest itself. Given that CMake already embeds RPATHs by default, 
-            # we can bypass this by using the `conanbuild` environment. Similarly,
-            # "conanbuild" is needed if Conan is being used to manage the build
-            # toolchain such that CMake is a tool_requires and is not otherwise
-            # available on the host machine.
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type}")
+            # we can bypass this by using the `conanbuild` environment on
+            # non-Windows platforms, while still retaining the correct behaviour.
+            env = "conanrun" if self.settings.os == "Windows" else "conanbuild"
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env=env)
