@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, download
 from conan.errors import ConanException
-import urllib.request
 import os
 
 
@@ -31,9 +30,7 @@ class ArmGnuToolchain(ConanFile):
 
     @property
     def license_url(self):
-        license_id = "ff19df33-da82-491a-ab50-c605d4589a26"
-        license_base_url = "https://developer.arm.com/GetEula?Id="
-        return license_base_url + license_id
+        return "https://gist.githubusercontent.com/kammce/dc566a05f6ab2787ceef5b706012e7a2/raw/4cb8ab752d7c0f87cc074afa4e548a2be8766210/EULA.html"
 
     def package_id(self):
         del self.info.settings.compiler
