@@ -33,6 +33,7 @@ Same as the _recipe folder_ and always lowercase.
 Please see the FAQs for:
 
 * [name collisions](../faqs.md#what-is-the-policy-on-recipe-name-collisions)
+* [naming forks](../faqs.md##what-is-the-policy-for-naming-forks)
 * [space and symbols](../faqs.md#should-reference-names-use---or-_)
 
 ### Version
