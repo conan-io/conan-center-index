@@ -189,6 +189,10 @@ class AndroidNDKConan(ConanFile):
     def _ndk_root(self):
         return os.path.join(self.package_folder, self._ndk_root_rel_path)
 
+    @property
+    def _clang_target(self):
+        return f"{self._clang_triplet}{self.settings_target.os.api_level}"
+
     def _wrap_executable(self, tool):
         suffix = ".exe" if self.settings_build.os == "Windows" else ""
         return f"{tool}{suffix}"
@@ -197,7 +201,7 @@ class AndroidNDKConan(ConanFile):
         prefix = ""
         if "clang" in tool:
             suffix = ".cmd" if self.settings_build.os == "Windows" else ""
-            prefix = "llvm" if bare else f"{self._clang_triplet}{self.settings_target.os.api_level}"
+            prefix = "llvm" if bare else self._clang_target
             return f"{prefix}-{tool}{suffix}"
         else:
             prefix = "llvm" if bare else f"{self._llvm_triplet}"
@@ -285,12 +289,25 @@ class AndroidNDKConan(ConanFile):
         self.conf_info.define("tools.android:ndk_path", os.path.join(self.package_folder, "bin"))
 
         compiler_executables = {
-            "c": self._define_tool_var("CC", "clang"),
-            "cpp": self._define_tool_var("CXX", "clang++"),
+            "c": self._define_tool_var_naked("CC", "clang"),
+            "cpp": self._define_tool_var_naked("CXX", "clang++"),
         }
+
+        # https://github.com/android/ndk/issues/1856
+        compiler_flags = [f"--target={self._clang_target}"]
+
+        # For x86 targets prior to Android Nougat (API 24), -mstackrealign is needed to properly align stacks for global constructors. See https://github.com/android/ndk/issues/635.
+        # https://android.googlesource.com/platform/ndk/+/refs/heads/ndk-release-r21/docs/BuildSystemMaintainers.md#additional-required-arguments
+        if self.settings_target.arch == "x86" and int(str(self.settings_target.os.api_level)) < 24:
+            compiler_flags.append("-mstackrealign")
+
         self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.conf_info.append("tools.build:cflags", compiler_flags)
+        self.conf_info.append("tools.build:cxxflags", compiler_flags)
         self.buildenv_info.define_path("CC", compiler_executables["c"])
         self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
+        self.buildenv_info.define_path("CFLAGS", " ".join(compiler_flags))
+        self.buildenv_info.define_path("CXXFLAGS", " ".join(compiler_flags))
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.
@@ -342,6 +359,8 @@ class AndroidNDKConan(ConanFile):
             self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.package_folder, "bin", "build", "cmake", "android.toolchain.cmake")
             self.env_info.CC = compiler_executables["c"]
             self.env_info.CXX = compiler_executables["cpp"]
+            self.env_info.CFLAGS = " ".join(compiler_flags)
+            self.env_info.CXXFLAGS = " ".join(compiler_flags)
             self.env_info.AR = self._define_tool_var("AR", "ar", bare)
             self.env_info.AS = self._define_tool_var("AS", "as", bare)
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", bare)
