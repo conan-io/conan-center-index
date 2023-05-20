@@ -136,9 +136,14 @@ class MinizipNgConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
-                              "")
+        if Version(self.version) < "4.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
+                                  "")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "set_target_properties(${MINIZIP_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
+                                  "")
 
     def build(self):
         self._patch_sources()
@@ -169,6 +174,9 @@ class MinizipNgConan(ConanFile):
         if self.options.with_bzip2:
             self.cpp_info.components["minizip"].defines.append("HAVE_BZIP2")
 
+        if Version(self.version) >= "4.0.0":
+            self.cpp_info.components["minizip"].includedirs.append(os.path.join("include", "minizip-ng"))
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "minizip"
         self.cpp_info.filenames["cmake_find_package_multi"] = "minizip"
@@ -192,3 +200,6 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].frameworks.extend(["CoreFoundation", "Security"])
         if self.settings.os != "Windows" and self.options.with_iconv:
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
+
+
+
