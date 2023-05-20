@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.errors import ConanException
+import urllib.request
 import os
 
 
@@ -18,7 +19,7 @@ class ArmGnuToolchain(ConanFile):
               "cortex-m4f", "cortex-m7", "cortex-m23", "cortex-m55",
               "cortex-m35p", "cortex-m33")
     settings = "os", "arch", 'compiler', 'build_type'
-    exports_sources = "toolchain.cmake", "LICENSE"
+    exports_sources = "toolchain.cmake"
     short_paths = True
 
     @property
@@ -50,6 +51,10 @@ class ArmGnuToolchain(ConanFile):
         get(self,
             **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
             strip_root=True)
+
+        # The below command is used instead of get() to get past 403 Forbidden
+        # issues
+        urllib.request.urlretrieve(self.license_url, "LICENSE")
 
     def package(self):
         destination = os.path.join(self.package_folder, "bin/")
@@ -83,7 +88,7 @@ class ArmGnuToolchain(ConanFile):
         self.buildenv_info.append_path("PATH", bin_folder)
 
         self.conf_info.define(
-            "tools.cmake.cmaketoolchain:system_name", "GENERIC")
+            "tools.cmake.cmaketoolchain:system_name", "Generic")
         self.conf_info.define(
             "tools.cmake.cmaketoolchain:system_processor", "ARM")
         self.conf_info.define("tools.build.cross_building:can_run", False)
