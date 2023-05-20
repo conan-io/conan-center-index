@@ -37,3 +37,7 @@ patches:
     - patch_file: "patches/2.0.0-0001-use-abs.patch"
       patch_description: "use std::abs instead fabsf/fabsl"
       patch_type: "portability"
+    - patch_file: "patches/2.0.0-0002-no-export-templates.patch"
+      patch_description: "Do not export symbols which are templates"
+      patch_type: "portability"
+      patch_source: "https://github.com/hosseinmoein/DataFrame/pull/235"
