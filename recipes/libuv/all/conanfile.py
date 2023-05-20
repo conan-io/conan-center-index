@@ -95,7 +95,11 @@ class LibuvConan(ConanFile):
 
     @property
     def _target_lib_name(self):
-        return "uv" if self.options.shared or Version(self.version) >= "1.45.0" else "uv_a"
+        if Version(self.version) < "1.45.0":
+            return "uv" if self.options.shared else "uv_a"
+        if is_msvc(self):
+            return "uv" if self.options.shared else "libuv"
+        return "uv"
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libuv")
