@@ -112,6 +112,8 @@ class LibuvConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "pthread", "rt"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["iphlpapi", "psapi", "userenv", "ws2_32"]
+            if Version(self.version) >= "1.45.0":
+                self.cpp_info.system_libs.append("dbghelp")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libuv" if self.options.shared else "libuv-static"
