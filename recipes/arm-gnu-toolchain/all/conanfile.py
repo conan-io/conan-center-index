@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, download
 from conan.errors import ConanException
 import urllib.request
 import os
@@ -48,13 +48,11 @@ class ArmGnuToolchain(ConanFile):
         pass
 
     def build(self):
+        download(self, self.license_url, "LICENSE", verify=False)
+
         get(self,
             **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
             strip_root=True)
-
-        # The below command is used instead of get() to get past 403 Forbidden
-        # issues
-        urllib.request.urlretrieve(self.license_url, "LICENSE")
 
     def package(self):
         destination = os.path.join(self.package_folder, "bin/")
