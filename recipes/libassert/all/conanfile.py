@@ -12,12 +12,13 @@ import os
 required_conan_version = ">=1.53.0"
 
 
-class PackageConan(ConanFile):
+class LibAssertConan(ConanFile):
     name = "libassert"
     description = "The most over-engineered and overpowered C++ assertion library."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jeremy-rifkin/libassert"
+    package_type = "library"
 
     topics = ("assert", "library", "assertions", "stacktrace")
     settings = "os", "arch", "compiler", "build_type"
