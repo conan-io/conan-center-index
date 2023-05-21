@@ -77,8 +77,8 @@ class ReplxxConan(ConanFile):
         libname = "replxx"
         if self.settings.build_type == "Debug":
             libname += "-d"
-
         self.cpp_info.libs = [libname]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
         if not self.options.shared:
