@@ -3,6 +3,7 @@ from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -75,6 +76,8 @@ class ReplxxConan(ConanFile):
 
     def package_info(self):
         libname = "replxx"
+        if is_msvc(self) and self.options.shared:
+            libname += "-static"
         if self.settings.build_type == "Debug":
             libname += "-d"
         self.cpp_info.libs = [libname]
