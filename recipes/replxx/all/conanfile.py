@@ -76,7 +76,7 @@ class ReplxxConan(ConanFile):
 
     def package_info(self):
         libname = "replxx"
-        if is_msvc(self) and self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             libname += "-static"
         if self.settings.build_type == "Debug":
             libname += "-d"
