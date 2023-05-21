@@ -75,7 +75,7 @@ class LibuvConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {self._target_lib_name: "libuv::libuv"}
+            {self._target_name: "libuv::libuv"}
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -94,18 +94,24 @@ class LibuvConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
-    def _target_lib_name(self):
+    def _target_name(self):
         if Version(self.version) < "1.45.0":
             return "uv" if self.options.shared else "uv_a"
-        if is_msvc(self):
-            return "uv" if self.options.shared else "libuv"
+        return "uv"
+
+    @property
+    def _lib_name(self):
+        if Version(self.version) < "1.45.0":
+            return "uv" if self.options.shared else "uv_a"
+        if is_msvc(self) and not self.options.shared:
+            return "libuv"
         return "uv"
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libuv")
-        self.cpp_info.set_property("cmake_target_name", self._target_lib_name)
+        self.cpp_info.set_property("cmake_target_name", self._target_name)
         self.cpp_info.set_property("pkg_config_name", "libuv" if self.options.shared else "libuv-static")
-        self.cpp_info.libs = [self._target_lib_name]
+        self.cpp_info.libs = [self._lib_name]
         if self.options.shared:
             self.cpp_info.defines = ["USING_UV_SHARED=1"]
         if self.settings.os in ["Linux", "FreeBSD"]:
