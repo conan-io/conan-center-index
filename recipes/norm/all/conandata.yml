@@ -6,3 +6,6 @@ patches:
   "1.5.9":
     - patch_file: "patches/0001-fix-pthread.patch"
     - patch_file: "patches/0002-fix-fpic.patch"
+    - patch_file: "patches/0003-cpp20-compat.patch"
+      patch_description: "C++20 compatibility: Fix ambiguous overloaded operator =="
+      patch_type: "portability"
