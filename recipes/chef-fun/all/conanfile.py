@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
@@ -42,7 +42,7 @@ class ChefFunConan(ConanFile):
 
     # same package ID for any package
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
