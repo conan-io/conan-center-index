@@ -4,6 +4,8 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.49.0"
@@ -56,6 +58,10 @@ class WatcherConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
             )
+
+        # https://github.com/e-dant/watcher/issues/31
+        if Version(self.version) == "0.8.3" and is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
