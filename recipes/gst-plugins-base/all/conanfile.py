@@ -142,7 +142,7 @@ class GStPluginsBaseConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
-        if self.options.with_wayland:
+        if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.21.0")
         if self.settings.os == 'Windows':
             self.tool_requires("winflexbison/2.5.24")
