@@ -22,23 +22,29 @@ patches:
     - patch_file: "patches/1.5.6-0001-include-cstdint.patch"
       patch_description: "include cstdint for uint8_t, intmax_t"
       patch_type: "portability"
+      patch_source: "https://github.com/an-tao/trantor/commit/e8e3887435dcfb310263c588743be1b3746193be"
   "1.5.10":
     - patch_file: "patches/1.5.6-0001-include-cstdint.patch"
       patch_description: "include cstdint for uint8_t, intmax_t"
       patch_type: "portability"
+      patch_source: "https://github.com/an-tao/trantor/commit/e8e3887435dcfb310263c588743be1b3746193be"
   "1.5.8":
     - patch_file: "patches/1.5.6-0001-include-cstdint.patch"
       patch_description: "include cstdint for uint8_t, intmax_t"
       patch_type: "portability"
+      patch_source: "https://github.com/an-tao/trantor/commit/e8e3887435dcfb310263c588743be1b3746193be"
   "1.5.7":
     - patch_file: "patches/1.5.6-0001-include-cstdint.patch"
       patch_description: "include cstdint for uint8_t, intmax_t"
       patch_type: "portability"
+      patch_source: "https://github.com/an-tao/trantor/commit/e8e3887435dcfb310263c588743be1b3746193be"
   "1.5.6":
     - patch_file: "patches/1.5.6-0001-include-cstdint.patch"
       patch_description: "include cstdint for uint8_t, intmax_t"
       patch_type: "portability"
+      patch_source: "https://github.com/an-tao/trantor/commit/e8e3887435dcfb310263c588743be1b3746193be"
   "1.5.5":
     - patch_file: "patches/1.5.5-0001-include-cstdint.patch"
       patch_description: "include cstdint for uint8_t"
       patch_type: "portability"
+      patch_source: "https://github.com/an-tao/trantor/commit/e8e3887435dcfb310263c588743be1b3746193be"
