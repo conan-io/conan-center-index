@@ -53,16 +53,16 @@ class PangoConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
         if self.options.with_xft == "auto":
-            self.options.with_xft = self.settings.os in ["Linux", "FreeBSD"]
+            self.options.with_xft = self.settings.os in ["FreeBSD", "Linux"]
         if self.options.with_freetype == "auto":
-            self.options.with_freetype = not self.settings.os in ["Windows", "Macos"]
+            self.options.with_freetype = not self.settings.os in ["Macos", "Windows"]
         if self.options.with_fontconfig == "auto":
-            self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
+            self.options.with_fontconfig = not self.settings.os in ["Macos", "Windows"]
         if self.options.shared:
-            self.dependencies.direct_host["glib"].options.shared = True
-            self.dependencies.direct_host["harfbuzz"].options.shared = True
+            self.options["glib"].shared = True
+            self.options["harfbuzz"].shared = True
             if self.options.with_cairo:
-                self.dependencies.direct_host["cairo"].options.shared = True
+                self.options["cairo"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
