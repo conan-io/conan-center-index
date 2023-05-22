@@ -3,6 +3,6 @@
 
 int main()
 {
-	std::cout << "pango version: " << pango_version_string() << std::endl;
+	std::cout << "pango version: " << pango_version_string() << "\n";
 	return 0;
 }
