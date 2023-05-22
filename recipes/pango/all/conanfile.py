@@ -28,18 +28,18 @@ class PangoConan(ConanFile):
         "fPIC": [True, False],
         "with_libthai": [True, False],
         "with_cairo": [True, False],
-        "with_xft": [True, False, "auto"],
-        "with_freetype": [True, False, "auto"],
-        "with_fontconfig": [True, False, "auto"],
+        "with_xft": [True, False],
+        "with_freetype": [True, False],
+        "with_fontconfig": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_libthai": False,
         "with_cairo": True,
-        "with_xft": "auto",
-        "with_freetype": "auto",
-        "with_fontconfig": "auto",
+        "with_xft": False,
+        "with_freetype": False,
+        "with_fontconfig": False,
     }
 
     def config_options(self):
@@ -52,12 +52,11 @@ class PangoConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-        if self.options.with_xft == "auto":
-            self.options.with_xft = self.settings.os in ["FreeBSD", "Linux"]
-        if self.options.with_freetype == "auto":
-            self.options.with_freetype = not self.settings.os in ["Macos", "Windows"]
-        if self.options.with_fontconfig == "auto":
-            self.options.with_fontconfig = not self.settings.os in ["Macos", "Windows"]
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.options.with_xft = True
+        if not self.settings.os in ["Macos", "Windows"]:
+            self.options.with_freetype = True
+            self.options.with_fontconfig = True
         if self.options.shared:
             self.options["glib"].shared = True
             self.options["harfbuzz"].shared = True
