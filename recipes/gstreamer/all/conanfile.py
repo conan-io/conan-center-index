@@ -47,7 +47,7 @@ class GStreamerConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.2", transitive_headers=True)
+        self.requires("glib/2.76.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if not self.dependencies.direct_host["glib"].options.shared and self.info.options.shared:
@@ -56,8 +56,8 @@ class GStreamerConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.1.0")
-        # Avoid issues when glib is shared by default but all its dependencies are static
-        # please see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
+        # There used to be an issue with glib being shared by default but its dependencies being static
+        # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
         self.tool_requires("glib/2.76.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
