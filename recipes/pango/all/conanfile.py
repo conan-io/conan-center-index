@@ -42,15 +42,6 @@ class PangoConan(ConanFile):
         "with_fontconfig": "auto",
     }
 
-    def _with_fontconfig(self):
-        return self.options.with_fontconfig == True or (self.options.with_fontconfig == "auto" and self.settings.os in ["Macos", "Windows"])
-
-    def _with_freetype(self):
-        return self.options.with_freetype == True or (self.options.with_freetype == "auto" and self.settings.os in ["Macos", "Windows"])
-
-    def _with_xft(self):
-        return self.options.with_xft == True or (self.options.with_xft == "auto" and self.settings.os in ["FreeBSD", "Linux"])
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -61,6 +52,12 @@ class PangoConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+        if self.options.with_xft == "auto":
+            self.options.with_xft = self.settings.os in ["FreeBSD", "Linux"]
+        if self.options.with_freetype == "auto":
+            self.options.with_freetype = not self.settings.os in ["Macos", "Windows"]
+        if self.options.with_fontconfig == "auto":
+            self.options.with_fontconfig = not self.settings.os in ["Macos", "Windows"]
         if self.options.shared:
             self.options["glib"].shared = True
             self.options["harfbuzz"].shared = True
@@ -71,16 +68,17 @@ class PangoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self._with_freetype():
+        if self.options.with_freetype:
             self.requires("freetype/2.13.0")
-        if self._with_fontconfig():
+
+        if self.options.with_fontconfig:
             self.requires("fontconfig/2.14.2")
-        if self._with_xft():
+        if self.options.with_xft:
             self.requires("libxft/2.3.6")
         if (
-            self._with_fontconfig()
-            and self._with_freetype()
-            and self._with_xft()
+            self.options.with_xft
+            and self.options.with_fontconfig
+            and self.options.with_freetype
         ):
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
@@ -128,9 +126,9 @@ class PangoConan(ConanFile):
         tc.project_options["introspection"] = "disabled"
         tc.project_options["libthai"] = "enabled" if self.options.with_libthai else "disabled"
         tc.project_options["cairo"] = "enabled" if self.options.with_cairo else "disabled"
-        tc.project_options["xft"] = "enabled" if self._with_xft() else "disabled"
-        tc.project_options["fontconfig"] = "enabled" if self._with_fontconfig() else "disabled"
-        tc.project_options["freetype"] = "enabled" if self._with_freetype() else "disabled"
+        tc.project_options["xft"] = "enabled" if self.options.with_xft else "disabled"
+        tc.project_options["fontconfig"] = "enabled" if self.options.with_fontconfig else "disabled"
+        tc.project_options["freetype"] = "enabled" if self.options.with_freetype else "disabled"
         tc.generate()
 
     def build(self):
@@ -177,13 +175,13 @@ class PangoConan(ConanFile):
         self.cpp_info.components["pango_"].requires.append("glib::gio-2.0")
         self.cpp_info.components["pango_"].requires.append("fribidi::fribidi")
         self.cpp_info.components["pango_"].requires.append("harfbuzz::harfbuzz")
-        if self._with_fontconfig():
+        if self.options.with_fontconfig:
             self.cpp_info.components["pango_"].requires.append("fontconfig::fontconfig")
 
-        if self._with_xft():
+        if self.options.with_xft:
             self.cpp_info.components["pango_"].requires.append("libxft::libxft")
             # Pango only uses xrender when Xft, fontconfig and freetype are enabled
-            if self._with_fontconfig() and self._with_freetype():
+            if self.options.with_fontconfig and self.options.with_freetype:
                 self.cpp_info.components["pango_"].requires.append("xorg::xrender")
         if self.options.with_cairo:
             self.cpp_info.components["pango_"].requires.append("cairo::cairo_")
@@ -191,7 +189,7 @@ class PangoConan(ConanFile):
             os.path.join(self.package_folder, "include", "pango-1.0")
         ]
 
-        if self._with_freetype():
+        if self.options.with_freetype:
             self.cpp_info.components["pangoft2"].libs = ["pangoft2-1.0"]
             self.cpp_info.components["pangoft2"].set_property("pkg_config_name", "pangoft2")
             self.cpp_info.components["pangoft2"].requires = [
@@ -202,17 +200,17 @@ class PangoConan(ConanFile):
                 os.path.join(self.package_folder, "include", "pango-1.0")
             ]
 
-        if self._with_fontconfig():
+        if self.options.with_fontconfig:
             self.cpp_info.components["pangofc"].set_property("pkg_config_name", "pangofc")
-            if self._with_freetype():
+            if self.options.with_freetype:
                 self.cpp_info.components["pangofc"].requires = ["pangoft2"]
 
         if self.settings.os != "Windows":
             self.cpp_info.components["pangoroot"].set_property("pkg_config_name", "pangoroot")
-            if self._with_freetype():
+            if self.options.with_freetype:
                 self.cpp_info.components["pangoroot"].requires = ["pangoft2"]
 
-        if self._with_xft():
+        if self.options.with_xft:
             self.cpp_info.components["pangoxft"].libs = ["pangoxft-1.0"]
             self.cpp_info.components["pangoxft"].set_property("pkg_config_name", "pangoxft")
             self.cpp_info.components["pangoxft"].requires = ["pango_", "pangoft2"]
@@ -230,7 +228,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangocairo"].libs = ["pangocairo-1.0"]
             self.cpp_info.components["pangocairo"].set_property("pkg_config_name", "pangocairo")
             self.cpp_info.components["pangocairo"].requires = ["pango_"]
-            if self._with_freetype():
+            if self.options.with_freetype:
                 self.cpp_info.components["pangocairo"].requires.append("pangoft2")
             if self.settings.os == "Windows":
                 self.cpp_info.components["pangocairo"].requires.append("pangowin32")
