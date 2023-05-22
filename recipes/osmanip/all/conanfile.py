@@ -25,6 +25,20 @@ class OsmanipConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "191",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
+
     def export_sources(self):
         if Version(self.version) < "4.5.0":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -34,6 +48,9 @@ class OsmanipConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("boost/1.81.0")
         if Version(self.version) < "4.2.0":
@@ -41,33 +58,14 @@ class OsmanipConan(ConanFile):
         else:
             self.requires("arsenalgear/2.1.0", transitive_headers=True)
 
-    @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _compiler_required_cpp17(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "191",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12.0",
-        }
-
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-
-        minimum_version = self._compiler_required_cpp17.get(str(self.info.settings.compiler), False)
-        if minimum_version:
-            if Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

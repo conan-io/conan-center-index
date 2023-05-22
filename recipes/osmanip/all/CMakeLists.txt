@@ -37,7 +37,6 @@ target_include_directories(osmanip PUBLIC ${OSMANIP_SRC_DIR}/include/)
 target_compile_features(osmanip PUBLIC cxx_std_17)
 set_target_properties(osmanip PROPERTIES
     PUBLIC_HEADER "${osmanip_inc}"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 target_link_libraries(osmanip PRIVATE arsenalgear::arsenalgear)
