@@ -1,11 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import os
-import shutil
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.files import copy
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac",
+    exports_sources = "configure.ac"
     test_type = "explicit"
 
     @property
@@ -15,23 +18,31 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def layout(self):
+        basic_layout(self)
+
     def build_requirements(self):
-        self.build_requires(self.tested_reference_str)
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        self.build_requires("automake/1.16.4")
+        self.tool_requires(self.tested_reference_str)
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        self.tool_requires("automake/1.16.5")
+
+    def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--enable-option-checking=fatal")
+        tc.configure_args.append("--enable-gtk-doc=no")
+        tc.generate()
 
     def build(self):
-        for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src),
-                        os.path.join(self.build_folder, src))
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = [
-            "--enable-option-checking=fatal",
-            "--enable-gtk-doc=no",
-        ]
-        autotools.configure(args=args)
+        copy(self, "configure.ac", self.export_sources_folder, self.build_folder)
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
 
     def test(self):
-        self.run("gtkdocize --copy", run_environment=True, win_bash=tools.os_info.is_windows)
+        if can_run(self):
+            self.run(f"gtkdocize --copy", env="conanrun")
