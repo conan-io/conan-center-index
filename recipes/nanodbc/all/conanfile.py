@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import load, get, apply_conandata_patches, rmdir, copy
+from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 import os
 
@@ -33,6 +33,9 @@ class NanodbcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
