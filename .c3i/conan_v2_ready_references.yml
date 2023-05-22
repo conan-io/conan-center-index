@@ -74,6 +74,7 @@ required_for_references:
 - brigand
 - brotli
 - brynet
+- bshoshany-thread-pool
 - bullet3
 - butteraugli
 - bvdberg-ctest
@@ -346,6 +347,7 @@ required_for_references:
 - liblsl
 - libltc
 - liblzf
+- libmad
 - libmikmod
 - libmodbus
 - libmodplug
@@ -415,6 +417,7 @@ required_for_references:
 - make
 - mariadb-connector-c
 - matchit
+- mawk
 - mbedtls
 - md4c
 - md4qt
@@ -523,6 +526,7 @@ required_for_references:
 - s2n
 - scnlib
 - screen_capture_lite
+- sdbus-cpp
 - sdl
 - sdl_image
 - seadex-essentials
@@ -534,6 +538,7 @@ required_for_references:
 - sigslot
 - simdjson
 - simdutf
+- skyr-url
 - snappy
 - soci
 - sophus
@@ -580,6 +585,7 @@ required_for_references:
 - uriparser
 - utf8proc
 - utfcpp
+- uvw
 - vaapi
 - variant-lite
 - vdpau
