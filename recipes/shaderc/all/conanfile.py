@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.cmake import CMake
 import os
 
 required_conan_version = ">=1.36.0"
@@ -28,6 +29,10 @@ class ShadercConan(ConanFile):
     _cmake = None
 
     @property
+    def _min_cppstd(self):
+        return "11"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -36,9 +41,9 @@ class ShadercConan(ConanFile):
         return "build_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        tools.files.copy("CMakeLists.txt")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+            tools.files.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -72,7 +77,7 @@ class ShadercConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -103,7 +108,7 @@ class ShadercConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        tools.files.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
