@@ -102,7 +102,7 @@ class DrogonConan(ConanFile):
     def requirements(self):
         self.requires("trantor/1.5.11", transitive_headers=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True)
-        self.requires("openssl/1.1.1t")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
@@ -117,7 +117,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.0.31")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.1.0")
 
