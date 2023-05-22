@@ -11,8 +11,8 @@ class NanodbcConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/nanodbc/nanodbc/"
     url = "https://github.com/conan-io/conan-center-index"
+
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -27,14 +27,12 @@ class NanodbcConan(ConanFile):
         "unicode": False,
         "with_boost": False,
     }
+
     generators = "CMakeDeps"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def set_version(self):
-        self.version = self.version or load(self, "version.txt")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -53,9 +51,7 @@ class NanodbcConan(ConanFile):
             self.requires("odbc/2.3.9")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
-
-        apply_conandata_patches(self)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -72,20 +68,23 @@ class NanodbcConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["nanodbc"]
-        if not self.options.shared:
-            if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["odbc32"]
+
+        if not self.options.shared and self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["odbc32"]
