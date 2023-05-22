@@ -67,6 +67,9 @@ class OsmanipConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if Version(self.version) >= "4.4.0" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++. Please use osmanip/4.3.0.")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
