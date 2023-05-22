@@ -62,7 +62,7 @@ class CassandraCppDriverConan(ConanFile):
         self.requires("rapidjson/cci.20220822")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
 
         if self.options.with_zlib:
             self.requires("minizip/1.2.13")

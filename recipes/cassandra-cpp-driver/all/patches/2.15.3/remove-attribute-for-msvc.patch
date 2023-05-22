@@ -1,0 +1,18 @@
+diff --git a/src/third_party/sparsehash/src/sparsehash/internal/hashtable-common.h b/src/third_party/sparsehash/src/sparsehash/internal/hashtable-common.h
+index bac2b88..e802b5c 100644
+--- a/src/third_party/sparsehash/src/sparsehash/internal/hashtable-common.h
++++ b/src/third_party/sparsehash/src/sparsehash/internal/hashtable-common.h
+@@ -50,8 +50,13 @@
+ _START_GOOGLE_NAMESPACE_
+
+ template <bool> struct SparsehashCompileAssert { };
++#if defined(_MSC_VER)
++#define SPARSEHASH_COMPILE_ASSERT(expr, msg) \
++  typedef SparsehashCompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1]
++#else
+ #define SPARSEHASH_COMPILE_ASSERT(expr, msg) \
+   __attribute__((unused)) typedef SparsehashCompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1]
++#endif
+
+ namespace sparsehash_internal {
+

@@ -1,5 +1,5 @@
 diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
-index 9052472..347430b 100644
+index 9052472..3f65adb 100644
 --- a/cmake/Dependencies.cmake
 +++ b/cmake/Dependencies.cmake
 @@ -21,28 +21,28 @@ if(NOT LIBUV_ROOT_DIR)
@@ -62,22 +62,13 @@ index 9052472..347430b 100644
 +find_package(minizip REQUIRED CONFIG)
 +set(CASS_LIBS ${CASS_LIBS} minizip::minizip)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b7..c0bce58 100644
+index 06b84b7..41b23f2 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,6 +1,50 @@
+@@ -1,6 +1,41 @@
  include(CheckSymbolExists)
  include(CheckCXXSourceCompiles)
  
-+#------------------------
-+# Windows libraries
-+#------------------------
-+
-+if(WIN32)
-+  # Assign additional library requirements for Windows
-+  set(CASS_LIBS iphlpapi psapi wsock32 crypt32 ws2_32 userenv version)
-+endif()
-+
 +#------------------------
 +# Libuv
 +#------------------------
@@ -116,7 +107,7 @@ index 06b84b7..c0bce58 100644
  file(GLOB SOURCES *.cpp *.hpp)
  
  if(APPLE)
-@@ -38,18 +82,14 @@ endif()
+@@ -38,18 +73,14 @@ endif()
  
  add_subdirectory(third_party/curl)
  add_subdirectory(third_party/hdr_histogram)
@@ -140,7 +131,7 @@ index 06b84b7..c0bce58 100644
  
  list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
  
-@@ -69,12 +109,6 @@ if(WIN32)
+@@ -69,12 +100,6 @@ if(WIN32)
    endif()
  endif()
  
@@ -153,7 +144,7 @@ index 06b84b7..c0bce58 100644
  #------------------------------
  # Build configured header
  #------------------------------
-@@ -131,10 +165,9 @@ if(CASS_BUILD_SHARED)
+@@ -131,8 +156,7 @@ if(CASS_BUILD_SHARED)
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck>
      $<TARGET_OBJECTS:hdr_histogram>
@@ -161,12 +152,9 @@ index 06b84b7..c0bce58 100644
 -    $<TARGET_OBJECTS:minizip>)
 +  )
    target_link_libraries(cassandra ${CASS_LIBS})
--  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
-+  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS})
+   target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
  
-   set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
-   set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -168,10 +201,9 @@ if(CASS_BUILD_STATIC)
+@@ -168,8 +192,7 @@ if(CASS_BUILD_STATIC)
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck_static>
      $<TARGET_OBJECTS:hdr_histogram_static>
@@ -174,12 +162,9 @@ index 06b84b7..c0bce58 100644
 -    $<TARGET_OBJECTS:minizip_static>)
 +  )
    target_link_libraries(cassandra_static ${CASS_LIBS})
--  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
-+  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS})
+   target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
  
-   set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
-   set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -274,11 +306,6 @@ if(CASS_BUILD_SHARED)
+@@ -274,11 +297,6 @@ if(CASS_BUILD_SHARED)
        endif()
      endif()
    endif()
@@ -191,4 +176,3 @@ index 06b84b7..c0bce58 100644
  endif()
  
  if(CASS_BUILD_STATIC)
-
