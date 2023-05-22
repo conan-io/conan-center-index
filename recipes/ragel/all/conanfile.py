@@ -19,9 +19,10 @@ class RagelConan(ConanFile):
     topics = ("FSM", "regex", "fsm-compiler")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt", "config.h"]
 
     def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "config.h", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
 
     def layout(self):
@@ -39,7 +40,7 @@ class RagelConan(ConanFile):
     def generate(self):
         if self.settings.os == "Windows":
             tc = CMakeToolchain(self)
-            tc.variables["RAGEL_SRC_DIR"] = self.source_folder.replace("\\", "/")
+            tc.variables["RAGEL_SOURCE_DIR"] = self.source_folder.replace("\\", "/")
             tc.generate()
 
             dpes = CMakeDeps(self)

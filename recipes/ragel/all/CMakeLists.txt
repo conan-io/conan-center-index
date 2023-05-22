@@ -124,7 +124,8 @@ file(GLOB SRC
 add_executable(${CMAKE_PROJECT_NAME} ${SRC} ${HEADERS})
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${CONAN_LIBS})
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${RAGEL_SOURCE_DIR}/aapl
-												 PRIVATE ${CMAKE_BINARY_DIR})
+                                                 PRIVATE ${CMAKE_SOURCE_DIR}
+                                                 PRIVATE ${CMAKE_BINARY_DIR})
 
 install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION bin)
