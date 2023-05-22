@@ -138,9 +138,3 @@ venv.bak/
 Session.vim
 *~
 .undodir
-
-# Autotools
-aclocal.m4
-configure
-autom4te.cache/
-gtk-doc.make
