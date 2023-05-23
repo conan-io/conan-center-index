@@ -36,6 +36,7 @@ class TzConan(ConanFile):
         # INFO: The Makefile enforces /usr/bin/awk, but we want to use tool requirements
         awk_path = os.path.join(self.dependencies.direct_build['mawk'].package_folder, "bin", "mawk")
         replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "AWK=		awk", f"AWK={awk_path}")
+        replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "$(AWK)", awk_path)
 
     def build(self):
         self._patch_sources()
