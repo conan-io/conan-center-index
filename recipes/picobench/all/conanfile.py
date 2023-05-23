@@ -25,27 +25,28 @@ class PicobenchConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["PICOBENCH_BUILD_TOOLS"] = self.options.with_cli
-        tc.generate()
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        if self.info.options.with_cli:
+            del self.info.settings.compiler
+        else:
+            self.info.clear()
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
-    def package_id(self):
-        if self.options.with_cli:
-            del self.info.settings.compiler
-        else:
-            self.info.clear()
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["PICOBENCH_BUILD_TOOLS"] = self.options.with_cli
+        tc.variables["PICOBENCH_BUILD_TESTS"] = False
+        tc.variables["PICOBENCH_BUILD_EXAMPLES"] = False
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -65,7 +66,7 @@ class PicobenchConan(ConanFile):
             binpath = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var: {}".format(binpath))
             self.env_info.PATH.append(binpath)
+        else:
+            self.cpp_info.bindirs = []
 
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
