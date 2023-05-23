@@ -3,7 +3,6 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
 
 import os
 
@@ -68,7 +67,7 @@ class GtkDocStubConan(ConanFile):
 
         self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
 
-        automake_dir = unix_path(self, os.path.join(self.package_folder, "res", "aclocal"))
+        automake_dir = os.path.join(self.package_folder, "res", "aclocal")
         self.buildenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", automake_dir)
 
         # TODO: remove the following when only Conan 2.0 is supported
