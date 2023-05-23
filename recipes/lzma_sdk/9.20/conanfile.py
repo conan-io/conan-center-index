@@ -94,15 +94,14 @@ class LzmaSdkConan(ConanFile):
 
     def _build_autotools(self):
         autotools = Autotools(self)
-        with tools.environment_append(env_build.vars):
-            for make_dir, _ in self._autotools_build_dirs:
-                with chdir(self, make_dir):
-                    args = [
-                        "-f", "makefile.gcc",
-                    ]
-                    if self.settings.os == "Windows":
-                        args.append("IS_MINGW=1")
-                    autotools.make(args=args)
+        for make_dir, _ in self._autotools_build_dirs:
+            with chdir(self, make_dir):
+                args = [
+                    "-f", "makefile.gcc",
+                ]
+                if self.settings.os == "Windows":
+                    args.append("IS_MINGW=1")
+                autotools.make(args=args)
 
     def _patch_sources(self):
         if is_msvc(self):
