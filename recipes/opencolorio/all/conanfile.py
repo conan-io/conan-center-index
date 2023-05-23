@@ -66,6 +66,10 @@ class OpenColorIOConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.2.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
