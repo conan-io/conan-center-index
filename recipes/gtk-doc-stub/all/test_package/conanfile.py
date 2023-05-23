@@ -15,9 +15,6 @@ class TestPackageConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def layout(self):
         basic_layout(self)
 
