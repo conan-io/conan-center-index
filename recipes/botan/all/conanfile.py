@@ -8,7 +8,7 @@ from conan.tools.build import build_jobs
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag, VCVars
 from conan.tools.microsoft.subsystems import unix_path
 from conan.tools.scm import Version
 
@@ -181,6 +181,11 @@ class BotanConan(ConanFile):
 
     def source(self):
         get(conanfile=self, **self.conan_data['sources'][self.version], strip_root=True)
+
+    def generate(self):
+        if is_msvc(self):
+            ms = VCVars(self)
+            ms.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -433,15 +438,12 @@ class BotanConan(ConanFile):
 
     @property
     def _nmake_cmd(self):
-        vcvars = tools.vcvars_command(self.settings)
-        make_cmd = vcvars + ' && nmake'
-        return make_cmd
+        return 'nmake'
 
     @property
     def _make_install_cmd(self):
         if is_msvc(self):
-            vcvars = tools.vcvars_command(self.settings)
-            make_install_cmd = vcvars + ' && nmake install'
+            make_install_cmd = '{make} install'.format(make=self._nmake_cmd)
         else:
             make_install_cmd = '{make} install'.format(make=self._make_program)
         return make_install_cmd
