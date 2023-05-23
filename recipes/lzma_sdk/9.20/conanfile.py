@@ -41,6 +41,9 @@ class LzmaSdkConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.build_requires("msys2/cci.latest")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         del self.info.settings.build_type
         del self.info.settings.compiler
@@ -49,7 +52,6 @@ class LzmaSdkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version])
         rm(self, "7zr.exe", self.source_folder)
         rm(self, "lzma.exe", self.source_folder)
-
 
     def generate(self):
         if is_msvc(self):
