@@ -70,6 +70,12 @@ class ArmGnuToolchain(ConanFile):
                 f"Pre-compiled binaries are only available for {supported_build_architectures[str(self._settings_build.os)]}."
             )
 
+        if (self.settings.os != "baremetal" and self.settings.arch != self._settings_build.arch):
+            # Update comment later if this works
+            raise ConanInvalidConfiguration(
+                f"This tool does not work when cross compiling to a target that is not 'baremetal'."
+            )
+
     def source(self):
         pass
 
