@@ -44,8 +44,8 @@ class OpenColorIOConan(ConanFile):
         if Version(self.version) >= "2.2.0":
             # in Apple OS, minizip-ng/with_libcomp=True deletes minizip-ng/with_zlib options.
             if is_apple_os(self):
-                self.options["minizip-ng/*"].with_libcomp = False
-            self.options["minizip-ng/*"].with_zlib = True
+                self.options["minizip-ng"].with_libcomp = False
+            self.options["minizip-ng"].with_zlib = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
