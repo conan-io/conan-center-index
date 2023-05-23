@@ -19,11 +19,11 @@ class TestPackageConan(ConanFile):
         self.build_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
-        self.build_requires("automake/1.16.4")
+        self.build_requires("automake/1.16.5")
 
     def build(self):
         for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src),
+            shutil.copy(os.path.join(self.export_sources_folder, src),
                         os.path.join(self.build_folder, src))
         self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
