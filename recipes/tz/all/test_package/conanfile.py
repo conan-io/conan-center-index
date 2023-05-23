@@ -1,19 +1,27 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.layout import basic_layout
 
 
 class TzTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
+    tzdata = None
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
-    def layout(self):
-        basic_layout(self)
+    def generate(self):
+        # INFO: zdump does not consume TZDATA, need to pass absolute path of the zoneinfo directory
+        self.tzdata = self.dependencies.build['tz'].buildenv_info.vars(self).get('TZDATA')
+        with open("tzdata.info", "w") as fd:
+            fd.write(self.tzdata)
+
+    def build(self):
+        pass
 
     def test(self):
         if can_run(self):
-            self.run('zdump -v America/Los_Angeles', env="conanrun")
+            with open("tzdata.info", "r") as fd:
+                self.tzdata = fd.read()
+            self.run(f"zdump {self.tzdata}/America/Los_Angeles")
