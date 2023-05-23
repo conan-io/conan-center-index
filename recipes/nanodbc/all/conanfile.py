@@ -76,6 +76,8 @@ class NanodbcConan(ConanFile):
         tc.cache_variables["NANODBC_DISABLE_EXAMPLES"] = True
         tc.cache_variables["NANODBC_DISABLE_TESTS"] = True
 
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+
         tc.generate()
 
     def build(self):
