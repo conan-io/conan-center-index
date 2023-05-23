@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy
+from conan.tools.files import get, apply_conandata_patches, export_conandata_patches, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.scm import Version
 import os
@@ -95,6 +95,8 @@ class NanodbcConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "nanodbc")
+        self.cpp_info.set_property("cmake_target_name", "nanodbc::nanodbc")
         self.cpp_info.libs = ["nanodbc"]
 
         if not self.options.shared and self.settings.os == "Windows":
