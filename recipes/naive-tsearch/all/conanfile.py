@@ -30,6 +30,8 @@ class NaiveTsearchConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if self.options.header_only:
+            self.package_type = 'header-library'
 
     def layout(self):
         cmake_layout(self, src_folder="src")
