@@ -200,7 +200,7 @@ class BotanConan(ConanFile):
             self.run(self._make_install_cmd)
 
     def package_info(self):
-        major_version = self.version.split('.')[0]
+        major_version = Version(self.version).major
         self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
         self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
         self.cpp_info.libs = ["botan" if is_msvc(self) else f"botan-{major_version}"]
