@@ -1,10 +1,12 @@
+import pprint
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "VirtualBuildEnv"
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
@@ -19,6 +21,22 @@ class TestPackageConan(ConanFile):
         tc.blocks["arch_flags"].values = {
             "arch_flag": "-mthumb -mfloat-abi=hard -march=armv7e-m+fp -mtune=cortex-m4"
         }
+
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(tc.blocks["generic_system"].values)
+
+        tc.blocks["generic_system"].values = {
+            'cmake_sysroot': None,
+            'cmake_system_name': "Generic",
+            'cmake_system_processor': "ARM",
+            'cmake_system_version': None,
+            'generator_platform': None,
+            'toolset': None
+        }
+
+        pp.pprint(tc.blocks["generic_system"].values)
+        print("=================================================")
+
         tc.variables[
             "CMAKE_EXE_LINKER_FLAGS_INIT"
         ] = "${{CMAKE_EXE_LINKER_FLAGS_INIT}} -specs=nano.specs -specs=nosys.specs"
