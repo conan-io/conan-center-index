@@ -1,9 +1,9 @@
 diff --git a/cmake/simdutf-flags.cmake b/cmake/simdutf-flags.cmake
-index 3f6248c..cf3c6f7 100644
+index 4844fa0..801e2b3 100644
 --- a/cmake/simdutf-flags.cmake
 +++ b/cmake/simdutf-flags.cmake
-@@ -22,4 +22,4 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
- set(CMAKE_CXX_STANDARD 11)
+@@ -24,4 +24,4 @@ set(SIMDUTF_CXX_STANDARD 11 CACHE STRING "the C++ standard to use for simdutf")
+ set(CMAKE_CXX_STANDARD ${SIMDUTF_CXX_STANDARD})
  set(CMAKE_CXX_STANDARD_REQUIRED ON)
  set(CMAKE_CXX_EXTENSIONS OFF)
 -set(CMAKE_MACOSX_RPATH OFF)
@@ -20,4 +20,11 @@ index f42e310..80ce35c 100644
 +add_library(simdutf simdutf.cpp)
  target_include_directories(simdutf PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
  target_include_directories(simdutf PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
-
+ 
+@@ -38,4 +38,4 @@ if(SIMDUTF_SANITIZE_UNDEFINED)
+ endif()
+ if(MSVC AND BUILD_SHARED_LIBS)
+   set(SIMDUTF_WINDOWS_DLL TRUE)
+-endif()
+\ No newline at end of file
++endif()

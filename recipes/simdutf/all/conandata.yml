@@ -1,7 +1,7 @@
 sources:
-  "3.2.9":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.9.tar.gz"
-    sha256: "55edc849b3e8dd4443399d647efab80e7f3a9a80719bb411027b33e7f8e9cb06"
+  "3.2.11":
+    url: "https://github.com/simdutf/simdutf/archive/v3.2.11.tar.gz"
+    sha256: "e7177c9cc0f88687473c7d57e6a10a6123277722716d7fbd627cb08f7cc76aa2"
   "3.2.2":
     url: "https://github.com/simdutf/simdutf/archive/v3.2.2.tar.gz"
     sha256: "5a5c84c05bf30d681126d1dcbde903615f2c927e201e0c6d489f74a91b7f506f"
@@ -33,8 +33,8 @@ sources:
     url: "https://github.com/simdutf/simdutf/archive/v1.0.1.tar.gz"
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
-  "3.2.9":
-    - patch_file: "patches/3.2.9-0001-fix-cmake.patch"
+  "3.2.11":
+    - patch_file: "patches/3.2.11-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"
       patch_type: "conan"
   "3.2.2":
