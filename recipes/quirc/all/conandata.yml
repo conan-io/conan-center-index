@@ -11,5 +11,11 @@ sources:
 patches:
   "1.1":
     - patch_file: "patches/remove-c99-features.patch"
+      patch_description: "remove c99 features"
+      patch_type: "portability"
+      patch_source: "https://github.com/dlbeer/quirc/issues/68"
   "1.0":
     - patch_file: "patches/replace-vla.patch"
+      patch_description: "threshold() uses now the row_average member of struct quirc."
+      patch_type: "portability"
+      patch_source: "https://github.com/dlbeer/quirc/commit/90371f36a034312f264f2589ff218dad62bee4a4"
