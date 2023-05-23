@@ -1,8 +1,11 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy, rename
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.54.0"
 
 
 class CppItertoolsConan(ConanFile):
@@ -23,13 +26,13 @@ class CppItertoolsConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        rename(self, extracted_dir, self._source_subfolder)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
 
         minimal_version = {
             "Visual Studio": "15",
@@ -38,7 +41,7 @@ class CppItertoolsConan(ConanFile):
             "apple-clang": "9.1"
         }
         compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = Version(self.settings.compiler.version)
 
         if compiler not in minimal_version:
             self.output.info("{} requires a compiler that supports at least C++17".format(self.name))
@@ -47,19 +50,15 @@ class CppItertoolsConan(ConanFile):
         # Exclude compilers not supported by cppitertools
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("{} requires a compiler that supports at least C++17. {} {} is not".format(
-                self.name, compiler, tools.Version(self.settings.compiler.version.value)))
+                self.name, compiler, Version(self.settings.compiler.version.value)))
 
     def requirements(self):
         if self.options.zip_longest:
             self.requires('boost/1.75.0')
 
     def package(self):
-        self.copy("*.hpp", dst=os.path.join("include", "cppitertools"), src=self._source_subfolder, excludes=('examples/**', 'test/**'))
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "cppitertools"
-        self.cpp_info.names["cmake_find_package_multi"] = "cppitertools"
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder,"include", "cppitertools"), excludes=('examples/**', 'test/**'))
+        copy(self, "LICENSE.md", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder,"licenses"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
