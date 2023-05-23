@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, download
-from conan.errors import ConanException
+from conan.errors import ConanException, ConanInvalidConfiguration
 import os
 
 
@@ -24,8 +24,8 @@ class ArmGnuToolchain(ConanFile):
     @property
     def download_info(self):
         version = self.version
-        os = str(self.settings.os)
-        arch = str(self.settings.arch)
+        os = str(self.settings_build.os)
+        arch = str(self.settings_build.arch)
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
     @property
@@ -38,8 +38,33 @@ class ArmGnuToolchain(ConanFile):
 
     def validate(self):
         if not self.download_info:
-            raise ConanException(
+            raise ConanInvalidConfiguration(
                 "This package is not available for this operating system and architecture.")
+
+        if not hasattr(self, "settings_build"):
+            raise ConanInvalidConfiguration(
+                f"{self.name} must be used with a build profile.")
+
+        supported_build_operating_systems = ["Linux", "Macos", "Windows"]
+        if not self.settings_build.os in supported_build_operating_systems:
+            raise ConanInvalidConfiguration(
+                f"The build os '{self.settings_build.os}' is not supported. "
+                f"Pre-compiled binaries are only available for {supported_build_operating_systems}."
+            )
+
+        supported_build_architectures = {
+            "Linux": ["armv8", "x86_64"],
+            "Macos": ["armv8", "x86_64"],
+            "Windows": ["x86_64"],
+        }
+        if (
+            not self.settings_build.arch
+            in supported_build_architectures[str(self.settings_build.os)]
+        ):
+            raise ConanInvalidConfiguration(
+                f"The build architecture '{self.settings_build.arch}' is not supported for {self.settings_build.os}. "
+                f"Pre-compiled binaries are only available for {supported_build_architectures[str(self.settings_build.os)]}."
+            )
 
     def source(self):
         pass
@@ -48,7 +73,7 @@ class ArmGnuToolchain(ConanFile):
         download(self, self.license_url, "LICENSE", verify=False)
 
         get(self,
-            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)],
+            **self.conan_data["sources"][self.version][str(self.settings_build.os)][str(self.settings_build.arch)],
             strip_root=True)
 
     def package(self):
@@ -95,3 +120,25 @@ class ArmGnuToolchain(ConanFile):
 
         f = os.path.join(self.package_folder, "res/toolchain.cmake")
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
+
+        # float_abi = str(self.settings_target.arch.thumbv7em.float_abi)
+        # float_abi = ""
+        # processor = str(self.settings_target.arch.thumbv7em.processor)
+        # c_flags = [f"-mfloat-abi={ float_abi }",
+        #            f"-mcpu={ processor }",
+        #            "-mthumb",
+        #            "-ffunction-sections",
+        #            "-fdata-sections",
+        #            "-fno-exceptions",
+        #            "-fno-rtti"]
+
+        # self.conf_info.extend("tools.build:cflags", c_flags)
+        # self.conf_info.extend("tools.build:cxxflags", c_flags)
+        # self.conf_info.extend("tools.build:exelinkflags",
+        #                       ["--specs=nano.specs",
+        #                        "--specs=nosys.specs",
+        #                        f"-mfloat-abi={ float_abi }",
+        #                        f"-mcpu={processor}",
+        #                        "-mthumb",
+        #                        "-Wl,--gc-sections",
+        #                        "-Wl,--print-memory-usage"])

@@ -7,9 +7,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_CXX_COMPILER_WORKS TRUE)
 set(CMAKE_C_COMPILER_WORKS TRUE)
 
-# Need to force system to GENERIC & ARM as leaving this to Conan will result in
+# Need to force system to Generic & ARM as leaving this to Conan will result in
 # pollution from host profile settings
-set(CMAKE_SYSTEM_NAME "GENERIC")
+set(CMAKE_SYSTEM_NAME "Generic")
 set(CMAKE_SYSTEM_PROCESSOR "ARM")
 
 # Target definition
