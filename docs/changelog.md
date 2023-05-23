@@ -1,5 +1,55 @@
 # Changelog
 
+### 04-May-2023 - 16:05 CEST
+
+- [bugfix] Fix cppstd issues when selecting the value to use in profiles.
+- [feature] Add support for raising `InvalidConfiguration` in `validate_build()` method in recipes.
+- [feature] Update library requirements for Conan client 2.0.4
+- [feature] Inform users when Conan v2 CI build is mandatory for merging.
+- [feature] Implement different "under maintenance" levels: OFF, MINOR, MAJOR, CRITICAL.
+- [feature] ValidateInfrastrucure: Check Artifactory repos exist.
+- [feature] Move variables to new folder properties approach.
+
+### 12-April-2023 - 16:18 CEST
+
+- [feature] Add ListPackages job the posibility to update a list via PR
+- [feature] Add c3i-conan2-ready label when modifying .c3i/conan_v2_ready_references.yml
+- [hotfix] Use Conan helpers to update Conan Center page
+- [hotfix] Automatic Merge reduces the number of requests for each execution
+
+### 03-April-2023 - 10:26 CEST
+
+- [fix] Remove options usage from build profile.
+- [fix] Fix promotion of recipe/packages when artifacts already exist in target repo.
+- [feature] Make master branch promotion job wait for sibling jobs (to avoid recipe promotion race condition).
+- [feature] Improve request of reviews and remove timeout.
+
+### 24-March-2023 - 12:00 CET
+
+- [feature] Install Conan command extensions for Conan v2
+- [feature] Reduce Github requests number to execute Automatic Merge CI job
+- [hotfix] Improve Promote Package CI job logging for better debug
+
+### 10-March-2023 - 19:55 CET
+
+- [feature] Add priority to pull requests
+- [hotfix] Avoid extra http requests to run automatic merge faster
+
+### 10-March-2023 - 13:15 CET
+
+- [hotfix] No longer update conan_v2_ready_references.yml automatically
+- [bugfix] Validate Green and clean PRs first when executing automatic merge CI job
+
+### 07-March-2023 - 17:05 CET
+
+- [hotfix] Automatic merge skips git conflicts
+- [hotfix] config label for "v2 ready" depends on PR author
+
+### 03-March-2023 - 11:05 CET
+
+- [feature] Update ready_v2_references.yml file automatically
+- [fix] Do not reuse the same build folder to avoid busy files
+
 ### 21-February-2023 - 17:22 CET
 
 - [fix] Fix bug with cppstd entry in configuration files.
