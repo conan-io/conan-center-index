@@ -279,7 +279,7 @@ class BotanConan(ConanFile):
                                                                        self.settings.get_safe('os.subsystem'),
                                                                        self.settings.get_safe('arch'))
                 botan_extra_cxx_flags.append(macos_min_version)
-            macos_sdk_path = '-isysroot {}'.format(XCRun(self.settings).sdk_path)
+            macos_sdk_path = '-isysroot {}'.format(XCRun(self).sdk_path)
             botan_extra_cxx_flags.append(macos_sdk_path)
 
         # This is to work around botan's configure script that *replaces* its
@@ -392,7 +392,7 @@ class BotanConan(ConanFile):
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
-        prefix = unix_path(path=self.package_folder) if self._is_mingw_windows else self.package_folder
+        prefix = unix_path(self, self.package_folder) if self._is_mingw_windows else self.package_folder
 
         botan_abi = ' '.join(botan_abi_flags) if botan_abi_flags else ' '
         botan_cxx_extras = ' '.join(botan_extra_cxx_flags) if botan_extra_cxx_flags else ' '
