@@ -24,13 +24,17 @@ class ArmGnuToolchain(ConanFile):
     @property
     def download_info(self):
         version = self.version
-        os = str(self.settings_build.os)
-        arch = str(self.settings_build.arch)
+        os = str(self._settings_build.os)
+        arch = str(self._settings_build.arch)
         return self.conan_data.get("sources", {}).get(version, {}).get(os, {}).get(arch)
 
     @property
     def license_url(self):
         return "https://gist.githubusercontent.com/kammce/dc566a05f6ab2787ceef5b706012e7a2/raw/4cb8ab752d7c0f87cc074afa4e548a2be8766210/EULA.html"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def package_id(self):
         del self.info.settings.compiler
@@ -46,9 +50,9 @@ class ArmGnuToolchain(ConanFile):
                 f"{self.name} must be used with a build profile.")
 
         supported_build_operating_systems = ["Linux", "Macos", "Windows"]
-        if not self.settings_build.os in supported_build_operating_systems:
+        if not self._settings_build.os in supported_build_operating_systems:
             raise ConanInvalidConfiguration(
-                f"The build os '{self.settings_build.os}' is not supported. "
+                f"The build os '{self._settings_build.os}' is not supported. "
                 f"Pre-compiled binaries are only available for {supported_build_operating_systems}."
             )
 
@@ -58,12 +62,12 @@ class ArmGnuToolchain(ConanFile):
             "Windows": ["x86_64"],
         }
         if (
-            not self.settings_build.arch
-            in supported_build_architectures[str(self.settings_build.os)]
+            not self._settings_build.arch
+            in supported_build_architectures[str(self._settings_build.os)]
         ):
             raise ConanInvalidConfiguration(
-                f"The build architecture '{self.settings_build.arch}' is not supported for {self.settings_build.os}. "
-                f"Pre-compiled binaries are only available for {supported_build_architectures[str(self.settings_build.os)]}."
+                f"The build architecture '{self._settings_build.arch}' is not supported for {self._settings_build.os}. "
+                f"Pre-compiled binaries are only available for {supported_build_architectures[str(self._settings_build.os)]}."
             )
 
     def source(self):
@@ -73,7 +77,7 @@ class ArmGnuToolchain(ConanFile):
         download(self, self.license_url, "LICENSE", verify=False)
 
         get(self,
-            **self.conan_data["sources"][self.version][str(self.settings_build.os)][str(self.settings_build.arch)],
+            **self.conan_data["sources"][self.version][str(self._settings_build.os)][str(self._settings_build.arch)],
             strip_root=True)
 
     def package(self):
