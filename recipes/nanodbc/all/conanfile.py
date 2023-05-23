@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.scm import Version
 import os
 
 class NanodbcConan(ConanFile):
@@ -46,6 +48,12 @@ class NanodbcConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 14)
+
+        if self.settings.compiler == "apple-clang" and Version(self.version) != "2.14.0":
+            raise ConanInvalidConfiguration("""
+                `apple-clang` compilation is supported only for version 2.14.0 and up.
+                See https://github.com/nanodbc/nanodbc/issues/274 for more details.
+                """)
 
     def requirements(self):
         if self.options.with_boost:
