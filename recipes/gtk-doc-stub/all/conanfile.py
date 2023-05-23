@@ -60,7 +60,6 @@ class GtkDocStubConan(ConanFile):
         autotools.install()
 
     def package_info(self):
-        self.cpp_info.bindirs = ["bin"]
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = ["res"]
