@@ -67,7 +67,7 @@ class ProtobufConan(ConanFile):
                 "Visual Studio": "15",
                 "msvc": "191",
             },
-        }.get(self._min_cppstd, {})
+        }.get(str(self._min_cppstd), {})
 
     def export_sources(self):
         export_conandata_patches(self)
