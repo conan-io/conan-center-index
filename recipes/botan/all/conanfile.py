@@ -189,9 +189,10 @@ class BotanConan(ConanFile):
             self.run(self._make_cmd)
 
     def package(self):
-        copy(self, pattern='license.txt', dst='licenses', src='.')
-	#with chdir(self, self._source_subfolder):
-	#self.run(self._make_install_cmd)
+        copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
+            self.run(self._make_install_cmd)
 
     def package_info(self):
         major_version = self.version.split('.')[0]
