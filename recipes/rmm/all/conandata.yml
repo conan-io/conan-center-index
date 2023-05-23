@@ -1,0 +1,4 @@
+sources:
+  "23.04.00":
+    url: "https://github.com/rapidsai/rmm/archive/refs/tags/v23.04.00.tar.gz"
+    sha256: "16f28d3c4ffcd6e4005bafabdd7ec3efac3aee9882f71ff758e5840294ad77ec"
