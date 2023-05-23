@@ -259,11 +259,13 @@ required_for_references:
 - gnutls
 - googleapis
 - gperf
+- graphene
 - grpc
 - grpc-proto
 - gsl
 - gsl-lite
 - gsoap
+- gstreamer
 - gtest
 - gtk
 - gurkenlaeufer
@@ -311,6 +313,7 @@ required_for_references:
 - lexbor
 - libalsa
 - libarchive
+- libassert
 - libatomic_ops
 - libattr
 - libbacktrace
@@ -539,6 +542,7 @@ required_for_references:
 - simdjson
 - simdutf
 - skyr-url
+- sml
 - snappy
 - soci
 - sophus
