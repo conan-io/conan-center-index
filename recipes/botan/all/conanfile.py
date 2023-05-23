@@ -267,7 +267,7 @@ class BotanConan(ConanFile):
             elif self.settings.arch in ['x86_64']:
                 botan_abi_flags.append('-arch x86_64')
 
-        if self.options.get_safe('fPIC', True):
+        if self.options.get_safe('fPIC', True) and not is_msvc(self):
             botan_extra_cxx_flags.append('-fPIC')
 
         if is_apple_os(self):
