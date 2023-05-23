@@ -14,6 +14,7 @@ patches:
     - patch_file: "patches/878.200.35/mDNSResponder.sln.patch"
     - patch_file: "patches/878.200.35/mDNSWin32.c.patch"
     - patch_file: "patches/878.200.35/Service.c.patch"
+    - patch_file: "patches/878.200.35/upgrade-windows-toolset.patch"
   "878.200.35-opt":
     - patch_file: "patches/878.200.35/opt/permit-over-long-service-types.patch"
     - patch_file: "patches/878.200.35/opt/poll-rather-than-select.patch"
