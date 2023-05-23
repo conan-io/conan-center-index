@@ -1,4 +1,10 @@
 sources:
+  "4.4.28":
+    url: "https://github.com/besser82/libxcrypt/archive/v4.4.28.tar.gz"
+    sha256: "db7e37901969cb1d1e8020cb73a991ef81e48e31ea5b76a101862c806426b457"
+  "4.4.27":
+    url: "https://github.com/besser82/libxcrypt/archive/v4.4.27.tar.gz"
+    sha256: "e4ff47b7fa5370fa08e27258f8a0de5cb7e9b09c297ec7ab56a8a82e229a1c84"
   "4.4.26":
     url: "https://github.com/besser82/libxcrypt/archive/v4.4.26.tar.gz"
     sha256: "e8a544dd19171c1e6191a6044c96cc31496d781ba08b5a00f53310d001d58114"
@@ -18,5 +24,5 @@ sources:
     url: "https://github.com/besser82/libxcrypt/archive/v4.4.17.tar.gz"
     sha256: "7665168d0409574a03f7b484682e68334764c29c21ca5df438955a381384ca07"
   "4.4.16":
-    sha256: "a98f65b8baffa2b5ba68ee53c10c0a328166ef4116bce3baece190c8ce01f375"
     url: "https://github.com/besser82/libxcrypt/archive/v4.4.16.tar.gz"
+    sha256: "a98f65b8baffa2b5ba68ee53c10c0a328166ef4116bce3baece190c8ce01f375"

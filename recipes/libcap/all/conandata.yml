@@ -1,51 +1,92 @@
 sources:
-  "2.45":
-    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.45.tar.xz"
-    sha256: "d66639f765c0e10557666b00f519caf0bd07a95f867dddaee131cd284fac3286"
-  "2.46":
-    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.46.tar.xz"
-    sha256: "4ed3d11413fa6c9667e49f819808fbb581cd8864b839f87d7c2a02c70f21d8b4"
-  "2.48":
-    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.48.tar.xz"
-    sha256: "4de9590ee09a87c282d558737ffb5b6175ccbfd26d580add10df44d0f047f6c2"
-  "2.50":
-    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.50.tar.xz"
-    sha256: "47a57b8bd238b84c93c921a9b4ff82337551dbcb0cca071316aadf3e23b19261"
-  "2.57":
-    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.57.tar.xz"
-    sha256: "750221e347689e779a0ce2b22746ee9987d229712da934acb81b2d280684b7ab"
+  "2.66":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.66.tar.xz"
+    sha256: "15c40ededb3003d70a283fe587a36b7d19c8b3b554e33f86129c059a4bb466b2"
+  "2.65":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.65.tar.xz"
+    sha256: "73e350020cc31fe15360879d19384ffa3395a825f065fcf6bda3a5cdf965bebd"
+  "2.62":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.62.tar.xz"
+    sha256: "190c5baac9bee06a129eae20d3e827de62f664fe3507f0bf6c50a9a59fbd83a2"
   "2.58":
     url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.58.tar.xz"
     sha256: "41399a7d77497d348d20475dc9b2046f53e6b9755bf858ec78cc235101a11d4b"
-
-patches:
-  "2.45":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
-  "2.46":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
-  "2.48":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
-  "2.50":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
   "2.57":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.57.tar.xz"
+    sha256: "750221e347689e779a0ce2b22746ee9987d229712da934acb81b2d280684b7ab"
+  "2.50":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.50.tar.xz"
+    sha256: "47a57b8bd238b84c93c921a9b4ff82337551dbcb0cca071316aadf3e23b19261"
+  "2.48":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.48.tar.xz"
+    sha256: "4de9590ee09a87c282d558737ffb5b6175ccbfd26d580add10df44d0f047f6c2"
+  "2.46":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.46.tar.xz"
+    sha256: "4ed3d11413fa6c9667e49f819808fbb581cd8864b839f87d7c2a02c70f21d8b4"
+  "2.45":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.45.tar.xz"
+    sha256: "d66639f765c0e10557666b00f519caf0bd07a95f867dddaee131cd284fac3286"
+patches:
+  "2.66":
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.65":
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.62":
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
   "2.58":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.57":
+    - patch_file: "patches/2.57/0001-libcap-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.57/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.50":
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.48":
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.46":
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"
+  "2.45":
+    - patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+      patch_description: "allow to configure fPIC option from conan recipe"
+      patch_type: "conan"
+    - patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+      patch_description: "allow to override compiler via environment variables"
+      patch_type: "conan"

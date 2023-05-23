@@ -1,8 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibsodiumConan(ConanFile):
@@ -11,8 +17,9 @@ class LibsodiumConan(ConanFile):
     license = "ISC"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://doc.libsodium.org/"
-    topics = ("sodium", "libsodium", "encryption", "signature", "hashing")
-    settings = "os", "compiler", "arch", "build_type"
+    topics = "encryption", "signature", "hashing"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,30 +33,16 @@ class LibsodiumConan(ConanFile):
         "PIE": False,
     }
 
-    exports_sources = "patches/*"
-    short_paths = True
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
-    def _msvc_sln_folder(self):
-        return {
-            "14": "vs2015",
-            "15": "vs2017",
-            "16": "vs2019",
-        }.get(str(self.settings.compiler.version), None)
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,89 +50,137 @@ class LibsodiumConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.options.shared and "MT" in self.settings.compiler.runtime:
-                raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with MT(d) runtime")
-            if not self._msvc_sln_folder:
-                raise ConanInvalidConfiguration("Unsupported Visual Studio version: {}".format(self.settings.compiler.version))
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with static runtime")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             if self._is_mingw:
-                self.build_requires("libtool/2.4.6")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+                self.tool_requires("libtool/2.4.7")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.configuration = "{}{}".format(
+                "Debug" if self.settings.build_type == "Debug" else "Release",
+                "DLL" if self.options.shared else "LIB",
+            )
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+
+            tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
+            tc.configure_args.append("--enable-soname-versions={}".format(yes_no(self.options.use_soname)))
+            tc.configure_args.append("--enable-pie={}".format(yes_no(self.options.PIE)))
+            if self._is_mingw:
+                tc.extra_ldflags.append("-lssp")
+            if self.settings.os == "Emscripten":
+                # FIXME: this is an old comment/test, has not been re-tested with conan2 upgrade
+                self.output.warn("os=Emscripten is not tested/supported by this recipe")
+                # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
+            tc.generate()
+
+    @property
+    def _msvc_sln_folder(self):
+        sln_folders = {
+            "Visual Studio": {
+                "10": "vs2010",
+                "11": "vs2012",
+                "12": "vs2013",
+                "14": "vs2015",
+                "15": "vs2017",
+                "16": "vs2019",
+            },
+            "msvc": {
+                "170": "vs2012",
+                "180": "vs2013",
+                "190": "vs2015",
+                "191": "vs2017",
+                "192": "vs2019",
+            },
+        }
+        default_folder = "vs2019"
+        if self.version != "1.0.18":
+            sln_folders["Visual Studio"]["17"] = "vs2022"
+            sln_folders["msvc"]["193"] = "vs2022"
+            default_folder = "vs2022"
+
+        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
 
     def _build_msvc(self):
-        sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._msvc_sln_folder, "libsodium.sln")
-        build_type = "{}{}".format(
+        msvc_sln_folder = os.path.join(self.source_folder, "builds", "msvc", self._msvc_sln_folder)
+
+        #==============================
+        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
+        if self.version == "1.0.18" and self._msvc_sln_folder == "vs2019":
+            toolset = MSBuildToolchain(self).toolset
+            replace_in_file(
+                self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
+                "<PlatformToolset>v142</PlatformToolset>",
+                f"<PlatformToolset>{toolset}</PlatformToolset>",
+            )
+        conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+        replace_in_file(
+            self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
+            "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+            f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+        )
+        #==============================
+
+        msbuild = MSBuild(self)
+        msbuild.build_type = "{}{}".format(
             "Dyn" if self.options.shared else "Static",
             "Debug" if self.settings.build_type == "Debug" else "Release",
         )
-        msbuild = MSBuild(self)
-        msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=build_type)
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self._is_mingw:
-            self._autotools.libs.append("ssp")
-
-        if self.settings.os == "Emscripten":
-            self.output.warn("os=Emscripten is not tested/supported by this recipe")
-            # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
-
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-soname-versions={}".format(yes_no(self.options.use_soname)),
-            "--enable-pie={}".format(yes_no(self.options.PIE)),
-        ]
-
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
+        msbuild.build(os.path.join(msvc_sln_folder, "libsodium.sln"))
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        if self.settings.compiler == "Visual Studio":
+        apply_conandata_patches(self)
+        if is_msvc(self):
             self._build_msvc()
         else:
+            autotools = Autotools(self)
             if self._is_mingw:
-                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), cwd=self._source_subfolder, win_bash=tools.os_info.is_windows)
-            autotools = self._configure_autotools()
+                autotools.autoreconf()
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
-        if self.settings.compiler == "Visual Studio":
-            self.copy("*.lib", dst="lib", keep_path=False)
-            self.copy("*.dll", dst="bin", keep_path=False)
-            inc_src = os.path.join(self._source_subfolder, "src", self.name, "include")
-            self.copy("*.h", src=inc_src, dst="include", keep_path=True, excludes=("*/private/*"))
+        copy(self, "*LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            output_dir = os.path.join(self.source_folder, "bin")
+            copy(self, "*.lib", src=output_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            inc_src = os.path.join(self.source_folder, "src", "libsodium", "include")
+            copy(self, "*.h", src=inc_src, dst=os.path.join(self.package_folder, "include"), excludes=("*/private/*"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libsodium"
-        self.cpp_info.libs = ["{}sodium".format("lib" if self.settings.compiler == "Visual Studio" else "")]
+        self.cpp_info.set_property("pkg_config_name", "libsodium")
+        self.cpp_info.libs = ["{}sodium".format("lib" if is_msvc(self) else "")]
         if not self.options.shared:
             self.cpp_info.defines = ["SODIUM_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):

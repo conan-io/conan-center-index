@@ -1,0 +1,44 @@
+sources:
+  "api.252009":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/API252009.tar.gz"
+    sha256: "f0ffd7e7145df2b66694d88a9d7854325032171ee6a9650f348da69f735d57a3"
+  "api.252005":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/API252004.tar.gz"
+    sha256: "28caa91bc1a7d8b1e7bf0198da23c74a8ea0cfda447c72eeb39b5766d01a754a"
+  "2.5.2":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/refs/tags/v2.5.2.tar.gz"
+    sha256: "6519f3d5871a1119876928531d249c45ef46392237ab7bacc6531b4d538551ca"
+  "cci.20211009":
+    url: "https://github.com/DiligentGraphics/DiligentTools/archive/846ffbe83ac5ae0c96135f5a772d0077d0d086a8.tar.gz"
+    sha256: "12ec01e730aefd64ca0d335b5ac6af47279f5e58617f37bc062cd83422f81703"
+patches:
+  "api.252009":
+    - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
+  "api.252005":
+    - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
+  "2.5.2":
+    - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0007-2.5.2-use-diligent-core-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0008-2.5.2-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0009-2.5.2-fix-include-path.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0010-2.5.2-fix-render-state-notation-paths.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0011-2.5.2-use-conan-dependencies-part2.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
+  "cci.20211009":
+    - patch_file: "patches/0001-use-imgui-from-conan.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-include-path.diff"
+      base_path: "source_subfolder"

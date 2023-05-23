@@ -1,0 +1,53 @@
+--- cmake/IgnCMake.cmake
++++ cmake/IgnCMake.cmake
+@@ -36,3 +36,10 @@ include(IgnPkgConfig)
+ #============================================================================
+ include(CMakePackageConfigHelpers)
+ include(CMakeParseArguments)
++
++set(IGNITION_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
++set(PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../..")
++set(IGNITION_CMAKE_DOXYGEN_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/doxygen")
++set(IGNITION_CMAKE_CODECHECK_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/codecheck")
++set(IGNITION_CMAKE_BENCHMARK_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/benchmark")
++set(IGNITION_CMAKE_TOOLS_DIR "${PACKAGE_PREFIX_DIR}/lib/ignition/ignition-cmake2/tools")
+\ No newline at end of file
+
+--- cmake/IgnSetCompilerFlags.cmake
++++ cmake/IgnSetCompilerFlags.cmake
+@@ -77,9 +77,9 @@ macro(ign_setup_unix)
+     exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_SYSTEM_PROCESSOR)
+     set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} CACHE INTERNAL
+         "processor type (i386 and x86_64)")
+-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+-      set(IGN_ADD_fPIC_TO_LIBRARIES true)
+-    endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
++    #if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
++    #  set(IGN_ADD_fPIC_TO_LIBRARIES true)
++    #endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+   endif(CMAKE_UNAME)
+ 
+ endmacro()
+@@ -93,7 +93,9 @@ macro(ign_setup_apple)
+   #    10.x.x = Mac OSX Snow Leopard (10.6)
+   #    11.x.x = Mac OSX Lion (10.7)
+   #    12.x.x = Mac OSX Mountain Lion (10.8)
+-  if(${CMAKE_SYSTEM_VERSION} LESS 10)
++  if(NOT CMAKE_SYSTEM_VERSION)
++      return()
++  elseif(${CMAKE_SYSTEM_VERSION} LESS 10)
+     add_definitions(-DMAC_OS_X_VERSION=1050)
+   elseif(${CMAKE_SYSTEM_VERSION} GREATER 10 AND ${CMAKE_SYSTEM_VERSION} LESS 11)
+     add_definitions(-DMAC_OS_X_VERSION=1060)
+
+--- cmake/IgnUtils.cmake
++++ cmake/IgnUtils.cmake
+@@ -1396,7 +1396,7 @@ macro(_ign_add_library_or_component)
+     # Generate export macro headers
+     # Note: INTERFACE libraries do not need the export header
+     set(binary_include_dir
+-      "${CMAKE_BINARY_DIR}/include/${include_dir}")
++      "${PROJECT_BINARY_DIR}/include/${include_dir}")
+ 
+     set(implementation_file_name "${binary_include_dir}/detail/Export.hh")
+ 

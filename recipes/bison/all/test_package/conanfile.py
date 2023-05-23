@@ -1,46 +1,38 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.microsoft import unix_path
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    generators = "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv"
+    test_type = "explicit"
+    win_bash = True
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def layout(self):
+        cmake_layout(self)
+
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires(self.tested_reference_str)
+        if self._settings_build.os == "Windows":
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     @property
     def _mc_parser_source(self):
         return os.path.join(self.source_folder, "mc_parser.yy")
 
-    def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
-            # verify bison may run
-            self.run("bison --version", run_environment=True)
-            # verify yacc may run
-            self.run("yacc --version", run_environment=True, win_bash=tools.os_info.is_windows)
-            # verify bison may preprocess something
-            self.run("bison -d {}".format(self._mc_parser_source), run_environment=True)
-
-            # verify CMake integration
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
-
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
-
-            # verify bison works without M4 environment variables
-            with tools.environment_append({"M4": None}):
-                self.run("bison -d {}".format(self._mc_parser_source), run_environment=True)
-
-            # verify bison works without BISON_PKGDATADIR and M4 environment variables
-            with tools.environment_append({"BISON_PKGDATADIR": None, "M4": None}):
-                self.run("bison -d {}".format(self._mc_parser_source), run_environment=True)
+        self.run("bison --version")
+        self.run("yacc --version")
+        self.run(f"bison -d {unix_path(self, self._mc_parser_source)}")

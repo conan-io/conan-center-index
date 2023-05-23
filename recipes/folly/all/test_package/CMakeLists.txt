@@ -1,11 +1,16 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
-find_package(folly CONFIG REQUIRED)
+find_package(folly REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} Folly::folly)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+target_link_libraries(${PROJECT_NAME}
+    Folly::folly
+    Folly::follybenchmark)
+
+
+if (${FOLLY_VERSION} VERSION_LESS "2021.07.20.00")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+else()
+    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+endif()

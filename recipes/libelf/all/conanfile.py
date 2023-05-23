@@ -1,7 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
 import os
-import shutil
+
+required_conan_version = ">=1.54.0"
 
 
 class LibelfConan(ConanFile):
@@ -10,23 +17,24 @@ class LibelfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://directory.fsf.org/wiki/Libelf"
     license = "LGPL-2.0"
-    topics = ("conan", "elf", "fsf", "libelf", "object-file")
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    topics = ("elf", "fsf", "libelf", "object-file")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _autotools = None
-    _cmake = None
+    exports_sources = "CMakeLists.txt"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,89 +42,84 @@ class LibelfConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.options.shared and self.settings.os not in ["Linux", "Windows"]:
-            raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux or windows platforms")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        if self.settings.os == "Windows":
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.options.shared and self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+            raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux/FreeBSD/windows platforms")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.build_requires("autoconf/2.69")
-            self.build_requires("gnu-config/cci.20201022")
+            self.tool_requires("autoconf/2.71")
+            self.tool_requires("gnu-config/cci.20210814")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _build_cmake(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
-    def _package_cmake(self):
-        cmake = self._configure_cmake()
-        cmake.install()
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True)
-        args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
-
-    def _build_autotools(self):
-        autotools = self._configure_autotools()
-        autotools.make()
-
-    def _package_autotools(self):
-        autotools = self._configure_autotools()
-        autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "locale"))
-        if self.settings.os == "Linux" and self.options.shared:
-            os.remove(os.path.join(self.package_folder, "lib", "libelf.a"))
-
-    @property
-    def _user_info_build(self):
-        # If using the experimental feature with different context for host and
-        # build, the 'user_info' attributes of the 'build_requires' packages
-        # will be located into the 'user_info_build' object. In other cases they
-        # will be located into the 'deps_user_info' object.
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+    def generate(self):
+        if self.settings.os == "Windows":
+            tc = CMakeToolchain(self)
+            tc.variables["LIBELF_SRC_DIR"] = self.source_folder.replace("\\", "/")
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.extend([
+                # it's required, libelf doesnt seem to understand DESTDIR
+                f"--prefix={unix_path(self, self.package_folder)}",
+            ])
+            tc.generate()
 
     def build(self):
         if self.settings.os == "Windows":
-            self._build_cmake()
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+            cmake.build()
         else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "Makefile.in"),
+            replace_in_file(self, os.path.join(self.source_folder, "lib", "Makefile.in"),
                                   "$(LINK_SHLIB)",
                                   "$(LINK_SHLIB) $(LDFLAGS)")
             # libelf sources contains really outdated 'config.sub' and
             # 'config.guess' files. It not allows to build libelf for armv8 arch.
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                        os.path.join(self._source_subfolder, "config.sub"))
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                        os.path.join(self._source_subfolder, "config.guess"))
-            self._build_autotools()
+            for gnu_config in [
+                self.conf.get("user.gnu-config:config_guess", check_type=str),
+                self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING.LIB", dst="licenses", src=self._source_subfolder)
+        copy(self, "COPYING.LIB", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.settings.os == "Windows":
-            self._package_cmake()
+            cmake = CMake(self)
+            cmake.install()
         else:
-            self._package_autotools()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            autotools = Autotools(self)
+            autotools.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "locale"))
+            if self.options.shared:
+                rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", "libelf")
+        self.cpp_info.libs = ["elf"]
+        self.cpp_info.includedirs.append(os.path.join("include", "libelf"))

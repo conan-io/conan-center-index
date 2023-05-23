@@ -1,4 +1,7 @@
 sources:
+  "cci.20211104":
+    url: "https://github.com/ben-strasser/fast-cpp-csv-parser/archive/5a417973b4cea674a5e4a3b88a23098a2ab75479.zip"
+    sha256: "33a22bda2603a87b8f36c79673339490f58656d92a4882e788de3f4ef7ec57b2"
   "cci.20200830":
     url: "https://github.com/ben-strasser/fast-cpp-csv-parser/archive/1165be530d19ed730228dd122f2df0896be8f64e.zip"
     sha256: "28ae9e3b95dcb7a78086ff1425f3bd1258407ebedc34d8517c5bcb8084b5833e"

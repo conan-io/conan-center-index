@@ -1,0 +1,8 @@
+sources:
+  "3.0.2":
+    url: "https://icculus.org/physfs/downloads/physfs-3.0.2.tar.bz2"
+    sha256: "304df76206d633df5360e738b138c94e82ccf086e50ba84f456d3f8432f9f863"
+patches:
+  "3.0.2":
+    - patch_file: "patches/0001-fix-export-import-symbols.patch"
+    - patch_file: "patches/0002-cmake-doc-option.patch"

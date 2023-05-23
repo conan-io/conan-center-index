@@ -1,4 +1,4 @@
-#include <modbus/modbus.h>
+#include <modbus.h>
 
 #include <stdio.h>
 #include <stdlib.h>

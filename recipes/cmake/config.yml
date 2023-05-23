@@ -1,21 +1,15 @@
 versions:
-  "3.15.7":
-    folder: "3.x.x"
-  "3.16.9":
-    folder: "3.x.x"
-  "3.17.5":
-    folder: "3.x.x"
-  "3.18.6":
-    folder: "3.x.x"
   "3.19.8":
-    folder: "3.x.x"
+    folder: "binary"
   "3.20.6":
-    folder: "3.x.x"
-  "3.21.0":
-    folder: "3.x.x"
-  "3.21.1":
-    folder: "3.x.x"
-  "3.21.2":
-    folder: "3.x.x"
-  "3.21.3":
-    folder: "3.x.x"
+    folder: "binary"
+  "3.21.7":
+    folder: "binary"
+  "3.22.6":
+    folder: "binary"
+  "3.23.5":
+    folder: "binary"
+  "3.24.4":
+    folder: "binary"
+  "3.25.3":
+    folder: "binary"

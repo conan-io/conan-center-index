@@ -1,12 +1,20 @@
 sources:
+  "2.0.1":
+    url: "https://github.com/zeromq/zyre/archive/v2.0.1.tar.gz"
+    sha256: "624d379dc880025144f58d3a7dc35ea1be4a57ba4e2a58c98ec15a60891be12d"
   "2.0.0":
     url: "https://github.com/zeromq/zyre/archive/v2.0.0.tar.gz"
     sha256: "b978a999947ddb6722d956db2427869b313225e50518c4fbbf960a68109e3e91"
 patches:
+  "2.0.1":
+    - patch_file: "patches/2.0.1-0001-cmake-use-conan-disable-executables.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.1-0002-zyre-disable-git-escape-CMAKE_BUILD_TYPE.patch"
+      base_path: "source_subfolder"
   "2.0.0":
-    - patch_file: "patches/0001-cmake-use-conan-disable-executables.patch"
+    - patch_file: "patches/2.0.0-0001-cmake-use-conan-disable-executables.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-zyre-disable-git-escape-CMAKE_BUILD_TYPE.patch"
+    - patch_file: "patches/2.0.0-0002-zyre-disable-git-escape-CMAKE_BUILD_TYPE.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-fix-zyre-self-test-on-windows.patch"
+    - patch_file: "patches/2.0.0-0003-fix-zyre-self-test-on-windows.patch"
       base_path: "source_subfolder"

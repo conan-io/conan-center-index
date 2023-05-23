@@ -1,4 +1,10 @@
 sources:
+  "2.61-1":
+    url: "https://github.com/WiringPi/WiringPi/archive/refs/tags/2.61-1.tar.gz"
+    sha256: "b5dc6c6c2ba1349acf602fafd7b58aa81e3fc3216a33b983386264cca0033e12"
+  "cci.20210727":
+    url: "https://github.com/WiringPi/WiringPi/archive/7f8fe26e4f775abfced43c07657a353f03ddb2d0.tar.gz"
+    sha256: "d85f063b1bfe73fd23ed20a3dfb7968be97172a78113d510e2a5f7ddeacc4799"
   "2.50":
-    sha256: f1ddf17e876f88e074d4597767e365a1b5ef20414a38754884935b38d8c8e932
-    url: https://github.com/WiringPi/WiringPi/archive/final_official_2.50.tar.gz
+    url: "https://github.com/WiringPi/WiringPi/archive/final_official_2.50.tar.gz"
+    sha256: "f1ddf17e876f88e074d4597767e365a1b5ef20414a38754884935b38d8c8e932"

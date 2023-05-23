@@ -1,0 +1,47 @@
+From 650a6d49e9a511d005171940761f6dd6b440ee66 Mon Sep 17 00:00:00 2001
+From: Chris Robinson <chris.kcat@gmail.com>
+Date: Mon, 18 Jul 2022 11:10:27 -0700
+Subject: [PATCH] Declare variables closer to where they're used
+
+---
+ alc/backends/alsa.cpp | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/alc/backends/alsa.cpp b/alc/backends/alsa.cpp
+index 9c78b6c6a..b6efeaba1 100644
+--- a/alc/backends/alsa.cpp
++++ b/alc/backends/alsa.cpp
+@@ -623,7 +623,6 @@ int AlsaPlayback::mixerNoMMapProc()
+ 
+ void AlsaPlayback::open(const char *name)
+ {
+-    al::optional<std::string> driveropt;
+     const char *driver{"default"};
+     if(name)
+     {
+@@ -640,7 +639,7 @@ void AlsaPlayback::open(const char *name)
+     else
+     {
+         name = alsaDevice;
+-        if(bool{driveropt = ConfigValueStr(nullptr, "alsa", "device")})
++        if(auto driveropt = ConfigValueStr(nullptr, "alsa", "device"))
+             driver = driveropt->c_str();
+     }
+     TRACE("Opening device \"%s\"\n", driver);
+@@ -896,7 +895,6 @@ AlsaCapture::~AlsaCapture()
+ 
+ void AlsaCapture::open(const char *name)
+ {
+-    al::optional<std::string> driveropt;
+     const char *driver{"default"};
+     if(name)
+     {
+@@ -913,7 +911,7 @@ void AlsaCapture::open(const char *name)
+     else
+     {
+         name = alsaDevice;
+-        if(bool{driveropt = ConfigValueStr(nullptr, "alsa", "capture")})
++        if(auto driveropt = ConfigValueStr(nullptr, "alsa", "capture"))
+             driver = driveropt->c_str();
+     }
+ 

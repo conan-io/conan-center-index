@@ -1,4 +1,3 @@
-https://github.com/Baron-von-Riedesel/JWasm/pull/10
 --- main.c
 +++ main.c
 @@ -69,7 +69,7 @@ int main( int argc, char **argv )

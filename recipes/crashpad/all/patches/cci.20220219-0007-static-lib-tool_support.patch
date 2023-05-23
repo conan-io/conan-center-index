@@ -1,0 +1,13 @@
+diff --git a/tools/BUILD.gn b/tools/BUILD.gn
+index 4069e070..316d7ee7 100644
+--- a/tools/BUILD.gn
++++ b/tools/BUILD.gn
+@@ -14,7 +14,7 @@
+ 
+ import("../build/crashpad_buildconfig.gni")
+ 
+-source_set("tool_support") {
++static_library("tool_support") {
+   sources = [
+     "tool_support.cc",
+     "tool_support.h",

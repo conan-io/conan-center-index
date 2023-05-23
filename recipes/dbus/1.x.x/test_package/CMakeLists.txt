@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(DBus1 REQUIRED CONFIG)
 
-find_package(DBus1 REQUIRED)
-
-add_executable(example example.c)
-target_link_libraries(example dbus-1::dbus-1)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE dbus-1)

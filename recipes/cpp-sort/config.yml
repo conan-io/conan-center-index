@@ -1,17 +1,29 @@
 versions:
-  "1.5.1":
+  "1.14.0":
     folder: all
-  "1.6.0":
+  "1.13.2":
     folder: all
-  "1.7.0":
+  "1.13.1":
     folder: all
-  "1.8.0":
+  "1.13.0":
     folder: all
-  "1.8.1":
+  "1.12.1":
     folder: all
-  "1.9.0":
+  "1.12.0":
+    folder: all
+  "1.11.0":
     folder: all
   "1.10.0":
     folder: all
-  "1.11.0":
+  "1.9.0":
+    folder: all
+  "1.8.1":
+    folder: all
+  "1.8.0":
+    folder: all
+  "1.7.0":
+    folder: all
+  "1.6.0":
+    folder: all
+  "1.5.1":
     folder: all

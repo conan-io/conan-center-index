@@ -1,0 +1,28 @@
+Always install and fix runtime destination
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,11 +4,7 @@ project(METIS C)
+ set(GKLIB_PATH "${CMAKE_SOURCE_DIR}/GKlib" CACHE PATH "path to GKlib")
+ set(SHARED FALSE CACHE BOOL "build a shared library")
+ 
+-if(MSVC)
+-  set(METIS_INSTALL FALSE)
+-else()
+-  set(METIS_INSTALL TRUE)
+-endif()
++set(METIS_INSTALL TRUE)
+ 
+ # Configure libmetis library.
+ if(SHARED)
+diff --git a/libmetis/CMakeLists.txt b/libmetis/CMakeLists.txt
+index b577360..e9c7825 100644
+--- a/libmetis/CMakeLists.txt
++++ b/libmetis/CMakeLists.txt
+@@ -13,6 +13,6 @@ endif()
+ if(METIS_INSTALL)
+   install(TARGETS metis
+     LIBRARY DESTINATION lib
+-    RUNTIME DESTINATION lib
++    RUNTIME DESTINATION bin
+     ARCHIVE DESTINATION lib)
+ endif()

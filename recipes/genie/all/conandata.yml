@@ -5,3 +5,9 @@ sources:
   "1157":
     url: "https://github.com/bkaradzic/GENie/archive/5fecb127855ee069df345f20d17fea78220fee93.zip"
     sha256: "88efc5d16665cbda9885d86b1665388e3307f0426df3da46c4598350caa893d9"
+  "1160":
+    url: "https://github.com/bkaradzic/GENie/archive/f9bd455a8439dbcb807816c0be9e4aedf5991bc3.zip"
+    sha256: "6fe7e2f0107c965ebe9d099b0168128dfcaee67d7368d4b15b42d80808e3d373"
+  "1170":
+    url: "https://github.com/bkaradzic/GENie/archive/22cc907a4351db46c55f73e6aa901f1b2f0c52ad.zip"
+    sha256: "C7691E50F8FB6F2346D0D3CEED14A26F9DE7AEE658CE30B61770F8BE87C1FE00"

@@ -1,0 +1,14 @@
+--- a/src/Makefile.nmake
++++ b/src/Makefile.nmake
+@@ -16,9 +16,9 @@
+ CFLAGS = /W4 /D "WIN32" /D "_MBCS" /D "STDC_HEADERS" /D "HAVE_STDLIB_H" /D "HAVE_STRING_H" /nologo 
+ 
+ !IF "$(DEBUG)" == "1"
+-CFLAGS = $(CFLAGS) /D "_DEBUG" /Od /MLd /RTC1 /ZI
++CFLAGS = $(CFLAGS) /D "_DEBUG"
+ !ELSE
+-CFLAGS = $(CFLAGS) /D "NDEBUG" /O2 /ML /GS /Zi
++CFLAGS = $(CFLAGS) /D "NDEBUG"
+ !ENDIF
+   
+ all: argtable2.lib argtable2.dll

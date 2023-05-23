@@ -1,0 +1,13 @@
+sources:
+  "2.5.1":
+    url: "https://github.com/litespeedtech/ls-qpack/archive/refs/tags/v2.5.1.tar.gz"
+    sha256: "dae1c159afc8541d51c12f5ad78209fe092815d37cb621b5ee46a9db049a283f"
+
+patches:
+  "2.5.1":
+    - patch_file: "patches/0001-use-cci-package.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+    - patch_file: "patches/0002-add-installer.patch"
+      patch_description: "add installer"
+      patch_type: "conan"

@@ -1,5 +1,19 @@
 versions:
+  "1.18":
+    folder: "all"
+  "1.17":
+    folder: "all"
+  "1.15":
+    folder: "all"
+  "1.14":
+    folder: "pre_1.15"
+  "1.12":
+    folder: "pre_1.15"
+  "1.10":
+    folder: "pre_1.15"
+  "1.9":
+    folder: "pre_1.15"
   "1.8":
-    folder: all
+    folder: "pre_1.15"
   "1.7":
-    folder: all
+    folder: "pre_1.15"

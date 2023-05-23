@@ -1,5 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class HdrhistogramcConan(ConanFile):
@@ -9,19 +14,19 @@ class HdrhistogramcConan(ConanFile):
     homepage = "https://github.com/HdrHistogram/HdrHistogram_c"
     description = "'C' port of High Dynamic Range (HDR) Histogram"
     topics = ("libraries", "c", "histogram")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True,
-                       "shared": False}
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+    }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,52 +34,65 @@ class HdrhistogramcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.13")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("HdrHistogram_c-" + self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["HDR_HISTOGRAM_BUILD_PROGRAMS"] = False
-            self._cmake.definitions["HDR_HISTOGRAM_BUILD_SHARED"] = self.options.shared
-            self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = self.options.shared
-            self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
-            self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-            self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["HDR_HISTOGRAM_BUILD_PROGRAMS"] = False
+        tc.variables["HDR_HISTOGRAM_BUILD_SHARED"] = self.options.shared
+        tc.variables["HDR_HISTOGRAM_INSTALL_SHARED"] = self.options.shared
+        tc.variables["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
+        tc.variables["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("COPYING.txt", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        target = "hdr_histogram" if self.options.shared else "hdr_histogram_static"
+        self.cpp_info.set_property("cmake_file_name", "hdr_histogram")
+        self.cpp_info.set_property("cmake_target_name", f"hdr_histogram::{target}")
+        if Version(self.version) >= "0.11.6":
+            self.cpp_info.set_property("pkg_config_name", "hdr_histogram")
+
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["hdr_histrogram"].libs = collect_libs(self)
+        self.cpp_info.components["hdr_histrogram"].includedirs.append(os.path.join("include", "hdr"))
+        if not self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["hdr_histrogram"].system_libs = ["m", "rt", "pthread"]
+            elif self.settings.os == "Windows":
+                self.cpp_info.components["hdr_histrogram"].system_libs = ["ws2_32"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "hdr_histogram"
         self.cpp_info.names["cmake_find_package_multi"] = "hdr_histogram"
-        hdr_histogram_target = "hdr_histogram" if self.options.shared else "hdr_histogram_static"
-        self.cpp_info.components["hdr_histrogram"].names["cmake_find_package"] = hdr_histogram_target
-        self.cpp_info.components["hdr_histrogram"].names["cmake_find_package_multi"] = hdr_histogram_target
-        self.cpp_info.components["hdr_histrogram"].libs = tools.collect_libs(self)
-        self.cpp_info.components["hdr_histrogram"].includedirs = ["include", os.path.join("include", "hdr")]
+        self.cpp_info.components["hdr_histrogram"].names["cmake_find_package"] = target
+        self.cpp_info.components["hdr_histrogram"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["hdr_histrogram"].set_property("cmake_target_name", f"hdr_histogram::{target}")
         self.cpp_info.components["hdr_histrogram"].requires = ["zlib::zlib"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["hdr_histrogram"].system_libs = ["m", "rt"]
-        elif self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.components["hdr_histrogram"].system_libs = ["ws2_32"]

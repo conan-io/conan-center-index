@@ -20,3 +20,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0008-manage-mysql-through-conan.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0009-downgrade-cmake-minimum-required.patch"
+      base_path: "source_subfolder"

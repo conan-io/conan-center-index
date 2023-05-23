@@ -1,56 +1,58 @@
 sources:
-  "13.4":
-    url: "https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.gz"
-    sha256: "59d7bc523e78570c549876fed297ec3e46dd307e90f5b1d22f49181191cf203e"
-  "13.3":
-    url: "https://ftp.postgresql.org/pub/source/v13.3/postgresql-13.3.tar.gz"
-    sha256: "0b54a8a68dbfaf5dcddd89eb3922740143df50fbea02fefda8de743d8af99516"
-  "13.2":
-    url: "https://ftp.postgresql.org/pub/source/v13.2/postgresql-13.2.tar.gz"
-    sha256: "3386a40736332aceb055c7c9012ecc665188536d874d967fcc5a33e7992f8080"
-  "13.1":
-    url: "https://ftp.postgresql.org/pub/source/v13.1/postgresql-13.1.tar.gz"
-    sha256: "c474a70fdacb49e5841e989b47f116080c2c21ff743312f73f4d2ca32ff1d7dd"
-  "13.0":
-    url: "https://ftp.postgresql.org/pub/source/v13.0/postgresql-13.0.tar.gz"
-    sha256: "67b09fca40a35360aef82fee43546271e6a04c33276e0093c5fb48653b2f5afa"
-  "12.6":
-    url: "https://ftp.postgresql.org/pub/source/v12.6/postgresql-12.6.tar.gz"
-    sha256: "c22039cb91a61b46c2df26b4ff64c64b95d6cf3d8e25c22a430bd8fe8eb78e7d"
-  "12.4":
-    url: "https://ftp.postgresql.org/pub/source/v12.4/postgresql-12.4.tar.gz"
-    sha256: "9749b891b9d8f984312fe510a7a3613035134cee1e634793dac5568d1e1a5852"
-  "12.3":
-    url: "https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz"
-    sha256: "708fd5b32a97577679d3c13824c633936f886a733fc55ab5a9240b615a105f50"
-  "12.2":
-    url: "https://ftp.postgresql.org/pub/source/v12.2/postgresql-12.2.tar.gz"
-    sha256: "8808449444ee9b086054a6dcfbfb98029e4f8022372c2edf3de5b6d8f417c8e4"
-  "11.11":
-    url: "https://ftp.postgresql.org/pub/source/v11.11/postgresql-11.11.tar.gz"
-    sha256: "53af5d8c8c314d31d382e3be670f32f0e21197434b90845560519b373a8ea409"
-  "11.9":
-    url: "https://ftp.postgresql.org/pub/source/v11.9/postgresql-11.9.tar.gz"
-    sha256: "e98a8649814e2fa632a5d86bfb91f1ad570d47b108bc5c0d0d854803282abb03"
-  "11.7":
-    url: "https://ftp.postgresql.org/pub/source/v11.7/postgresql-11.7.tar.gz"
-    sha256: "4db579e34f1d61433db9f29971b04934ea1e3318e4c3905b1e6f240e5b853539"
-  "11.5":
-    url: "https://ftp.postgresql.org/pub/source/v11.5/postgresql-11.5.tar.gz"
-    sha256: "f639af0f8c3f1e470e41c8108cbdaea5836b2738cadd422135aa2a0febc8ae78"
-  "10.14":
-    url: "https://ftp.postgresql.org/pub/source/v10.14/postgresql-10.14.tar.gz"
-    sha256: "5a27e8704d6f401f97b8c61716f7e6bf934d0a4fafc1185b37ee0e2764c54ea9"
-  "9.6.19":
-    url: "https://ftp.postgresql.org/pub/source/v9.6.19/postgresql-9.6.19.tar.gz"
-    sha256: "1840c1f84560ed169079c93610c46c42c4c590181352244e0d8966633a88f358"
+  "14.7":
+    url: "https://ftp.postgresql.org/pub/source/v14.7/postgresql-14.7.tar.bz2"
+    sha256: "cef60f0098fa8101c1546f4254e45b722af5431337945b37af207007630db331"
+  "14.5":
+    url: "https://ftp.postgresql.org/pub/source/v14.5/postgresql-14.5.tar.bz2"
+    sha256: "d4f72cb5fb857c9a9f75ec8cf091a1771272802f2178f0b2e65b7b6ff64f4a30"
+  "14.2":
+    url: "https://ftp.postgresql.org/pub/source/v14.2/postgresql-14.2.tar.bz2"
+    sha256: "2cf78b2e468912f8101d695db5340cf313c2e9f68a612fb71427524e8c9a977a"
+  "13.6":
+    url: "https://ftp.postgresql.org/pub/source/v13.6/postgresql-13.6.tar.gz"
+    sha256: "42dcde620b627d35bf51dfc2c1d0f7f25f44d3dbedd81cc459da2d2c9e859059"
+  "12.10":
+    url: "https://ftp.postgresql.org/pub/source/v12.10/postgresql-12.10.tar.gz"
+    sha256: "987e008699d52d5de4bae0580416f6c75aa28016b11543c42f5fbde5efbdfb56"
+  "11.15":
+    url: "https://ftp.postgresql.org/pub/source/v11.15/postgresql-11.15.tar.gz"
+    sha256: "5f6ef2add1acb93d69012a55c3f276b91f4f0c91aa9a91243d9c5737ed5b5541"
+  "10.20":
+    url: "https://ftp.postgresql.org/pub/source/v10.20/postgresql-10.20.tar.gz"
+    sha256: "403bdad47101f7c0a15824627dd0fa0ad4abf1fa26d2bde77dea8921da25a48e"
+  "9.6.24":
+    url: "https://ftp.postgresql.org/pub/source/v9.6.24/postgresql-9.6.24.tar.gz"
+    sha256: "52947ecc119846eace5164399d173576c0d4a47ec116ae58a46a8fd0c576c7c3"
 patches:
-  "9.6.19":
-    - patch_file: "patches/9.6.19/001-Use-return-instead-of-exit-in-configure.patch"
-      base_path: "source_subfolder"
-      # url: https://www.postgresql.org/message-id/09A4B554-82B1-4536-B191-2461342EE0BB%40icloud.com
-      # patch_source: https://www.postgresql.org/message-id/attachment/45881/0002-Use-return-instead-of-exit-in-configure.patch
-      # patch_type: portability
-  "13.3":
-    - patch_file: "patches/13.3/001-Remove-thread-safety-check.patch"
-      base_path: "source_subfolder"
+  "14.7":
+    - patch_file: "patches/14.7/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "14.5":
+    - patch_file: "patches/14.5/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "14.2":
+    - patch_file: "patches/14.2/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "13.6":
+    - patch_file: "patches/13.6/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "12.10":
+    - patch_file: "patches/12.10/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "11.15":
+    - patch_file: "patches/11.15/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "10.20":
+    - patch_file: "patches/10.20/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"
+  "9.6.24":
+    - patch_file: "patches/9.6.24/002-mingw-build-static-libraries.patch"
+      patch_description: "port MinGW: Enable building static libraries in MinGW."
+      patch_type: "portability"

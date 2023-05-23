@@ -8,7 +8,5 @@ sources:
 patches:
   "2.5.24":
     - patch_file: "patches/0001-2.5.24-mingw-support.patch"
-      base_path: "source_subfolder"
   "2.5.22":
     - patch_file: "patches/0001-2.5.22-mingw-support.patch"
-      base_path: "source_subfolder"

@@ -1,0 +1,9 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/alicevision/CCTag/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "ae8a819bc978eb13bb1061a204c214da835e56c9b7dc775237ed6b2191011dec"
+patches:
+  "1.0.1":
+    - patch_file: "patches/0001-honor-vc-runtime.patch"
+      patch_description: "Honor vc runtime"
+      patch_type: "conan"

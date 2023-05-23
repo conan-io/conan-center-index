@@ -1,4 +1,13 @@
 sources:
+  "2.0.7":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.7.tar.gz"
+    sha256: "6c0853bb27738b811f2b4d4af095323c3d5ce36ceed6b50e5f773204fb8f7200"
+  "2.0.6":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.6.tar.gz"
+    sha256: "8258b75a72303b661a238047cb348203d88d9dddf85d480ed885f375916fcab6"
+  "2.0.5":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.5.tar.gz"
+    sha256: "eca3fe72aea7036c31d00ca120493923c4d5b99fe02e6d3322f7c88dbdcd0085"
   "2.0.2":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.2.tar.gz"
     sha256: "dd37886f22ca6890e403ea6c1d60f36eab1d08d2f232a35f5b02126621149d28"
-    url: "https://github.com/Dead2/zlib-ng/archive/2.0.2.tar.gz"

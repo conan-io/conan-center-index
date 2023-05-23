@@ -1,28 +1,36 @@
 import os
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
 
 class TermcolorConan(ConanFile):
     name = "termcolor"
+    description = "Termcolor is a header-only C++ library for printing colored messages to the terminal."
+    topics = ("termcolor", "terminal", "color")
+    license = "BSD-3-Clause"
     homepage = "https://github.com/ikalnytskyi/termcolor"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Termcolor is a header-only C++ library for printing colored messages to the terminal."
-    license = "BSD-3-Clause"
-    topics = ("conan", "termcolor", "terminal", "color")
     no_copy_source = True
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package_id(self):
         self.info.header_only()
 
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.configure(source_folder=self._source_subfolder)
+        return cmake
+
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "include"), dst="include")
-        self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))

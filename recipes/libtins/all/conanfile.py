@@ -1,5 +1,8 @@
 from conans import tools, CMake, ConanFile
 import os
+import textwrap
+
+required_conan_version = ">=1.43.0"
 
 
 class LibTinsConan(ConanFile):
@@ -9,8 +12,7 @@ class LibTinsConan(ConanFile):
     description = "High-level, multiplatform C++ network packet sniffing and crafting library."
     license = "BSD-2-Clause"
     topics = ("pcap", "packets", "network", "packet-analyser", "packet-parsing", "libpcap", "sniffing")
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,6 +28,9 @@ class LibTinsConan(ConanFile):
         "with_wpa2": True,
         "with_dot11": True,
     }
+
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -40,21 +45,29 @@ class LibTinsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("libpcap/1.10.0")
-        if self.options.with_ack_tracker:
-            self.requires("boost/1.75.0")
-        if self.options.with_wpa2:
-            self.requires("openssl/1.1.1j")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("libpcap/1.10.1")
+        if self.options.with_ack_tracker:
+            self.requires("boost/1.79.0")
+        if self.options.with_wpa2:
+            self.requires("openssl/1.1.1q")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        # Use Findlibpcap.cmake from cmake_find_package
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "FIND_PACKAGE(PCAP REQUIRED)",
+                              "find_package(libpcap REQUIRED)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "${PCAP_LIBRARY}",
+                              "libpcap::libpcap")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -73,6 +86,7 @@ class LibTinsConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -80,14 +94,41 @@ class LibTinsConan(ConanFile):
         self.copy(os.path.join(self._source_subfolder, "LICENSE"), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "CMake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"libtins": "libtins::libtins"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+
     def package_info(self):
-        # FIXME: official CMake imported target is not namespaced
-        self.cpp_info.names["cmake_find_package"] = "libtins"
-        self.cpp_info.names["cmake_find_package_multi"] = "libtins"
-        self.cpp_info.names["pkg_config"] = "libtins"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "libtins")
+        self.cpp_info.set_property("cmake_target_name", "libtins")
+        self.cpp_info.set_property("pkg_config_name", "libtins")
+        self.cpp_info.libs = ["tins"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("TINS_STATIC")
+            self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

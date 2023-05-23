@@ -32,6 +32,18 @@ sources:
   "2.18.1":
     url: "https://github.com/randombit/botan/archive/2.18.1.tar.gz"
     sha256: "4afebf2dbfa2f047d161437dcc544003d5822f47ceac97ada6a24948297bd3ed"
+  "2.18.2":
+    url: "https://github.com/randombit/botan/archive/2.18.2.tar.gz"
+    sha256: "10ded69c4fd4ade9d87527b394787beefa190b4ecb65ed04535bdd00e088cd96"
+  "2.19.1":
+    url: "https://github.com/randombit/botan/archive/2.19.1.tar.gz"
+    sha256: "eb5eaac0d8bf1dcf64b7ae39736d928fca8be1b24c27787873106e41a6c36725"
+  "2.19.2":
+    url: "https://github.com/randombit/botan/archive/2.19.2.tar.gz"
+    sha256: "47bb0330255cf1a439db3f2bc91894b2f41788e58eb71d27e0abf36038d93f1e"
+  "2.19.3":
+    url: "https://github.com/randombit/botan/archive/2.19.3.tar.gz"
+    sha256: "8f568bf74c2e476d92ac8a1cfc2ba8407ec038fe9458bd0a11e7da827a9b8199"
 patches:
   "2.12.1":
     - patch_file: "patches/dll-dir.patch"
@@ -40,4 +52,7 @@ patches:
       base_path: "sources"
   "2.17.2":
     - patch_file: "patches/vs2015-install-fix.patch"
+      base_path: "sources"
+  "2.18.2":
+    - patch_file: "patches/fix-amalgamation-build.patch"
       base_path: "sources"

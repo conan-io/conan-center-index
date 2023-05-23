@@ -1,133 +1,107 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get, rm, rmdir, save
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 import textwrap
 
-class FastCDRConan(ConanFile):
+required_conan_version = ">=1.54.0"
 
+
+class FastCDRConan(ConanFile):
     name = "fast-cdr"
     license = "Apache-2.0"
     homepage = "https://github.com/eProsima/Fast-CDR"
     url = "https://github.com/conan-io/conan-center-index"
     description = "eProsima FastCDR library for serialization"
-    topics = ("conan", "DDS", "Middleware", "Serialization")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("dds", "middleware", "serialization")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared":          [True, False],
-        "fPIC":            [True, False]
+        "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
-        "shared":            False,
-        "fPIC":              True
+        "shared": False,
+        "fPIC": True,
     }
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
-    _cmake = None
-
-    @property
-    def _pkg_cmake(self):
-        return os.path.join(
-            self.package_folder,
-            "lib",
-            "cmake"
-        )
-
-    @property
-    def _module_subfolder(self):
-        return os.path.join(
-            "lib",
-            "cmake"
-        )
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join(
-            self._module_subfolder,
-            "conan-target-properties.cmake"
-        )
-
-    @property
-    def _pkg_share(self):
-        return os.path.join(
-            self.package_folder,
-            "share"
-        )
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-            self._cmake.configure()
-        return self._cmake
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.os == "Windows":
-            if ("MT" in self.settings.compiler.runtime and self.options.shared):
-                # This combination leads to an fast-cdr error when linking
-                # linking dynamic '*.dll' and static MT runtime
-                # see https://github.com/eProsima/Fast-CDR/blob/v1.0.21/include/fastcdr/eProsima_auto_link.h#L37
-                # (2021-05-31)
-                raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+            # This combination leads to an fast-cdr error when linking
+            # linking dynamic '*.dll' and static MT runtime
+            # see https://github.com/eProsima/Fast-CDR/blob/v1.0.21/include/fastcdr/eProsima_auto_link.h#L37
+            # (2021-05-31)
+            raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.generate()
+
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(self._pkg_cmake)
-        tools.rmdir(self._pkg_share)
-        tools.remove_files_by_mask(
-            directory=os.path.join(self.package_folder, "lib"),
-            pattern="*.pdb"
-        )
-        tools.remove_files_by_mask(
-            directory=os.path.join(self.package_folder, "bin"),
-            pattern="*.pdb"
-        )
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"fastcdr": "fastcdr::fastcdr"}
         )
 
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "fastcdr"
-        self.cpp_info.names["cmake_find_package_multi"] = "fastcdr"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "fastcdr")
+        self.cpp_info.set_property("cmake_target_name", "fastcdr")
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("FASTCDR_DYN_LINK")
-        self.cpp_info.builddirs.append(self._module_subfolder)
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "fastcdr"
+        self.cpp_info.names["cmake_find_package_multi"] = "fastcdr"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

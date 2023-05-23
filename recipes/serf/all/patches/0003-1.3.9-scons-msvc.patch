@@ -5,7 +5,7 @@
                   "Visual C++ to use for building (E.g. 11.0, 9.0)",
                   None,
 -                 allowed_values=('14.0', '12.0',
-+                 allowed_values=('14.2', "14.1", '14.0', '12.0',
++                 allowed_values=('14.3', '14.2', '14.1', '14.0', '12.0',
                                   '11.0', '10.0', '9.0', '8.0', '6.0')
                  ),
  

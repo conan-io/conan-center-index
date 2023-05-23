@@ -1,16 +1,25 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag, unix_path
 import os
+
+required_conan_version = ">=1.57.0"
 
 
 class CoinCglConan(ConanFile):
     name = "coin-cgl"
     description = "COIN-OR Cut Generator Library"
-    topics = ("conan", "clp", "simplex", "solver", "linear", "programming")
+    topics = ("cgl", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Cgl"
-    license = ("EPL-2.0",)
+    license = "EPL-2.0"
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
@@ -20,98 +29,115 @@ class CoinCglConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**.patch"
-    generators = "pkg_config"
-
-    _autotools = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.4")
-        self.requires("coin-osi/0.108.6")
-        self.requires("coin-clp/1.17.6")
+        self.requires("coin-utils/2.11.6")
+        self.requires("coin-osi/0.108.7")
+        self.requires("coin-clp/1.17.7")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        self.tool_requires("gnu-config/cci.20210814")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("coin-cgl does not support shared builds on Windows")
+        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
+        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
+            raise ConanInvalidConfiguration("coin-cgl shared not supported yet when cross-building")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Cgl-releases-{}".format(self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env = {
-                    "CC": "cl -nologo",
-                    "CXX": "cl -nologo",
-                    "LD": "link -nologo",
-                    "AR": "lib",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        configure_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--without-blas"
-            "--without-lapack"
-        ]
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.cxx_flags.append("-EHsc")
-            configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
-        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
-        return self._autotools
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--without-blas",
+            "--without-lapack",
+        ])
+        if is_msvc(self):
+            tc.extra_cxxflags.append("-EHsc")
+            tc.configure_args.append(f"--enable-msvc={msvc_runtime_flag(self)}")
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
+        env = tc.environment()
+        if is_msvc(self):
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", f"{compile_wrapper} link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+        if self._settings_build.os == "Windows":
+            # TODO: Something to fix in conan client or pkgconf recipe?
+            # This is a weird workaround when build machine is Windows. Here we have to inject regular
+            # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
+        tc.generate(env)
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+        if not is_msvc(self):
+            for gnu_config in [
+                self.conf.get("user.gnu-config:config_guess", check_type=str),
+                self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-
-        os.unlink(os.path.join(self.package_folder, "lib", "libCgl.la"))
-
-        if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "libCgl.lib"),
-                      os.path.join(self.package_folder, "lib", "Cgl.lib"))
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install(args=["-j1"])
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
+        if is_msvc(self):
+            rename(self,
+                   os.path.join(self.package_folder, "lib", "libCgl.a"),
+                   os.path.join(self.package_folder, "lib", "Cgl.lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "cgl")
         self.cpp_info.libs = ["Cgl"]
-        self.cpp_info.includedirs = [os.path.join("include", "coin")]
-        self.cpp_info.names["pkg_config"] = "cgl"
+        self.cpp_info.includedirs.append(os.path.join("include", "coin"))

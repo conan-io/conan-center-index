@@ -1,0 +1,136 @@
+---
+# Configuration for `https://github.com/conan-io/conan-center-index` repository (using Conan v2)
+id: 'conan-io/conan-center-index'
+
+conan:
+  version: 2.0.2
+
+artifactory:
+  url: "https://c3i.jfrog.io/c3i"
+  main_repo: "conan-center"
+  pull-request_repo_prefix: "c3i_PR-v2"
+  pull-request_permission: "c3i-pr"
+  logs_repo: "misc-v2"
+  # cache_repo: "cache"
+
+github:
+  reviewers: "reviewers.yml"
+  authorized_users: "authorized_users.yml"
+
+#slack:
+#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
+#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
+
+# Things related to Jenkins jobs:
+tasks:
+  automatic_merge:
+    reviews_required_total: 1000  # AutomaticMerge shouldn't run with this file, but just in case
+    reviews_required_team: 1000  # AutomaticMerge shouldn't run with this file, but just in case
+  access_request:
+      request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
+      max_inactivity_days: 0
+  cci:
+    conan_v2_run_export: false
+    detailed_status_checks: false
+    write_comments: false
+    update_labels: false
+    user_feedback:
+      title: "Conan v2 pipeline"
+      description: "> **Note**: Conan v2 builds may be required once they are on the [v2 ready](https://github.com/conan-io/conan-center-index/blob/master/.c3i/conan_v2_ready_references.yml) list"
+      regression: "> **Regression**: Conan v2 builds are mandatory and they are required for the PR to be merged, because this recipe worked with Conan v2 previously."
+      text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
+      collapse_on_success: false
+      collapse_on_failure: true
+  list_packages:
+    update_yaml_list_path: ".c3i/conan_v2_ready_references"
+    update_yaml_list_key: "required_for_references"
+  scheduled_export_check:
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
+    report_issue_append: false
+
+configurations:
+  - id: linux-gcc
+    epochs: [0, 20211221, 20220120, 20220628]
+    hrname: "Linux, GCC"
+    build_profile:
+      os: "Linux"
+    content:
+      - os: ["Linux"]
+        arch: ["x86_64"]
+        compiler:
+          - "gcc":
+              compiler.libcxx: ["libstdc++11"]
+              compiler.version: ["11"]
+              build_type: ["Release"]
+  - id: macos-clang
+    epochs: [0, 20211221, 20220120, 20220628]
+    hrname: "macOS, Clang"
+    build_profile:
+      os: "Macos"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: [ "13" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release"]
+  - id: macos-m1-clang
+    epochs: [0, 20211221, 20220120, 20220628]
+    hrname: "macOS M1, Clang"
+    build_profile:
+      os: "Macos"
+      arch: "x86_64"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "armv8" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: ["13" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release"]
+  - id: windows-msvc
+    epochs: [0, 20211221, 20220120, 20220628]
+    hrname: "Windows, MSVC"
+    build_profile:
+      os: "Windows"
+    content:
+      - os: [ "Windows" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "msvc":
+              compiler.version: [ "192" ]
+              build_type:
+                - "Release":
+                    compiler.runtime: ["dynamic"]
+                    compiler.runtime_type: [ "Release" ]
+
+cppstd:
+  apple-clang:
+    "13": ["gnu17"]
+  gcc:
+    "11": ["gnu17"]
+  msvc:
+    "192": ["14"]
+
+jenkins:
+  url: "http://mb-jenkins-my-bloody-jenkins:8080"
+
+node_labels:
+  Windows:
+    x86_64:
+      "msvc":
+        default: "windows20221212"
+  Macos:
+    x86_64:
+      "apple-clang":
+        default: "mac_apple_clang_${compiler.version}"
+    armv8:
+      "apple-clang":
+        default: "mac_apple_clang_${compiler.version}"
+  Linux:
+    x86_64:
+      "gcc":
+        default: "linux_gcc_${compiler.version}_ubuntu16.04"
+      "clang":
+        default: "linux_clang_${compiler.version}_ubuntu16.04"

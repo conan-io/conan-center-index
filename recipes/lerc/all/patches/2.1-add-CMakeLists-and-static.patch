@@ -1,0 +1,61 @@
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,24 @@
++cmake_minimum_required(VERSION 3.8)
++project(Lerc)
++
++file(GLOB SOURCES 
++  "src/LercLib/*"
++  "src/LercLib/Lerc1Decode/*"
++)
++
++add_library(LercLib ${SOURCES})
++target_compile_features(LercLib PRIVATE cxx_std_11)
++if(BUILD_SHARED_LIBS)
++  set_target_properties(LercLib PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN TRUE)
++  if(WIN32)
++    target_compile_definitions(LercLib PRIVATE LERC_EXPORTS)
++  endif()
++endif()
++
++set(HEADER_FILES include/Lerc_c_api.h include/Lerc_types.h)
++install(FILES ${HEADER_FILES} DESTINATION include)
++install(TARGETS LercLib
++  RUNTIME DESTINATION bin
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++)
+--- a/include/Lerc_c_api.h
++++ b/include/Lerc_c_api.h
+@@ -28,13 +28,7 @@ Contributors:  Thomas Maurer
+ extern "C" {
+ #endif
+ 
+-#if defined(_MSC_VER)
+-  #define LERCDLL_API __declspec(dllexport)
+-#elif __GNUC__ >= 4
+-  #define LERCDLL_API __attribute__((visibility("default")))
+-#else
+-  #define LERCDLL_API
+-#endif
++#define LERCDLL_API
+ 
+ 
+   //! C-API for LERC library
+--- a/src/LercLib/Lerc_c_api.h
++++ b/src/LercLib/Lerc_c_api.h
+@@ -28,8 +28,12 @@ Contributors:  Thomas Maurer
+ extern "C" {
+ #endif
+ 
+-#if defined(_MSC_VER)
+-  #define LERCDLL_API __declspec(dllexport)
++#ifdef _WIN32
++  #ifdef LERC_EXPORTS
++    #define LERCDLL_API __declspec(dllexport)
++  #else
++    #define LERCDLL_API
++  #endif
+ #elif __GNUC__ >= 4
+   #define LERCDLL_API __attribute__((visibility("default")))
+ #else

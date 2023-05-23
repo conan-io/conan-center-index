@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt	2019-04-02 10:39:55.000000000 -0000
++++ b/CMakeLists.txt	2022-11-07 17:09:53.295000000 -0000
+@@ -1,10 +1,10 @@
++cmake_minimum_required(VERSION 3.2)
++
+ project(json-schema-validator
+     LANGUAGES CXX)
+ 
+ set(PROJECT_VERSION 2.0.0)
+ 
+-cmake_minimum_required(VERSION 3.2)
+-
+ option(BUILD_TESTS      "Build tests"    ON)
+ option(BUILD_EXAMPLES   "Build examples" ON)
+ 

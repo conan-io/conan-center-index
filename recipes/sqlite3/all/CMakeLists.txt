@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(sqlite3 C)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+project(sqlite3 LANGUAGES C)
 
 # Add some options from https://sqlite.org/compile.html
 option(SQLITE3_BUILD_EXECUTABLE "Build sqlite command line utility for accessing SQLite databases")
@@ -21,6 +18,7 @@ option(ENABLE_UNLOCK_NOTIFY "Enable support for the unlock notify API")
 option(ENABLE_DEFAULT_SECURE_DELETE "Turns on secure deletion by default")
 option(USE_ALLOCA "The alloca() memory allocator will be used in a few situations where it is appropriate.")
 option(OMIT_LOAD_EXTENSION "Omits the entire extension loading mechanism from SQLite")
+option(OMIT_DEPRECATED "Omits deprecated interfaces and features")
 if(SQLITE3_VERSION VERSION_GREATER_EQUAL "3.35.0")
     option(ENABLE_MATH_FUNCTIONS "Enables the built-in SQL math functions" ON)
 else()
@@ -33,17 +31,25 @@ option(HAVE_POSIX_FALLOCATE "Use posix_fallocate()")
 option(HAVE_STRERROR_R "Use strerror_r()")
 option(HAVE_USLEEP "Use usleep() system call to implement the xSleep method")
 option(DISABLE_GETHOSTUUID "Disable function gethostuuid")
+set(MAX_COLUMN CACHE STRING "The maximum number of columns in a table / index / view")
+set(MAX_VARIABLE_NUMBER CACHE STRING "The maximum value of a ?nnn wildcard that the parser will accept")
 set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or BLOB")
 option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
+option(ENABLE_DBPAGE_VTAB "The SQLITE_DBPAGE extension implements an eponymous-only virtual table that provides direct access to the underlying database file by interacting with the pager. SQLITE_DBPAGE is capable of both reading and writing any page of the database. Because interaction is through the pager layer, all changes are transactional.")
 
-add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
+add_library(${PROJECT_NAME} ${SQLITE3_SRC_DIR}/sqlite3.c)
 set_target_properties(${PROJECT_NAME} PROPERTIES C_VISIBILITY_PRESET hidden)
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(${PROJECT_NAME}
-        PRIVATE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllexport)">
-        INTERFACE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllimport)">
-        PUBLIC $<$<NOT:$<BOOL:${WIN32}>>:"SQLITE_API=__attribute__((visibility(\"default\")))">
-    )
+    if(WIN32)
+        target_compile_definitions(${PROJECT_NAME}
+            PRIVATE "SQLITE_API=__declspec(dllexport)"
+            INTERFACE "SQLITE_API=__declspec(dllimport)"
+        )
+    else()
+        target_compile_definitions(${PROJECT_NAME}
+            PUBLIC "SQLITE_API=__attribute__((visibility(\"default\")))"
+        )
+    endif()
 endif()
 if(ENABLE_JSON1)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_JSON1)
@@ -90,6 +96,9 @@ endif()
 if(OMIT_LOAD_EXTENSION)
     target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_OMIT_LOAD_EXTENSION)
 endif()
+if (OMIT_DEPRECATED)
+    target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_OMIT_DEPRECATED)
+endif()
 if(ENABLE_MATH_FUNCTIONS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_MATH_FUNCTIONS)
 endif()
@@ -115,11 +124,20 @@ if(DISABLE_GETHOSTUUID)
     target_compile_definitions(${PROJECT_NAME}  PRIVATE HAVE_GETHOSTUUID=0)
 endif()
 target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_THREADSAFE=${THREADSAFE})
+if(MAX_COLUMN)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_MAX_COLUMN=${MAX_COLUMN})
+endif()
+if(MAX_VARIABLE_NUMBER)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_MAX_VARIABLE_NUMBER=${MAX_VARIABLE_NUMBER})
+endif()
 if(MAX_BLOB_SIZE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_MAX_LENGTH=${MAX_BLOB_SIZE})
 endif()
 if(DISABLE_DEFAULT_VFS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_OS_OTHER=1)
+endif()
+if(ENABLE_DBPAGE_VTAB)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_DBPAGE_VTAB)
 endif()
 
 if(THREADSAFE)
@@ -132,9 +150,14 @@ if(NOT OMIT_LOAD_EXTENSION)
 endif()
 
 if(ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
-    find_library(MATH_LIBRARY m)
-    if(MATH_LIBRARY)
-        target_link_libraries(${PROJECT_NAME}  PRIVATE ${MATH_LIBRARY})
+    include(CheckLibraryExists)
+    # Check if math functionality is on the separate 'libm' library,
+    # otherwise assume that it is already part of the C runtime.
+    # The `m` library is part of the compiler toolchain, this checks
+    # if the compiler can successfully link against the library.
+    check_library_exists(m log "" HAVE_MATH_LIBRARY)
+    if(HAVE_MATH_LIBRARY)
+        target_link_libraries(${PROJECT_NAME} PRIVATE m)
     endif()
 endif()
 
@@ -144,20 +167,20 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(DIRECTORY source_subfolder/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY ${SQLITE3_SRC_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h")
 
 if(SQLITE3_BUILD_EXECUTABLE)
-    add_executable(sqlite3-bin source_subfolder/shell.c)
+    add_executable(sqlite3-bin ${SQLITE3_SRC_DIR}/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
-    set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
+    if(ENABLE_DBPAGE_VTAB)
+        target_compile_definitions(sqlite3-bin PRIVATE SQLITE_ENABLE_DBPAGE_VTAB)
+    endif()
+    set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3" PDB_NAME "sqlite3-bin")
     include(CheckSymbolExists)
     check_symbol_exists(system "stdlib.h" HAVE_SYSTEM)
     if(NOT HAVE_SYSTEM)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_NOHAVE_SYSTEM)
     endif()
-    install(TARGETS sqlite3-bin
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
+    install(TARGETS sqlite3-bin DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

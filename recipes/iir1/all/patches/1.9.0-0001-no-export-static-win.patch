@@ -1,0 +1,14 @@
+--- a/iir/Common.h
++++ b/iir/Common.h
+@@ -46,7 +46,11 @@
+ 
+ // This exports the classes/structures to the windows DLL
+ #ifdef _WIN32
++#ifdef iir_EXPORTS
+ #define DllExport   __declspec( dllexport )
++#else
++#define DllExport
++#endif
+ #define _CRT_SECURE_NO_WARNINGS
+ #else
+ #define DllExport

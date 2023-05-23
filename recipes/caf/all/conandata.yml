@@ -1,19 +1,13 @@
 sources:
-  "0.17.6":
-    url: "https://github.com/actor-framework/actor-framework/archive/0.17.6.tar.gz"
-    sha256: "e2bf5bd243f08bb7d8adde197cfe3e6d71314ed3378fe0692f8932f4c3b3928c"
-  "0.18.0":
-    url: "https://github.com/actor-framework/actor-framework/archive/0.18.0.tar.gz"
-    sha256: "df765fa78861e67d44e2587c0ac0c1c662d8c93fe5ffc8757f552fc7ac15941f"
-  "0.18.2":
-    url: "https://github.com/actor-framework/actor-framework/archive/0.18.2.tar.gz"
-    sha256: "03837dbef73a13c3e4cac76c009d018f48d1d97b182277230f204984c9542ccc"
+  "0.18.6":
+    url: "https://github.com/actor-framework/actor-framework/archive/0.18.6.tar.gz"
+    sha256: "c2ead63a0322d992fea8813a7f7d15b4d16cbb8bbe026722f2616a79109b91cc"
   "0.18.5":
     url: "https://github.com/actor-framework/actor-framework/archive/0.18.5.tar.gz"
     sha256: "4c96f896f000218bb65890b4d7175451834add73750d5f33b0c7fe82b7d5a679"
-patches:
-  "0.17.6":
-    - patch_file: "patches/win_install.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/udp.patch"
-      base_path: "source_subfolder"
+  "0.18.2":
+    url: "https://github.com/actor-framework/actor-framework/archive/0.18.2.tar.gz"
+    sha256: "03837dbef73a13c3e4cac76c009d018f48d1d97b182277230f204984c9542ccc"
+  "0.18.0":
+    url: "https://github.com/actor-framework/actor-framework/archive/0.18.0.tar.gz"
+    sha256: "df765fa78861e67d44e2587c0ac0c1c662d8c93fe5ffc8757f552fc7ac15941f"

@@ -1,13 +1,43 @@
 sources:
-  "7.0.2":
-    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.2.tar.gz"
-    sha256: "8166ffca150abce77cc4254343bb89d3476e17910e96fa4936b87dafcc72d592"
-  "7.0.4":
-    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.4.tar.gz"
-    sha256: "1442b9f5d8824e7794e97a2eca3f5f109e33c423a37714ada9ad98435b4d4b01"
-  "7.0.5":
-    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.5.tar.gz"
-    sha256: "232f84e410f439e6bc1b721fc65280906e9f6ad5b39490561870d42a1ee1af17"
+  "7.5.1":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.5.1.tar.gz"
+    sha256: "2a283bfc335c4b6b01d2acc1eea1a5e4c456bd3dd11e41ef24ca3d955c9655a3"
+  "7.5.0":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.5.0.tar.gz"
+    sha256: "ba31bd0a2337f3717a1ad88a3b3f7fefa3f1e4dae4fc922e72144cfecffe5e94"
+  "7.4.2":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.4.2.tar.gz"
+    sha256: "f0db44c96a80a6ce3dda02c598574f5f0209376bd2c6c176797710da8eb3e108"
+  "7.4.1":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.4.1.tar.gz"
+    sha256: "e6ff9749f402dd77f320a2a28b77a45636cbe186f926d9b5a7b54ea6ee631ada"
+  "7.4.0":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.4.0.tar.gz"
+    sha256: "34865a84052c670fbc4554361acef716655906f65f5bba88e3fd73dff92989de"
+  "7.3.1":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.3.1.tar.gz"
+    sha256: "260426f71226c888832a6da47c55c05dab31b8240dbbc67b4b2466af24d962d3"
+  "7.3.0":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.3.0.tar.gz"
+    sha256: "fa3763fee656164e5f3a7d6a11f08771dd70700adb93de9db4625ad981e0defb"
+  "7.2.1":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.2.1.tar.gz"
+    sha256: "279c1b897c8ae426a493ca77e01c8cfd47e8cd313f3e35ed3ddf098dcccdeeda"
+  "7.1.1":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.1.1.tar.gz"
+    sha256: "090e885d6f241b87a98234571cc1bd2ff935933365717e327602ea37f4d3548a"
+  "7.1.0":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.1.0.tar.gz"
+    sha256: "98faba7cd9d743dae2a8bec70b1c4a382339b9fa40b71fda2936c9d7054d7a85"
   "7.0.7":
     url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.7.tar.gz"
     sha256: "e366e9280fbe99e68bc5b31a74f51610e27ca8a646dff28e883573893572ab75"
+  "7.0.5":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.5.tar.gz"
+    sha256: "232f84e410f439e6bc1b721fc65280906e9f6ad5b39490561870d42a1ee1af17"
+  "7.0.4":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.4.tar.gz"
+    sha256: "1442b9f5d8824e7794e97a2eca3f5f109e33c423a37714ada9ad98435b4d4b01"
+  "7.0.2":
+    url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.2.tar.gz"
+    sha256: "8166ffca150abce77cc4254343bb89d3476e17910e96fa4936b87dafcc72d592"

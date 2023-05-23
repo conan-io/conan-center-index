@@ -1,4 +1,4 @@
-/* From PROJ quickstart */	
+/* From PROJ quickstart */
 
 #include <stdio.h>
 #include <proj.h>
@@ -35,7 +35,7 @@ int main (void) {
     P = P_for_GIS;
 
     /* a coordinate union representing Copenhagen: 55d N, 12d E    */
-    /* Given that we have used proj_normalize_for_visualization(), the order of
+    /* Given that we have used proj_normalize_for_visualization(), the order of */
     /* coordinates is longitude, latitude, and values are expressed in degrees. */
     a = proj_coord (12, 55, 0, 0);
 

@@ -1,8 +1,414 @@
 # Changelog
 
+### 12-April-2023 - 16:18 CEST
+
+- [feature] Add ListPackages job the posibility to update a list via PR
+- [feature] Add c3i-conan2-ready label when modifying .c3i/conan_v2_ready_references.yml
+- [hotfix] Use Conan helpers to update Conan Center page
+- [hotfix] Automatic Merge reduces the number of requests for each execution
+
+### 03-April-2023 - 10:26 CEST
+
+- [fix] Remove options usage from build profile.
+- [fix] Fix promotion of recipe/packages when artifacts already exist in target repo.
+- [feature] Make master branch promotion job wait for sibling jobs (to avoid recipe promotion race condition).
+- [feature] Improve request of reviews and remove timeout.
+
+### 24-March-2023 - 12:00 CET
+
+- [feature] Install Conan command extensions for Conan v2
+- [feature] Reduce Github requests number to execute Automatic Merge CI job
+- [hotfix] Improve Promote Package CI job logging for better debug
+
+### 10-March-2023 - 19:55 CET
+
+- [feature] Add priority to pull requests
+- [hotfix] Avoid extra http requests to run automatic merge faster
+
+### 10-March-2023 - 13:15 CET
+
+- [hotfix] No longer update conan_v2_ready_references.yml automatically
+- [bugfix] Validate Green and clean PRs first when executing automatic merge CI job
+
+### 07-March-2023 - 17:05 CET
+
+- [hotfix] Automatic merge skips git conflicts
+- [hotfix] config label for "v2 ready" depends on PR author
+
+### 03-March-2023 - 11:05 CET
+
+- [feature] Update ready_v2_references.yml file automatically
+- [fix] Do not reuse the same build folder to avoid busy files
+
+### 21-February-2023 - 17:22 CET
+
+- [fix] Fix bug with cppstd entry in configuration files.
+- [fix] Fix configuration read of list from an external yaml file.
+
+### 21-February-2023 - 12:44 CET
+
+- [feature] ScheduledExportCheck: Collect warnings from hooks and publish them to a separate table.
+- [feature] AutomaticMerge: Add conditional status checks with allowlist.
+- [feature] AutomaticMerge: Add branches config to merge branches automatically.
+- [feature] Conan: Add methods to get the latest recipe revision.
+- [feature] Bump library requirements to support the latest Conan versions.
+- [fix] PromotePackages: Fix an issue when promoting multiple references.
+- [fix] UpdateSearchIndex: Fix conan inspect call command.
+
+### 14-February-2023 - 15:32 CET
+
+- [fix] Fix ScheduledExportCheck job not updating hook validation issues.
+- [fix] Fix missing GitHub labels for PRs with "bump version" and "bump dependencies"
+- [feature] PromotePackages: Add a parameter to promote multiple references.
+- [feature] Increase `conan test` time limit to 1 hour.
+- [feature] Add request header for GitHub API version.
+
+### 03-February-2023 - 10:24 CET
+
+- [fix] Fix macOS deployment target / minos value.
+- [feature] Validate: Add return code for license check.
+- [feature] Add references list and force parameters to TapaholesRepo job.
+- [feature] Add new ListPackages job.
+- [feature] Update Conan versions library requirements to 1.58.0 and 2.0.0-beta9.
+
+### 20-January-2023 - 16:09 CET
+
+- [feature] Make feedback messages of PRs configurable.
+- [feature] Add status icon to the title of PRs comments.
+- [fix] Fix Conan v2 error when getting revisions.
+
+### 16-January-2023 - 16:43 CET
+
+- [fix] ValidateInfrastructure: Fix Conan version check.
+- [feature] TapaholesRepo: Build references when there are 0 packages for a recipe revision.
+
+### 12-January-2023 - 19:33 CET
+
+- [fix] Fix Conan v2 download/upload recipe commands.
+
+### 12-January-2023 - 11:21 CET
+
+- [feature] Add support for Conan v2 beta 7.
+- [feature] Check complete Conan version on ValidateInfrastructure.
+- [fix] Increase `conan test` timeout value.
+- [fix] Fix stage name when calculating build configurations.
+
+### 10-January-2023 - 15:20 CET
+
+- [feature] Add entry in config to disable merging labels from the multibranch job.
+- [feature] Add timeout to `conan test` command.
+- [feature] Add API wrapper support for status page.
+- [refactor] Separate build configuration calculation from pull-request interaction (labels/comments).
+- [feature] Take main repository from configuration for Tapaholes jobs.
+
+### 15-December-2022 - 11:12 CET
+
+- [feature] Set github feeback title via config file (`feedback_title`).
+- [fix] Fix log summary html table for shared option with Conan v2.
+- [fix] ValidateInfra: Remove same OS version check for Macos nodes.
+
+### 09-December-2022 - 11:38 CET
+
+- [feature] Add environment variable to build with different Xcode/apple-clang compilers on Macos agents.
+- [feature] Add `MACOSX_DEPLOYMENT_TARGET` and `SDKROOT` env variables to build stages on Macos.
+- [feature] Add `LongPathsEnabled` registry key check on Windows to Validate Infrastructure job.
+- [fix] Fix git user on commits when updating docs for supported platforms and configurations.
+- [fix] Fix getting commit hash when writing GitHub error messages.
+- [fix] Fix Conan v2 inspect command.
+- [fix] Fix condition when waiting for another job to finish.
+
+### 14-November-2022 - 11:54 CET
+
+- [feature] Disable inactivity count for Access Request job.
+- [feature] Add `github-actions[bot]` to permanent users list.
+- [feature] No need to run ValidateInfrastructure job for Access Request and Reviewers update pull-requests.
+- [fix] JobRelauncher retry property fix.
+
+### 07-November-2022 - 11:17 CET
+
+- [feature] Improve Access Request's pull-request description mentioning users.
+- [fix] Access Request should not remove reviewers and maintainers.
+- [fix] Access Request should count requests done on the same day as the pull request.
+- [fix] Avoid posting pipeline title in GitHub messages if feedback is empty.
+
+### 27-October-2022 - 15:18 CEST
+
+- [feature] Add under maintenance check to AccessRequest and ScheduledExportCheck jobs.
+- [feature] AccessRequest: Remove inactive users.
+- [feature] Accept Major.Minor as bump version.
+- [feature] Add message title to gihtub comments.
+- [fix] Update maintainers list and fix output.
+- [fix] Remove dummy files from tests.
+- [fix] Make sure contributors are not removed in Access request PR.
+
+### 17-October-2022 - 10:33 CEST
+
+- [feature] Improve management of GitHub labels on pull requests.
+- [feature] New EpochsSummary job to show epoch status for each reference.
+- [feature] Save bot comments as labels as job artifacts for easier user feedback.
+- [feature] Ability to wait for a job and merge bot messages from another pipeline: Allows to provide feedback to users in PRs from the Conan v2 pipeline in the future.
+- [feature] Add timeout to AutomaticMerge job.
+- [feature] Add note about Windows SDK on supported platforms documentation.
+- [fix] Fix getting package IDs from Artifactory in the Conan v2 pipeline.
+- [fix] Bump dependencies pull requests should only consider modified comments.
+- [fix] ValidateInfrastructure job parameter for macos executors.
+
+### 20-September-2022 - 14:27 CEST
+
+- [feature] Handle scenarios where some files are removed.
+- [feature] Simplify logic to detect references to be built in a pull request.
+- [feature] Workaround in Conan v2 commands to list package IDs in a pull request.
+- [feature] Bump minimum required Conan client version.
+- [fix] When merging a pull request, check recipe revisions only against the pull-request repository.
+- [fix] Do not consider GitHub check runs for pull requests opened by a bot.
+- [fix] Consider files renamed in pull requests as "added" and "removed".
+- [fix] Cover use-case when a pull request adds just one conanfile.py.
+- [fix] Simplify assignment of GitHub labels.
+- [fix] Use backquotes in GitHub comments.
+- [fix] Fix promotion of packages with Conan v2.
+
+### 1-September-2022 - 10:21 CEST
+
+- [feature] Avoid `test_v?_package` folders that don't match the Conan version.
+- [feature] Keep at least 3 days of job logs.
+- [fix] Properly encode GitHub API URLs.
+- [fix] Replace invalid chars when generating profiles.
+- [refactor] Refactors around the GitHub classes implementation.
+
+### 18-August-2022 - 15:21 CEST
+
+- [fix] Conan v2: Check recipe revision only if it has been successfully exported.
+- [feature]: Consider changes from `master` before merging a pull-request. If those changes result in a new recipe revision, the pull-request is triggered again.
+
+### 8-August-2022 - 11:25 CEST
+
+- [fix] Take into account status checks from GitHub actions before merging a pull-request.
+- [feature] Double check that the recipe revision exported using Conan v2 matches the one exported by Conan v1.
+- [feature] Fail if required Conan version is not available on Linux containers instead of falling back to latest.
+
+### 22-July-2022 - 12:13 CEST
+
+- [feature]: ValidateInfrastructure: Add check to verify CMake 3.21 is installed in Windows machines.
+- [feature]: ValidateInfrastructure: Execute the validation when a pull-request is modifying configuration files.
+- [feature]: Conan v2: Iterate `cppstd` values in profiles to build first match.
+- [feature]: Conan v2: Apply `shared` option for the whole dependency graph.
+- [feature]: Add `tools.apple.sdk_path` to configuration in Macos (required by new build helpers).
+- [feature]: Set `tools.system.package_manager:mode=install` and `tools.system.package_manager:sudo=True` in configuration files (required by new system package manager helpers to mimic the behavior of old ones).
+- [feature]: Upgrade required Conan versions to work with the library. Minimum versions tested are now `1.49.0` and `2.0.0b1`.
+- [fix]: ValidateInfrastructure: Fix error message split.
+- [bugfix]: Accept missing HTTP code for requests.
+
+### 06-July-2022 - 14:28 CEST
+
+- [feature]: Configure AccessRequest job to run on Mondays and Thursdays.
+- [fix]: Improve Conan v2 export message.
+- [fix]: Fix config parameters for RelaunchUnexpected job
+- [fix]: Make AccessRequest job open PR against cci repo.
+- [fix]: DSL: Remove old jobs by date only
+- [refactor]: Refactor GitHub-related code utilities.
+
+### 27-June-2022 - 17:29 CEST
+
+- [fix] Fix "no changes detected" issue in some pull-requests.
+- [fix] Avoid static builds with static runtime in MSVC compiler.
+- [fix] Fix Conan v2 export checkout of sources.
+- [fix] Conan v2: Avoid reading configuration entries that do not exist.
+- [feature] Avoid failure in some jobs when the system is under maintenance.
+- [feature] ValidateInfrastructure job now works for `msvc` & Visual Studio 2022.
+- [feature] Conan v2: support hooks installation.
+- [feature] Add more parameters to DSL scripts.
+
+### 08-June-2022 - 16:29 CEST
+
+- [feature] Allow changes in multiple folders (except for the `recipes` one).
+- [feature] Detect changes made in a future `linters` folder.
+- [feature] Validate configuration files in pull-requests that modifies them.
+- [feature] Add support for more Conan v2 commands.
+- [feature] DSL: Parameterize jenkinsfile path.
+- [fix] DSL: Discard old builds to avoid consuming all inodes.
+- [fix] Remove `under maintenance` label in pull requests.
+- [fix] Add a detailed message for Conan v2 export.
+- [fix] Abort `RelaunchUnexpectedError` job when the system is under maintenance.
+
+### 19-May-2022 - 15:52 CEST
+
+- [feature] Add Conan v2 export extra step in pull-request job.
+- [feature] Tag pull-requests as "under maintenance" when the build service is not available.
+- [config] Update Conan version to 1.47.0.
+- [feature] Check right WinSDK in ValidateInfrastructure job.
+- [fix] Fix access request job for authorized users.
+- [feature] New Conan v2 commands: info and recipe revision.
+- [feature] Store package ID cache at job level.
+
+### 10-May-2022 - 17:05 CEST
+
+- [fix] Exclude `shared=True` and runtime `MT/MTd` profile configuration from builds.
+- [job] RelaunchUnexpectedError: a new job to automatically retrigger failed jobs.
+- [feature] Ability to load the configuration file from an external source.
+- [feature] Allow changes to files in the `.c3i` folder.
+- [config] Move reviewers and approved users to configuration files.
+- [config] Move automatic merge parameters to the configuration file.
+- [config] Move GitHub activation to configuration file.
+- [config] Remove default configuration.
+- [feature] Added compatibility for more Conan 2 commands.
+- [fix] Avoid regeneration of folder and multibranch jobs by the DSL cron job.
+
+### 28-April-2022 - 9:56 CEST
+
+- [config] Update Conan client to 1.46.2
+- [fix] Do not create GitHub pull-request statuses in advance.
+- [fix] Move some Conan command calls to the wrapper.
+- [feature] Added compatibility for Conan v2 export command.
+- [config] Changed the required number of reviewers: 1 team and 1 community is enough
+
+### 21-April-2022 - 13:46 CEST
+
+- [feature] Updated Python version to > 3.7 in all build agents.
+- [feature] Added CMake and Python versions to the infrastructure information.
+- [config] Added new community reviewers.
+- [feature] Moved Jenkins and Slack to the configuration file.
+- [feature] Retry each build config if there is an unexpected error.
+- [feature] Added logging to collect information about some jobs.
+- [feature] Use a real build profile for cross-building configurations.
+- [bugfix] Improve export error report.
+
+### 31-March-2022 - 11:55 CEST
+
+- [config] Upgrade Conan client version to 1.45.0.
+
+### 25-March-2022 - 09:54 CET
+
+- [feature] Updated CMake version to 3.20 only in MacOS machines.
+- [feature] Collect requirements from test_package as well.
+- [feature] Make the conan-center-bot write a comment after merging a `Bump version` or `Bump dependencies` labeled pull request.
+- [feature] Allow SecheduledExportCheck job to report in any issue.
+- [feature] DSL: Add cron triggers to some jobs.
+- [feature] DSL: Disable concurrent builds on some jobs.
+- [feature] Adapt paths for Ansible machines.
+- [bugfix] Fix wrong log links in conan-center-bot message.
+- [fix] Use consistent slashes in paths.
+- [fix] Fix alert for job cancellation.
+
+### 09-March-2022 - 13:37 CET
+
+- [feature] Merge pull-requests that bump version automatically.
+- [feature] Get requirements from `conan info --dry-build` command.
+- [feature] Use reference with recipe revision for `conan info` commands.
+- [feature] Add possibility to load the configuration from file.
+- [fix] Fix DSL typo for access request job.
+- [fix] Removed retries from pull-request builds (introduced long ago to avoid timeout issues).
+- [refactor] Completely remove resource locking for executors.
+
+### 24-February-2022 - 14:03 CET
+
+- [fix] Fix encoding issues in `summary.html` file.
+- [fix] Specify branch discovery in DSL for cci multibranch job.
+
+### 22-February-2022 - 10:26 CET
+
+- [feature] Merge pull-request that bump dependencies automatically.
+- [feature] Notify about Visual Studio license status in ValidateInfrastructure.
+- [config] Upgrade Conan client version to 1.44.1.
+- [fix] Fix potential race condition calculating package IDs.
+
+### 16-February-2022 - 12:46 CET
+
+- [fix] Pin Artifactory client library version.
+
+### 10-February-2022 - 16:44 CET
+
+- [fix] Fix DSL parameters and TapaholesList name.
+- [feature] Added ConanReference string conversion in call-stacks.
+- [fix] Fix ValidateInfrastructure executors and labels count.
+
+### 04-February-2022 - 12:48 CET
+
+- [bugfix] Avoid race-conditions in Conan client instance.
+- [hotfix] Race condition reading/writing a file.
+
+### 03-February-2022 - 17:01 CET
+
+- [feature] New label to identify pull-requests that are just bumping dependencies version.
+- [bugfix] Fixed bugs with promotion and properties for references that don't build any binary.
+- [feature] Add parameter to chose if documentation of supported platforms should be updated automatically.
+- [feature] Improve Conan version regex to accept development versions
+
+### 26-January-2022 - 11:14 CET
+
+- [config] Add MacOS apple-clang 13.0 configuration to a new epoch.
+- [feature] Handle `header_only=True` default option in recipes.
+- [feature] Notify failed builds due to expired Visual Studio licenses.
+- [feature] Tapaholes job now sets epoch as well.
+- [fix] Throw error if configuration file to use is not found.
+- [feature] Add missing DSL job descriptions.
+- [feature] Child jobs use the same parent folder.
+- [refactor] Remove resource locking.
+
+### 18-January-2022 - 16:49 CET
+
+- [config] Bump Conan client version to 1.43.3.
+
+### 29-December-2021 - 16:41 CET
+
+- [config] Add Linux GCC 11, Clang 12 & 13 configurations with new epoch feature.
+- [config] Drop Linux GCC 6 and clang 10 configurations.
+- [fix] Fixed some unexpected errors.
+- [feature] Prepare pipeline to work with ansible provisioned machines.
+
+### 17-December-2021 - 09:56 CET
+
+- [feature] Introduce 'epoch' concept to build configurations as a strategy to build packages for new compilers.
+- [feature] Allow pull-requests to build packages from different recipes for the same library.
+- [feature] Profiles and logs from builds in the packages generated summary are now open in a new tab.
+- [fix] Improve error reporting of mismatched revision in PRs.
+
+### 14-December-2021 - 09:13 CET
+
+- [config] Bump Conan client version to 1.43.0.
+
+### 01-December-2021 - 12:29 CET
+
+- [config] Bump Conan client version to 1.42.2.
+
+### 24-November-2021 - 17:49 CET
+
+- [feature] Return host requirements when computing package IDs.
+
+### 22-November-2021 - 17:53 CET
+
+- [feature] Cache computation of package IDs.
+
+### 15-November-2021 - 11:03 CET
+
+- [feature] Add `xlarge` pod size in Linux for building packages with higher memory requirements.
+
+### 11-November-2021 - 13:22 CET
+
+- [config] Bump Conan client version to 1.41.0
+- [fix] Identify PRs to `CONTRIBUTING.md` as changes in docs.
+- [feature] Added Jenkins DSLs for job descriptions.
+- [fix] Parse integer value when assigning properties.
+
+### 18-October-2021 - 17:05 CEST
+
+- [config] Upgrade Conan version to 1.40.4
+- [fix] Replace `Unauthorized User` label by `User-approval pending`
+- [feat] Remove `os_build` and `arch_build` from generated profiles
+
+### 11-October-2021 - 12:14 CEST
+
+- [configs] Configurable Github statuses to check
+- [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
+- [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
+- [feature] Skip stale pull-requests from automatic review requests.
+- [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
+- [fix] Removed EAP, now it should be named _"Access requests"_ everywhere
+- [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
+- [job] New job to remove dead branches from CI
+
 ### 01-October-2021 - 13:08 CEST
 
-- [hotfix] Apply patch for https://github.com/conan-io/conan/issues/9695 (Added root certificate for Let's encrypt)
+- [hotfix] Apply patch for <https://github.com/conan-io/conan/issues/9695> (Added root certificate for Let's encrypt)
 
 ### 21-September-2021 - 12:09 CEST
 
@@ -52,10 +458,10 @@
 
 ### 01-June-2021 - 08:59 CEST
 
- - [feature] RequestReviews: Add column to enable/disable review requests (any user).
- - [testing] Use declared Conan version to run tests.
- - [internal] Pay some technical debt.
- - [internal] Simplify workflow, all packages already have properties.
+- [feature] RequestReviews: Add column to enable/disable review requests (any user).
+- [testing] Use declared Conan version to run tests.
+- [internal] Pay some technical debt.
+- [internal] Simplify workflow, all packages already have properties.
 
 ### 25-May-2021 - 13:42 CEST
 
@@ -94,7 +500,7 @@
 - [feature] Stop generating packages for apple-clang 9.1.
 - [feature] Raise error if `ConanInvalidConfiguration` is raised from `build()` method.
 - [feature] BuildSingleReference: All PRs use the new workflow.
-- [feature] Allow modifications in the *.github* folder for GitHub bots and actions.
+- [feature] Allow modifications in the _.github_ folder for GitHub bots and actions.
 - [feature] Use BuildSingleReference job to build packages (if needed) during a merge.
 - [feature] BuildSingleReference: Add build environment property to packages.
 - [feature] Tapaholes: Delete repositories after running jobs.
@@ -311,27 +717,35 @@
 - [fix] Fix checkExportSanity function
 
 ### 24-June-2020 - 10:55 CEST
+
 - Updated Conan client to the 1.26.1 version in Windows and Mac agents.
 
 ### 18-June-2020 - 18:40 CEST
+
 - Remove short paths limitation in all Windows agents.
 
 ### 04-June-2020 - 10:39 CEST
+
 - Add `CONAN_SKIP_BROKEN_SYMLINKS_CHECK=1` in master jobs.
 
 ### 02-June-2020 - 13:06 CEST
+
 - Avoid partial rebuilds in master jobs. Added `all_packages_done` property for every reference to track the completion of packages creation.
 
 ### 02-June-2020 - 00:02 CEST
+
 - Updated CMake to 3.16.4 in Windows and Mac agents.
 
 ### 20-May-2020 - 10:34 CEST
+
 - Updated Conan client to the 1.25.2 version in Windows and Mac agents.
 
 ### 14-May-2020 - 15:52 CEST
+
 - Updated Conan client to 1.25.1 version in Windows and Mac agents.
 
 ### 13-May-2020 - 09:47 CEST (08e2be6)
+
 - [refact] Simplify around ComputePackageID and CreatePackage
 - [refact] No need to pass 'winTmpPath' everywhere
 - Move the 'retryIze' call inside the scope of the node (Might improve [#1020](https://github.com/conan-io/conan-center-index/issues/1020))

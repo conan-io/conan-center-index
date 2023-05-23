@@ -1,0 +1,20 @@
+diff --git a/CMake/export.cmake b/CMake/export.cmake
+index 6e8bc5d..5118cb4 100644
+--- a/CMake/export.cmake
++++ b/CMake/export.cmake
+@@ -20,6 +20,7 @@
+ #######################################################################
+ 
+ # Set the fluid executable path
++if (0)
+ if (CMAKE_CROSSCOMPILING)
+   find_file(FLUID_PATH
+     NAMES fluid fluid.exe
+@@ -37,6 +38,7 @@ else ()
+   set (FLTK_FLUID_EXECUTABLE fluid)
+   set (FLUID fluid) # export
+ endif (CMAKE_CROSSCOMPILING)
++endif()
+ 
+ add_subdirectory(src)
+ 

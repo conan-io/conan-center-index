@@ -1,0 +1,124 @@
+name: "[linter] Conan v2 migration"
+
+on:
+  pull_request:
+
+env:
+  PYTHONPATH: ${{github.workspace}}
+  PYVER: "3.8"
+  REQUIREMENTS: "pylint==2.14"
+
+jobs:
+  test_linter:
+    name: Test linter changes (v2 migration)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get changed files
+        uses: ./.github/actions/pr_changed_files
+        id: changed_files
+        with:
+          files: |
+            linter/**
+            .github/workflows/linter-conan-v2.yml
+
+      - name: Get Conan v1 version
+        id: parse_conan_v1_version
+        if: steps.changed_files.outputs.any_changed == 'true'
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq '.conan.version' '.c3i/config_v1.yml'
+
+      - uses: actions/setup-python@v4
+        if: steps.changed_files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+
+      - name: Install requirements
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: |
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
+
+      - name: Execute linter over all recipes in the repository
+        id: linter_recipes
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: |
+          echo '## Linter summary (recipes)' >> $GITHUB_STEP_SUMMARY
+          pylint --rcfile=linter/pylintrc_recipe `ls recipes/*/*/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --score=y --exit-zero
+          jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
+          jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
+
+      - name: Execute linter over all test_package/recipes in the repository
+        id: linter_test_package
+        if: steps.changed_files.outputs.any_changed == 'true'
+        run: |
+          echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
+          pylint --rcfile=linter/pylintrc_testpackage `ls recipes/*/*/test_package/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --exit-zero
+          jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
+          jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
+
+  conanfile_recipe:
+    name: Lint changed conanfile.py (v2 migration)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get changed files
+        id: changed-files
+        uses: ./.github/actions/pr_changed_files
+        with:
+          files: |
+            recipes/*/*/conanfile.py
+      - name: Get Conan v1 version
+        id: parse_conan_v1_version
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq '.conan.version' '.c3i/config_v1.yml'
+      - uses: actions/setup-python@v4
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+      - name: Install dependencies
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
+      - name: Run linter
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::add-matcher::linter/recipe_linter.json"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            pylint --rcfile=linter/pylintrc_recipe --output-format=parseable ${file}
+          done
+
+  conanfile_test_package:
+    name: Lint changed test_package/conanfile.py (v2 migration)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get changed files
+        id: changed-files
+        uses: ./.github/actions/pr_changed_files
+        with:
+          files: |
+            recipes/*/*/test_*/conanfile.py
+      - name: Get Conan v1 version
+        id: parse_conan_v1_version
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq '.conan.version' '.c3i/config_v1.yml'
+      - uses: actions/setup-python@v4
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          python-version: ${{ env.PYVER }}
+      - name: Install dependencies
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
+      - name: Run linter
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::add-matcher::linter/recipe_linter.json"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            pylint --rcfile=linter/pylintrc_testpackage --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=parseable ${file}
+          done

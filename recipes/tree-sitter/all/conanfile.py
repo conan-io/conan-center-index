@@ -1,9 +1,8 @@
-import os
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-import shutil
+from conans import CMake, ConanFile, tools
+import functools
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
+
 
 class TreeSitterConan(ConanFile):
     name = "tree-sitter"
@@ -12,53 +11,51 @@ class TreeSitterConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tree-sitter.github.io/tree-sitter"
     license = "MIT"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True,
-                       "shared": False}
-    _autotools = None
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+    }
 
+    generators = "cmake"
+    exports_sources = "CMakeLists.txt"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def config_options(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("tree-sitter is not support on {}.".format(self.settings.os))
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-
-        return self._autotools
+    @functools.lru_cache(1)
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
-        autotools = self._configure_autotools()
-
-        with tools.chdir(self._source_subfolder):
-            autotools.make()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-
-        autotools = self._configure_autotools()
-        with tools.chdir(self._source_subfolder):
-            autotools.install(args=["PREFIX={}".format(self.package_folder)])
-
-            if self.options.shared:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
-            else:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib*")
-
-        tools.rmdir(os.path.join(self.package_folder, os.path.join("lib", "pkgconfig")))
-
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "tree-sitter"

@@ -1,0 +1,4 @@
+sources:
+  "0.9.1":
+    url: "https://github.com/coin3d/dime/releases/download/dime-0.9.1/dime-0.9.1-src.tar.gz"
+    sha256: "ded4c45b4a13a876d87bb36a0fba40d3456ccda3add739791da117e9603f0325"

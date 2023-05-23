@@ -1,0 +1,14 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,3 +7,11 @@ add_library(tiny-aes
+         )
+ 
+ target_include_directories(tiny-aes PRIVATE tiny-AES-c/)
++include(GNUInstallDirs)
++install(FILES aes.h aes.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++install(
++    TARGETS tiny-aes
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)

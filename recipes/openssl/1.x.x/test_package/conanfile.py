@@ -1,37 +1,31 @@
-from conans import CMake, tools, ConanFile
-from conans.tools import Version
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 import os
 
 
-class DefaultNameConan(ConanFile):
-    settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
-    def _build_cmake(self, use_find_package):
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OPENSSL_WITH_ZLIB"] = not self.dependencies["openssl"].options.get_safe("no_zlib", True)
+        tc.generate()
+
+    def build(self):
         cmake = CMake(self)
-
-        if self.settings.os == "Android":
-            cmake.definitions["CONAN_LIBCXX"] = ""
-        openssl_version = Version(self.deps_cpp_info["openssl"].version)
-        if openssl_version.major == "1" and openssl_version.minor == "1":
-            cmake.definitions["OPENSSL_WITH_ZLIB"] = False
-        else:
-            cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
-        cmake.definitions["USE_FIND_PACKAGE"] = use_find_package
-        cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-        cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-        if self.settings.compiler == 'Visual Studio':
-            cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = 'MT' in str(self.settings.compiler.runtime)
-
         cmake.configure()
         cmake.build()
 
-    def build(self):
-        self._build_cmake(use_find_package=True)
-        self._build_cmake(use_find_package=False)
-
     def test(self):
-        if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "digest")
-            self.run(bin_path, run_environment=True)
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

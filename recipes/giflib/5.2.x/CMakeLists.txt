@@ -1,56 +1,62 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(gif C)
+cmake_minimum_required(VERSION 3.1)
+project(gif LANGUAGES C)
 
-include("${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+include(GNUInstallDirs)
 
-set(SOURCE_FILES
-    "source_subfolder/dgif_lib.c"
-    "source_subfolder/egif_lib.c"
-    "source_subfolder/gifalloc.c"
-    "source_subfolder/gif_err.c"
-    "source_subfolder/gif_font.c"
-    "source_subfolder/gif_hash.c"
-    "source_subfolder/openbsd-reallocarray.c"
+add_library(gif
+    "${GIFLIB_SRC_DIR}/dgif_lib.c"
+    "${GIFLIB_SRC_DIR}/egif_lib.c"
+    "${GIFLIB_SRC_DIR}/gifalloc.c"
+    "${GIFLIB_SRC_DIR}/gif_err.c"
+    "${GIFLIB_SRC_DIR}/gif_font.c"
+    "${GIFLIB_SRC_DIR}/gif_hash.c"
+    "${GIFLIB_SRC_DIR}/openbsd-reallocarray.c"
 )
-
-if(NOT BUILD_SHARED_LIBS)
-    add_definitions(-DUSE_GIF_LIB)
+if(WIN32)
+    if(BUILD_SHARED_LIBS)
+        set_property(TARGET gif PROPERTY PREFIX "")
+        target_compile_definitions(gif INTERFACE USE_GIF_DLL)
+    else()
+        target_compile_definitions(gif PUBLIC USE_GIF_LIB)
+    endif()
 endif()
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
-if(WIN32 AND BUILD_SHARED_LIBS)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY PREFIX "")
-endif()
-
-set(GIF_UTILS
-    gif2rgb
-    gifbuild
-    giffix
-    giftext
-    giftool
-    gifclrmp
+install(
+    TARGETS gif
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(
+    FILES "${GIFLIB_SRC_DIR}/gif_lib.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-add_library(giflib_util STATIC
-    "source_subfolder/qprintf.c"
-    "source_subfolder/quantize.c"
-    "source_subfolder/getarg.c"
-)
-target_link_libraries(giflib_util PRIVATE ${PROJECT_NAME})
+if(UTILS)
+    add_library(giflib_util STATIC
+        "${GIFLIB_SRC_DIR}/qprintf.c"
+        "${GIFLIB_SRC_DIR}/quantize.c"
+        "${GIFLIB_SRC_DIR}/getarg.c"
+    )
+    target_link_libraries(giflib_util PRIVATE gif)
 
-foreach(GIF_UTIL ${GIF_UTILS})
-    add_executable(${GIF_UTIL} "source_subfolder/${GIF_UTIL}.c")
-    target_link_libraries(${GIF_UTIL} PRIVATE ${PROJECT_NAME} giflib_util)
-endforeach()
-find_library(M_LIBRARY NAMES m)
-if(M_LIBRARY)
-    target_link_libraries(gifclrmp PRIVATE ${M_LIBRARY})
+    set(GIF_UTILS
+        gif2rgb
+        gifbuild
+        giffix
+        giftext
+        giftool
+        gifclrmp
+    )
+    foreach(GIF_UTIL ${GIF_UTILS})
+        add_executable(${GIF_UTIL} "${GIFLIB_SRC_DIR}/${GIF_UTIL}.c")
+        target_link_libraries(${GIF_UTIL} PRIVATE gif giflib_util)
+    endforeach()
+    find_library(LIBM NAMES m)
+    target_link_libraries(gifclrmp PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
+    if(MSVC)
+        find_package(getopt-for-visual-studio REQUIRED CONFIG)
+        target_link_libraries(giftool PRIVATE getopt-for-visual-studio::getopt-for-visual-studio)
+    endif()
+    install(TARGETS ${GIF_UTILS} DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
-
-install(TARGETS ${PROJECT_NAME} ${GIF_UTILS}
-        ARCHIVE DESTINATION "lib"
-        LIBRARY DESTINATION "lib"
-        RUNTIME DESTINATION "bin"
-        BUNDLE DESTINATION "bin")
-install(FILES "source_subfolder/gif_lib.h" DESTINATION "include")

@@ -1,9 +1,13 @@
 import os
 
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import apply_conandata_patches, copy, chdir, export_conandata_patches, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibcapConan(ConanFile):
@@ -13,8 +17,8 @@ class LibcapConan(ConanFile):
     homepage = "https://git.kernel.org/pub/scm/libs/libcap/libcap.git"
     description = "This is a library for getting and setting POSIX.1e" \
                   " (formerly POSIX 6) draft 15 capabilities"
-    topics = ("conan", "libcap", "capabilities")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("capabilities")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,85 +29,76 @@ class LibcapConan(ConanFile):
         "fPIC": True,
         "psx_syscals": False,
     }
-    exports_sources = "patches/**"
 
-    _autotools = None
-    _autotools_env = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.name} only supports Linux")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools, self._autotools_env
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.fpic = self.options.get_safe("fPIC", True)
-        self._autotools_env = self._autotools.vars
-        self._autotools_env["SHARED"] = \
-            "yes" if self.options.shared else "no"
-        self._autotools_env["PTHREADS"] = \
-            "yes" if self.options.psx_syscals else "no"
-        self._autotools_env["DESTDIR"] = self.package_folder
-        self._autotools_env["prefix"] = "/"
-        self._autotools_env["lib"] = "lib"
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.fpic = self.options.get_safe("fPIC", True)
+        env = tc.environment()
+        env.define("SHARED", "yes" if self.options.shared else "no")
+        env.define("PTHREADS", "yes" if self.options.psx_syscals else "no")
+        env.define("DESTDIR", self.package_folder)
+        env.define("prefix", "/")
+        env.define("lib", "lib")
 
-        if tools.cross_building(self.settings) and not tools.get_env("BUILD_CC"):
-            native_cc = tools.which("cc")
-            self.output.info("Using native compiler '{}'".format(native_cc))
-            self._autotools_env["BUILD_CC"] = native_cc
+        if cross_building(self):
+            # libcap needs to run an executable that is compiled from sources
+            # during the build - so it needs a native compiler (it doesn't matter which)
+            # Assume the `cc` command points to a working C compiler
+            env.define("BUILD_CC", "cc")
 
-        return self._autotools, self._autotools_env
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        tc.generate(env)
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
 
-        with tools.chdir(os.path.join(self._source_subfolder, self.name)):
-            env_build, env_build_vars = self._configure_autotools()
-            env_build.make(vars=env_build_vars)
+        autotools = Autotools(self)
+        with chdir(self, os.path.join(self.source_folder, "libcap")):
+            autotools.make()
 
     def package(self):
-        self.copy("License", dst="licenses", src=self._source_subfolder)
+        copy(self, "License", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
-        with tools.chdir(os.path.join(self._source_subfolder, self.name)):
-            env_build, env_build_vars = self._configure_autotools()
-
-            env_build.make(target="install-common-cap", vars=env_build_vars)
+        autotools = Autotools(self)
+        with chdir(self, os.path.join(self.source_folder, "libcap")):
+            autotools.make(target="install-common-cap")
             install_cap = ("install-shared-cap" if self.options.shared
                            else "install-static-cap")
-            env_build.make(target=install_cap, vars=env_build_vars)
+            autotools.make(target=install_cap)
 
             if self.options.psx_syscals:
-                env_build.make(target="install-common-psx",
-                               vars=env_build_vars)
+                autotools.make(target="install-common-psx")
                 install_psx = ("install-shared-psx" if self.options.shared
                                else "install-static-psx")
-                env_build.make(target=install_psx, vars=env_build_vars)
+                autotools.make(target=install_psx)
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.components["cap"].names["pkg_config"] = "libcap"
+        self.cpp_info.components["cap"].set_property("pkg_config_name", "libcap")
         self.cpp_info.components["cap"].libs = ["cap"]
         if self.options.psx_syscals:
-            self.cpp_info.components["psx"].names["pkg_config"] = "libpsx"
+            self.cpp_info.components["psx"].set_property("pkg_config_name", "libpsx")
             self.cpp_info.components["psx"].libs = ["psx"]
             self.cpp_info.components["psx"].system_libs = ["pthread"]
-            self.cpp_info.components["psx"].exelinkflags = [
-                "-Wl,-wrap,pthread_create"]
+            self.cpp_info.components["psx"].exelinkflags = ["-Wl,-wrap,pthread_create"]
+            # trick to avoid conflicts with cap component
+            self.cpp_info.set_property("pkg_config_name", "libcap-do-not-use")

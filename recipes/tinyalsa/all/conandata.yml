@@ -1,4 +1,11 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/tinyalsa/tinyalsa/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "573ae0b2d3480851c1d2a12503ead2beea27f92d44ed47b74b553ba947994ef1"
   "1.1.1":
     url: "https://github.com/tinyalsa/tinyalsa/archive/1.1.1.tar.gz"
     sha256: "d92b438cea348ae316c4b2cbf367b4f01ed821a947e6a34d813624e9e3c936c1"
+patches:
+  "2.0.0":
+    - patch_file: "patches/tinyalsa-2.0.0-strncpy-warning.patch"
+      base_path: "source_subfolder"

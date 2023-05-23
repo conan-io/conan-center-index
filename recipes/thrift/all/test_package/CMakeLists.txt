@@ -1,20 +1,13 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 find_package(Thrift CONFIG REQUIRED)
 
-set(HEADER_FILES    calculator_constants.h
-                    calculator_types.h
-                    Calculator.h)
-
-set(SOURCE_FILES    calculator_constants.cpp
-                    calculator_types.cpp
-                    Calculator.cpp
-                    test_package.cpp)
-
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} thriftnb::thriftnb)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+add_executable(${PROJECT_NAME}
+    calculator_constants.cpp
+    calculator_types.cpp
+    Calculator.cpp
+    test_package.cpp
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE thrift::thrift)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

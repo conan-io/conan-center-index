@@ -1,73 +1,67 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.0"
 
 
 class WaylandProtocolsConan(ConanFile):
     name = "wayland-protocols"
     description = "Wayland is a project to define a protocol for a compositor to talk to its clients as well as a library implementation of the protocol"
-    topics = ("wayland")
+    topics = ("wayland",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/wayland/wayland-protocols"
     license = "MIT"
-
     settings = "os", "arch", "compiler", "build_type"
 
-    _meson = None
-
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-    
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Wayland-protocols can be built on Linux only")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.1")
+        self.tool_requires("meson/1.0.0")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["tests"] = "false"
+        tc.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "dep_scanner = dependency('wayland-scanner', native: true)",
-                              "#dep_scanner = dependency('wayland-scanner', native: true)")
-
-    def _configure_meson(self):
-        if not self._meson:
-            defs = {
-                "tests": "false",
-            }
-            self._meson = Meson(self)
-            self._meson.configure(
-                source_folder=self._source_subfolder,
-                build_folder=self._build_subfolder,
-                defs=defs,
-                args=['--datadir=%s' % os.path.join(self.package_folder, "res")],
-            )
-        return self._meson
+        if Version(self.version) <= "1.23":
+            # fixed upstream in https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/113
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                            "dep_scanner = dependency('wayland-scanner', native: true)",
+                            "#dep_scanner = dependency('wayland-scanner', native: true)")
 
     def build(self):
         self._patch_sources()
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "res", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "res", "pkgconfig"))
 
     def package_info(self):
         pkgconfig_variables = {
@@ -76,4 +70,8 @@ class WaylandProtocolsConan(ConanFile):
         }
         self.cpp_info.set_property(
             "pkg_config_custom_content",
-            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
+
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
+        self.cpp_info.bindirs = []

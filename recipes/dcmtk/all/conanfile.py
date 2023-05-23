@@ -1,9 +1,15 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import CMake
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.scm import Version
+import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class DCMTKConan(ConanFile):
@@ -12,7 +18,8 @@ class DCMTKConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://dicom.offis.de/dcmtk"
     license = "BSD-3-Clause"
-    topics = "conan", "dcmtk", "dicom", "image"
+    topics = ("dicom", "image")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,6 +37,7 @@ class DCMTKConan(ConanFile):
         "builtin_private_tags": [True, False],
         "external_dictionary": [None, True, False],
         "wide_io": [True, False],
+        "enable_stl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -47,11 +55,10 @@ class DCMTKConan(ConanFile):
         "builtin_private_tags": False,
         "external_dictionary": None,
         "wide_io": False,
+        "enable_stl": True,
     }
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package"
 
-    _cmake = None
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -61,111 +68,117 @@ class DCMTKConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("with_tcpwrappers")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        if self.settings.os == "Windows":
-            del self.options.with_tcpwrappers
-
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self) and self.settings.arch == "armv8":
-            # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
-            raise ConanInvalidConfiguration("Cross building to 'arm' is not supported (yet)")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.charset_conversion == "libiconv":
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/69.1")
+            self.requires("icu/72.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.12")
+            self.requires("libxml2/2.10.3")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.13")
         if self.options.with_openssl:
-            # Library uses opaque type 'ssl_ctx_st' from openssl. Not available in >=1.1.0.
-            #   and it fails to build only in Windows
-            self.requires("openssl/1.0.2u")
+            if self.settings.os == "Windows":
+                # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
+                self.requires("openssl/1.0.2u")
+            else:
+                self.requires("openssl/1.1.1t")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.39")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
 
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self) and \
+           self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
+            raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
 
         # DICOM Data Dictionaries are required
-        self._cmake.definitions["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path
+        cmake.definitions["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path
 
-        self._cmake.definitions["BUILD_APPS"] = self.options.with_applications
-        self._cmake.definitions["DCMTK_WITH_ICONV"] = self.options.charset_conversion == "libiconv"
+        cmake.definitions["BUILD_APPS"] = self.options.with_applications
+        cmake.definitions["DCMTK_WITH_ICONV"] = self.options.charset_conversion == "libiconv"
         if self.options.charset_conversion == "libiconv":
-            self._cmake.definitions["WITH_LIBICONVINC"] = self.deps_cpp_info["libiconv"].rootpath
-        self._cmake.definitions["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
-        self._cmake.definitions["DCMTK_WITH_OPENJPEG"] = False
-        self._cmake.definitions["DCMTK_WITH_OPENSSL"] = self.options.with_openssl
+            cmake.definitions["WITH_LIBICONVINC"] = self.deps_cpp_info["libiconv"].rootpath
+        cmake.definitions["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
+        cmake.definitions["DCMTK_WITH_OPENJPEG"] = False
+        cmake.definitions["DCMTK_WITH_OPENSSL"] = self.options.with_openssl
         if self.options.with_openssl:
-            self._cmake.definitions["WITH_OPENSSLINC"] = self.deps_cpp_info["openssl"].rootpath
-        self._cmake.definitions["DCMTK_WITH_PNG"] = self.options.with_libpng
+            cmake.definitions["WITH_OPENSSLINC"] = self.deps_cpp_info["openssl"].rootpath
+        cmake.definitions["DCMTK_WITH_PNG"] = self.options.with_libpng
         if self.options.with_libpng:
-            self._cmake.definitions["WITH_LIBPNGINC"] = self.deps_cpp_info["libpng"].rootpath
-        self._cmake.definitions["DCMTK_WITH_SNDFILE"] = False
-        self._cmake.definitions["DCMTK_WITH_THREADS"] = self.options.with_multithreading
-        self._cmake.definitions["DCMTK_WITH_TIFF"] = self.options.with_libtiff
+            cmake.definitions["WITH_LIBPNGINC"] = self.deps_cpp_info["libpng"].rootpath
+        cmake.definitions["DCMTK_WITH_SNDFILE"] = False
+        cmake.definitions["DCMTK_WITH_THREADS"] = self.options.with_multithreading
+        cmake.definitions["DCMTK_WITH_TIFF"] = self.options.with_libtiff
         if self.options.with_libtiff:
-            self._cmake.definitions["WITH_LIBTIFFINC"] = self.deps_cpp_info["libtiff"].rootpath
+            cmake.definitions["WITH_LIBTIFFINC"] = self.deps_cpp_info["libtiff"].rootpath
         if self.settings.os != "Windows":
-            self._cmake.definitions["DCMTK_WITH_WRAP"] = self.options.with_tcpwrappers
-        self._cmake.definitions["DCMTK_WITH_XML"] = self.options.with_libxml2
+            cmake.definitions["DCMTK_WITH_WRAP"] = self.options.with_tcpwrappers
+        cmake.definitions["DCMTK_WITH_XML"] = self.options.with_libxml2
         if self.options.with_libxml2:
-            self._cmake.definitions["WITH_LIBXMLINC"] = self.deps_cpp_info["libxml2"].rootpath
-            self._cmake.definitions["WITH_LIBXML_SHARED"] = self.options["libxml2"].shared
-        self._cmake.definitions["DCMTK_WITH_ZLIB"] = self.options.with_zlib
+            cmake.definitions["WITH_LIBXMLINC"] = self.deps_cpp_info["libxml2"].rootpath
+            cmake.definitions["WITH_LIBXML_SHARED"] = self.options["libxml2"].shared
+        cmake.definitions["DCMTK_WITH_ZLIB"] = self.options.with_zlib
         if self.options.with_zlib:
-            self._cmake.definitions["WITH_ZLIBINC"] = self.deps_cpp_info["zlib"].rootpath
+            cmake.definitions["WITH_ZLIBINC"] = self.deps_cpp_info["zlib"].rootpath
 
-        self._cmake.definitions["DCMTK_ENABLE_STL"] = True
-        self._cmake.definitions["DCMTK_ENABLE_CXX11"] = True
+        if self.options.enable_stl:
+            cmake.definitions["DCMTK_ENABLE_STL"] = "ON"
+        else:
+            cmake.definitions["DCMTK_ENABLE_STL"] = "OFF"
+        cmake.definitions["DCMTK_ENABLE_CXX11"] = True
 
-        self._cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False
-        self._cmake.definitions["DCMTK_WITH_DOXYGEN"] = False
+        cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False
+        cmake.definitions["DCMTK_WITH_DOXYGEN"] = False
 
-        self._cmake.definitions["DCMTK_ENABLE_PRIVATE_TAGS"] = self.options.builtin_private_tags
+        cmake.definitions["DCMTK_ENABLE_PRIVATE_TAGS"] = self.options.builtin_private_tags
         if self.options.external_dictionary is not None:
-            self._cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+            if Version(self.version) < "3.6.7":
+                cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+            else:
+                cmake.definitions["DCMTK_DEFAULT_DICT"] = self.options.external_dictionary
         if self.options.builtin_dictionary is not None:
-            self._cmake.definitions["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
-        self._cmake.definitions["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
-        self._cmake.definitions["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
-
+            cmake.definitions["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
+        cmake.definitions["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
+        cmake.definitions["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
 
         if self.settings.os == "Windows":
-            self._cmake.definitions["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
+            cmake.definitions["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
 
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["DCMTK_ICONV_FLAGS_ANALYZED"] = True
-            self._cmake.definitions["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = "MD" in str(self.settings.compiler.runtime)
+        if is_msvc(self):
+            cmake.definitions["DCMTK_ICONV_FLAGS_ANALYZED"] = True
+            cmake.definitions["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = "MD" in msvc_runtime_flag(self)
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -175,18 +188,18 @@ class DCMTKConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {target: "DCMTK::{}".format(target) for target in self._dcmtk_components.keys()}
+            {target: f"DCMTK::{target}" for target in self._dcmtk_components}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -195,7 +208,7 @@ class DCMTKConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_subfolder(self):
@@ -203,8 +216,7 @@ class DCMTKConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join(self._module_subfolder, "conan-official-{self.name}-targets.cmake")
 
     @property
     def _dcmtk_components(self):
@@ -231,7 +243,7 @@ class DCMTKConan(ConanFile):
         def xml2():
             return ["libxml2::libxml2"] if self.options.with_libxml2 else []
 
-        charls = "dcmtkcharls" if tools.Version("3.6.6") <= self.version else "charls"
+        charls = "dcmtkcharls" if Version("3.6.6") <= self.version else "charls"
 
         return {
             "ofstd"   : charset_conversion(),
@@ -267,25 +279,31 @@ class DCMTKConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "share")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "DCMTK")
+
         self.cpp_info.names["cmake_find_package"] = "DCMTK"
         self.cpp_info.names["cmake_find_package_multi"] = "DCMTK"
 
         def register_components(components):
             for target_lib, requires in components.items():
+                self.cpp_info.components[target_lib].set_property("cmake_target_name", target_lib)
+                self.cpp_info.components[target_lib].libs = [target_lib]
+                self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
+                self.cpp_info.components[target_lib].requires = requires
+
+                # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[target_lib].names["cmake_find_package"] = target_lib
                 self.cpp_info.components[target_lib].names["cmake_find_package_multi"] = target_lib
                 self.cpp_info.components[target_lib].builddirs.append(self._module_subfolder)
                 self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-                self.cpp_info.components[target_lib].libs = [target_lib]
-                self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
-                self.cpp_info.components[target_lib].requires = requires
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["ofstd"].system_libs.extend([
                     "iphlpapi", "ws2_32", "netapi32", "wsock32"
                 ])
-            elif self.settings.os == "Linux":
+            elif self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["ofstd"].system_libs.append("m")
                 if self.options.with_multithreading:
                     self.cpp_info.components["ofstd"].system_libs.append("pthread")
@@ -293,10 +311,12 @@ class DCMTKConan(ConanFile):
         register_components(self._dcmtk_components)
 
         dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
-        self.output.info("Settings DCMDICTPATH environment variable: {}".format(dcmdictpath))
-        self.env_info.DCMDICTPATH = dcmdictpath
+        self.output.info(f"Settings DCMDICTPATH environment variable: {dcmdictpath}")
+        self.runenv_info.define_path("DCMDICTPATH", dcmdictpath)
+        self.env_info.DCMDICTPATH = dcmdictpath # remove in conan v2?
 
         if self.options.with_applications:
+            self.buildenv_info.define_path("DCMDICTPATH", dcmdictpath)
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)

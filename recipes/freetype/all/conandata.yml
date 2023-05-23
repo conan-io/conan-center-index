@@ -1,31 +1,26 @@
 sources:
-  "2.11.0":
-    url: [
-      "https://download.savannah.gnu.org/releases/freetype/freetype-2.11.0.tar.gz",
-      "https://sourceforge.net/projects/freetype/files/freetype2/2.11.0/freetype-2.11.0.tar.gz/download",
-    ]
-    sha256: "a45c6b403413abd5706f3582f04c8339d26397c4304b78fa552f2215df64101f"
+  "2.13.0":
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.13.0/freetype-2.13.0.tar.xz"
+    sha256: "5ee23abd047636c24b2d43c6625dcafc66661d1aca64dec9e0d05df29592624c"
+  "2.12.1":
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.12.1.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.12.1/freetype-2.12.1.tar.xz"
+    sha256: "4766f20157cc4cf0cd292f80bf917f92d1c439b243ac3018debf6b9140c41a7f"
+  "2.11.1":
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.11.1.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.11.1/freetype-2.11.1.tar.xz"
+    sha256: "3333ae7cfda88429c97a7ae63b7d01ab398076c3b67182e960e5684050f2c5c8"
   "2.10.4":
-    url: [
-      "https://download.savannah.gnu.org/releases/freetype/freetype-2.10.4.tar.gz",
-      "https://sourceforge.net/projects/freetype/files/freetype2/2.10.4/freetype-2.10.4.tar.gz/download",
-    ]
-    sha256: "5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac"
-  "2.10.2":
-    url: [
-      "https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.gz",
-      "https://sourceforge.net/projects/freetype/files/freetype2/2.10.2/freetype-2.10.2.tar.gz/download",
-    ]
-    sha256: "e09aa914e4f7a5d723ac381420949c55c0b90b15744adce5d1406046022186ab"
-  "2.10.1":
-    url: [
-      "https://download.savannah.gnu.org/releases/freetype/freetype-2.10.1.tar.gz",
-      "https://sourceforge.net/projects/freetype/files/freetype2/2.10.1/freetype-2.10.1.tar.gz/download",
-    ]
-    sha256: "3a60d391fd579440561bf0e7f31af2222bc610ad6ce4d9d7bd2165bca8669110"
-  "2.10.0":
-    url: [
-      "https://download.savannah.gnu.org/releases/freetype/freetype-2.10.0.tar.gz",
-      "https://sourceforge.net/projects/freetype/files/freetype2/2.10.0/freetype-2.10.0.tar.gz/download",
-    ]
-    sha256: "955e17244e9b38adb0c98df66abb50467312e6bb70eac07e49ce6bd1a20e809a"
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.10.4.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.10.4/freetype-2.10.4.tar.xz"
+    sha256: "86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784"
+patches:
+  "2.13.0":
+    - patch_file: "patches/2.13.0-0001-fix-fallthrough.patch"
+      patch_description: "Fix FALL_THROUGH macro for clang 10 & 11"
+      patch_type: "portability"

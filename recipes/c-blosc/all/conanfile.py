@@ -1,16 +1,21 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.53.0"
+
 
 class CbloscConan(ConanFile):
     name = "c-blosc"
     description = "An extremely fast, multi-threaded, meta-compressor library."
     license = "BSD-3-Clause"
-    topics = ("conan", "c-blosc", "blosc", "compression")
+    topics = ("c-blosc", "blosc", "compression")
     homepage = "https://github.com/Blosc/c-blosc"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -19,7 +24,7 @@ class CbloscConan(ConanFile):
         "with_lz4": [True, False],
         "with_snappy": [True, False],
         "with_zlib": [True, False],
-        "with_zstd": [True, False]
+        "with_zstd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,93 +33,92 @@ class CbloscConan(ConanFile):
         "with_lz4": True,
         "with_snappy": True,
         "with_zlib": True,
-        "with_zstd": True
+        "with_zstd": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.simd_intrinsics
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
+            self.requires("lz4/1.9.4")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.8")
+            self.requires("snappy/1.1.9")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.13")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.5.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BLOSC_INSTALL"] = True
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_SHARED"] = self.options.shared
+        tc.variables["BUILD_TESTS"] = False
+        if Version(self.version) >= "1.20.0":
+            tc.variables["BUILD_FUZZERS"] = False
+        tc.variables["BUILD_BENCHMARKS"] = False
+        simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
+        tc.variables["DEACTIVATE_SSE2"] = simd_intrinsics not in ["sse2", "avx2"]
+        tc.variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
+        tc.variables["DEACTIVATE_LZ4"] = not self.options.with_lz4
+        tc.variables["DEACTIVATE_SNAPPY"] = not self.options.with_snappy
+        tc.variables["DEACTIVATE_ZLIB"] = not self.options.with_zlib
+        tc.variables["DEACTIVATE_ZSTD"] = not self.options.with_zstd
+        tc.variables["DEACTIVATE_SYMBOLS_CHECK"] = True
+        tc.variables["PREFER_EXTERNAL_LZ4"] = True
+        if Version(self.version) < "1.19.0":
+            tc.variables["PREFER_EXTERNAL_SNAPPY"] = True
+        tc.variables["PREFER_EXTERNAL_ZLIB"] = True
+        tc.variables["PREFER_EXTERNAL_ZSTD"] = True
+        tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        # Generate a relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "cmake"))
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # Remove folder containing custom FindLib.cmake files
-        tools.rmdir(os.path.join(self._source_subfolder, "cmake"))
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BLOSC_INSTALL"] = True
-        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["BUILD_TESTS"] = False
-        if tools.Version(self.version) >= "1.20.0":
-            self._cmake.definitions["BUILD_FUZZERS"] = False
-        self._cmake.definitions["BUILD_BENCHMARKS"] = False
-        simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
-        self._cmake.definitions["DEACTIVATE_SSE2"] = simd_intrinsics not in ["sse2", "avx2"]
-        self._cmake.definitions["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
-        self._cmake.definitions["DEACTIVATE_LZ4"] = not self.options.with_lz4
-        self._cmake.definitions["DEACTIVATE_SNAPPY"] = not self.options.with_snappy
-        self._cmake.definitions["DEACTIVATE_ZLIB"] = not self.options.with_zlib
-        self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
-        self._cmake.definitions["DEACTIVATE_SYMBOLS_CHECK"] = True
-        self._cmake.definitions["PREFER_EXTERNAL_LZ4"] = True
-        if tools.Version(self.version) < "1.19.0":
-            self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
-        self._cmake.definitions["PREFER_EXTERNAL_ZLIB"] = True
-        self._cmake.definitions["PREFER_EXTERNAL_ZSTD"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
 
     def package(self):
         licenses = ["BLOSC.txt", "BITSHUFFLE.txt", "FASTLZ.txt"]
         for license_file in licenses:
-            self.copy(license_file, dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
-        cmake = self._configure_cmake()
+            copy(self, license_file, src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "blosc"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+        self.cpp_info.set_property("pkg_config_name", "blosc")
+        prefix = "lib" if is_msvc(self) and not self.options.shared else ""
+        self.cpp_info.libs = [f"{prefix}blosc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["m", "pthread"])

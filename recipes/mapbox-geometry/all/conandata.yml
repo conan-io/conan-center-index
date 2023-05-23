@@ -1,0 +1,4 @@
+sources:
+  "2.0.3":
+    url: "https://github.com/mapbox/geometry.hpp/archive/refs/tags/v2.0.3.tar.gz"
+    sha256: "9d750d34576069bcc4f39677af08cde2862fbe4b8c0d9af504877c2fae2ae273"

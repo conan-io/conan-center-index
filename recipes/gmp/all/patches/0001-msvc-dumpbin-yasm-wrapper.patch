@@ -1,6 +1,6 @@
 --- /dev/null
 +++ dumpbin_nm.py
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,28 @@
 +#!/usr/bin/env python3
 +
 +import re
@@ -8,7 +8,8 @@
 +import sys
 +#print(open(sys.argv[1], "rb").read())
 +#output = subprocess.check_output(["dumpbin", "-nologo", "-symbols"] + sys.argv[1:], stderr=subprocess.STDOUT, text=True, shell=True)
-+output = subprocess.check_output("dumpbin -nologo -symbols {}".format(sys.argv[1]), stderr=subprocess.STDOUT, text=True, shell=True)
++output = subprocess.check_output("dumpbin -nologo -symbols {}".format(sys.argv[1]), stderr=subprocess.STDOUT, shell=True)
++output = output.decode()
 +for line in output.splitlines():
 +    d = re.split("[ |]+", line.strip())
 +    if len(d) == 6:

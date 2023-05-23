@@ -1,0 +1,14 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -86,10 +86,10 @@
+ # 2018-11-16 PH added PCRE2GREP_SUPPORT_CALLOUT_FORK support and tidied
+ # 2019-02-16 PH hacked to avoid CMP0026 policy issue (see comments below)
+ 
+-PROJECT(PCRE2 C)
+ 
+ # Increased minimum to 2.8.0 to support newer add_test features.
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
++PROJECT(PCRE2 C)
+ 
+ # Set policy CMP0026 to avoid warnings for the use of LOCATION in
+ # GET_TARGET_PROPERTY. This should no longer be required.

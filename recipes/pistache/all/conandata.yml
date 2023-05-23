@@ -1,8 +1,15 @@
 sources:
+  "0.0.5":
+    url: "https://github.com/pistacheio/pistache/archive/refs/tags/0.0.5.tar.gz"
+    sha256: "e2da87ebc01367e33bd8d7800cb2bf5c23e9fb4e6f49dce2cab5f8756df8dca0"
   "cci.20201127":
-    url: https://github.com/pistacheio/pistache/archive/a3c5c68e0f08e19331d53d12846079ad761fe974.tar.gz
-    sha256: f1abb9e43ff847ebff8edb72623c9942162df134bccfb571af9c7817d3261fae
+    url: "https://github.com/pistacheio/pistache/archive/a3c5c68e0f08e19331d53d12846079ad761fe974.tar.gz"
+    sha256: "f1abb9e43ff847ebff8edb72623c9942162df134bccfb571af9c7817d3261fae"
 patches:
   "cci.20201127":
     - patch_file: "patches/0001-remove-fpic.patch"
-      base_path: "source_subfolder"
+      patch_description: "disable fPIC"
+      patch_type: "conan"
+    - patch_file: "patches/0002-include-stddef.patch"
+      patch_description: "include <stddef>"
+      patch_type: "portability"

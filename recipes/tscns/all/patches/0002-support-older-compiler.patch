@@ -1,0 +1,13 @@
+diff --git a/tscns.h b/tscns.h
+index e66153d..a7c9a73 100644
+--- a/tscns.h
++++ b/tscns.h
+@@ -139,7 +139,7 @@ public:
+     param_seq.store(++seq, std::memory_order_release);
+   }
+ 
+-  alignas(64) std::atomic<uint32_t> param_seq = 0;
++  alignas(64) std::atomic<uint32_t> param_seq{0};
+   double ns_per_tsc = 1.0;
+   int64_t ns_offset = 0;
+   int64_t calibate_interval_ns;

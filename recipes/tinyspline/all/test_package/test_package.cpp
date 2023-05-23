@@ -5,7 +5,7 @@
 #endif
 
 int main() {
-  tinyspline::BSpline spline(6, 3, 3, TS_OPENED);
+  tinyspline::BSpline spline(6, 3, 3);
 
   return 0;
 }

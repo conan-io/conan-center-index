@@ -1,29 +1,31 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class OggConan(ConanFile):
     name = "ogg"
     description = "The OGG library"
-    topics = ("conan", "ogg", "codec", "audio", "lossless")
+    topics = ("codec", "audio", "lossless")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/ogg"
     license = "BSD-2-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+
     settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -31,39 +33,51 @@ class OggConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        # Generate a relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Ogg")
+        self.cpp_info.set_property("cmake_target_name", "Ogg::ogg")
+        self.cpp_info.set_property("pkg_config_name", "ogg")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["ogglib"].libs = ["ogg"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ogg"
         self.cpp_info.names["cmake_find_package_multi"] = "Ogg"
         self.cpp_info.components["ogglib"].names["cmake_find_package"] = "ogg"
         self.cpp_info.components["ogglib"].names["cmake_find_package_multi"] = "ogg"
-        self.cpp_info.components["ogglib"].libs = ["ogg"]
+        self.cpp_info.components["ogglib"].set_property("cmake_target_name", "Ogg::ogg")
+        self.cpp_info.components["ogglib"].set_property("pkg_config_name", "ogg")

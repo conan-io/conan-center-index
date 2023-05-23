@@ -1,0 +1,7 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/jay-tux/fpgen/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "5e5faf1fbdcb3d93306bd8a838f805afdccdbb9076d78356ad5443943555be7d"
+  "1.1.0-clang":
+    url: "https://github.com/jay-tux/fpgen/archive/refs/tags/v1.1.0-clang.tar.gz"
+    sha256: "02936c1e790bcdba1479cf8164596b05cfc5b7401b3c71e0a1fd77e51fe8b93f"

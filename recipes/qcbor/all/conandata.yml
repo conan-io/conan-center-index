@@ -1,0 +1,23 @@
+sources:
+  "1.2":
+    url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.2.tar.gz"
+    sha256: "0f706ad90ada600bd1ddbdf8dc6f2f5910e11de355bb4454b9b4123f0e4ff525"
+  "1.1":
+    url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.1.tar.gz"
+    sha256: "1e7e8986bf918eafb11f5373df9b80fd56811d2cd39c7630d8171130802199b6"
+  "1.0":
+    url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.0.tar.gz"
+    sha256: "961a46eb5a599cc040bfce4f4fade4427e046f1748f37ba4ebbc097fb9cdf1d3"
+patches:
+  "1.2":
+    - patch_file: "patches/1.2-0001-fix-cmake.patch"
+      patch_description: "disable fix fPIC and add installation"
+      patch_type: "conan"
+  "1.1":
+    - patch_file: "patches/1.1-0001-fix-cmake.patch"
+      patch_description: "link mathlib and add installation"
+      patch_type: "conan"
+  "1.0":
+    - patch_file: "patches/1.0-0001-fix-cmake.patch"
+      patch_description: "link mathlib and add installation"
+      patch_type: "conan"

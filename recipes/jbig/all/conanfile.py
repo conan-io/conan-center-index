@@ -1,39 +1,35 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
-class ConanJBig(ConanFile):
+class JBigConan(ConanFile):
     name = "jbig"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ImageMagick/jbig"
     description = "jbig for the Windows build of ImageMagick"
-    topics = ("conan", "jbig", "imagemagick", "window", "graphic")
+    topics = ("jbig", "imagemagick", "window", "graphic")
     license = "GPL-2.0"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_executables": [True, False]
+        "build_executables": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_executables": True
+        "build_executables": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,40 +37,38 @@ class ConanJBig(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXECUTABLES"] = self.options.build_executables
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["JBIG_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["BUILD_EXECUTABLES"] = self.options.build_executables
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["jbig"]
-        if self.options.shared and self.settings.compiler == "Visual Studio":
+        if self.options.shared and is_msvc(self):
             self.cpp_info.defines = ["_JBIGDLL_"]
 
+        # TODO: to remove in conan v2
         if self.options.build_executables:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -1,0 +1,20 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,7 +58,7 @@ else()
+ endif()
+ 
+ find_package(blaze REQUIRED)
+-find_package(libjpeg-turbo REQUIRED)
++find_package(JPEG REQUIRED MODULE)
+ find_package(cimg REQUIRED)
+ 
+ # Dependencies
+@@ -121,7 +121,7 @@ target_include_directories(
+ # Link dependencies
+ target_link_libraries(${WB_TARGET_NAME} sf_compressor)
+ target_link_libraries(${WB_TARGET_NAME} blaze::blaze)
+-target_link_libraries(${WB_TARGET_NAME} libjpeg-turbo::libjpeg-turbo)
++target_link_libraries(${WB_TARGET_NAME} JPEG::JPEG)
+ target_link_libraries(${WB_TARGET_NAME} cimg::cimg)
+ 
+ # Catch2 installation

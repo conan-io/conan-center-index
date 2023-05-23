@@ -1,9 +1,14 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
-import glob
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeDeps, NMakeToolchain
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.55.0"
 
 
 class FreexlConan(ConanFile):
@@ -11,23 +16,26 @@ class FreexlConan(ConanFile):
     description = "FreeXL is an open source library to extract valid data " \
                   "from within an Excel (.xls) spreadsheet."
     license = ["MPL-1.0", "GPL-2.0-only", "LGPL-2.1-only"]
-    topics = ("conan", "freexl", "excel", "xls")
+    topics = ("excel", "xls")
     homepage = "https://www.gaia-gis.it/fossil/freexl/index"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    _autotools= None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,74 +43,77 @@ class FreexlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("gnu-config/cci.20201022")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+        if not is_msvc(self):
+            self.tool_requires("gnu-config/cci.20210814")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+            deps = NMakeDeps(self)
+            deps.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        if self.settings.compiler == "Visual Studio":
-            self._build_msvc()
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            args = "freexl_i.lib FREEXL_EXPORT=-DDLL_EXPORT" if self.options.shared else "freexl.lib"
+            with chdir(self, self.source_folder):
+                self.run(f"nmake -f makefile.vc {args}")
         else:
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-            autotools = self._configure_autotools()
+            for gnu_config in [
+                self.conf.get("user.gnu-config:config_guess", check_type=str),
+                self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
-    def _build_msvc(self):
-        args = "freexl_i.lib FREEXL_EXPORT=-DDLL_EXPORT" if self.options.shared else "freexl.lib"
-        with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings):
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake -f makefile.vc {}".format(args))
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
-
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            self.copy("freexl.h", dst="include", src=os.path.join(self._source_subfolder, "headers"))
-            self.copy("*.lib", dst="lib", src=self._source_subfolder)
-            self.copy("*.dll", dst="bin", src=self._source_subfolder)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            copy(self, "freexl.h", src=os.path.join(self.source_folder, "headers"), dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", "freexl")
+        suffix = "_i" if is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"freexl{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")

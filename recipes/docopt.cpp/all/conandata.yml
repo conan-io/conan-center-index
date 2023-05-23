@@ -1,20 +1,25 @@
 sources:
-  "0.6.2":
-    url: "https://github.com/docopt/docopt.cpp/archive/v0.6.2.tar.gz"
-    sha256: "c05542245232420d735c7699098b1ea130e3a92bade473b64baf876cdf098a17"
   "0.6.3":
     url: "https://github.com/docopt/docopt.cpp/archive/v0.6.3.tar.gz"
     sha256: "28af5a0c482c6d508d22b14d588a3b0bd9ff97135f99c2814a5aa3cbff1d6632"
-patches:
   "0.6.2":
-    - patch_file: "patches/include-stdexcept.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/cmake-library-0.6.2.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/msvc-dll-export-0.6.2.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/docopt/docopt.cpp/archive/v0.6.2.tar.gz"
+    sha256: "c05542245232420d735c7699098b1ea130e3a92bade473b64baf876cdf098a17"
+patches:
   "0.6.3":
     - patch_file: "patches/cmake-library-0.6.3.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
     - patch_file: "patches/msvc-dll-export-0.6.3.patch"
-      base_path: "source_subfolder"
+      patch_description: "export ostream<< to dll"
+      patch_type: "portability"
+  "0.6.2":
+    - patch_file: "patches/include-stdexcept.patch"
+      patch_description: "include stdexcept"
+      patch_type: "portability"
+    - patch_file: "patches/cmake-library-0.6.2.patch"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
+    - patch_file: "patches/msvc-dll-export-0.6.2.patch"
+      patch_description: "export ostream<< to dll"
+      patch_type: "portability"

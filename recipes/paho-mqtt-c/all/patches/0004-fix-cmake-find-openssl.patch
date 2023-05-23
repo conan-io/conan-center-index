@@ -1,14 +1,5 @@
-From 3deb6cb1fe233e321b32d86b17016122d6f82ee7 Mon Sep 17 00:00:00 2001
-From: Chris Mc <prince.chrismc@gmail.com>
-Date: Mon, 19 Apr 2021 22:14:02 -0400
-Subject: [PATCH] to allow linking with openssl on windows since it overrides the path
-
----
- src/CMakeLists.txt | 27 ++++-----------------------
- 1 file changed, 4 insertions(+), 23 deletions(-)
-
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index b46eaca0..93ade4fb 100644
+index 399b37d..55fee4f 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -108,29 +108,10 @@ INSTALL(FILES MQTTAsync.h MQTTClient.h MQTTClientPersistence.h MQTTProperties.h
@@ -38,10 +29,19 @@ index b46eaca0..93ade4fb 100644
 -        HINTS ${OPENSSL_SEARCH_PATH}/lib ${OPENSSL_SEARCH_LIB_PATH})
 -    FIND_LIBRARY(OPENSSLCRYPTO_LIB NAMES crypto libcrypto libeay32
 -      	HINTS ${OPENSSL_SEARCH_PATH}/lib ${OPENSSL_SEARCH_LIB_PATH})
-+    find_package(OpenSSL REQUIRED)
++    find_package(OpenSSL REQUIRED CONFIG)
 +    
 +    SET(OPENSSL_LIB ${OPENSSL_SSL_LIBRARY})
 +    SET(OPENSSLCRYPTO_LIB ${OPENSSL_CRYPTO_LIBRARY})
  
      MESSAGE(STATUS "OpenSSL hints: ${OPENSSL_SEARCH_PATH}")
      MESSAGE(STATUS "OpenSSL headers found at ${OPENSSL_INCLUDE_DIR}")
+@@ -151,6 +132,8 @@ IF (PAHO_WITH_SSL)
+ 
+     TARGET_LINK_LIBRARIES(paho-mqtt3cs ${OPENSSL_LIB} ${OPENSSLCRYPTO_LIB} ${LIBS_SYSTEM})
+     TARGET_LINK_LIBRARIES(paho-mqtt3as ${OPENSSL_LIB} ${OPENSSLCRYPTO_LIB} ${LIBS_SYSTEM})
++    target_link_directories(paho-mqtt3cs PRIVATE "${OPENSSL_ROOT_DIR}/lib")
++    target_link_directories(paho-mqtt3as PRIVATE "${OPENSSL_ROOT_DIR}/lib")
+     SET_TARGET_PROPERTIES(
+         paho-mqtt3cs paho-mqtt3as PROPERTIES
+         VERSION ${CLIENT_VERSION}

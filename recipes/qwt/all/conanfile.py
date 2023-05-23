@@ -1,20 +1,27 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
-from conans import ConanFile, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
+
 
 class QwtConan(ConanFile):
     name = "qwt"
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qwt.sourceforge.io/"
-    topics = ("conan", "archive", "compression")
+    topics = ("archive", "compression")
     description = (
         "The Qwt library contains GUI Components and utility classes which are primarily useful for programs "
         "with a technical background. Beside a framework for 2D plots it provides scales, sliders, dials, compasses, "
         "thermometers, wheels and knobs to control or display values, arrays, or ranges of type double."
     )
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,29 +29,22 @@ class QwtConan(ConanFile):
         "widgets": [True, False],
         "svg": [True, False],
         "opengl": [True, False],
-        "mathml": [True, False],
-        "designer": [True, False]
+        "designer": [True, False],
+        "polar": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "plot": True,
         "widgets": True,
+        "svg": False,
         "opengl": True,
-        "designer": True,
-        "mathml": False,
-        "svg": False
-
+        "designer": False,
+        "polar": True,
     }
-    generators = "qmake"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-    
-    def build_requirements(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self.build_requires("jom/1.1.3")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,76 +52,104 @@ class QwtConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.2")
+        self.requires("qt/5.15.7")
+
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
+        qt_options = self.dependencies["qt"].options
+        if self.info.options.widgets and not qt_options.widgets:
+            raise ConanInvalidConfiguration("qwt:widgets=True requires qt:widgets=True")
+        if self.info.options.svg and not qt_options.qtsvg:
+            raise ConanInvalidConfiguration("qwt:svg=True requires qt:qtsvg=True")
+        if self.info.options.opengl and qt_options.opengl == "no":
+            raise ConanInvalidConfiguration("qwt:opengl=True is not compatible with qt:opengl=no")
+        if self.info.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
+            raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            self.tool_requires("qt/5.15.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _patch_qwt_config_files(self):
-        # qwtconfig.pri
-        qwtconfig_path = os.path.join(self.source_folder, self._source_subfolder, "qwtconfig.pri")
-        qwtconfig = tools.load(qwtconfig_path)
+    def generate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            env = VirtualBuildEnv(self)
+            env.generate()
+        else:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
-        qwtconfig = "CONFIG += conan_basic_setup\ninclude(../conanbuildinfo.pri)\n" + qwtconfig
-        qwtconfig += "QWT_CONFIG {}= QwtDll\n".format("+" if self.options.shared else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtPlot\n".format("+" if self.options.plot else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtWidgets\n".format("+" if self.options.widgets else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtSvg\n".format("+" if self.options.svg else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtOpenGL\n".format("+" if self.options.opengl else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtMathML\n".format("+" if self.options.mathml else "-")
-        qwtconfig += "QWT_CONFIG {}= QwtDesigner\n".format("+" if self.options.designer else "-")
-        tools.save(qwtconfig_path, qwtconfig)
+        tc = CMakeToolchain(self)
+        tc.variables["QWT_DLL"] = self.options.shared
+        tc.variables["QWT_STATIC "] = not self.options.shared
+        tc.variables["QWT_PLOT"] = self.options.plot
+        tc.variables["QWT_WIDGETS"] = self.options.widgets
+        tc.variables["QWT_SVG"] = self.options.svg
+        tc.variables["QWT_OPENGL"] =self.options.opengl
+        tc.variables["QWT_DESIGNER"] = self.options.designer
+        tc.variables["QWT_POLAR"] = self.options.polar
+        tc.variables["QWT_BUILD_PLAYGROUND"] = False
+        tc.variables["QWT_BUILD_EXAMPLES"] = False
+        tc.variables["QWT_BUILD_TESTS"] = False
+        tc.variables["QWT_FRAMEWORK"] = False
+        tc.variables["CMAKE_INSTALL_DATADIR"] = "res"
+        tc.generate()
 
-        # qwtbuild.pri
-        qwtbuild_path = os.path.join(self.source_folder, self._source_subfolder, "qwtbuild.pri")
-        qwtbuild = tools.load(qwtbuild_path)
-        # set build type
-        qwtbuild += "CONFIG -= debug_and_release\n"
-        qwtbuild += "CONFIG -= build_all\n"
-        qwtbuild += "CONFIG -= release\n"
-        qwtbuild += "CONFIG += {}\n".format("debug" if self.settings.build_type == "Debug" else "release")
-        if self.settings.build_type == "RelWithDebInfo":
-            qwtbuild += "CONFIG += force_debug_info\n"
-        tools.save(qwtbuild_path, qwtbuild)
-
-    def _patch_qmake_generator_files(self):
-        # Work around the qmake generator bug (https://github.com/conan-io/conan/pull/9568) which
-        # causes exe linker flags to be set on DLL, causing link failure.
-        if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self.build_folder, "conanbuildinfo.pri"), "CONAN_QMAKE_LFLAGS += -ENTRY:mainCRTStartup", "", strict=False)
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_qwt_config_files()
-        self._patch_qmake_generator_files()
-
-        if self.settings.compiler == "Visual Studio":
-            vcvars = tools.vcvars_command(self.settings)
-            self.run("{} && qmake {}".format(vcvars, self._source_subfolder), run_environment=True)
-            self.run("{} && jom".format(vcvars))
-        else:
-            self.run("qmake {}".format(self._source_subfolder), run_environment=True)
-            self.run("make -j {}".format(tools.cpu_count()))
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=os.path.join(self._source_subfolder), dst="licenses")
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "src"))
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        postfix = ""
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                postfix += "d"
-            elif self.settings.os == "Macos":
-                postfix += "_debug"
-        self.cpp_info.libs = ["qwt" + postfix]
-        self.env_info.QT_PLUGIN_PATH.append(os.path.join(self.package_folder, 'bin'))
-        self.env_info.QT_PLUGIN_PATH.append(os.path.join(self.package_folder, 'lib'))
-        self.cpp_info.defines = ['HAVE_QWT', 'QWT_DLL'] if self.options.shared else ['HAVE_QWT']
+        self.cpp_info.libs = ["qwt"]
+        self.cpp_info.requires = ["qt::qtCore", "qt::qtConcurrent", "qt::qtPrintSupport"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("QWT_DLL")
+        if not self.options.plot:
+            self.cpp_info.defines.append("NO_QWT_PLOT")
+        if not self.options.polar:
+            self.cpp_info.defines.append("NO_QWT_POLAR")
+        if self.options.widgets:
+            self.cpp_info.requires.append("qt::qtWidgets")
+        else:
+            self.cpp_info.defines.append("NO_QWT_WIDGETS")
+        if self.options.opengl:
+            self.cpp_info.requires.append("qt::qtOpenGL")
+            if Version(self.dependencies["qt"].ref.version).major >= "6":
+                self.cpp_info.requires.append("qt::qtOpenGLWidgets")
+        else:
+            self.cpp_info.defines.append("QWT_NO_OPENGL")
+        if self.options.svg:
+            self.cpp_info.requires.append("qt::qtSvg")
+        else:
+            self.cpp_info.defines.append("QWT_NO_SVG")
+
+        if self.options.designer:
+            qt_plugin_path = os.path.join(
+                self.package_folder, "res" if self.settings.os == "Windows" else "lib",
+                f"qt{Version(self.dependencies['qt'].ref.version).major}", "plugins",
+            )
+            self.runenv_info.prepend_path("QT_PLUGIN_PATH", qt_plugin_path)
+
+            # TODO: to remove in conan v2
+            self.env_info.QT_PLUGIN_PATH.append(qt_plugin_path)

@@ -1,5 +1,19 @@
+# Conan specific
+**/test_package/build/
+**/test_package/build-*/
+**/test_package/test_output/
+conan.lock
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
+build/
+
+# CMake
+CMakeUserPresets.json
+
 # IDEs
 .idea
+.vs
 .vscode
 .project
 .pydevproject
@@ -9,12 +23,9 @@
 ## emacs
 *~
 
-
 # Byte-compiled / optimized / DLL files / Cache
 __pycache__/
-test_package/__pycache__/
-test_package/build/
-build/
+**/test_package/__pycache__/
 *.pyc
 *.py[cod]
 *$py.class
@@ -120,3 +131,10 @@ venv.bak/
 
 # scons build files
 *.dblite
+
+# vim temp files
+.*.sw?
+.sw?
+Session.vim
+*~
+.undodir

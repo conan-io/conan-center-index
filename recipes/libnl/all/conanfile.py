@@ -8,14 +8,14 @@ required_conan_version = ">=1.33.0"
 class LibNlConan(ConanFile):
     name = "libnl"
     description = "A collection of libraries providing APIs to netlink protocol based Linux kernel interfaces."
-    topics = "conan", "netlink"
+    topics = ("netlink")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.infradead.org/~tgr/libnl/"
     license = "LGPL-2.1-only"
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": False}
-    build_requires = ( "flex/2.6.4", "bison/3.5.3" )
+    build_requires = ( "flex/2.6.4", "bison/3.7.6" )
 
     _autotools = None
 
@@ -27,13 +27,14 @@ class LibNlConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Libnl is only supported on Linux")
-
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Libnl is only supported on Linux")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -63,10 +64,14 @@ class LibNlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def package_info(self):
         self.cpp_info.components["nl"].libs = ["nl-3"]
         self.cpp_info.components["nl"].includedirs = [os.path.join('include', 'libnl3')]
-        if not tools.os_info.is_windows:
+        if self._settings_build.os != "Windows":
             self.cpp_info.components["nl"].system_libs = ["pthread", "m"]
         self.cpp_info.components["nl-route"].libs = ["nl-route-3"]
         self.cpp_info.components["nl-route"].requires = ["nl"]

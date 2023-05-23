@@ -1,14 +1,22 @@
-from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches, rmdir, rm
+from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.build import cross_building
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class Mpg123Conan(ConanFile):
     name = "mpg123"
     description = "Fast console MPEG Audio Player and decoder library"
-    topics = ("conan", "mpg123", "mpeg", "audio", "player", "decoder")
+    topics = ("mpeg", "audio", "player", "decoder")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpg123.org/"
     license = "LGPL-2.1-or-later", "GPL-2.0-or-later"
@@ -25,7 +33,7 @@ class Mpg123Conan(ConanFile):
         "layer2": [True, False],
         "layer3": [True, False],
         "moreinfo": [True, False],
-        "seektable": "ANY",
+        "seektable": [None, "ANY"],
         "module": ["dummy", "libalsa", "tinyalsa", "win32"],
     }
     default_options = {
@@ -43,56 +51,10 @@ class Mpg123Conan(ConanFile):
         "seektable": "1000",
         "module": "dummy",
     }
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "pkg_config", "cmake_find_package"
-
-    _autotools = None
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        if self.options.module == "libalsa":
-            self.requires("libalsa/1.2.4")
-        if self.options.module == "tinyalsa":
-            self.requires("tinyalsa/1.1.1")
-
-    def validate(self):
-        try:
-            int(self.options.seektable)
-        except ValueError:
-            raise ConanInvalidConfiguration("seektable must be an integer")
-        if self.settings.os != "Windows":
-            if self.options.module == "win32":
-                raise ConanInvalidConfiguration("win32 is an invalid module for non-Windows os'es")
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
-        if self.settings.arch in ["x86", "x86_64"]:
-            self.build_requires("yasm/1.3.0")
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _audio_module(self):
@@ -100,95 +62,157 @@ class Mpg123Conan(ConanFile):
             "libalsa": "alsa",
         }.get(str(self.options.module), str(self.options.module))
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-moreinfo={}".format(yes_no(self.options.moreinfo)),
-            "--enable-network={}".format(yes_no(self.options.network)),
-            "--enable-ntom={}".format(yes_no(self.options.flexible_resampling)),
-            "--enable-icy={}".format(yes_no(self.options.icy)),
-            "--enable-id3v2={}".format(yes_no(self.options.id3v2)),
-            "--enable-ieeefloat={}".format(yes_no(self.options.ieeefloat)),
-            "--enable-layer1={}".format(yes_no(self.options.layer1)),
-            "--enable-layer2={}".format(yes_no(self.options.layer2)),
-            "--enable-layer3={}".format(yes_no(self.options.layer3)),
-            "--with-audio={}".format(self._audio_module),
-            "--with-seektable={}".format(self.options.seektable),
-            "--enable-modules=no",
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["NO_MOREINFO"] = not self.options.moreinfo
-        self._cmake.definitions["NETWORK"] = self.options.network
-        self._cmake.definitions["NO_NTOM"] = not self.options.flexible_resampling
-        self._cmake.definitions["NO_ICY"] = not self.options.icy
-        self._cmake.definitions["NO_ID3V2"] = not self.options.id3v2
-        self._cmake.definitions["IEEE_FLOAT"] = self.options.ieeefloat
-        self._cmake.definitions["NO_LAYER1"] = not self.options.layer1
-        self._cmake.definitions["NO_LAYER2"] = not self.options.layer2
-        self._cmake.definitions["NO_LAYER3"] = not self.options.layer3
-        self._cmake.definitions["USE_MODULES"] = False
-        self._cmake.definitions["CHECK_MODULES"] = self._audio_module
-        self._cmake.definitions["WITH_SEEKTABLE"] = self.options.seektable
-        self._cmake.verbose = True
-        self._cmake.parallel = False
-        self._cmake.configure()
-        return self._cmake
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        if is_msvc(self):
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.module == "libalsa":
+            self.requires("libalsa/1.2.7.2")
+        if self.options.module == "tinyalsa":
+            self.requires("tinyalsa/2.0.0")
+
+    def validate(self):
+        if not str(self.options.seektable).isdigit():
+            raise ConanInvalidConfiguration(f"The option -o {self.ref.name}:seektable must be an integer number.")
+        if self.settings.os != "Windows" and self.options.module == "win32":
+            raise ConanInvalidConfiguration(f"The option -o {self.ref.name}:module should not use 'win32' for non-Windows OS")
+
+
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.tool_requires("yasm/1.3.0")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        if is_msvc(self):
+            tc = CMakeToolchain(self)
+            tc.variables["NO_MOREINFO"] = not self.options.moreinfo
+            tc.variables["NETWORK"] = self.options.network
+            tc.variables["NO_NTOM"] = not self.options.flexible_resampling
+            tc.variables["NO_ICY"] = not self.options.icy
+            tc.variables["NO_ID3V2"] = not self.options.id3v2
+            tc.variables["IEEE_FLOAT"] = self.options.ieeefloat
+            tc.variables["NO_LAYER1"] = not self.options.layer1
+            tc.variables["NO_LAYER2"] = not self.options.layer2
+            tc.variables["NO_LAYER3"] = not self.options.layer3
+            tc.variables["USE_MODULES"] = False
+            tc.variables["CHECK_MODULES"] = self._audio_module
+            tc.variables["WITH_SEEKTABLE"] = self.options.seektable
+            tc.generate()
+            tc = CMakeDeps(self)
+            tc.generate()
+        else:
+            yes_no = lambda v: "yes" if v else "no"
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.extend([
+                f"--enable-moreinfo={yes_no(self.options.moreinfo)}",
+                f"--enable-network={yes_no(self.options.network)}",
+                f"--enable-ntom={yes_no(self.options.flexible_resampling)}",
+                f"--enable-icy={yes_no(self.options.icy)}",
+                f"--enable-id3v2={yes_no(self.options.id3v2)}",
+                f"--enable-ieeefloat={yes_no(self.options.ieeefloat)}",
+                f"--enable-layer1={yes_no(self.options.layer1)}",
+                f"--enable-layer2={yes_no(self.options.layer2)}",
+                f"--enable-layer3={yes_no(self.options.layer3)}",
+                f"--with-audio={self._audio_module}",
+                f"--with-default-audio={self._audio_module}",
+                f"--with-seektable={self.options.seektable}",
+                f"--enable-modules=no",
+                f"--enable-shared={yes_no(self.options.shared)}",
+                f"--enable-static={yes_no(not self.options.shared)}",
+            ])
+            if is_apple_os(self):
+                # Needed for fix_apple_shared_install_name invocation in package method
+                tc.extra_cflags = ["-headerpad_max_install_names"]
+            tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
-            cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "ports", "cmake"))
             cmake.build()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
-            cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            cmake = CMake(self)
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "mpg123"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mpg123"
-        self.cpp_info.names["cmake_find_package"] = "MPG123"
-        self.cpp_info.names["cmake_find_package_multi"] = "MPG123"
+        self.cpp_info.set_property("cmake_file_name", "mpg123")
 
         self.cpp_info.components["libmpg123"].libs = ["mpg123"]
-        self.cpp_info.components["libmpg123"].names["pkg_config"] = "libmpg123"
+        self.cpp_info.components["libmpg123"].set_property("pkg_config_name", "libmpg123")
+        self.cpp_info.components["libmpg123"].set_property("cmake_target_name", "MPG123::libmpg123")
+        self.cpp_info.components["libmpg123"].names["cmake_find_package"] = "libmpg123"
+        self.cpp_info.components["libmpg123"].names["cmake_find_package_multi"] = "libmpg123"
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["libmpg123"].defines.append("LINK_MPG123_DLL")
 
         self.cpp_info.components["libout123"].libs = ["out123"]
-        self.cpp_info.components["libout123"].names["pkg_config"] = "libout123"
+        self.cpp_info.components["libout123"].set_property("pkg_config_name", "libout123")
+        self.cpp_info.components["libout123"].set_property("cmake_target_name", "MPG123::libout123")
+        self.cpp_info.components["libout123"].names["cmake_find_package"] = "libout123"
+        self.cpp_info.components["libout123"].names["cmake_find_package_multi"] = "libout123"
         self.cpp_info.components["libout123"].requires = ["libmpg123"]
 
         self.cpp_info.components["libsyn123"].libs = ["syn123"]
-        self.cpp_info.components["libsyn123"].names["pkg_config"] = "libsyn123"
+        self.cpp_info.components["libsyn123"].set_property("pkg_config_name", "libsyn123")
+        self.cpp_info.components["libsyn123"].set_property("cmake_target_name", "MPG123::libsyn123")
+        self.cpp_info.components["libsyn123"].names["cmake_find_package"] = "libsyn123"
+        self.cpp_info.components["libsyn123"].names["cmake_find_package_multi"] = "libsyn123"
         self.cpp_info.components["libsyn123"].requires = ["libmpg123"]
 
         if self.settings.os == "Linux":
             self.cpp_info.components["libmpg123"].system_libs = ["m"]
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.cpp_info.components["libsyn123"].system_libs = ["mvec"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libmpg123"].system_libs = ["shlwapi"]
 
@@ -198,6 +222,13 @@ class Mpg123Conan(ConanFile):
             self.cpp_info.components["libout123"].requires.append("tinyalsa::tinyalsa")
         if self.options.module == "win32":
             self.cpp_info.components["libout123"].system_libs.append("winmm")
+
+
+        # TODO: Remove after Conan 2.x becomes the standard
+        self.cpp_info.filenames["cmake_find_package"] = "mpg123"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mpg123"
+        self.cpp_info.names["cmake_find_package"] = "MPG123"
+        self.cpp_info.names["cmake_find_package_multi"] = "MPG123"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))

@@ -1,0 +1,104 @@
+--- a/gcore/gdal_rat.cpp
++++ b/gcore/gdal_rat.cpp
+@@ -51,7 +51,7 @@
+ #pragma clang diagnostic ignored "-Wdocumentation"
+ #pragma clang diagnostic ignored "-Wold-style-cast"
+ #endif
+-#include "json.h"
++#include <json-c/json.h>
+ #ifdef __clang__
+ #pragma clang diagnostic pop
+ #endif
+--- a/ogr/ogrsf_frmts/geojson/ogresrijsonreader.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogresrijsonreader.cpp
+@@ -37,7 +37,7 @@
+ 
+ #include "cpl_conv.h"
+ #include "cpl_error.h"
+-#include "json.h"
++#include <json-c/json.h>
+ // #include "json_object.h"
+ // #include "json_tokener.h"
+ #include "ogr_api.h"
+--- a/ogr/ogrsf_frmts/geojson/ogrgeojsondatasource.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogrgeojsondatasource.cpp
+@@ -41,7 +41,7 @@
+ #include "cpl_string.h"
+ #include "cpl_vsi.h"
+ #include "cpl_vsi_error.h"
+-#include "json.h"
++#include <json-c/json.h>
+ // #include "json_object.h"
+ #include "gdal_utils.h"
+ #include "gdal.h"
+--- a/ogr/ogrsf_frmts/geojson/ogrgeojsonlayer.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogrgeojsonlayer.cpp
+@@ -38,7 +38,7 @@
+ #  endif
+ #endif  // !DEBUG_VERBOSE
+ 
+-#include <json.h>
++#include <json-c/json.h>
+ 
+ #if !DEBUG_JSON
+ #  ifdef __clang
+--- a/ogr/ogrsf_frmts/geojson/ogrgeojsonreader.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogrgeojsonreader.cpp
+@@ -32,7 +32,7 @@
+ #include "ogrgeojsonreader.h"
+ #include "ogrgeojsonutils.h"
+ #include "ogr_geojson.h"
+-#include <json.h> // JSON-C
++#include <json-c/json.h>
+ 
+ #if (!defined(JSON_C_VERSION_NUM)) || (JSON_C_VERSION_NUM < JSON_C_VER_013)
+ #include <json_object_private.h> // just for sizeof(struct json_object)
+--- a/ogr/ogrsf_frmts/geojson/ogrgeojsonutils.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogrgeojsonutils.cpp
+@@ -32,7 +32,7 @@
+ #include "cpl_port.h"
+ #include "cpl_conv.h"
+ #include "ogr_geometry.h"
+-#include <json.h> // JSON-C
++#include <json-c/json.h>
+ 
+ #include <algorithm>
+ #include <memory>
+--- a/ogr/ogrsf_frmts/geojson/ogrgeojsonwriter.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogrgeojsonwriter.cpp
+@@ -33,13 +33,13 @@
+ #include "ogrgeojsonutils.h"
+ #include "ogr_geojson.h"
+ #include "ogrgeojsonreader.h"
+-#include <json.h>  // JSON-C
++#include <json-c/json.h>
+ 
+ #if (!defined(JSON_C_VERSION_NUM)) || (JSON_C_VERSION_NUM < JSON_C_VER_013)
+ #include <json_object_private.h>
+ #endif
+ 
+-#include <printbuf.h>
++#include <json-c/printbuf.h>
+ #include "ogr_api.h"
+ #include "ogr_p.h"
+ 
+--- a/ogr/ogrsf_frmts/geojson/ogrtopojsonreader.cpp
++++ b/ogr/ogrsf_frmts/geojson/ogrtopojsonreader.cpp
+@@ -30,5 +30,5 @@
+ #include "ogrgeojsonutils.h"
+ #include "ogr_geojson.h"
+-#include <json.h>  // JSON-C
++#include <json-c/json.h>
+ #include "ogr_api.h"
+ 
+--- a/port/cpl_json_header.h
++++ b/port/cpl_json_header.h
+@@ -33,7 +33,7 @@
+ #pragma GCC system_header
+ #endif
+ 
+-#include <json.h>
++#include <json-c/json.h>
+ 
+ #undef json_object_object_foreachC
+ #define json_object_object_foreachC(obj,iter) \

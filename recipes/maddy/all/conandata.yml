@@ -1,0 +1,4 @@
+sources:
+  "1.1.2":
+    sha256: ce66e1ee63bda3a6ab9c814edc0ed818abecca1c2218307ff87fb9ec1fc970fc
+    url: https://github.com/progsource/maddy/archive/refs/tags/1.1.2.tar.gz

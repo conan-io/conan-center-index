@@ -1,26 +1,78 @@
 sources:
-  "0.4.0":
-    url: "https://github.com/uNetworking/uSockets/archive/v0.4.0.tar.gz"
-    sha256: "f9f15b395def578cc79a5b32abc64fa9cff5dac873062911f515b984b90f7cc2"
-  "0.6.0":
-    url: "https://github.com/uNetworking/uSockets/archive/v0.6.0.tar.gz"
-    sha256: "999387d3653b2bc663c34aa7e973358ac4c4897dccd644553a5caab843a978a1"
+  "0.8.5":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.8.5.tar.gz"
+    sha256: "c52c98b7ff2c24534c17ad97d5fea8ca0cb7ff38cc933b8d08bac6e498a2ea6b"
+  "0.8.3":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.8.3.tar.gz"
+    sha256: "2f96a26365b87badbea2360a82521a382c0c3ee2dcf4f32c79b11d0cb1989a53"
+  "0.8.2":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.8.2.tar.gz"
+    sha256: "c17fc99773a30552cdd7741ff98af177eeecb26b89fc38011b430956b3b2eca5"
+  "0.8.1":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.8.1.tar.gz"
+    sha256: "3b33b5924a92577854e2326b3e2d393849ec00beb865a1271bf24c0f210cc1d6"
   "0.7.1":
     url: "https://github.com/uNetworking/uSockets/archive/v0.7.1.tar.gz"
     sha256: "1fdc5376e5ef9acf4fb673fcd5fd191da9b8d59a319e9ec7922872070a3dd21c"
-patches:
-  "0.4.0":
-    - patch_file: "patches/0001-makefile.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-vcxproj.patch"
-      base_path: "source_subfolder"
   "0.6.0":
-    - patch_file: "patches/0001-makefile_0.6.0.patch"
+    url: "https://github.com/uNetworking/uSockets/archive/v0.6.0.tar.gz"
+    sha256: "999387d3653b2bc663c34aa7e973358ac4c4897dccd644553a5caab843a978a1"
+  "0.4.0":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.4.0.tar.gz"
+    sha256: "f9f15b395def578cc79a5b32abc64fa9cff5dac873062911f515b984b90f7cc2"
+patches:
+  "0.8.5":
+    - patch_file: "patches/0001-makefile_0.8.3.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-vcxproj.patch"
+      patch_description: "remove lto options"
+      patch_type: "portability"
+  "0.8.3":
+    - patch_file: "patches/0001-makefile_0.8.3.patch"
       base_path: "source_subfolder"
+      patch_description: "remove lto options"
+      patch_type: "portability"
+  "0.8.2":
+    - patch_file: "patches/0001-makefile_0.8.2.patch"
+      base_path: "source_subfolder"
+      patch_description: "remove lto options"
+      patch_type: "portability"
+    - patch_file: "patches/0002-vcxproj_0.8.1.patch"
+      base_path: "source_subfolder"
+      patch_description: "build static library"
+      patch_type: "conan"
+  "0.8.1":
+    - patch_file: "patches/0001-makefile_0.8.1.patch"
+      base_path: "source_subfolder"
+      patch_description: "remove lto options"
+      patch_type: "portability"
+    - patch_file: "patches/0002-vcxproj_0.8.1.patch"
+      base_path: "source_subfolder"
+      patch_description: "build static library"
+      patch_type: "conan"
   "0.7.1":
     - patch_file: "patches/0001-makefile_0.6.0.patch"
       base_path: "source_subfolder"
+      patch_description: "remove lto options"
+      patch_type: "portability"
     - patch_file: "patches/0002-vcxproj.patch"
       base_path: "source_subfolder"
+      patch_description: "build static library"
+      patch_type: "conan"
+  "0.6.0":
+    - patch_file: "patches/0001-makefile_0.6.0.patch"
+      base_path: "source_subfolder"
+      patch_description: "remove lto options"
+      patch_type: "portability"
+    - patch_file: "patches/0002-vcxproj.patch"
+      base_path: "source_subfolder"
+      patch_description: "build static library"
+      patch_type: "conan"
+  "0.4.0":
+    - patch_file: "patches/0001-makefile.patch"
+      base_path: "source_subfolder"
+      patch_description: "remove lto options"
+      patch_type: "portability"
+    - patch_file: "patches/0002-vcxproj.patch"
+      base_path: "source_subfolder"
+      patch_description: "build static library"
+      patch_type: "conan"

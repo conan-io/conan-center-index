@@ -5,8 +5,5 @@ sources:
 patches:
   "2.4.1.3":
     - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/mingw-support.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/msvc-2015-no-SFINAE.patch"
-      base_path: "source_subfolder"

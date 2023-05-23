@@ -1,13 +1,21 @@
 versions:
-  "2.89":
+  "3.25":
     folder: all
-  "3.06":
+  "3.24":
     folder: all
-  "3.07":
+  "3.22a":
     folder: all
-  "3.08":
+  "3.21":
+    folder: all
+  "3.17":
     folder: all
   "3.09":
     folder: all
-  "3.17":
+  "3.08":
+    folder: all
+  "3.07":
+    folder: all
+  "3.06":
+    folder: all
+  "2.89":
     folder: all

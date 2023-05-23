@@ -1,10 +1,19 @@
 sources:
-  "4.24":
-    sha256: 90a59a0df6a11528749647fe18401cc7e03881e3e63c309f8c520ce06dd413d0
-    url: https://ftp.mozilla.org/pub/nspr/releases/v4.24/src/nspr-4.24.tar.gz
-  "4.27":
-    sha256: 6d495192b6ab00a3c28db053492cf794329f7c0351a5728db198111a1816e89b
-    url: https://ftp.mozilla.org/pub/nspr/releases/v4.27/src/nspr-4.27.tar.gz
+  "4.35":
+    url: "https://ftp.mozilla.org/pub/nspr/releases/v4.35/src/nspr-4.35.tar.gz"
+    sha256: "7ea3297ea5969b5d25a5dd8d47f2443cda88e9ee746301f6e1e1426f8a6abc8f"
+  "4.33":
+    url: "https://ftp.mozilla.org/pub/nspr/releases/v4.33/src/nspr-4.33.tar.gz"
+    sha256: "b23ee315be0e50c2fb1aa374d17f2d2d9146a835b1a79c1918ea15d075a693d7"
+  "4.32":
+    url: "https://ftp.mozilla.org/pub/nspr/releases/v4.32/src/nspr-4.32.tar.gz"
+    sha256: "bb6bf4f534b9559cf123dcdc6f9cd8167de950314a90a88b2a329c16836e7f6c"
   "4.29":
-    sha256: 22286bdb8059d74632cc7c2865c139e63953ecfb33bf4362ab58827e86e92582
-    url: https://ftp.mozilla.org/pub/nspr/releases/v4.29/src/nspr-4.29.tar.gz
+    url: "https://ftp.mozilla.org/pub/nspr/releases/v4.29/src/nspr-4.29.tar.gz"
+    sha256: "22286bdb8059d74632cc7c2865c139e63953ecfb33bf4362ab58827e86e92582"
+  "4.27":
+    url: "https://ftp.mozilla.org/pub/nspr/releases/v4.27/src/nspr-4.27.tar.gz"
+    sha256: "6d495192b6ab00a3c28db053492cf794329f7c0351a5728db198111a1816e89b"
+  "4.24":
+    url: "https://ftp.mozilla.org/pub/nspr/releases/v4.24/src/nspr-4.24.tar.gz"
+    sha256: "90a59a0df6a11528749647fe18401cc7e03881e3e63c309f8c520ce06dd413d0"

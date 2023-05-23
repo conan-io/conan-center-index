@@ -1,0 +1,170 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -333,30 +333,29 @@ set(
+         index.htm
+ )
+ 
+-include_directories(${CMAKE_SOURCE_DIR}/src)
+-
+-if(CMAKE_BUILD_TYPE MATCHES "[dD]ebug")
+-    set(qhull_CPP qhullcpp_d)
+-    set(qhull_SHARED qhull_d) 
+-    set(qhull_SHAREDP qhull_pd)
+-    set(qhull_SHAREDR qhull_rd)
+-    set(qhull_STATIC qhullstatic_d)
+-    set(qhull_STATICR qhullstatic_rd)
+-else()
+-    set(qhull_CPP qhullcpp)
+-    set(qhull_SHARED libqhull)  # Temporarily avoid name conflict with qhull executable
+-    set(qhull_SHAREDP qhull_p)
+-    set(qhull_SHAREDR qhull_r)
+-    set(qhull_STATIC qhullstatic)
+-    set(qhull_STATICR qhullstatic_r)
+-endif()
++include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
++
++set(qhull_CPP qhullcpp)
++set(qhull_SHARED libqhull)  # Temporarily avoid name conflict with qhull executable
++set(qhull_SHAREDP qhull_p)
++set(qhull_SHAREDR qhull_r)
++set(qhull_STATIC qhullstatic)
++set(qhull_STATICR qhullstatic_r)
+ 
++if(BUILD_SHARED_LIBS)
++set(
++    qhull_TARGETS_INSTALL
++        ${qhull_SHAREDR}
++        qhull rbox qconvex qdelaunay qvoronoi qhalf
++        ${qhull_SHARED}
++)
++else()
+ set(
+     qhull_TARGETS_INSTALL
+-        ${qhull_CPP} ${qhull_STATIC} ${qhull_STATICR} ${qhull_SHAREDR}
++        ${qhull_STATIC} ${qhull_STATICR}
+         qhull rbox qconvex qdelaunay qvoronoi qhalf
+-        ${qhull_SHARED} ${qhull_SHAREDP}  # Deprecated, use qhull_r instead
+ )
++endif()
+ set(
+     qhull_TARGETS_TEST   # Unused
+         user_eg user_eg2 user_eg3 user_egp testqset testqset_r
+@@ -371,10 +370,12 @@ add_library(${qhull_SHAREDR} SHARED
+         src/libqhull_r/qhull_r-exports.def)
+ set_target_properties(${qhull_SHAREDR} PROPERTIES
+     SOVERSION ${qhull_SOVERSION}
+-    VERSION ${qhull_VERSION})
++    VERSION ${qhull_VERSION}
++    OUTPUT_NAME "${qhull_SHAREDR}$<$<CONFIG:Debug>:d>")
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHAREDR} m)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHAREDR} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -384,6 +385,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -394,18 +396,15 @@ add_library(${qhull_SHARED} SHARED
+         ${libqhull_SOURCES}
+         src/libqhull/qhull-exports.def)
+         
+-if(qhull_SHARED MATCHES "libqhull")
+-   set(qhull_OUTPUT_NAME qhull)
+-   set_target_properties(${qhull_SHARED} PROPERTIES
+-        OUTPUT_NAME "${qhull_OUTPUT_NAME}" )
+-endif()
+ 
+ set_target_properties(${qhull_SHARED} PROPERTIES
+     SOVERSION ${qhull_SOVERSION}
+-    VERSION ${qhull_VERSION})
++    VERSION ${qhull_VERSION}
++    OUTPUT_NAME "qhull$<$<CONFIG:Debug>:_d>")
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHARED} m)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHARED} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -415,6 +414,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -427,10 +427,12 @@ add_library(${qhull_SHAREDP} SHARED
+ set_target_properties(${qhull_SHAREDP} PROPERTIES
+     COMPILE_DEFINITIONS "qh_QHpointer"
+     SOVERSION ${qhull_SOVERSION}
+-    VERSION ${qhull_VERSION})
++    VERSION ${qhull_VERSION}
++    OUTPUT_NAME "${qhull_SHAREDP}$<$<CONFIG:Debug>:d>")
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_SHAREDP} m)
++    if(0)
+     if(APPLE)
+         set_target_properties(${qhull_SHAREDP} PROPERTIES 
+             INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+@@ -440,6 +442,7 @@ if(UNIX)
+             INSTALL_RPATH_USE_LINK_PATH TRUE
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
++    endif()
+ endif(UNIX)
+ 
+ # ---------------------------------------
+@@ -448,11 +451,13 @@ endif(UNIX)
+ 
+ add_library(${qhull_STATIC} STATIC ${libqhull_SOURCES})
+ set_target_properties(${qhull_STATIC} PROPERTIES
+-    VERSION ${qhull_VERSION})
++    VERSION ${qhull_VERSION}
++    OUTPUT_NAME "${qhull_STATIC}$<$<CONFIG:Debug>:_d>")
+ 
+ add_library(${qhull_STATICR} STATIC ${libqhullr_SOURCES})
+ set_target_properties(${qhull_STATICR} PROPERTIES
+-    VERSION ${qhull_VERSION})
++    VERSION ${qhull_VERSION}
++    OUTPUT_NAME "${qhull_STATICR}$<$<CONFIG:Debug>:d>")
+ 
+ if(UNIX)
+     target_link_libraries(${qhull_STATIC} m)
+@@ -466,7 +471,8 @@ endif(UNIX)
+ 
+ add_library(${qhull_CPP} STATIC ${libqhullcpp_SOURCES})
+ set_target_properties(${qhull_CPP} PROPERTIES
+-    VERSION ${qhull_VERSION})
++    VERSION ${qhull_VERSION}
++    OUTPUT_NAME "${qhull_CPP}$<$<CONFIG:Debug>:_d>")
+ 
+ # ---------------------------------------
+ # Define qhull executables linked to qhullstatic library
+@@ -619,6 +625,7 @@ add_test(NAME user_eg3
+ 
+ install(TARGETS ${qhull_TARGETS_INSTALL} EXPORT QhullTargets
+         RUNTIME DESTINATION ${BIN_INSTALL_DIR}
++        BUNDLE DESTINATION ${BIN_INSTALL_DIR}
+         LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+         ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+         INCLUDES DESTINATION include)
+@@ -661,10 +668,7 @@ install(
+ )
+ 
+ install(FILES ${libqhull_HEADERS}    DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull)
+-install(FILES ${libqhull_DOC}        DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull)
+ install(FILES ${libqhullr_HEADERS}    DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull_r)
+-install(FILES ${libqhullr_DOC}        DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull_r)
+-install(FILES ${libqhullcpp_HEADERS} DESTINATION ${INCLUDE_INSTALL_DIR}/libqhullcpp)
+ install(FILES html/qhull.man         DESTINATION ${MAN_INSTALL_DIR} RENAME qhull.1)
+ install(FILES html/rbox.man          DESTINATION ${MAN_INSTALL_DIR} RENAME rbox.1)
+ install(FILES ${doc_FILES}           DESTINATION ${DOC_INSTALL_DIR})

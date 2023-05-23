@@ -5,4 +5,3 @@ sources:
 patches:
   "20191207":
     - patch_file: "patches/fix-cmake-files.patch"
-      base_path: "source_subfolder"

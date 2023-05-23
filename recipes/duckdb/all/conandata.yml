@@ -1,0 +1,39 @@
+sources:
+  "0.7.1":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.7.1.tar.gz"
+    sha256: "67f840f861e5ffbe137d65a8543642d016f900b89dd035492d562ad11acf0e1e"
+  "0.6.1":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.6.1.tar.gz"
+    sha256: "ea9bba89ae3e461f3fc9f83911b2f3b6c386c23463bcf7b1ed6bb4cc13e822a4"
+  "0.6.0":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.6.0.tar.gz"
+    sha256: "700b09114f8b99892a9d19ba21ca962ae65d1ea8085622418a2fa50ff915b244"
+  "0.5.1":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.5.1.tar.gz"
+    sha256: "3dab7ba0d0f8d024d3c73fd3d4fb8834203c31d7b0ddb1e8539ee266e11b0e9b"
+patches:
+  "0.7.1":
+    - patch_file: "patches/0.7.0-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/0.6.0-0002-include-stdlib.patch"
+      patch_description: "include stdlib for abort function"
+      patch_type: "portability"
+  "0.6.1":
+    - patch_file: "patches/0.6.0-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/0.6.0-0002-include-stdlib.patch"
+      patch_description: "include stdlib for abort function"
+      patch_type: "portability"
+  "0.6.0":
+    - patch_file: "patches/0.6.0-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/0.6.0-0002-include-stdlib.patch"
+      patch_description: "include stdlib for abort function"
+      patch_type: "portability"
+  "0.5.1":
+    - patch_file: "patches/0.5.1-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"

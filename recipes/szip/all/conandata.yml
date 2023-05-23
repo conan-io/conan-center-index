@@ -5,6 +5,4 @@ sources:
 patches:
   "2.1.1":
     - patch_file: "patches/fix_unknown_size_t.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/build_either_static_or_shared.patch"
-      base_path: "source_subfolder"

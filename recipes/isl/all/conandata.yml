@@ -1,7 +1,10 @@
 sources:
+  "0.24":
+    url: "https://libisl.sourceforge.io/isl-0.24.tar.gz"
+    sha256: "26e6e4d60ad59b3fff9948eb36743f0c874e124e410ef5bab930d0f546bc580d"
   "0.23":
-    url: "http://isl.gforge.inria.fr/isl-0.23.tar.gz"
+    url: "https://libisl.sourceforge.io/isl-0.23.tar.gz"
     sha256: "19e77cb562ab3da5a37f263208d6f902ae3a9d52c756bf6eb1a6b2f8a74b883c"
   "0.22":
-    url: "http://isl.gforge.inria.fr/isl-0.22.tar.gz"
+    url: "https://libisl.sourceforge.io/isl-0.22.tar.gz"
     sha256: "d0c6714e4427d3eb964388afe526a8e0f69687da7e944f1ad66ffa639923be46"

@@ -5,6 +5,9 @@ sources:
   "2020.08.10.00":
     url: "https://github.com/facebook/folly/archive/v2020.08.10.00.tar.gz"
     sha256: "e81140d04a4e89e3f848e528466a9b3d3ae37d7eeb9e65467fca50d70918eef6"
+  "2022.01.31.00":
+    url: "https://github.com/facebook/folly/archive/v2022.01.31.00.tar.gz"
+    sha256: "d764b9a7832d967bb7cfea4bcda15d650315aa4d559fde1da2a52b015cd88b9c"
 patches:
   "2019.10.21.00":
     - patch_file: "patches/0001-find-packages.patch"
@@ -23,6 +26,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0013-include-bit.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0020-include-ssizet.patch"
+      base_path: "source_subfolder"
   "2020.08.10.00":
     - patch_file: "patches/0008-find-packages.patch"
       base_path: "source_subfolder"
@@ -37,4 +42,15 @@ patches:
     - patch_file: "patches/0014-find-librt.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0015-benchmark-format-macros.patch"
+      base_path: "source_subfolder"
+  "2022.01.31.00":
+    - patch_file: "patches/0016-find-packages.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0017-compiler-flags.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0018-find-glog.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0019-exclude-example.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0022-fix-windows-minmax.patch"
       base_path: "source_subfolder"

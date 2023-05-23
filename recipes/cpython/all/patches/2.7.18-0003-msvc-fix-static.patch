@@ -1,0 +1,11 @@
+--- PC/dl_nt.c
++++ PC/dl_nt.c
+@@ -107,5 +107,7 @@
+     }
+     return TRUE;
+ }
+-
++#else
++ULONG_PTR _Py_ActivateActCtx() { return 0; }
++void _Py_DeactivateActCtx(ULONG_PTR cookie) {}
+ #endif /* Py_ENABLE_SHARED */

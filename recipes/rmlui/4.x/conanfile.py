@@ -9,8 +9,8 @@ class RmluiConan(ConanFile):
     homepage = "https://github.com/mikke89/RmlUi"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    topics = ("conan", "css", "gui", "html", "lua", "rmlui")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("css", "gui", "html", "lua", "rmlui")
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "enable_rtti_and_exceptions": [True, False],
         "font_interface": ["freetype", None],
@@ -29,7 +29,7 @@ class RmluiConan(ConanFile):
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
-    build_requires = ["cmake/3.20.0"]
+    build_requires = ["cmake/3.23.2"]
     exports_sources = ["CMakeLists.txt"]
     generators = ["cmake", "cmake_find_package"]
 
@@ -79,7 +79,7 @@ class RmluiConan(ConanFile):
 
     def requirements(self):
         if self.options.font_interface == "freetype":
-            self.requires("freetype/2.10.1")
+            self.requires("freetype/2.10.4")
 
         if self.options.with_lua_bindings:
             self.requires("lua/5.3.5")

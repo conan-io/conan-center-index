@@ -1,23 +1,33 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class EnetConan(ConanFile):
     name = "enet"
     description = "ENet reliable UDP networking library"
-    topics = ("conan", "enet", "udp", "networking")
+    topics = ("udp", "networking")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lsalzman/enet"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -25,36 +35,37 @@ class EnetConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="*", dst="include", src=include_folder)
-        self.copy(pattern="*.lib", dst="lib", src="lib", keep_path=False)
-        self.copy(pattern="*.a", dst="lib", src="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src="lib", keep_path=False, symlinks=True)
-        self.copy(pattern="*.dll", dst="bin", src="bin", keep_path=False)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libenet"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", "libenet")
+        self.cpp_info.libs = ["enet"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "winmm"])
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             self.cpp_info.defines.append("ENET_DLL")

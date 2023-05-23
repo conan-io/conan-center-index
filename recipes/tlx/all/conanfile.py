@@ -1,8 +1,11 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class TlxConan(ConanFile):
@@ -10,10 +13,11 @@ class TlxConan(ConanFile):
     description = "tlx is a collection of C++ helpers and extensions " \
                   "universally needed, but not found in the STL."
     license = "BSL-1.0"
-    topics = ("tlx", "data-structure", "algorithm")
+    topics = ("data-structure", "algorithm")
     homepage = "https://github.com/tlx/tlx"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,13 +29,8 @@ class TlxConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,81 +38,80 @@ class TlxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["TLX_BUILD_TESTS"] = False
+        tc.variables["TLX_USE_GCOV"] = False
+        tc.variables["TLX_TRY_COMPILE_HEADERS"] = False
+        tc.variables["TLX_MORE_TESTS"] = False
+        tc.variables["TLX_BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["TLX_BUILD_SHARED_LIBS"] = self.options.shared
+        # For msvc shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # Do not force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "-fPIC", "")
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["TLX_BUILD_TESTS"] = False
-        self._cmake.definitions["TLX_USE_GCOV"] = False
-        self._cmake.definitions["TLX_TRY_COMPILE_HEADERS"] = False
-        self._cmake.definitions["TLX_MORE_TESTS"] = False
-        self._cmake.definitions["TLX_BUILD_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["TLX_BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-fPIC", "")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"tlx": "tlx::tlx"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
-    @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "tlx"
-        self.cpp_info.names["cmake_find_package_multi"] = "tlx"
-        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.set_property("cmake_file_name", "tlx")
+        self.cpp_info.set_property("cmake_target_name", "tlx")
+        self.cpp_info.set_property("pkg_config_name", "tlx")
+        self.cpp_info.libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["m", "pthread"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "tlx"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")

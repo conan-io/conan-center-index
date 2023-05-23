@@ -13,14 +13,12 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Avoiding conflicts](#avoiding-conflicts)
   * [Draft](#draft)
   * [Getting your pull request reviewed](#getting-your-pull-request-reviewed)
-    * [Official reviewers](#official-reviewers)
-    * [Community reviewers](#community-reviewers)
-    * [Rule of 3 reviews](#rule-of-3-reviews)
+    * [Rule of 2 reviews](#rule-of-2-reviews)
     * [Reviews from others](#reviews-from-others)
     * [Addressing review comments](#addressing-review-comments)
   * [Automatic Merges](#automatic-merges)
     * [Merge](#merge)
-    * [Upload](#upload)
+    * [Package available to consume](#package-available-to-consume)
     * [Updating web front end](#updating-web-front-end)
   * [Stale PRs](#stale-prs)<!-- endToc -->
 
@@ -38,7 +36,7 @@ In general, reviews are driven by the automated [bot](https://github.com/conan-c
 ## Green build
 
 The first important prerequisite is ensuring your PR is green (build is successful).
-It requires a bit of patience, because there are many PRs are running, and we're building a lot of configurations for a numerous versions of libraries.
+It requires a bit of patience, because there are many PRs running and we're building a lot of configurations for a numerous versions of libraries.
 Keep attention to the error messages from the bot, and address all the build failures.
 The bot tries to provide all the helpful information needed to understand and reproduce an issue, such as:
 
@@ -51,69 +49,46 @@ If you struggle to fix build errors yourself, you may want to ask for help from 
 ### Unexpected error
 
 Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
-Keep in mind conan-center-index is still _under development_, and there can be some instabilities. Especially, as we're using lots of external services,
-which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
-So, what to do once `Unexpected error` was encountered? You may consider re-running the build by closing your pull request, waiting 15 seconds, and then re-opening it again.
 
-Sometimes it's necessary to restart the build several times.
-If an `Unexpected error` persists, tag [@jgsogo](https://github.com/jgsogo) and [@danimtb](https://github.com/danimtb) asking for the help with CI.
-Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-index/issues/new/choose).
+To learn more, checkout the [label definition](labels.md#unexpected-error).
 
 ## Avoiding conflicts
 
-It's recommended to rebase your changes on top of the master branch to avoid conflicts.
-Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts.
-Obviously, PRs that have merge conflicts are never merged, and all the conflicts have to be resolved first.
+Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts. Pull Requests that have merge conflicts can't be merged, and all the conflicts have to be resolved first.
+
+Please [synchronize your branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to take into account the latest changes in the main branch. This is important for ConanCenter to ensure it is building the correct recipe revision, see [this comment](https://github.com/conan-io/conan-center-index/pull/8797#discussion_r781993233) for details. One trick is to look out for comments from the [Community's Conflict PR Bot](https://github.com/prince-chrismc/conan-center-index/blob/patch-41/docs/community_resources.md#bots) which can anticipate possible problems.
 
 ## Draft
 
-Draft pull requests are also never merged. The same applies for PRs with the `WIP` keyword (stands for `Work in Progress`) in the title - GitHub considers them drafts as well.
+Draft pull requests are also never merged, and they won't likely be reviewed.
 Once you're done with your changes, remember to convert from "Draft" to "Normal" pull request.
 
 ## Getting your pull request reviewed
 
-Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from random people, we have two categories of reviewers:
+Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from anyone, we have two categories of reviewers:
 
-### Official reviewers
+- Official reviewers: these are active team members who are responsible for developing Conan, ConanCenter, and ConanCenterIndex.
+- Community reviewers: this list includes former Conan team members and ConanCenterIndex contributors who are very active and proven to be trusted - they frequently submit pull requests and provide their own useful reviews
 
-The list includes only official Conan developers:
+The list or reviewers, located [here](../.c3i/reviewers.yml),
+is not constant and will change periodically based on contribution.
+That also means **you can be included in this list** as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
 
-- [@memsharded](https://github.com/memsharded)
-- [@lasote](https://github.com/lasote)
-- [@danimtb](https://github.com/danimtb)
-- [@jgsogo](https://github.com/jgsogo)
-- [@czoido](https://github.com/czoido)
-- [@solvingj](https://github.com/solvingj)
-- [@sse4](https://github.com/sse4)
-- [@uilianries](https://github.com/uilianries)
+> **Note**: GitHubs user interface does not support such custom rules so you should not rely solely on the message it provides.
 
-### Community reviewers
+### Rule of 2 reviews
 
-The list includes conan-center-index contributors who are very active and proven to be trusted - they frequently submitted pull requests and provide their own useful reviews:
-
-- [@madebr](https://github.com/madebr)
-- [@SpaceIm](https://github.com/SpaceIm)
-- [@ericLemanissier](https://github.com/ericLemanissier)
-- [@prince-chrismc](https://github.com/prince-chrismc)
-- [@Croydon](https://github.com/Croydon)
-- [@intelligide](https://github.com/intelligide)
-- [@theirix](https://github.com/theirix)
-- [@gocarlos](https://github.com/gocarlos)
-- [@mathbunnyru](https://github.com/mathbunnyru)
-- [@ericriff](https://github.com/ericriff)
-
-The list is not constant and will change periodically based on contribution.
-That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
-
-### Rule of 3 reviews
-
-At least 3 reviews are required for an approval, and at least one of them has to be from the official reviewers.
-So, it might be 1 official + 2 community, or 3 official, but it couldn't be just 3 community reviews.
+At least 2 approving reviews are required, and at least one of them has to be from the official reviewers.
+So, it might be 1 official + 1 community, or 2 official, but it couldn't be just 2 community reviews.
 Approvals are only counted if they are associated with the latest commit in the PR, while "Change requested" ones (from the Conan team) will persist even if there are new commits. Don't hesitate to dismiss old reviews if the issues have already been addressed.
+
+> **Note** Pull requests labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
+> or [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+) are merged by
+> the bot without requiring any approval.
 
 ### Reviews from others
 
-All reviews are still valuable and very helpful. Even if you're not listed as an official or community reviewer counted by the bot, your reviews are still welcome, so please do not hesitate to provide them.
+All reviews are still valuable and very helpful. Even if you're not listed as an official or community reviewer, **your reviews are very welcome**, so please do not hesitate to provide them.
 
 ### Addressing review comments
 
@@ -122,32 +97,36 @@ It doesn't always mean accepting all the suggestions, but at least providing a r
 
 ## Automatic Merges
 
-The bot runs Automatic Merges every 30 minutes. Currently, it can only merge a single PR in this timeframe, so there is a theoretical limit of 48 PRs merged per day (in practice, it's even less for reasons listed below).
+The bot runs Automatic Merges every 20 minutes. Currently, it can only merge a single PR in this timeframe, so there is a theoretical limit of ~70 PRs merged per day (in practice, it's even less for reasons listed below).
 PR is selected for the merge only if:
 
 - Author is already [approved](https://github.com/conan-io/conan-center-index/issues/4).
-- Author has signed CLA.
-- PR is not a Draft or WIP.
+- Author has signed the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md).
+- PR is not a Draft.
 - PR has a green status (successful build).
 - PR doesn't have merge conflicts with `master` branch.
-- PR has 3 approved reviews (as described above).
+- PR has approved reviews (as described above).
 - PR does not have any [official reviewers](#official-reviewers) requesting changes
 - Master build is not running already (see below)
 
-If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of master is launched.
+If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of `master` is launched.
+
+The conan-center-bot will perform a [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). You don't need to rebase
+your pull request, we ask you not to do it because it will dismiss any reviews and the reviewer will need to restart.
 
 ### Merge
 
-After merging a pull request, if an actual merge happened (for instance, the recipe changed in PR was already updated in master by the time PR merged),
-it will introduce a new recipe revision. Therefore, the build should be run one more time, so the master build is launched.
+After merging a pull request, if an actual merge happened (for instance, the recipe changed in PR was already updated in `master` by the time PR merged),
+it will introduce a new recipe revision. Therefore, the build should be run one more time, so the `master` build is launched.
 In reality this could happen frequently enough if there are multiple PRs aiming to update the same recipe (even if they touch different files in the same recipe).
 Such builds can take hours for big packages (like boost), blocking other merges for a while.
-So we really appreciate it if changes in master to the same recipe are already merged into the proposed PR.
+So we really appreciate it if changes in `master` to the same recipe are already merged into the proposed PR.
 
-### Upload
+### Package available to consume
 
-Even if there is no new revision introduced, CI still needs to publish artifacts from the internal repository to ConanCenter, and it may also take hours for big enough packages.
-This also blocks further merges until upload is finished. It also explains why new packages are not immediately available for consumption after the merge, and there is a grace period to wait for their availability.
+New packages are promoted from the internal repository to ConanCenter. This process is an internal Artifactory promotion that is quite
+fast, nevertheless there are some caches and CDNs that need to be invalidated and propagated before the package is finally available for consumption.
+The process can take several minutes, so please, consider a *grace period* and understand that the package won't be available immediately.
 
 ### Updating web front end
 
@@ -158,4 +137,4 @@ That may explain the fact there are moments when the information showed in the f
 
 ## Stale PRs
 
-Conan Center Index uses [stale bot](https://github.com/probot/stale) to close abandoned pull requests. It's configured by [stale.yml](.github/stale.yml). When a pull request gets stale, we encourage anyone to take ownership of the PR (even submit changes to the author's branch if possible) so existing work doesn't get lost when the pull request is closed without merging.
+Conan Center Index uses [stale bot](https://github.com/probot/stale) to close abandoned pull requests. It's configured by [stale.yml](../.github/stale.yml). When a pull request gets stale, we encourage anyone to take ownership of the PR (even submit changes to the author's branch if possible) so existing work doesn't get lost when the pull request is closed without merging.

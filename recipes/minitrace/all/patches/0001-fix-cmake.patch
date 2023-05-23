@@ -1,0 +1,41 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 06320bb..52c948c 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,11 +1,18 @@
+ cmake_minimum_required(VERSION 3.10)
+ project(minitrace)
+ 
+-add_library(${PROJECT_NAME} STATIC minitrace.c)
++add_library(${PROJECT_NAME} minitrace.c)
+ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+ 
+ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+ 
++set_target_properties(${PROJECT_NAME} PROPERTIES
++    PUBLIC_HEADER minitrace.h
++    WINDOWS_EXPORT_ALL_SYMBOLS ON
++    C_EXTENSIONS OFF
++    C_STANDARD 99
++)
++
+ option(MTR_ENABLED "Enable minitrace" ON)
+ if(MTR_ENABLED)
+     target_compile_definitions(${PROJECT_NAME} PUBLIC MTR_ENABLED)
+@@ -19,4 +26,14 @@ if(MTR_BUILD_TEST)
+     find_package(Threads)
+     add_executable(minitrace_test_mt minitrace_test_mt.cpp)
+     target_link_libraries(minitrace_test_mt ${PROJECT_NAME} Threads::Threads)
+-endif()
+\ No newline at end of file
++endif()
++
++include(GNUInstallDirs)
++
++install(
++    TARGETS ${PROJECT_NAME}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)

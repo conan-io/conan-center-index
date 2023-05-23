@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7ae7f5d..0a5662f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,14 +20,15 @@
+ 
+ # It is a fatal error if no working C compiler is available to build
+ # the shapelib library and utilities
++
++# Version 3.7 or above of cmake is currently required for all platforms.
++cmake_minimum_required(VERSION 3.7)
++
+ project(shapelib C)
+ 
+ message(STATUS "CMake version = ${CMAKE_VERSION}")
+ message(STATUS "CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
+ 
+-# Version 2.8.5 or above of cmake is currently required for all platforms.
+-cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
+-
+ # libraries are all shared by default.
+ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+ 

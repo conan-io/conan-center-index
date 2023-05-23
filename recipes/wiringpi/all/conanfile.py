@@ -1,14 +1,17 @@
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy
 
+required_conan_version = ">=1.53.0"
 
 class WiringpiConan(ConanFile):
     name = "wiringpi"
     license = "LGPL-3.0"
     description = "GPIO Interface library for the Raspberry Pi"
     homepage = "http://wiringpi.com"
-    topics = ("conan", "wiringpi", "gpio", "raspberrypi")
+    topics = ("wiringpi", "gpio", "raspberrypi")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
@@ -19,46 +22,41 @@ class WiringpiConan(ConanFile):
                        "fPIC": True,
                        "wpi_extensions": False,
                        "with_devlib": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+            
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("WiringPi only works for Linux.")
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} only works for Linux")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("WiringPi-final_official_" + self.version, self._source_subfolder)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_WPI_EXTENSIONS"] = self.options.wpi_extensions
-        self._cmake.definitions["WITH_DEV_LIB"] = self.options.with_devlib
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WIRINGPI_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["WIRINGPI_WITH_WPI_EXTENSIONS"] = self.options.wpi_extensions
+        tc.variables["WIRINGPI_WITH_DEV_LIB"] = self.options.with_devlib
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

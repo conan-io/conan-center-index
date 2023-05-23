@@ -1,118 +1,165 @@
-import os
-from conans import tools, ConanFile, CMake
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan import ConanFile
+from conan.tools.files import chdir, copy, rmdir, get, save, load
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.build import build_jobs, cross_building, check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+import os
+import json
+
+required_conan_version = ">=1.51.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
+    package_type = "application"
     description = "Conan installer for CMake"
-    topics = ("conan", "cmake", "build", "installer")
+    topics = ("cmake", "build", "installer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
-    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
         "with_openssl": [True, False],
+        "bootstrap": [True, False],
     }
     default_options = {
         "with_openssl": True,
+        "bootstrap": False,
     }
-
-    _source_subfolder = "source_subfolder"
-    _cmake = None
-
-    def _minor_version(self):
-        return ".".join(str(self.version).split(".")[:2])
 
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
 
-    def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
+    def requirements(self):
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1t")
+
+    def validate_build(self):
+        if self.settings.os == "Windows" and self.options.bootstrap:
+            raise ConanInvalidConfiguration("CMake does not support bootstrapping on Windows")
 
         minimal_cpp_standard = "11"
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
             "gcc": "4.8",
             "clang": "3.3",
             "apple-clang": "9",
             "Visual Studio": "14",
+            "msvc": "190",
         }
 
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
-            self.output.warn(
-                "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
-            self.output.warn(
-                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+            self.output.warning(
+                f"{self.name} recipe lacks information about the {compiler} compiler standard version support")
+            self.output.warning(
+                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
-                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}")
 
-    def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "x86":
+            raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
+
+    def layout(self):
+        if self.options.bootstrap:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+        rmdir(self, os.path.join(self.source_folder, "Tests", "RunCMake", "find_package"))
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            if not self.settings.compiler.cppstd:
-                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
-            self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
+    def generate(self):
+        if self.options.bootstrap:
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
+            bootstrap_cmake_options = ["--"]
+            bootstrap_cmake_options.append(f'-DCMAKE_CXX_STANDARD={"11" if not self.settings.compiler.cppstd else self.settings.compiler.cppstd}')
             if self.settings.os == "Linux":
-                self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
                 if self.options.with_openssl:
-                    self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-            if tools.cross_building(self):
-                self._cmake.definitions["HAVE_POLL_FINE_EXITCODE"] = ''
-                self._cmake.definitions["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
-            self._cmake.configure(source_folder=self._source_subfolder)
+                    openssl = self.dependencies["openssl"]
+                    bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=ON")
+                    bootstrap_cmake_options.append(f'-DOPENSSL_USE_STATIC_LIBS={"FALSE" if openssl.options.shared else "TRUE"}')
+                else:
+                    bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=OFF")
+            save(self, "bootstrap_args", json.dumps({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}))
+        else:
+            tc = CMakeToolchain(self)
+            # Disabling testing because CMake tests build can fail in Windows in some cases
+            tc.variables["BUILD_TESTING"] = False
+            if not self.settings.compiler.cppstd:
+                tc.variables["CMAKE_CXX_STANDARD"] = 11
+            tc.variables["CMAKE_BOOTSTRAP"] = False
+            if self.settings.os == "Linux":
+                tc.variables["CMAKE_USE_OPENSSL"] = self.options.with_openssl
+                if self.options.with_openssl:
+                    openssl = self.dependencies["openssl"]
+                    tc.variables["OPENSSL_USE_STATIC_LIBS"] = not openssl.options.shared
+            if cross_building(self):
+                tc.variables["HAVE_POLL_FINE_EXITCODE"] = ''
+                tc.variables["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
+            # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
+            # C3I workaround to force CMake to choose the highest version of
+            # the windows SDK available in the system
+            if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
+                tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
+            tc.generate()
+            tc = CMakeDeps(self)
+            # CMake try_compile failure: https://github.com/conan-io/conan-center-index/pull/16073#discussion_r1110037534
+            tc.set_property("openssl", "cmake_find_mode", "module")
+            tc.generate()
 
-        return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "project(CMake)",
-                              "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup(NO_OUTPUT_DIRS)".format(
-                                  self.install_folder.replace("\\", "/")))
-        if self.settings.os == "Linux":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
-                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
-                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} pthread)")
-        cmake = self._configure_cmake()
-        cmake.build()
+        if self.options.bootstrap:
+            toolchain_file_content = json.loads(load(self, os.path.join(self.generators_folder, "bootstrap_args")))
+            bootstrap_cmake_options = toolchain_file_content.get("bootstrap_cmake_options")
+            with chdir(self, self.source_folder):
+                self.run(f'./bootstrap --prefix="" --parallel={build_jobs(self)} {bootstrap_cmake_options}')
+                autotools = Autotools(self)
+                autotools.make()
+        else:
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def package(self):
-        self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "doc"))
+        copy(self, "Copyright.txt", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
+        if self.options.bootstrap:
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.install()
+        else:
+            cmake = CMake(self)
+            cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_id(self):
         del self.info.settings.compiler
+        del self.info.options.bootstrap
 
     def package_info(self):
-        minor = self._minor_version()
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
 
+        # Needed for compatibility with v1.x - Remove when 2.0 becomes the default
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
-
-        self.env_info.CMAKE_ROOT = self.package_folder
-        mod_path = os.path.join(self.package_folder, "share", "cmake-%s" % minor, "Modules")
-        self.env_info.CMAKE_MODULE_PATH = mod_path
-        if not os.path.exists(mod_path):
-            raise ConanException("Module path not found: %s" % mod_path)

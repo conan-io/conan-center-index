@@ -1,31 +1,17 @@
 versions:
-  "13.4":
+  "14.7":
     folder: all
-  "13.3":
+  "14.5":
     folder: all
-  "13.2":
+  "14.2":
     folder: all
-  "13.1":
+  "13.6":
     folder: all
-  "13.0":
+  "12.10":
     folder: all
-  "12.6":
+  "11.15":
     folder: all
-  "12.4":
+  "10.20":
     folder: all
-  "12.3":
-    folder: all
-  "12.2":
-    folder: all
-  "11.11":
-    folder: all
-  "11.9":
-    folder: all
-  "11.7":
-    folder: all
-  "11.5":
-    folder: all
-  "10.14":
-    folder: all
-  "9.6.19":
+  "9.6.24":
     folder: all

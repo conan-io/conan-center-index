@@ -1,4 +1,31 @@
 sources:
+  "1.3.239.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.239.0.tar.gz"
+    sha256: "8b040328c18399b7bbf5bef84fac3d7b7376b39ec6833b7e19b7961bf7a72017"
+  "1.3.236.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.236.0.tar.gz"
+    sha256: "fb6f323a36efcd98766bb72f598008f73c4c92bce69c79fc98ad2b3cdca0c263"
+  "1.3.231.1":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.231.1.tar.gz"
+    sha256: "df3857f01c1aa9ee1927d2feaaa431406d243958e07791e9aed4cb5ab22a5f2b"
+  "1.3.224.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.224.0.tar.gz"
+    sha256: "c43c6aa149fa1165e01b375b4d95cbc23b4fc72bd9972a89c55dd1eaa8a360ca"
+  "1.3.216.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.216.0.tar.gz"
+    sha256: "3f80a926390faedd33e6ed17ec68340abace83913b285174e2dee87156577be5"
+  "1.3.211.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.211.0.tar.gz"
+    sha256: "4335eec84b87d64130e860dad5d6dc1f722277d4e0ff5027153e2743628cb221"
+  "1.3.204.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.204.0.tar.gz"
+    sha256: "c6bec993194377944fb8d6d585a90e1288994660782d709e30fa1d91810d6820"
+  "11.7.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/11.7.0.tar.gz"
+    sha256: "b6c83864c3606678d11675114fa5f358c519fe1dad9a781802bcc87fb8fa32d5"
+  "11.6.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/11.6.0.tar.gz"
+    sha256: "99ecd3a0c2c2219293d76723846f762a9f3e7dd0dc2a4f346d0fc3a05a0ce000"
   "11.5.0":
     url: "https://github.com/KhronosGroup/glslang/archive/11.5.0.tar.gz"
     sha256: "fd0b5e3bda591bb08bd3049655a99a0a55f0de4059b9c8f7b397e4b19cf5d51f"
@@ -6,9 +33,23 @@ sources:
     url: "https://github.com/KhronosGroup/glslang/archive/8.13.3559.tar.gz"
     sha256: "c58fdcf7e00943ba10f9ae565b2725ec9d5be7dab7c8e82cac72fcaa83c652ca"
 patches:
+  "1.3.239.0":
+    - patch_file: "patches/1.3.236.0-0001-no-force-glslang-pic.patch"
+  "1.3.236.0":
+    - patch_file: "patches/1.3.236.0-0001-no-force-glslang-pic.patch"
+  "1.3.231.1":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
+  "1.3.224.0":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
+  "1.3.216.0":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
+  "1.3.211.0":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
+  "1.3.204.0":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
+  "11.7.0":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
+  "11.6.0":
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
   "11.5.0":
-    - patch_file: "patches/conanize-cmake-11.5.0.patch"
-      base_path: "source_subfolder"
-  "8.13.3559":
-    - patch_file: "patches/conanize-cmake-8.13.3559.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"

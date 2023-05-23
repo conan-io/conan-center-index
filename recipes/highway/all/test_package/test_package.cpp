@@ -24,7 +24,11 @@ void test()
 
     for (size_t i = 0; i < count; i += Lanes(d)) {
         const auto x = Load(d, &x_array[i]);
+#if HWY_MAJOR == 0 && HWY_MINOR < 14
         result += GetLane(SumOfLanes(x));
+#else
+        result += GetLane(SumOfLanes(d, x));
+#endif
     }
 
     std::cout << "result = " << result << ", expected = " << expected << '\n';

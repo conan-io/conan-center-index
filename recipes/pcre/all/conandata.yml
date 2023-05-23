@@ -1,10 +1,17 @@
 sources:
   "8.45":
-    url: "https://ftp.pcre.org/pub/pcre/pcre-8.45.tar.gz"
-    sha256: "4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09"
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.bz2"
+    sha256: "4dae6fdcd2bb0bb6c37b5f97c33c2be954da743985369cddac3546e3218bffb8"
   "8.44":
-    url: "https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz"
-    sha256: "aecafd4af3bd0f3935721af77b889d9024b2e01d96b58471bd91a3063fb47728"
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.44/pcre-8.44.tar.bz2"
+    sha256: "19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
   "8.41":
-    url: "https://ftp.pcre.org/pub/pcre/pcre-8.41.tar.gz"
-    sha256: "244838e1f1d14f7e2fa7681b857b3a8566b74215f28133f14a8f5e59241b682c"
+    url: "https://sourceforge.net/projects/pcre/files/pcre/8.41/pcre-8.41.tar.bz2"
+    sha256: "e62c7eac5ae7c0e7286db61ff82912e1c0b7a0c13706616e94a7dd729321b530"
+patches:
+  "8.45":
+    - patch_file: "patches/0001-fix-cmake-8.45.patch"
+  "8.44":
+    - patch_file: "patches/0001-fix-cmake-8.41.patch"
+  "8.41":
+    - patch_file: "patches/0001-fix-cmake-8.41.patch"

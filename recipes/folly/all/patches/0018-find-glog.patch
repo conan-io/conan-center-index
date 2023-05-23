@@ -1,0 +1,16 @@
+diff --git a/build/fbcode_builder/CMake/FindGlog.cmake b/build/fbcode_builder/CMake/FindGlog.cmake
+index 752647c..aa2fa1c 100644
+--- a/build/fbcode_builder/CMake/FindGlog.cmake
++++ b/build/fbcode_builder/CMake/FindGlog.cmake
+@@ -10,9 +10,9 @@ include(FindPackageHandleStandardArgs)
+ include(SelectLibraryConfigurations)
+ 
+ find_library(GLOG_LIBRARY_RELEASE glog
+-  PATHS ${GLOG_LIBRARYDIR})
++  PATHS ${CONAN_GLOG_ROOT})
+ find_library(GLOG_LIBRARY_DEBUG glogd
+-  PATHS ${GLOG_LIBRARYDIR})
++  PATHS ${CONAN_GLOG_ROOT})
+ 
+ find_path(GLOG_INCLUDE_DIR glog/logging.h
+   PATHS ${GLOG_INCLUDEDIR})

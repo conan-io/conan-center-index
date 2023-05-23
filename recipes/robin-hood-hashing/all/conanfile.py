@@ -1,39 +1,52 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.layout import basic_layout
 import os
 
-from conans import ConanFile, tools
+required_conan_version = ">=1.52.0"
 
-class ConanRecipe(ConanFile):
+
+class RobinHoodHashingConan(ConanFile):
     name = "robin-hood-hashing"
     description = "Faster and more efficient replacement for std::unordered_map / std::unordered_set"
-    topics = ("conan", "robin-hood-hashing", "header-only", "containers")
+    topics = ("robin-hood-hashing", "header-only", "containers")
     homepage = "https://github.com/martinus/robin-hood-hashing"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = "compiler"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
 
-    _source_subfolder = "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-
-    def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-
-        self.copy(pattern="robin_hood.h", dst="include",
-                  src=os.path.join(self._source_subfolder, "src", "include"))
-
-    def package_info(self):
-        # Original CMakeLists.txt exports "robin_hood::robin_hood" target:
-        self.cpp_info.names["cmake_find_package"] = "robin_hood"
-        self.cpp_info.names["cmake_find_package_multi"] = "robin_hood"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "robin_hood.h", src=os.path.join(self.source_folder, "src", "include"),
+                                   dst=os.path.join(self.package_folder, "include"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "robin_hood")
+        self.cpp_info.set_property("cmake_target_name", "robin_hood::robin_hood")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "robin_hood"
+        self.cpp_info.names["cmake_find_package_multi"] = "robin_hood"

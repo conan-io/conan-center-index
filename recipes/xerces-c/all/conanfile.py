@@ -1,8 +1,13 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class XercesCConan(ConanFile):
@@ -10,11 +15,12 @@ class XercesCConan(ConanFile):
     description = (
         "Xerces-C++ is a validating XML parser written in a portable subset of C++"
     )
-    topics = ("conan", "xerces", "XML", "validation", "DOM", "SAX", "SAX2")
+    topics = ("xerces", "XML", "validation", "DOM", "SAX", "SAX2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xerces.apache.org/xerces-c/index.html"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,17 +42,8 @@ class XercesCConan(ConanFile):
         "mutex_manager": "standard",
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,15 +60,18 @@ class XercesCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
-            self.requires("icu/69.1")
+            self.requires("icu/72.1", run=can_run(self))
         if self.options.network_accessor == "curl":
-            self.requires("libcurl/7.78.0")
+            self.requires("libcurl/7.88.1")
 
-    def _validate(self, option, value, os):
+    def _validate(self, option, value, host_os):
         """
         Validate that the given `option` has the required `value` for the given `os`
         If not raises a ConanInvalidConfiguration error
@@ -81,12 +81,8 @@ class XercesCConan(ConanFile):
         :param os: either a single string or a tuple of strings containing the
                    OS(es) that `value` is valid on
         """
-        if self.settings.os not in os and getattr(self.options, option) == value:
-            raise ConanInvalidConfiguration(
-                "Option '{option}={value}' is only supported on {os}".format(
-                    option=option, value=value, os=os
-                )
-            )
+        if self.settings.os not in host_os and getattr(self.options, option) == value:
+            raise ConanInvalidConfiguration(f"Option '{option}={value}' is only supported on {host_os}")
 
     def validate(self):
         if self.settings.os not in ("Windows", "Macos", "Linux"):
@@ -102,50 +98,61 @@ class XercesCConan(ConanFile):
         self._validate("mutex_manager", "windows", ("Windows", ))
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and self.options.message_loader == "icu":
-            self.build_requires("icu/69.1")
+        if self.options.message_loader == "icu" and not can_run(self):
+            self.tool_requires("icu/72.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if can_run(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = CMakeToolchain(self)
+        # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
+        tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         # https://xerces.apache.org/xerces-c/build-3.html
-        self._cmake.definitions["network-accessor"] = self.options.network_accessor
-        self._cmake.definitions["transcoder"] = self.options.transcoder
-        self._cmake.definitions["message-loader"] = self.options.message_loader
-        self._cmake.definitions["xmlch-type"] = self.options.char_type
-        self._cmake.definitions["mutex-manager"] = self.options.mutex_manager
+        tc.variables["network-accessor"] = self.options.network_accessor
+        tc.variables["transcoder"] = self.options.transcoder
+        tc.variables["message-loader"] = self.options.message_loader
+        tc.variables["xmlch-type"] = self.options.char_type
+        tc.variables["mutex-manager"] = self.options.mutex_manager
         # avoid picking up system dependency
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.network_accessor != "curl"
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = "icu" not in (self.options.transcoder, self.options.message_loader)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.network_accessor != "curl"
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = "icu" not in (self.options.transcoder, self.options.message_loader)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        for license in ("LICENSE", "NOTICE"):
+            copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        # remove unneeded directories
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "XercesC")
+        self.cpp_info.set_property("cmake_target_name", "XercesC::XercesC")
+        self.cpp_info.set_property("pkg_config_name", "xerces-c")
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        self.cpp_info.names["cmake_find_package"] = "XercesC"
-        self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
+
+        if Version(conan_version).major < 2:
+            self.cpp_info.names["cmake_find_package"] = "XercesC"
+            self.cpp_info.names["cmake_find_package_multi"] = "XercesC"

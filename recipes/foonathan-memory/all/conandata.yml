@@ -1,8 +1,18 @@
 sources:
+  "0.7.3":
+    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-3.tar.gz"
+    sha256: "4203d15db22a94a3978eeb1afb59a37d35c57c0f148733f0f1a53a6281cb74dd"
+  "0.7.2":
+    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-2.tar.gz"
+    sha256: "8aba7211bb0e59b7538decda453e492cc6e36f8781508ed92b38cbafe8a48762"
+  "0.7.1":
+    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7-1.tar.gz"
+    sha256: "19eb61c5cba6ccc40b8ee741350fd29402a46641ba752c30b7079528d87dbc79"
   "0.7.0":
     url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7.tar.gz"
-    sha256: "01A7CC5A5EBDDBD71BEC69C89562A4A2ECD7C29334C0A29D38D83E7F7F66EB53"
+    sha256: "01a7cc5a5ebddbd71bec69c89562a4a2ecd7c29334c0a29d38d83e7f7f66eb53"
 patches:
   "0.7.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.7.0-0001-fix-virtualAllocFromApp.patch"
+    - patch_file: "patches/0.7.0-0001-fix-virtualAllocFromApp.patch"
+      patch_description: "use VirtualAlloc on Desktop environment"
+      patch_type: "portability"

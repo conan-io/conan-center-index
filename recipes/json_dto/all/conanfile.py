@@ -1,11 +1,16 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.52.0"
 
 
-class JsondtoConan(ConanFile):
+class PackageConan(ConanFile):
     name = "json_dto"
     license = "BSD-3-Clause"
     homepage = "https://github.com/Stiffstream/json_dto"
@@ -16,47 +21,54 @@ class JsondtoConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 14
 
-    def requirements(self):
-        self.requires("rapidjson/1.1.0")
-
-    def validate(self):
-        minimal_cpp_standard = "14"
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
+    @property
+    def _compilers_minimum_version(self):
+        return {
             "gcc": "5",
             "clang": "4",
             "apple-clang": "8",
-            "Visual Studio": "15"
+            "Visual Studio": "14",
+            "msvc": "190",
         }
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-        elif tools.Version(self.settings.compiler.version) < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("rapidjson/1.1.0", transitive_headers=True)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = CMake(self)
-        cmake.definitions["JSON_DTO_INSTALL"] = True
-        cmake.definitions["JSON_DTO_FIND_DEPS"] = False
-        cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.hpp",
+            dst=os.path.join(self.package_folder, "include", "json_dto"),
+            src=os.path.join(self.source_folder, "dev", "json_dto"),
+        )
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        self.cpp_info.set_property("cmake_file_name", "json-dto")
+        self.cpp_info.set_property("cmake_target_name", "json-dto::json-dto")
         self.cpp_info.names["cmake_find_package"] = "json-dto"
         self.cpp_info.names["cmake_find_package_multi"] = "json-dto"

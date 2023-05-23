@@ -1,0 +1,46 @@
+diff --git a/src/mixer_plugin.c b/src/mixer_plugin.c
+index 34117a9..4172dd3 100644
+--- a/src/mixer_plugin.c
++++ b/src/mixer_plugin.c
+@@ -82,7 +82,8 @@ static int mixer_plug_get_elem_id(struct mixer_plug_data *plug_data,
+     id->iface = ctl->iface;
+
+     strncpy((char *)id->name, (char *)ctl->name,
+-            sizeof(id->name));
++            sizeof(id->name) - 1);
++    ((char*)id->name)[sizeof(id->name) - 1] = '\0';
+
+     return 0;
+ }
+@@ -100,7 +101,8 @@ static int mixer_plug_info_enum(struct snd_control *ctl,
+
+     strncpy(einfo->value.enumerated.name,
+             val->texts[einfo->value.enumerated.item],
+-            sizeof(einfo->value.enumerated.name));
++            sizeof(einfo->value.enumerated.name) - 1);
++    einfo->value.enumerated.name[sizeof(einfo->value.enumerated.name) - 1] = '\0';
+
+     return 0;
+ }
+diff --git a/src/pcm_plugin.c b/src/pcm_plugin.c
+index 15bfc80..30bd4c5 100644
+--- a/src/pcm_plugin.c
++++ b/src/pcm_plugin.c
+@@ -153,9 +153,14 @@ static int pcm_plug_info(struct pcm_plug_data *plug_data,
+         return ret;
+     }
+
+-    strncpy((char *)info->id, name, sizeof(info->id));
+-    strncpy((char *)info->name, name, sizeof(info->name));
+-    strncpy((char *)info->subname, name, sizeof(info->subname));
++    strncpy((char *)info->id, name, sizeof(info->id) - 1);
++    ((char *)info->id)[sizeof(info->id) - 1] = '\0';
++
++    strncpy((char *)info->name, name, sizeof(info->name) - 1);
++    ((char *)info->name)[sizeof(info->name) - 1] = '\0';
++
++    strncpy((char *)info->subname, name, sizeof(info->subname) - 1);
++    ((char *)info->subname)[sizeof(info->subname) - 1] = '\0';
+
+     info->subdevices_count = 1;
+

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+project(test_package LANGUAGES C)
 
-find_package(miniaudio REQUIRED)
+find_package(miniaudio REQUIRED CONFIG)
 
-add_executable(test_package example.c)
-target_link_libraries(test_package miniaudio::miniaudio)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE miniaudio::miniaudio)

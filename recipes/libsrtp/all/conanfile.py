@@ -1,21 +1,24 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get, replace_in_file
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
-class ConanRecipe(ConanFile):
+class LibsrtpRecipe(ConanFile):
     name = "libsrtp"
     description = (
         "This package provides an implementation of the Secure Real-time Transport"
         "Protocol (SRTP), the Universal Security Transform (UST), and a supporting"
         "cryptographic kernel."
     )
-    topics = ("conan", "libsrtp", "srtp")
+    topics = ("srtp",)
     homepage = "https://github.com/cisco/libsrtp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,44 +31,40 @@ class ConanRecipe(ConanFile):
         "with_openssl": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/[>=1.1 <4]")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["TEST_APPS"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
+        tc.variables["TEST_APPS"] = False
+        if Version(self.version) < "2.4.0":
+            # Relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(
+            self, os.path.join(self.source_folder, "CMakeLists.txt"),
             "install(TARGETS srtp2 DESTINATION lib)",
             (
                 "include(GNUInstallDirs)\n"
@@ -75,17 +74,17 @@ class ConanRecipe(ConanFile):
                 "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
             ),
         )
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        libsrtp_major = tools.Version(self.version).major
-        self.cpp_info.names["pkg_config"] = "libsrtp{}".format(libsrtp_major if int(libsrtp_major) > 1 else "")
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", f"libsrtp{Version(self.version).major}")
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]

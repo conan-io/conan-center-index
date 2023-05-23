@@ -1,0 +1,11 @@
+versions:
+  "0.11":
+    folder: all
+  "0.10":
+    folder: all
+  "0.9":
+    folder: all
+  "0.8":
+    folder: all
+  "0.7":
+    folder: all

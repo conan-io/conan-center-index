@@ -1,0 +1,13 @@
+diff --git a/bandit/adapters/snowhouse.h b/bandit/adapters/snowhouse.h
+index f3d9fde..ee3844c 100644
+--- a/bandit/adapters/snowhouse.h
++++ b/bandit/adapters/snowhouse.h
+@@ -3,7 +3,7 @@
+ 
+ #include <bandit/adapters/interface.h>
+ #include <bandit/assertion_exception.h>
+-#include <bandit/assertion_frameworks/snowhouse/snowhouse.h>
++#include <snowhouse/snowhouse.h>
+ 
+ namespace bandit {
+   namespace adapter {

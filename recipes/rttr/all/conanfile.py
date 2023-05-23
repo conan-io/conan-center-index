@@ -1,20 +1,22 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import os
-import glob
-from conans import ConanFile, tools, CMake
+
+required_conan_version = ">=1.53.0"
 
 
 class RTTRConan(ConanFile):
     name = "rttr"
     description = "Run Time Type Reflection library"
-    topics = ("conan", "reflection", "rttr", )
+    topics = ("reflection",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rttrorg/rttr"
     license = "MIT"
 
-    exports_sources = "CMakeLists.txt", "patches/*.patch",
-    generators = "cmake",
-
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,11 +28,8 @@ class RTTRConan(ConanFile):
         "with_rtti": False,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,54 +37,70 @@ class RTTRConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_UNIT_TESTS"] = False
-        self._cmake.definitions["BUILD_WITH_RTTI"] = self.options.with_rtti
-        self._cmake.definitions["BUILD_PACKAGE"] = False
-        self._cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
-        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_DOCUMENTATION"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_UNIT_TESTS"] = False
+        tc.variables["BUILD_WITH_RTTI"] = self.options.with_rtti
+        tc.variables["BUILD_PACKAGE"] = False
+        tc.variables["BUILD_RTTR_DYNAMIC"] = self.options.shared
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # No warnings as errors
+        for target in ["rttr_core", "rttr_core_lib", "rttr_core_s", "rttr_core_lib_s"]:
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "src", "rttr", "CMakeLists.txt"),
+                f"set_compiler_warnings({target})",
+                "",
+            )
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(pdb)
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        cmake_target = "Core" if self.options.shared else "Core_Lib"
+        self.cpp_info.set_property("cmake_file_name", "rttr")
+        self.cpp_info.set_property("cmake_target_name", f"RTTR::{cmake_target}")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["_rttr"].libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_rttr"].system_libs = ["dl", "pthread"]
+        if self.options.shared:
+            self.cpp_info.components["_rttr"].defines = ["RTTR_DLL"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "rttr"
         self.cpp_info.filenames["cmake_find_package_multi"] = "rttr"
         self.cpp_info.names["cmake_find_package"] = "RTTR"
         self.cpp_info.names["cmake_find_package_multi"] = "RTTR"
-        cmake_target = "Core" if self.options.shared else "Core_Lib"
         self.cpp_info.components["_rttr"].names["cmake_find_package"] = cmake_target
         self.cpp_info.components["_rttr"].names["cmake_find_package_multi"] = cmake_target
-        self.cpp_info.components["_rttr"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.components["_rttr"].system_libs = ["dl", "pthread"]
-        if self.options.shared:
-            self.cpp_info.components["_rttr"].defines = ["RTTR_DLL"]
+        self.cpp_info.components["_rttr"].set_property("cmake_target_name", f"RTTR::{cmake_target}")

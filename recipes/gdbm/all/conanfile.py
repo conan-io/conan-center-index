@@ -56,16 +56,16 @@ class GdbmConan(ConanFile):
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.with_readline:
-            self.requires("readline/8.0")
+            self.requires("readline/8.1.2")
 
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("gdbm is not supported on Windows")
 
     def build_requirements(self):
-        self.build_requires("bison/3.5.3")
+        self.build_requires("bison/3.7.6")
         self.build_requires("flex/2.6.4")
-        self.build_requires("gnu-config/cci.20201022")
+        self.build_requires("gnu-config/cci.20210814")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

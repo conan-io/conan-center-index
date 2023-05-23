@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(NmosCppTestPackage CXX)
+cmake_minimum_required(VERSION 3.8)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package CXX)
 
-find_package(nmos-cpp REQUIRED)
+find_package(nmos-cpp REQUIRED CONFIG)
 
-add_executable(test_package main.cpp)
-target_link_libraries(test_package nmos-cpp::compile-settings nmos-cpp::nmos-cpp)
-set_target_properties(test_package PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE nmos-cpp::compile-settings nmos-cpp::nmos-cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

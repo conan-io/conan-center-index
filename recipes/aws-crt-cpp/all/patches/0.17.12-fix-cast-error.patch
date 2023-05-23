@@ -1,0 +1,13 @@
+diff --git a/source/io/TlsOptions.cpp b/source/io/TlsOptions.cpp
+index 9f9f8cf..e9913ef 100644
+--- a/source/io/TlsOptions.cpp
++++ b/source/io/TlsOptions.cpp
+@@ -216,7 +216,7 @@ namespace Aws
+ 
+                 if (m_slotId)
+                 {
+-                    options.slot_id = &(*m_slotId);
++                    options.slot_id = const_cast<uint64_t*>(&(*m_slotId));
+                 }
+ 
+                 if (m_userPin)

@@ -55,6 +55,7 @@ CONFIGURE_OPTIONS = (
     "thread",
     "timer",
     "type_erasure",
+    "url",
     "wave",
 )
 

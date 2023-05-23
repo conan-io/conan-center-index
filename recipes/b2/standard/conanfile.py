@@ -23,7 +23,7 @@ class B2Conan(ConanFile):
     'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
     'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
     'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142'
+    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143'
 
     Specifies the toolset to use for building. The default of 'auto' detects
     a usable compiler for building and should be preferred. The 'cxx' toolset
@@ -39,7 +39,7 @@ class B2Conan(ConanFile):
             'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
             'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
             'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142']
+            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143']
     }
     default_options = {
         'use_cxx_env': False,
@@ -52,11 +52,8 @@ class B2Conan(ConanFile):
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "b2-" + \
-            os.path.basename(self.conan_data["sources"][self.version]['url']).replace(
-                ".tar.gz", "")
-        os.rename(extracted_dir, "source")
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination="source")
 
     def build(self):
         use_windows_commands = os.name == 'nt'

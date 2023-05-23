@@ -1,13 +1,17 @@
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, CMake, tools
-
+from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.files import apply_conandata_patches, chdir, collect_libs, get, load, rename, replace_in_file, rm, rmdir, save
+from conan.tools.scm import Version
+from conans import CMake
 from collections import defaultdict
 import json
 import re
 import os.path
 import os
+import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.50.2" # Due to conan.tools.scm.Version
 
 
 class LLVMCoreConan(ConanFile):
@@ -47,7 +51,8 @@ class LLVMCoreConan(ConanFile):
         ],
         'with_ffi': [True, False],
         'with_zlib': [True, False],
-        'with_xml2': [True, False]
+        'with_xml2': [True, False],
+        'use_llvm_cmake_files': [True, False],
     }
     default_options = {
         'shared': False,
@@ -65,7 +70,8 @@ class LLVMCoreConan(ConanFile):
         'use_sanitizer': 'None',
         'with_ffi': False,
         'with_zlib': True,
-        'with_xml2': True
+        'with_xml2': True,
+        'use_llvm_cmake_files': False,
     }
 
     # Older cmake versions may have issues generating the graphviz output used
@@ -74,9 +80,9 @@ class LLVMCoreConan(ConanFile):
         'cmake/3.20.5'
     ]
 
-    exports_sources = ['CMakeLists.txt', 'patches/*']
-    generators = ['cmake', 'cmake_find_package']
+    generators = 'cmake', 'cmake_find_package'
     no_copy_source = True
+    short_paths = True
 
     @property
     def _source_subfolder(self):
@@ -84,8 +90,8 @@ class LLVMCoreConan(ConanFile):
 
     def _supports_compiler(self):
         compiler = self.settings.compiler.value
-        version = tools.Version(self.settings.compiler.version)
-        major_rev, minor_rev = int(version.major), int(version.minor)
+        version = Version(self.settings.compiler.version)
+        major_rev, minor_rev = version.major, (version.minor or 0)
 
         unsupported_combinations = [
             [compiler == 'gcc', major_rev == 5, minor_rev < 1],
@@ -99,12 +105,11 @@ class LLVMCoreConan(ConanFile):
             raise ConanInvalidConfiguration(message.format(compiler, version))
 
     def _patch_sources(self):
-        for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     def _patch_build(self):
         if os.path.exists('FindIconv.cmake'):
-            tools.replace_in_file('FindIconv.cmake', 'iconv charset', 'iconv')
+            replace_in_file(self, 'FindIconv.cmake', 'iconv charset', 'iconv')
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -177,25 +182,32 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_LIBPFM'] = False
         cmake.definitions['LLVM_ENABLE_LIBEDIT'] = False
         cmake.definitions['LLVM_ENABLE_FFI'] = self.options.with_ffi
-        cmake.definitions['LLVM_ENABLE_ZLIB'] = \
-            self.options.get_safe('with_zlib', False)
+        cmake.definitions['LLVM_ENABLE_ZLIB'] = "FORCE_ON" if \
+            self.options.get_safe('with_zlib', False) else False
         cmake.definitions['LLVM_ENABLE_LIBXML2'] = \
             self.options.get_safe('with_xml2', False)
         return cmake
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-            del self.options.with_zlib
             del self.options.with_xml2
 
     def requirements(self):
         if self.options.with_ffi:
             self.requires('libffi/3.3')
         if self.options.get_safe('with_zlib', False):
-            self.requires('zlib/1.2.11')
+            self.requires('zlib/1.2.12')
         if self.options.get_safe('with_xml2', False):
             self.requires('libxml2/2.9.10')
+
+    def package_id(self):
+        del self.info.options.use_llvm_cmake_files
 
     def validate(self):
         if self.options.shared:  # Shared builds disabled just due to the CI
@@ -209,11 +221,12 @@ class LLVMCoreConan(ConanFile):
             message = 'Cannot enable exceptions without rtti support'
             raise ConanInvalidConfiguration(message)
         self._supports_compiler()
-        if tools.cross_building(self, skip_x64_x86=True):
+        if cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration('Cross-building not implemented')
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
+            destination=self._source_subfolder)
         self._patch_sources()
 
     def build(self):
@@ -221,6 +234,29 @@ class LLVMCoreConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake", "llvm")
+
+    @property
+    def _alias_module_file_rel_path(self):
+        return os.path.join(self._module_subfolder, "conan-official-{}-targets.cmake".format(self.name))
+
+    @property
+    def _old_alias_module_file_rel_path(self):
+        return os.path.join(self._module_subfolder, "conan-official-{}-old-targets.cmake".format(self.name))
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        save(self, module_file, content)
 
     def package(self):
         self.copy('LICENSE.TXT', dst='licenses', src=self._source_subfolder)
@@ -237,8 +273,8 @@ class LLVMCoreConan(ConanFile):
                 self.copy(lib, dst='lib', src='lib')
 
             CMake(self).configure(args=['--graphviz=graph/llvm.dot'], source_dir='.', build_dir='.')
-            with tools.chdir('graph'):
-                dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
+            with chdir(self, 'graph'):
+                dot_text = load(self, 'llvm.dot').replace('\r\n', '\n')
 
             dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
             deps = re.findall(dep_regex, dot_text)
@@ -276,13 +312,45 @@ class LLVMCoreConan(ConanFile):
                 else:
                     components[lib].append(dep)
 
-        tools.rmdir(os.path.join(self.package_folder, 'bin'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+            alias_targets = {}
+            old_alias_targets = {}
+            for component, _ in components.items():
+                alias_targets[component] = "LLVM::{}".format(component)
+                old_alias_targets["llvm-core::{}".format(component[4:].replace('LLVM', '').lower())] = "LLVM::{}".format(component)
+
+            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._alias_module_file_rel_path),
+                alias_targets
+            )
+
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._old_alias_module_file_rel_path),
+                old_alias_targets
+            )
+
+        rmdir(self, os.path.join(self.package_folder, 'share'))
+
+        rm(self, "LLVMExports*.cmake", self.package_folder, recursive=True)
+        rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVM-Config.cmake'),
+               os.path.join(self.package_folder, self._module_subfolder, 'LLVM-ConfigInternal.cmake'))
+        rename(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfig.cmake'),
+               os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'))
+
+        replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'AddLLVM.cmake'),
+                        "include(LLVM-Config)",
+                        "include(LLVM-ConfigInternal)")
+        replace_in_file(self, os.path.join(self.package_folder, self._module_subfolder, 'LLVMConfigInternal.cmake'),
+                        "LLVM-Config.cmake",
+                        "LLVM-ConfigInternal.cmake")
+
+        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+            rm(self, mask, self.package_folder, recursive=True)
 
         for name in os.listdir(lib_path):
-            if 'LLVM' not in name:
-                os.remove(os.path.join(lib_path, name))
+            fullname = os.path.join(lib_path, name)
+            if 'LLVM' not in name and os.path.isfile(fullname):
+                os.remove(fullname)
 
         if not self.options.shared:
             if self.options.get_safe('with_zlib', False):
@@ -299,8 +367,10 @@ class LLVMCoreConan(ConanFile):
                     os.remove(os.path.join(lib_path, name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "LLVM")
+
         if self.options.shared:
-            self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.libs = collect_libs(self)
             if self.settings.os == 'Linux':
                 self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
             elif self.settings.os == 'Macos':
@@ -319,15 +389,10 @@ class LLVMCoreConan(ConanFile):
             'xml2': 'libxml2::libxml2'
         }
 
-        for lib, deps in components.items():
-            component = lib[4:].replace('LLVM', '').lower()
+        for component, deps in components.items():
+            self.cpp_info.components[component].libs = [component]
+            self.cpp_info.components[component].requires.extend(dep for dep in deps if dep.startswith('LLVM'))
 
-            self.cpp_info.components[component].libs = [lib]
-
-            self.cpp_info.components[component].requires = [
-                dep[4:].replace('LLVM', '').lower()
-                for dep in deps if dep.startswith('LLVM')
-            ]
             for lib, target in targets.items():
                 if lib in deps:
                     self.cpp_info.components[component].requires.append(target)
@@ -336,3 +401,29 @@ class LLVMCoreConan(ConanFile):
                 dep for dep in deps
                 if not dep.startswith('LLVM') and dep not in dependencies
             ]
+
+            self.cpp_info.components[component].set_property("cmake_target_name", component)
+            self.cpp_info.components[component].builddirs.append(self._module_subfolder)
+
+            self.cpp_info.components[component].names["cmake_find_package"] = component
+            self.cpp_info.components[component].names["cmake_find_package_multi"] = component
+            self.cpp_info.components[component].build_modules["cmake_find_package"].extend([
+                self._alias_module_file_rel_path,
+                self._old_alias_module_file_rel_path,
+            ])
+            self.cpp_info.components[component].build_modules["cmake_find_package_multi"].extend([
+                self._alias_module_file_rel_path,
+                self._old_alias_module_file_rel_path,
+            ])
+
+            if self.options.use_llvm_cmake_files:
+                self.cpp_info.components[component].build_modules["cmake_find_package"].append(
+                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
+                )
+                self.cpp_info.components[component].build_modules["cmake_find_package_multi"].append(
+                    os.path.join(self._module_subfolder, "LLVMConfigInternal.cmake")
+                )
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "LLVM"
+        self.cpp_info.names["cmake_find_package_multi"] = "LLVM"

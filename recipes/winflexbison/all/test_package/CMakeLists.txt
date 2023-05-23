@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.0)
-project(test_package)
-
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES C CXX)
 
 # Flex
 
@@ -28,7 +25,7 @@ endforeach()
 
 FLEX_TARGET(TestParser basic_nr.l "${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp" COMPILE_FLAGS "${FLEX_TARGET_COMPILE_FLAGS}")
 add_executable(flex_test_package ${FLEX_TestParser_OUTPUTS})
-set_property(TARGET flex_test_package PROPERTY CXX_STANDARD 11)
+target_compile_features(flex_test_package PRIVATE cxx_std_11)
 
 # Bison
 
@@ -50,5 +47,5 @@ endforeach()
 bison_target(bison_parser_target mc_parser.yy "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp")
 
 add_executable(bison_test_package "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp" dummy_lex.c)
-set_property(TARGET bison_test_package PROPERTY CXX_STANDARD 11)
+target_compile_features(bison_test_package PRIVATE cxx_std_11)
 target_include_directories(bison_test_package PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")

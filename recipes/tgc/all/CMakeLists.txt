@@ -1,15 +1,13 @@
 cmake_minimum_required(VERSION 3.4)
-project(tgc C)
+project(tgc LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+add_library(tgc ${TGC_SRC_DIR}/tgc.c)
+set_property(TARGET tgc PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-add_library(${PROJECT_NAME} source_subfolder/tgc.c)
-set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-
-install(TARGETS ${PROJECT_NAME}
+include(GNUInstallDirs)
+install(TARGETS tgc
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES source_subfolder/tgc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${TGC_SRC_DIR}/tgc.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

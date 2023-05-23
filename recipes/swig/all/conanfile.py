@@ -1,4 +1,6 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan import ConanFile
+from conan.tools.files import get
+from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import functools
 import os
@@ -24,8 +26,16 @@ class SwigConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _use_pcre2(self):
+        return self.version not in ['4.0.1', '4.0.2']
+
+
     def requirements(self):
-        self.requires("pcre/8.45")
+        if self._use_pcre2:
+            self.requires("pcre2/10.40")
+        else:
+            self.requires("pcre/8.45")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
@@ -33,15 +43,15 @@ class SwigConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.7.6")
-        self.build_requires("automake/1.16.4")
+            self.build_requires("bison/3.8.2")
+        self.build_requires("automake/1.16.5")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _user_info_build(self):
@@ -81,11 +91,13 @@ class SwigConan(ConanFile):
 
         libargs = list("-L\"{}\"".format(p) for p in deps_libpaths) + list("-l\"{}\"".format(l) for l in deps_libs)
         args = [
-            "PCRE_LIBS={}".format(" ".join(libargs)),
-            "PCRE_CPPFLAGS={}".format(" ".join("-D{}".format(define) for define in deps_defines)),
+            "{}_LIBS={}".format("PCRE2" if self._use_pcre2 else "PCRE", " ".join(libargs)),
+            "{}_CPPFLAGS={}".format("PCRE2" if self._use_pcre2 else "PCRE", " ".join("-D{}".format(define) for define in deps_defines)),
             "--host={}".format(self.settings.arch),
             "--with-swiglibdir={}".format(self._swiglibdir),
         ]
+        if self.settings.os == "Linux":
+            args.append("LIBS=-ldl")
 
         host, build = None, None
 
@@ -108,7 +120,7 @@ class SwigConan(ConanFile):
             autotools.libs.extend(["mingwex", "ssp"])
 
         autotools.configure(args=args, configure_dir=self._source_subfolder,
-                                  host=host, build=build)
+                            host=host, build=build)
         return autotools
 
     def _patch_sources(self):
@@ -144,10 +156,14 @@ class SwigConan(ConanFile):
         return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
+        self.cpp_info.includedirs=[]
         self.cpp_info.names["cmake_find_package"] = "SWIG"
         self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
         self.cpp_info.builddirs = [self._module_subfolder]
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = \
+            [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = \
+            [os.path.join(self._module_subfolder, self._module_file)]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

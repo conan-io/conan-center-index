@@ -1,13 +1,13 @@
 versions:
-  "2.16.3-apache":
+  "3.2.1":
     folder: all
-  "2.16.3-gpl":
+  "3.1.0":
     folder: all
-  "2.23.0":
-    folder: all
-  "2.24.0":
+  "3.0.0":
     folder: all
   "2.25.0":
     folder: all
-  "3.0.0":
+  "2.24.0":
+    folder: all
+  "2.23.0":
     folder: all

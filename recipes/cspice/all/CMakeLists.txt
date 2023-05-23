@@ -1,33 +1,49 @@
-cmake_minimum_required(VERSION 3.4)
-project(cspice C)
+cmake_minimum_required(VERSION 3.7)
+project(cspice LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+include(GNUInstallDirs)
 
-option(BUILD_UTILITIES "Build cspice utilities" ON)
+option(CSPICE_BUILD_UTILITIES "Build cspice utilities" ON)
 
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
+add_compile_options(
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-implicit-int>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-format>
+  $<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:AppleClang>>:-Wno-pointer-to-int-cast>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-logical-op-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-shift-op-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-parentheses>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-dangling-else>
+  $<$<C_COMPILER_ID:AppleClang>:-Wno-unsequenced>
+  $<$<C_COMPILER_ID:MSVC>:/wd4101>
+  $<$<C_COMPILER_ID:MSVC>:/wd4244>
+  $<$<C_COMPILER_ID:MSVC>:/wd4267>
+  $<$<C_COMPILER_ID:MSVC>:/wd4311>
+  $<$<C_COMPILER_ID:MSVC>:/wd4477>
+  $<$<C_COMPILER_ID:MSVC>:/wd4554>
+  $<$<C_COMPILER_ID:MSVC>:/wd4723>
+  $<$<C_COMPILER_ID:MSVC>:/wd4996>
+  # Behavior of implicitly defined functions changed in AppleClang 12
+  # https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
+  $<$<AND:$<C_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:${CMAKE_C_COMPILER_VERSION},12>>:-Wno-error=implicit-function-declaration>
+)
+
+set(SRC_DIR ${CSPICE_SRC_DIR}/src)
 
 file(GLOB CSPICE_SRC_FILES ${SRC_DIR}/cspice/*.c)
 add_library(cspice ${CSPICE_SRC_FILES})
 
 if(WIN32)
-  target_compile_definitions(cspice PRIVATE "_COMPLEX_DEFINED;MSDOS;OMIT_BLANK_CC;NON_ANSI_STDIO")
+  target_compile_definitions(cspice PRIVATE "_COMPLEX_DEFINED;MSDOS;OMIT_BLANK_CC;NON_ANSI_STDIO;_CRT_SECURE_NO_WARNINGS")
   set_target_properties(cspice PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 elseif(UNIX)
   target_compile_definitions(cspice PRIVATE "NON_UNIX_STDIO")
   target_compile_options(cspice PRIVATE -ansi)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_link_libraries(cspice PRIVATE m)
-endif()
-
-# Behavior of implicitly defined functions changed in AppleClang 12
-# https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
-if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND
-   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
-  target_compile_options(cspice PRIVATE -Wno-error=implicit-function-declaration)
+include(CheckFunctionExists)
+check_function_exists(pow HAVE_MATH_SYSTEM)
+if(NOT HAVE_MATH_SYSTEM)
+    target_link_libraries(cspice PRIVATE m)
 endif()
 
 install(
@@ -37,13 +53,13 @@ install(
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-file(GLOB INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/include/*.h)
-install(FILES ${INCLUDE_FILES} DESTINATION include)
+file(GLOB INCLUDE_FILES ${CSPICE_SRC_DIR}/include/*.h)
+install(FILES ${INCLUDE_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-if(BUILD_UTILITIES)
+if(CSPICE_BUILD_UTILITIES)
   # csupport is common to all utilities
   file(GLOB CSUPPORT_SRC_FILES "${SRC_DIR}/csupport/*.c")
-  add_library(csupport OBJECT ${CSUPPORT_SRC_FILES})
+  add_library(csupport STATIC ${CSUPPORT_SRC_FILES})
 
   # Walk into all utilities subfolders and build them (except cook_c which only contains examples)
   file(GLOB CSPICE_UTILITIES_SUBDIRS RELATIVE ${SRC_DIR} "${SRC_DIR}/*_c")
@@ -106,7 +122,7 @@ if(BUILD_UTILITIES)
       if(TARGET ${CSPICE_SUBDIR}_commonlib)
         target_link_libraries(${CSPICE_UTILITY} PRIVATE ${CSPICE_SUBDIR}_commonlib)
       endif()
-      if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      if(NOT HAVE_MATH_SYSTEM)
         target_link_libraries(${CSPICE_UTILITY} PRIVATE m)
       endif()
       install(TARGETS ${CSPICE_UTILITY} DESTINATION ${CMAKE_INSTALL_BINDIR})

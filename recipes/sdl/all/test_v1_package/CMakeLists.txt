@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.1)
+project(test_package)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+find_package(SDL2 REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2main)
+if(TARGET SDL2::SDL2-static)
+    target_link_libraries(${PROJECT_NAME} SDL2::SDL2-static)
+else()
+    target_link_libraries(${PROJECT_NAME} SDL2::SDL2)
+endif()

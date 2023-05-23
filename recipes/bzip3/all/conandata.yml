@@ -1,0 +1,37 @@
+sources:
+  "1.3.0":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.3.0/bzip3-1.3.0.tar.xz"
+    sha256: "72fca01d9030e9c260e2ff8fe9d2e9f6261ea28e86adabeb6a8af3300ec390ef"
+  "1.2.3":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.3/bzip3-1.2.3.tar.xz"
+    sha256: "a6a4fa418bdff6f15be3604e8e85b5b73bf0f20e31de9603d55dc100914a111f"
+  "1.2.2":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.2/bzip3-1.2.2.tar.xz"
+    sha256: "2b82d0adcea762ac090cf9e791159894e633a37b34696bcd8c66202b23c4130b"
+  "1.2.1":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.1/bzip3-1.2.1.tar.xz"
+    sha256: "4ad3aea9b9c28be102dbfeb3aec89281116784bf41b97331da88aa137bd91a27"
+  "1.2.0":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.0/bzip3-1.2.0.tar.xz"
+    sha256: "f0441519321070e03708638b37bdeb9105aff8f0a5c838e45aff1b0cbe752572"
+  "1.1.8":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.8/bzip3-1.1.8.tar.bz2"
+    sha256: "bc15d0e4599aad18d9ed71ee0f7e859af89051bf5105b0751e8ca3a26117567d"
+  "1.1.7":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.7/bzip3-1.1.7.tar.bz2"
+    sha256: "1f74768dd1a76c45417f84779cc04d8d8b1f595ac564a2ea2aeb0248defca803"
+  "1.1.6":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.6/bzip3-1.1.6.tar.bz2"
+    sha256: "2bfd35dd57ab80b35b25e3ad628e0ff8f1f5e6dea02a8d472914823ea2e07e96"
+  "1.1.5":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.5/bzip3-1.1.5.tar.bz2"
+    sha256: "2f5012b0004b6c23d5f606deed9191fdce44849234edbcf26e0316bf7856d114"
+  "1.1.4":
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.4/bzip3-1.1.4.tar.bz2"
+    sha256: "e23a06ae17fc36192e79d0151950b3bbd4e26381af50ba4b4fd7a2d9797e498f"
+patches:
+  "1.1.5":
+    - patch_file: "patches/1.1.5-0002-export-symbols.patch"
+  "1.1.4":
+    - patch_file: "patches/1.1.4-0001-make-restrict-alias.patch"
+    - patch_file: "patches/1.1.4-0002-export-symbols.patch"

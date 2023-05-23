@@ -1,0 +1,31 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,20 +1,9 @@
+-cmake_minimum_required (VERSION 2.8)
++cmake_minimum_required (VERSION 3.1)
+   
+-project(jwasm)
++project(jwasm LANGUAGES C)
+ 
+ include_directories(H)
+ if (WIN32)
+-set(CompilerFlags
+-        CMAKE_CXX_FLAGS
+-        CMAKE_CXX_FLAGS_DEBUG
+-        CMAKE_CXX_FLAGS_RELEASE
+-        CMAKE_C_FLAGS
+-        CMAKE_C_FLAGS_DEBUG
+-        CMAKE_C_FLAGS_RELEASE
+-        )
+-foreach(CompilerFlag ${CompilerFlags})
+-  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+-endforeach()
+ add_definitions(-D__NT__ -DNDEBUG -DDEBUG_OUT -D_CRT_SECURE_NO_WARNINGS)
+ else()
+ add_definitions(-D__UNIX__ -DNDEBUG -DDEBUG_OUT)
+@@ -23,3 +12,5 @@ endif()
+ FILE(GLOB all_c_files *.c)
+ LIST(REMOVE_ITEM all_c_files ${CMAKE_CURRENT_SOURCE_DIR}/trmem.c)
+ add_executable(jwasm ${all_c_files})
++include(GNUInstallDirs)
++install(TARGETS jwasm DESTINATION ${CMAKE_INSTALL_BINDIR})

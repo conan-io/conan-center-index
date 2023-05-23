@@ -1,26 +1,16 @@
 sources:
-  "3.9.1":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.9.1.tar.gz"
-    sha256: "f1103d9efd2d563be93c85cc7342414f39610d3e97070ae119fcfc73a668141f"
-  "3.9.0":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.9.0.tar.gz"
-    sha256: "fd962c548d2aef6772bd1778d9bbf6a3ac362f78b14f042649722e8c7ae720c3"
-  "3.8.1":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.8.1.tar.gz"
-    sha256: "6753ea1d21d6711e7f653f9a327e6bbd803eb8f090a4b98c5a3d1012c2822206"
-  "3.8.0":
-    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.8.0.tar.gz"
-    sha256: "90e2ea9db689f5ca8c0bd61e671ac47c749e85998a867b777c3ded8a6399a695"
-patches:
-  "3.9.1":
-    - patch_file: "patches/fix-cmake-3.9.1.patch"
-      base_path: "source_subfolder"
-  "3.9.0":
-    - patch_file: "patches/fix-cmake-3.9.0.patch"
-      base_path: "source_subfolder"
-  "3.8.1":
-    - patch_file: "patches/fix-cmake-3.8.1.patch"
-      base_path: "source_subfolder"
-  "3.8.0":
-    - patch_file: "patches/fix-cmake-3.8.0.patch"
-      base_path: "source_subfolder"
+  "3.11.2":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.2/geos-3.11.2.tar.bz2"
+    sha256: "b1f077669481c5a3e62affc49e96eb06f281987a5d36fdab225217e5b825e4cc"
+  "3.11.1":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.1/geos-3.11.1.tar.bz2"
+    sha256: "be83ed195ffb82373710c90befc580911ea0eb57003a2d703e30101c5b262f62"
+  "3.11.0":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.0/geos-3.11.0.tar.bz2"
+    sha256: "79ab8cabf4aa8604d161557b52e3e4d84575acdc0d08cb09ab3f7aaefa4d858a"
+  "3.10.3":
+    url: "https://download.osgeo.org/geos/geos-3.10.3.tar.bz2"
+    sha256: "3c141b07d61958a758345d5f54e3c735834b2f4303edb9f67fb26914f0d44770"
+  "3.10.2":
+    url: "https://download.osgeo.org/geos/geos-3.10.2.tar.bz2"
+    sha256: "50bbc599ac386b4c2b3962dcc411f0040a61f204aaef4eba7225ecdd0cf45715"

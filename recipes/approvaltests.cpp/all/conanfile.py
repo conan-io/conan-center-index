@@ -1,7 +1,11 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, download, rename
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-from conans import ConanFile, tools
-from conans.tools import Version, ConanInvalidConfiguration
+required_conan_version = ">=1.51.1"
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -12,7 +16,9 @@ class ApprovalTestsCppConan(ConanFile):
     description = "Approval Tests allow you to verify a chunk of output " \
                   "(such as a file) in one operation as opposed to writing " \
                   "test assertions for each element."
-    topics = ("conan", "testing", "unit-testing", "header-only")
+    topics = ("testing", "unit-testing", "header-only")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_boosttest": [True, False],
         "with_catch2": [True, False],
@@ -28,66 +34,58 @@ class ApprovalTestsCppConan(ConanFile):
         "with_cpputest": False,
     }
     no_copy_source = True
-    settings = "compiler"
-
-    def configure(self):
-        if not self._boost_test_supported():
-            del self.options.with_boosttest
-        if not self._cpputest_supported():
-            del self.options.with_cpputest
-        self._validate_compiler_settings()
 
     @property
     def _header_file(self):
         return "ApprovalTests.hpp"
 
+    def config_options(self):
+        if Version(self.version) < "8.6.0":
+            del self.options.with_boosttest
+        if Version(self.version) < "10.4.0":
+            del self.options.with_cpputest
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.get_safe("with_boosttest"):
-            self.requires("boost/1.72.0")
+            self.requires("boost/1.81.0")
         if self.options.with_catch2:
-            self.requires("catch2/2.13.7")
+            self.requires("catch2/2.13.10")
         if self.options.with_gtest:
-            self.requires("gtest/1.10.0")
+            self.requires("gtest/1.12.1")
         if self.options.with_doctest:
-            self.requires("doctest/2.4.6")
+            self.requires("doctest/2.4.10")
         if self.options.get_safe("with_cpputest"):
             self.requires("cpputest/4.0")
+
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
+        if Version(self.version) >= "10.2.0":
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                raise ConanInvalidConfiguration(f"{self.ref} with compiler gcc requires at least compiler version 5")
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
             url = source["url"]
             filename = url[url.rfind("/") + 1:]
-            tools.download(url, filename)
-            tools.check_sha256(filename, source["sha256"])
-        os.rename("ApprovalTests.v.{}.hpp".format(self.version),
-                  self._header_file)
+            download(self, url, filename, sha256=source["sha256"])
+        rename(self, src=os.path.join(self.source_folder, f"ApprovalTests.v.{self.version}.hpp"),
+                     dst=os.path.join(self.source_folder, self._header_file))
 
     def package(self):
-        self.copy(self._header_file, dst="include")
-        self.copy("LICENSE", dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, self._header_file, src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ApprovalTests")
+        self.cpp_info.set_property("cmake_target_name", "ApprovalTests::ApprovalTests")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
         self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"
-
-    def package_id(self):
-        self.info.header_only()
-
-    def _boost_test_supported(self):
-        return Version(self.version) >= "8.6.0"
-
-    def _cpputest_supported(self):
-        return Version(self.version) >= "10.4.0"
-
-    def _std_puttime_required(self):
-        return Version(self.version) >= "10.2.0"
-
-    def _validate_compiler_settings(self):
-        if self._std_puttime_required():
-            self._require_at_least_compiler_version("gcc", 5)
-
-    def _require_at_least_compiler_version(self, compiler, compiler_version):
-        if self.settings.compiler == compiler and tools.Version(self.settings.compiler.version) < compiler_version:
-            raise ConanInvalidConfiguration(
-                "{}/{} with compiler {} requires at least compiler version {}".
-                    format(self.name, self.version, compiler, compiler_version))

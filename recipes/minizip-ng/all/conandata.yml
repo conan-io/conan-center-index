@@ -1,7 +1,93 @@
 sources:
+  "3.0.9":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.9.tar.gz"
+    sha256: "992693a532eb15b20d306e6aeea1a1a6501bd19dca993ebe9a95fd22d6b7fd74"
+  "3.0.8":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.8.tar.gz"
+    sha256: "27cc2f62cd02d79b71b346fc6ace02728385f8ba9c6b5f124062b0790a04629a"
+  "3.0.7":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.7.tar.gz"
+    sha256: "39981a0db1bb6da504909bce63d7493286c5e50825c056564544c990d15c55cf"
+  "3.0.6":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.6.tar.gz"
+    sha256: "383fa1bdc28c482828a8a8db53f758dbd44291b641182724fda5df5b59cce543"
+  "3.0.5":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.5.tar.gz"
+    sha256: "1a248c378fdf4ef6c517024bb65577603d5146cffaebe81900bec9c0a5035d4d"
+  "3.0.4":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.4.tar.gz"
+    sha256: "2ab219f651901a337a7d3c268128711b80330a99ea36bdc528c76b591a624c3c"
+  "3.0.3":
+    url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.3.tar.gz"
+    sha256: "5f1dd0d38adbe9785cb9c4e6e47738c109d73a0afa86e58c4025ce3e2cc504ed"
   "3.0.2":
     url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.2.tar.gz"
     sha256: "6ba4b6629c107c27ab526e517bdb105612232f0965a6747f60150e5a04c2fe5a"
   "3.0.1":
     url: "https://github.com/zlib-ng/minizip-ng/archive/3.0.1.tar.gz"
     sha256: "96c95b274dd535984ce0e87691691388f2b976106e8cf8d527b15da552ac94e4"
+patches:
+  "3.0.9":
+    - patch_file: "patches/3.0.9-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+  "3.0.8":
+    - patch_file: "patches/3.0.8-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+  "3.0.7":
+    - patch_file: "patches/3.0.7-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.6-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"
+  "3.0.6":
+    - patch_file: "patches/3.0.6-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.6-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"
+  "3.0.5":
+    - patch_file: "patches/3.0.5-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.5-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"
+  "3.0.4":
+    - patch_file: "patches/3.0.4-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.1-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"
+  "3.0.3":
+    - patch_file: "patches/3.0.3-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.1-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"
+  "3.0.2":
+    - patch_file: "patches/3.0.2-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.1-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"
+  "3.0.1":
+    - patch_file: "patches/3.0.1-0001-fix-cmake-project.patch"
+      patch_description: "CMake: declare project() sooner"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.1-0002-fix-lzma-libdir.patch"
+      patch_description: "CMake: inject libdir of lzma"
+      patch_type: "conan"
+      patch_source: "https://github.com/zlib-ng/minizip-ng/pull/658"

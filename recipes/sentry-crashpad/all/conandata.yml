@@ -1,41 +1,13 @@
 sources:
-  "0.4.12":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.12/sentry-native.zip"
-    sha256: "d7fa804995124c914a3abe077a73307960bbcadfbba9021e8ccbd05c7ba45f88"
-  "0.4.11":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.11/sentry-native.zip"
-    sha256: "4a0dae61ab718ac23fc7041de3236a2929a12a5a6594b7ec375dc55fb33aabce"
-  "0.4.10":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.10/sentry-native.zip"
-    sha256: "8926735b5c27ad2ae0e40098c53f45a031cdc584cb4519ffc93d04de28df6a7a"
-  "0.4.9":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.9/sentry-native.zip"
-    sha256: "559344bad846b7868c182b22df0cd9869c31ebf46a222ac7a6588aab0211af7d"
-  "0.4.8":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.8/sentry-native.zip"
-    sha256: "35afb62eecc5e719187c81f5c89b4e3d3c45c7b3c1597836202989fa40c79178"
-  "0.4.7":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.7/sentry-native.zip"
-    sha256: "fb16658b250c342ed05e4d2edeff8ec806d9db758dfa188b78070bdfaf54f598"
-  "0.4.1":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.1/sentry-native.zip"
-    sha256: "ffeec2a8aa6d2f274123cd16c62ad6d5d4c6f993e44e9e2f88210261ccb51fcc"
-  "0.2.6":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.2.6/sentry-native-0.2.6.zip"
-    sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
-patches:
-  "0.4.9":
-    - patch_file: "patches/0.4.9-0001-missing-installed-headers.patch"
-      base_path: "source_subfolder"
-  "0.4.8":
-    - patch_file: "patches/0.4.7-0001-missing-installed-headers.patch"
-      base_path: "source_subfolder"
-  "0.4.7":
-    - patch_file: "patches/0.4.7-0001-missing-installed-headers.patch"
-      base_path: "source_subfolder"
-  "0.4.1":
-    - patch_file: "patches/0.4.1-0001-missing-installed-headers.patch"
-      base_path: "source_subfolder"
-  "0.2.6":
-    - patch_file: "patches/0.2.6-0001-missing-installed-headers.patch"
-      base_path: "source_subfolder"
+  "0.6.1":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.1/sentry-native.zip"
+    sha256: "47527a3513db141affb8af28a0b8d886f78348a65acd2110d7eed936e3d82954"
+  "0.6.0":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.0/sentry-native.zip"
+    sha256: "ae03c9c8487794cd0f6d7fb7bb9b3c13e1a253190b290eaf752e2b4f007fd089"
+  "0.5.4":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.5.4/sentry-native.zip"
+    sha256: "e151bdc76894eb964ba4637361b2a96b7447fb04212053cf695fd7f72b636e4d"
+  "0.4.18":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.18/sentry-native.zip"
+    sha256: "41fdf6499cd8576142beb03104badcc9e0b80b8ef27080ca71cd4408cc1d7ece"

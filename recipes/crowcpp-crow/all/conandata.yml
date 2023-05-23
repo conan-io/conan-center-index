@@ -1,21 +1,34 @@
 sources:
+  "1.0+5":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+5.tar.gz"
+    sha256: "4eb1b80b97dda4a3c4f613c581c734e0221911c88ff859ed679bda3dd5d7b319"
+  "1.0+3":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+3.tar.gz"
+    sha256: "509248e7bd30dad725cfb66c383405a8bdc59d1fe7f8f2b464d459444047855e"
+  "1.0+1":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v1.0+1.tar.gz"
+    sha256: "0763342f1d6bfc8a58c99647bd2a5ac9fcb278523a662a20b560e42e5c6c8474"
+  "0.3+4":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+4.tar.gz"
+    sha256: "539622451c1c9be4329d1c260d4014db14ef399b6bc170c7dd0d72b33cba88b0"
+  "0.3+3":
+    url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+3.tar.gz"
+    sha256: "d6d8019ec647dc199e026e847f6cdf714afea29d1c202e3b2a9cde929bfd54b2"
   "0.3+2":
     url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+2.tar.gz"
     sha256: "982fe978c113506aefe77c413befb3ab21fffb09d9bdf287ec8e8ba59bd786e7"
   "0.3":
-    url: "https://github.com/CrowCpp/crow/archive/v0.3.tar.gz"
+    url: "https://github.com/CrowCpp/Crow/archive/refs/tags/v0.3.tar.gz"
     sha256: "95538db88fba73c0bc87bbc40b62dcf488012c133a895634ade015009ebb4f25"
   "0.2":
-    url: "https://github.com/CrowCpp/crow/archive/0.2.tar.gz"
+    url: "https://github.com/CrowCpp/Crow/archive/refs/tags/0.2.tar.gz"
     sha256: "c419767f0a336f2add71fc8b311ad95434d59601fb8b0e5ba3048407d85d0a71"
 patches:
   "0.2":
     - patch_file: "patches/0.2/0001-normalize-buildsystem.patch"
-      base_path: "source_subfolder"
-      # patch_type: "conan" 
-      # description: "Skip tests and examples from build"
+      patch_description: "Skip tests and examples from build"
+      patch_type: "conan"
     - patch_file: "patches/0.2/0002-replace-uint.patch"
-      base_path: "source_subfolder"
-      # patch_type: "portability" 
-      # source: "https://github.com/CrowCpp/Crow/commit/5fe3a45793604a50f5c9086909dfa1b50dfa3e88"
-      # description: "Replace uint (not default type) with unsigned"
+      patch_description: "Replace uint (not default type) with unsigned"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/CrowCpp/Crow/commit/5fe3a45793604a50f5c9086909dfa1b50dfa3e88"

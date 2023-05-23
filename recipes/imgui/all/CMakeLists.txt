@@ -1,16 +1,12 @@
-cmake_minimum_required(VERSION 3.4)
-project(imgui CXX)
+cmake_minimum_required(VERSION 3.8)
+project(imgui LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
-set(MISC_DIR ${SOURCE_DIR}/misc)
+set(MISC_DIR ${IMGUI_SRC_DIR}/misc)
 set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
-set(IMGUI_USER_CONFIG imgui_user_config.h)
+set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
 
-file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.cpp)
-file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
+file(GLOB SOURCE_FILES ${IMGUI_SRC_DIR}/*.cpp)
+file(GLOB HEADER_FILES ${IMGUI_SRC_DIR}/*.h)
 file(GLOB EXTRA_FONTS_FILES ${EXTRA_FONTS_DIR}/*.ttf)
 if (MSVC)
     file(GLOB EXTRA_NATVIS_FILES ${MISC_DIR}/natvis/*.natvis)
@@ -28,14 +24,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME}
     EXPORT_MACRO_NAME IMGUI_API
-    EXPORT_FILE_NAME ${IMGUI_USER_CONFIG}
+    EXPORT_FILE_NAME ${IMGUI_EXPORT_HEADERS}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${SOURCE_DIR}>
+    $<BUILD_INTERFACE:${IMGUI_SRC_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:include>
 )
-target_compile_definitions(${PROJECT_NAME} PUBLIC "IMGUI_USER_CONFIG=\"${IMGUI_USER_CONFIG}\"")
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
 include(GNUInstallDirs)
 
@@ -45,7 +41,7 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS ${BINARY_TO_COMPRESSED_BIN}
         DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR}/${IMGUI_USER_CONFIG}
+install(FILES ${HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR}/${IMGUI_EXPORT_HEADERS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES ${EXTRA_FONTS_FILES}

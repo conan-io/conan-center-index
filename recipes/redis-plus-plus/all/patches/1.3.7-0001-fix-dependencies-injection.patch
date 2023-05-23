@@ -1,0 +1,41 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 69794d9..fbb75b7 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -34,8 +34,7 @@ if(REDIS_PLUS_PLUS_BUILD_ASYNC)
+         message(STATUS "redis-plus-plus build async interface with libuv")
+ 
+         # libuv dependency
+-        find_path(REDIS_PLUS_PLUS_ASYNC_LIB_HEADER NAMES uv.h)
+-        find_library(REDIS_PLUS_PLUS_ASYNC_LIB uv)
++        find_package(libuv REQUIRED CONFIG)
+     else()
+         message(FATAL_ERROR "invalid REDIS_PLUS_PLUS_BUILD_ASYNC")
+     endif()
+@@ -131,7 +130,6 @@ if(hiredis_FOUND)
+     list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis)
+
+     if(REDIS_PLUS_PLUS_USE_TLS)
+-        find_package(hiredis_ssl REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis_ssl)
+         find_package(OpenSSL REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS ${OPENSSL_LIBRARIES})
+@@ -191,7 +189,7 @@ if(REDIS_PLUS_PLUS_BUILD_STATIC)
+ 
+     if(REDIS_PLUS_PLUS_BUILD_ASYNC)
+         target_include_directories(${STATIC_LIB} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${REDIS_PLUS_PLUS_ASYNC_FUTURE_HEADER}>)
+-        target_include_directories(${STATIC_LIB} PUBLIC $<BUILD_INTERFACE:${REDIS_PLUS_PLUS_ASYNC_LIB_HEADER}>)
++        target_link_libraries(${STATIC_LIB} PUBLIC $<IF:$<TARGET_EXISTS:uv>,uv,uv_a>)
+         if(REDIS_PLUS_PLUS_ASYNC_FUTURE STREQUAL "boost")
+             target_include_directories(${STATIC_LIB} SYSTEM PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>)
+         endif()
+@@ -245,8 +244,7 @@ if(REDIS_PLUS_PLUS_BUILD_SHARED)
+ 
+     if(REDIS_PLUS_PLUS_BUILD_ASYNC)
+         target_include_directories(${SHARED_LIB} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${REDIS_PLUS_PLUS_ASYNC_FUTURE_HEADER}>)
+-        target_include_directories(${SHARED_LIB} PUBLIC $<BUILD_INTERFACE:${REDIS_PLUS_PLUS_ASYNC_LIB_HEADER}>)
+-        target_link_libraries(${SHARED_LIB} PUBLIC ${REDIS_PLUS_PLUS_ASYNC_LIB})
++        target_link_libraries(${SHARED_LIB} PUBLIC $<IF:$<TARGET_EXISTS:uv>,uv,uv_a>)
+         if(REDIS_PLUS_PLUS_ASYNC_FUTURE STREQUAL "boost")
+             target_include_directories(${SHARED_LIB} SYSTEM PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>)
+         endif()

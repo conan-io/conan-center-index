@@ -1,0 +1,15 @@
+sources:
+  "2.3.1":
+    url: "https://github.com/babelouest/orcania/archive/refs/tags/v2.3.1.tar.gz"
+    sha256: "bbf08d563528b8ab88dd4b0e67aeb4e7c4fc9f19dcd1a0346b773cf492f7612b"
+patches:
+  "2.3.1":
+    - patch_file: "patches/2.3.1-0001-mingw-fix-Werror=stringop-truncation.patch"
+      patch_description: "Fixes -Werror=stringop-truncation error when building with MinGW@Linux"
+      patch_type: "conan"
+    - patch_file: "patches/2.3.1-0002-no-m.patch"
+      patch_description: "m math library is not really needed"
+      patch_type: "conan"
+    - patch_file: "patches/2.3.1-0003-shared-static-conan.patch"
+      patch_description: "Build shared and static libraries + fix MSVC support"
+      patch_type: "conan"

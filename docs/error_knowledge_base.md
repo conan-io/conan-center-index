@@ -1,21 +1,29 @@
 # Errors from the conan-center hook (KB-Hxxx)
 
+These are located at [conan-io/hooks](https://github.com/conan-io/hooks/blob/master/hooks/conan-center.py).
 
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
-`Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd``. As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
+`Conan > 1.15` deprecated the usage of the global ``cppstd`` setting in favor of ``compiler.cppstd`` to [manage C++ standard](https://docs.conan.io/1/howtos/manage_cpp_standard.html). As a subsetting of the compiler, it shouldn't be declared in the `conanfile.py`.
 
 #### **<a name="KB-H002">#KB-H002</a>: "REFERENCE LOWERCASE"**
 
-The package names in conan-center have to be lowercase. e.g: ``zlib/1.2.8``
+The package names in conan-center have to be [lowercase](https://github.com/conan-io/tribe/blob/main/design/017-lowercase-references.md). e.g: ``zlib/1.2.8``.
 
 #### **<a name="KB-H003">#KB-H003</a>: "RECIPE METADATA"**
 
-The recipe has to declare the following fields: [url](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#url), [license](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#license), [description](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#description) and [homepage](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#homepage). Also we recommend adding [topics](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#topics).
+The recipe has to declare the following attributes:
+
+- [url](https://docs.conan.io/1/reference/conanfile/attributes.html#url)
+- [license](https://docs.conan.io/1/reference/conanfile/attributes.html#license)
+- [description](https://docs.conan.io/1/reference/conanfile/attributes.html#description)
+- [homepage](https://docs.conan.io/1/reference/conanfile/attributes.html#homepage).
+
+Also we recommend adding [topics](https://docs.conan.io/1/reference/conanfile/attributes.html#topics) attribute.
 
 #### **<a name="KB-H005">#KB-H005</a>: "HEADER_ONLY, NO COPY SOURCE"**
 
-If the recipe calls `self.info.header_only()` in the `package_id()` method and doesn't declare settings, it should use the [no_copy_source](https://docs.conan.io/en/latest/reference/conanfile/attributes.html#no-copy-source) attribute to avoid unnecessary copies of the source code.
+If the recipe calls [self.info.header_only()](https://docs.conan.io/1/howtos/header_only.html) in the [package_id()](https://docs.conan.io/1/reference/conanfile/methods.html#package-id) method and doesn't declare settings, it should use the [no_copy_source](https://docs.conan.io/1/reference/conanfile/attributes.html#no-copy-source) attribute to avoid unnecessary copies of the source code.
 
 #### **<a name="KB-H006">#KB-H006</a>: "FPIC OPTION"**
 
@@ -53,13 +61,11 @@ class SomeRecipe(ConanFile):
             del self.options.fPIC
 ```
 
-Here we use `configure()` method, because user options are loaded after `config_options()` only.
-
+Here we use [configure()](https://docs.conan.io/1/reference/conanfile/methods.html#configure-config-options) method, because user options are loaded after [config_options()](https://docs.conan.io/1/reference/conanfile/methods.html#configure-config-options) only.
 
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
-It is not allowed to use version ranges for the recipes in Conan center, where the dependency graph should be deterministic.
-
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
 
 #### **<a name="KB-H009">#KB-H009</a>: "RECIPE FOLDER SIZE"**
 
@@ -67,7 +73,7 @@ The recipe folder (including the `test_package` folder) cannot exceed 256KB.
 
 #### **<a name="KB-H010">#KB-H010</a>: "IMMUTABLE SOURCES"**
 
-Create a file `conandata.yml` in the recipe folder containing the source code origins:
+Create a file [conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) in the recipe folder containing the source code origins:
 
 **_recipes/lib/1.2.0/conandata.yml_**:
 
@@ -90,7 +96,7 @@ class SomeRecipe(ConanFile):
 
 #### **<a name="KB-H011">#KB-H011</a>: "LIBCXX MANAGEMENT"**
 
-If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the `compiler.libcxx` subsetting, because the cpp standard library shouldn't affect the binary ID:
+If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.libcxx](https://docs.conan.io/1/reference/config_files/settings.yml.html#c-standard-libraries-aka-compiler-libcxx) subsetting, because the cpp standard library shouldn't affect the binary ID:
 
 ```python
 class SomeRecipe(ConanFile):
@@ -106,8 +112,12 @@ The binary packages should contain a folder named `licenses` containing the cont
 
 #### **<a name="KB-H013">#KB-H013</a>: "DEFAULT PACKAGE LAYOUT"**
 
-The binary packages shouldn't contain any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`. If you are packaging an application put all the contents inside the `bin` folder.
+The binary packages generally do not need any other files or folder except the following: `["lib", "bin", "include", "res", "licenses"]`.
+This closely matches the default [`cpp_info`](https://docs.conan.io/1/reference/conanfile/methods.html#package-info) from the client.
+The upstream package layout should be followed as much as possible, if a folder is not in the list (like `"share"`) then an exception
+can very easily be added by adding it to [this list of exceptions](https://github.com/conan-io/hooks/blob/d587cfebbf2b31c16e477b79c0c2fd4501f60fc8/hooks/conan-center.py#L1089-L1090).
 
+> **Note**: We are in the process of evaluating this rule, looking at calculating the size impact for problematic packages
 
 #### **<a name="KB-H014">#KB-H014</a>: "MATCHING CONFIGURATION"**
 
@@ -119,29 +129,34 @@ The binary package is shared (self.options.shared == True) but there is no `dll`
 
 #### **<a name="KB-H016">#KB-H016</a>: "CMAKE-MODULES-CONFIG-FILES"**
 
-The binary package cannot contain module or config CMake files ("Find*.cmake", "*Config.cmake",                                                                   "*-config.cmake").
-
+The binary package cannot contain module or config CMake files ("Find\*.cmake", "\*Config.cmake", "\*-config.cmake").
 The package shouldn't contain specific build-system files to inform to the consumers how to link with it.
-In order to make sure that the package will be consumed with any build-system, conan-center repository encourages to declare a `def package_info(self)` method with all the needed information about the package.
+In order to make sure that the package will be consumed with any build-system, conan-center repository encourages to declare a [def package_info(self)](https://docs.conan.io/1/reference/conanfile/methods.html#package-info) method with all the needed information about the package.
 
-The consumers of the package will be able to consume the packages using a specific [generators](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#generators) for the build system they use.
+The consumers of the package will be able to consume the packages using a specific [generators](https://docs.conan.io/1/using_packages/conanfile_txt.html#generators) for the build system they use.
+
+See also: [Why are CMake find/config files and pkg-config files not packaged?](faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
 
 #### **<a name="KB-H017">#KB-H017</a>: "PDB FILES NOT ALLOWED"**
 
-Because of the big size of the PDB files and the issues using them changing the original folders, the PDB files are not allowed to be packaged.
+Because of the big size of the [PDB](https://github.com/Microsoft/microsoft-pdb) files (Program Databse, a debug information format) and the issues using them changing the original folders, the PDB files are not allowed to be packaged.
+
+See also: [Why PDB files are not allowed?](faqs.md#why-pdb-files-are-not-allowed).
 
 #### **<a name="KB-H018">#KB-H018</a>: "LIBTOOL FILES PRESENCE"**
 
-Packaging libtool files (*.la) instead of library files (*.a) is not allowed.
+Packaging [libtool files](https://www.linuxfromscratch.org/blfs/view/svn/introduction/la-files.html) (\*.la) instead of library files (\*.a) is not allowed.
 
 #### **<a name="KB-H0119">#KB-H019</a>: "CMAKE FILE NOT IN BUILD FOLDERS"**
 
-Some file with `*.cmake` extension has been found in a folder not declared in `cpp_info.builddirs`.
+Some file with `*.cmake` extension has been found in a folder not declared in [cpp_info.builddirs](https://docs.conan.io/1/reference/conanfile/attributes.html#cpp-info).
 It is only allowed to put build files in `builddirs` because the generators might be able to include them when needed, but only if they are located in well known paths.
 
 #### **<a name="KB-H020">#KB-H020</a>: "PC-FILES"**
 
 For the same reasons explained at [KB-H016](#KB-H016) it is not allowed to package `*.pc` files.
+
+See also: [Why are CMake find/config files and pkg-config files not packaged?](faqs.md#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged).
 
 #### **<a name="KB-H021">#KB-H021</a>: "MS RUNTIME FILES"**
 
@@ -149,7 +164,7 @@ For the legal reasons, and in order to reduce the size of packages, it's not all
 
 #### **<a name="KB-H022">#KB-H022</a>: "CPPSTD MANAGEMENT"**
 
-If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the compiler.cppstd subsetting, because the cpp standard library shouldn't affect the binary ID:
+If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.cppstd](https://docs.conan.io/1/howtos/manage_cpp_standard.html) subsetting, because the cpp standard library shouldn't affect the binary ID:
 
 ```python
 class SomeRecipe(ConanFile):
@@ -174,7 +189,7 @@ There is a complete explanation in the [FAQ](faqs.md#should-recipes-export-a-rec
 
 #### **<a name="KB-H024">#KB-H024</a>: "TEST PACKAGE FOLDER"**
 
-The [test_package](https://docs.conan.io/en/latest/creating_packages/getting_started.html#the-test-package-folder) folder is required for every recipe in Conan Center Index.
+The [test_package](https://docs.conan.io/1/creating_packages/getting_started.html) folder is required for every recipe in Conan Center Index.
 
 ```
 . conanfile.py
@@ -205,7 +220,7 @@ class SomeRecipe(ConanFile):
     ...
 ```
 
-- Encoding:
+- [Encoding](https://www.python.org/dev/peps/pep-0263/):
 
 ```python
 # -*- coding: utf-8 -*-  # not allowed
@@ -217,12 +232,12 @@ class SomeRecipe(ConanFile):
 
 #### **<a name="KB-H027">#KB-H027</a>: "CONAN CENTER INDEX URL"**
 
-The attribute `url` should point to the address where the recipe is located.
-The current Conan Center Index address is https://github.com/conan-io/conan-center-index
+The attribute [url](https://docs.conan.io/1/reference/conanfile/attributes.html#url) should point to the address where the recipe is located.
+The current Conan Center Index address is <https://github.com/conan-io/conan-center-index>
 
 #### **<a name="KB-H028">#KB-H028</a>: "CMAKE MINIMUM VERSION"**
 
-All CMake files added to recipe package should contain a minimal version (Not necessarily 2.8.11, it can be any version) available in the file:
+All CMake files added to recipe package should contain a [minimal version](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html) (Not necessarily 2.8.11, it can be any version) available in the file:
 
 ```cmake
 # CMakeLists.txt
@@ -234,7 +249,7 @@ project(conanwrapper)
 
 #### **<a name="KB-H029">#KB-H029</a>: "TEST PACKAGE - RUN ENVIRONMENT"**
 
-The [RunEnvironment()](https://docs.conan.io/en/latest/reference/build_helpers/run_environment.html#runenvironment) build helper is no longer needed in the *test_package/conanfile.py*. It has been integrated by [run_environment](https://docs.conan.io/en/latest/devtools/running_packages.html#running-from-packages) parameter.
+The [RunEnvironment()](https://docs.conan.io/1/reference/build_helpers/run_environment.html#runenvironment) build helper is no longer needed in the `test_package/conanfile.py`. It has been integrated by [run_environment](https://docs.conan.io/1/devtools/running_packages.html#running-from-packages) parameter.
 
 ```python
 # test_package/conanfile.py
@@ -247,39 +262,23 @@ class TestConan(ConanFile):
 
 #### **<a name="KB-H030">#KB-H030</a>: "CONANDATA.YML FORMAT"**
 
-The structure of the *conandata.yml* file should follow this schema:
-
-```yml
-sources:
-  "1.69.0":
-    url: "url1.69.0"
-    sha256: "sha1.69.0"
-  "1.70.0":
-    url: "url1.70.0"
-    sha256: "sha1.70.0"
-patches:
-  "1.70.0":
-    - patch_file: "001-1.70.0.patch"
-      base_path: "source_subfolder/1.70.0"
-    - url: "https://fake_url.com/custom.patch"
-      sha256: "sha_custom"
-      base_path: "source_subfolder"
-  "1.71.0":
-    - patch_file: "001-1.71.0.patch"
-      base_path: "source_subfolder/1.71.0"
-```
+The structure of the [conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) file should follow the schema
+defined in [Adding Packages - `Conandata.yml` Format](adding_packages/conandata_yml_format.md).
 
 #### **<a name="KB-H031">#KB-H031</a>: "CONANDATA.YML REDUCE"**
 
-This hook re-creates the information of the *conandata.yml* file, discarding the fields not relevant to the version of the package exported. This avoids creating new recipe revisions for every new change introduced in the file.
+This [hook](https://docs.conan.io/1/extending/hooks.html) re-creates the information of the [conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) file, discarding the fields not relevant to the version of the package exported. This avoids creating new recipe revisions for every new change introduced in the file.
 Any additional field in the YAML file will raise an error.
+
 #### **<a name="KB-H032">#KB-H032</a>: "SYSTEM REQUIREMENTS"**
 
-System requires can be used as an option when a Conan package is not available the same package can be installer system package manager. However, it can cause  reproducibility problems, since the package may vary according the distribution or OS. Conan is not able to track its metadata, so that, installing system packages by recipe is not allowed.
+[System requirements](https://docs.conan.io/1/reference/conanfile/methods.html#systempackagetool) can be used as an option when a Conan package is not available ,the same package can be installed by system package manager. However, it can cause reproducibility problems, since the package may vary according the distribution or OS. Conan is not able to track its metadata, so that, installing system packages by recipe is not allowed.
+
+See also: [Can I install packages from the system package manager?](faqs.md#can-i-install-packages-from-the-system-package-manager).
 
 #### **<a name="KB-H034">#KB-H034</a>: "TEST PACKAGE - NO IMPORTS()"**
 
-The method [imports](https://docs.conan.io/en/latest/reference/conanfile/methods.html#imports) helps the test package stage copying all dynamic libraries and special resources. However, the [run_environment](https://docs.conan.io/en/latest/reference/conanfile/other.html#running-commands) parameter, used when running commands, is able to solve all paths to the dynamic libraries installed in your cache.
+The method [imports](https://docs.conan.io/1/reference/conanfile/methods.html#imports) helps the test package stage copying all dynamic libraries and special resources. However, the [run_environment](https://docs.conan.io/1/reference/conanfile/other.html#running-commands) parameter, used when running commands, is able to solve all paths to the dynamic libraries installed in your cache.
 
 #### **<a name="KB-H037">#KB-H037</a>: "NO AUTHOR"**
 
@@ -289,6 +288,8 @@ Since the entire community is maintaining all CCI recipes, putting just one name
 
 According the Conan issue [#6269](https://github.com/conan-io/conan/issues/6269), the attribute `cpp_info.name` should be avoided for Conan Center Index in favor of `cpp_info.names["cmake_find_package"]` and `cpp_info.names["cmake_find_package_multi"]`.
 
+See also: [Migrating legacy cpp_info attributes to set_property()](https://docs.conan.io/1/migrating_to_2.0/properties.html).
+
 #### **<a name="KB-H041">#KB-H041</a>: "NO FINAL ENDLINE"**
 
 Source files should end with a final endline.
@@ -296,23 +297,23 @@ This avoids potential warnings/errors like `no new line at the end of file`.
 
 #### **<a name="KB-H044">#KB-H044</a>: "NO REQUIRES.ADD()"**
 
-Both `self.requires.add()` and `self.build_requires.add()` have been deprecated in favor of `self.requires()` and `self.build_requires()` which were introduced on Conan 1.x. Both `add()` were introduced during Conan 0.x and since Conan 1.23 they no longer follow the original behavior.
+Both `self.requires.add()` and `self.build_requires.add()` have been deprecated in favor of [self.requires()](https://docs.conan.io/1/reference/conanfile/methods.html#requirements) and [self.build_requires()](https://docs.conan.io/1/reference/conanfile/methods.html#build-requirements) which were introduced on Conan 1.x. Both `add()` were introduced during Conan 0.x and since Conan 1.23 they no longer follow the original behavior.
 
 #### **<a name="KB-H045">#KB-H045</a>: "DELETE OPTIONS"**
 
 The method `self.options.remove()` was introduced in Conan 0.x, however, Conan 1.x brings a more pythonic way for removing options from your recipe: `del self.options.<option_name>`
 
+See also: [configure(), config_options()](https://docs.conan.io/1/reference/conanfile/methods.html#configure-config-options).
+
 #### **<a name="KB-H046">#KB-H046</a>: "CMAKE VERBOSE MAKEFILE"**
 
-The CMake definition CMAKE_VERBOSE_MAKEFILE helps for debugging when developing, however, for regular CI build, it increases the log size and it's only required when problems occur and need to be verified.
-
-#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
-
-According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
+The CMake definition [CMAKE_VERBOSE_MAKEFILE](https://cmake.org/cmake/help/latest/variable/CMAKE_VERBOSE_MAKEFILE.html) helps for debugging when developing, however, for regular CI build, it increases the log size and it's only required when problems occur and need to be verified.
 
 #### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
 
-The file test_package/CMakeLists.txt should require CMake 3.1 by default: `cmake_minimum_required(VERSION 3.1)`. The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if `CMAKE_CXX_STANDARD` or `CXX_STANDARD` is explicit, CMake 3.1 is mandatory.
+> **Warning**: This is a legacy Conan 1.x details from the deprecated generators
+
+The file test_package/CMakeLists.txt should require CMake 3.15 by default: [cmake_minimum_required(VERSION 3.15)](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html). The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if [CMAKE_CXX_STANDARD](https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html) or [CXX_STANDARD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html#prop_tgt:CXX_STANDARD) is explicit, CMake 3.1 is mandatory.
 
 #### **<a name="KB-H049">#KB-H049</a>: "CMAKE WINDOWS EXPORT ALL SYMBOLS"**
 
@@ -324,33 +325,35 @@ By default, all packages should be built as static library (the option ``shared`
 
 #### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
 
-The attribue `default_options` should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
+The attribue [default_options](https://docs.conan.io/1/reference/conanfile/attributes.html#default-options) should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
-It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
+It's important to have new library version defined in both [config.yml](adding_packages/folders_and_files.md#configyml) and
+[conandata.yml](adding_packages/folders_and_files.md#conandatayml), otherwise newly added version will not be checked and built
+by CI and will not be available for download.
 
 #### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
-The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.
+The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs,
+request to publicly expose needed methods, if necessary.
 
 #### **<a name="KB-H054">#KB-H054</a>: "LIBRARY DOES NOT EXIST"**
 
-Libraries which are listed on [Components](https://docs.conan.io/en/latest/creating_packages/package_information.html#package-information-components) must be present in `libdirs`. Check if the library name is correct, or if a library is only generated for a specific platform.
+Libraries which are listed on [Components](https://docs.conan.io/1/creating_packages/package_information.html#package-information-components) must be present in [libdirs](https://docs.conan.io/1/reference/conanfile/attributes.html#cpp-info). Check if the library name is correct, or if a library is only generated for a specific platform.
 
 #### **<a name="KB-H055">#KB-H055</a>: "SINGLE REQUIRES"**
 
-Do not use `requirements()` and `self.requires` together in the same recipe.
+Do not use [requirements()](https://docs.conan.io/1/reference/conanfile/methods.html#requirements) method and [self.requires](https://docs.conan.io/1/reference/conanfile/attributes.html#requires) attribute together in the same recipe.
 The duality creates a heterogeneous way of solving dependencies, making it difficult to review and susceptible to prone errors.
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
 
-Public Domain is not a license by itself, but consists of all the creative work to which no exclusive intellectual property rights apply.
-If a project is under Public Domain and there is no license listed, the [Unlicense](https://spdx.org/licenses/Unlicense) should be used.
+See [License Attribute](adding_packages/conanfile_attributes.md#license-attribute) for details.
 
 #### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
 
-The [rename()](https://docs.conan.io/en/latest/reference/conanfile/tools/files.html#conan-tools-rename) method will be the standard for Conan 2.0, and
+The [rename()](https://docs.conan.io/1/reference/conanfile/tools/files.html#conan-tools-rename) method will be the standard for Conan 2.0, and
 also, it uses [robocopy](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy), which is safer on Windows.
 
 #### **<a name="KB-H058">#KB-H058</a>: "ILLEGAL CHARACTERS"**
@@ -363,19 +366,138 @@ Generic class names can cause review confusion. To keep a better naming, it shou
 
 #### **<a name="KB-H060">#KB-H060</a>: "NO CRLF"**
 
-Files with CRLF as endline can cause CI errors when building a package, due the conversion to LF and false detection from CI as changed file.
-The .gitattribute file lists which files should be converted to LF when commit. However, if you want to enforce it in your local copy, you may run:
+Files with [CRLF](https://en.wikipedia.org/wiki/Newline) as endline can cause CI errors when building a package, due the conversion to LF and false detection from CI as changed file.
+The [.gitattributes](https://git-scm.com/docs/gitattributes) file lists which files should be converted to LF when commit. However, if you want to enforce it in your local copy, you may run:
 
     > git config --local core.autocrlf false
     > git config --local core.eol lf
 
-The `core.autocrlf` disabled means that git will not convert from CRLF to LF on commit. The `core.eol` sets the specific line ending to be used for every commit.
+The [core.autocrlf](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration) disabled means that git will not convert from CRLF to LF on commit. The [core.eol](https://git-scm.com/docs/git-config) sets the specific line ending to be used for every commit.
 
 #### **<a name="KB-H062">#KB-H062</a>: "TOOLS CROSS BUILDING"**
 
-Replace all occurrences of `tools.cross_building(self.settings)` with `tools.cross_building(self)`.
-When cross building, conan needs to compare `self.settings` and `self.settings_build`, which are attributes of `self`.
+Replace all occurrences of `tools.cross_building(self.settings)` with [tools.cross_building(self)](https://docs.conan.io/1/reference/tools.html#tools-cross-building).
+When cross building, conan needs to compare [self.settings](https://docs.conan.io/1/reference/conanfile/attributes.html#settings) and [self.settings_build](https://docs.conan.io/1/systems_cross_building/cross_building.html), which are attributes of `self`.
 
 #### **<a name="KB-H064">#KB-H064</a>: "INVALID TOPICS"**
 
-An invalid topic has been detected. Remove or rename it.
+An invalid [topic](https://docs.conan.io/1/reference/conanfile/attributes.html#topics) has been detected. Remove or rename it.
+Right now, topic `conan` is considered redundant and it's not needed to explicitly list it within recipe.
+
+#### **<a name="KB-H065">#KB-H065</a>: "NO REQUIRED_CONAN_VERSION"**
+
+The recipe misses [required_conan_version](https://docs.conan.io/1/reference/conanfile/other.html#requiring-a-conan-version-for-the-recipe) attribute.
+It may happen due to the usage of new features within recipe (such as `strip_root` parameter of the [tools.get](https://docs.conan.io/1/reference/conanfile/tools/files/downloads.html#conan-tools-files-get) helper).
+The policy of Conan Center Index to support only the latest version of the Conan Client, so it's safe to put the version Conan Center Index currently runs into the recipe.
+Otherwise, it's not an easy task on its own to determine the minimal version that has to be specified: checking the Conan Client [Changelog](https://docs.conan.io/1/changelog.html), one has to know in which Conan Client releases all the attributes, methods, build helpers, etc. used by the recipe were first introduced, and then select the most recent of them.
+Consider adding the following code:
+
+```python
+required_conan_version = ">=1.43.0"  # use the version that Conan Center Index runs
+
+class SomeRecipe(ConanFile):
+    ...
+
+```
+
+See also: [Submitting a Package](adding_packages/README.md#submitting-a-package).
+
+#### **<a name="KB-H066">#KB-H066</a>: "SHORT_PATHS USAGE"**
+
+The recipe missess [short_paths](https://docs.conan.io/1/reference/conanfile/attributes.html#short-paths) attribute.
+It may happen due to the very long paths within source, build or package directories during the package creating.
+Consider adding the following code:
+
+```python
+class SomeRecipe(ConanFile):
+    ...
+
+    short_paths = True
+```
+
+See also: [Maximum Path Length Limitation](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd).
+
+#### **<a name="KB-H068">#KB-H068</a>: "TEST_TYPE MANAGEMENT"**
+
+In Conan 2.0, see [migration guide](https://docs.conan.io/1/migrating_to_2.0/recipes.html#changes-in-the-test-package-recipe),
+the `test_package/conanfile.py` needs to declare the requirement being tested explicitly. To be prepared you
+have to set the attribute `test_type="explicit"` (this will be ignored in 2.0) to make Conan activate the explicit
+mode, then declaring the requirement using the `self.tested_reference_str` that contains the reference being tested.
+
+#### **<a name="KB-H069">#KB-H069</a>: "TEST PACKAGE - NO DEFAULT OPTIONS"**
+
+This is to ensure the exact package that is built and uploaded is tested against. When `options` of `default_options` are modified in a
+`test_package` it can possibly result in the graph being modified. The objective is to enforce quality of the packages and to avoid confusing
+"missing packages" errors.
+
+#### **<a name="KB-H070">#KB-H070</a>: "MANDATORY SETTINGS"**
+
+> :information_source: This rule was put in place as it was deemed safe for evaluation however there is room for improvement
+
+ConanCenter operates is profiles with a predefined list of settings, all of these much be present in the recipe to ensure `package_id`s are
+computed correctly. Some libraries, for instance header-only, do not require all the settings and those should be deleted from the `package_id`.
+This approach ensure consistency and reduces the learning curve.
+
+Recipes should include:
+
+```python
+class SomeRecipe(ConanFile):
+    ...
+
+    settings = "os", "compiler", "build_type", "arch"
+```
+
+- For header-only recipes ([example](https://github.com/conan-io/conan-center-index/blob/3a773e2d69ada3bd931252c43a48daf636ddfe87/recipes/eigen/all/conanfile.py#L35-L36)):
+
+    ```python
+        def package_id(self):
+            self.info.header_only()
+    ```
+
+There is the case when the package is header-only, but the options affects the generated artifact, (e.g. kanguru, pagmo2 ...), so you need to use `self.info.settings.clear()` instead.
+
+- @prince-chrismc This needs to a better example; For "tool" recipes ([example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/cmake/3.x.x/conanfile.py#L104-L105)) which only provide binaries, see [our packaging policy](adding_packages/build_and_package.md) for more, should do as follows:
+
+    ```python
+        def package_id(self):
+            del self.info.settings.compiler
+    ```
+
+#### **<a name="KB-H071">#KB-H071</a>: "INCLUDE PATH DOES NOT EXIST"**
+
+It's erroneous to leave the default `include` directory when it's not present. Consider adding:
+
+```python
+def package_info(self):
+    self.cpp_info.includedirs = []
+```
+
+#### **<a name="KB-H072">#KB-H072</a>: "PYLINT EXECUTION"**
+
+Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex and it should not be skipped. It's an important tool which helps us keep a standard level of acceptance. Otherwise, it would be incredibly hard to review all recipes and keep them to the same level of standards.
+
+#### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
+
+The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](adding_packages/README.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](package_templates/README.md) folder.
+
+#### **<a name="KB-H075">#KB-H075</a>: "REQUIREMENT OVERRIDE PARAMETER"**
+
+The [self.requires()](https://docs.conan.io/1/reference/conanfile/methods.html#requirements) allows to override a dependency version, forcing to use that version imposed by the recipe only. As a side-effect, dependencies can use different versions of the same project at the same package, which may cause unpredicted errors, like ABI incompatibility. For that reason, the `override` parameter is forbidden and should not be used. Instead, all dependencies should align their package versions, even when it's necessary to open more pull requests to update dependency versions.
+
+#### **<a name="KB-H076">#KB-H076</a>: "EITHER STATIC OR SHARED OF EACH LIB"**
+
+It checks whether static & shared artifacts of the same lib are packaged together. Also, if there are tuples of (.a/.dylib) or (.a/.so) files with the same name.
+So it works on Unix systems only, not Windows. Putting both same library name as shared and static in the very same package is considered an error, as it should be separated
+and managed by the package option `shared`.
+
+#### **<a name="KB-H077">#KB-H077</a>: "APPLE RELOCATABLE SHARED LIBS"**
+
+It checks whether installed shared libs are relocatable on Linux & macOS. All shared libs on macOS properly have `@rpath/<shared>` in install tree (@rpath token is supported since macOS 10.5 Leopard).
+
+## Deprecated errors
+
+The following errors from the hooks are deprecated and no longer reported:
+
+### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
+
+According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.

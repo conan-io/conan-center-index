@@ -30,6 +30,8 @@ class TestPackageConan(ConanFile):
                 check(self.options['imagemagick'].with_lzma, 'lzma')
                 check(self.options['imagemagick'].with_lcms, 'lcms')
                 check(self.options['imagemagick'].with_openexr, 'openexr')
+                check(self.options['imagemagick'].with_heic, 'heic')
+                check(self.options['imagemagick'].with_jbig, 'jbig')
                 check(self.options['imagemagick'].with_jpeg, 'jpeg')
                 check(self.options['imagemagick'].with_openjp2, 'jp2')
                 check(self.options['imagemagick'].with_pango, 'pangocairo')

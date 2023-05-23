@@ -5,4 +5,9 @@ sources:
 patches:
   "2.13":
     - patch_file: "patches/0001-2.13-fix-fatal-errors-msvc.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix 64-bit MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/Baron-von-Riedesel/JWasm/pull/10"
+    - patch_file: "patches/0002-fix-cmake.patch"
+      patch_description: "Fix CMake to add an install target & honor vc runtime"
+      patch_type: "compatibility"

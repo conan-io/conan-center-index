@@ -1,16 +1,16 @@
 sources:
-  "0.0.1":
-    sha256: 4fa1e40cc06c2147f5308e63f51a8785fcc41515b6a6a7c280459d005f1c0aeb
-    url: https://github.com/rvarago/absent/archive/0.0.1.tar.gz
-  "0.1.0":
-    sha256: 32be167191d695f7663cd6043b226c83798aeb617504ad6c82ddf3b3fdb08498
-    url: https://github.com/rvarago/absent/archive/0.1.0.tar.gz
-  "0.2.0":
-    sha256: f3a587f1a5bdd74e4363378201e56c362830a62f0f92f1872038e71b7a1462c7
-    url: https://github.com/rvarago/absent/archive/0.2.0.tar.gz
-  "0.3.0":
-    sha256: ac6d1b9cc2e57318eab1252bf5aa13c7bac25e316285a687c61dfdfa71e71e8d
-    url: https://github.com/rvarago/absent/archive/0.3.0.tar.gz
   "0.3.1":
-    sha256: fe0a96303c6438f1095273b093e56c8f10a3b79dea86676b59aec94e6ed89224
-    url: https://github.com/rvarago/absent/archive/0.3.1.tar.gz
+    url: "https://github.com/rvarago/absent/archive/0.3.1.tar.gz"
+    sha256: "fe0a96303c6438f1095273b093e56c8f10a3b79dea86676b59aec94e6ed89224"
+  "0.3.0":
+    url: "https://github.com/rvarago/absent/archive/0.3.0.tar.gz"
+    sha256: "ac6d1b9cc2e57318eab1252bf5aa13c7bac25e316285a687c61dfdfa71e71e8d"
+  "0.2.0":
+    url: "https://github.com/rvarago/absent/archive/0.2.0.tar.gz"
+    sha256: "f3a587f1a5bdd74e4363378201e56c362830a62f0f92f1872038e71b7a1462c7"
+  "0.1.0":
+    url: "https://github.com/rvarago/absent/archive/0.1.0.tar.gz"
+    sha256: "32be167191d695f7663cd6043b226c83798aeb617504ad6c82ddf3b3fdb08498"
+  "0.0.1":
+    url: "https://github.com/rvarago/absent/archive/0.0.1.tar.gz"
+    sha256: "4fa1e40cc06c2147f5308e63f51a8785fcc41515b6a6a7c280459d005f1c0aeb"

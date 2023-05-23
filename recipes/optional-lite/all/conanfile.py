@@ -1,37 +1,51 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
-from conans import ConanFile, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.50.0"
+
 
 class OptionalLiteConan(ConanFile):
     name = "optional-lite"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/optional-lite"
     description = "A single-file header-only version of a C++17-like optional, a nullable object for C++98, C++11 and later"
-    topics = ("conan", "cpp98", "cpp17", "optional", "optional-implementations")
+    topics = ("cpp98", "cpp17", "optional", "optional-implementations")
     license = "BSL-1.0"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "optional-lite")
+        self.cpp_info.set_property("cmake_target_name", "nonstd::optional-lite")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "optional-lite"
         self.cpp_info.filenames["cmake_find_package_multi"] = "optional-lite"
         self.cpp_info.names["cmake_find_package"] = "nonstd"
         self.cpp_info.names["cmake_find_package_multi"] = "nonstd"
         self.cpp_info.components["optionallite"].names["cmake_find_package"] = "optional-lite"
         self.cpp_info.components["optionallite"].names["cmake_find_package_multi"] = "optional-lite"
+        self.cpp_info.components["optionallite"].set_property("cmake_target_name", "nonstd::optional-lite")
+        self.cpp_info.components["optionallite"].bindirs = []
+        self.cpp_info.components["optionallite"].libdirs = []

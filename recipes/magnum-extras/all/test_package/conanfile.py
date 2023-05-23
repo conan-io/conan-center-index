@@ -1,11 +1,10 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
 import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         if self.options["magnum-extras"].ui:

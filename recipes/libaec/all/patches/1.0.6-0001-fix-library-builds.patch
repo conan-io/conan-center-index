@@ -1,0 +1,113 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6f75ead..c974cce 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,7 +4,7 @@ project(libaec LANGUAGES C VERSION 1.0.6)
+ # Automatically export symbols for Windows DLLs
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+ 
+-set(CMAKE_C_STANDARD 99)
++set(CMAKE_C_STANDARD 11)
+ set(CMAKE_C_VISIBILITY_PRESET hidden)
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ include(CTest)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index a26f9b7..3cd8f72 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -10,12 +10,17 @@ target_include_directories(aec
+   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>"
+   "$<INSTALL_INTERFACE:include>")
+ 
+-# Create both static and shared aec library.
++if (NOT BUILD_SHARED_LIBS)
++
++# Create aec library.
+ add_library(aec_static STATIC "$<TARGET_OBJECTS:aec>")
+ target_link_libraries(aec_static PUBLIC aec)
+ set_target_properties(aec_static
+   PROPERTIES
+-  OUTPUT_NAME $<IF:$<BOOL:${MSVC}>,aec_static,aec>)
++  OUTPUT_NAME $<IF:$<BOOL:${MSVC}>,aec_static,aec>
++  PUBLIC_HEADER ../include/libaec.h)
++
++else()
+ 
+ add_library(aec_shared SHARED "$<TARGET_OBJECTS:aec>")
+ target_link_libraries(aec_shared PUBLIC aec)
+@@ -26,17 +31,24 @@ set_target_properties(aec_shared
+   OUTPUT_NAME aec
+   PUBLIC_HEADER ../include/libaec.h)
+ 
++endif()
++
+ # Wrapper for compatibility with szip
+ add_library(sz OBJECT sz_compat.c)
+ target_link_libraries(sz PUBLIC aec)
+ 
+-# Create both static and shared szip library.
++# Create szip library.
++if (NOT BUILD_SHARED_LIBS)
++
+ add_library(sz_static STATIC "$<TARGET_OBJECTS:sz>" "$<TARGET_OBJECTS:aec>")
+ set_target_properties(sz_static
+   PROPERTIES
+-  OUTPUT_NAME $<IF:$<BOOL:${MSVC}>,szip_static,sz>)
++  OUTPUT_NAME $<IF:$<BOOL:${MSVC}>,szip_static,sz>
++  PUBLIC_HEADER ../include/szlib.h)
+ target_link_libraries(sz_static PUBLIC sz)
+ 
++else()
++
+ add_library(sz_shared SHARED "$<TARGET_OBJECTS:sz>" "$<TARGET_OBJECTS:aec>")
+ target_link_libraries(sz_shared PUBLIC sz)
+ set_target_properties(sz_shared
+@@ -46,11 +58,16 @@ set_target_properties(sz_shared
+   OUTPUT_NAME $<IF:$<BOOL:${MSVC}>,szip,sz>
+   PUBLIC_HEADER ../include/szlib.h)
+ 
++endif()
++
+ # Simple client for testing and benchmarking.
+ # Can also be used stand-alone
+ add_executable(aec_client aec.c)
+ set_target_properties(aec_client PROPERTIES OUTPUT_NAME aec)
+ target_link_libraries(aec_client PUBLIC aec)
++if (MSVC)
++  target_compile_options(aec_client PUBLIC /FS /Z7)
++endif()
+ 
+ include(GNUInstallDirs)
+ if(UNIX)
+@@ -61,23 +78,14 @@ if(UNIX)
+     PROPERTIES
+     COMPILE_DEFINITIONS
+     "HAVE_VISIBILITY=$<BOOL:${COMPILER_HAS_HIDDEN_VISIBILITY}>;BUILDING_LIBAEC")
+-
+-  # The shell scripts for benchmarking are supported on unix only
+-  add_executable(utime EXCLUDE_FROM_ALL utime.c)
+-  target_include_directories(utime PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/..")
+-  add_custom_target(bench
+-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/benc.sh
+-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/typical.rz
+-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bdec.sh
+-    DEPENDS aec_client utime)
+ endif()
+ 
+-if(UNIX OR MINGW)
+-  # Install manpage
+-  install(
+-    FILES aec.1
+-    DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1
+-    COMPONENT doc)
+-endif()
++if (NOT BUILD_SHARED_LIBS)
+ 
+-install(TARGETS aec_static aec_shared sz_static sz_shared aec_client)
++install(TARGETS aec_static sz_static aec_client)
++
++else()
++
++install(TARGETS aec_shared sz_shared aec_client)
++
++endif()

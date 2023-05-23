@@ -1,103 +1,111 @@
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, rmdir, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
+from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
 class LibFtdiConan(ConanFile):
     name = "libftdi"
     description = "A library to talk to FTDI chips"
     license = "LGPL-2.0-only", "GPLv2-or-later"
-    topics = ("conan", "libftdi1")
+    topics = "ftdi"
     homepage = "https://www.intra2net.com/en/developer/libftdi/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-            "shared"             : [True, False], 
+            "shared"             : [True, False],
             "fPIC"               : [True, False],
             "enable_cpp_wrapper" : [True, False],
             "build_eeprom_tool"  : [True, False],
             "use_streaming"      : [True, False],
     }
     default_options = {
-            "shared": False, 
+            "shared": False,
             "fPIC": True,
             "enable_cpp_wrapper": True,
             "build_eeprom_tool" : False,
             "use_streaming"     : True,
     }
-    _cmake = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "libftdi1-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio":
+            if is_msvc(self):
                 self.options.use_streaming = False
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.license = ("LGPL-2.1-only", "GPL-2.0-only") if self.options.build_eeprom_tool or self.options.enable_cpp_wrapper else ("LGPL-2.1-only")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        options = {
-            "BUILD_TESTS": False,
-            "EXAMPLES": False,
-            "FTDI_EEPROM": self.options.build_eeprom_tool,
-            "FTDIPP" : self.options.enable_cpp_wrapper,
-            "STATICLIBS": not self.options.shared,
-            "ENABLE_STREAMING": self.options.use_streaming,
-        }
-        self._cmake.definitions.update(options)
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["EXAMPLES"] = False
+        tc.variables["FTDI_EEPROM"] = self.options.build_eeprom_tool
+        tc.variables["FTDIPP"] = self.options.enable_cpp_wrapper
+        tc.variables["ENABLE_STREAMING"] = self.options.use_streaming
+        tc.variables["LIB_SUFFIX"] = ""
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def requirements(self):
-        self.requires("libusb/1.0.24")
-        self.requires("boost/1.75.0")
+        self.requires("libusb/1.0.26")
+        if self.options.enable_cpp_wrapper:
+            self.requires("boost/1.80.0")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.options.use_streaming:
+        if is_msvc(self) and self.options.use_streaming:
             raise ConanInvalidConfiguration("VS doesn't not compile with enabled option use_streaming")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING.LIB", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if self.options.build_eeprom_tool or self.options.enable_cpp_wrapper:
+            copy(self, "COPYING.GPL", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        lib_folder = os.path.join(self.package_folder, "lib",)
-        tools.rmdir(os.path.join(lib_folder, "cmake"))
-        tools.rmdir(os.path.join(lib_folder, "pkgconfig"))
+        lib_folder = os.path.join(self.package_folder, "lib")
+        rmdir(self, os.path.join(lib_folder, "cmake"))
+        rmdir(self, os.path.join(lib_folder, "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "LibFTDI1"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibFTDI1"
-        self.cpp_info.names["pkgconfig"] = "libftdi1"
+        # Remove "self.cpp_info.filenames.." statements in Conan V2
+        self.cpp_info.filenames['cmake_find_package'] = "LibFTDI1"
+        self.cpp_info.filenames['cmake_find_package_multi'] = "LibFTDI1"
 
-        self.cpp_info.components["ftdi"].names["pkg_config"] = "libftdi1"
+        self.cpp_info.set_property("cmake_file_name", "LibFTDI1")
+        self.cpp_info.components["ftdi"].set_property("pkg_config_name", "libftdi1")
         self.cpp_info.components["ftdi"].libs = ["ftdi1"]
         self.cpp_info.components["ftdi"].requires = ["libusb::libusb"]
         self.cpp_info.components["ftdi"].includedirs.append(os.path.join("include", "libftdi1"))
+        self.cpp_info.components["ftdi"].names["pkg_config"] = "libftdi1"
 
-        self.cpp_info.components["ftdipp"].names["pkg_config"] = "libftdi1pp"
-        self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
-        self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
-        self.cpp_info.components["ftdipp"].includedirs.append(os.path.join("include", "libftdipp1"))
+        if self.options.enable_cpp_wrapper:
+            self.cpp_info.components["ftdipp"].set_property("pkg_config_name", "libftdipp1")
+            self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
+            self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::headers"]
+            self.cpp_info.components["ftdipp"].names["pkg_config"] = "libftdipp1"
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ftdipp"].system_libs.append("m")

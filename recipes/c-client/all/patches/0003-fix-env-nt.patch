@@ -1,0 +1,11 @@
+--- src/osdep/nt/env_nt.c
++++ src/osdep/nt/env_nt.c
+@@ -167,7 +167,7 @@
+   if (suffix) {			/* append timezone suffix if desired */
+     char *tz;
+     tzset ();			/* get timezone from TZ environment stuff */
+-    tz = tzname[daylight ? (((struct tm *) t)->tm_isdst > 0) : 0];
++    tz = _tzname[_daylight ? (((struct tm *) t)->tm_isdst > 0) : 0];
+     if (tz && tz[0]) {
+       char *s;
+       for (s = tz; *s; s++) if (*s & 0x80) return;

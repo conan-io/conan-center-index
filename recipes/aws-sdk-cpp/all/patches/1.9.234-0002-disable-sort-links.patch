@@ -1,0 +1,18 @@
+# Fix errors like below in older cmake versions:
+# CMake Error at source_subfolder/cmake/dependencies.cmake:34 (get_target_property):
+#  INTERFACE_LIBRARY targets may only have whitelisted properties.  The
+#  property "LINK_LIBRARIES_ALL" is not allowed.
+
+diff --git cmake/sdks.cmake cmake/sdks.cmake
+index 68ccc88ec8..91e3295e1d 100644
+--- cmake/sdks.cmake
++++ cmake/sdks.cmake
+@@ -269,7 +269,7 @@ function(add_sdks)
+ 
+     # the catch-all config needs to list all the targets in a dependency-sorted order
+     include(dependencies)
+-    sort_links(EXPORTS)
++    #sort_links(EXPORTS)
+ 
+     # make an everything config by just including all the individual configs
+     file(WRITE ${CMAKE_BINARY_DIR}/aws-sdk-cpp-config.cmake "")

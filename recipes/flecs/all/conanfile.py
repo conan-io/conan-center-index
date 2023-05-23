@@ -1,7 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class FlecsConan(ConanFile):
@@ -24,55 +27,64 @@ class FlecsConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FLECS_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["FLECS_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["FLECS_SHARED_LIBS"] = self.options.shared
-        self._cmake.definitions["FLECS_DEVELOPER_WARNINGS"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) < "3.0.1":
+            tc.variables["FLECS_STATIC_LIBS"] = not self.options.shared
+            tc.variables["FLECS_SHARED_LIBS"] = self.options.shared
+            tc.variables["FLECS_DEVELOPER_WARNINGS"] = False
+        else:
+            tc.variables["FLECS_STATIC"] = not self.options.shared
+            tc.variables["FLECS_SHARED"] = self.options.shared
+        tc.variables["FLECS_PIC"] = self.options.get_safe("fPIC", True)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "flecs"
-        self.cpp_info.names["cmake_find_package_multi"] = "flecs"
-        target_and_lib_name = "flecs" if self.options.shared else "flecs_static"
-        self.cpp_info.components["_flecs"].names["cmake_find_package"] = target_and_lib_name
-        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = target_and_lib_name
-        self.cpp_info.components["_flecs"].libs = [target_and_lib_name]
+        suffix = "" if self.options.shared else "_static"
+        self.cpp_info.set_property("cmake_file_name", "flecs")
+        self.cpp_info.set_property("cmake_target_name", f"flecs::flecs{suffix}")
+
+        # TODO: back to global scope once cmake_find_package* generators removed
+        self.cpp_info.components["_flecs"].libs = [f"flecs{suffix}"]
         if not self.options.shared:
             self.cpp_info.components["_flecs"].defines.append("flecs_STATIC")
+        if Version(self.version) >= "3.0.0":
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["_flecs"].system_libs.append("pthread")
+            elif self.settings.os == "Windows":
+                self.cpp_info.components["_flecs"].system_libs.extend(["wsock32", "ws2_32"])
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "flecs"
+        self.cpp_info.names["cmake_find_package_multi"] = "flecs"
+        self.cpp_info.components["_flecs"].names["cmake_find_package"] = f"flecs{suffix}"
+        self.cpp_info.components["_flecs"].names["cmake_find_package_multi"] = f"flecs{suffix}"
+        self.cpp_info.components["_flecs"].set_property("cmake_target_name", f"flecs::flecs{suffix}")

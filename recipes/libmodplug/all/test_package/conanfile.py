@@ -1,10 +1,19 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
@@ -12,12 +21,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            # Download a public domain xm file; https://modarchive.org/module.php?178293
-            tools.download(
-                "https://api.modarchive.org/downloads.php?moduleid=178293#burbs.xm",
-                filename="burbs.xm",
-                sha256="ced080401a2635cddc6d13b9095efa217f260ce7b3a482a29b454f72317b0c4d",
-                )
-            bin_path = os.path.join("bin", "test_package")
-            self.run("%s %s" % (bin_path, "burbs.xm"), run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

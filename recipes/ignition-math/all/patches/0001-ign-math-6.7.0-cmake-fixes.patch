@@ -1,0 +1,64 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -39,7 +39,7 @@ ign_find_package(
+ ########################################
+ # Include swig
+ find_package(SWIG QUIET)
+-if (NOT SWIG_FOUND)
++if (1)
+   IGN_BUILD_WARNING("Swig is missing: Language interfaces are disabled.")
+   message (STATUS "Searching for swig - not found.")
+ else()
+@@ -47,7 +47,7 @@ else()
+ endif()
+ 
+ # Include other languages if swig was found
+-if (SWIG_FOUND)
++if (0)
+   ########################################
+   # Include ruby
+   find_package(Ruby 1.9 QUIET)
+@@ -74,9 +74,9 @@ ign_create_packages()
+ #============================================================================
+ # Configure documentation
+ #============================================================================
+-configure_file(${CMAKE_SOURCE_DIR}/api.md.in ${CMAKE_BINARY_DIR}/api.md)
+-configure_file(${CMAKE_SOURCE_DIR}/tutorials.md.in ${CMAKE_BINARY_DIR}/tutorials.md)
++configure_file(${PROJECT_SOURCE_DIR}/api.md.in ${PROJECT_BINARY_DIR}/api.md)
++configure_file(${PROJECT_SOURCE_DIR}/tutorials.md.in ${PROJECT_BINARY_DIR}/tutorials.md)
+ 
+ ign_create_docs(
+-  API_MAINPAGE_MD "${CMAKE_BINARY_DIR}/api.md"
+-  TUTORIALS_MAINPAGE_MD "${CMAKE_BINARY_DIR}/tutorials.md")
++  API_MAINPAGE_MD "${PROJECT_BINARY_DIR}/api.md"
++  TUTORIALS_MAINPAGE_MD "${PROJECT_BINARY_DIR}/tutorials.md")
+
+--- include/ignition/math/Helpers.hh
++++ include/ignition/math/Helpers.hh
+@@ -870,7 +870,7 @@ namespace ignition
+     // The following regex takes a time string in the general format of
+     // "dd hh:mm:ss.nnn" where n is milliseconds, if just one number is
+     // provided, it is assumed to be seconds
+-    static const std::regex time_regex(
++    static const char* time_regex_str =
+         "^([0-9]+ ){0,1}"                       // day:
+                                                 // Any positive integer
+ 
+@@ -887,7 +887,7 @@ namespace ignition
+                                                 // 0 - 9
+                                                 // 00 - 59
+ 
+-        "(\\.[0-9]{1,3}){0,1})$");              // millisecond:
++        "(\\.[0-9]{1,3}){0,1})$";              // millisecond:
+                                                 // .0 - .9
+                                                 // .00 - .99
+                                                 // .000 - 0.999
+@@ -907,6 +907,7 @@ namespace ignition
+         uint64_t & numberMinutes, uint64_t & numberSeconds,
+         uint64_t & numberMilliseconds)
+     {
++      static const std::regex time_regex(time_regex_str);
+       std::smatch matches;
+ 
+       // `matches` should always be a size of 6 as there are 6 matching
+ 

@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class GiflibConan(ConanFile):
@@ -33,6 +33,10 @@ class GiflibConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -51,7 +55,7 @@ class GiflibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not self._is_msvc:
             self.build_requires("gnu-config/cci.20201022")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -66,7 +70,7 @@ class GiflibConan(ConanFile):
                               "SUBDIRS = lib util pic $(am__append_1)",
                               "SUBDIRS = lib pic $(am__append_1)")
 
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.build_visual()
         else:
             self.build_configure()
@@ -131,8 +135,13 @@ class GiflibConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         with tools.chdir(self._source_subfolder):
-            if self.settings.os == "Macos":
-                tools.replace_in_file("configure", r"-install_name \$rpath/\$soname", r"-install_name \$soname")
+            if tools.is_apple_os(self.settings.os):
+                # relocatable shared lib on macOS
+                tools.replace_in_file(
+                    "configure",
+                    "-install_name \\$rpath/\\$soname",
+                    "-install_name \\@rpath/\\$soname"
+                )
 
             self.run("chmod +x configure")
             env_build.configure(args=args)
@@ -143,13 +152,18 @@ class GiflibConan(ConanFile):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder, ignore_case=True, keep_path=False)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
+        if self._is_msvc and self.options.shared:
             tools.rename(os.path.join(self.package_folder, "lib", "gif.dll.lib"),
                          os.path.join(self.package_folder, "lib", "gif.lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "GIF")
+        self.cpp_info.set_property("cmake_target_name", "GIF::GIF")
+
         self.cpp_info.names["cmake_find_package"] = "GIF"
         self.cpp_info.names["cmake_find_package_multi"] = "GIF"
+
         self.cpp_info.libs = ["gif"]
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc:
             self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")

@@ -1,26 +1,19 @@
 sources:
-  "2.16.3-apache":
-    url: "https://tls.mbed.org/download/mbedtls-2.16.3-apache.tgz"
-    sha256: "ec1bee6d82090ed6ea2690784ea4b294ab576a65d428da9fe8750f932d2da661"
-  "2.16.3-gpl":
-    url: "https://tls.mbed.org/download/mbedtls-2.16.3-gpl.tgz"
-    sha256: "fd01fe4b289116df7781d05e1ef712b6c98823c5334f4a27404f13a8d066ef6a"
-  "2.23.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.23.0.tar.gz"
-    sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"
-  "2.24.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz"
-    sha256: "b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
-  "2.25.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.25.0.tar.gz"
-    sha256: "ea2049c2dd4868693998d5a9780e198194be5aea1706ff4a9d4f882f18c0a101"
+  "3.2.1":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.2.1.tar.gz"
+    sha256: "5850089672560eeaca03dc36678ee8573bb48ef6e38c94f5ce349af60c16da33"
+  "3.1.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.1.0.tar.gz"
+    sha256: "64d01a3b22b91cf3a25630257f268f11bc7bfa37981ae6d397802dd4ccec4690"
   "3.0.0":
     url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.0.0.tar.gz"
     sha256: "377d376919be19f07c7e7adeeded088a525be40353f6d938a78e4f986bce2ae0"
-patches:
-  "2.16.3-apache":
-    - patch_file: "patches/0001-visual-studio-shared-apache.patch"
-      base_path: "source_subfolder"
-  "2.16.3-gpl":
-    - patch_file: "patches/0001-visual-studio-shared-gpl.patch"
-      base_path: "source_subfolder"
+  "2.25.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.25.0.tar.gz"
+    sha256: "ea2049c2dd4868693998d5a9780e198194be5aea1706ff4a9d4f882f18c0a101"
+  "2.24.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz"
+    sha256: "b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
+  "2.23.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.23.0.tar.gz"
+    sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"

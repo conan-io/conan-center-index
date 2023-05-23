@@ -1,6 +1,9 @@
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
-import glob
-from conans import ConanFile, tools
+
+required_conan_version = ">=1.50.0"
 
 
 class SdfConan(ConanFile):
@@ -9,26 +12,30 @@ class SdfConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/memononen/SDF"
-    topics = ("conan", "sdf", "signed", "distance", "field", "contour")
-    settings = "os"
+    topics = ("sdf", "signed", "distance", "field", "contour")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('SDF-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def package(self):
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        self.copy("*.h", src=os.path.join(self._source_subfolder, "src"), dst="include")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", src=os.path.join(self.source_folder, "src"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

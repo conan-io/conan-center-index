@@ -1,3 +1,23 @@
 versions:
-  "0.29.0":
+  "7.0.0":
+    folder: all
+  "6.0.0":
+    folder: all
+  "5.0.0":
+    folder: all
+  "3.0.0":
+    folder: all
+  "2.0.0":
+    folder: all
+  "1.0.0":
+    folder: all
+  "0.39.0":
+    folder: all
+  "0.38.0":
+    folder: all
+  "0.37.0":
+    folder: all
+  "0.36.0":
+    folder: all
+  "0.35.0":
     folder: all

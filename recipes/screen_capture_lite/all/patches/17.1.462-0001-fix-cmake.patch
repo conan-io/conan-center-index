@@ -1,0 +1,66 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d646b23..23742b8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,11 +1,10 @@
+-cmake_minimum_required(VERSION 3.20)
++cmake_minimum_required(VERSION 3.12)
+ project(screen_capture_lite_build)
+ 
+ set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF) 
+ option(BUILD_EXAMPLE "Build example" ON)
+-set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
+ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ 
+@@ -22,13 +21,20 @@ else()
+ endif()
+ 
+ add_subdirectory(src_cpp) 
+-add_subdirectory(src_csharp) 
+ 
+-install (TARGETS screen_capture_lite_static screen_capture_lite_shared 
+-	RUNTIME DESTINATION bin
+-	ARCHIVE DESTINATION lib
+-	LIBRARY DESTINATION lib
+-)
++if(BUILD_SHARED_LIBS)
++  install (TARGETS screen_capture_lite_shared
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  )
++else()
++  install (TARGETS screen_capture_lite_static
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  )
++endif()
+  
+ install (FILES 
+ 	include/ScreenCapture.h 
+diff --git a/src_cpp/CMakeLists.txt b/src_cpp/CMakeLists.txt
+index 9d1ecc8..2933b97 100644
+--- a/src_cpp/CMakeLists.txt
++++ b/src_cpp/CMakeLists.txt
+@@ -77,9 +77,11 @@ set(libsrc
+ 		${SCREEN_CAPTURE_PLATFORM_SRC}
+ )
+ 
++if(NOT BUILD_SHARED_LIBS)
+ message("Building STATIC Library")
+ add_library(${PROJECT_NAME}_static STATIC ${libsrc})
+ 
++else()
+   message("Building SHARED Library")
+   
+     add_library(${PROJECT_NAME}_shared SHARED ${libsrc} ../include/ScreenCapture_C_API.h)
+@@ -127,4 +129,4 @@ add_library(${PROJECT_NAME}_static STATIC ${libsrc})
+ 			${CMAKE_THREAD_LIBS_INIT}
+ 		)	 
+ 	endif()
+-  
++endif()

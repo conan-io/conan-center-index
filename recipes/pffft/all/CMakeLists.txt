@@ -1,29 +1,29 @@
 cmake_minimum_required(VERSION 3.4)
-project(pffft C)
+project(pffft LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+include(GNUInstallDirs)
 
 option(DISABLE_SIMD "Use scalar code instead of simd code" OFF)
 
-add_library(${PROJECT_NAME} source_subfolder/pffft.c)
+add_library(pffft ${PFFFT_SRC_DIR}/pffft.c)
 if(DISABLE_SIMD)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE PFFFT_SIMD_DISABLE)
+    target_compile_definitions(pffft PRIVATE PFFFT_SIMD_DISABLE)
 endif()
 if(MSVC)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
-  set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    target_compile_definitions(pffft PRIVATE _USE_MATH_DEFINES)
+    set_property(TARGET pffft PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif()
-find_library(MATH_LIBRARY m)
-if(MATH_LIBRARY)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${MATH_LIBRARY})
+include(CheckFunctionExists)
+check_function_exists(round HAVE_MATH_SYSTEM)
+if(NOT HAVE_MATH_SYSTEM)
+    target_link_libraries(pffft PRIVATE m)
 endif()
 
 install(
-  TARGETS ${PROJECT_NAME}
+  TARGETS pffft
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES source_subfolder/pffft.h
+install(FILES ${PFFFT_SRC_DIR}/pffft.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

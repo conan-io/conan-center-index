@@ -14,3 +14,5 @@ patches:
       base_path: source_subfolder
     - patch_file: patches/0005-use-JPEG-target-for-plugin.patch
       base_path: source_subfolder
+    - patch_file: patches/0006-Declare-result-as-LONG-for-Mingw-build.patch
+      base_path: source_subfolder

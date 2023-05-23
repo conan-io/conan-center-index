@@ -1,7 +1,10 @@
 import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.52.0"
 
 
 class Box2dConan(ConanFile):
@@ -16,55 +19,53 @@ class Box2dConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True,}
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("box2d-%s" % self.version, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BOX2D_BUILD_TESTBED"] = False
-        self._cmake.definitions["BOX2D_BUILD_UNIT_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.variables["BOX2D_BUILD_TESTBED"] = False
+        tc.variables["BOX2D_BUILD_UNIT_TESTS"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "box2d"
         self.cpp_info.names["cmake_find_package_multi"] = "box2d"
         self.cpp_info.libs = ["box2d"]
-        if tools.Version(self.version) >= "2.4.1" and self.options.shared:
+        if Version(self.version) >= "2.4.1" and self.options.shared:
             self.cpp_info.defines.append("B2_SHARED")

@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 88c4ba53..0b094735 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -446,7 +446,7 @@ add_subdirectory(Primitives)
+ add_subdirectory(Platforms)
+ add_subdirectory(Common)
+ add_subdirectory(Graphics)
+-add_subdirectory(Tests)
++#add_subdirectory(Tests)
+ 
+ 
+ # Installation instructions

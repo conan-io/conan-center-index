@@ -1,27 +1,34 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibcdsConan(ConanFile):
     name = "libcds"
     description = "C++11 library of Concurrent Data Structures."
     license = "BSL-1.0"
-    topics = ("conan", "libcds", "concurrent", "lock-free", "containers", "hazard-pointer", "rcu")
+    topics = ("concurrent", "lock-free", "containers", "hazard-pointer", "rcu")
     homepage = "https://github.com/khizmax/libcds"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,54 +36,65 @@ class LibcdsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.81.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("Macos M1 not supported (yet)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_TESTS"] = False
-        self._cmake.definitions["WITH_TESTS_COVERAGE"] = False
-        self._cmake.definitions["WITH_BOOST_ATOMIC"] = False
-        self._cmake.definitions["WITH_ASAN"] = False
-        self._cmake.definitions["WITH_TSAN"] = False
-        self._cmake.definitions["ENABLE_UNIT_TEST"] = False
-        self._cmake.definitions["ENABLE_STRESS_TEST"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITH_TESTS"] = False
+        tc.variables["WITH_TESTS_COVERAGE"] = False
+        tc.variables["WITH_BOOST_ATOMIC"] = False
+        tc.variables["WITH_ASAN"] = False
+        tc.variables["WITH_TSAN"] = False
+        tc.variables["ENABLE_UNIT_TEST"] = False
+        tc.variables["ENABLE_STRESS_TEST"] = False
+        tc.generate()
+        cd = CMakeDeps(self)
+        cd.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "LibCDS"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibCDS"
         cmake_target = "cds" if self.options.shared else "cds-s"
-        self.cpp_info.components["_libcds"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["_libcds"].names["cmake_find_package_multi"] = cmake_target
-        self.cpp_info.components["_libcds"].libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "LibCDS")
+        self.cpp_info.set_property("cmake_target_name", f"LibCDS::{cmake_target}")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["_libcds"].libs = collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["_libcds"].defines = ["CDS_BUILD_STATIC_LIB"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["_libcds"].system_libs = ["pthread"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_libcds"].system_libs = ["m", "pthread"]
         if self.settings.compiler in ["gcc", "clang", "apple-clang"] and self.settings.arch == "x86_64":
             self.cpp_info.components["_libcds"].cxxflags = ["-mcx16"]
         self.cpp_info.components["_libcds"].requires = ["boost::boost"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "LibCDS"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibCDS"
+        self.cpp_info.components["_libcds"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_libcds"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_libcds"].set_property("cmake_target_name", f"LibCDS::{cmake_target}")

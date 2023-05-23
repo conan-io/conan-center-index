@@ -1,0 +1,64 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -263,9 +263,7 @@ set(REPORTER_SOURCES
+ )
+ set(REPORTER_FILES ${REPORTER_HEADERS} ${REPORTER_SOURCES})
+ 
+-# Fixme: STATIC because for dynamic, we would need to handle visibility
+-# and I don't want to do the annotations right now
+-add_library(Catch2 STATIC
++add_library(Catch2
+   ${REPORTER_FILES}
+   ${INTERNAL_FILES}
+   ${BENCHMARK_HEADERS}
+@@ -318,7 +316,7 @@ target_include_directories(Catch2
+ )
+ 
+ 
+-add_library(Catch2WithMain STATIC
++add_library(Catch2WithMain
+     ${SOURCES_DIR}/internal/catch_main.cpp
+ )
+ add_build_reproducibility_settings(Catch2WithMain)
+@@ -338,8 +336,12 @@ if (NOT_SUBPROJECT)
+         Catch2WithMain
+       EXPORT
+         Catch2Targets
+-      DESTINATION
++      LIBRARY DESTINATION 
++        ${CMAKE_INSTALL_LIBDIR}
++      ARCHIVE DESTINATION
+         ${CMAKE_INSTALL_LIBDIR}
++      RUNTIME DESTINATION
++        ${CMAKE_INSTALL_BINDIR}
+     )
+ 
+ 
+@@ -409,3 +411,27 @@ endif()
+ 
+ list(APPEND CATCH_WARNING_TARGETS Catch2 Catch2WithMain)
+ set(CATCH_WARNING_TARGETS ${CATCH_WARNING_TARGETS} PARENT_SCOPE)
++
++
++# We still do not support building dynamic library with hidden visibility
++# so we want to check & warn users if they do this. However, we won't abort
++# the configuration step so that we don't have to also provide an override.
++if (BUILD_SHARED_LIBS)
++    if (MSVC)
++        set_target_properties(Catch2 Catch2WithMain
++          PROPERTIES
++            WINDOWS_EXPORT_ALL_SYMBOLS ON
++        )
++    endif()
++
++    get_target_property(_VisPreset Catch2 CXX_VISIBILITY_PRESET)
++    if (NOT MSVC AND _VisPreset STREQUAL "hidden")
++        set_target_properties(Catch2 Catch2WithMain
++          PROPERTIES
++            CXX_VISIBILITY_PRESET "default"
++            VISIBILITY_INLINES_HIDDEN OFF
++        )
++        message(WARNING "Setting Catch2's visibility to default."
++                        " Hidden visibility is not supported.")
++    endif()
++endif()

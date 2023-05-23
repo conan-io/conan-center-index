@@ -1,8 +1,13 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-import contextlib
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class BisonConan(ConanFile):
@@ -20,145 +25,147 @@ class BisonConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/*"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("m4/1.4.18")
+        self.requires("m4/1.4.19")
+
+    def validate(self):
+        if is_msvc(self) and self.version == "3.8.2":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} is not yet ready for Visual Studio, use previous version "
+                "or open a pull request on https://github.com/conan-io/conan-center-index/pulls"
+            )
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.4")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
         if self.settings.os != "Windows":
-            self.build_requires("flex/2.6.4")
+            self.tool_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CFLAGS": "-{}".format(self.settings.compiler.runtime),
-                    "LD": "link",
-                    "NM": "dumpbin -symbols",
-                    "STRIP": ":",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "RANLIB": ":",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    @property
-    def _datarootdir(self):
-        return os.path.join(self.package_folder, "res")
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = [
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
             "--enable-relocatable",
             "--disable-nls",
-            "--datarootdir={}".format(os.path.join(self._datarootdir).replace("\\", "/")),
-        ]
-        host, build = None, None
-        if self.settings.os == "Windows":
-            self._autotools.defines.append("_WINDOWS")
-        if self.settings.compiler == "Visual Studio":
+            "--datarootdir=${prefix}/res",
+        ])
+        if self.settings.compiler == "apple-clang":
+            tc.configure_args.append("gl_cv_compiler_check_decl_option=")
+        if is_msvc(self):
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
             # Visual Studio does not support the %n format flag:
             # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
             # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
             # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
-            args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
-            self._autotools.flags.append("-FS")
-            host, build = False, False
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
-        return self._autotools
+            tc.configure_args.extend([
+                "gl_cv_func_printf_directive_n=no",
+                "gl_cv_func_snprintf_directive_n=no",
+                "gl_cv_func_snprintf_directive_n=no",
+            ])
+            tc.extra_cflags.append("-FS")
+        env = tc.environment()
+        if is_msvc(self):
+            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
+            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+        tc.generate(env)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
+
+        makefile = os.path.join(self.source_folder, "Makefile.in")
+        yacc = os.path.join(self.source_folder, "src", "yacc.in")
 
         if self.settings.os == "Windows":
             # replace embedded unix paths by windows paths
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, makefile,
                                   "echo '#define BINDIR \"$(bindir)\"';",
                                   "echo '#define BINDIR \"$(shell cygpath -m \"$(bindir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, makefile,
                                   "echo '#define PKGDATADIR \"$(pkgdatadir)\"';",
                                   "echo '#define PKGDATADIR \"$(shell cygpath -m \"$(pkgdatadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, makefile,
                                   "echo '#define DATADIR \"$(datadir)\"';",
                                   "echo '#define DATADIR \"$(shell cygpath -m \"$(datadir)\")\"';")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+            replace_in_file(self, makefile,
                                   "echo '#define DATAROOTDIR \"$(datarootdir)\"';",
                                   "echo '#define DATAROOTDIR \"$(shell cygpath -m \"$(datarootdir)\")\"';")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+        replace_in_file(self, makefile,
                               "dist_man_MANS = $(top_srcdir)/doc/bison.1",
                               "dist_man_MANS =")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
-                              "@prefix@",
-                              "${}_ROOT".format(self.name.upper()))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "yacc.in"),
-                              "@bindir@",
-                              "${}_ROOT/bin".format(self.name.upper()))
+        replace_in_file(self, yacc, "@prefix@", "$CONAN_BISON_ROOT")
+        replace_in_file(self, yacc, "@bindir@", "$CONAN_BISON_ROOT/bin")
 
     def build(self):
         self._patch_sources()
-        with self._build_context():
-            env_build = self._configure_autotools()
-            env_build.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.install()
 
     def package(self):
-        with self._build_context():
-            env_build = self._configure_autotools()
-            env_build.install()
-            self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-
-        if self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "liby.a"),
-                      os.path.join(self.package_folder, "lib", "y.lib"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        if is_msvc(self):
+            rename(self, os.path.join(self.package_folder, "lib", "liby.a"),
+                         os.path.join(self.package_folder, "lib", "y.lib"))
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.libs = ["y"]
+        self.cpp_info.resdirs = ["res"]
 
-        self.output.info("Setting BISON_ROOT environment variable: {}".format(self.package_folder))
-        self.env_info.BISON_ROOT = self.package_folder.replace("\\", "/")
+        bison_root = self.package_folder.replace("\\", "/")
+        self.buildenv_info.define_path("CONAN_BISON_ROOT", bison_root)
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-        pkgdir = os.path.join(self._datarootdir, "bison")
-        self.output.info("Setting the BISON_PKGDATADIR environment variable: {}".format(pkgdir))
-        self.env_info.BISON_PKGDATADIR = pkgdir
+        pkgdir = os.path.join(self.package_folder, "res", "bison")
+        self.buildenv_info.define_path("BISON_PKGDATADIR", pkgdir)
 
         # yacc is a shell script, so requires a shell (such as bash)
-        self.user_info.YACC = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")
+        yacc = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")
+        self.conf_info.define("user.bison:yacc", yacc)
+
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.CONAN_BISON_ROOT = self.package_folder.replace("\\", "/")
+        self.env_info.BISON_PKGDATADIR = pkgdir
+        self.user_info.YACC = yacc

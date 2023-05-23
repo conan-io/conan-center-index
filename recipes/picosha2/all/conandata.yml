@@ -1,0 +1,7 @@
+sources:
+  "cci.20220808":
+    url: "https://github.com/okdshin/PicoSHA2/archive/27fcf6979298949e8a462e16d09a0351c18fcaf2.tar.gz"
+    sha256: "18d82bb79c021ccf4ce58125b64691accef54237ba5194462740bacf8b39d8a9"
+  "1.0.0":
+    url: "https://github.com/okdshin/PicoSHA2/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "dec99b43440157847cf5dadfad060b9154749523da28eb1599872f87d1ea8e4b"

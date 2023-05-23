@@ -1,18 +1,21 @@
 sources:
-  "2.0.14":
-    url: "https://www.libsdl.org/release/SDL2-2.0.14.tar.gz"
-    sha256: d8215b571a581be1332d2106f8036fcb03d12a70bae01e20f424976d275432bc
-  "2.0.16":
-    url: "https://www.libsdl.org/release/SDL2-2.0.16.tar.gz"
-    sha256: 65be9ff6004034b5b2ce9927b5a4db1814930f169c4b2dae0a1e4697075f287b
+  "2.26.1":
+    url: "https://www.libsdl.org/release/SDL2-2.26.1.tar.gz"
+    sha256: "02537cc7ebd74071631038b237ec4bfbb3f4830ba019e569434da33f42373e04"
+  "2.26.0":
+    url: "https://www.libsdl.org/release/SDL2-2.26.0.tar.gz"
+    sha256: "8000d7169febce93c84b6bdf376631f8179132fd69f7015d4dadb8b9c2bdb295"
+  "2.24.1":
+    url: "https://www.libsdl.org/release/SDL2-2.24.1.tar.gz"
+    sha256: "bc121588b1105065598ce38078026a414c28ea95e66ed2adab4c44d80b309e1b"
+  "2.24.0":
+    url: "https://www.libsdl.org/release/SDL2-2.24.0.tar.gz"
+    sha256: "91e4c34b1768f92d399b078e171448c6af18cafda743987ed2064a28954d6d97"
+  "2.0.20":
+    url: "https://www.libsdl.org/release/SDL2-2.0.20.tar.gz"
+    sha256: "c56aba1d7b5b0e7e999e4a7698c70b63a3394ff9704b5f6e1c57e0c16f04dd06"
 patches:
-  "2.0.14":
-    - patch_file: "patches/0001-fix-cmake-ios-tvos.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-mingw-improvements.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-2.0.14-wayland-scanner-buildrequires.patch"
-      base_path: "source_subfolder"
-  "2.0.16":  
-    - patch_file: "patches/0003-2.0.16-wayland-scanner-buildrequires.patch"
-      base_path: "source_subfolder"
+  "2.0.20":
+    - patch_file: "patches/0004-2.0.20-ndk.patch"
+      patch_type: "conan"
+      patch_description: "ndk patch"

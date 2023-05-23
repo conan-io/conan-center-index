@@ -1,0 +1,4 @@
+sources:
+  "0.1.15":
+    url: "https://github.com/kristapsdz/kplot/archive/refs/tags/VERSION_0_1_15.tar.gz"
+    sha256: "602ebaac9b67dc7c7e84d8112df887c95ba0a1c4ed71fbab6671f8c5ecf4ba2a"

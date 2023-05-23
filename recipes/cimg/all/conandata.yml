@@ -1,4 +1,13 @@
 sources:
+  "3.2.0":
+    url: "https://cimg.eu/files/CImg_3.2.0.zip"
+    sha256: "7a923357c3127d8839696c7b0f4eb4c23982c090d3f49fb133f2c8556ca74a88"
+  "3.0.2":
+    url: "https://cimg.eu/files/CImg_3.0.2.zip"
+    sha256: "ee55a37c33d503a64ff264b53952e502ba7c2887b59ded47c47c86ea52ac5c31"
+  "3.0.0":
+    url: "https://cimg.eu/files/CImg_3.0.0.zip"
+    sha256: "8ec6e9d87459a3cb85bddcd5ae8a4891bc734957ea4aa3089dcf1d234e8d0525"
   "2.9.9":
     url: "https://cimg.eu/files/CImg_2.9.9.zip"
     sha256: "c94412f26800ea318fa79410c58da1cf3df71771d07e515c39b16ee743f68e92"

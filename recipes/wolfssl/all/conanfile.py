@@ -1,10 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import contextlib
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class WolfSSLConan(ConanFile):
@@ -12,9 +16,13 @@ class WolfSSLConan(ConanFile):
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.wolfssl.com/"
-    description = "wolfSSL (formerly CyaSSL) is a small, fast, portable implementation of TLS/SSL for embedded devices to the cloud."
+    description = (
+        "wolfSSL (formerly CyaSSL) is a small, fast, portable implementation "
+        "of TLS/SSL for embedded devices to the cloud."
+    )
     topics = ("wolfssl", "tls", "ssl", "iot", "fips", "secure", "cryptology", "secret")
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -48,12 +56,6 @@ class WolfSSLConan(ConanFile):
         "testcert": False,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -64,49 +66,34 @@ class WolfSSLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        self.build_requires("libtool/2.4.6")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.options.opensslall and not self.options.opensslextra:
             raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "LD": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.link_flags.append("-ladvapi32")
-        self._autotools.libs = []
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
+        tc.configure_args.extend([
             "--disable-examples",
             "--disable-crypttests",
             "--enable-harden",
@@ -125,41 +112,48 @@ class WolfSSLConan(ConanFile):
             "--enable-testcert={}".format(yes_no(self.options.testcert)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        ])
+        if is_msvc(self):
+            tc.extra_ldflags.append("-ladvapi32")
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+        env = tc.environment()
+        if is_msvc(self):
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+        tc.generate(env)
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            if self.settings.compiler == "Visual Studio" and tools.Version(self.version) < "4.7":
-                tools.replace_in_file("libtool",
-                                      "AR_FLAGS=\"Ucru\"", "AR_FLAGS=\"cru\"")
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        copy(self, "LICENSING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
         os.unlink(os.path.join(self.package_folder, "bin", "wolfssl-config"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "wolfssl.lib"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "wolfssl"
-        libname = "wolfssl"
-        self.cpp_info.libs = [libname]
+        self.cpp_info.set_property("pkg_config_name", "wolfssl")
+        self.cpp_info.libs = ["wolfssl"]
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")
         if not self.options.shared:
-            if self.settings.os == "Linux":
-                self.cpp_info.system_libs.append("m")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])

@@ -1,0 +1,16 @@
+sources:
+  "0.27":
+    url: "https://github.com/bluescarni/mppp/archive/v0.27.tar.gz"
+    sha256: "a1e04f6605b3242d4361742159cf5ab273162fd7c105c2743a9bebcf44c846c3"
+  "0.26":
+    url: "https://github.com/bluescarni/mppp/archive/v0.26.tar.gz"
+    sha256: "4dbfa68802d9a1365eda884f085418afc147d01b7a928e8333e4dcc1c3b3ce9e"
+patches:
+  "0.27":
+    - patch_file: "patches/0.27-0001-disable-warning-error.patch"
+      patch_description: "disable the flag for treats warning as errors"
+      patch_type: "portability"
+  "0.26":
+    - patch_file: "patches/0.26-0001-disable-warning-error.patch"
+      patch_description: "disable the flag for treats warning as errors"
+      patch_type: "portability"

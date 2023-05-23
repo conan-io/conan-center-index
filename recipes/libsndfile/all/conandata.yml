@@ -1,4 +1,7 @@
 sources:
+  "1.2.0":
+    url: "https://github.com/libsndfile/libsndfile/releases/download/1.2.0/libsndfile-1.2.0.tar.xz"
+    sha256: "0e30e7072f83dc84863e2e55f299175c7e04a5902ae79cfb99d4249ee8f6d60a"
   "1.0.31":
     url: "https://github.com/libsndfile/libsndfile/releases/download/1.0.31/libsndfile-1.0.31.tar.bz2"
     sha256: "a8cfb1c09ea6e90eff4ca87322d4168cdbe5035cb48717b40bf77e751cc02163"
@@ -9,9 +12,15 @@ sources:
     url: "https://github.com/libsndfile/libsndfile/releases/download/v1.0.29/libsndfile-1.0.29.tar.bz2"
     sha256: "2ba20d44817c8176f097ab25eff44ef0aeec9e00973def5a7174c5ae0764b22f"
 patches:
+  "1.2.0":
+    - patch_file: "patches/1.0.31-0001-fix-msvc-runtime-logic.patch"
+      patch_description: "always set CMP0091"
+      patch_type: "portability"
   "1.0.31":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.0.31-0001-disable-static-runtime-logic.patch"
+    - patch_file: "patches/1.0.31-0001-fix-msvc-runtime-logic.patch"
+      patch_description: "always set CMP0091"
+      patch_type: "portability"
   "1.0.30":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.0.30-0001-disable-static-runtime-logic.patch"
+    - patch_file: "patches/1.0.30-0001-disable-static-libgcc-mingw.patch"
+      patch_description: "disable link libgcc statically on MINGW"
+      patch_type: "portability"

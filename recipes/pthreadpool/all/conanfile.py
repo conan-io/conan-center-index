@@ -1,6 +1,9 @@
-from conans import ConanFile, CMake, tools
-import glob
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class PthreadpoolConan(ConanFile):
@@ -9,11 +12,10 @@ class PthreadpoolConan(ConanFile):
                   "implementation. It provides similar functionality to " \
                   "#pragma omp parallel for, but with additional features."
     license = "BSD-2-Clause"
-    topics = ("conan", "pthreadpool", "multi-threading", "pthreads",
-              "multi-core", "threadpool")
+    topics = ("multi-threading", "pthreads", "multi-core", "threadpool")
     homepage = "https://github.com/Maratyszcza/pthreadpool"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,12 +29,6 @@ class PthreadpoolConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,47 +36,49 @@ class PthreadpoolConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("fxdiv/cci.20200417")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("pthreadpool-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["PTHREADPOOL_LIBRARY_TYPE"] = "default"
+        tc.variables["PTHREADPOOL_ALLOW_DEPRECATED_API"] = True
+        tc.cache_variables["PTHREADPOOL_SYNC_PRIMITIVE"] = self.options.sync_primitive
+        tc.variables["PTHREADPOOL_BUILD_TESTS"] = False
+        tc.variables["PTHREADPOOL_BUILD_BENCHMARKS"] = False
+        tc.cache_variables["FXDIV_SOURCE_DIR"] = "dummy" # this value doesn't really matter, it's just to avoid a download
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PTHREADPOOL_LIBRARY_TYPE"] = "default"
-        self._cmake.definitions["PTHREADPOOL_ALLOW_DEPRECATED_API"] = True
-        self._cmake.definitions["PTHREADPOOL_SYNC_PRIMITIVE"] = self.options.sync_primitive
-        self._cmake.definitions["PTHREADPOOL_BUILD_TESTS"] = False
-        self._cmake.definitions["PTHREADPOOL_BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["FXDIV_SOURCE_DIR"] = "dummy" # this value doesn't really matter, it's just to avoid a download
-        self._cmake.configure()
-        return self._cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["pthreadpool"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]

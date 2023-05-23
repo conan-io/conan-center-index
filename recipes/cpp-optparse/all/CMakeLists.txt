@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 3.4)
-project(cpp-optparser)
+project(cpp-optparse LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+include(GNUInstallDirs)
 
-add_library(OptionParser source_subfolder/OptionParser.cpp)
-
-if(MSVC AND BUILD_SHARED_LIBS)
-    set_target_properties(OptionParser PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-endif()
+add_library(OptionParser ${CPP_OPTPARSE_SRC_DIR}/OptionParser.cpp)
+set_target_properties(OptionParser PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 install(TARGETS OptionParser
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES source_subfolder/OptionParser.h DESTINATION include)
+install(FILES ${CPP_OPTPARSE_SRC_DIR}/OptionParser.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

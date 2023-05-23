@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/mapbox/variant/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "7059f4420d504c4bc96f8a462a0f6d029c5be914ba55cc030a0a773366dd7bc8"

@@ -1,8 +1,10 @@
 sources:
   "3.2.0":
-    sha256: 324b3a2b16cd14ea4234d75fa90f08b29509bac9cd3795c44268e22f906ee0ad
-    url: https://github.com/cisco/libest/archive/r3.2.0.tar.gz
+    url: "https://github.com/cisco/libest/archive/r3.2.0.tar.gz"
+    sha256: "324b3a2b16cd14ea4234d75fa90f08b29509bac9cd3795c44268e22f906ee0ad"
 patches:
   "3.2.0":
     - patch_file: "patches/0001-examples-are-broken-don-t-build-them.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-add-extern.patch"
       base_path: "source_subfolder"

@@ -1,10 +1,13 @@
 sources:
-  "1.4.4":
-    url: https://github.com/jarro2783/cxxopts/archive/v1.4.4.zip
-    sha256: 7c8ec885fcc58e10a8268b57ae04d5cbeac895d150d3a09c15605ff7ef05cf87
-  "2.2.0":
-    url: https://github.com/jarro2783/cxxopts/archive/v2.2.0.zip
-    sha256: f9640c00d9938bedb291a21f9287902a3a8cee38db6910b905f8eba4a6416204
+  "3.1.1":
+    url: "https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.1.1.tar.gz"
+    sha256: "523175f792eb0ff04f9e653c90746c12655f10cb70f1d5e6d6d9491420298a08"
+  "3.0.0":
+    url: "https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "36f41fa2a46b3c1466613b63f3fa73dc24d912bc90d667147f1e43215a8c6d00"
   "2.2.1":
-    url: https://github.com/jarro2783/cxxopts/archive/v2.2.1.zip
-    sha256: 7021ce97f51a40f7fd3558da416ab6914b1d3f758ccf68a1e8734ad10b49b676
+    url: "https://github.com/jarro2783/cxxopts/archive/refs/tags/v2.2.1.tar.gz"
+    sha256: "984aa3c8917d649b14d7f6277104ce38dd142ce378a9198ec926f03302399681"
+  "2.2.0":
+    url: "https://github.com/jarro2783/cxxopts/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "447dbfc2361fce9742c5d1c9cfb25731c977b405f9085a738fbd608626da8a4d"

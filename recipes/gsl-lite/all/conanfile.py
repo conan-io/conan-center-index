@@ -1,18 +1,20 @@
-from conans import tools, ConanFile
+from conan import ConanFile
+from conan.tools.files import get, copy
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.47.0"
+
 
 class GslLiteConan(ConanFile):
     name = "gsl-lite"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    generators = "cmake"
     homepage = "https://github.com/martinmoene/gsl-lite"
     topics = ("GSL")
     description = "A single-file header-only version of ISO C++ " \
                   "Guideline Support Library (GSL) for C++98, C++11 and later"
-    no_copy_source = True
+
+    settings = "os", "arch", "compiler", "build_type"
     #  There are three configuration options for this GSL implementation's behavior
     #  when pre/post conditions on the GSL types are violated:
     #
@@ -27,9 +29,11 @@ class GslLiteConan(ConanFile):
         "on_contract_violation": "terminate",
     }
 
+    no_copy_source = True
+
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     @property
     def _contract_map(self):
@@ -40,22 +44,27 @@ class GslLiteConan(ConanFile):
         }
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy("*gsl-lite.hpp", src=self._source_subfolder)
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
+        copy(self, "*gsl-lite.hpp", src=self._source_subfolder, dst=self.package_folder)
+        copy(self, "LICENSE",  src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "gsl-lite")
+        self.cpp_info.set_property("cmake_target_name", "gsl::gsl-lite")
+        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "gsl-lite"
         self.cpp_info.filenames["cmake_find_package_multi"] = "gsl-lite"
         self.cpp_info.names["cmake_find_package"] = "gsl"
         self.cpp_info.names["cmake_find_package_multi"] = "gsl"
         self.cpp_info.components["gsllite"].names["cmake_find_package"] = "gsl-lite"
         self.cpp_info.components["gsllite"].names["cmake_find_package_multi"] = "gsl-lite"
-        self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+        self.cpp_info.components["gsllite"].set_property("cmake_target_name", "gsl::gsl-lite")

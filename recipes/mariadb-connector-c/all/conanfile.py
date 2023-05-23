@@ -1,8 +1,10 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.53.0"
 
 
 class MariadbConnectorcConan(ConanFile):
@@ -10,11 +12,11 @@ class MariadbConnectorcConan(ConanFile):
     description = "MariaDB Connector/C is used to connect applications " \
                   "developed in C/C++ to MariaDB and MySQL databases."
     license = "LGPL-2.1-or-later"
-    topics = ("conan", "mariadb-connector-c", "mariadb", "mysql", "database")
+    topics = ("mariadb", "mysql", "database")
     homepage = "https://mariadb.com/kb/en/mariadb-connector-c"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,7 +24,7 @@ class MariadbConnectorcConan(ConanFile):
         "dyncol": [True, False],
         "with_iconv": [True, False],
         "with_curl": [True, False],
-        "with_ssl": [False, "openssl", "gnutls", "schannel"]
+        "with_ssl": [False, "openssl", "gnutls", "schannel"],
     }
     default_options = {
         "shared": False,
@@ -30,14 +32,11 @@ class MariadbConnectorcConan(ConanFile):
         "dyncol": True,
         "with_iconv": False,
         "with_curl": True,
-        "with_ssl": "openssl"
+        "with_ssl": "openssl",
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,80 +46,88 @@ class MariadbConnectorcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
-            raise ConanInvalidConfiguration("schannel only supported on Windows")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.2.13")
         if self.options.get_safe("with_iconv"):
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_curl:
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/8.0.1")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
-        elif self.options.with_ssl == "gnutls":
+            self.requires("openssl/[>=1.1 <4]")
+
+    def validate(self):
+        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
+            raise ConanInvalidConfiguration("schannel only supported on Windows")
+        if self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("gnutls not yet available in CCI")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "mariadb-connector-c-{}-src".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Windows":
+            tc.variables["WITH_MSI"] = False
+            tc.variables["WITH_SIGNCODE"] = False
+            tc.variables["WITH_RTC"] = False
+        else:
+            tc.variables["WITH_MYSQLCOMPAT"] = False
+            tc.variables["WITH_ICONV"] = self.options.with_iconv
+        tc.variables["WITH_UNIT_TESTS"] = False
+        tc.variables["WITH_DYNCOL"] = self.options.dyncol
+        tc.variables["WITH_EXTERNAL_ZLIB"] = True
+        tc.variables["WITH_CURL"] = self.options.with_curl
+        tc.variables["WITH_SSL"] = self.options.with_ssl
+        tc.variables["INSTALL_BINDIR"] = "bin"
+        tc.variables["INSTALL_LIBDIR"] = "lib"
+        tc.variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
+        # To install relocatable shared libs on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        root_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
-        tools.replace_in_file(
+        root_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
+        replace_in_file(self,
             root_cmake,
             "SET(SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})",
-            "SET(SSL_LIBRARIES ${OPENSSL_LIBRARIES})"
+            "SET(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)"
         )
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if self.settings.os == "Windows":
-            self._cmake.definitions["WITH_MSI"] = False
-            self._cmake.definitions["WITH_SIGNCODE"] = False
-            self._cmake.definitions["WITH_RTC"] = False
-        else:
-            self._cmake.definitions["WITH_MYSQLCOMPAT"] = False
-            self._cmake.definitions["WITH_ICONV"] = self.options.with_iconv
-        self._cmake.definitions["WITH_UNIT_TESTS"] = False
-        self._cmake.definitions["WITH_DYNCOL"] = self.options.dyncol
-        self._cmake.definitions["WITH_EXTERNAL_ZLIB"] = True
-        self._cmake.definitions["WITH_CURL"] = self.options.with_curl
-        self._cmake.definitions["WITH_SSL"] = self.options.with_ssl
-        self._cmake.definitions["INSTALL_BINDIR"] = "bin"
-        self._cmake.definitions["INSTALL_LIBDIR"] = "lib"
-        self._cmake.definitions["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
-        self._cmake.configure()
-        return self._cmake
+        replace_in_file(self, root_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
+        plugins_io_cmake = os.path.join(self.source_folder, "plugins", "io", "CMakeLists.txt")
+        replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING.LIB", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING.LIB", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "symbols"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "symbols"))
+        rmdir(self, os.path.join(self.package_folder, "man"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libmariadb"
+        self.cpp_info.set_property("pkg_config_name", "libmariadb")
         self.cpp_info.includedirs.append(os.path.join("include", "mariadb"))
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "shlwapi"]
@@ -128,5 +135,7 @@ class MariadbConnectorcConan(ConanFile):
                 self.cpp_info.system_libs.append("secur32")
 
         plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
-        self.output.info("Creating MARIADB_PLUGIN_DIR environment variable: {}".format(plugin_dir))
-        self.env_info.MARIADB_PLUGIN_DIR = plugin_dir
+        self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
+
+        # TODO: to remove in conan v2
+        self.env_info.MARIADB_PLUGIN_DIR.append(plugin_dir)

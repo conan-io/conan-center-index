@@ -1,53 +1,39 @@
-import os
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import build_jobs, can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
-    @property
-    def _with_netssl(self):
-        return (
-            ("enable_netssl" in self.options["poco"] and self.options["poco"].enable_netssl) or
-            ("enable_netssl_win" in self.options["poco"] and self.options["poco"].enable_netssl_win)
-        )
+    def layout(self):
+        cmake_layout(self)
 
-    @property
-    def _with_encodings(self):
-        return "enable_encodings" in self.options["poco"] and self.options["poco"].enable_encodings
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
-    @property
-    def _with_jwt(self):
-        return "enable_jwt" in self.options["poco"] and self.options["poco"].enable_jwt
+    def generate(self):
+        tc = CMakeToolchain(self)
+        poco_options = self.dependencies["poco"].options
+        tc.variables["TEST_CRYPTO"] = poco_options.enable_crypto
+        tc.variables["TEST_UTIL"] = poco_options.enable_util
+        tc.variables["TEST_NET"] = poco_options.enable_net
+        tc.variables["TEST_NETSSL"] = poco_options.get_safe("enable_netssl") or poco_options.get_safe("enable_netssl_win")
+        tc.variables["TEST_SQLITE"] = poco_options.enable_data_sqlite
+        tc.variables["TEST_ENCODINGS"] = poco_options.get_safe("enable_encodings", False)
+        tc.variables["TEST_JWT"] = poco_options.get_safe("enable_jwt", False)
+        tc.variables["TEST_PROMETHEUS"] = poco_options.get_safe("enable_prometheus", False)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["TEST_CRYPTO"] = self.options["poco"].enable_crypto
-        cmake.definitions["TEST_UTIL"] = self.options["poco"].enable_util
-        cmake.definitions["TEST_NET"] = self.options["poco"].enable_net
-        cmake.definitions["TEST_NETSSL"] = self._with_netssl
-        cmake.definitions["TEST_SQLITE"] = self.options["poco"].enable_data_sqlite
-        cmake.definitions["TEST_ENCODINGS"] = self._with_encodings
-        cmake.definitions["TEST_JWT"] = self._with_jwt
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
-            self.run(os.path.join("bin", "core"), run_environment=True)
-            if self.options["poco"].enable_util:
-                self.run(os.path.join("bin", "util"), run_environment=True)
-            if self.options["poco"].enable_crypto:
-                self.run("{} {}".format(os.path.join("bin", "crypto"), os.path.join(self.source_folder, "conanfile.py")), run_environment=True)
-            if self.options["poco"].enable_net:
-                self.run(os.path.join("bin", "net"), run_environment=True)
-                self.run(os.path.join("bin", "net_2"), run_environment=True)
-            if self._with_netssl:
-                self.run(os.path.join("bin", "netssl"), run_environment=True)
-            if self.options["poco"].enable_data_sqlite:
-                self.run(os.path.join("bin", "sqlite"), run_environment=True)
-            if self._with_encodings:
-                self.run(os.path.join("bin", "encodings"), run_environment=True)
-            if self._with_jwt:
-                self.run(os.path.join("bin", "jwt"), run_environment=True)
+        if can_run(self):
+            with chdir(self, self.build_folder):
+                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")

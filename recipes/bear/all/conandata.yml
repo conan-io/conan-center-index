@@ -1,0 +1,7 @@
+sources:
+  "3.0.21":
+    url: "https://github.com/rizsotto/Bear/archive/refs/tags/3.0.21.tar.gz"
+    sha256: "0c949a6a907bc61a1284661f8d9dab1788a62770c265f6142602669b6e5c389d"
+patches:
+  "3.0.21":
+    - patch_file: "patches/7de12540948cd5e0ee5f966b5cc383bc0c0e5fe9.diff"

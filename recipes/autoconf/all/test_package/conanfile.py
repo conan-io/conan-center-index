@@ -1,45 +1,51 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import copy
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
-import shutil
-
-required_conan_version = ">=1.36.0"
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp",
-    test_type = "build_requires"
+    settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
+    win_bash = True
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+    def layout(self):
+        basic_layout(self)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
-                    yield
-        else:
-            yield
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
+            self.tool_requires("msys2/cci.latest")
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+        if is_msvc(self):
+            env = Environment()
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
-        for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
-        self.run("{} --verbose".format(os.environ["AUTOCONF"]),
-                 win_bash=tools.os_info.is_windows, run_environment=True)
-        self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")),
-                 win_bash=tools.os_info.is_windows, run_environment=True)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with self._build_context():
-            autotools.configure()
-            autotools.make()
+        for src in ("configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp"):
+            copy(self, src, self.source_folder, self.build_folder)
+        self.run("autoconf --verbose")
+        autotools = Autotools(self)
+        autotools.configure(build_script_folder=self.build_folder)
+        autotools.make()
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run(os.path.join(".", "test_package"), run_environment=True)
+        self.win_bash = None
+        if can_run(self):
+            bin_path = os.path.join(self.build_folder, "test_package")
+            self.run(bin_path, env="conanrun")

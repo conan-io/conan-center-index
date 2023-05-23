@@ -1,0 +1,11 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6420a81..a98e68f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ cmake_minimum_required(VERSION 3.0)
+-project(DMTX VERSION 0.7.5 LANGUAGES C)
++project(DMTX VERSION 0.7.7 LANGUAGES C)
+ 
+ # DMTX library
+ option(DMTX_SHARED "Build DMTX as shared library" ${BUILD_SHARED_LIBS})

@@ -1,9 +1,12 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
-required_conan_version = ">=1.37.0"
 
 class GemmlowpConan(ConanFile):
     name = "gemmlowp"
@@ -12,61 +15,64 @@ class GemmlowpConan(ConanFile):
     homepage = "https://github.com/google/gemmlowp"
     description = "Low-precision matrix multiplication"
     topics = ("gemm", "matrix")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    _cmake = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("shared is not supported on Windows")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions['BUILD_TESTING'] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "contrib"))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package"] = "eight_bit_int_gemm"
-        self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package_multi"] = "eight_bit_int_gemm"
+        self.cpp_info.set_property("cmake_file_name", "gemmlowp")
+        self.cpp_info.set_property("cmake_target_name", "gemmlowp::gemmlowp")
+
+        self.cpp_info.components["eight_bit_int_gemm"].set_property("cmake_target_name", "gemmlowp::eight_bit_int_gemm")
+        self.cpp_info.components["eight_bit_int_gemm"].includedirs.append(os.path.join("include", "gemmlowp"))
         self.cpp_info.components["eight_bit_int_gemm"].libs = ["eight_bit_int_gemm"]
-        if self.settings.os == "Linux":
+        if is_msvc(self):
+            self.cpp_info.components["eight_bit_int_gemm"].defines = ["NOMINMAX"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eight_bit_int_gemm"].system_libs.extend(["pthread"])

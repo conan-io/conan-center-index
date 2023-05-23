@@ -1,17 +1,20 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class NormConan(ConanFile):
     name = "norm"
     description = "A reliable multicast transport protocol"
-    topics = ("conan", "norm", "multicast", "transport protocol")
+    topics = ("multicast", "transport protocol", "nack-oriented reliable multicast")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
     license = "NRL"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,42 +24,50 @@ class NormConan(ConanFile):
         "fPIC": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = "./protolib" # FIXME: use external protolib when available in CCI
-        self._cmake.configure()
-        return self._cmake
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("libxml2/2.10.3") # dependency of protolib actually
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version])
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["NORM_CUSTOM_PROTOLIB_VERSION"] = "./protolib" # FIXME: use external protolib when available in CCI
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*proto*")
+            rm(self, "*proto*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "norm"
-        self.cpp_info.names["cmake_find_package_multi"] = "norm"
+        self.cpp_info.set_property("cmake_file_name", "norm")
+        self.cpp_info.set_property("cmake_target_name", "norm::norm")
         self.cpp_info.libs = ["norm"]
         if not self.options.shared:
             self.cpp_info.libs.append("protokit")
@@ -65,10 +76,9 @@ class NormConan(ConanFile):
             self.cpp_info.defines.append("NORM_USE_DLL")
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = [
-                "ws2_32", "iphlpapi", "user32", "gdi32", "Advapi32", "ntdll"]
+            # system libs of protolib actually
+            self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "user32", "gdi32", "advapi32", "ntdll"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "rt"]
-            
-        if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
+            self.cpp_info.system_libs.extend(["dl", "rt"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")

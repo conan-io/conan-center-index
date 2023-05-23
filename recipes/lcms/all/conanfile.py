@@ -1,9 +1,13 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
-from conans.tools import Version
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import check_min_vs
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.57.0"
 
 
 class LcmsConan(ConanFile):
@@ -12,7 +16,8 @@ class LcmsConan(ConanFile):
     description = "A free, open source, CMM engine."
     license = "MIT"
     homepage = "https://github.com/mm2/Little-CMS"
-    topics = ("lcms", "cmm", "icc", "cmm-engine")
+    topics = ("littlecms", "little-cms", "cmm", "icc", "cmm-engine", "color-management-engine")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,15 +28,8 @@ class LcmsConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,113 +37,67 @@ class LcmsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("gnu-config/cci.20201022")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+        self.tool_requires("meson/1.0.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = MesonToolchain(self)
+        tc.generate()
 
     def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "14":
+        apply_conandata_patches(self)
+        if check_min_vs(self, "190", raise_invalid=False):
             # since VS2015 vsnprintf is built-in
-            path = os.path.join(self._source_subfolder, "src", "lcms2_internal.h")
-            tools.replace_in_file(path, "#       define vsnprintf  _vsnprintf", "")
-        if self.settings.os == "Android" and tools.os_info.is_windows:
-            # remove escape for quotation marks, to make ndk on windows happy
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
-                                  "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g",
-                                  "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
-
-    def _build_visual_studio(self):
-        if tools.Version(self.version) <= "2.11":
-            vc_sln_subdir = "VC2013"
-        else:
-            vc_sln_subdir = "VC2015"
-        with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
-            target = "lcms2_DLL" if self.options.shared else "lcms2_static"
-            upgrade_project = Version(self.settings.compiler.version) > "12"
-            # run build
-            msbuild = MSBuild(self)
-            msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--without-tiff",
-            "--without-jpeg",
-        ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    @property
-    def _user_info_build(self):
-        # If using the experimental feature with different context for host and
-        # build, the 'user_info' attributes of the 'build_requires' packages
-        # will be located into the 'user_info_build' object. In other cases they
-        # will be located into the 'deps_user_info' object.
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+            path = os.path.join(self.source_folder, "src", "lcms2_internal.h")
+            replace_in_file(self, path, "#       define vsnprintf  _vsnprintf", "")
 
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
-            self._build_visual_studio()
-        else:
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                        os.path.join(self._source_subfolder, "config.sub"))
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                        os.path.join(self._source_subfolder, "config.guess"))
-            autotools = self._configure_autotools()
-            autotools.make()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
-            if self.options.shared:
-                self.copy(pattern="*.lib", src=os.path.join(self._source_subfolder, "bin"), dst="lib", keep_path=False)
-                self.copy(pattern="*.dll", src=os.path.join(self._source_subfolder, "bin"), dst="bin", keep_path=False)
-            else:
-                self.copy(pattern="*.lib", src=os.path.join(self._source_subfolder, "Lib", "MS"), dst="lib",
-                          keep_path=False)
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
-            # remove entire share directory
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            # remove pkgconfig
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            # remove la files
-            la = os.path.join(self.package_folder, "lib", "liblcms2.la")
-            if os.path.isfile(la):
-                os.unlink(la)
-            # remove binaries
-            for bin_program in ["tificc", "linkicc", "transicc", "psicc", "jpgicc"]:
-                for ext in ["", ".exe"]:
-                    try:
-                        os.remove(os.path.join(self.package_folder, "bin", bin_program + ext))
-                    except:
-                        pass
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
+        meson.install()
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ["lcms2" if self.options.shared else "lcms2_static"]
-            if self.options.shared:
-                self.cpp_info.defines.append("CMS_DLL")
-        else:
-            self.cpp_info.libs = ["lcms2"]
-        self.cpp_info.names["pkg_config"] = "lcms2"
+        self.cpp_info.set_property("pkg_config_name", "lcms2")
+        self.cpp_info.libs = ["lcms2"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("CMS_DLL")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    from conan.tools.files import rename
+    import glob
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

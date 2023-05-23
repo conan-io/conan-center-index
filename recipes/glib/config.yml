@@ -1,47 +1,19 @@
 versions:
-  # "2.65.0":
-  #   folder: all
-  # "2.65.1":
-  #   folder: all
-  # "2.65.2":
-  #   folder: all
-  "2.65.3":
+  "2.76.1":
     folder: all
-  # "2.66.0":
-  #   folder: all
-  # "2.66.1":
-  #   folder: all
-  "2.66.2":
+  "2.76.0":
     folder: all
-  # "2.67.0":
-  #   folder: all
-  # "2.67.1":
-  #   folder: all
-  # "2.67.2":
-  #   folder: all
-  # "2.67.3":
-  #   folder: all
-  # "2.67.4":
-  #   folder: all
-  # "2.67.5":
-  #   folder: all
-  "2.67.6":
+  "2.75.3":
     folder: all
-  # "2.68.0":
-  #   folder: all
-  # "2.68.1":
-  #   folder: all
-  # "2.68.2":
-  #   folder: all
-  "2.68.3":
+  "2.75.2":
     folder: all
-  "2.69.0":
+  "2.75.1":
     folder: all
-  "2.69.1":
+  "2.75.0":
     folder: all
-  "2.69.2":
+  "2.74.1":
     folder: all
-  "2.69.3":
+  "2.73.3":
     folder: all
-  "2.70.0":
+  "2.72.4":
     folder: all

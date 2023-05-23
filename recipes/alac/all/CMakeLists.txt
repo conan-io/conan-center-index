@@ -1,16 +1,18 @@
-cmake_minimum_required(VERSION 3.4)
-project(alac)
+cmake_minimum_required(VERSION 3.8)
+project(alac LANGUAGES C CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+include(GNUInstallDirs)
 
-file(GLOB ALAC_LIB_SRCS source_subfolder/codec/*.c source_subfolder/codec/*.cpp)
-file(GLOB ALAC_LIB_PUBLIC_HDRS source_subfolder/codec/ALAC*.h)
+file(GLOB ALAC_LIB_SRCS ${ALAC_SRC_DIR}/codec/*.c ${ALAC_SRC_DIR}/codec/*.cpp)
+file(GLOB ALAC_LIB_PUBLIC_HDRS ${ALAC_SRC_DIR}/codec/ALAC*.h)
 
 add_library(alac ${ALAC_LIB_SRCS})
-target_include_directories(alac PUBLIC source_subfolder/codec)
+target_include_directories(alac PUBLIC ${ALAC_SRC_DIR}/codec)
 set_property(TARGET alac PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-target_compile_definitions(alac PRIVATE $<$<BOOL:${WIN32}>:TARGET_OS_WIN32>)
+target_compile_definitions(alac
+    PRIVATE
+        $<IF:$<BOOL:${APPLE}>,TARGET_OS_MAC=1,TARGET_OS_MAC=0>
+)
 
 install(FILES ${ALAC_LIB_PUBLIC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(TARGETS alac
@@ -19,11 +21,14 @@ install(TARGETS alac
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(ALAC_BUILD_UTILITY)
-    file(GLOB ALAC_CONVERTER_SRCS source_subfolder/convert-utility/*.cpp)
+    file(GLOB ALAC_CONVERTER_SRCS ${ALAC_SRC_DIR}/convert-utility/*.cpp)
 
     add_executable(alacconvert ${ALAC_CONVERTER_SRCS})
     target_link_libraries(alacconvert PRIVATE alac)
-    target_compile_definitions(alacconvert PRIVATE $<$<BOOL:${WIN32}>:TARGET_OS_WIN32>)
+    target_compile_definitions(alacconvert
+        PRIVATE
+            $<IF:$<PLATFORM_ID:Windows>,TARGET_OS_WIN32=1,TARGET_OS_WIN32=0>
+    )
 
     install(TARGETS alacconvert DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

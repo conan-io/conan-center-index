@@ -1,9 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import cmake_layout
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.59.0"
 
 class LAConan(ConanFile):
     name = "wg21-linear_algebra"
@@ -12,15 +15,12 @@ class LAConan(ConanFile):
     topics = ("linear-algebra", "multi-dimensional", "maths")
     license = "NCSA"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-library"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def requirements(self):
-        self.requires("mdspan/0.1.0")
+        self.requires("mdspan/0.5.0")
 
     @property
     def _minimum_cpp_standard(self):
@@ -30,41 +30,41 @@ class LAConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
-            "gcc": "8",
-            "clang": "8",
+            "msvc": "192",
+            "gcc": "10",
+            "clang": "12", # Should be 11 but https://github.com/conan-io/conan-docker-tools/issues/251
             "apple-clang": "11"
         }
 
     def validate(self):
+        compiler = self.settings.compiler
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler))
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} "
-                             "compiler support.".format(
-                                 self.name, self.settings.compiler))
+            self.output.warn(f"{self.name} recipe lacks information about the "
+                             f"{compiler} compiler support.")
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
-                    "{} requires C++{} support. "
-                    "The current compiler {} {} does not support it.".format(
-                        self.name, self._minimum_cpp_standard,
-                        self.settings.compiler,
-                        self.settings.compiler.version))
+                    f"{self.ref} requires at least {compiler} {min_version}")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
-
-    def package(self):
-        self.copy(pattern="*", dst="include",
-                  src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*LICENSE*", dst="licenses", keep_path=False)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def package(self):
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "wg21_linear_algebra")
+        self.cpp_info.set_property("cmake_target_name", "wg21_linear_algebra::wg21_linear_algebra")
+
         self.cpp_info.names["cmake_find_package"] = "wg21_linear_algebra"
         self.cpp_info.names["cmake_find_package_multi"] = "wg21_linear_algebra"

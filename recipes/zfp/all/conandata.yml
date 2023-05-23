@@ -1,4 +1,7 @@
 sources:
+  "1.0.0":
+    url: "https://github.com/LLNL/zfp/releases/download/1.0.0/zfp-1.0.0.tar.gz"
+    sha256: "0ea08ae3e50e3c92f8b8cf41ba5b6e2de8892bc4a4ca0c59b8945b6c2ab617c4"
   "0.5.5":
-    url: "https://github.com/LLNL/zfp/archive/0.5.5.tar.gz"
-    sha256: "6a7f4934489087d9c117a4af327fd6495ea757924f4df467b9c537abf8bd86c4"
+    url: "https://github.com/LLNL/zfp/releases/download/0.5.5/zfp-0.5.5.tar.gz"
+    sha256: "fdf7b948bab1f4e5dccfe2c2048fd98c24e417ad8fb8a51ed3463d04147393c5"

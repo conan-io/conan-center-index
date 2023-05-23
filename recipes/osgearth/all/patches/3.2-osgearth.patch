@@ -1,0 +1,197 @@
+diff --git a/src/osgEarthDrivers/lerc/CMakeLists.txt b/src/osgEarthDrivers/lerc/CMakeLists.txt
+--- a/src/osgEarthDrivers/lerc/CMakeLists.txt	(revision 6b5fb806a9190f7425c32db65d3ea905a55a9c16)
++++ b/src/osgEarthDrivers/lerc/CMakeLists.txt	(date 1653145387687)
+@@ -1,17 +1,11 @@
+-INCLUDE_DIRECTORIES( ../../third_party/lerc )
++INCLUDE_DIRECTORIES( ${lerc_INCLUDE_DIR} )
+
+ SET(TARGET_SRC
+     ReaderWriterLERC.cpp
+-    ../../third_party/lerc/BitMask.cpp
+-    ../../third_party/lerc/BitStuffer2.cpp
+-    ../../third_party/lerc/Huffman.cpp
+-    ../../third_party/lerc/Lerc.cpp
+-    ../../third_party/lerc/Lerc_c_api_impl.cpp
+-    ../../third_party/lerc/Lerc2.cpp
+-    ../../third_party/lerc/RLE.cpp
+-    ../../third_party/lerc/Lerc1Decode/BitStuffer.cpp
+-    ../../third_party/lerc/Lerc1Decode/CntZImage.cpp
+ )
++
++
++SET(TARGET_LIBRARIES_VARS lerc_LIBRARIES)
+
+ #### end var setup  ###
+ SETUP_PLUGIN(lerc)
+\ No newline at end of file
+diff --git a/src/osgEarthProcedural/GroundCoverLayer.cpp b/src/osgEarthProcedural/GroundCoverLayer.cpp
+--- a/src/osgEarthProcedural/GroundCoverLayer.cpp	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarthProcedural/GroundCoverLayer.cpp	(date 1639490999900)
+@@ -1329,7 +1329,8 @@
+ void
+ GroundCoverLayer::Renderer::releaseGLObjects(osg::State* state) const
+ {
+-    _cameraState.forEach(CameraStateRGLO(state));
++    CameraStateRGLO state_rglo(state);
++    _cameraState.forEach(state_rglo);
+ 
+     if (_texArena.valid())
+     {
+diff --git a/src/osgEarthProcedural/LifeMapLayer.cpp b/src/osgEarthProcedural/LifeMapLayer.cpp
+--- a/src/osgEarthProcedural/LifeMapLayer.cpp	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarthProcedural/LifeMapLayer.cpp	(date 1639490999912)
+@@ -206,7 +206,7 @@
+             std::vector<osg::ref_ptr<Feature>> hits;
+ 
+             if (_index.Search(a_min, a_max, &hits, ~0) == 0)
+-                return false;
++                return nullptr;
+ 
+             const LifeMapValue* result = nullptr;
+ 
+@@ -223,7 +223,7 @@
+                         return result;
+                 }
+             }
+-            return false;
++            return nullptr;
+         }
+     };
+ }
+diff --git a/src/osgEarth/Units b/src/osgEarth/Units
+--- a/src/osgEarth/Units	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarth/Units	(date 1639490999868)
+@@ -196,17 +196,17 @@
+     class qualified_double
+     {
+     public:
+-        qualified_double<T>( double value, const Units& units ) : _value(value), _units(units) { }
++        qualified_double( double value, const Units& units ) : _value(value), _units(units) { }
+ 
+-        qualified_double<T>( const T& rhs ) : _value(rhs._value), _units(rhs._units) { }
++        qualified_double( const T& rhs ) : _value(rhs._value), _units(rhs._units) { }
+ 
+         // parses the qualified number from a parseable string (e.g., "123km")
+-        qualified_double<T>(const std::string& parseable, const Units& defaultUnits) : _value(0.0), _units(defaultUnits) {
++        qualified_double(const std::string& parseable, const Units& defaultUnits) : _value(0.0), _units(defaultUnits) {
+             Units::parse( parseable, _value, _units, defaultUnits );
+         }
+ 
+         // loads the qualified number from an old-school config (e.g., { value="123" units="km" } )
+-        qualified_double<T>( const Config& conf, const Units& defaultUnits ) : _value(0.0) {
++        qualified_double( const Config& conf, const Units& defaultUnits ) : _value(0.0) {
+             if ( conf.hasValue("value") ) {
+                 _value = conf.value<double>("value", 0.0);
+                 if ( !Units::parse( conf.value("units"), _units ) )
+diff --git a/src/osgEarthProcedural/CMakeLists.txt b/src/osgEarthProcedural/CMakeLists.txt
+--- a/src/osgEarthProcedural/CMakeLists.txt	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarthProcedural/CMakeLists.txt	(date 1639490999885)
+@@ -102,4 +102,5 @@
+ # Add this project to the NodeKits solution folder
+ set_property( TARGET ${LIB_NAME} PROPERTY FOLDER "NodeKits" )
+ 
+-INCLUDE(ModuleInstall OPTIONAL)
+\ No newline at end of file
++INCLUDE(ModuleInstall OPTIONAL)
++INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/source_subfolder/src/osgEarth)
+\ No newline at end of file
+diff --git a/src/osgEarth/CMakeLists.txt b/src/osgEarth/CMakeLists.txt
+--- a/src/osgEarth/CMakeLists.txt	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarth/CMakeLists.txt	(date 1639490999857)
+@@ -494,7 +494,7 @@
+ 
+ 
+ SET(VERSION_GIT_SOURCE "")
+-find_package(git)
++find_package(Git)
+ if (GIT_FOUND)
+     option(OSGEARTH_EMBED_GIT_SHA "Encode the SHA in the Version header code" OFF)
+     if(OSGEARTH_EMBED_GIT_SHA)
+diff --git a/src/osgEarthDrivers/fastdxt/dxt.cpp b/src/osgEarthDrivers/fastdxt/dxt.cpp
+--- a/src/osgEarthDrivers/fastdxt/dxt.cpp	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarthDrivers/fastdxt/dxt.cpp	(date 1639491170857)
+@@ -119,7 +119,11 @@
+ 			     int &outputBytes )
+ {
+   byte *tmpBuf;
++#ifdef __MINGW32__
++  tmpBuf = (byte*)__mingw_aligned_malloc(width*height*4,16);
++#else
+   tmpBuf = (byte*)memalign(16, width*height*4);
++#endif
+   memset(tmpBuf, 0, width*height*4);
+   RGBAtoYCoCg(inBuf, tmpBuf, width, height);
+   CompressImageDXT5(tmpBuf, outBuf, width, height, outputBytes);
+diff --git a/CMakeModules/OsgEarthMacroUtils.cmake b/CMakeModules/OsgEarthMacroUtils.cmake
+--- a/CMakeModules/OsgEarthMacroUtils.cmake	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/CMakeModules/OsgEarthMacroUtils.cmake	(date 1639490999842)
+@@ -505,7 +505,7 @@
+ 
+ 	# generate the build-time script that will create out cpp file with inline shaders:
+ 	configure_file(
+-		"${CMAKE_SOURCE_DIR}/CMakeModules/ConfigureShaders.cmake.in"
++		"${CMAKE_SOURCE_DIR}/source_subfolder/CMakeModules/ConfigureShaders.cmake.in"
+ 		"${CMAKE_CURRENT_BINARY_DIR}/ConfigureShaders.cmake"
+ 		@ONLY)
+ 
+@@ -518,7 +518,7 @@
+ 		DEPENDS
+ 			${GLSL_FILES}
+ 			"${TEMPLATE_FILE}"
+-			"${CMAKE_SOURCE_DIR}/CMakeModules/ConfigureShaders.cmake.in" )
++			"${CMAKE_SOURCE_DIR}/source_subfolder/CMakeModules/ConfigureShaders.cmake.in" )
+ 
+ endmacro(configure_shaders)
+ 
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/CMakeLists.txt	(date 1639490999923)
+@@ -127,29 +127,14 @@
+     find_package(OpenGL)
+ ENDIF (OSGEARTH_USE_GLES)
+ 
+-# required
+-find_package(OSG REQUIRED)
+-find_package(CURL REQUIRED)
+-find_package(GDAL REQUIRED)
+-
+ # optional
+-find_package(GEOS)
+-find_package(Sqlite3)
+-find_package(Draco)
+-find_package(BASISU)
+ find_package(GLEW)
+-find_package(Protobuf)
+-find_package(WEBP)
+ find_package(Blend2D)
+ 
+ if(OSGEARTH_ENABLE_PROFILING)
+     find_package(Tracy)
+ endif()
+ 
+-if(OSGEARTH_BUILD_ZIP_PLUGIN)
+-    find_package(LIBZIP)
+-endif()
+-
+ if(OSGEARTH_BUILD_TRITON_NODEKIT)
+     find_package(Triton QUIET)
+ endif()
+@@ -216,7 +201,8 @@
+ INCLUDE(OsgEarthMacroUtils)
+ 
+ # OpenSceneGraph is the 3D rendering toolkit
+-DETECT_OSG_VERSION()
++set(OPENSCENEGRAPH_VERSION "3.6.5")
++set(OSG_PLUGINS "osgPlugins-${OPENSCENEGRAPH_VERSION}"  CACHE STRING "" FORCE)
+ 
+ IF (NOT OPENSCENEGRAPH_VERSION)
+ 	SET(OPENSCENEGRAPH_VERSION ${OPENSCENEGRAPH_MAJOR_VERSION}.${OPENSCENEGRAPH_MINOR_VERSION}.${OPENSCENEGRAPH_PATCH_VERSION})
+diff --git a/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt b/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt
+--- a/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt	(revision 15d5340f174212d6f93ae55c0d9af606c3d361c0)
++++ b/src/osgEarthDrivers/cache_leveldb/CMakeLists.txt	(date 1639490999877)
+@@ -1,5 +1,3 @@
+-FIND_PACKAGE(LevelDB)
+-
+ IF(LEVELDB_FOUND)
+ 
+     INCLUDE_DIRECTORIES( ${LEVELDB_INCLUDE_DIR} )

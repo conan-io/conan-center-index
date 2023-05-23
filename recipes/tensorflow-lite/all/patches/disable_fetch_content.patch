@@ -1,0 +1,12 @@
+diff --git a/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake b/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
+index 9ed95109ba9..4ddf322b95f 100644
+--- a/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
++++ b/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
+@@ -244,6 +244,7 @@ endfunction()
+ # All content names passed to this method are added to the global property
+ # OVERRIDABLE_FETCH_CONTENT_LIST.
+ function(OverridableFetchContent_Declare CONTENT_NAME)
++  message(FATAL_ERROR "OverridableFetchContent_Declare called by ${CONTENT_NAME}! Failing build.")
+   set(OVERRIDABLE_ARGS
+     GIT_REPOSITORY
+     GIT_TAG

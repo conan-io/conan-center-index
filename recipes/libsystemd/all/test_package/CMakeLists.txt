@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+cmake_minimum_required(VERSION 3.6)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SYSTEMD REQUIRED IMPORTED_TARGET libsystemd)
 
-add_executable(example example.c)
-target_link_libraries(example ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::SYSTEMD)

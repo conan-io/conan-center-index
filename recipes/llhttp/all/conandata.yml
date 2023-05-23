@@ -1,0 +1,8 @@
+sources:
+  "6.0.6":
+    url: https://github.com/nodejs/llhttp/archive/refs/tags/release/v6.0.6.tar.gz
+    sha256: "14023d0efce07a996a197d3b6b15020b26526605277e521f5aa10dacc3af67ad"
+patches:
+  "6.0.6":
+    - patch_file: "patches/cmake_install_dirs.patch"
+      base_path: "source_subfolder"

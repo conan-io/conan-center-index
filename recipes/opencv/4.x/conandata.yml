@@ -1,32 +1,122 @@
 sources:
-  "4.1.2":
-    - sha256: 385dd0a9c25e67ef0dd60e022d2a2d7b17e2f36819cf3cb46aa8cdff5c5282c9
-      url: https://github.com/opencv/opencv/archive/4.1.2.tar.gz
-    - sha256: 0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b
-      url: https://github.com/opencv/opencv_contrib/archive/4.1.2.tar.gz
-  "4.5.0":
-    - sha256: dde4bf8d6639a5d3fe34d5515eab4a15669ded609a1d622350c7ff20dace1907
-      url: https://github.com/opencv/opencv/archive/4.5.0.tar.gz
-    - sha256: a65f1f0b98b2c720abbf122c502044d11f427a43212d85d8d2402d7a6339edda
-      url: https://github.com/opencv/opencv_contrib/archive/4.5.0.tar.gz
-  "4.5.1":
-    - sha256: e27fe5b168918ab60d58d7ace2bd82dd14a4d0bd1d3ae182952c2113f5637513
-      url: https://github.com/opencv/opencv/archive/4.5.1.tar.gz
-    - sha256: 12c3b1ddd0b8c1a7da5b743590a288df0934e5cef243e036ca290c2e45e425f5
-      url: https://github.com/opencv/opencv_contrib/archive/4.5.1.tar.gz
-  "4.5.2":
-    - sha256: ae258ed50aa039279c3d36afdea5c6ecf762515836b27871a8957c610d0424f8
-      url: https://github.com/opencv/opencv/archive/4.5.2.tar.gz
-    - sha256: 9f52fd3114ac464cb4c9a2a6a485c729a223afb57b9c24848484e55cef0b5c2a
-      url: https://github.com/opencv/opencv_contrib/archive/4.5.2.tar.gz
+  "4.5.5":
+    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.5.5.tar.gz"
+      sha256: "a1cfdcf6619387ca9e232687504da996aaa9f7b5689986b8331ec02cb61d28ad"
+    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.5.5.tar.gz"
+      sha256: "a97c2eaecf7a23c6dbd119a609c6d7fae903e5f9ff5f1fe678933e01c67a6c11"
   "4.5.3":
-    - sha256: 77f616ae4bea416674d8c373984b20c8bd55e7db887fd38c6df73463a0647bab
-      url: https://github.com/opencv/opencv/archive/4.5.3.tar.gz
-    - sha256: 73da052fd10e73aaba2560eaff10cc5177e2dcc58b27f8aedf7c649e24c233bc
-      url: https://github.com/opencv/opencv_contrib/archive/4.5.3.tar.gz
-patches:
+    - url: "https://github.com/opencv/opencv/archive/4.5.3.tar.gz"
+      sha256: "77f616ae4bea416674d8c373984b20c8bd55e7db887fd38c6df73463a0647bab"
+    - url: "https://github.com/opencv/opencv_contrib/archive/4.5.3.tar.gz"
+      sha256: "73da052fd10e73aaba2560eaff10cc5177e2dcc58b27f8aedf7c649e24c233bc"
+  "4.5.2":
+    - url: "https://github.com/opencv/opencv/archive/4.5.2.tar.gz"
+      sha256: "ae258ed50aa039279c3d36afdea5c6ecf762515836b27871a8957c610d0424f8"
+    - url: "https://github.com/opencv/opencv_contrib/archive/4.5.2.tar.gz"
+      sha256: "9f52fd3114ac464cb4c9a2a6a485c729a223afb57b9c24848484e55cef0b5c2a"
+  "4.5.1":
+    - url: "https://github.com/opencv/opencv/archive/4.5.1.tar.gz"
+      sha256: "e27fe5b168918ab60d58d7ace2bd82dd14a4d0bd1d3ae182952c2113f5637513"
+    - url: "https://github.com/opencv/opencv_contrib/archive/4.5.1.tar.gz"
+      sha256: "12c3b1ddd0b8c1a7da5b743590a288df0934e5cef243e036ca290c2e45e425f5"
+  "4.5.0":
+    - url: "https://github.com/opencv/opencv/archive/4.5.0.tar.gz"
+      sha256: "dde4bf8d6639a5d3fe34d5515eab4a15669ded609a1d622350c7ff20dace1907"
+    - url: "https://github.com/opencv/opencv_contrib/archive/4.5.0.tar.gz"
+      sha256: "a65f1f0b98b2c720abbf122c502044d11f427a43212d85d8d2402d7a6339edda"
   "4.1.2":
-    - patch_file: "patches/0001-jasper.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-openexr.patch"
-      base_path: "source_subfolder"
+    - url: "https://github.com/opencv/opencv/archive/4.1.2.tar.gz"
+      sha256: "385dd0a9c25e67ef0dd60e022d2a2d7b17e2f36819cf3cb46aa8cdff5c5282c9"
+    - url: "https://github.com/opencv/opencv_contrib/archive/4.1.2.tar.gz"
+      sha256: "0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b"
+patches:
+  "4.5.5":
+    - patch_file: "patches/4.5.5-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
+  "4.5.3":
+    - patch_file: "patches/4.5.3-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
+  "4.5.2":
+    - patch_file: "patches/4.1.2-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+      patch_description: "Fix discovery of zlib static if Android"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
+  "4.5.1":
+    - patch_file: "patches/4.1.2-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
+  "4.5.0":
+    - patch_file: "patches/4.1.2-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.5.0-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"
+  "4.1.2":
+    - patch_file: "patches/4.1.2-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0002-find-ade.patch"
+      patch_description: "Robust discovery & injection of ade"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0003-find-quirc.patch"
+      patch_description: "Robust discovery & injection of quirc"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.2-0004-jasper.patch"
+      patch_description: "Compatibility with recent jasper versions"
+      patch_type: "portability"
+    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+      patch_description: "Honor install layout from conan if Android"
+      patch_type: "conan"

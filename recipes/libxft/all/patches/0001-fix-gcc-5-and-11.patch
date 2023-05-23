@@ -1,0 +1,24 @@
+From 84310d83bf4c057dd0866e7116779c9c2f043007 Mon Sep 17 00:00:00 2001
+From: ericLemanissier <eric.lemanissier@gmail.com>
+Date: Fri, 23 Sep 2022 07:59:55 +0000
+Subject: [PATCH] fix compilation with gcc 5 and gcc 11
+
+stdint.h header is needed for SIZE_MAX
+---
+ src/xftrender.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/xftrender.c b/src/xftrender.c
+index 3021d56..c15237e 100644
+--- a/src/xftrender.c
++++ b/src/xftrender.c
+@@ -21,6 +21,7 @@
+  */
+ 
+ #include "xftint.h"
++#include <stdint.h>
+ 
+ #define NUM_LOCAL	1024
+ #define NUM_ELT_LOCAL	128
+-- 
+GitLab

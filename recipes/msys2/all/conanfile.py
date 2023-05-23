@@ -1,17 +1,16 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.files import chdir, get, replace_in_file, copy
+from conan.tools.layout import basic_layout
 import fnmatch
 import os
 import shutil
 import subprocess
+import errno
+import ctypes
 
-try:
-    import ctypes
-    from ctypes import wintypes
-except ImportError:
-    pass
-except ValueError:
-    pass
+required_conan_version = ">=1.47.0"
+
 
 class lock:
     def __init__(self):
@@ -34,28 +33,36 @@ class lock:
 
     __del__ = close
 
-
 class MSYS2Conan(ConanFile):
     name = "msys2"
     description = "MSYS2 is a software distro and building platform for Windows"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.msys2.org"
     license = "MSYS license"
-    topics = ("conan", "msys", "unix", "subsystem")
-    short_paths = True
+    topics = ("msys", "unix", "subsystem")
+
+    settings = "os", "arch"
     # "exclude_files" "packages" "additional_packages" values are a comma separated list
     options = {
-        "exclude_files": "ANY",
-        "packages": "ANY",
-        "additional_packages": "ANY"
+        "exclude_files": ["ANY"],
+        "packages": ["ANY"],
+        "additional_packages": [None, "ANY"],
+        "no_kill": [True, False]
     }
     default_options = {
         "exclude_files": "*/link.exe",
         "packages": "base-devel,binutils,gcc",
-        "additional_packages": None
+        "additional_packages": None,
+        "no_kill": False,
     }
-    settings = "os", "arch"
 
+    short_paths = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.options.no_kill
 
     def validate(self):
         if self.settings.os != "Windows":
@@ -63,9 +70,12 @@ class MSYS2Conan(ConanFile):
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=False) # Preserve tarball root dir (msys64/)
 
     def _update_pacman(self):
-        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             try:
                 self._kill_pacman()
 
@@ -82,6 +92,8 @@ class MSYS2Conan(ConanFile):
 
     # https://github.com/msys2/MSYS2-packages/issues/1966
     def _kill_pacman(self):
+        if self.options.no_kill:
+            return
         if (self.settings.os == "Windows"):
             taskkill_exe = os.path.join(os.environ.get('SystemRoot'), 'system32', 'taskkill.exe')
 
@@ -90,34 +102,30 @@ class MSYS2Conan(ConanFile):
                 out = subprocess.PIPE
                 err = subprocess.STDOUT
             else:
-                out = file(os.devnull, 'w')
+                out = open(os.devnull, 'w', encoding='UTF-8')
                 err = subprocess.PIPE
 
             if os.path.exists(taskkill_exe):
-                taskkill_cmds = [taskkill_exe + " /f /t /im pacman.exe",
-                                 taskkill_exe + " /f /im gpg-agent.exe",
-                                 taskkill_exe + " /f /im dirmngr.exe",
-                                 taskkill_exe + ' /fi "MODULES eq msys-2.0.dll"']
+                taskkill_cmds = [
+                    f"{taskkill_exe} /f /t /im pacman.exe",
+                    f"{taskkill_exe} /f /im gpg-agent.exe",
+                    f"{taskkill_exe} /f /im dirmngr.exe",
+                    f'{taskkill_exe} /fi "MODULES eq msys-2.0.dll"',
+                ]
                 for taskkill_cmd in taskkill_cmds:
                     try:
                         proc = subprocess.Popen(taskkill_cmd, stdout=out, stderr=err, bufsize=1)
                         proc.wait()
                     except OSError as e:
                         if e.errno == errno.ENOENT:
-                            raise ConanException("Cannot kill pacman")
+                            raise ConanException("Cannot kill pacman") from e
 
     @property
     def _msys_dir(self):
-        subdir = "msys64"
-        return os.path.join(self.package_folder, "bin", subdir)
-
-    def source(self):
-        # sources are different per configuration - do download in build
-        pass
+        subdir = "msys64" # top-level directoy in tarball
+        return os.path.join(self.source_folder, subdir)
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                    destination=os.path.join(self.package_folder, "bin"))
         with lock():
             self._do_build()
 
@@ -130,11 +138,11 @@ class MSYS2Conan(ConanFile):
 
         self._update_pacman()
 
-        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+        with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
-                self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
+                self.run(f'bash -l -c "pacman -S {package} --noconfirm"')
             for package in ['pkgconf']:
-                self.run('bash -l -c "pacman -Rs $(pacman -Qsq %s) --noconfirm"' % package)
+                self.run(f'bash -l -c "pacman -Rs -d -d $(pacman -Qsq {package}) --noconfirm"')
 
         self._kill_pacman()
 
@@ -144,38 +152,43 @@ class MSYS2Conan(ConanFile):
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         tmp_name = os.path.join(tmp_dir, 'dummy')
-        with open(tmp_name, 'a'):
+        with open(tmp_name, 'a', encoding='UTF-8'):
             os.utime(tmp_name, None)
 
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
-        tools.replace_in_file(os.path.join(self._msys_dir, "etc", "profile"),
+        replace_in_file(self, os.path.join(self._msys_dir, "etc", "profile"),
                               'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
 
     def package(self):
         excludes = None
         if self.options.exclude_files:
             excludes = tuple(str(self.options.exclude_files).split(","))
-        #self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
         for exclude in excludes:
             for root, _, filenames in os.walk(self._msys_dir):
                 for filename in filenames:
                     fullname = os.path.join(root, filename)
                     if fnmatch.fnmatch(fullname, exclude):
                         os.unlink(fullname)
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#kb-h013-default-package-layout
+        copy(self, "*", dst=os.path.join(self.package_folder, "bin", "msys64"), src=self._msys_dir, excludes=excludes)
         shutil.copytree(os.path.join(self._msys_dir, "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
 
-        msys_root = self._msys_dir
+        msys_root = os.path.join(self.package_folder, "bin", "msys64")
         msys_bin = os.path.join(msys_root, "usr", "bin")
+        self.cpp_info.bindirs.append(msys_bin)
 
-        self.output.info("Creating MSYS_ROOT env var : %s" % msys_root)
+        self.buildenv_info.define_path("MSYS_ROOT", msys_root)
+        self.buildenv_info.define_path("MSYS_BIN", msys_bin)
+
+        self.conf_info.define("tools.microsoft.bash:subsystem", "msys2")
+        self.conf_info.define("tools.microsoft.bash:path", os.path.join(msys_bin, "bash.exe"))
+
+        # conan v1 specific stuff
         self.env_info.MSYS_ROOT = msys_root
-
-        self.output.info("Creating MSYS_BIN env var : %s" % msys_bin)
         self.env_info.MSYS_BIN = msys_bin
-
-        self.output.info("Appending PATH env var with : " + msys_bin)
         self.env_info.path.append(msys_bin)

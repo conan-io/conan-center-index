@@ -1,14 +1,24 @@
---- CMakeLists.txt.old	2019-12-27 12:02:21.820493913 +0100
-+++ CMakeLists.txt	2019-12-27 12:06:07.968261384 +0100
-@@ -34,7 +34,6 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@
+ # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ # SOFTWARE.
+ 
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.8)
+ project(backward CXX)
+ 
+ include(BackwardConfig.cmake)
+@@ -33,8 +33,6 @@ if (COMPILER_NAME MATCHES "^nvcc")
+ endif()
  
  # set CXX standard
- set(CMAKE_CXX_STANDARD_REQUIRED True)
+-set(CMAKE_CXX_STANDARD_REQUIRED True)
 -set(CMAKE_CXX_STANDARD 11)
  if (${COMPILER_IS_NVCC})
    # GNU CXX extensions are not supported by nvcc
    set(CMAKE_CXX_EXTENSIONS OFF)
-@@ -47,7 +46,7 @@
+@@ -47,7 +45,7 @@ endif()
  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_COMPILER_IS_GNUCXX)
  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
  	if (NOT ${COMPILER_IS_NVCC})
@@ -17,24 +27,45 @@
  	endif()
  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
  endif()
-@@ -74,6 +73,7 @@
+@@ -56,11 +54,13 @@ endif()
+ # BACKWARD OBJECT
+ ###############################################################################
+ 
++if(0)
+ add_library(backward_object OBJECT backward.cpp)
+ target_compile_definitions(backward_object PRIVATE ${BACKWARD_DEFINITIONS})
+ target_include_directories(backward_object PRIVATE ${BACKWARD_INCLUDE_DIRS})
+ set(BACKWARD_ENABLE $<TARGET_OBJECTS:backward_object> CACHE STRING
+ 	"Link with this object to setup backward automatically")
++endif()
+ 
+ 
+ ###############################################################################
+@@ -74,6 +74,19 @@ endif()
  add_library(backward ${libtype} backward.cpp)
  target_compile_definitions(backward PUBLIC ${BACKWARD_DEFINITIONS})
  target_include_directories(backward PUBLIC ${BACKWARD_INCLUDE_DIRS})
-+conan_target_link_libraries(backward)
++target_compile_features(backward PUBLIC cxx_std_11)
++if(STACK_DETAILS_DW)
++    find_package(elfutils REQUIRED CONFIG)
++    target_link_libraries(backward PUBLIC elfutils::libdw)
++endif()
++if(STACK_DETAILS_BFD)
++    find_package(binutils REQUIRED CONFIG)
++    target_link_libraries(backward PUBLIC binutils::binutils)
++endif()
++if(STACK_DETAILS_DWARF)
++    find_package(libdwarf REQUIRED CONFIG)
++    target_link_libraries(backward PUBLIC libdwarf::libdwarf)
++endif()
  
  ###############################################################################
  # TESTS
-@@ -117,11 +117,23 @@
+@@ -117,11 +130,18 @@ if(BACKWARD_TESTS)
  	endforeach()
  endif()
  
-+# Introduce variables:
-+# * CMAKE_INSTALL_LIBDIR
-+# * CMAKE_INSTALL_BINDIR
-+# * CMAKE_INSTALL_INCLUDEDIR
 +include(GNUInstallDirs)
-+
  install(
      FILES "backward.hpp"
 -    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
@@ -51,10 +82,9 @@
 +    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
  )
-
---- backward.hpp.old	2019-12-27 13:11:07.097037784 +0100
-+++ backward.hpp	2019-12-27 13:11:23.336703016 +0100
-@@ -1922,7 +1922,7 @@
+--- a/backward.hpp
++++ b/backward.hpp
+@@ -1922,7 +1922,7 @@ private:
  
  		dwarf_file_t file_handle;
  		file_handle.reset(open(filename_object.c_str(), O_RDONLY));

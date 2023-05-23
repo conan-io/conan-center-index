@@ -1,42 +1,49 @@
-import glob
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, NMakeDeps, NMakeToolchain
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+
+required_conan_version = ">=1.55.0"
 
 
 class LibxsltConan(ConanFile):
     name = "libxslt"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libxslt is a software library implementing XSLT processor, based on libxml2"
-    topics = ("XSLT", "processor")
+    topics = ("xslt", "processor")
     homepage = "https://xmlsoft.org"
     license = "MIT"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       "debugger": False,
-                       "crypto": False,
-                       "profiler": False,
-                       "plugins": False}
-    options = {name: [True, False] for name in default_options.keys()}
-    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
-    _source_subfolder = "source_subfolder"
-    exports_sources = "patches/**"
-
-    def requirements(self):
-        self.requires("libxml2/2.9.12")
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "debugger": [True, False],
+        "crypto": [True, False],
+        "profiler": [True, False],
+        "plugins": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "debugger": False,
+        "crypto": False,
+        "profiler": False,
+        "plugins": False,
+    }
 
     @property
-    def _full_source_subfolder(self):
-        return os.path.join(self.source_folder, self._source_subfolder)
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxslt-{0}".format(self.version), self._source_subfolder)
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,138 +51,184 @@ class LibxsltConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
+        self.requires("libxml2/2.10.3", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if self.options.plugins and not self.options.shared:
+            raise ConanInvalidConfiguration("plugins require shared")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+            deps = NMakeDeps(self)
+            deps.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+
+            tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
+            tc.configure_args.extend([
+                "--with-python=no",
+                f"--with-libxml-src={unix_path(self, self.dependencies['libxml2'].package_folder)}",
+                f"--with-debugger={yes_no(self.options.debugger)}",
+                f"--with-crypto={yes_no(self.options.crypto)}",
+                f"--with-profiler={yes_no(self.options.profiler)}",
+                f"--with-plugins={yes_no(self.options.plugins)}",
+            ])
+            tc.generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+    def _build_msvc(self):
+        # Configure step to generate Makefile.msvc
+        deps_includedirs = []
+        deps_libdirs = []
+        for deps in self.dependencies.values():
+            deps_cpp_info = deps.cpp_info.aggregated_components()
+            deps_includedirs.extend(deps_cpp_info.includedirs)
+            deps_libdirs.extend(deps_cpp_info.libdirs)
+
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "compiler=msvc",
+            f"prefix={self.package_folder}",
+            f"cruntime=/{msvc_runtime_flag(self)}",
+            f"debug={yes_no(self.settings.build_type == 'Debug')}",
+            f"static={yes_no(not self.options.shared)}",
+            "include=\"{}\"".format(";".join(deps_includedirs)),
+            "lib=\"{}\"".format(";".join(deps_libdirs)),
+            "iconv=no",
+            "xslt_debug=no",
+            f"debugger={yes_no(self.options.debugger)}",
+            f"crypto={yes_no(self.options.crypto)}",
+            f"profiler={yes_no(self.options.profiler)}",
+            f"modules={yes_no(self.options.plugins)}",
+        ]
+
+        with chdir(self, os.path.join(self.source_folder, "win32")):
+            self.run(f"cscript configure.js {' '.join(args)}")
+
+        # Fix library names in generated Makefile.msvc
+        def format_libs(package):
+            libs = []
+            dep_cpp_info = self.dependencies[package].cpp_info.aggregated_components()
+            for lib in dep_cpp_info.libs + dep_cpp_info.system_libs:
+                libname = lib
+                if not libname.endswith(".lib"):
+                    libname += ".lib"
+                libs.append(libname)
+            return " ".join(libs)
+
+        makefile_msvc = os.path.join(self.source_folder, "win32", "Makefile.msvc")
+        replace_in_file(self, makefile_msvc, "libxml2.lib", format_libs("libxml2"))
+        replace_in_file(self, makefile_msvc, "libxml2_a.lib", format_libs("libxml2"))
+        if self.dependencies["libxml2"].options.get_safe("icu"):
+            replace_in_file(self, makefile_msvc, "LIBS = wsock32.lib", f"LIBS = {format_libs('icu')}")
+
+        # Avoid to indirectly build both static & shared when we build utils
+        lib_suffix = "" if self.options.shared else "a"
+        replace_in_file(
+            self, makefile_msvc,
+            "$(UTILS) : $(UTILS_INTDIR) $(BINDIR) libxslt libxslta libexslt libexslta",
+            f"$(UTILS) : $(UTILS_INTDIR) $(BINDIR) libxslt{lib_suffix} libexslt{lib_suffix}",
+        )
+
+        # Build with NMake
+        with chdir(self, os.path.join(self.source_folder, "win32")):
+            targets = f"libxslt{lib_suffix} libexslt{lib_suffix} utils"
+            self.run(f"nmake -f Makefile.msvc {targets}")
 
     def build(self):
-        self._patch_sources()
-        if self._is_msvc:
-            self._build_windows()
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            self._build_msvc()
         else:
-            self._build_with_configure()
-
-    def _build_windows(self):
-        with tools.chdir(os.path.join(self._full_source_subfolder, 'win32')):
-            debug = "yes" if self.settings.build_type == "Debug" else "no"
-            static = "no" if self.options.shared else "yes"
-
-            with tools.vcvars(self.settings):
-                args = ["cscript",
-                        "configure.js",
-                        "compiler=msvc",
-                        "prefix=%s" % self.package_folder,
-                        "cruntime=/%s" % self.settings.compiler.runtime,
-                        "debug=%s" % debug,
-                        "static=%s" % static,
-                        'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                        'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths),
-                        'iconv=no',
-                        'xslt_debug=no']
-                for name in self._option_names:
-                    cname = {"plugins": "modules"}.get(name, name)
-                    value = getattr(self.options, name)
-                    value = "yes" if value else "no"
-                    args.append("%s=%s" % (cname, value))
-                configure_command = ' '.join(args)
-                self.output.info(configure_command)
-                self.run(configure_command)
-
-                # Fix library names because they can be not just zlib.lib
-                def format_libs(package):
-                    libs = []
-                    for lib in self.deps_cpp_info[package].libs:
-                        libname = lib
-                        if not libname.endswith('.lib'):
-                            libname += '.lib'
-                        libs.append(libname)
-                    for lib in self.deps_cpp_info[package].system_libs:
-                        libname = lib
-                        if not libname.endswith('.lib'):
-                            libname += '.lib'
-                        libs.append(libname)
-                    return ' '.join(libs)
-
-                def fix_library(option, package, old_libname):
-                    if option:
-                        tools.replace_in_file("Makefile.msvc",
-                                              "LIBS = %s" % old_libname,
-                                              "LIBS = %s" % format_libs(package))
-
-                if "icu" in self.deps_cpp_info.deps:
-                    fix_library(True, 'icu', 'wsock32.lib')
-
-                tools.replace_in_file("Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
-                tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
-
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake /f Makefile.msvc install")
-
-    def _build_with_configure(self):
-        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        full_install_subfolder = tools.unix_path(self.package_folder)
-        # fix rpath
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._full_source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        configure_args = ['--with-python=no', '--prefix=%s' % full_install_subfolder]
-        if self.options.shared:
-            configure_args.extend(['--enable-shared', '--disable-static'])
-        else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
-
-        libxml_src = "--with-libxml-src=" + tools.unix_path(self.deps_cpp_info["libxml2"].rootpath)
-        configure_args.append(libxml_src)
-
-        for name in self._option_names:
-            value = getattr(self.options, name)
-            value = ("--with-%s" % name) if value else ("--without-%s" % name)
-            configure_args.append(value)
-
-        env_build.configure(args=configure_args, configure_dir=self._full_source_subfolder)
-        env_build.make(args=["install", "V=1"])
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._full_source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows":
-            # There is no way to avoid building the tests, but at least we don't want them in the package
-            for prefix in ["run", "test"]:
-                for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
-                    os.remove(test)
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.build_type == "Debug":
-                os.unlink(os.path.join(self.package_folder, "bin", "libexslt.pdb"))
-                os.unlink(os.path.join(self.package_folder, "bin", "libxslt.pdb"))
-                os.unlink(os.path.join(self.package_folder, "bin", "xsltproc.pdb"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            copy(self, "*.h", src=os.path.join(self.source_folder, "libxslt"),
+                              dst=os.path.join(self.package_folder, "include", "libxslt"))
+            copy(self, "*.h", src=os.path.join(self.source_folder, "libexslt"),
+                              dst=os.path.join(self.package_folder, "include", "libexslt"))
+            build_dir = os.path.join(self.source_folder, "win32", "bin.msvc")
+            copy(self, "*.exe", src=build_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
             if self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "lib", "libxslt_a.lib"))
-                os.unlink(os.path.join(self.package_folder, "lib", "libexslt_a.lib"))
+                copy(self, "*xslt.lib", src=build_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+                copy(self, "*xslt.dll", src=build_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
             else:
-                os.unlink(os.path.join(self.package_folder, "lib", "libxslt.lib"))
-                os.unlink(os.path.join(self.package_folder, "lib", "libexslt.lib"))
-                os.unlink(os.path.join(self.package_folder, "bin", "libxslt.dll"))
-                os.unlink(os.path.join(self.package_folder, "bin", "libexslt.dll"))
-        for f in "libxslt.la", "libexslt.la":
-            la = os.path.join(self.package_folder, 'lib', f)
-            if os.path.isfile(la):
-                os.unlink(la)
+                copy(self, "*xslt_a.lib", src=build_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        else:
+            autotools = Autotools(self)
+            autotools.install()
+            os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.sh", os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ['exslt', 'xslt']
-        if self._is_msvc:
-            if self.options.shared:
-                self.cpp_info.libs = ['lib%s' % l for l in self.cpp_info.libs]
-            else:
-                self.cpp_info.libs = ['lib%s_a' % l for l in self.cpp_info.libs]
-        self.cpp_info.includedirs.append(os.path.join("include", "libxslt"))
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "LibXslt")
+        self.cpp_info.set_property("pkg_config_name", "libxslt_full_package") # unofficial, avoid conflicts in conan generators
+
+        prefix = "lib" if is_msvc(self) else ""
+        suffix = "_a" if is_msvc(self) and not self.options.shared else ""
+
+        # xslt
+        self.cpp_info.components["xslt"].set_property("cmake_target_name", "LibXslt::LibXslt")
+        self.cpp_info.components["xslt"].set_property("pkg_config_name", "libxslt")
+        self.cpp_info.components["xslt"].libs = [f"{prefix}xslt{suffix}"]
         if not self.options.shared:
-            self.cpp_info.defines = ["LIBXSLT_STATIC"]
-        if self.settings.os in ["Linux", "Macos", "FreeBSD", "Android"]:
-            self.cpp_info.system_libs.append('m')
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append('ws2_32')
+            self.cpp_info.components["xslt"].defines = ["LIBXSLT_STATIC"]
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.components["xslt"].system_libs.append("m")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["xslt"].system_libs.append("ws2_32")
+        self.cpp_info.components["xslt"].requires = ["libxml2::libxml2"]
+
+        # exslt
+        self.cpp_info.components["exslt"].set_property("cmake_target_name", "LibXslt::LibExslt")
+        self.cpp_info.components["exslt"].set_property("pkg_config_name", "libexslt")
+        self.cpp_info.components["exslt"].libs = [f"{prefix}exslt{suffix}"]
+        self.cpp_info.components["exslt"].requires = ["xslt"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "LibXslt"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXslt"
+        self.cpp_info.names["pkg_config"] = "libxslt_full_package"
+        self.cpp_info.components["xslt"].names["cmake_find_package"] = "LibXslt"
+        self.cpp_info.components["xslt"].names["cmake_find_package_multi"] = "LibXslt"
+        self.cpp_info.components["xslt"].names["pkg_config"] = "libxslt"
+        self.cpp_info.components["exslt"].names["cmake_find_package"] = "LibExslt"
+        self.cpp_info.components["exslt"].names["cmake_find_package_multi"] = "LibExslt"
+        self.cpp_info.components["exslt"].names["pkg_config"] = "libexslt"
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

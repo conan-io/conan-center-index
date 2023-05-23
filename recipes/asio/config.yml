@@ -1,4 +1,20 @@
 versions:
+  "1.27.0":
+    folder: all
+  "1.26.0":
+    folder: all
+  "1.24.0":
+    folder: all
+  "1.23.0":
+    folder: all
+  "1.22.1":
+    folder: all
+  "1.22.0":
+    folder: all
+  "1.21.0":
+    folder: all
+  "1.20.0":
+    folder: all
   "1.19.2":
     folder: all
   "1.19.1":

@@ -1,21 +1,29 @@
 versions:
-  2.3.5:
+  "2.4.11":
     folder: 2.x.x
-  2.3.6:
+  "2.4.10":
     folder: 2.x.x
-  2.3.7:
+  "2.4.9":
     folder: 2.x.x
-  2.3.8:
+  "2.4.8":
     folder: 2.x.x
-  2.4.0:
+  "2.4.6":
     folder: 2.x.x
-  2.4.1:
+  "2.4.5":
     folder: 2.x.x
-  2.4.3:
+  "2.4.4":
     folder: 2.x.x
-  2.4.4:
+  "2.4.3":
     folder: 2.x.x
-  2.4.5:
+  "2.4.1":
     folder: 2.x.x
-  2.4.6:
+  "2.4.0":
+    folder: 2.x.x
+  "2.3.8":
+    folder: 2.x.x
+  "2.3.7":
+    folder: 2.x.x
+  "2.3.6":
+    folder: 2.x.x
+  "2.3.5":
     folder: 2.x.x

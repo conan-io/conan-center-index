@@ -1,0 +1,14 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -93,10 +93,10 @@
+ # 2020-04-25 Carlo added function check for mkostemp used in ProtExecAllocator
+ # 2020-04-28 PH added function check for memfd_create based on Carlo's patch
+ 
+-PROJECT(PCRE2 C)
+ 
+ # Increased minimum to 2.8.0 to support newer add_test features.
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
++PROJECT(PCRE2 C)
+ 
+ # Set policy CMP0026 to avoid warnings for the use of LOCATION in
+ # GET_TARGET_PROPERTY. This should no longer be required.

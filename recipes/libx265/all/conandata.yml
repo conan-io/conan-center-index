@@ -1,16 +1,15 @@
 sources:
-  "3.2.1":
-    url: "https://github.com/videolan/x265/archive/3.2.1.tar.gz"
-    sha256: "b5ee7ea796a664d6e2763f9c0ae281fac5d25892fc2cb134698547103466a06a"
   "3.4":
-    url: "https://github.com/videolan/x265/archive/3.4.tar.gz"
+    url: "https://github.com/videolan/x265/archive/refs/tags/3.4.tar.gz"
     sha256: "544d147bf146f8994a7bf8521ed878c93067ea1c7c6e93ab602389be3117eaaf"
-patches:
   "3.2.1":
-    - patch_file: "patches/0001-remove_register_classifier.patch"
-      base_path: "source_subfolder"
+    url: "https://bitbucket.org/multicoreware/x265_git/downloads/x265_3.2.1.tar.gz"
+    sha256: "b68939625356459e7055b9589451689924f236bac8deba3db21e3c2fb062d328"
+patches:
   "3.4":
-    - patch_file: "patches/0001-remove_register_classifier.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-numa.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/3.2.1-0001-remove_register_classifier.patch"
+    - patch_file: "patches/3.2.1-0002-cmake-min-required.patch"
+    - patch_file: "patches/3.4-0001-numa.patch"
+  "3.2.1":
+    - patch_file: "patches/3.2.1-0001-remove_register_classifier.patch"
+    - patch_file: "patches/3.2.1-0002-cmake-min-required.patch"

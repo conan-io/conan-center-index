@@ -16,10 +16,36 @@
  */
 
 #include "gdcmReader.h"
+#include "gdcmUIDGenerator.h"
 #include "gdcmWriter.h"
 #include "gdcmAttribute.h"
 
 #include <iostream>
+
+#ifdef GDCM_USE_SYSTEM_OPENSSL
+#include "gdcmCryptoFactory.h"
+void test_openssl_link()
+{
+  (void)gdcm::CryptoFactory::GetFactoryInstance(gdcm::CryptoFactory::OPENSSL);
+}
+#endif
+
+#ifdef GDCM_USE_SYSTEM_JSON
+#include "gdcmJSON.h"
+void test_json_link()
+{
+  gdcm::JSON json;
+  json.PrettyPrintOn();
+}
+#endif
+
+bool test_uid()
+{
+  gdcm::UIDGenerator uid;
+  uid.SetRoot( "1.2.3.4.0.0.1" );
+  const char *s = uid.Generate();
+  return gdcm::UIDGenerator::IsValid(s);
+}
 
 int main(int argc, char* argv[])
 {
@@ -68,7 +94,7 @@ int main(int argc, char* argv[])
     std::cerr << "Could not write: " << outfilename << std::endl;
     return 1;
   }
-
+  std::cout << "GDCM test: success\n";
   return 0;
 }
 

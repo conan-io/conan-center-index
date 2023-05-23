@@ -1,67 +1,59 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException
-import os
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.gnu import PkgConfig
+from conan.tools.system import package_manager
+
+required_conan_version = ">=1.51.3"
 
 
 class SysConfigGLUConan(ConanFile):
     name = "glu"
     version = "system"
     description = "cross-platform virtual conan package for the GLU support"
-    topics = ("conan", "opengl", "glu")
+    topics = ("opengl", "glu")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
-    settings = "os"
-    requires = "opengl/system"
+    package_type = "shared-library"
+    settings = "os", "arch", "compiler", "build_type"
+
+    def layout(self):
+        pass
+
+    def requirements(self):
+        # - glu headers include opengl headers
+        # - on Apple OS, glu is part of OpenGL framework, already managed by opengl recipe
+        self.requires("opengl/system", transitive_headers=True, transitive_libs=is_apple_os(self))
+
+    def package_id(self):
+        self.info.clear()
 
     def system_requirements(self):
-        packages = []
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            if tools.os_info.with_yum or tools.os_info.with_dnf:
-                packages = ["mesa-libGLU-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libglu1-mesa-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["glu"]
-            elif tools.os_info.with_zypper:
-                packages = ["Mesa-libGLU-devel"]
-            else:
-                self.output.warn("Don't know how to install GLU for your distro")
-        if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
-            packages = ["libGLU"]
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+        dnf = package_manager.Dnf(self)
+        dnf.install(["mesa-libGLU-devel"], update=True, check=True)
 
-    def _fill_cppinfo_from_pkgconfig(self, name):
-        pkg_config = tools.PkgConfig(name)
-        if not pkg_config.provides:
-            raise ConanException("GLU development files aren't available, giving up")
-        libs = [lib[2:] for lib in pkg_config.libs_only_l]
-        lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
-        ldflags = [flag for flag in pkg_config.libs_only_other]
-        include_dirs = [include[2:] for include in pkg_config.cflags_only_I]
-        cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
-        defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
+        yum = package_manager.Yum(self)
+        yum.install(["mesa-libGLU-devel"], update=True, check=True)
 
-        self.cpp_info.system_libs.extend(libs)
-        self.cpp_info.libdirs.extend(lib_dirs)
-        self.cpp_info.sharedlinkflags.extend(ldflags)
-        self.cpp_info.exelinkflags.extend(ldflags)
-        self.cpp_info.defines.extend(defines)
-        self.cpp_info.includedirs.extend(include_dirs)
-        self.cpp_info.cflags.extend(cflags)
-        self.cpp_info.cxxflags.extend(cflags)
+        apt = package_manager.Apt(self)
+        apt.install(["libglu1-mesa-dev"], update=True, check=True)
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["glu"], update=True, check=True)
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["glu-devel"], update=True, check=True)
+
+        pkg = package_manager.Pkg(self)
+        pkg.install(["libGLU"], update=True, check=True)
 
     def package_info(self):
+        self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Glu32"]
+            self.cpp_info.system_libs = ["glu32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self._fill_cppinfo_from_pkgconfig("glu")
-
-    def package_id(self):
-        self.info.header_only()
+            pkg_config = PkgConfig(self, 'glu')
+            pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")

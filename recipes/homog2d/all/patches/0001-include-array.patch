@@ -1,0 +1,12 @@
+diff --git a/homog2d.hpp b/homog2d.hpp
+index 64191fb..f30d150 100644
+--- a/homog2d.hpp
++++ b/homog2d.hpp
+@@ -30,6 +30,7 @@ See https://github.com/skramm/homog2d
+ #include <fstream>
+ #include <algorithm>
+ #include <numeric>
++#include <array>
+ #include <set>
+ #include <list>
+ #include <vector>

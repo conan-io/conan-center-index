@@ -1,16 +1,13 @@
 sources:
   "1.7.0":
-    url: "https://downloads.apache.org/apr/apr-1.7.0.tar.gz"
-    sha256: "48e9dbf45ae3fdc7b491259ffb6ccf7d63049ffacbc1c0977cced095e4c2d5a2"
+    url: "https://archive.apache.org/dist/apr/apr-1.7.0.tar.bz2"
+    sha256: "e2e148f0b2e99b8e5c6caa09f6d4fb4dd3e83f744aa72a952f94f5a14436f7ea"
 patches:
   "1.7.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-cmake-build-only-shared-static.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-apr-config-prefix-env.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-cmake-gen_test_char-use-target.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0004-autotools-mingw.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0005-clang12-apple.patch"
+    - patch_file: "patches/0001-cmake-build-only-shared-static.patch"
+    - patch_file: "patches/0002-apr-config-prefix-env.patch"
+    - patch_file: "patches/0003-cmake-gen_test_char-use-target.patch"
+    - patch_file: "patches/0004-autotools-mingw.patch"
+    - patch_file: "patches/0005-clang12-apple.patch"
+    - patch_file: "patches/0006-sys_siglist-fix.patch"
+    - patch_file: "patches/0007-cmake-minimum-required.patch"

@@ -1,0 +1,11 @@
+--- a/frmts/pdf/pdfsdk_headers.h
++++ b/frmts/pdf/pdfsdk_headers.h
+@@ -103,7 +103,7 @@ typedef unsigned char Guchar;
+ #undef GetObject
+ #endif
+
+-#include "podofo.h"
++#include <podofo/podofo.h>
+ #endif // HAVE_PODOFO
+
+ #ifdef HAVE_PDFIUM

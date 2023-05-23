@@ -1,33 +1,58 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
-from conans.tools import Version
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
-class XZUtils(ConanFile):
+class XZUtilsConan(ConanFile):
     name = "xz_utils"
-    description = "XZ Utils is free general-purpose data compression software with a high compression ratio. XZ Utils were written" \
-                  " for POSIX-like systems, but also work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
+    description = (
+        "XZ Utils is free general-purpose data compression software with a high "
+        "compression ratio. XZ Utils were written for POSIX-like systems, but also "
+        "work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
+    )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
-    topics = ("conan", "lzma", "xz", "compression")
+    topics = ("lzma", "xz", "compression")
     license = "Unlicense", "LGPL-2.1-or-later",  "GPL-2.0-or-later", "GPL-3.0-or-later"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    _autotools = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
+    @property
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
-        return "Debug" if self.settings.build_type == "Debug" else "Release"
+        # there is no DebugMT configuration in upstream vcxproj, we patch Debug configuration afterwards
+        return "{}{}".format(
+            "Debug" if self.settings.build_type == "Debug" else "Release",
+            "MT" if is_msvc_static_runtime(self) and self.settings.build_type != "Debug" else "",
+        )
+
+    @property
+    def _msbuild_target(self):
+        return "liblzma_dll" if self.options.shared else "liblzma"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,144 +60,142 @@ class XZUtils(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _apply_patches(self):
-        if tools.Version(self.version) == "5.2.4" and self.settings.compiler == "Visual Studio":
-            # Relax Windows SDK restriction
-            # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
-            #
-            # emulate VS2019+ meaning of WindowsTargetPlatformVersion == "10.0"
-            # undocumented method, but officially recommended workaround by microsoft at at
-            # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
-            windows_target_platform_version_old = "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>"
-            if self.settings.compiler.version == 15:
-                windows_target_platform_version_new = "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>"
-            else:
-                windows_target_platform_version_new = "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
-                                  windows_target_platform_version_old,
-                                  windows_target_platform_version_new)
-            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                                  windows_target_platform_version_old,
-                                  windows_target_platform_version_new)
+    def generate(self):
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.configuration = self._effective_msbuild_type
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.configure_args.append("--disable-doc")
+            if self.settings.build_type == "Debug":
+                tc.configure_args.append("--enable-debug")
+            tc.generate()
+
+    @property
+    def _msvc_sln_folder(self):
+        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
+           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
+            return "vs2017"
+        return "vs2013"
 
     def _build_msvc(self):
-        # windows\INSTALL-MSVC.txt
-        msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
-        with tools.chdir(os.path.join(self._source_subfolder, "windows", msvc_version)):
-            target = "liblzma_dll" if self.options.shared else "liblzma"
-            msbuild = MSBuild(self)
-            msbuild.build(
-                "xz_win.sln",
-                targets=[target],
-                build_type=self._effective_msbuild_type(),
-                platforms={"x86": "Win32", "x86_64": "x64"},
-                upgrade_project=False)
+        build_script_folder = os.path.join(self.source_folder, "windows", self._msvc_sln_folder)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = ["--disable-doc"]
-        if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
-            args.append("--with-pic")
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
+        #==============================
+        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client.
+        vcxproj_files = [
+            os.path.join(build_script_folder, "liblzma.vcxproj"),
+            os.path.join(build_script_folder, "liblzma_dll.vcxproj"),
+        ]
+        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
+           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
+            old_toolset = "v141"
         else:
-            args.extend(["--enable-static", "--disable-shared"])
-        if self.settings.build_type == "Debug":
-            args.append("--enable-debug")
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args, build=False)
-        return self._autotools
+            old_toolset = "v120"
+        new_toolset = MSBuildToolchain(self).toolset
+        conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+        for vcxproj_file in vcxproj_files:
+            replace_in_file(
+                self, vcxproj_file,
+                f"<PlatformToolset>{old_toolset}</PlatformToolset>",
+                f"<PlatformToolset>{new_toolset}</PlatformToolset>",
+            )
+            replace_in_file(
+                self, vcxproj_file,
+                "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+                f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
+            )
+        #==============================
+
+        msbuild = MSBuild(self)
+        msbuild.build_type = self._effective_msbuild_type
+        msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
+        msbuild.build(os.path.join(build_script_folder, "xz_win.sln"), targets=[self._msbuild_target])
 
     def build(self):
-        self._apply_patches()
-        if self.settings.compiler == "Visual Studio":
+        apply_conandata_patches(self)
+        if is_msvc(self):
             self._build_msvc()
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            inc_dir = os.path.join(self._source_subfolder, "src", "liblzma", "api")
-            self.copy(pattern="*.h", dst="include", src=inc_dir, keep_path=True)
-            arch = {"x86": "Win32", "x86_64": "x64"}.get(str(self.settings.arch))
-            target = "liblzma_dll" if self.options.shared else "liblzma"
-            msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
-            bin_dir = os.path.join(self._source_subfolder, "windows", msvc_version,
-                                   str(self._effective_msbuild_type()), arch, target)
-            self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
-            if self.options.shared:
-                self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
-            tools.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            inc_dir = os.path.join(self.source_folder, "src", "liblzma", "api")
+            copy(self, "*.h", src=inc_dir, dst=os.path.join(self.package_folder, "include"))
+            output_dir = os.path.join(self.source_folder, "windows")
+            copy(self, "*.lib", src=output_dir, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=output_dir, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            rename(self, os.path.join(self.package_folder, "lib", "liblzma.lib"),
                          os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.Version(self.version)
         )
 
-    @staticmethod
-    def _create_cmake_module_variables(module_file, version):
+    def _create_cmake_module_variables(self, module_file):
         # TODO: also add LIBLZMA_HAS_AUTO_DECODER, LIBLZMA_HAS_EASY_ENCODER & LIBLZMA_HAS_LZMA_PRESET
-        content = textwrap.dedent("""\
-            if(DEFINED LibLZMA_FOUND)
-                set(LIBLZMA_FOUND ${{LibLZMA_FOUND}})
-            endif()
+        content = textwrap.dedent(f"""\
+            set(LIBLZMA_FOUND TRUE)
             if(DEFINED LibLZMA_INCLUDE_DIRS)
                 set(LIBLZMA_INCLUDE_DIRS ${{LibLZMA_INCLUDE_DIRS}})
             endif()
             if(DEFINED LibLZMA_LIBRARIES)
                 set(LIBLZMA_LIBRARIES ${{LibLZMA_LIBRARIES}})
             endif()
-            set(LIBLZMA_VERSION_MAJOR {major})
-            set(LIBLZMA_VERSION_MINOR {minor})
-            set(LIBLZMA_VERSION_PATCH {patch})
-            set(LIBLZMA_VERSION_STRING "{major}.{minor}.{patch}")
-        """.format(major=version.major, minor=version.minor, patch=version.patch))
-        tools.save(module_file, content)
-
-    @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
+            set(LIBLZMA_VERSION_MAJOR {Version(self.version).major})
+            set(LIBLZMA_VERSION_MINOR {Version(self.version).minor})
+            set(LIBLZMA_VERSION_PATCH {Version(self.version).patch})
+            set(LIBLZMA_VERSION_STRING "{self.version}")
+        """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "LibLZMA")
+        self.cpp_info.set_property("cmake_target_name", "LibLZMA::LibLZMA")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.set_property("pkg_config_name", "liblzma")
+        self.cpp_info.libs = ["lzma"]
         if not self.options.shared:
             self.cpp_info.defines.append("LZMA_API_STATIC")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["pkg_config"] = "liblzma"
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibLZMA"
         self.cpp_info.names["cmake_find_package_multi"] = "LibLZMA"
-        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

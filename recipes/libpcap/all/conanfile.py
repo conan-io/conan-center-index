@@ -1,8 +1,19 @@
-from conans import AutoToolsBuildEnvironment, tools, ConanFile
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
+import glob
 import os
+import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibPcapConan(ConanFile):
@@ -12,20 +23,18 @@ class LibPcapConan(ConanFile):
     description = "libpcap is an API for capturing network traffic"
     license = "BSD-3-Clause"
     topics = ("networking", "pcap", "sniffing", "network-traffic")
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
-        "enable_universal": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
-        "enable_universal": True
     }
-    _autotools = None
 
     # TODO: Add dbus-glib when available
     # TODO: Add libnl-genl when available
@@ -33,68 +42,133 @@ class LibPcapConan(ConanFile):
     # TODO: Add libibverbs when available
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os != "Linux":
+            del self.options.enable_libusb
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        if self.settings.os == "Windows":
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.enable_libusb:
-            self.requires("libusb/1.0.24")
+        if self.options.get_safe("enable_libusb"):
+            self.requires("libusb/1.0.26")
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
-        if tools.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
+        if Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on OSX.")
+        if hasattr(self, "settings_build") and cross_building(self) and \
+           self.options.shared and is_apple_os(self):
+            raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
+        if Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
 
     def build_requirements(self):
-        if self.settings.os == "Linux":
-            self.build_requires("bison/3.7.1")
-            self.build_requires("flex/2.6.4")
+        if is_msvc(self, build_context=True):
+            self.tool_requires("winflexbison/2.5.24")
+        else:
+            self.tool_requires("bison/3.8.2")
+            self.tool_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
-            configure_args.append("--disable-universal" if not self.options.enable_universal else "")
-            configure_args.append("--enable-usb" if self.options.enable_libusb else "--disable-usb")
-            configure_args.extend([
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+
+        if self.settings.os == "Windows":
+            tc = CMakeToolchain(self)
+            if not self.options.shared:
+                tc.variables["ENABLE_REMOTE"] = False
+            if is_msvc(self):
+                tc.variables["USE_STATIC_RT"] = is_msvc_static_runtime(self)
+            else:
+                # Don't force -static-libgcc for MinGW, because conan users expect
+                # to inject this compilation flag themselves
+                tc.variables["USE_STATIC_RT"] = False
+            tc.generate()
+        else:
+            if not cross_building(self):
+                VirtualRunEnv(self).generate(scope="build")
+
+            tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
+            tc.configure_args.extend([
+                f"--enable-usb={yes_no(self.options.get_safe('enable_libusb'))}",
+                "--disable-universal",
                 "--without-libnl",
                 "--disable-bluetooth",
                 "--disable-packet-ring",
                 "--disable-dbus",
-                "--disable-rdma"
+                "--disable-rdma",
             ])
-            if tools.cross_building(self.settings):
+            if cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
-                configure_args.append("--with-pcap=%s" % target_os)
+                tc.configure_args.append(f"--with-pcap={target_os}")
             elif "arm" in self.settings.arch and self.settings.os == "Linux":
-                configure_args.append("--host=arm-linux")
-            self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+                tc.configure_args.append("--host=arm-linux")
+            tc.generate()
+
+            AutotoolsDeps(self).generate()
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
+        else:
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.install()
+
+            def flatten_filetree(folder):
+                for file in glob.glob(folder + "/**/*"):
+                    shutil.move(file, folder + os.sep)
+                for subdir in [dir[0] for dir in os.walk(folder) if dir[0] != folder]:
+                    os.rmdir(subdir)
+
+            # libpcap installs into a subfolder like x64 or amd64
+            with chdir(self, self.package_folder):
+                flatten_filetree("bin")
+                flatten_filetree("lib")
+
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+            if self.options.shared:
+                rm(self, "pcap_static.lib", os.path.join(self.package_folder, "lib"))
+                rm(self, "libpcap.a", os.path.join(self.package_folder, "lib"))
+        else:
+            autotools = Autotools(self)
+            autotools.install()
+            rmdir(self, os.path.join(self.package_folder, "bin"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            if self.options.shared:
+                rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"]= "libpcap"
-        self.cpp_info.libs = ["pcap"]
+        self.cpp_info.set_property("pkg_config_name", "libpcap")
+        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.libs = [f"pcap{suffix}"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]

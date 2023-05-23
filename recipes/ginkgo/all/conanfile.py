@@ -1,7 +1,9 @@
+from conan.tools.microsoft import msvc_runtime_flag
 from conans import ConanFile, tools, CMake
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.43.0"
 
 
 class GinkgoConan(ConanFile):
@@ -9,16 +11,27 @@ class GinkgoConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://github.com/ginkgo-project/ginkgo"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "High-performance linear algebra library for manycore systems, with a focus on sparse solution of linear systems."
+    description = (
+        "High-performance linear algebra library for manycore systems, with a "
+        "focus on sparse solution of linear systems."
+    )
     topics = ("hpc", "linear-algebra")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "openmp": [
-        True, False], "cuda": [True, False]}
-    default_options = {"shared": False, "fPIC": False,
-                       "openmp": False, "cuda": False}
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "openmp": [True, False],
+        "cuda": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": False,
+        "openmp": False,
+        "cuda": False,
+    }
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -28,6 +41,10 @@ class GinkgoConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _minimum_cpp_standard(self):
@@ -43,6 +60,11 @@ class GinkgoConan(ConanFile):
             "intel": "18"
         }
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -50,27 +72,34 @@ class GinkgoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-            if self.settings.compiler == "Visual Studio":
-                static_crt = str(
-                    self.settings.compiler.runtime).startswith("MT")
-                if static_crt and self.options.shared:
-                    raise ConanInvalidConfiguration(
-                        "Ginkgo does not support mixing static CRT and shared library")
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                "{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard,
+                    self.settings.compiler, self.settings.compiler.version
+                )
+            )
+
+        if self.options.shared and self._is_msvc and "MT" in msvc_runtime_flag(self):
+            raise ConanInvalidConfiguration(
+                "Ginkgo does not support mixing static CRT and shared library"
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -91,7 +120,7 @@ class GinkgoConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -104,42 +133,37 @@ class GinkgoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Ginkgo"
-        self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
-        self.cpp_info.names["pkg_config"] = "ginkgo"
+        self.cpp_info.set_property("cmake_file_name", "Ginkgo")
+        self.cpp_info.set_property("cmake_target_name", "Ginkgo::ginkgo")
+        self.cpp_info.set_property("pkg_config_name", "ginkgo")
 
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
-        has_dpcpp_device = Version(self.version) >= Version("1.4.0")
+        has_dpcpp_device = tools.Version(self.version) >= "1.4.0"
 
-        self.cpp_info.components["ginkgo_core"].names["cmake_find_package"] = "ginkgo"
-        self.cpp_info.components["ginkgo_core"].names["cmake_find_package_multi"] = "ginkgo"
-        self.cpp_info.components["ginkgo_core"].names["pkg_config"] = "ginkgo"
+        self.cpp_info.components["ginkgo_core"].set_property("cmake_target_name", "Ginkgo::ginkgo")
+        self.cpp_info.components["ginkgo_core"].set_property("pkg_config_name", "ginkgo")
         self.cpp_info.components["ginkgo_core"].libs = [
             "ginkgo" + debug_suffix]
         self.cpp_info.components["ginkgo_core"].requires = [
             "ginkgo_omp", "ginkgo_cuda", "ginkgo_reference", "ginkgo_hip"
         ]
 
-        self.cpp_info.components["ginkgo_cuda"].names["cmake_find_package"] = "ginkgo_cuda"
-        self.cpp_info.components["ginkgo_cuda"].names["cmake_find_package_multi"] = "ginkgo_cuda"
+        self.cpp_info.components["ginkgo_cuda"].set_property("cmake_target_name", "Ginkgo::ginkgo_cuda")
         self.cpp_info.components["ginkgo_cuda"].libs = [
             "ginkgo_cuda" + debug_suffix]
         self.cpp_info.components["ginkgo_cuda"].requires = ["ginkgo_hip"]
 
-        self.cpp_info.components["ginkgo_omp"].names["cmake_find_package"] = "ginkgo_omp"
-        self.cpp_info.components["ginkgo_omp"].names["cmake_find_package_multi"] = "ginkgo_omp"
+        self.cpp_info.components["ginkgo_omp"].set_property("cmake_target_name", "Ginkgo::ginkgo_omp")
         self.cpp_info.components["ginkgo_omp"].libs = [
             "ginkgo_omp" + debug_suffix]
         self.cpp_info.components["ginkgo_omp"].requires = [
             "ginkgo_cuda", "ginkgo_hip"]
 
-        self.cpp_info.components["ginkgo_hip"].names["cmake_find_package"] = "ginkgo_hip"
-        self.cpp_info.components["ginkgo_hip"].names["cmake_find_package_multi"] = "ginkgo_hip"
+        self.cpp_info.components["ginkgo_hip"].set_property("cmake_target_name", "Ginkgo::ginkgo_hip")
         self.cpp_info.components["ginkgo_hip"].libs = [
             "ginkgo_hip" + debug_suffix]
 
-        self.cpp_info.components["ginkgo_reference"].names["cmake_find_package"] = "ginkgo_reference"
-        self.cpp_info.components["ginkgo_reference"].names["cmake_find_package_multi"] = "ginkgo_reference"
+        self.cpp_info.components["ginkgo_reference"].set_property("cmake_target_name", "Ginkgo::ginkgo_reference")
         self.cpp_info.components["ginkgo_reference"].libs = [
             "ginkgo_reference" + debug_suffix]
 
@@ -148,13 +172,11 @@ class GinkgoConan(ConanFile):
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_dpcpp"]
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_device"]
 
-            self.cpp_info.components["ginkgo_dpcpp"].names["cmake_find_package"] = "ginkgo_dpcpp"
-            self.cpp_info.components["ginkgo_dpcpp"].names["cmake_find_package_multi"] = "ginkgo_dpcpp"
+            self.cpp_info.components["ginkgo_dpcpp"].set_property("cmake_target_name", "Ginkgo::ginkgo_dpcpp")
             self.cpp_info.components["ginkgo_dpcpp"].libs = [
                 "ginkgo_dpcpp" + debug_suffix]
 
-            self.cpp_info.components["ginkgo_device"].names["cmake_find_package"] = "ginkgo_device"
-            self.cpp_info.components["ginkgo_device"].names["cmake_find_package_multi"] = "ginkgo_device"
+            self.cpp_info.components["ginkgo_device"].set_property("cmake_target_name", "Ginkgo::ginkgo_device")
             self.cpp_info.components["ginkgo_device"].libs = [
                 "ginkgo_device" + debug_suffix]
 
@@ -164,3 +186,9 @@ class GinkgoConan(ConanFile):
             self.cpp_info.components["ginkgo_hip"].requires += ["ginkgo_device"]
             self.cpp_info.components["ginkgo_cuda"].requires += ["ginkgo_device"]
             self.cpp_info.components["ginkgo_dpcpp"].requires += ["ginkgo_device"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "Ginkgo"
+        self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
+        self.cpp_info.components["ginkgo_core"].names["cmake_find_package"] = "ginkgo"
+        self.cpp_info.components["ginkgo_core"].names["cmake_find_package_multi"] = "ginkgo"

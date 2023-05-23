@@ -1,4 +1,13 @@
 sources:
+  "0.7":
+    url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.7.tar.gz"
+    sha256: "7b2c30a4c46514cc5b20d2bebab25c495df39574b9e117c760d1cfe19f71d9aa"
+  "0.6":
+    url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.6.tar.gz"
+    sha256: "95dedaa5cedf7a271f051d91b24b3b6c78aa3c5b2bc3cf058554c92748a421b2"
+  "0.5":
+    url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.5.tar.gz"
+    sha256: "7ec1017d71d48595c078a4488140b230fd9cad1059986a18a507f356bf00e89b"
   "0.4":
     url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.4.tar.gz"
     sha256: "ba03449bb964d6cabbae3b6d6c8fce6e4276e4190885f9b5efc56153ef4b3c39"
@@ -9,9 +18,13 @@ sources:
     url: "https://github.com/charles-lunarg/vk-bootstrap/archive/v0.2.tar.gz"
     sha256: "45afc9c2c90309f768786c8014913627e6f1cb4db20449a65b98283b58918483"
 patches:
+  "0.6":
+    - patch_file: "patches/0001-fix-cmake-0.6.patch"
+  "0.5":
+    - patch_file: "patches/0001-fix-cmake-0.5.patch"
+  "0.4":
+    - patch_file: "patches/0001-fix-cmake-0.4.patch"
   "0.3.1":
     - patch_file: "patches/0001-fix-cmake-0.3.1.patch"
-      base_path: "source_subfolder"
   "0.2":
     - patch_file: "patches/0001-fix-cmake-0.2.patch"
-      base_path: "source_subfolder"
