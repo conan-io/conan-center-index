@@ -1,0 +1,4 @@
+sources:
+  "1.3.0":
+    url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.39.tar.gz"
+    sha256: "186cb427cd6b4654f381357b60af7ffb0ae9bb50d7af7d87e0723858f7318b80"
