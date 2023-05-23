@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -18,9 +18,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/hpc-maths/samurai"
     topics = ("scientific computing", "adaptive mesh refinement", "header-only")
     package_type = "header-library"
-    # Keep these or explain why it's not required for this particular case
     settings = "os", "arch", "compiler", "build_type"
-    # Do not copy sources to build folder for header only projects, unless you need to apply patches
     no_copy_source = True
 
     @property
@@ -60,10 +58,6 @@ class PackageConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        # In case this library does not work in some another configuration, it should be validated here too
-        # if self.settings.os == "Windows":
-        #     raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -81,19 +75,3 @@ class PackageConan(ConanFile):
         # Folders not used for header-only
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # Set these to the appropriate values if the package has an official FindPACKAGE.cmake
-        # listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
-        # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
-        self.cpp_info.set_property("cmake_module_file_name", "samurai")
-        self.cpp_info.set_property("cmake_module_target_name", "samurai::samurai")
-        # Set these to the appropriate values if package provides a CMake config file
-        # (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
-        self.cpp_info.set_property("cmake_file_name", "samurai")
-        self.cpp_info.set_property("cmake_target_name", "samurai::samurai")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "samurai"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "samurai"
-        self.cpp_info.names["cmake_find_package"] = "samurai"
-        self.cpp_info.names["cmake_find_package_multi"] = "samurai"
