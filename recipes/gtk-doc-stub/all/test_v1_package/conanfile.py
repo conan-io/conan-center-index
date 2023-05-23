@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
         self.build_requires("automake/1.16.5")
 
     def build(self):
-        shutil.copy(os.path.join(self.export_sources_folder, "configure.ac"), os.path.join(self.build_folder, "configure.ac"))
+        shutil.copy(os.path.join(self.source_folder, "configure.ac"), os.path.join(self.build_folder, "configure.ac"))
         self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
