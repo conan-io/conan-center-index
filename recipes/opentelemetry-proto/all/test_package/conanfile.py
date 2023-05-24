@@ -1,10 +1,11 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
 import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
     _res_folder = ""
@@ -15,7 +16,14 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build(self):
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
+
         self._res_folder = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root")
 
     def test(self):
