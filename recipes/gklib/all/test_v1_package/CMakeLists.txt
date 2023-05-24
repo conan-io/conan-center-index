@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
