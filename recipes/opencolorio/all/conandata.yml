@@ -8,11 +8,15 @@ sources:
 patches:
   "2.1.0":
     - patch_file: "patches/fix-cmake-source-dir-and-targets.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix CMake source dir and targets for CI"
+      patch_type: "portability"
     - patch_file: "patches/pstring.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix include paths"
+      patch_type: "portability"
     - patch_file: "patches/strlen.patch"
-      base_path: "source_subfolder"
+      patch_description: "Add missing include"
+      patch_type: "portability"
   "1.1.1":
     - patch_file: "patches/1.1.1.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix compilation for version 1.1.1 on CI"
+      patch_type: "portability"
