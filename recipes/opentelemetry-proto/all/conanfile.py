@@ -12,7 +12,6 @@ class OpenTelemetryProtoConan(ConanFile):
     homepage = "https://github.com/open-telemetry/opentelemetry-proto"
     description = "Protobuf definitions for the OpenTelemetry protocol (OTLP)"
     topics = ("opentelemetry", "telemetry", "otlp")
-    package_type = "unknown"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -40,6 +39,5 @@ class OpenTelemetryProtoConan(ConanFile):
         self.conf_info.define("user.opentelemetry-proto:proto_root", os.path.join(self.package_folder, "res"))
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        self.cpp_info.resdirs = []
 
         self.user_info.proto_root = os.path.join(self.package_folder, "res")
