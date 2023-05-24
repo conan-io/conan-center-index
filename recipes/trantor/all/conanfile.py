@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -31,7 +31,7 @@ class TrantorConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 14
 
     @property
@@ -43,6 +43,9 @@ class TrantorConan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,14 +65,14 @@ class TrantorConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version:
             if Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
         else:
-            self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
+            self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio with MDd
         if is_msvc(self) and self.options.shared and "MDd" in msvc_runtime_flag(self):
@@ -92,6 +95,7 @@ class TrantorConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # fix c-ares imported target
         replace_in_file(self, cmakelists, "c-ares_lib", "c-ares::cares")
