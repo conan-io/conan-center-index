@@ -49,7 +49,7 @@ class AtSpi2CoreConan(ConanFile):
             self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("glib/2.76.2")
+        self.requires("glib/2.76.3")
         if self.options.with_x11:
             self.requires("xorg/system")
         self.requires("dbus/1.15.2")
