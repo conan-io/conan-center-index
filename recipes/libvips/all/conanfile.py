@@ -117,7 +117,7 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.76.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.76.3", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.2.0")
         if self.options.with_cgif:
@@ -206,7 +206,7 @@ class LibvipsConan(ConanFile):
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if not can_run(self):
-            self.tool_requires("glib/2.76.2")
+            self.tool_requires("glib/2.76.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
