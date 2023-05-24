@@ -81,7 +81,7 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self._requires_abseil:
-            self.requires("abseil/20230125.3")
+            self.requires("abseil/20230125.3", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -240,10 +240,13 @@ class ProtobufConan(ConanFile):
         self.cpp_info.components["libprotobuf"].set_property("pkg_config_name", "protobuf")
         self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
+        package_requirements = []
         if self.options.with_zlib:
-            self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
+            package_requirements += ["zlib::zlib"]
         if self._requires_abseil:
-            self.cpp_info.components["libprotobuf"].requires = ["abseil::abseil"]
+            package_requirements += ["abseil::abseil"]
+        self.cpp_info.components["libprotobuf"].requires = package_requirements
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libprotobuf"].system_libs.extend(["m", "pthread"])
             if self._is_clang_x86 or "arm" in str(self.settings.arch):

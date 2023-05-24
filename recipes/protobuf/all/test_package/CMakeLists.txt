@@ -6,7 +6,7 @@ find_package(protobuf CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp addressbook.proto)
 
-if (protobuf_VERSION VERSION_LESS "3.22.0")
+if (protobuf_VERSION VERSION_LESS "4.22.0")
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 else()
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
