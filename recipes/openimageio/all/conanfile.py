@@ -5,11 +5,9 @@ from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.scm import Version
-import functools
 import os
 
 required_conan_version = ">=1.53.0"
-
 
 class OpenImageIOConan(ConanFile):
     name = "openimageio"
@@ -77,10 +75,12 @@ class OpenImageIOConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def export_sources(self):
         self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        files.export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
