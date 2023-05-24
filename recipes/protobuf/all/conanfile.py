@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
@@ -41,6 +42,10 @@ class ProtobufConan(ConanFile):
     short_paths = True
 
     @property
+    def _minimum_cpp_standard(self):
+        return 11 if Version(self.version) < "4.22" else 14
+
+    @property
     def _is_clang_cl(self):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
@@ -79,6 +84,9 @@ class ProtobufConan(ConanFile):
             self.requires("abseil/20230125.3")
 
     def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
@@ -87,6 +95,10 @@ class ProtobufConan(ConanFile):
         if self.settings.compiler == "clang":
             if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
+
+        if self.settings.compiler == "gcc":
+            if Version(self.version) >= "4.22" and Version(self.settings.compiler.version) < "7.3":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 7.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -98,6 +110,7 @@ class ProtobufConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
+        tc.cache_variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["protobuf_ABSL_PROVIDER"] = "package"
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
