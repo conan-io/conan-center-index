@@ -16,6 +16,7 @@ class FTXUIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ArthurSonzogni/FTXUI"
     topics = ("ncurses", "terminal", "screen", "tui")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -91,9 +92,13 @@ class FTXUIConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        if Version(self.version) >= "4.1.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ftxui")
+        if Version(self.version) >= "4.1.0":
+            self.cpp_info.set_property("pkg_config_name", "ftxui")
 
         self.cpp_info.components["ftxui-dom"].set_property("cmake_target_name", "ftxui::dom")
         self.cpp_info.components["ftxui-dom"].libs = ["ftxui-dom"]
