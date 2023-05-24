@@ -78,7 +78,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.1")
         if self.options.with_glib:
             self.requires("glib/2.76.2", run=can_run(self))
 
@@ -97,7 +97,7 @@ class HarfbuzzConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.with_glib and not can_run(self):
