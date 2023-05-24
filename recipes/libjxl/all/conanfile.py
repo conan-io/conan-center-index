@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -16,6 +15,7 @@ class LibjxlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -55,12 +55,9 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        highway = self.dependencies["highway"]
-        if hasattr(highway, "options.shared") and not highway.options.shared and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref}:shared=True requires -o highway:shared=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -76,9 +73,6 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_FORCE_SYSTEM_BROTLI"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_HWY"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
-        if cross_building(self):
-            tc.variables["CMAKE_SYSTEM_PROCESSOR"] = \
-                str(self.settings.arch)
         tc.variables["JPEGXL_ENABLE_TOOLS"] = False
         tc.generate()
 
@@ -108,18 +102,6 @@ class LibjxlConan(ConanFile):
             return name + "-static"
         return name
 
-    def _stdcpp_library(self):
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ["libstdc++", "libstdc++11"]:
-            return "stdc++"
-        elif libcxx in ["libc++"]:
-            return "c++"
-        elif libcxx in ["c++_shared"]:
-            return "c++_shared"
-        elif libcxx in ["c++_static"]:
-            return "c++_static"
-        return None
-
     def package_info(self):
         # jxl
         self.cpp_info.components["jxl"].names["pkg_config"] = "libjxl"
@@ -145,10 +127,10 @@ class LibjxlConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
 
-        if not self.options.shared and self._stdcpp_library():
+        if not self.options.shared and stdcpp_library(self):
             self.cpp_info.components["jxl"].system_libs.append(
-                self._stdcpp_library())
+                stdcpp_library(self))
             self.cpp_info.components["jxl_dec"].system_libs.append(
-                self._stdcpp_library())
+                stdcpp_library(self))
             self.cpp_info.components["jxl_threads"].system_libs.append(
-                self._stdcpp_library())
+                stdcpp_library(self))
