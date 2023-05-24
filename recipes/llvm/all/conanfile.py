@@ -149,7 +149,7 @@ class Llvm(ConanFile):
         }
     }
 
-    exports_sources = 'patches/**/*'
+    exports_sources = 'patches/**/*', 'conandata.yml'
 
     def layout(self):
         cmake_layout(self, src_folder="src")
