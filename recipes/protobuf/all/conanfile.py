@@ -54,7 +54,7 @@ class ProtobufConan(ConanFile):
 
     @property
     def _requires_abseil(self):
-        return Version(self.version) >= "3.22.0"
+        return Version(self.version) >= "4.22"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -195,7 +195,7 @@ class ProtobufConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
-        if Version(self.version) < "3.22":
+        if Version(self.version) < "4.22":
             rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
                          os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
@@ -214,7 +214,7 @@ class ProtobufConan(ConanFile):
             os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
         ]
-        if Version(self.version) >= "3.22":
+        if Version(self.version) >= "4.22":
             build_modules += os.path.join(self._cmake_install_base_path, "protobuf-config.cmake"),
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
@@ -246,7 +246,7 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
             self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
-        if Version(self.version) >= "3.22":
+        if Version(self.version) >= "4.22":
             # libutf8_range
             self.cpp_info.components["libutf8_range"].set_property("cmake_target_name", "protobuf::libutf8_range")
             self.cpp_info.components["libutf8_range"].libs = [lib_prefix + "utf8_range" + lib_suffix]
