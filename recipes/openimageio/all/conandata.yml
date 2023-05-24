@@ -14,19 +14,20 @@ sources:
 patches:
   "2.2.7.0":
     - patch_file: "patches/2.2.7.0-cmake-targets.patch"
-      base_path: "source_subfolder"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
   "2.2.18.0":
     - patch_file: "patches/2.2.18.0-cmake-targets.patch"
-      base_path: "source_subfolder"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
   "2.3.7.2":
     - patch_file: "patches/2.3.7.2-cmake-targets.patch"
-      base_path: "source_subfolder"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
   "2.4.7.1":
     - patch_file: "patches/2.4.7.1-cmake-targets.patch"
-      base_path: "source_subfolder"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"
     - patch_file: "patches/2.4.7.1-fix-msvc2017.patch"
-      base_path: "source_subfolder"
       patch_description: "Fix compile error with MSVC 2017"
       patch_type: "official"
