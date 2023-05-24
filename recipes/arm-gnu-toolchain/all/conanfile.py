@@ -80,9 +80,9 @@ class ArmGnuToolchain(ConanFile):
         if (str(self.settings.os) != "baremetal" and str(self.settings.arch) != str(self._settings_build.arch)):
             print("ARCH MISMATCH")
             # Update comment later if this works
-            raise ConanInvalidConfiguration(
-                f"This tool does not work when cross compiling to a target that is not 'baremetal'."
-            )
+            # raise ConanInvalidConfiguration(
+            #     f"This tool does not work when cross compiling to a target that is not 'baremetal'."
+            # )
 
     def source(self):
         pass
