@@ -36,11 +36,18 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(variables={
+        cmake_definitions = {
             'CMAKE_CXX_STANDARD': self._ccpstd(),
-            'llvm_build_llvm_dylib': self.dependencies[self.tested_reference_str].options.llvm_build_llvm_dylib,
+            'llvm_build_llvm_dylib': False,
+        }
+
+        # XXX fine for v2 but service runs this test_package also for v1
+        conan_v2 = hasattr(self, "dependencies")
+        if conan_v2:
             # We could also add additional testing per project / runtime if needed
-        })
+            cmake_definitions['llvm_build_llvm_dylib'] = self.dependencies[self.tested_reference_str].options.llvm_build_llvm_dylib
+
+        cmake.configure(variables=cmake_definitions)
         cmake.build()
 
     def test(self):
