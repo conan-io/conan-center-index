@@ -31,7 +31,7 @@ class ChaiScriptConan(ConanFile):
     def configure(self):
         if self.options.header_only:
             self.package_type = "header-library"
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
             del self.options.dyn_load
             del self.options.use_std_make_shared
             del self.options.multithread_support
