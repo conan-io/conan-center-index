@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, rmdir, chdir, load, copy
+from conan.tools.files import get, apply_conandata_patches, chdir, load, copy
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
@@ -140,7 +140,7 @@ class Llvm(ConanFile):
             'with_xml2': False,
             'keep_binaries_regex': '^$',
 
-            ## options removed in package id
+            # options removed in package id
             # XXX Should these files used by conan at all?
             'use_llvm_cmake_files': False,
             # creating job pools with current free memory
@@ -334,7 +334,7 @@ class Llvm(ConanFile):
                 'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
                 'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
                 'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
-            }
+        }
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
             cmake_definitions.update(
