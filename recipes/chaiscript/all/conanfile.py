@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, rmdir, copy, collect_libs
+from conan.tools.files import get, rmdir, copy
 import os
 
 
@@ -63,7 +63,7 @@ class ChaiScriptConan(ConanFile):
             cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst="licenses", src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
             copy(self, pattern="*.hpp", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, 'include'))
         else:
