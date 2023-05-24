@@ -17,8 +17,8 @@ class TzConan(ConanFile):
     settings = "os", "build_type", "arch", "compiler"
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        del self.settings.rm_safe("compiler.libcxx")
+        del self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
