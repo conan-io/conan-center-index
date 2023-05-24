@@ -57,6 +57,10 @@ class UtilLinuxLibuuidConan(ConanFile):
                 "Release": "3",
                 "Debug": "3",
             },
+            "apple-clang": {
+                "Release": "5",
+                "Debug": "5",
+            },
         }
         return min_version[str(compiler)][str(build_type)]
 
