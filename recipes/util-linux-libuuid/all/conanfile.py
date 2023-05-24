@@ -62,7 +62,7 @@ class UtilLinuxLibuuidConan(ConanFile):
                 "Debug": "5",
             },
         }
-        return min_version[str(compiler)][str(build_type)]
+        return min_version.get(str(compiler), {}).get(str(build_type), "0")
 
     def validate(self):
         min_version = self._minimum_compiler_version(self.settings.compiler, self.settings.build_type)
