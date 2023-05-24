@@ -67,15 +67,10 @@ class OpenImageIOConan(ConanFile):
     short_paths = True
     generators = "CMakeDeps"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
         files.export_conandata_patches(self)
 
     def config_options(self):
@@ -205,6 +200,7 @@ class OpenImageIOConan(ConanFile):
         files.apply_conandata_patches(self)
 
         cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
@@ -215,7 +211,7 @@ class OpenImageIOConan(ConanFile):
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "share"))
 
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
+        files.copy(self, "LICENSE.md", src=self.source_folder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenImageIO")
