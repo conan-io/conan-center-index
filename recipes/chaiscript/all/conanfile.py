@@ -104,7 +104,7 @@ class ChaiScriptConan(ConanFile):
             self.cpp_info.libs = [f'chaiscript_stdlib-{self.version}', 'stl_extra']
         if self.options.get_safe("use_std_make_shared"):
             self.cpp_info.defines.append("CHAISCRIPT_USE_STD_MAKE_SHARED")
-        if self.settings.os == "Linux":
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["dl"]
-            if self.options.get_safe("multithread_support"):
+            if self.options.get_safe("multithread_support") or self.options.header_only:
                 self.cpp_info.system_libs.append("pthread")
