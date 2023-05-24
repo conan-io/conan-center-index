@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy, download
 from conan.errors import ConanException, ConanInvalidConfiguration
 import os
+import pprint
 
 
 required_conan_version = ">=1.50.0"
@@ -70,7 +71,14 @@ class ArmGnuToolchain(ConanFile):
                 f"Pre-compiled binaries are only available for {supported_build_architectures[str(self._settings_build.os)]}."
             )
 
-        if (self.settings.os != "baremetal" and self.settings.arch != self._settings_build.arch):
+        pp = pprint.PrettyPrinter(indent=4)
+
+        pp.pprint(str(self.settings.os))
+        pp.pprint(str(self.settings.arch))
+        pp.pprint(str(self._settings_build.arch))
+
+        if (self.settings.os != "baremetal" and str(self.settings.arch) != str(self._settings_build.arch)):
+            print("ARCH MISMATCH")
             # Update comment later if this works
             raise ConanInvalidConfiguration(
                 f"This tool does not work when cross compiling to a target that is not 'baremetal'."
