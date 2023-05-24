@@ -52,6 +52,10 @@ class ProtobufConan(ConanFile):
     def _can_disable_rtti(self):
         return Version(self.version) >= "3.15.4"
 
+    @property
+    def _requires_abseil(self):
+        return Version(self.version) >= "3.22.0"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -71,6 +75,8 @@ class ProtobufConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
+        if self._requires_abseil:
+            self.requires("abseil/20230125.3")
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -93,6 +99,7 @@ class ProtobufConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["protobuf_ABSL_PROVIDER"] = "package"
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
         tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
@@ -218,6 +225,8 @@ class ProtobufConan(ConanFile):
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
+        if self._requires_abseil:
+            self.cpp_info.components["libprotobuf"].requires = ["abseil::abseil"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libprotobuf"].system_libs.extend(["m", "pthread"])
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
