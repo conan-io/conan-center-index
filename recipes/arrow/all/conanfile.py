@@ -575,7 +575,7 @@ class ArrowConan(ConanFile):
         del self.options.plasma
 
         if self.options.acero:
-            self.cpp_info.components["libacero"].libs = [f"acero{suffix}"]
+            self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
             self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
             self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
             self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
