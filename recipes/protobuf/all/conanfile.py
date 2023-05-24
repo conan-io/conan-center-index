@@ -232,6 +232,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
+        utf_lib_prefix = "lib" if self._is_clang_cl else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
 
         # libprotobuf
@@ -262,10 +263,10 @@ class ProtobufConan(ConanFile):
         if Version(self.version) >= "4.22":
             # libutf8_range
             self.cpp_info.components["libutf8_range"].set_property("cmake_target_name", "protobuf::libutf8_range")
-            self.cpp_info.components["libutf8_range"].libs = [lib_prefix + "utf8_range" + lib_suffix]
+            self.cpp_info.components["libutf8_range"].libs = [utf_lib_prefix + "utf8_range" + lib_suffix]
             # libutf8_validity
             self.cpp_info.components["libutf8_validity"].set_property("cmake_target_name", "protobuf::libutf8_validity")
-            self.cpp_info.components["libutf8_validity"].libs = [lib_prefix + "utf8_validity" + lib_suffix]
+            self.cpp_info.components["libutf8_validity"].libs = [utf_lib_prefix + "utf8_validity" + lib_suffix]
 
         # libprotobuf-lite
         if self.options.lite:
