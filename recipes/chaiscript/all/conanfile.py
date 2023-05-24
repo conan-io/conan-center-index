@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import get, rmdir, copy
-from conan.tools.microsoft import is_msvc
-from conan.tools.build import check_min_cppstd, check_min_vs
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.build import check_min_cppstd
 from conan import Version
 from conan.errors import ConanInvalidConfiguration
 import os
