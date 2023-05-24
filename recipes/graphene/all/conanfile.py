@@ -51,7 +51,7 @@ class GrapheneConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.76.2")
+            self.requires("glib/2.76.3")
 
     def validate(self):
         if self.settings.compiler == "gcc":
