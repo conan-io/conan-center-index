@@ -73,6 +73,8 @@ class ProtobufConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+            if Version(self.version) >= "4.22.0" and is_msvc(self):
+                self.options["abseil"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
