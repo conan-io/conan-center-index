@@ -71,10 +71,6 @@ class OpenImageIOConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -155,7 +151,7 @@ class OpenImageIOConan(ConanFile):
             )
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)
