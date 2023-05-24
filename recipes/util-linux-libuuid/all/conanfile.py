@@ -5,6 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -46,7 +47,23 @@ class UtilLinuxLibuuidConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def _minimum_compiler_version(self, compiler, build_type):
+        min_version = {
+            "gcc": {
+                "Release": "4",
+                "Debug": "8",
+            },
+            "clang": {
+                "Release": "3",
+                "Debug": "3",
+            },
+        }
+        return min_version[str(compiler)][str(build_type)]
+
     def validate(self):
+        min_version = self._minimum_compiler_version(self.settings.compiler, self.settings.build_type)
+        if Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(f"{self.settings.compiler} {self.settings.compiler.version} does not meet the minimum version requirement of version {min_version}")
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows")
 
