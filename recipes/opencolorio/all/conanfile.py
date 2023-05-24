@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
@@ -40,12 +41,6 @@ class OpenColorIOConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # opencolorio>=2.2.0 requires minizip-ng with with_zlib
-        if Version(self.version) >= "2.2.0":
-            # in Apple OS, minizip-ng/with_libcomp=True deletes minizip-ng/with_zlib options.
-            if is_apple_os(self):
-                self.options["minizip-ng"].with_libcomp = False
-            self.options["minizip-ng"].with_zlib = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,6 +67,10 @@ class OpenColorIOConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+
+        # opencolorio>=2.2.0 requires minizip-ng with with_zlib
+        if Version(self.version) >= "2.2.0" and self.options["minizip-ng"].get_safe("with_zlib") == False:
+            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True.")
 
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
