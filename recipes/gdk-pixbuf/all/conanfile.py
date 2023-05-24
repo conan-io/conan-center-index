@@ -63,7 +63,7 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.76.3", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_libpng:
             self.requires("libpng/1.6.39")
         if self.options.with_libtiff:
@@ -94,7 +94,7 @@ class GdkPixbufConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if not can_run(self):
-            self.tool_requires("glib/2.76.2")
+            self.tool_requires("glib/2.76.3")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
