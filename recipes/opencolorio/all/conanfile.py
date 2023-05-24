@@ -69,7 +69,8 @@ class OpenColorIOConan(ConanFile):
             check_min_cppstd(self, 11)
 
         # opencolorio>=2.2.0 requires minizip-ng with with_zlib
-        if Version(self.version) >= "2.2.0" and self.options["minizip-ng"].get_safe("with_zlib") == False:
+        if Version(self.version) >= "2.2.0" and \
+            not self.dependencies["minizip-ng"].options.get_safe("with_zlib", False):
             raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True.")
 
     def build_requirements(self):
