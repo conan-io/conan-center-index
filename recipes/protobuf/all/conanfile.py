@@ -246,6 +246,14 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
             self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
+        if Version(self.version) >= "3.22":
+            # libutf8_range
+            self.cpp_info.components["libutf8_range"].set_property("cmake_target_name", "protobuf::libutf8_range")
+            self.cpp_info.components["libutf8_range"].libs = [lib_prefix + "utf8_range" + lib_suffix]
+            # libutf8_validity
+            self.cpp_info.components["libutf8_validity"].set_property("cmake_target_name", "protobuf::libutf8_validity")
+            self.cpp_info.components["libutf8_validity"].libs = [lib_prefix + "utf8_validity" + lib_suffix]
+
         # libprotobuf-lite
         if self.options.lite:
             self.cpp_info.components["libprotobuf-lite"].set_property("cmake_target_name", "protobuf::libprotobuf-lite")
