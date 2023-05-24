@@ -15,13 +15,9 @@ sources:
 patches:
   "13.0.1":
     - patch_file: "patches/13/calculate_job_pools.patch"
-    - patch_file: "patches/13/fix_xml2_library_name.patch"
   "14.0.6":
     - patch_file: "patches/14/calculate_job_pools.patch"
-    - patch_file: "patches/14/fix_xml2_library_name.patch"
   "15.0.7":
     - patch_file: "patches/15/calculate_job_pools.patch"
-    - patch_file: "patches/15/fix_xml2_library_name.patch"
   "16.0.3":
     - patch_file: "patches/16/calculate_job_pools.patch"
-    - patch_file: "patches/16/fix_xml2_library_name.patch"
