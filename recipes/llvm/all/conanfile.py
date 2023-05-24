@@ -669,3 +669,7 @@ class Llvm(ConanFile):
                     os.path.join(module_subfolder,
                                  "LLVMConfigInternal.cmake")
                 )
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "LLVM"
+        self.cpp_info.names["cmake_find_package_multi"] = "LLVM"
