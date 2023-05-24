@@ -106,6 +106,8 @@ class Llvm(ConanFile):
             'use_llvm_cmake_files': [True, False],
             'ram_per_compile_job': ['ANY'],
             'ram_per_link_job': ['ANY'],
+            # conan center index ci workaround, memory consumption to high in debug builds
+            'enable_debug': [True, False],
         },
     }
     default_options = {
@@ -146,6 +148,7 @@ class Llvm(ConanFile):
             # creating job pools with current free memory
             'ram_per_compile_job': '2000',
             'ram_per_link_job': '14000',
+            'enable_debug': False,
         }
     }
 
@@ -212,6 +215,10 @@ class Llvm(ConanFile):
         if is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
             raise ConanInvalidConfiguration(
                 "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
+
+        if self.settings.build_type == "Debug" and not self.options.enable_debug:
+            raise ConanInvalidConfiguration(
+                "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option enable_debug=True.")
 
     # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
     # def validate(self):
@@ -620,6 +627,7 @@ class Llvm(ConanFile):
         del self.info.options.use_llvm_cmake_files
         del self.info.options.ram_per_compile_job
         del self.info.options.ram_per_link_job
+        del self.info.options.enable_debug
 
     def package_info(self):
         module_subfolder = os.path.join("lib", "cmake")
