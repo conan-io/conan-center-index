@@ -117,13 +117,13 @@ class LzmaSdkConan(ConanFile):
         # Patches for other build systems
         replace_in_file(self, os.path.join(self.source_folder, "C", "Util", "7z", "makefile.gcc"),
                               "CFLAGS = ",
-                              "CFLAGS = -fpermissive ")
+                              "CFLAGS += -fpermissive ")
         replace_in_file(self, os.path.join(self.source_folder, "C", "Util", "7z", "makefile.gcc"),
                               ": 7zAlloc.c",
                               ": ../../7zAlloc.c")
-        replace_in_file(self, os.path.join(self.source_folder, "C", "Util", "Lzma", "makefile.gcc"),
+        replace_in_file(self, os.path.join(self.source_folder, "CPP", "7zip", "Bundles", "LzmaCon", "makefile.gcc"),
                               "CFLAGS = ",
-                              "CFLAGS = -fpermissive ")
+                              "CFLAGS += -fpermissive ")
         replace_in_file(self, os.path.join(self.source_folder, "CPP", "Common", "MyString.h"),
                               "#ifdef _WIN32\r\n",
                               "#ifdef _WIN32\r\n#ifndef UNDER_CE\r\n#include <windows.h>\r\n#endif\r\n")
