@@ -47,11 +47,9 @@ class SevenZipConan(ConanFile):
 
     def source(self):
         if Version(self.version) < "22":
-            from six.moves.urllib.parse import urlparse
-            url = self.conan_data["sources"][self.version]["url"]
-            filename = os.path.basename(urlparse(url).path)
-            sha256 = self.conan_data["sources"][self.version]["sha256"]
-            download(self, url, filename, sha256)
+            item = self.conan_data["sources"][self.version]
+            filename = "7z-source.7z"
+            download(self, **item, filename=filename)
             self.run(f"7zr x {filename}")
             os.unlink(filename)
         else:
