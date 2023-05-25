@@ -15,7 +15,6 @@ class MysqlConnectorCPPRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = ("boost/1.81.0", "openssl/[>=1.1 <4]", "libmysqlclient/8.0.31")
 
     @property
     def _min_cppstd(self):
@@ -29,6 +28,14 @@ class MysqlConnectorCPPRecipe(ConanFile):
             "gcc": "9" if Version(self.version) >= "8.0.27" else "5.3",
             "clang": "6",
         }
+
+    def requirements(self):
+        self.requires("boost/1.81.0")
+        if self.settings.os == "Macos":
+            self.requires("openssl/[>=1.1 <3]")
+        else:
+            self.requires("openssl/[>=1.1 <4]")
+        self.requires("libmysqlclient/8.0.31")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
