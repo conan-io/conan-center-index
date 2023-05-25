@@ -15,7 +15,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = ("boost/1.81.0", "openssl/[>=1.1 <4]", "protobuf/3.21.9", "libmysqlclient/8.0.31")
+    requires = ("boost/1.81.0", "openssl/[>=1.1 <4]", "libmysqlclient/8.0.31")
 
     @property
     def _min_cppstd(self):
@@ -83,7 +83,6 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.cache_variables["MYSQL_LIB_DIR"] = self.dependencies["libmysqlclient"].cpp_info.aggregated_components().libdirs[0].replace("\\", "/")
         tc.cache_variables["MYSQL_INCLUDE_DIR"] = self.dependencies["libmysqlclient"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
         tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-        tc.cache_variables["WITH_PROTOBUF"] = self.dependencies["protobuf"].package_folder.replace("\\", "/")
         tc.generate()
 
     def build(self):
