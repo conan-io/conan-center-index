@@ -12,11 +12,11 @@ required_conan_version = ">=1.50.0"
 
 class XsimdConan(ConanFile):
     name = "xsimd"
+    description = "C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xsimd"
-    description = "C++ wrappers for SIMD intrinsics and parallelized, optimized mathematical functions (SSE, AVX, NEON, AVX512)"
-    topics = ("simd-intrinsics", "vectorization", "simd")
+    topics = ("simd-intrinsics", "vectorization", "simd", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,20 +25,19 @@ class XsimdConan(ConanFile):
     default_options = {
         "xtl_complex": False,
     }
-
     no_copy_source = True
 
     def requirements(self):
         if self.options.xtl_complex:
-            self.requires("xtl/0.7.4")
+            self.requires("xtl/0.7.5")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         # TODO: check supported version (probably >= 8.0.0)
-        if Version(self.version) < "8.0.0" and self.settings.os == "Macos" and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
-            raise ConanInvalidConfiguration(f"{self.name} doesn't support macOS M1")
+        if Version(self.version) < "8.0.0" and is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support macOS M1")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -79,9 +78,7 @@ class XsimdConan(ConanFile):
         if self.options.xtl_complex:
             self.cpp_info.defines = ["XSIMD_ENABLE_XTL_COMPLEX=1"]
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         ## TODO: workaround for arm compilation issue : https://github.com/xtensor-stack/xsimd/issues/735
         if Version(self.version) >= "9.0.0" and \
