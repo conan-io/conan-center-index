@@ -33,10 +33,10 @@ class ThrustConan(ConanFile):
     def requirements(self):
         # TODO: https://github.com/conan-io/conan-center-index/pull/17484
         # Otherwise CUB from system CUDA is used, which is not guaranteed to be compatible
-        # self.requires("cub/1.17.2", transitive_headers=True, transitive_libs=True)
+        # self.requires("cub/1.17.2")
 
         if self.options.device_system == "tbb":
-            self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/2021.9.0")
 
         if self.options.device_system in ["cuda", "omp"]:
             dev = str(self.options.device_system).upper()
