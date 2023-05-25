@@ -28,6 +28,10 @@ class ExtracmakemodulesConan(ConanFile):
         tc.cache_variables["BUILD_QTHELP_DOCS"] = False
         tc.cache_variables["BUILD_MAN_DOCS"] = False
         tc.cache_variables["BUILD_TESTING"] = False
+
+        share_folder = os.path.join(self.package_folder, "res")
+
+        tc.cache_variables["SHARE_INSTALL_DIR"] = share_folder
         tc.generate()
 
     def build(self):
@@ -37,8 +41,12 @@ class ExtracmakemodulesConan(ConanFile):
 
     def package(self):
         cm_folder = "{}-{}".format(self.name, self.version)
-        lic_folder = os.path.join(cm_folder, "LICENSES")
-        copy(self, "*", src=lic_folder, dst="licenses")
+        lic_folder_st = os.path.join(cm_folder, "LICENSES")
+        lic_folder = os.path.join(self.source_folder, lic_folder_st)
+        self.output.info("license folder: {}".format(lic_folder))
+
+        lic_folder_inst = os.path.join(self.package_folder, "licenses")
+        copy(self, "*", src=lic_folder, dst=lic_folder_inst)
 
         cmake = CMake(self)
         cmake.install()
@@ -49,4 +57,4 @@ class ExtracmakemodulesConan(ConanFile):
     def package_info(self):
         # this package is CMake files, it doesn't need an extra one generating
         self.cpp_info.set_property("cmake_find_mode", "none")
-        self.cpp_info.builddirs.append(os.path.join("share", "ECM", "cmake"))
+        self.cpp_info.builddirs.append(os.path.join("res", "ECM", "cmake"))
