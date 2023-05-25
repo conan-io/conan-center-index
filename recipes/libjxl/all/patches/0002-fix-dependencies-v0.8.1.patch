@@ -1,3 +1,25 @@
+diff --git a/lib/jpegli.cmake b/lib/jpegli.cmake
+index 2dcbb8c..9c72e7e 100644
+--- a/lib/jpegli.cmake
++++ b/lib/jpegli.cmake
+@@ -41,7 +41,7 @@ set(JPEGLI_INTERNAL_SOURCES
+ )
+ 
+ set(JPEGLI_INTERNAL_LIBS
+-  hwy
++  highway::highway
+   jxl-static
+   Threads::Threads
+   ${ATOMICS_LIBRARIES}
+@@ -55,7 +55,7 @@ target_include_directories(jpegli-static PUBLIC
+   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+-  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:hwy,INTERFACE_INCLUDE_DIRECTORIES>>"
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>"
+ )
+ target_include_directories(jpegli-static PUBLIC "${JPEG_INCLUDE_DIRS}")
+ target_link_libraries(jpegli-static PUBLIC ${JPEGLI_INTERNAL_LIBS})
 diff --git a/lib/jxl.cmake b/lib/jxl.cmake
 index a8a96e1..0601850 100644
 --- a/lib/jxl.cmake
