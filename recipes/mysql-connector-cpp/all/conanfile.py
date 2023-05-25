@@ -16,7 +16,6 @@ class MysqlConnectorCPPRecipe(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     requires = ("boost/1.81.0", "openssl/[>=1.1 <4]", "protobuf/3.21.9", "libmysqlclient/8.0.31")
-    build_policy = "missing"
 
     @property
     def _min_cppstd(self):
