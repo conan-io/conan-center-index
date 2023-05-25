@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, chdir, download, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -25,11 +26,11 @@ class SevenZipConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def validate(self):
-        if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("Only Windows supported")
-        if self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("Unsupported architecture")
+    # def validate(self):
+    #     if self.settings.os != "Windows":
+    #         raise ConanInvalidConfiguration("Only Windows supported")
+    #     if self.settings.arch not in ("x86", "x86_64"):
+    #         raise ConanInvalidConfiguration("Unsupported architecture")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -50,7 +51,8 @@ class SevenZipConan(ConanFile):
             item = self.conan_data["sources"][self.version]
             filename = "7z-source.7z"
             download(self, **item, filename=filename)
-            self.run(f"7zr x {filename}")
+            sevenzip = os.path.join(self.dependencies.build["lzma_sdk"].package_folder, "bin", "7zr.exe")
+            self.run(f"{sevenzip} x {filename}")
             os.unlink(filename)
         else:
             get(self, **self.conan_data["sources"][self.version])
