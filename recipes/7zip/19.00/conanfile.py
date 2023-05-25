@@ -26,11 +26,11 @@ class SevenZipConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    # def validate(self):
-    #     if self.settings.os != "Windows":
-    #         raise ConanInvalidConfiguration("Only Windows supported")
-    #     if self.settings.arch not in ("x86", "x86_64"):
-    #         raise ConanInvalidConfiguration("Unsupported architecture")
+    def validate(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Only Windows supported")
+        if self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("Unsupported architecture")
 
     def layout(self):
         basic_layout(self, src_folder="src")
