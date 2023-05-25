@@ -4,6 +4,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename, replace_in_file
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -77,27 +78,32 @@ class JemallocConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def validate(self):
-        if self.options.enable_cxx and \
-                self.settings.compiler.get_safe("libcxx") == "libc++" and \
-                self.settings.compiler == "clang" and \
-                Version(self.settings.compiler.version) < "10":
-            raise ConanInvalidConfiguration("clang and libc++ version {} (< 10) is missing a mutex implementation".format(self.settings.compiler.version))
-        # TODO: REVISE THIS
-        # if self.settings.compiler == "Visual Studio" and \
-        #         self.options.shared and \
-        #         "MT" in self.settings.compiler.runtime:
-        #     raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
-        # if self.settings.compiler == "Visual Studio" and self.settings.compiler.version != "15":
-        #     # https://github.com/jemalloc/jemalloc/issues/1703
-        #     raise ConanInvalidConfiguration("Only Visual Studio 15 2017 is supported.  Please fix this if other versions are supported")
+        # 1. MSVC specific checks
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+            # The upstream repository provides solution files for Visual Studio 2015, 2017, 2019 and 2022,
+            # but the 2015 solution does not work properly due to unresolved external symbols:
+            # `test_hooks_libc_hook` and `test_hooks_arena_new_hook`
+            check_min_vs(self, "191")
+            # Building the shared library with a static MSVC runtime is not supported
+            if self.options.shared and is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("Building the shared library with MT runtime is not supported.")
+            # Only x86-64 and x86 are supported
+            if self.settings.arch not in ["x86_64", "x86"]:
+                raise ConanInvalidConfiguration(f"{self.settings.arch} is not supported.")
+        # 2. Clang specific checks
+        if self.settings.compiler == "clang":
+            if Version(self.settings.compiler.version) <= "3.9":
+                raise ConanInvalidConfiguration("Clang 3.9 or earlier is not supported.")
+            if self.options.enable_cxx and self.settings.compiler.get_safe("libcxx") == "libc++" and \
+                    Version(self.settings.compiler.version) < "10":
+                raise ConanInvalidConfiguration(f"Clang 9 or earlier with libc++ is not supported due to the missing mutex implementation.")
+        # 3. Verify the build type
         if self.settings.build_type not in ("Release", "Debug", None):
-            raise ConanInvalidConfiguration("Only Release and Debug build_types are supported")
-        # if self.settings.compiler == "Visual Studio" and self.settings.arch not in ("x86_64", "x86"):
+            raise ConanInvalidConfiguration("Only Release and Debug builds are supported.")
+
+        # jemalloc seems to support Apple Silicon Macs (Reference: Homebrew)
+        # if self.settings.os == "Macos" and self.settings.arch not in ("x86_64", "x86"):
         #     raise ConanInvalidConfiguration("Unsupported arch")
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) <= "3.9":
-            raise ConanInvalidConfiguration("Unsupported compiler version")
-        if self.settings.os == "Macos" and self.settings.arch not in ("x86_64", "x86"):
-            raise ConanInvalidConfiguration("Unsupported arch")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
