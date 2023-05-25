@@ -32,7 +32,7 @@ class XlsxioConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "shared": True,
+        "shared": False,
         "build_static": True,
         "build_pc_files": True,
         "build_tools": True,
