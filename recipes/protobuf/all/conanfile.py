@@ -226,8 +226,15 @@ class ProtobufConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, f"protobuf-targets-{str(self.settings.build_type).lower()}.cmake"))
+        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
+        if Version(self.version) < "4.22.0":
+            rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
+                        os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
+        else:
+            # TODO: dirty hack, need to fix
+            rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
+                        os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-protoc.cmake"))
 
         if not self.options.lite:
             rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "lib"))
@@ -243,10 +250,12 @@ class ProtobufConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "protobuf_full_package") # unofficial, but required to avoid side effects (libprotobuf component "steals" the default global pkg_config name)
 
         build_modules = [
+            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
-            os.path.join(self._cmake_install_base_path, "protobuf-config.cmake"),
         ]
+        if Version(self.version) >= "4.22.0":
+            build_modules.append(os.path.join(self._cmake_install_base_path, "protobuf-protoc.cmake"))
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
