@@ -5,24 +5,17 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename, replace_in_file
 from conan.tools.scm import Version
-
-
-# from conans import AutoToolsBuildEnvironment, MSBuild
-
-# from conans import tools as tools_legacy
-
 import os
-import shutil
-import string
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.54.0"
+
 
 class JemallocConan(ConanFile):
     name = "jemalloc"
     description = "jemalloc is a general purpose malloc(3) implementation that emphasizes fragmentation avoidance and scalable concurrency support."
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
-    homepage = "http://jemalloc.net/"
+    homepage = "https://jemalloc.net/"
     topics = ("conan", "jemalloc", "malloc", "free")
     settings = "os", "arch", "compiler", "build_type"
     options = {
