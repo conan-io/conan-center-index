@@ -32,7 +32,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def requirements(self):
         self.requires("boost/1.81.0")
         if self.settings.os == "Macos":
-            self.requires("openssl/[>=1.1 <3]")
+            self.requires("openssl/1.1.1t]")
         else:
             self.requires("openssl/[>=1.1 <4]")
         self.requires("libmysqlclient/8.0.31")
