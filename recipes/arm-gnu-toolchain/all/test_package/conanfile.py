@@ -2,11 +2,12 @@ import pprint
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.env import VirtualBuildEnv
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualBuildEnv"
+    generators = "CMakeDeps"
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
@@ -15,6 +16,10 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
+        if str(self.settings.os) != "Windows":
+            virtual_build_env = VirtualBuildEnv(self)
+            virtual_build_env.generate()
+
         tc = CMakeToolchain(self)
 
         tc.variables["CMAKE_TRY_COMPILE_TARGET_TYPE"] = "STATIC_LIBRARY"

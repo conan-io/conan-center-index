@@ -67,14 +67,7 @@ class ArmGnuToolchain(ConanFile):
                 f"Pre-compiled binaries are only available for {supported_build_architectures[str(self._settings_build.os)]}."
             )
 
-        pp = pprint.PrettyPrinter(indent=4)
-
-        pp.pprint(str(self.settings.os))
-        pp.pprint(str(self.settings.arch))
-        pp.pprint(str(self._settings_build.arch))
-
         if (str(self.settings.os) != "baremetal" and str(self.settings.arch) != str(self._settings_build.arch)):
-            print("ARCH MISMATCH")
             # Update comment later if this works
             raise ConanInvalidConfiguration(
                 f"This tool does not work when cross compiling to a target that is not 'baremetal'."
@@ -135,9 +128,9 @@ class ArmGnuToolchain(ConanFile):
         f = os.path.join(self.package_folder, "res/toolchain.cmake")
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
 
-        # float_abi = str(self.settings_target.arch.thumbv7em.float_abi)
-        # float_abi = ""
-        # processor = str(self.settings_target.arch.thumbv7em.processor)
+        # float_abi = str(self.settings_target.arch.float_abi)
+        # processor = str(self.settings_target.arch.processor)
+
         # c_flags = [f"-mfloat-abi={ float_abi }",
         #            f"-mcpu={ processor }",
         #            "-mthumb",
@@ -145,14 +138,12 @@ class ArmGnuToolchain(ConanFile):
         #            "-fdata-sections",
         #            "-fno-exceptions",
         #            "-fno-rtti"]
+        # link_flags = [f"-mfloat-abi={ float_abi }",
+        #               f"-mcpu={ processor }",
+        #               "-mthumb",
+        #               "-Wl,--gc-sections",
+        #               "-Wl,--print-memory-usage"]
 
         # self.conf_info.extend("tools.build:cflags", c_flags)
         # self.conf_info.extend("tools.build:cxxflags", c_flags)
-        # self.conf_info.extend("tools.build:exelinkflags",
-        #                       ["--specs=nano.specs",
-        #                        "--specs=nosys.specs",
-        #                        f"-mfloat-abi={ float_abi }",
-        #                        f"-mcpu={processor}",
-        #                        "-mthumb",
-        #                        "-Wl,--gc-sections",
-        #                        "-Wl,--print-memory-usage"])
+        # self.conf_info.extend("tools.build:exelinkflags", link_flags)
