@@ -1,5 +1,8 @@
 import os
-from conans import ConanFile, CMake, tools
+#from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import get
 
 class ExtracmakemodulesConan(ConanFile):
     name = "extra-cmake-modules"
@@ -8,19 +11,23 @@ class ExtracmakemodulesConan(ConanFile):
     homepage = "https://api.kde.org/ecm/"
     topics = ("conan", "cmake", "toolchain", "build-settings")
     description = "KDE's CMake modules"
-    generators = "cmake"
     no_copy_source = False
+    package_type = "build-scripts"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("extra-cmake-modules-{}".format(self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
 
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_HTML_DOCS"] = False
+        tc.cache_variables["BUILD_QTHELP_DOCS"] = False
+        tc.cache_variables["BUILD_MAN_DOCS"] = False
+
+        tc.generate()
+        
+        
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
