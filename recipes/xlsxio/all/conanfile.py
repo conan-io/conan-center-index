@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -44,7 +44,7 @@ class XlsxioConan(ConanFile):
     }
     def export_sources(self):
         export_conandata_patches(self)
-        
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -75,6 +75,9 @@ class XlsxioConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC"] = self.options.build_static
         tc.variables["BUILD_SHARED"] = self.options.shared
@@ -93,7 +96,7 @@ class XlsxioConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -137,7 +140,7 @@ class XlsxioConan(ConanFile):
                 self.cpp_info.components["xlsxio_readw_shared"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw_shared")
                 self.cpp_info.components["xlsxio_readw_shared"].set_property("pkg_config_name", "libxlsxio_readw_shared")
 
-        if self.settings.os in ["Linux"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
 
         # TODO: to remove in conan v2
