@@ -88,7 +88,7 @@ class PangoConan(ConanFile):
             self.requires("xorg/system")    # for xorg::xrender
         if self.options.with_cairo:
             self.requires("cairo/1.17.6")
-        self.requires("harfbuzz/7.1.0")
+        self.requires("harfbuzz/7.3.0")
         self.requires("glib/2.76.3")
         self.requires("fribidi/1.0.12")
 
