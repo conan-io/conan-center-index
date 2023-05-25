@@ -4,6 +4,7 @@ from conan.tools.files import copy, get, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 import os
 import textwrap
 
@@ -27,6 +28,22 @@ class XsimdConan(ConanFile):
     }
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        return 14 if self.options.xtl_complex else 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
+
     def requirements(self):
         if self.options.xtl_complex:
             self.requires("xtl/0.7.5")
@@ -38,6 +55,14 @@ class XsimdConan(ConanFile):
         # TODO: check supported version (probably >= 8.0.0)
         if Version(self.version) < "8.0.0" and is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support macOS M1")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
