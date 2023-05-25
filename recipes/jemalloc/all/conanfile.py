@@ -54,6 +54,17 @@ class JemallocConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def add_missing_ac_define_description(self):
+        # This function patches `configure.ac` to add the missing description in `AC_DEFINE`,
+        # fixing the error reported by the newer version of `autoreconf`
+        # Issue: https://github.com/jemalloc/jemalloc/issues/2346
+        # PR: https://github.com/jemalloc/jemalloc/pull/2396/files
+        # Type: Backport
+        path = os.path.join(self.source_folder, "configure.ac")
+        find = "AC_DEFINE([JEMALLOC_UAF_DETECTION], [ ])"
+        repl = "AC_DEFINE([JEMALLOC_UAF_DETECTION], [ ], [ ])"
+        replace_in_file(self, path, find, repl)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -139,8 +150,10 @@ class JemallocConan(ConanFile):
         tc.generate(env)
 
     def build(self):
+        self.add_missing_ac_define_description()
         apply_conandata_patches(self)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
