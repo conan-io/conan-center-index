@@ -1,4 +1,5 @@
 required_for_references:
+- 7bitdi
 - aaf
 - aaplus
 - abseil
@@ -7,6 +8,7 @@ required_for_references:
 - ada
 - ade
 - aeron
+- aggeom-agg
 - alac
 - alpaca
 - amgcl
@@ -246,6 +248,7 @@ required_for_references:
 - ghc-filesystem
 - giflib
 - ginkgo
+- gklib
 - glad
 - glfw
 - gli
@@ -439,6 +442,7 @@ required_for_references:
 - msgpack-c
 - msgpack-cxx
 - msys2
+- naive-tsearch
 - namedtype
 - nameof
 - nanoflann
@@ -527,6 +531,7 @@ required_for_references:
 - rttr
 - ruy
 - s2n
+- samurai
 - scnlib
 - screen_capture_lite
 - sdbus-cpp
