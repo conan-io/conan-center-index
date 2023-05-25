@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -153,6 +153,9 @@ class OpenColorIOConan(ConanFile):
 
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
+        if Version(self.version) == "1.1.1":
+            fix_apple_shared_install_name(self)
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenColorIO")
         self.cpp_info.set_property("cmake_target_name", "OpenColorIO::OpenColorIO")
@@ -164,8 +167,10 @@ class OpenColorIOConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines.append("OpenColorIO_STATIC")
 
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.frameworks.extend(["Foundation", "IOKit", "ColorSync", "CoreGraphics"])
+            if Version(self.version) == "2.1.0":
+                self.cpp_info.frameworks.extend(["Carbon", "CoreFoundation"])
 
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines.append("OpenColorIO_SKIP_IMPORTS")
