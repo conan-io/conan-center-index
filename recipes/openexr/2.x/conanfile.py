@@ -14,11 +14,11 @@ class OpenEXRConan(ConanFile):
     name = "openexr"
     description = "OpenEXR is a high dynamic-range (HDR) image file format developed by Industrial Light & " \
                   "Magic for use in computer imaging applications."
-    topics = ("openexr", "hdr", "image", "picture")
+    topics = ("hdr", "image", "picture", "file format", "computer vision")
     license = "BSD-3-Clause"
     homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,8 +49,7 @@ class OpenEXRConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -65,8 +64,6 @@ class OpenEXRConan(ConanFile):
         tc.variables["OPENEXR_BUILD_UTILS"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.variables["CMAKE_SKIP_INSTALL_RPATH"] = True
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()

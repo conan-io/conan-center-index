@@ -16,18 +16,27 @@ class QuillConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/odygrd/quill/"
-    topics = ("quill", "logging", "log", "async")
+    topics = ("logging", "log", "async")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "with_bounded_queue": [True, False],
         "with_no_exceptions": [True, False],
+        "with_x86_arch": [True, False],
+        "with_bounded_blocking_queue": [True, False],
     }
     default_options = {
         "fPIC": True,
         "with_bounded_queue": False,
         "with_no_exceptions": False,
+        "with_x86_arch": False,
+        "with_bounded_blocking_queue": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return "17" if Version(self.version) >= "2.0.0" else "14"
 
     @property
     def _compilers_minimum_versions(self):
@@ -52,14 +61,15 @@ class QuillConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if Version(self.version) < "2.8.0":
+            del self.options.with_bounded_blocking_queue
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.6.3":
-            self.requires("fmt/9.1.0")
-        else:
-            self.requires("fmt/7.1.3")
+        self.requires("fmt/10.0.0", transitive_headers=True)
 
     def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]
@@ -67,18 +77,16 @@ class QuillConan(ConanFile):
         if not any(arch in str(self.settings.arch) for arch in supported_archs):
             raise ConanInvalidConfiguration(f"{self.settings.arch} is not supported by {self.ref}")
 
-        cxx_std = "17" if Version(self.version) >= "2.0.0" else "14"
-
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, cxx_std)
+            check_min_cppstd(self, self._min_cppstd)
 
-        compilers_minimum_version = self._compilers_minimum_versions[cxx_std]
+        compilers_minimum_version = self._compilers_minimum_versions[self._min_cppstd]
         minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{cxx_std}, which your compiler does not support.")
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
         else:
-            self.output.warning(f"{self.ref} requires C++{cxx_std}. Your compiler is unknown. Assuming it supports C++{cxx_std}.")
+            self.output.warning(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
         if Version(self.version) >= "2.0.0" and \
             self.settings.compiler== "clang" and Version(self.settings.compiler.version).major == "11" and \
@@ -89,6 +97,8 @@ class QuillConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def is_quilll_x86_arch(self):
+        if not self.options.with_x86_arch:
+            return False
         if Version(self.version) < "2.7.0":
             return False
         if self.settings.arch not in ("x86", "x86_64"):
@@ -103,12 +113,24 @@ class QuillConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["QUILL_FMT_EXTERNAL"] = True
         tc.variables["QUILL_ENABLE_INSTALL"] = True
-        tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
+
+        if Version(self.version) < "2.8.0":
+            tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
+        else:
+            if self.options.with_bounded_queue:
+                tc.preprocessor_definitions["QUILL_USE_BOUNDED_QUEUE"] = 1
+
         tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.is_quilll_x86_arch():
-            tc.variables["QUILL_X86ARCH"] = True
+            if Version(self.version) < "2.8.0":
+                tc.variables["QUILL_X86ARCH"] = True
+            else:
+                tc.preprocessor_definitions["QUILL_X86ARCH"] = 1
             tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
+        if Version(self.version) >= "2.8.0" and self.options.get_safe("with_bounded_blocking_queue"):
+            tc.preprocessor_definitions["QUILL_USE_BOUNDED_BLOCKING_QUEUE"] = 1
+
         tc.generate()
 
         deps = CMakeDeps(self)

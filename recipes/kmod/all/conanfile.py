@@ -17,9 +17,9 @@ class KModConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kmod-project/kmod"
     license = "LGPL-2.1-only"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
         "with_zstd": [True, False],
         "with_xz": [True, False],
         "with_zlib": [True, False],
@@ -28,7 +28,6 @@ class KModConan(ConanFile):
         "logging": [True, False],
     }
     default_options = {
-        "fPIC": True,
         "with_zstd": True,
         "with_xz": True,
         "with_zlib": True,
@@ -46,13 +45,13 @@ class KModConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.os != "Linux":

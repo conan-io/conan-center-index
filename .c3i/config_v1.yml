@@ -16,16 +16,6 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
-  check_runs:
-    - "Lint changed files (YAML files)"
-    - "Lint changed conanfile.py (v2 migration)"
-
-# Requirements to merge a given pull-request:
-# * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-# * check_runs refers to notifications from GH actions
-status_checks:
-  - "license/cla"
-  - "continuous-integration/jenkins/pr-merge"
 
 slack:
   credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
@@ -50,6 +40,8 @@ tasks:
     status_checks:
       - name: "license/cla"
       - name: "continuous-integration/jenkins/pr-merge"
+      - name: "c3i/conan-v2/pr-merge"
+        required_for_references: "conan_v2_ready_references.yml"
   cci:
     conan_v2_run_export: false
     write_comments: true
@@ -73,8 +65,8 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "gcc":
-              compiler.libcxx: [ "libstdc++11", "libstdc++" ]
-              compiler.version: [ "5", "7", "8", "9", "10" ]
+              compiler.libcxx: [ "libstdc++11" ]
+              compiler.version: [ "5", "7", "9", "10" ]
               build_type: [ "Release", "Debug" ]
   - id: linux-gcc
     epochs: [20211221, 20220120]
@@ -84,20 +76,9 @@ configurations:
         arch: ["x86_64"]
         compiler:
           - "gcc":
-              compiler.libcxx: ["libstdc++11", "libstdc++"]
-              compiler.version: ["5", "7", "8", "9", "10", "11"]
+              compiler.libcxx: [ "libstdc++11" ]
+              compiler.version: ["5", "7", "9", "10", "11"]
               build_type: ["Release", "Debug"]
-  - id: linux-clang
-    epochs: [0]
-    hrname: "Linux, Clang"
-    content:
-      - os: [ "Linux" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "clang":
-              compiler.libcxx: [ "libstdc++", "libc++" ]
-              compiler.version: [ "11" ]
-              build_type: [ "Release", "Debug" ]
   - id: linux-clang
     epochs: [20211221, 20220120]
     hrname: "Linux, Clang"
@@ -107,9 +88,9 @@ configurations:
         compiler:
           - "clang":
               compiler.libcxx: ["libstdc++", "libc++"]
-              compiler.version: ["11", "12", "13"]
+              compiler.version: ["12", "13"]
               build_type: ["Release", "Debug"]
-  - id: configs/macos-clang
+  - id: macos-clang
     epochs: [0, 20211221]
     hrname: "macOS, Clang"
     content:
@@ -120,7 +101,7 @@ configurations:
               compiler.version: [ "11.0", "12.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/macos-clang
+  - id: macos-clang
     epochs: [20220120]
     hrname: "macOS, Clang"
     content:
@@ -128,10 +109,10 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "apple-clang":
-              compiler.version: [ "11.0", "12.0", "13.0"]
+              compiler.version: [ "13.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/macos-m1-clang
+  - id: macos-m1-clang
     epochs: [0, 20211221]
     hrname: "macOS, Clang (M1/arm64)"
     build_profile:
@@ -145,7 +126,7 @@ configurations:
               compiler.version: [ "12.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/macos-m1-clang
+  - id: macos-m1-clang
     epochs: [20220120]
     hrname: "macOS, Clang (M1/arm64)"
     build_profile:
@@ -156,10 +137,10 @@ configurations:
         arch: [ "armv8" ]
         compiler:
           - "apple-clang":
-              compiler.version: [ "12.0", "13.0" ]
+              compiler.version: [ "13.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
-  - id: configs/windows-visual_studio
+  - id: windows-visual_studio
     epochs: [0, 20211221, 20220120]
     hrname: "Windows, Visual Studio"
     content:
@@ -167,12 +148,12 @@ configurations:
         arch: [ "x86_64" ]
         compiler:
           - "Visual Studio":
-              compiler.version: [ "15", "16" ]
+              compiler.version: [ "16" ]
               build_type:
                 - "Release":
-                    compiler.runtime: [ "MT", "MD" ]
+                    compiler.runtime: [ "MD" ]
                 - "Debug":
-                    compiler.runtime: [ "MTd", "MDd" ]
+                    compiler.runtime: [ "MDd" ]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"
@@ -206,6 +187,7 @@ pod_size:
   large:
     - "pcl"
     - "duckdb"
+    - "ceres-solver"
   xlarge:
     - "llvm"
     - "opengv"

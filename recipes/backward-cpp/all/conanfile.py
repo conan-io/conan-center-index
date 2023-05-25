@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class BackwardCppConan(ConanFile):
@@ -17,6 +17,7 @@ class BackwardCppConan(ConanFile):
     topics = ("backward-cpp", "stack-trace")
     license = "MIT"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -57,10 +58,7 @@ class BackwardCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -68,27 +66,27 @@ class BackwardCppConan(ConanFile):
     def requirements(self):
         if self.settings.os in ["Linux", "Android"]:
             if self._has_stack_details("dwarf"):
-                self.requires("libdwarf/20191104")
+                self.requires("libdwarf/20191104", transitive_headers=True, transitive_libs=True)
+                self.requires("libelf/0.8.13")
             if self._has_stack_details("dw"):
-                self.requires("elfutils/0.186")
+                self.requires("elfutils/0.186", transitive_headers=True, transitive_libs=True)
             if self._has_stack_details("bfd"):
-                self.requires("binutils/2.38")
+                self.requires("binutils/2.38", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.info.settings.os not in self._supported_os:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.info.settings.os}.")
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.os not in self._supported_os:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.info.settings.os == "Macos":
-            if self.info.settings.arch == "armv8":
+        if self.settings.os == "Macos":
+            if self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration("Macos M1 not supported yet")
             if not self._has_stack_details("backtrace_symbol"):
                 raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
                                                 " is supported on Macos")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
