@@ -133,7 +133,9 @@ class JemallocConan(ConanFile):
         else:
             tc.configure_args.append("--disable-shared")
             tc.configure_args.append("--enable-static")
-        tc.generate()
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+            env.define("CC", "cl.exe")
+        tc.generate(env)
 
     def build(self):
         apply_conandata_patches(self)
