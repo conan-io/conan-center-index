@@ -68,7 +68,7 @@ class EastlConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eabase/2.09.12", transitive_headers=True, transitive_libs=True)
+        self.requires("eabase/2.09.12")
 
     def package_id(self):
         self.info.clear()
