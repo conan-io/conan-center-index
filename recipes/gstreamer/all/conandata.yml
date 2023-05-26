@@ -1,19 +1,19 @@
 sources:
-  "1.16.2":
-    sha256: "dac037ab84d557f5d4e6e66e833f6bf8cf4f84671a311e0b2df99f9b30a9d693"
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.16.2/gstreamer-1.16.2.tar.bz2"
-  "1.18.0":
-    sha256: "f072da67b6dad9b4aecf2cb594aaaa66f86c22af9ba80503b90f957d47015ef8"
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.0/gstreamer-1.18.0.tar.bz2"
-  "1.18.3":
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.3/gstreamer-1.18.3.tar.gz"
-    sha256: "d7e3917b5d3d9c3bd9bb70b7500314a5725377cff39bcd818df13c1fda0f60ba"
-  "1.18.4":
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.4/gstreamer-1.18.4.tar.gz"
-    sha256: "f0956c2056281f5909d030945a9896810e55084f29b6bcfc401b53e91ddf1c7f"
-  "1.19.1":
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.1/gstreamer-1.19.1.tar.gz"
-    sha256: "2e51f61e59564e48883b5f1996871b0d1c404406aadb9aa1b306de8a2a331a90"
   "1.19.2":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.2/gstreamer-1.19.2.tar.gz"
     sha256: "6ec8494867d9b58f145c0c357da631faf21c2c72c7cd8b637b440188fe904ab8"
+  "1.19.1":
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.1/gstreamer-1.19.1.tar.gz"
+    sha256: "2e51f61e59564e48883b5f1996871b0d1c404406aadb9aa1b306de8a2a331a90"
+  "1.18.4":
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.4/gstreamer-1.18.4.tar.gz"
+    sha256: "f0956c2056281f5909d030945a9896810e55084f29b6bcfc401b53e91ddf1c7f"
+  "1.18.3":
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.3/gstreamer-1.18.3.tar.gz"
+    sha256: "d7e3917b5d3d9c3bd9bb70b7500314a5725377cff39bcd818df13c1fda0f60ba"
+  "1.18.0":
+    sha256: "f072da67b6dad9b4aecf2cb594aaaa66f86c22af9ba80503b90f957d47015ef8"
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.0/gstreamer-1.18.0.tar.bz2"
+  "1.16.2":
+    sha256: "dac037ab84d557f5d4e6e66e833f6bf8cf4f84671a311e0b2df99f9b30a9d693"
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.16.2/gstreamer-1.16.2.tar.bz2"

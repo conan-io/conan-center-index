@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, stdcpp_library
+from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
@@ -35,6 +35,10 @@ class LibMysqlClientCConan(ConanFile):
     short_paths = True
 
     @property
+    def _min_cppstd(self):
+        return "17" if Version(self.version) >= "8.0.27" else "11"
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
@@ -58,12 +62,22 @@ class LibMysqlClientCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1t")
+        if Version(self.version) < "8.0.30":
+            self.requires("openssl/1.1.1t")
+        else:
+            self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
-        self.requires("zstd/1.5.4")
+        self.requires("zstd/1.5.5")
         self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.6.2")
+
+    def validate_build(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
 
     def validate(self):
         def loose_lt_semver(v1, v2):
@@ -74,36 +88,21 @@ class LibMysqlClientCConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.name} {self.version} requires {self.settings.compiler} {minimum_version} or newer")
-
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
 
         # Sice 8.0.17 this doesn't support shared library on MacOS.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
         if self.settings.compiler == "apple-clang" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.name}/{self.version} doesn't support shared library")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared library")
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
         if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
-            raise ConanInvalidConfiguration(f"{self.name}/{self.version} doesn't support C++20")
-
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
     def build_requirements(self):
-        if is_apple_os(self) and not self._cmake_new_enough("3.18"):
-            # CMake 3.18 or higher is required if Apple, but CI of CCI may run CMake 3.15
-            self.tool_requires("cmake/3.24.3")
+        if is_apple_os(self):
+            self.tool_requires("cmake/[>=3.18 <4]")
         if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
@@ -154,20 +153,31 @@ class LibMysqlClientCConan(ConanFile):
 
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
                         "NAMES zstd",
-                        f"NAMES zstd {self.dependencies['zstd'].cpp_info.components['zstdlib'].libs[0]}")
+                        f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+        # Fix discovery & link to OpenSSL
+        ssl_cmake = os.path.join(self.source_folder, "cmake", "ssl.cmake")
+        replace_in_file(self, ssl_cmake,
                         "NAMES ssl",
                         f"NAMES ssl {self.dependencies['openssl'].cpp_info.components['ssl'].libs[0]}")
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+        replace_in_file(self, ssl_cmake,
                         "NAMES crypto",
                         f"NAMES crypto {self.dependencies['openssl'].cpp_info.components['crypto'].libs[0]}")
 
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+        replace_in_file(self, ssl_cmake,
                         "IF(NOT OPENSSL_APPLINK_C)\n",
                         "IF(FALSE AND NOT OPENSSL_APPLINK_C)\n",
                         strict=False)
+
+        replace_in_file(self, ssl_cmake,
+                        "SET(SSL_LIBRARIES ${MY_OPENSSL_LIBRARY} ${MY_CRYPTO_LIBRARY})",
+                        "find_package(OpenSSL REQUIRED MODULE)\nset(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)")
+
+        # And do not merge OpenSSL libs into mysqlclient lib
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "libutils.cmake"),
+                        'IF(WIN32 AND ${TARGET} STREQUAL "mysqlclient")',
+                        "if(0)")
 
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"]
@@ -201,6 +211,10 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["ENABLED_PROFILING"] = False
         tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
         tc.cache_variables["WIX_DIR"] = False
+        # Disable additional Linux distro-specific compiler checks. 
+        # The recipe already checks for minimum versions of supported
+        # compilers.
+        tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
 
         tc.cache_variables["WITH_LZ4"] = "system"
 

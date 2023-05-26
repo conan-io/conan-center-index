@@ -25,6 +25,7 @@ class LibcurlConan(ConanFile):
     topics = ("curl", "data-transfer",
             "ftp", "gopher", "http", "imap", "ldap", "mqtt", "pop3", "rtmp", "rtsp",
             "scp", "sftp", "smb", "smtp", "telnet", "tftp")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -70,6 +71,7 @@ class LibcurlConan(ConanFile):
         "with_verbose_strings": [True, False],
         "with_ca_bundle": [False, "auto", "ANY"],
         "with_ca_path": [False, "auto", "ANY"],
+        "with_ca_fallback": [True, False],
     }
     default_options = {
         "shared": False,
@@ -115,6 +117,7 @@ class LibcurlConan(ConanFile):
         "with_verbose_strings": True,
         "with_ca_bundle": "auto",
         "with_ca_path": "auto",
+        "with_ca_fallback": False,
     }
 
     @property
@@ -178,7 +181,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.5.1")
         if self.options.with_nghttp2:
@@ -190,9 +193,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.18.1")
+            self.requires("c-ares/1.19.0")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -214,15 +217,18 @@ class LibcurlConan(ConanFile):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
+            if self.settings.os in [ "tvOS", "watchOS" ]:
+                self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
-        download(self, "https://curl.se/ca/cacert-2023-01-10.pem", "cacert.pem", verify=True, sha256="fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2023-01-10.pem"
+        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0"
+        download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -241,8 +247,22 @@ class LibcurlConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
+            # autoreconf is caalled with "--force" which regenerate all files.
+            # Because we want to use a patched config.sub for tvOS/watchOS, we
+            # need to call this patch after autoreconf.
+            self._patch_autoreconf()
             autotools.configure()
             autotools.make()
+
+    def _patch_autoreconf(self):
+        # Fix config.sub for tvOS/watchOS
+        if self.settings.os in [ "tvOS", "watchOS" ]:
+            for gnu_config in [
+                    self.conf.get("user.gnu-config:config_guess", check_type=str),
+                    self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -478,6 +498,8 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ca_path != "auto":
             tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
 
+        tc.configure_args.append(f"--with-ca-fallback={self._yes_no(self.options.with_ca_fallback)}")
+
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -596,6 +618,8 @@ class LibcurlConan(ConanFile):
             tc.cache_variables["CURL_CA_PATH"] = str(self.options.with_ca_path)
         else:
             tc.cache_variables["CURL_CA_PATH"] = "none"
+
+        tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
 
         tc.generate()
 
