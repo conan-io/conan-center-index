@@ -7,8 +7,8 @@ class LibqasmConan(ConanFile):
 
     # Optional metadata
     license = "Apache-2.0"
-    author = "QuTech-Delft"
-    url = "https://center.conan.io"
+    homepage = "https://github.com/QuTech-Delft/libqasm"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Library to parse cQASM files"
     topics = ("code generation", "parser", "compiler", "quantum compilation", "quantum simulation")
 
