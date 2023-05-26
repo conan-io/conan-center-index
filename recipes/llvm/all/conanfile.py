@@ -108,6 +108,7 @@ class Llvm(ConanFile):
             'ram_per_link_job': ['ANY'],
             # conan center index ci workaround, memory consumption to high in debug builds
             'enable_debug': [True, False],
+            'enable_unsafe_mode': [True, False],
         },
     }
     default_options = {
@@ -149,6 +150,7 @@ class Llvm(ConanFile):
             'ram_per_compile_job': '2000',
             'ram_per_link_job': '14000',
             'enable_debug': False,
+            'enable_unsafe_mode': False,
         }
     }
 
@@ -219,6 +221,11 @@ class Llvm(ConanFile):
         if self.settings.build_type == "Debug" and not self.options.enable_debug:
             raise ConanInvalidConfiguration(
                 "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option enable_debug=True.")
+
+        if not self.options.enable_unsafe_mode:
+            if self.settings.compiler.libcxx != "libstdc++" and self.settings.compiler.libcxx != "libstdc++11":
+                raise ConanInvalidConfiguration(
+                    "Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
 
     # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
     # def validate(self):
