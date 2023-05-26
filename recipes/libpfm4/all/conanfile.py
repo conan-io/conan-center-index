@@ -31,7 +31,7 @@ class Libpfm4Conan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
