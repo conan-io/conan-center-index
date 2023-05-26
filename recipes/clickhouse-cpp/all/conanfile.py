@@ -20,7 +20,6 @@ class ClickHouseCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_bench": [True, False],
-        "build_tests": [True, False],
         "with_openssl": [True, False]
     }
     default_options = {
@@ -90,7 +89,6 @@ class ClickHouseCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_BENCHMARK"] =  self.options.build_bench
-        tc.variables["BUILD_TESTS"] = self.options.build_tests
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
