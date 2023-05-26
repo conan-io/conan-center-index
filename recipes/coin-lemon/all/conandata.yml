@@ -7,9 +7,4 @@ patches:
     - patch_file: "patches/cmake-add-runtime-destination_1.3.1.patch"
     - patch_file: "patches/0001-remove-register-keyword.patch"
     - patch_file: "patches/fix_cpp_17_compilation_warnings.patch"
-      patch_type: "portability"
-      patch_description: "Fix C++17 compilation warnings regarding the use of the deprecated std::iterator"
-    - patch_file: "patches/fix_cpp_20_compilation_errors.patch"
-      patch_type: "portability"
-      patch_description: "Fix C++20 compilation errors regarding the use of allocator.construct and allocator.destroy"
-
+    - patch_file: "patches/fix_cpp_20_compilation_warnings.patch"
