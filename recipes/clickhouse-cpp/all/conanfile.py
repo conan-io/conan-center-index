@@ -26,7 +26,6 @@ class ClickHouseCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "build_bench": False,
-        "build_tests": False,
         "with_openssl": False
     }
 
