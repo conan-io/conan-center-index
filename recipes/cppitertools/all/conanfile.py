@@ -60,6 +60,10 @@ class CppItertoolsConan(ConanFile):
     def package(self):
         copy(self, "*.hpp", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder,"include", "cppitertools"), excludes=('examples/**', 'test/**'))
         copy(self, "LICENSE.md", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder,"licenses"))
-
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cppitertools")
+        self.cpp_info.set_property("cmake_target_name", "cppitertools::cppitertools")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
     def package_id(self):
         self.info.clear()
