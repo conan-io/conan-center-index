@@ -38,7 +38,7 @@ class BShoshanyThreadPoolConan(ConanFile):
         return "source_subfolder"
 
     def package(self):
-        copy(self, "*.hpp", self.source_folder, os.path.join(self.package_folder, "include"))
+        copy(self, "include/*.hpp", self.source_folder, self.package_folder)
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_id(self):
