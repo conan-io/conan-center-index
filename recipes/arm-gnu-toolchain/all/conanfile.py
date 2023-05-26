@@ -67,7 +67,10 @@ class ArmGnuToolchain(ConanFile):
                 f"Pre-compiled binaries are only available for {supported_build_architectures[str(self._settings_build.os)]}."
             )
 
-        if (str(self.settings.os) != "baremetal" and str(self.settings.arch) != str(self._settings_build.arch)):
+        if (
+            str(self.settings.os) != "baremetal" and
+            str(self.settings.arch) != str(self._settings_build.arch)
+        ):
             # Update comment later if this works
             raise ConanInvalidConfiguration(
                 f"This tool does not work when cross compiling to a target that is not 'baremetal'."
@@ -128,23 +131,27 @@ class ArmGnuToolchain(ConanFile):
         f = os.path.join(self.package_folder, "res/toolchain.cmake")
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
 
-        if str(self.settings.os) == "baremetal":
-            print("====================<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+        if str(self.settings.arch) == "thumbv7em":
             float_abi = str(self.settings.arch.float_abi)
             processor = str(self.settings.arch.processor)
 
-            c_flags = [f"-mfloat-abi={ float_abi }",
-                       f"-mcpu={ processor }",
-                       "-mthumb",
-                       "-ffunction-sections",
-                       "-fdata-sections",
-                       "-fno-exceptions",
-                       "-fno-rtti"]
-            link_flags = [f"-mfloat-abi={ float_abi }",
-                          f"-mcpu={ processor }",
-                          "-mthumb",
-                          "-Wl,--gc-sections",
-                          "-Wl,--print-memory-usage"]
+            c_flags = [
+                f"-mfloat-abi={ float_abi }",
+                f"-mcpu={ processor }",
+                "-mthumb",
+                "-ffunction-sections",
+                "-fdata-sections",
+                "-fno-exceptions",
+                "-fno-rtti"
+            ]
+
+            link_flags = [
+                f"-mfloat-abi={ float_abi }",
+                f"-mcpu={ processor }",
+                "-mthumb",
+                "-Wl,--gc-sections",
+                "-Wl,--print-memory-usage"
+            ]
 
             self.conf_info.extend("tools.build:cflags", c_flags)
             self.conf_info.extend("tools.build:cxxflags", c_flags)
