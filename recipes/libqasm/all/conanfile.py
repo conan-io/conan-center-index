@@ -1,10 +1,9 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.scm import Git
 
 class LibqasmConan(ConanFile):
     name = "libqasm"
-    version = "0.5.0"
 
     # Optional metadata
     license = "Apache-2.0"
