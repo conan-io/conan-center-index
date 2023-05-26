@@ -13,7 +13,7 @@ class PystringConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/imageworks/pystring"
-    topics = ("pystring", "string")
+    topics = ("python", "string")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
