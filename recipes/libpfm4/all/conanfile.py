@@ -11,11 +11,12 @@ class Libpfm4Conan(ConanFile):
     license = "MIT"
     homepage = "http://perfmon2.sourceforge.net"
     url = "https://github.com/conan-io/conan-center-index"
-    description = ("A helper library to program the performance monitoring events")
+    description = "A helper library to program the performance monitoring events"
     topics = ("perf", "pmu", "benchmark", "microbenchmark")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    package_type = "library"
 
     def validate(self):
         # The library doesn't really make much sense without perf_events API
@@ -23,25 +24,11 @@ class Libpfm4Conan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("This library is Linux only")
 
-    def config_options(self):
-        # and currently does not compile on modern Mac OS X && Windows
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self)
@@ -80,9 +67,6 @@ class Libpfm4Conan(ConanFile):
             f'LIBDIR=lib{os.sep}',
             f'-C {self.source_folder}'
         ]
-        # due to bug, Mac install phase fails with config shared
-        if self.settings.os == 'Macos':
-            args.append('CONFIG_PFMLIB_SHARED=n')
 
         copy(self, "err.h", dst=os.path.join(self.package_folder, "include", "perfmon"), src=os.path.join(self.source_folder, "include", "perfmon"))
         autotools = Autotools(self)
@@ -91,5 +75,6 @@ class Libpfm4Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["pfm"]
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ["pthread", "m"]
+        # This currently only compiles on Linux, so always add the libs
+        self.cpp_info.system_libs = ["pthread", "m"]
+
