@@ -17,6 +17,7 @@ class XlntConan(ConanFile):
     homepage = "https://github.com/tfussell/xlnt"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,11 +44,11 @@ class XlntConan(ConanFile):
 
     def requirements(self):
         self.requires("libstudxml/1.1.0-b.10+1")
-        self.requires("miniz/3.0.1")
-        self.requires("utfcpp/3.2.2")
+        self.requires("miniz/3.0.2")
+        self.requires("utfcpp/3.2.3")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         libstudxml_version = Version(self.dependencies["libstudxml"].ref.version)
         libstudxml_major_minor = f"{libstudxml_version.major}.{libstudxml_version.minor}"
@@ -55,8 +56,7 @@ class XlntConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} not compatible with libstudxml < 1.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

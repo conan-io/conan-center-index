@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir, save
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -13,6 +14,7 @@ class MsgpackCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/msgpack/msgpack-c"
     topics = ("msgpack", "message-pack", "serialization")
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "fPIC": [True, False],
@@ -45,7 +47,7 @@ class MsgpackCConan(ConanFile):
         tc.variables["MSGPACK_ENABLE_STATIC"] = not self.options.shared
         tc.variables["MSGPACK_32BIT"] = self.settings.arch == "x86"
         tc.variables["MSGPACK_BUILD_EXAMPLES"] = False
-        tc.variables["MSGPACK_BUILD_TESTS"] = False
+        tc.cache_variables["MSGPACK_BUILD_TESTS"] = False
         tc.generate()
 
     def build(self):
@@ -82,9 +84,13 @@ class MsgpackCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msgpack")
-        self.cpp_info.set_property("cmake_target_name", "msgpackc")
         self.cpp_info.set_property("pkg_config_name", "msgpack")
-        self.cpp_info.libs = ["msgpackc"]
+        if Version(self.version) < "6.0.0":
+            self.cpp_info.libs = ["msgpackc"]
+            self.cpp_info.set_property("cmake_target_name", "msgpackc")
+        else:
+            self.cpp_info.libs = ["msgpack-c"]
+            self.cpp_info.set_property("cmake_target_name", "msgpack-c")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "msgpack"

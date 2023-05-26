@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from collections import namedtuple
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class PocoConan(ConanFile):
@@ -22,6 +22,7 @@ class PocoConan(ConanFile):
         "mobile and embedded systems."
     )
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -85,21 +86,12 @@ class PocoConan(ConanFile):
             del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
-        if Version(self.version) < "1.9.0":
-            del self.options.enable_encodings
-        if Version(self.version) < "1.10.0":
-            del self.options.enable_data_mysql
-            del self.options.enable_data_postgresql
-            del self.options.enable_jwt
-        if Version(self.version) < "1.11.0":
-            del self.options.enable_activerecord
-            del self.options.enable_activerecord_compiler
         if Version(self.version) < "1.12.0":
             del self.options.enable_prometheus
 
     def configure(self):
         if self.options.enable_active_record != "deprecated":
-            self.output.warn("enable_active_record option is deprecated, use 'enable_activerecord' instead")
+            self.output.warning("enable_active_record option is deprecated, use 'enable_activerecord' instead")
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if not self.options.enable_xml:
@@ -119,33 +111,33 @@ class PocoConan(ConanFile):
         if Version(self.version) < "1.12.0":
             self.requires("pcre/8.45")
         else:
-            self.requires("pcre2/10.40")
+            self.requires("pcre2/10.42")
         self.requires("zlib/1.2.13")
         if self.options.enable_xml:
             self.requires("expat/2.5.0")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.39.4")
+            self.requires("sqlite3/3.41.2")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
-            self.requires("openssl/1.1.1s", transitive_headers=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("enable_data_postgresql"):
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.0.31")
 
     def package_id(self):
         del self.info.options.enable_active_record
 
     def validate(self):
-        if self.info.options.enable_apacheconnector:
+        if self.options.enable_apacheconnector:
             # FIXME: missing apache2 recipe + few issues
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
-        if is_msvc(self) and self.info.options.shared and is_msvc_static_runtime(self):
+        if is_msvc(self) and self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Cannot build shared poco libraries with MT(d) runtime")
         for compopt in self._poco_component_tree.values():
             if not compopt.option:
@@ -156,29 +148,28 @@ class PocoConan(ConanFile):
                         continue
                     if not self.options.get_safe(self._poco_component_tree[compdep].option, False):
                         raise ConanInvalidConfiguration(f"option {compopt.option} requires also option {self._poco_component_tree[compdep].option}")
-        if self.info.options.enable_data_sqlite:
+        if self.options.enable_data_sqlite:
             if self.dependencies["sqlite3"].options.threadsafe == 0:
                 raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
-        if self.info.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
+        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
             raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _dep_include_paths(self, dep):
-        dep_info = self.dependencies[dep]
-        return [os.path.join(dep_info.package_folder, dir).replace("\\", "/") for dir in dep_info.cpp_info.includedirs]
+    def _dep_include_paths(self, dep_name):
+        dep = self.dependencies[dep_name]
+        dep_cpp_info = dep.cpp_info.aggregated_components()
+        return [os.path.join(dep.package_folder, dir).replace("\\", "/") for dir in dep_cpp_info.includedirs]
 
-    def _dep_lib_paths(self, dep):
-        dep_info = self.dependencies[dep]
-        return [os.path.join(dep_info.package_folder, dir).replace("\\", "/") for dir in dep_info.cpp_info.libdirs]
+    def _dep_lib_paths(self, dep_name):
+        dep = self.dependencies[dep_name]
+        dep_cpp_info = dep.cpp_info.aggregated_components()
+        return [os.path.join(dep.package_folder, dir).replace("\\", "/") for dir in dep_cpp_info.libdirs]
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
-        if Version(self.version) < "1.10.1":
-            tc.variables["POCO_STATIC"] = not self.options.shared
         for comp in self._poco_component_tree.values():
             if comp.option:
                 tc.variables[comp.option.upper()] = self.options.get_safe(comp.option, False)
@@ -208,10 +199,7 @@ class PocoConan(ConanFile):
         # Disable automatic linking on MSVC
         tc.preprocessor_definitions["POCO_NO_AUTOMATIC_LIBS"] = "1"
         # Picked up from conan v1 CMake wrapper, don't know the rationale
-        if Version(self.version) >= "1.11.0":
-            tc.preprocessor_definitions["XML_DTD"] = "1"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.preprocessor_definitions["XML_DTD"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)

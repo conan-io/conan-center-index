@@ -17,6 +17,7 @@ class LibtiffConan(ConanFile):
     homepage = "http://www.simplesystems.org/libtiff"
     topics = ("tiff", "image", "bigtiff", "tagged-image-file-format")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -82,29 +83,28 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.15")
+            self.requires("libdeflate/1.18")
         if self.options.lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.2")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
 
     def validate(self):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -121,6 +121,12 @@ class LibtiffConan(ConanFile):
             tc.variables["webp"] = self.options.webp
         if Version(self.version) >= "4.3.0":
             tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
+        if Version(self.version) >= "4.5.0":
+            # Disable tools, test, contrib, man & html generation
+            tc.variables["tiff-tools"] = False
+            tc.variables["tiff-tests"] = False
+            tc.variables["tiff-contrib"] = False
+            tc.variables["tiff-docs"] = False
         tc.variables["cxx"] = self.options.cxx
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
@@ -137,9 +143,10 @@ class LibtiffConan(ConanFile):
                               "set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} WINDOWS_EXPORT_ALL_SYMBOLS ON)")
 
         # Disable tools, test, contrib, man & html generation
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
-                              "add_subdirectory(man)\nadd_subdirectory(html)", "")
+        if Version(self.version) < "4.5.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
+                                  "add_subdirectory(man)\nadd_subdirectory(html)", "")
 
     def build(self):
         self._patch_sources()
@@ -148,7 +155,8 @@ class LibtiffConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
+        license_file = "COPYRIGHT" if Version(self.version) < "4.5.0" else "LICENSE.md"
+        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))

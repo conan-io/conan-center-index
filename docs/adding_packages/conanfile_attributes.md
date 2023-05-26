@@ -20,7 +20,7 @@ or are known by ConanCenter's build service and have special meaning.
 
 ## Attributes
 
-These are a [key feature](https://docs.conan.io/en/latest/reference/conanfile/attributes.html) which allow the Conan client to understand,
+These are a [key feature](https://docs.conan.io/1/reference/conanfile/attributes.html) which allow the Conan client to understand,
 identify, and expose recipes and which project they expose.
 
 In ConanCenter, there are a few conventions that need to be respected to ensure recipes can be discovered there `conan search` command
@@ -33,6 +33,7 @@ Same as the _recipe folder_ and always lowercase.
 Please see the FAQs for:
 
 * [name collisions](../faqs.md#what-is-the-policy-on-recipe-name-collisions)
+* [naming forks](../faqs.md##what-is-the-policy-for-naming-forks)
 * [space and symbols](../faqs.md#should-reference-names-use---or-_)
 
 ### Version
@@ -60,7 +61,7 @@ Where the SPDX guidelines do not apply, packages should do the following:
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
 
-For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
+For `conan create` the order is listed [here](https://docs.conan.io/1/reference/commands/creator/create.html#methods-execution-order)
 test packages recipes should append the following methods:
 
 * deploy
@@ -168,7 +169,7 @@ Usage of each option should follow the rules:
 ### Options to Avoid
 
 * `build_testing` should not be added, nor any other related unit test option. Options affect the package ID, therefore, testing should not be part of that.
-   Instead, use Conan config [skip_test](https://docs.conan.io/en/latest/reference/config_files/global_conf.html#tools-configurations) feature:
+   Instead, use Conan config [skip_test](https://docs.conan.io/1/reference/config_files/global_conf.html#tools-configurations) feature:
 
    ```python
    def generate(self):
@@ -176,17 +177,17 @@ Usage of each option should follow the rules:
       tc.variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=true, check_type=bool)
    ```
 
-   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/en/latest/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/en/latest/reference/build_helpers/meson.html#test).
- 
+   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/1/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/1/reference/build_helpers/meson.html#test).
+
  ### Removing from `package_id`
- 
- By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/en/latest/reference/conanfile/methods.html#package-id)).
+
+ By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/1/reference/conanfile/methods.html#package-id)).
  Options which do not impact the generated packages should be deleted, for instance adding a `#define` for a package.
- 
+
  ```python
 def package_id(self):
    del self.info.options.enable_feature
- 
+
 def package_info(self):
    if self.options.enable_feature:
       self.cpp_info.defines.append("FOBAR_FEATURE=1")

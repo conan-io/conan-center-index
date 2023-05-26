@@ -18,6 +18,7 @@ class C4CoreConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/c4core"
     topics = ("utilities", "low-latency", )
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -46,7 +47,7 @@ class C4CoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_fast_float:
-            self.requires("fast_float/3.9.0")
+            self.requires("fast_float/4.0.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -54,13 +55,12 @@ class C4CoreConan(ConanFile):
 
         ## clang with libc++ is not supported. It is already fixed since 0.1.9.
         if Version(self.version) <= "0.1.8":
-            if self.info.settings.compiler in ["clang", "apple-clang"] and \
-                self.info.settings.compiler.get_safe("libcxx") == "libc++":
+            if self.settings.compiler in ["clang", "apple-clang"] and \
+                self.settings.compiler.get_safe("libcxx") == "libc++":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang with libc++")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

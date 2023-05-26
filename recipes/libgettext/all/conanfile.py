@@ -32,12 +32,12 @@ class GetTextConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"],
+        "threads": ["posix", "solaris", "pth", "windows", "disabled"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "threads": "auto",
+        # Handle default value for `threads` in `config_options` method
     }
 
     @property
@@ -56,14 +56,13 @@ class GetTextConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
+        self.options.threads = {"Solaris": "solaris", "Windows": "windows"}.get(str(self.settings.os), "posix")
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
-        if (self.options.threads == "auto"):
-            self.options.threads = {"Solaris": "solaris", "Windows": "windows"}.get(str(self.settings.os), "posix")
 
     def layout(self):
         basic_layout(self, src_folder="src")
