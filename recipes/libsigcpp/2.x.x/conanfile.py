@@ -45,7 +45,7 @@ class LibSigCppConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
