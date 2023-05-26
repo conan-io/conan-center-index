@@ -20,12 +20,12 @@ diff --git a/lemon/maps.h b/lemon/maps.h
        ValueIt(typename Container::const_iterator _it)
          : it(_it) {}
      public:
-+      typedef std::forward_iterator_tag iterator_category;
-+      typedef Value value_type;
-+      typedef void difference_type;
-+      typedef void pointer;
-+      typedef void reference;
-
++      using iterator_category = std::forward_iterator_tag;
++      using value_type = Value;
++      using difference_type = void;
++      using pointer = void;
++      using reference = void;
+ 
        /// Constructor
        ValueIt() {}
 @@ -3131,13 +3135,17 @@
@@ -40,11 +40,11 @@ diff --git a/lemon/maps.h b/lemon/maps.h
        ValueIt(typename std::map<Value, Key>::const_iterator _it)
          : it(_it) {}
      public:
-+      typedef std::forward_iterator_tag iterator_category;
-+      typedef Value value_type;
-+      typedef void difference_type;
-+      typedef void pointer;
-+      typedef void reference;
-
++      using iterator_category = std::forward_iterator_tag;
++      using value_type = Value;
++      using difference_type = void;
++      using pointer = void;
++      using reference = void;
+ 
        /// Constructor
        ValueIt() {}
