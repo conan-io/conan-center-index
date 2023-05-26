@@ -44,7 +44,7 @@ class LibqasmConan(ConanFile):
             del self.options.fPIC
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         git = Git(self)
