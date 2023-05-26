@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class ThriftConan(ConanFile):
@@ -17,6 +17,7 @@ class ThriftConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/apache/thrift"
     topics = ("thrift", "serialization", "rpc")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,8 +53,7 @@ class ThriftConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,33 +61,31 @@ class ThriftConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
+        self.requires("boost/1.81.0", transitive_headers=True)
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:
-            self.requires("qt/5.15.7")
+            self.requires("qt/5.15.9")
 
     def build_requirements(self):
-        # TODO: use is_msvc with build_context in conan >=1.52.0 (see https://github.com/conan-io/conan/pull/11949)
-        if str(self._settings_build.compiler) in ["Visual Studio", "msvc"]:
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
-            self.tool_requires("bison/3.7.6")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+            self.tool_requires("bison/3.8.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -102,8 +100,6 @@ class ThriftConan(ConanFile):
             tc.variables["WITH_MT"] = is_msvc_static_runtime(self)
         # This policy doesn't matter for us, but avoids a warning
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         cd = CMakeDeps(self)

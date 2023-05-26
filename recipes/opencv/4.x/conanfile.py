@@ -50,6 +50,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
         "with_imgcodec_sunraster": [True, False],
+        "with_msmf": [True, False],
+        "with_msmf_dxva": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
         "dnn_cuda": [True, False],
@@ -86,6 +88,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
         "with_imgcodec_sunraster": False,
+        "with_msmf": True,
+        "with_msmf_dxva": True,
         "neon": True,
         "dnn": True,
         "dnn_cuda": False,
@@ -126,6 +130,9 @@ class OpenCVConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_gtk
             del self.options.with_v4l
+        if self.settings.os != "Windows":
+            del self.options.with_msmf
+            del self.options.with_msmf_dxva
 
         if self._has_with_ffmpeg_option:
             # Following the packager choice, ffmpeg is enabled by default when
@@ -191,7 +198,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4")
@@ -200,7 +207,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.12.1")
             self.requires("harfbuzz/6.0.0")
@@ -212,7 +219,8 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires(f"protobuf/{self._protobuf_version}")
+            # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
+            self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True)
         if self.options.with_ade:
             self.requires("ade/0.1.2a")
 
@@ -237,8 +245,7 @@ class OpenCVConan(ConanFile):
                 self.tool_requires(f"protobuf/{self._protobuf_version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
 
         get(self, **self.conan_data["sources"][self.version][1],
             destination=self._contrib_folder, strip_root=True)
@@ -364,9 +371,9 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::avcodec;ffmpeg::avformat;ffmpeg::avutil;ffmpeg::swscale"
-            for component in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
-                # TODO: use self.dependencies once https://github.com/conan-io/conan/issues/12728 fixed
-                ffmpeg_component_version = self.deps_cpp_info["ffmpeg"].components[component].version
+            ffmpeg_cpp_info = self.dependencies["ffmpeg"].cpp_info
+            for component in ["avcodec", "avformat", "avutil", "swscale"]:
+                ffmpeg_component_version = ffmpeg_cpp_info.components[component].get_property("component_version")
                 tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
 
         tc.variables["WITH_GSTREAMER"] = False
@@ -430,8 +437,8 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         tc.variables["WITH_DSHOW"] = is_msvc(self)
-        tc.variables["WITH_MSMF"] = is_msvc(self)
-        tc.variables["WITH_MSMF_DXVA"] = is_msvc(self)
+        tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
+        tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
         tc.variables["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 
@@ -533,7 +540,7 @@ class OpenCVConan(ConanFile):
             return False
         gtk_version = self.dependencies["gtk"].ref.version
         if gtk_version == "system":
-            return self.options["gtk"].version == 2
+            return self.dependencies["gtk"].options.version == 2
         else:
             return Version(gtk_version) < "3.0.0"
 

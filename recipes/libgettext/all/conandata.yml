@@ -14,11 +14,9 @@ patches:
     - patch_file: "patches/0001-build-Fix-build-errors-with-MSVC.patch"
       patch_description: "Fix build errors with MSVC"
       patch_type: "portability"
-
     - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
       patch_description: "memmove is intrinsic function on MSVC"
       patch_type: "portability"
-
     - patch_file: "patches/0003-Reported-by-Gabor-Z.-Papp-gzp-papp.hu.patch"
       patch_description: "fix preloadable libintl for static build"
       patch_type: "portability"

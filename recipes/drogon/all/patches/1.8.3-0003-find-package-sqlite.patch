@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 680dc46..28cbcf4 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -405,7 +405,7 @@ if (BUILD_SQLITE)
+     find_package(SQLite3 QUIET)
+     find_package(unofficial-sqlite3 QUIET)
+     if (SQLite3_FOUND)
+-        target_link_libraries(${PROJECT_NAME} PRIVATE SQLite3_lib)
++        target_link_libraries(${PROJECT_NAME} PRIVATE SQLite::SQLite3)
+         set(DROGON_FOUND_SQLite3 TRUE)
+     elseif (unofficial-sqlite3_FOUND)
+         target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::sqlite3::sqlite3)

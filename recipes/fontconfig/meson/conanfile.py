@@ -1,20 +1,14 @@
 from conan import ConanFile
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    rename,
-    replace_in_file,
-    rm,
-    rmdir
-)
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.files import (
+    apply_conandata_patches, copy, export_conandata_patches, get,
+    replace_in_file, rm, rmdir
+)
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 
 import os
 
@@ -51,25 +45,28 @@ class FontconfigConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("freetype/2.12.1")
+        self.requires("freetype/2.13.0")
         self.requires("expat/2.5.0")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
 
     def build_requirements(self):
         self.tool_requires("gperf/3.1")
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/1.0.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         deps = PkgConfigDeps(self)
         deps.generate()
 
@@ -82,14 +79,11 @@ class FontconfigConan(ConanFile):
         })
         tc.generate()
 
-        env = VirtualBuildEnv(self)
-        env.generate()
-
     def _patch_files(self):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "freetype_req = '>= 21.0.15'",
-                        f"freetype_req = '{Version(self.deps_cpp_info['freetype'].version)}'")
+                        f"freetype_req = '{Version(self.dependencies['freetype'].ref.version)}'")
 
     def build(self):
         self._patch_files()
@@ -98,21 +92,17 @@ class FontconfigConan(ConanFile):
         meson.build()
 
     def package(self):
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-        if is_msvc(self):
-            if os.path.isfile(os.path.join(self.package_folder, "lib", "libfontconfig.a")):
-                rename(self, os.path.join(self.package_folder, "lib", "libfontconfig.a"),
-                         os.path.join(self.package_folder, "lib", "fontconfig.lib"))
-
-        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rm(self, "*.conf", os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"))
         rm(self, "*.def", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -123,15 +113,30 @@ class FontconfigConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
-        self.cpp_info.names["cmake_find_package"] = "Fontconfig"
-        self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-
         fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.output.info(f"Creating FONTCONFIG_FILE environment variable: {fontconfig_file}")
         self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
-        self.env_info.FONTCONFIG_FILE = fontconfig_file # TODO: remove in conan v2?
 
         fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
-        self.output.info(f"Creating FONTCONFIG_PATH environment variable: {fontconfig_path}")
         self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
-        self.env_info.FONTCONFIG_PATH = fontconfig_path # TODO: remove in conan v2?
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "Fontconfig"
+        self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
+        self.env_info.FONTCONFIG_FILE = fontconfig_file
+        self.env_info.FONTCONFIG_PATH = fontconfig_path
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    from conan.tools.files import rename
+    import glob
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

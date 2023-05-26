@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, stdcpp_library
+from conan.tools.build import can_run, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
@@ -57,24 +57,23 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.40.0")
+        self.requires("sqlite3/3.41.1", run=can_run(self))
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.4.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.86.0")
+            self.requires("libcurl/7.88.1")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("sqlite3/3.40.0")
+        if not can_run(self):
+            self.tool_requires("sqlite3/3.41.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            env = VirtualBuildEnv(self)
-            env.generate()
-        else:
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
@@ -136,10 +135,10 @@ class ProjConan(ConanFile):
             else:
                 cmake_sqlite_call = "generate_proj_db.cmake"
                 pattern = "\"${EXE_SQLITE3}\""
-            if hasattr(self, "settings_build") and cross_building(self):
-                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
-            else:
+            if can_run(self):
                 lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
+            else:
+                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
             replace_in_file(self,
                 os.path.join(self.source_folder, "data", cmake_sqlite_call),
                 f"COMMAND {pattern}",
@@ -189,7 +188,7 @@ class ProjConan(ConanFile):
             if proj_version >= "7.0.0":
                 self.cpp_info.components["projlib"].system_libs.append("shell32")
             if proj_version >= "7.1.0":
-                self.cpp_info.components["projlib"].system_libs.append("Ole32")
+                self.cpp_info.components["projlib"].system_libs.append("ole32")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:

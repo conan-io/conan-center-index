@@ -1,4 +1,94 @@
 sources:
+  "7.0.0":
+    Windows:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-x86_64-windows-c-api.zip"
+        sha256: "d09f31a8dcc6d38ac442a3b1d653137d5814cddad006b5e38151bbc4a9b9d692"
+    MinGW:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-x86_64-mingw-c-api.zip"
+        sha256: "1198d705bae1d09df15b8ae194d54dfd11bd90e2cc6fbb9aa13a7b000bd24ba9"
+    Linux:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-x86_64-linux-c-api.tar.xz"
+        sha256: "cc9b137c0fddeb57a2d439fb8ad57e224a51e0e949cd8ea3fb4a6ee8bb1085d2"
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-aarch64-linux-c-api.tar.xz"
+        sha256: "47a5fcad64a0e223cf1796eafd0fc9ca62c8b3e457942695397feb56382d3db1"
+      "s390x":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-s390x-linux-c-api.tar.xz"
+        sha256: "18d32031a731e9f7d9dfdc9e75ac8210f88321b4c99b21e24bed6a25ba6cf0ca"
+    Macos:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-x86_64-macos-c-api.tar.xz"
+        sha256: "b2b9dd2a200e93889ce2bff637aacbc8c40dae9903fb30eda20ed52fd4ca83a4"
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-aarch64-macos-c-api.tar.xz"
+        sha256: "88bc1c36665d230206130a9d194b11b907438c86224ed184f2bee8ef348cf193"
+    Android:
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v7.0.0/wasmtime-v7.0.0-aarch64-linux-c-api.tar.xz"
+        sha256: "47a5fcad64a0e223cf1796eafd0fc9ca62c8b3e457942695397feb56382d3db1"
+  "6.0.1":
+    Windows:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-x86_64-windows-c-api.zip"
+        sha256: "09e5a916421933c6b81ae040b1678450a0c23c4286a2327d515001c51e5fe344"
+    MinGW:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-x86_64-mingw-c-api.zip"
+        sha256: "03982d3ff2d34d47f5609b4ac3acbc517d25c8ab881df69328d1e21b19ff70c4"
+    Linux:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-x86_64-linux-c-api.tar.xz"
+        sha256: "a64c6e7bee46598d9efd357f4e7c6a4dfb3888e389755ff050555e0d330bcc0f"
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-aarch64-linux-c-api.tar.xz"
+        sha256: "6dbc2dc9b9cc5ecd937f7fca07b5c87014615a4c00bcbac51ceb78140f9ccdf1"
+      "s390x":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-s390x-linux-c-api.tar.xz"
+        sha256: "047536e2085372d68ca5ee342d7c11722f8ac5858dd0e99615cf7c4cfa433225"
+    Macos:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-x86_64-macos-c-api.tar.xz"
+        sha256: "97bb023c9f8eb206fb2a11befbbdd55003dfd3bcf763dd4bdf72bd02768f3faf"
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-aarch64-macos-c-api.tar.xz"
+        sha256: "914c5b7a844c8e04d4f191ac229d4e3714d185971bde1be3203a6041aec5f465"
+    Android:
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v6.0.1/wasmtime-v6.0.1-aarch64-linux-c-api.tar.xz"
+        sha256: "6dbc2dc9b9cc5ecd937f7fca07b5c87014615a4c00bcbac51ceb78140f9ccdf1"
+  "5.0.0":
+    Windows:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-x86_64-windows-c-api.zip"
+        sha256: "11b3c7473afee0db400683ac1aa9e5243b3d55dbdaeaca534c7b3481d3e3c8a3"
+    MinGW:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-x86_64-mingw-c-api.zip"
+        sha256: "3c87f5c59a10cfda484131dd1454a9bac8b56e48648377178b4b1cbb201358bd"
+    Linux:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-x86_64-linux-c-api.tar.xz"
+        sha256: "cbdec67ae16af672d50ff2c47718713d60b6cdc05f7c0bee77f612dde8c7ee92"
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-aarch64-linux-c-api.tar.xz"
+        sha256: "1b2baa5038afdd6d8338c4b94487c2b271d391b1f3e0bdf462ca7d9ef1c489df"
+      "s390x":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-s390x-linux-c-api.tar.xz"
+        sha256: "4ee4fc1e43c5b588f52b309046549928e3f6c1daee373d245c71687c1bd8a2dd"
+    Macos:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-x86_64-macos-c-api.tar.xz"
+        sha256: "8c6f326c452598e23e2ba4894378e4ba73d18ce4d488cb1f29a377a47457321c"
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-aarch64-macos-c-api.tar.xz"
+        sha256: "7c773aa2650bd9b2b50cfe5faa8bbff772a5417d8fc2ae1f050f575331aa6015"
+    Android:
+      "armv8":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v5.0.0/wasmtime-v5.0.0-aarch64-linux-c-api.tar.xz"
+        sha256: "1b2baa5038afdd6d8338c4b94487c2b271d391b1f3e0bdf462ca7d9ef1c489df"
   "4.0.0":
     Windows:
       "x86_64":

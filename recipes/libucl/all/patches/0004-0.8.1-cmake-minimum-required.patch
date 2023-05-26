@@ -1,0 +1,11 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7b55faf..2cb451f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+-PROJECT(libucl C)
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
++PROJECT(libucl C)
+ 
+ SET(LIBUCL_VERSION_MAJOR 0)
+ SET(LIBUCL_VERSION_MINOR 5)

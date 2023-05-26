@@ -15,6 +15,7 @@ class ButteraugliConan(ConanFile):
     homepage = "https://github.com/google/butteraugli"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,16 +45,15 @@ class ButteraugliConan(ConanFile):
 
     def requirements(self):
         if self.options.tool:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
             self.requires("libjpeg/9e")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

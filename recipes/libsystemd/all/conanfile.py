@@ -3,13 +3,14 @@ import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, get, \
-    replace_in_file
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.50.2"
+required_conan_version = ">=1.53.0"
 
 
 class LibsystemdConan(ConanFile):
@@ -18,8 +19,9 @@ class LibsystemdConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/systemd/"
     description = "System and Service Manager API library"
-    topics = ("systemd", "libsystemd", "service", "manager")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("systemd", "service", "manager")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,45 +38,41 @@ class LibsystemdConan(ConanFile):
         "with_xz": True,
         "with_zstd": True,
     }
-    generators = "PkgConfigDeps", "VirtualBuildEnv"
-    exports_sources = "patches/**"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def validate(self):
-        if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
-
-    def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
-        self.tool_requires("m4/1.4.19")
-        self.tool_requires("gperf/3.1")
-        self.tool_requires("pkgconf/1.7.4")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcap/2.65")
+        self.requires("libcap/2.68")
         self.requires("libmount/2.36.2")
         if self.options.with_selinux:
             self.requires("libselinux/3.3")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
 
-    def layout(self):
-        basic_layout(self, src_folder="source")
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only Linux supported")
+
+    def build_requirements(self):
+        self.tool_requires("meson/1.1.0")
+        self.tool_requires("m4/1.4.19")
+        self.tool_requires("gperf/3.1")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,6 +88,9 @@ class LibsystemdConan(ConanFile):
         return ""
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = MesonToolchain(self)
         tc.project_options["selinux"] = ("true" if self.options.with_selinux
                                          else "false")
@@ -131,6 +132,8 @@ class LibsystemdConan(ConanFile):
             unrelated.extend(["sysext", "nscd"])
         if Version(self.version) >= "251.1":
             unrelated.append("link-boot-shared")
+        if Version(self.version) >= "252.1":
+            unrelated.append("link-journalctl-shared")
 
         for opt in unrelated:
             tc.project_options[opt] = "false"
@@ -145,10 +148,13 @@ class LibsystemdConan(ConanFile):
         # is also required to provide a path to the header files directly to
         # the compiler.
         for dependency in self.dependencies.values():
-            for includedir in dependency.cpp_info.includedirs:
-                tc.c_args.append("-I{}".format(includedir))
+            for includedir in dependency.cpp_info.aggregated_components().includedirs:
+                tc.c_args.append(f"-I{includedir}")
 
         tc.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -164,7 +170,7 @@ class LibsystemdConan(ConanFile):
         meson.configure()
         target = ("systemd:shared_library" if self.options.shared
                   else "systemd:static_library")
-        meson.build(target="version.h {}".format(target))
+        meson.build(target=f"version.h {target}")
 
     def package(self):
         copy(self, "LICENSE.LGPL2.1", self.source_folder,
@@ -184,23 +190,10 @@ class LibsystemdConan(ConanFile):
                  os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libsystemd")
+        self.cpp_info.set_property("component_version", str(Version(self.version).major))
         self.cpp_info.libs = ["systemd"]
-        # FIXME: this `.version` should only happen for the `pkg_config`
-        #  generator (see https://github.com/conan-io/conan/issues/8202)
-        # systemd uses only major version in its .pc file
-        self.cpp_info.version = str(Version(self.version).major)
-        self.cpp_info.set_property("component_version",
-                                   str(Version(self.version).major))
         self.cpp_info.system_libs = ["rt", "pthread", "dl"]
 
-        # FIXME: remove this block and set required_conan_version to >=1.51.1
-        #  (see https://github.com/conan-io/conan/pull/11790)
-        self.cpp_info.requires = ["libcap::libcap", "libmount::libmount"]
-        if self.options.with_selinux:
-            self.cpp_info.requires.append("libselinux::libselinux")
-        if self.options.with_lz4:
-            self.cpp_info.requires.append("lz4::lz4")
-        if self.options.with_xz:
-            self.cpp_info.requires.append("xz_utils::xz_utils")
-        if self.options.with_zstd:
-            self.cpp_info.requires.append("zstd::zstd")
+        # TODO: to remove in conan v2
+        self.cpp_info.version = str(Version(self.version).major)

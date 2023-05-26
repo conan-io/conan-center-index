@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     struct sail_image *image;
                   
-    SAIL_TRY_OR_EXECUTE(sail_load_image_from_file(SAIL_DEMO_FILE_PATH, &image),
+    SAIL_TRY_OR_EXECUTE(sail_load_from_file(SAIL_DEMO_FILE_PATH, &image),
         /* on error */ return 1);
 
     printf("Size: %ux%u, bytes per line: %u, "

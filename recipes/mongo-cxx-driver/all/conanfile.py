@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 import shutil
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54.0"
 
 
 class MongoCxxConan(ConanFile):
@@ -33,8 +33,7 @@ class MongoCxxConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,12 +41,15 @@ class MongoCxxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.22.0")
+        self.requires("mongo-c-driver/1.23.2")
         if self.options.polyfill == "boost":
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.81.0")
 
     @property
     def _minimal_std_version(self):
@@ -90,33 +92,29 @@ class MongoCxxConan(ConanFile):
             )
 
     def validate(self):
-        if self.info.options.with_ssl and not bool(self.dependencies["mongo-c-driver"].options.with_ssl):
+        if self.options.with_ssl and not bool(self.dependencies["mongo-c-driver"].options.with_ssl):
             raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
 
-        if self.info.options.polyfill == "mnmlstc":
+        if self.options.polyfill == "mnmlstc":
             # TODO: add mnmlstc polyfill support
             # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
             raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
 
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimal_std_version)
 
-        compiler = str(self.info.settings.compiler)
-        if self.info.options.polyfill == "experimental" and compiler == "apple-clang":
+        compiler = str(self.settings.compiler)
+        if self.options.polyfill == "experimental" and compiler == "apple-clang":
             raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
 
-        version = Version(self.info.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if compiler in self._compilers_minimum_version and version < self._compilers_minimum_version[compiler]:
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires a compiler that supports at least C++{self._minimal_std_version}",
             )
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -130,8 +128,7 @@ class MongoCxxConan(ConanFile):
         tc.variables["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
         if not valid_min_cppstd(self, self._minimal_std_version):
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimal_std_version
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.variables["ENABLE_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)

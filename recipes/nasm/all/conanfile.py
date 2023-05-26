@@ -2,12 +2,12 @@ from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.microsoft import NMakeToolchain, is_msvc
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import NMakeToolchain, is_msvc
 import os
 import shutil
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=1.55.0"
 
 
 class NASMConan(ConanFile):
@@ -47,16 +47,14 @@ class NASMConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
         if is_msvc(self):
             tc = NMakeToolchain(self)
-            env = tc.environment
-            env.append("CL", " /nologo")
-            tc.generate() # generate() should take env as a parameter
+            tc.generate()
         else:
             tc = AutotoolsToolchain(self)
             if self.settings.arch == "x86":

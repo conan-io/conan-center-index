@@ -1,4 +1,13 @@
 sources:
+  "23.3.3":
+    url: "https://github.com/google/flatbuffers/archive/v23.3.3.tar.gz"
+    sha256: "8aff985da30aaab37edf8e5b02fda33ed4cbdd962699a8e2af98fdef306f4e4d"
+  "23.1.21":
+    url: "https://github.com/google/flatbuffers/archive/v23.1.21.tar.gz"
+    sha256: "d84cb25686514348e615163b458ae0767001b24b42325f426fd56406fd384238"
+  "23.1.4":
+    url: "https://github.com/google/flatbuffers/archive/v23.1.4.tar.gz"
+    sha256: "801871ff3747838c0dd9730fc44ca9cc453ff42f9c8a0a2f1b33776d2ca5e4b9"
   "22.12.06":
     url: "https://github.com/google/flatbuffers/archive/v22.12.06.tar.gz"
     sha256: "209823306f2cbedab6ff70997e0d236fcfd1864ca9ad082cbfdb196e7386daed"
@@ -23,23 +32,18 @@ sources:
   "2.0.5":
     url: "https://github.com/google/flatbuffers/archive/refs/tags/v2.0.5.tar.gz"
     sha256: "b01e97c988c429e164c5c7df9e87c80007ca87f593c0d73733ba536ddcbc8f98"
-  "2.0.0":
-    url: "https://github.com/google/flatbuffers/archive/v2.0.0.tar.gz"
-    sha256: "9ddb9031798f4f8754d00fca2f1a68ecf9d0f83dfac7239af1311e4fd9a565c4"
   "1.12.0":
     url: "https://github.com/google/flatbuffers/archive/v1.12.0.tar.gz"
     sha256: "62f2223fb9181d1d6338451375628975775f7522185266cd5296571ac152bc45"
-  "1.11.0":
-    url: "https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz"
-    sha256: "3f4a286642094f45b1b77228656fbd7ea123964f19502f9ecfd29933fd23a50b"
 patches:
   "2.0.6":
     - patch_file: "patches/0004-no-flatc-execution-build-time.patch"
+      patch_description: "No flatc execution during build time"
+      patch_type: "conan"
   "2.0.5":
     - patch_file: "patches/0002-apple-no-universal-build.patch"
+      patch_description: "Don't use universal2 architecture"
+      patch_type: "bugfix"
     - patch_file: "patches/0003-no-flatc-execution-build-time.patch"
-  "1.11.0":
-    - patch_file: "patches/0001-fix-copy-ctor.patch"
-      patch_description: "Fix build with Clang"
-      patch_type: "portability"
-      patch_source: "https://github.com/google/flatbuffers/pull/5650"
+      patch_description: "No flatc execution during build time"
+      patch_type: "conan"

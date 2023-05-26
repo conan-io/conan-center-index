@@ -15,6 +15,7 @@ required_conan_version = ">=1.53.0"
 
 class GDCMConan(ConanFile):
     name = "gdcm"
+    package_type = "library"
     description = "C++ library for DICOM medical files"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -63,17 +64,16 @@ class GDCMConan(ConanFile):
         if self.options.with_json:
             self.requires("json-c/0.16")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if is_msvc_static_runtime(self) and self.info.options.shared:
+        if is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared and static runtime together.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -93,8 +93,12 @@ class GDCMConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        rm(self, "Find*.cmake", os.path.join(self.source_folder, "CMake"))
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

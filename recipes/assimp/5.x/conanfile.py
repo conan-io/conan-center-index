@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class AssimpConan(ConanFile):
@@ -20,7 +20,8 @@ class AssimpConan(ConanFile):
     )
     topics = ("assimp", "3d", "game development", "3mf", "collada")
     license = "BSD-3-Clause"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -166,11 +167,11 @@ class AssimpConan(ConanFile):
         # TODO: unvendor others libs:
         # - Open3DGC
         self.requires("minizip/1.2.13")
-        self.requires("utfcpp/3.2.1")
+        self.requires("utfcpp/3.2.3")
         if Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
-            self.requires("pugixml/1.12.1")
+            self.requires("pugixml/1.13")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.2.6")
         if self._depends_on_poly2tri:
@@ -184,7 +185,7 @@ class AssimpConan(ConanFile):
         if self._depends_on_clipper:
             self.requires("clipper/4.10.0")  # Only 4.x supported
         if self._depends_on_stb:
-            self.requires("stb/cci.20210910")
+            self.requires("stb/cci.20220909")
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.0")
 
@@ -193,8 +194,7 @@ class AssimpConan(ConanFile):
             raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -278,6 +278,6 @@ class AssimpConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
         if not self.options.shared:
-            stdcpp_library = tools_legacy.stdcpp_library(self)
-            if stdcpp_library:
-                self.cpp_info.system_libs.append(stdcpp_library)
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)

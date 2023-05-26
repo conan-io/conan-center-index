@@ -6,8 +6,9 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
+import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.55.0"
 
 
 class M4Conan(ConanFile):
@@ -35,13 +36,12 @@ class M4Conan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-                self.tool_requires("msys2/cci.latest")
             self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -62,12 +62,11 @@ class M4Conan(ConanFile):
             ])
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 tc.extra_ldflags.append("-PDB")
-        elif self.settings.compiler == "clang":
-            if Version(self.version) < "1.4.19":
-                tc.extra_cflags.extend([
-                    "-rtlib=compiler-rt",
-                    "-Wno-unused-command-line-argument",
-                ])
+        elif self.settings.compiler == "clang" and Version(self.version) < "1.4.19":
+            tc.extra_cflags.extend([
+                "-rtlib=compiler-rt",
+                "-Wno-unused-command-line-argument",
+            ])
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
         env = tc.environment()
@@ -88,11 +87,12 @@ class M4Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # dummy file for configure
-        help2man = os.path.join(self.source_folder, "help2man")
-        save(self, help2man, "#!/usr/bin/env bash\n:")
-        if os.name == "posix":
-            os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
+        if shutil.which("help2man") == None:
+            # dummy file for configure
+            help2man = os.path.join(self.source_folder, "help2man")
+            save(self, help2man, "#!/usr/bin/env bash\n:")
+            if os.name == "posix":
+                os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
 
     def build(self):
         self._patch_sources()
@@ -103,8 +103,7 @@ class M4Conan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):

@@ -1,0 +1,31 @@
+name: "Alert Community"
+description: "Comment on pull request if certain files changes"
+author: "prince-chrismc"
+inputs:
+  files:
+    description: "Check for changes using only this list of files (Defaults to the entire repo)"
+    required: true
+    default: ""
+  reviewers:
+    description: "List of users to mention (make sure to include the @)"
+    required: true
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    # Assume the repo checked out the code since this is running
+    - uses: ./.github/actions/pr_changed_files
+      id: changed_files
+      with:
+        files: ${{ inputs.files }}
+    - if: always() && steps.changed_files.outputs.any_changed == 'true'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `:robot: **Beep Boop**! This pull request is making changes to '${{ inputs.files }}'.\n\n:wave: ${{ inputs.reviewers }} you might be interested. :wink:`
+          })

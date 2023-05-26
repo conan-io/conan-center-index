@@ -6,36 +6,69 @@ or are known by ConanCenter's build service and have special meaning.
 <!-- toc -->
 ## Contents
 
+  * [Attributes](#attributes)
+    * [Name](#name)
+    * [Version](#version)
+      * [ConanCenter specific releases format](#conancenter-specific-releases-format)
+    * [License Attribute](#license-attribute)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
-  * [License Attribute](#license-attribute)
   * [Settings](#settings)
   * [Options](#options)
     * [Recommended Names](#recommended-names)
     * [Predefined Options and Known Defaults](#predefined-options-and-known-defaults)
     * [Options to Avoid](#options-to-avoid)<!-- endToc -->
 
-## Order of methods and attributes
+## Attributes
 
-Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
+These are a [key feature](https://docs.conan.io/1/reference/conanfile/attributes.html) which allow the Conan client to understand,
+identify, and expose recipes and which project they expose.
 
-For `conan create` the order is listed [here](https://docs.conan.io/en/latest/reference/commands/creator/create.html#methods-execution-order)
-test packages recipes should append the following methods:
+In ConanCenter, there are a few conventions that need to be respected to ensure recipes can be discovered there `conan search` command
+of through the web UI. Many of which are enforces with the [hooks](../error_knowledge_base.md).
 
-- deploy
-- test
+### Name
 
-the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
-`package` in `conanfile.py`.
+Same as the _recipe folder_ and always lowercase.
 
-## License Attribute
+Please see the FAQs for:
+
+* [name collisions](../faqs.md#what-is-the-policy-on-recipe-name-collisions)
+* [naming forks](../faqs.md##what-is-the-policy-for-naming-forks)
+* [space and symbols](../faqs.md#should-reference-names-use---or-_)
+
+### Version
+
+ConanCenter is geared towards quickly added new release, the build service always pass the version it is currently building to the recipe.
+The `version` attribute MUST NOT be added to any recipe - with exception to "system packages".
+
+#### ConanCenter specific releases format
+
+The notation shown below is used for publishing packages which do not match the original library's official releases. This format which includes the "datestamp" corresponding to the date of a commit: `cci.<YEAR MONTH DAY>`.
+
+In order to create reproducible builds, we also "commit-lock" to the latest commit on that day. Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [config.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/config.yml#L4). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+
+### License Attribute
 
 The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
 Where the SPDX guidelines do not apply, packages should do the following:
 
-- When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project fall under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
-- When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains the custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206).
+* When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project falls under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
+* When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains the custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206).
 
+
+## Order of methods and attributes
+
+Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
+
+For `conan create` the order is listed [here](https://docs.conan.io/1/reference/commands/creator/create.html#methods-execution-order)
+test packages recipes should append the following methods:
+
+* deploy
+* test
+
+the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
+`package` in `conanfile.py`.
 
 ## Settings
 
@@ -69,9 +102,9 @@ in this direction. However, there are a couple of options that have a special me
 
 Adding options is often needed to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend using the following naming conventions for such options:
 
-- enable_<feature> / disable_<feature>
-- with_<dependency> / without_<dependency>
-- use_<feature>
+* enable_<feature> / disable_<feature>
+* with_<dependency> / without_<dependency>
+* use_<feature>
 
 The actual recipe code then may look like:
 
@@ -136,7 +169,7 @@ Usage of each option should follow the rules:
 ### Options to Avoid
 
 * `build_testing` should not be added, nor any other related unit test option. Options affect the package ID, therefore, testing should not be part of that.
-   Instead, use Conan config [skip_test](https://docs.conan.io/en/latest/reference/config_files/global_conf.html#tools-configurations) feature:
+   Instead, use Conan config [skip_test](https://docs.conan.io/1/reference/config_files/global_conf.html#tools-configurations) feature:
 
    ```python
    def generate(self):
@@ -144,4 +177,18 @@ Usage of each option should follow the rules:
       tc.variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=true, check_type=bool)
    ```
 
-   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/en/latest/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/en/latest/reference/build_helpers/meson.html#test).
+   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/1/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/1/reference/build_helpers/meson.html#test).
+
+ ### Removing from `package_id`
+
+ By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/1/reference/conanfile/methods.html#package-id)).
+ Options which do not impact the generated packages should be deleted, for instance adding a `#define` for a package.
+
+ ```python
+def package_id(self):
+   del self.info.options.enable_feature
+
+def package_info(self):
+   if self.options.enable_feature:
+      self.cpp_info.defines.append("FOBAR_FEATURE=1")
+```

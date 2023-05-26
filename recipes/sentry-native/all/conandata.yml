@@ -1,28 +1,19 @@
 sources:
-  "0.5.3":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.5.3/sentry-native.zip"
-    sha256: "d9a2434783e558bc9e074518ce155bda129bfa12d376dde939e6a732c92f9757"
-  "0.5.0":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.5.0/sentry-native.zip"
-    sha256: "1a65767a7c6c368a6dea44125eb268ed8374100f33168829f21df78cbfa8632b"
+  "0.6.1":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.1/sentry-native.zip"
+    sha256: "47527a3513db141affb8af28a0b8d886f78348a65acd2110d7eed936e3d82954"
+  "0.6.0":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.0/sentry-native.zip"
+    sha256: "ae03c9c8487794cd0f6d7fb7bb9b3c13e1a253190b290eaf752e2b4f007fd089"
+  "0.5.4":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.5.4/sentry-native.zip"
+    sha256: "e151bdc76894eb964ba4637361b2a96b7447fb04212053cf695fd7f72b636e4d"
   "0.4.18":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.18/sentry-native.zip"
     sha256: "41fdf6499cd8576142beb03104badcc9e0b80b8ef27080ca71cd4408cc1d7ece"
-  "0.4.17":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.17/sentry-native.zip"
-    sha256: "38c9e180c29b6561c5f91ada154e191eabe9d7c270734cff81e55532878ec273"
-  "0.4.15":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.15/sentry-native.zip"
-    sha256: "ae3ac4efa76d431d8734d7b0b1bf9bbedaf2cbdb18dfc5c95e2411a67808cf29"
-  "0.4.13":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.13/sentry-native.zip"
-    sha256: "85e0e15d7fb51388d967ab09e7ee1b95f82330a469a93c65d964ea1afd5e6127"
-  "0.2.6":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.2.6/sentry-native-0.2.6.zip"
-    sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
 patches:
-  "0.2.6":
-    - patch_file: "patches/0.2.6-0001-remove-sentry-handler-dependency.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0.2.6-0002-set-cmake-cxx-standard-14.patch"
-      base_path: "source_subfolder"
+  "0.6.0":
+    - patch_file: "patches/sentry-native-903c17a.patch"
+      patch_description: "Make it possible to build with support for the crashpad WER module while using the sentry-crashpad package"
+      patch_type: "official"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/816"

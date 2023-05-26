@@ -1,6 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, download, unzip, load, copy
+from conan.tools.files import get, download, unzip, load, copy, rm
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -60,7 +60,8 @@ class AndroidNDKConan(ConanFile):
         pass
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
+        major, _ = self._ndk_major_minor
+        if major >= 23:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             self._unzip_fix_symlinks(url=data["url"], target_folder=self.source_folder, sha256=data["sha256"])
         else:
@@ -75,6 +76,10 @@ class AndroidNDKConan(ConanFile):
         copy(self, "cmake-wrapper", src=os.path.join(self.source_folder, os.pardir), dst=os.path.join(self.package_folder, "bin"))
         self._fix_broken_links()
         self._fix_permissions()
+        # Remove module and config CMake files, see https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#kb-h016-cmake-modules-config-files
+        rm(self, "*Config.cmake", os.path.join(self.package_folder, "bin"), recursive=True)
+        rm(self, "*-config.cmake", os.path.join(self.package_folder, "bin"), recursive=True)
+        rm(self, "Find*.cmake", os.path.join(self.package_folder, "bin"), recursive=True)
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
 

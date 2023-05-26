@@ -1,13 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rename, replace_in_file, rmdir, save
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    rename, replace_in_file, rmdir, save
+)
 from conan.tools.scm import Version
 
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class CryptoPPConan(ConanFile):
@@ -16,8 +19,9 @@ class CryptoPPConan(ConanFile):
     homepage = "https://cryptopp.com"
     license = "BSL-1.0"
     description = "Crypto++ Library is a free C++ class library of cryptographic schemes."
-    topics = ("cryptopp", "crypto", "cryptographic", "security")
+    topics = ("crypto", "cryptographic", "security")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,43 +33,30 @@ class CryptoPPConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
-    def build_requirements(self):
-        if Version(self.version) >= "8.7.0" and not self._cmake_new_enough("3.20"):
-            self.tool_requires("cmake/3.20.6")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.options.shared and Version(self.version) >= "8.7.0":
             raise ConanInvalidConfiguration("cryptopp 8.7.0 and higher do not support shared builds")
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    def build_requirements(self):
+        if Version(self.version) >= "8.7.0":
+            self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         # Get cryptopp sources
-        get(self, **self.conan_data["sources"][self.version]["source"],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
 
         if Version(self.version) < "8.7.0":
             # Get CMakeLists
@@ -100,7 +91,7 @@ class CryptoPPConan(ConanFile):
             # Relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         else:
-            tc.cache_variables["CRYPTOPP_SOURCES"] = self.source_folder
+            tc.cache_variables["CRYPTOPP_SOURCES"] = self.source_folder.replace("\\", "/")
             tc.cache_variables["CRYPTOPP_BUILD_TESTING"] = False
             tc.cache_variables["CRYPTOPP_BUILD_DOCUMENTATION"] = False
             tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
@@ -172,9 +163,10 @@ class CryptoPPConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
-        cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
         self.cpp_info.set_property("cmake_file_name", "cryptopp")
-        self.cpp_info.set_property("cmake_target_name", cmake_target)
+        self.cpp_info.set_property("cmake_target_name", "cryptopp::cryptopp")
+        legacy_cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
+        self.cpp_info.set_property("cmake_target_aliases", [legacy_cmake_target])
         self.cpp_info.set_property("pkg_config_name", "libcryptopp")
 
         # TODO: back to global scope once cmake_find_package* generators removed
@@ -184,13 +176,13 @@ class CryptoPPConan(ConanFile):
         elif self.settings.os == "SunOS":
             self.cpp_info.components["libcryptopp"].system_libs = ["nsl", "socket"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["libcryptopp"].system_libs = ["ws2_32"]
+            self.cpp_info.components["libcryptopp"].system_libs = ["bcrypt", "ws2_32"]
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libcryptopp"
-        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = legacy_cmake_target
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = legacy_cmake_target
         self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["libcryptopp"].set_property("cmake_target_name", cmake_target)
+        self.cpp_info.components["libcryptopp"].set_property("cmake_target_name", "cryptopp::cryptopp")
         self.cpp_info.components["libcryptopp"].set_property("pkg_config_name", "libcryptopp")

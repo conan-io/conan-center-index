@@ -3,7 +3,6 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -19,7 +18,7 @@ class QuaZIPConan(ConanFile):
     homepage = "https://github.com/stachenov/quazip"
     license = "LGPL-2.1-linking-exception"
     topics = ("zip", "unzip", "compress")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,7 +31,7 @@ class QuaZIPConan(ConanFile):
 
     @property
     def _qt_major(self):
-        return Version(self.deps_cpp_info["qt"].version).major
+        return Version(self.dependencies["qt"].ref.version).major
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -49,12 +48,13 @@ class QuaZIPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("qt/5.15.9")
         self.requires("zlib/1.2.13")
-        self.requires("qt/5.15.6")
+        if Version(self.version) >= "1.4":
+            self.requires("bzip2/1.0.8")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -65,8 +65,6 @@ class QuaZIPConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)

@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -43,9 +43,11 @@ class AvahiConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("glib/2.75.2")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def configure(self):
@@ -71,6 +73,10 @@ class AvahiConan(ConanFile):
         tc.generate()
         AutotoolsDeps(self).generate()
         PkgConfigDeps(self).generate()
+        # Override Avahi's problematic check for the pkg-config executable.
+        env = Environment()
+        env.define("have_pkg_config", "yes")
+        env.vars(self).save_script("conanbuild_pkg_config")
 
     def build(self):
         autotools = Autotools(self)
