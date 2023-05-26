@@ -11,10 +11,10 @@ class PystringConan(ConanFile):
     description = "Pystring is a collection of C++ functions which match the " \
                   "interface and behavior of python's string class methods using std::string."
     license = "BSD-3-Clause"
-    topics = ("pystring", "string")
-    homepage = "https://github.com/imageworks/pystring"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/imageworks/pystring"
+    topics = ("pystring", "string")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,8 +39,7 @@ class PystringConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
