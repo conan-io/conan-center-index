@@ -36,6 +36,7 @@ class CppItertoolsConan(ConanFile):
 
         minimal_version = {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7",
             "clang": "5.0",
             "apple-clang": "9.1"
