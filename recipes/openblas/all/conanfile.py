@@ -120,9 +120,16 @@ class OpenblasConan(ConanFile):
 
     def generate(self):
 
-        ninja_generator = "Ninja" if self.settings.os == "Windows" and \
-            self.options.build_lapack else None
-        tc = CMakeToolchain(self, generator=ninja_generator)
+        conf_generator = self.conf.get("tools.cmake.cmaketoolchain:generator")
+        ninja_conditions = \
+            self.settings.os == "Windows" and self.options.build_lapack \
+            and (not conf_generator or "Visual Studio" in conf_generator)
+        generator = "Ninja" if ninja_conditions else None
+        if ninja_conditions:
+            self.output.warning(
+                "The Visual Studio generator is not compatible with OpenBLAS "
+                "when building LAPACK. Overwriting generator to 'Ninja'")
+        tc = CMakeToolchain(self, generator=generator)
 
         tc.variables["NOFORTRAN"] = not self.options.build_lapack
         if self.options.build_lapack:
