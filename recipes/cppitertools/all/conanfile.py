@@ -5,7 +5,7 @@ from conan.tools.files import get, copy, rename
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.50.0"
 
 
 class CppItertoolsConan(ConanFile):
