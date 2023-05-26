@@ -80,7 +80,7 @@ class PistacheConan(ConanFile):
 
     def build_requirements(self):
         if self.version != "cci.20201127":
-            self.tool_requires("meson/1.1.0")
+            self.tool_requires("meson/1.1.1")
             if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
 
