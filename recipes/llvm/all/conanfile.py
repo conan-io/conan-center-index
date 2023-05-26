@@ -222,13 +222,12 @@ class Llvm(ConanFile):
             raise ConanInvalidConfiguration(
                 "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option enable_debug=True.")
 
+    # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
+    def validate(self):
         if not self.options.enable_unsafe_mode:
             if self.settings.compiler.libcxx != "libstdc++" and self.settings.compiler.libcxx != "libstdc++11":
                 raise ConanInvalidConfiguration(
                     "Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
-
-    # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
-    # def validate(self):
 
     # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
     # import for Apt doesn't satisfy: E9011(conan-import-tools)
