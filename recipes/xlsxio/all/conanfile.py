@@ -21,7 +21,6 @@ class XlsxioConan(ConanFile):
     options = {
         "fPIC":[True, False],
         "shared": [True, False],
-        "build_static": [True, False],
         "build_pc_files": [True, False],
         "build_tools": [True, False],
         "build_examples": [True, False],
@@ -33,7 +32,6 @@ class XlsxioConan(ConanFile):
     default_options = {
         "fPIC": True,
         "shared": False,
-        "build_static": True,
         "build_pc_files": True,
         "build_tools": True,
         "build_examples": True,
@@ -79,7 +77,7 @@ class XlsxioConan(ConanFile):
         tc.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC"] = self.options.build_static
+        tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["BUILD_PC_FILES"] = self.options.build_pc_files
         tc.variables["BUILD_TOOLS"] = self.options.build_tools
@@ -118,28 +116,17 @@ class XlsxioConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "xlsxio")
         self.cpp_info.set_property("pkg_config_name", "xlsxio")
 
-        if self.options.build_static :
-            self.cpp_info.components["xlsxio_read_static"].set_property("cmake_target_name", "xlsxio::xlsxio_read_static")
-            self.cpp_info.components["xlsxio_read_static"].set_property("cmake_module_target_name", "xlsxio::xlsxio_read_static")
-            self.cpp_info.components["xlsxio_read_static"].set_property("pkg_config_name", "libxlsxio_read_static")
-            self.cpp_info.components["xlsxio_write_static"].set_property("cmake_target_name", "xlsxio::xlsxio_write_static")
-            self.cpp_info.components["xlsxio_write_static"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write_static")
-            self.cpp_info.components["xlsxio_write_static"].set_property("pkg_config_name", "libxlsxio_write_static")
-            if self.options.with_wide:
-                self.cpp_info.components["xlsxio_readw_static"].set_property("cmake_target_name", "xlsxio::xlsxio_readw_static")
-                self.cpp_info.components["xlsxio_readw_static"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw_static")
-                self.cpp_info.components["xlsxio_readw_static"].set_property("pkg_config_name", "libxlsxio_readw_static")
-        if self.options.shared :
-            self.cpp_info.components["xlsxio_read_shared"].set_property("cmake_target_name", "xlsxio::xlsxio_read_shared")
-            self.cpp_info.components["xlsxio_read_shared"].set_property("cmake_module_target_name", "xlsxio::xlsxio_read_shared")
-            self.cpp_info.components["xlsxio_read_shared"].set_property("pkg_config_name", "libxlsxio_read_shared")
-            self.cpp_info.components["xlsxio_write_shared"].set_property("cmake_target_name", "xlsxio::xlsxio_write_shared")
-            self.cpp_info.components["xlsxio_write_shared"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write_shared")
-            self.cpp_info.components["xlsxio_write_shared"].set_property("pkg_config_name", "libxlsxio_write_shared")
-            if self.options.with_wide:
-                self.cpp_info.components["xlsxio_readw_shared"].set_property("cmake_target_name", "xlsxio::xlsxio_readw_shared")
-                self.cpp_info.components["xlsxio_readw_shared"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw_shared")
-                self.cpp_info.components["xlsxio_readw_shared"].set_property("pkg_config_name", "libxlsxio_readw_shared")
+        self.cpp_info.components["xlsxio_read"].set_property("cmake_target_name", "xlsxio::xlsxio_read")
+        self.cpp_info.components["xlsxio_read"].set_property("cmake_module_target_name", "xlsxio::xlsxio_read")
+        self.cpp_info.components["xlsxio_read"].set_property("pkg_config_name", "libxlsxio_read")
+        self.cpp_info.components["xlsxio_write"].set_property("cmake_target_name", "xlsxio::xlsxio_write")
+        self.cpp_info.components["xlsxio_write"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write")
+        self.cpp_info.components["xlsxio_write"].set_property("pkg_config_name", "libxlsxio_write")
+        if self.options.with_wide:
+            self.cpp_info.components["xlsxio_readw"].set_property("cmake_target_name", "xlsxio::xlsxio_readw")
+            self.cpp_info.components["xlsxio_readw"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw")
+            self.cpp_info.components["xlsxio_readw"].set_property("pkg_config_name", "libxlsxio_readw")
+
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
@@ -147,19 +134,11 @@ class XlsxioConan(ConanFile):
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "xlsxio"
         self.cpp_info.names["cmake_find_package_multi"] = "xlsxio"
-        if self.options.build_static :
-            self.cpp_info.components["xlsxio_read_static"].names["cmake_find_package"] = "xlsxio_read_static"
-            self.cpp_info.components["xlsxio_read_static"].names["cmake_find_package_multi"] = "xlsxio_read_static"
-            self.cpp_info.components["xlsxio_write_static"].names["cmake_find_package"] = "xlsxio_write_static"
-            self.cpp_info.components["xlsxio_write_static"].names["cmake_find_package_multi"] = "xlsxio_write_static"
-            if self.options.with_wide:
-                self.cpp_info.components["xlsxio_readw_static"].names["cmake_find_package"] = "xlsxio_readw_static"
-                self.cpp_info.components["xlsxio_readw_static"].names["cmake_find_package_multi"] = "xlsxio_readw_static"
-        if self.options.shared :
-            self.cpp_info.components["xlsxio_read_shared"].names["cmake_find_package"] = "xlsxio_read_shared"
-            self.cpp_info.components["xlsxio_read_shared"].names["cmake_find_package_multi"] = "xlsxio_read_shared"
-            self.cpp_info.components["xlsxio_write_shared"].names["cmake_find_package"] = "xlsxio_write_shared"
-            self.cpp_info.components["xlsxio_write_shared"].names["cmake_find_package_multi"] = "xlsxio_write_shared"
-            if self.options.with_wide:
-                self.cpp_info.components["xlsxio_readw_shared"].names["cmake_find_package"] = "xlsxio_readw_shared"
-                self.cpp_info.components["xlsxio_readw_shared"].names["cmake_find_package_multi"] = "xlsxio_readw_shared"
+        self.cpp_info.components["xlsxio_read"].names["cmake_find_package"] = "xlsxio_read"
+        self.cpp_info.components["xlsxio_read"].names["cmake_find_package_multi"] = "xlsxio_read"
+        self.cpp_info.components["xlsxio_write"].names["cmake_find_package"] = "xlsxio_write"
+        self.cpp_info.components["xlsxio_write"].names["cmake_find_package_multi"] = "xlsxio_write"
+        if self.options.with_wide:
+            self.cpp_info.components["xlsxio_readw"].names["cmake_find_package"] = "xlsxio_readw"
+            self.cpp_info.components["xlsxio_readw"].names["cmake_find_package_multi"] = "xlsxio_readw"
+
