@@ -73,20 +73,9 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.4")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "2.4.1" and not self._cmake_new_enough("3.16.3"):
-            self.tool_requires("cmake/3.25.3")
+        if Version(self.version) >= "2.4.1":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
