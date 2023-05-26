@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 import os
 import re
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -16,12 +16,15 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def generate(self):
+        package_version = str(self.dependencies[self.tested_reference_str].ref.version)
+        tc = CMakeToolchain(self)
+        tc.variables["DOCKING"] = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', package_version)
+        tc.generate()
+
     def build(self):
         cmake = CMake(self)
-        if re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.dependencies[self.tested_reference_str].ref.version)):
-            cmake.configure(variables={"DOCKING": "ON"})
-        else:
-            cmake.configure()
+        cmake.configure()
         cmake.build()
 
     def test(self):
