@@ -61,4 +61,4 @@ class CppItertoolsConan(ConanFile):
         copy(self, "LICENSE.md", src=os.path.join(self.source_folder, self._source_subfolder), dst=os.path.join(self.package_folder,"licenses"))
 
     def package_id(self):
-        self.info.settings.clear()
+        self.info.clear()
