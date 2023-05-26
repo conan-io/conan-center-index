@@ -224,7 +224,7 @@ class Llvm(ConanFile):
 
         if not self.options.enable_unsafe_mode:
             safe_libcxx = re.compile("^libstdc\+\+(11)?$")
-            if not safe_libcxx.match(self.settings.compiler.libcxx):
+            if not safe_libcxx.match(str(self.settings.compiler.libcxx)):
                 raise ConanInvalidConfiguration(
                     "Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
 
