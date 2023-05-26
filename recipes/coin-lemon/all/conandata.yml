@@ -9,8 +9,6 @@ patches:
     - patch_file: "patches/fix_cpp_17_compilation_warnings.patch"
       patch_type: "portability"
       patch_description: "Fix C++17 compilation warnings regarding the use of the deprecated std::iterator"
-      patch_source: "https://lemon.cs.elte.hu/trac/lemon/attachment/ticket/680/fix_cpp_17_compilation_warnings.patch"
     - patch_file: "patches/fix_cpp_20_compilation_errors.patch"
       patch_type: "portability"
       patch_description: "Fix C++20 compilation errors regarding the use of allocator.construct and allocator.destroy"
-      patch_source: "http://lemon.cs.elte.hu/trac/lemon/attachment/ticket/631/93c983122692.patch"
