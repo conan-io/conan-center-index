@@ -476,10 +476,6 @@ def package_info(self):
 
 Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex and it should not be skipped. It's an important tool which helps us keep a standard level of acceptance. Otherwise, it would be incredibly hard to review all recipes and keep them to the same level of standards.
 
-#### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
-
-The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](adding_packages/README.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](package_templates/README.md) folder.
-
 #### **<a name="KB-H075">#KB-H075</a>: "REQUIREMENT OVERRIDE PARAMETER"**
 
 The [self.requires()](https://docs.conan.io/1/reference/conanfile/methods.html#requirements) allows to override a dependency version, forcing to use that version imposed by the recipe only. As a side-effect, dependencies can use different versions of the same project at the same package, which may cause unpredicted errors, like ABI incompatibility. For that reason, the `override` parameter is forbidden and should not be used. Instead, all dependencies should align their package versions, even when it's necessary to open more pull requests to update dependency versions.
