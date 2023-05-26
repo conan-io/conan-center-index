@@ -1,8 +1,8 @@
 from conan import ConanFile
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake,  CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 import re
 
