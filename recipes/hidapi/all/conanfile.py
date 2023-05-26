@@ -6,6 +6,7 @@ from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
+from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 import os
 
@@ -150,7 +151,7 @@ class HidapiConan(ConanFile):
             self.cpp_info.components["hidraw"].system_libs = ["pthread", "dl"]
         else:
             self.cpp_info.libs = ["hidapi"]
-            if self.settings.os == "Macos":
+            if is_apple_os(self):
                 self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation", "AppKit"])
             if Version(self.version) == "0.10.1" and self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["setupapi"]
