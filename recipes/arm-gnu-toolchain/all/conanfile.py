@@ -128,22 +128,24 @@ class ArmGnuToolchain(ConanFile):
         f = os.path.join(self.package_folder, "res/toolchain.cmake")
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
 
-        # float_abi = str(self.settings_target.arch.float_abi)
-        # processor = str(self.settings_target.arch.processor)
+        if str(self.settings.os) == "baremetal":
+            print("====================<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            float_abi = str(self.settings.arch.float_abi)
+            processor = str(self.settings.arch.processor)
 
-        # c_flags = [f"-mfloat-abi={ float_abi }",
-        #            f"-mcpu={ processor }",
-        #            "-mthumb",
-        #            "-ffunction-sections",
-        #            "-fdata-sections",
-        #            "-fno-exceptions",
-        #            "-fno-rtti"]
-        # link_flags = [f"-mfloat-abi={ float_abi }",
-        #               f"-mcpu={ processor }",
-        #               "-mthumb",
-        #               "-Wl,--gc-sections",
-        #               "-Wl,--print-memory-usage"]
+            c_flags = [f"-mfloat-abi={ float_abi }",
+                       f"-mcpu={ processor }",
+                       "-mthumb",
+                       "-ffunction-sections",
+                       "-fdata-sections",
+                       "-fno-exceptions",
+                       "-fno-rtti"]
+            link_flags = [f"-mfloat-abi={ float_abi }",
+                          f"-mcpu={ processor }",
+                          "-mthumb",
+                          "-Wl,--gc-sections",
+                          "-Wl,--print-memory-usage"]
 
-        # self.conf_info.extend("tools.build:cflags", c_flags)
-        # self.conf_info.extend("tools.build:cxxflags", c_flags)
-        # self.conf_info.extend("tools.build:exelinkflags", link_flags)
+            self.conf_info.extend("tools.build:cflags", c_flags)
+            self.conf_info.extend("tools.build:cxxflags", c_flags)
+            self.conf_info.extend("tools.build:exelinkflags", link_flags)

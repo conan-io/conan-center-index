@@ -9,8 +9,8 @@ set(CMAKE_C_COMPILER_WORKS TRUE)
 
 # Need to force system to Generic & ARM as leaving this to Conan will result in
 # pollution from host profile settings
-set(CMAKE_SYSTEM_NAME "Generic")
-set(CMAKE_SYSTEM_PROCESSOR "ARM")
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
 
 # Target definition
 set(TOOLCHAIN arm-none-eabi)
@@ -18,12 +18,11 @@ set(TOOLCHAIN arm-none-eabi)
 # Perform compiler test with static library
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-# ------------------------------------------------------------------------------
-# Set compilers
-# ------------------------------------------------------------------------------
+# Set toolchain compilers
 set(CMAKE_C_COMPILER ${TOOLCHAIN}-gcc${CMAKE_EXECUTABLE_SUFFIX})
 set(CMAKE_CXX_COMPILER ${TOOLCHAIN}-g++${CMAKE_EXECUTABLE_SUFFIX})
 set(CMAKE_ASM_COMPILER ${TOOLCHAIN}-gcc${CMAKE_EXECUTABLE_SUFFIX})
+set(CMAKE_AR ${TOOLCHAIN}-ar${CMAKE_EXECUTABLE_SUFFIX})
 set(CMAKE_SIZE_UTIL ${TOOLCHAIN}-size${CMAKE_EXECUTABLE_SUFFIX})
 set(CMAKE_OBJDUMP ${TOOLCHAIN}-objdump${CMAKE_EXECUTABLE_SUFFIX})
 set(CMAKE_OBJCOPY ${TOOLCHAIN}-objcopy${CMAKE_EXECUTABLE_SUFFIX})
