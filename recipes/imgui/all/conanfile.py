@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conans.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake,  CMakeToolchain, cmake_layout
@@ -26,6 +27,12 @@ class IMGUIConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def validate(self):
+        if self.settings.compiler == "gcc" and self.settings.compiler.verison < Version("6.0"):
+            cppstd = self.settings.get_safe("compiler.cppstd")
+            if Version(self.version) >= Version("1.58.5") and (not cppstd or cppstd < "11"):
+                raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 5 from 1.85.5 without C++11 support")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
@@ -65,7 +72,7 @@ class IMGUIConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        m = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+)\.docking', str(self.version))
+        m = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version))
         version = Version(m.group('version')) if m else Version(self.version)
         backends_folder = os.path.join(
             self.source_folder,

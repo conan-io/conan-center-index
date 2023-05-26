@@ -1,3 +1,5 @@
+import re
+
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
@@ -17,7 +19,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        if re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.dependencies[self.tested_reference_str].ref.version)):
+            cmake.configure(variables={"DOCKING": "ON"})
+        else:
+            cmake.configure()
         cmake.build()
 
     def test(self):
