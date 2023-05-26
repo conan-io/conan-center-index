@@ -63,9 +63,12 @@ class IMGUIConan(ConanFile):
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
+    def _match_docking_branch(self):
+        return re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version))
+
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        m = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version))
+        m = self._match_docking_branch()
         version = Version(m.group('version')) if m else Version(self.version)
         backends_folder = os.path.join(
             self.source_folder,
@@ -78,6 +81,8 @@ class IMGUIConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.conf_info.define("user.imgui:with_docking", bool(self._match_docking_branch()))
+
         self.cpp_info.libs = ["imgui"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

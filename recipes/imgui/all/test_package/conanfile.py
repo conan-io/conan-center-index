@@ -17,9 +17,9 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        package_version = str(self.dependencies[self.tested_reference_str].ref.version)
+        with_docking = self.dependencies[self.tested_reference_str].conf_info.get("user.imgui:with_docking", False)
         tc = CMakeToolchain(self)
-        tc.variables["DOCKING"] = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', package_version)
+        tc.variables["DOCKING"] = with_docking
         tc.generate()
 
     def build(self):
