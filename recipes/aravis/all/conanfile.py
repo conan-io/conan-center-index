@@ -69,7 +69,7 @@ class AravisConan(ConanFile):
         if self.options.usb:
             self.requires("libusb/1.0.26")
         if self.options.gst_plugin:
-            self.requires("gstreamer/1.19.2")
+            self.requires("gstreamer/1.22.3")
             self.requires("gst-plugins-base/1.19.2")
 
     def validate(self):
