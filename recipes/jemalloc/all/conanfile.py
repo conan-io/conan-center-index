@@ -229,23 +229,3 @@ class JemallocConan(ConanFile):
     #     else:
     #         autotools = self._configure_autotools()
     #         autotools.make()
-
-    # @property
-    # def _library_name(self):
-    #     libname = "jemalloc"
-    #     if self.settings.compiler == "Visual Studio":
-    #         if self.options.shared:
-    #             if self.settings.build_type == "Debug":
-    #                 libname += "d"
-    #         else:
-    #             toolset = tools_legacy.msvs_toolset(self.settings)
-    #             toolset_number = "".join(c for c in toolset if c in string.digits)
-    #             libname += "-vc{}-{}".format(toolset_number, self._msvc_build_type)
-    #     else:
-    #         if self.settings.os == "Windows":
-    #             if not self.options.shared:
-    #                 libname += "_s"
-    #         else:
-    #             if not self.options.shared and self.options.fPIC:
-    #                 libname += "_pic"
-    #     return libname
