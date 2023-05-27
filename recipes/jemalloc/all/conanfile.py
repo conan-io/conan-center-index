@@ -190,13 +190,6 @@ class JemallocConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])
 
-    # @property
-    # def _msvc_build_type(self):
-    #     build_type = str(self.settings.build_type) or "Release"
-    #     if not self.options.shared:
-    #         build_type += "-static"
-    #     return build_type
-
     # def _patch_sources(self): # TODO: Is this necessary???
     #     if self.settings.os == "Windows":
     #         makefile_in = os.path.join(self.source_folder, "Makefile.in")
