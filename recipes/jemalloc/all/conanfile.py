@@ -147,7 +147,12 @@ class JemallocConan(ConanFile):
             tc.configure_args.append("--enable-static")
         env = tc.environment()
         if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
-            env.define("CC", "cl.exe")
+            # Do not check whether the math library exists when compiled by MSVC
+            # because MSVC treats the function `char log()` as a intrinsic function
+            # and therefore complains about insufficient arguments passed to the function
+            tc.configure_args.append("ac_cv_search_log=none required")
+            env.define("CC", "cl")
+            env.define("CXX", "cl")
         tc.generate(env)
 
     def build(self):
