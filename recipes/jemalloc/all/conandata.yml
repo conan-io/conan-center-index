@@ -9,3 +9,8 @@ sources:
 patches:
   "5.2.1":
     - patch_file: "patches/0001-clang12-dont-declare-system-functions-as-nothrow.patch"
+  "5.3.0":
+    - patch_file: "patches/0002-add-missing-ac-define-description.patch"
+      patch_description: "Patch configure.ac to add the missing description in AC_DEFINE."
+      patch_type: "backport"
+      patch_source: "https://github.com/jemalloc/jemalloc/pull/2396"
