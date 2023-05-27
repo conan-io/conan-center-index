@@ -113,10 +113,10 @@ class JemallocConan(ConanFile):
         # 3. Verify the build type
         if self.settings.build_type not in ("Release", "Debug", None):
             raise ConanInvalidConfiguration("Only Release and Debug builds are supported.")
-
-        # jemalloc seems to support Apple Silicon Macs (Reference: Homebrew)
-        # if self.settings.os == "Macos" and self.settings.arch not in ("x86_64", "x86"):
-        #     raise ConanInvalidConfiguration("Unsupported arch")
+        # 4: Apple Silicon specific checks
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            if Version(self.version) < "5.3.0":
+                raise ConanInvalidConfiguration("Support for Apple Silicon is only available as of 5.3.0.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -167,7 +167,6 @@ class JemallocConan(ConanFile):
         autotools = Autotools(self)
         autotools.install(target="install_lib_shared" if self.options.shared else "install_lib_static")
         autotools.install(target="install_include")
-        # TODO: Verify this
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             rename(self, os.path.join(self.package_folder, "lib", f"{self._library_name}.lib"),
                          os.path.join(self.package_folder, "lib", f"lib{self._library_name}.a"))
