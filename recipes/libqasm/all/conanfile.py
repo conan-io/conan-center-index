@@ -1,6 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.scm import Git
+from conan.tools.files import get
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
 
 class LibqasmConan(ConanFile):
     name = "libqasm"
@@ -31,6 +35,19 @@ class LibqasmConan(ConanFile):
         "tree_gen_build_tests": False
     }
 
+    @property
+    def _min_cppstd(self):
+        return 23
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "13",
+            "clang": "13",
+            "gcc": "11",
+            "msvc": "19"
+        }
+
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
         if self.settings.os == "Windows":
@@ -44,12 +61,10 @@ class LibqasmConan(ConanFile):
             del self.options.fPIC
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder=".")
 
     def source(self):
-        git = Git(self)
-        git.clone(url="https://github.com/QuTech-Delft/libqasm.git", target=".")
-        git.checkout("2db9916f8e32c5e36d05cb20cafb87133d4dbf16")
+        get(self, **self.conan_data["sources"]["0.5.1"])
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -65,6 +80,19 @@ class LibqasmConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        check_min_vs(self, 193)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def package(self):
         cmake = CMake(self)
