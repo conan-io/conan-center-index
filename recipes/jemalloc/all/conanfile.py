@@ -4,7 +4,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename, replace_in_file
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 import shutil
@@ -92,7 +92,7 @@ class JemallocConan(ConanFile):
 
     def validate(self):
         # 1. MSVC specific checks
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+        if is_msvc(self):
             # The upstream repository provides solution files for Visual Studio 2015, 2017, 2019 and 2022,
             # but the 2015 solution does not work properly due to unresolved external symbols:
             # `test_hooks_libc_hook` and `test_hooks_arena_new_hook`
@@ -147,7 +147,7 @@ class JemallocConan(ConanFile):
             tc.configure_args.append("--disable-shared")
             tc.configure_args.append("--enable-static")
         env = tc.environment()
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+        if is_msvc(self):
             # Do not check whether the math library exists when compiled by MSVC
             # because MSVC treats the function `char log()` as a intrinsic function
             # and therefore complains about insufficient arguments passed to the function
@@ -174,7 +174,7 @@ class JemallocConan(ConanFile):
                          os.path.join(self.package_folder, "lib", f"lib{self._library_name}.a"))
             if not self.options.shared:
                 os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+        if is_msvc(self):
             shutil.copytree(os.path.join(self.source_folder, "include", "msvc_compat"),
                             os.path.join(self.package_folder, "include", "msvc_compat"))
 
@@ -183,7 +183,7 @@ class JemallocConan(ConanFile):
         self.cpp_info.libs = [self._library_name]
         self.cpp_info.includedirs = [os.path.join(self.package_folder, "include"),
                                      os.path.join(self.package_folder, "include", "jemalloc")]
-        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+        if is_msvc(self):
             self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "msvc_compat"))
         if not self.options.shared:
             self.cpp_info.defines = ["JEMALLOC_EXPORT="]
