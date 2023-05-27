@@ -104,10 +104,7 @@ class OpenVDBConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -200,7 +197,7 @@ class OpenVDBConan(ConanFile):
             tc.variables["NANOVDB_BUILD_TOOLS"] = False
 
         if self._needs_boost:
-            tc.variables["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+            tc.variables["Boost_USE_STATIC_LIBS"] = not self.options["boost"].get_safe("shared", self.options.shared)
             tc.variables["OPENVDB_DISABLE_BOOST_IMPLICIT_LINKING"] = True
 
         if self._needs_openexr:
