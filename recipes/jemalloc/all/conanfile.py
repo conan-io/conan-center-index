@@ -187,19 +187,3 @@ class JemallocConan(ConanFile):
             self.cpp_info.defines = ["JEMALLOC_EXPORT="]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])
-
-    # def _patch_sources(self): # TODO: Is this necessary???
-    #     if self.settings.os == "Windows":
-    #         makefile_in = os.path.join(self.source_folder, "Makefile.in")
-    #         replace_in_file(self, makefile_in,
-    #                               "DSO_LDFLAGS = @DSO_LDFLAGS@",
-    #                               "DSO_LDFLAGS = @DSO_LDFLAGS@ -Wl,--out-implib,lib/libjemalloc.a", strict=False)
-    #         replace_in_file(self, makefile_in,
-    #                               "\t$(INSTALL) -d $(LIBDIR)\n"
-    #                               "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(LIBDIR)",
-    #                               "\t$(INSTALL) -d $(BINDIR)\n"
-    #                               "\t$(INSTALL) -d $(LIBDIR)\n"
-    #                               "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
-    #                               "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)", strict=False)
-    #
-    #     apply_conandata_patches(self)
