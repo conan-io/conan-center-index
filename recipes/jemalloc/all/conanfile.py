@@ -7,6 +7,7 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import shutil
 
 required_conan_version = ">=1.54.0"
 
@@ -167,35 +168,22 @@ class JemallocConan(ConanFile):
         autotools = Autotools(self)
         autotools.install(target="install_lib_shared" if self.options.shared else "install_lib_static")
         autotools.install(target="install_include")
-
-
-        # if self.settings.compiler == "Visual Studio":
-        #     arch_subdir = {
-        #         "x86_64": "x64",
-        #         "x86": "x86",
-        #     }[str(self.settings.arch)]
-        #     self.copy("*.lib", src=os.path.join(self.source_folder, "msvc", arch_subdir, self._msvc_build_type), dst=os.path.join(self.package_folder, "lib"))
-        #     self.copy("*.dll", src=os.path.join(self.source_folder, "msvc", arch_subdir, self._msvc_build_type), dst=os.path.join(self.package_folder, "bin"))
-        #     self.copy("jemalloc.h", src=os.path.join(self.source_folder, "include", "jemalloc"), dst=os.path.join(self.package_folder, "include", "jemalloc"), keep_path=True)
-        #     shutil.copytree(os.path.join(self.source_folder, "include", "msvc_compat"),
-        #                     os.path.join(self.package_folder, "include", "msvc_compat"))
-        # else:
-        #     autotools = self._configure_autotools()
-        #     # Use install_lib_XXX and install_include to avoid mixing binaries and dll's
-        #     autotools.make(target="install_lib_shared" if self.options.shared else "install_lib_static")
-        #     autotools.make(target="install_include")
-        #     if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-        #         rename(self, os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
-        #                      os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
-        #         if not self.options.shared:
-        #             os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
+        # TODO: Verify this
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            rename(self, os.path.join(self.package_folder, "lib", f"{self._library_name}.lib"),
+                         os.path.join(self.package_folder, "lib", f"lib{self._library_name}.a"))
+            if not self.options.shared:
+                os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
+            shutil.copytree(os.path.join(self.source_folder, "include", "msvc_compat"),
+                            os.path.join(self.package_folder, "include", "msvc_compat"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "jemalloc")
         self.cpp_info.libs = [self._library_name]
         self.cpp_info.includedirs = [os.path.join(self.package_folder, "include"),
                                      os.path.join(self.package_folder, "include", "jemalloc")]
-        if self.settings.compiler == "msvc":
+        if str(self.settings.compiler) in ["Visual Studio", "msvc"]:
             self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "msvc_compat"))
         if not self.options.shared:
             self.cpp_info.defines = ["JEMALLOC_EXPORT="]
