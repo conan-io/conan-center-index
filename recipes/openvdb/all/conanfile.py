@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import get, copy, rm, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 import os
@@ -54,12 +54,6 @@ class OpenVDBConan(ConanFile):
         return self.settings.arch in ["x86", "x86_64"]
 
     @property
-    def _needs_boost(self):
-        return True
-        # Will be fixed from upstream
-        # return Version(self.version) < "10.0.0" or self.options.delayed_load
-
-    @property
     def _needs_openexr(self):
         return Version(self.version) < "8.1.0"
 
@@ -88,9 +82,6 @@ class OpenVDBConan(ConanFile):
                 "intel": "19",
             }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -101,6 +92,9 @@ class OpenVDBConan(ConanFile):
             del self.options.nanovdb
             del self.options.nanovdb_with_openvdb
             del self.options.nanovdb_with_tbb
+
+        if Version(self.version) < "10.0.0":
+            del self.options.delayed_load
 
     def configure(self):
         if self.options.shared:
@@ -118,8 +112,7 @@ class OpenVDBConan(ConanFile):
             self.tool_requires("cmake/[>=3.12.0 <4.0]")
 
     def requirements(self):
-        if self._needs_boost:
-            self.requires("boost/1.80.0")
+        self.requires("boost/1.80.0")
 
         if Version(self.version) < "9.0.0":
             self.requires("onetbb/2020.3")
@@ -161,7 +154,7 @@ class OpenVDBConan(ConanFile):
         tc.variables["USE_LOG4CPLUS"] = self.options.with_log4cplus
         tc.variables["OPENVDB_SIMD"] = self.options.simd
         if Version(self.version) >= "10.0.0":
-            tc.variables["OPENVDB_USE_DELAYED_LOADING"] = self.options.delayed_load
+            tc.variables["OPENVDB_USE_DELAYED_LOADING"] = self.options.get_safe("delayed_load", False)
 
         tc.variables["OPENVDB_CORE_SHARED"] = self.options.shared
         tc.variables["OPENVDB_CORE_STATIC"] = not self.options.shared
@@ -196,8 +189,8 @@ class OpenVDBConan(ConanFile):
             tc.variables["NANOVDB_USE_INTRINSICS"] = True
             tc.variables["NANOVDB_BUILD_TOOLS"] = False
 
-        if self._needs_boost:
-            tc.variables["Boost_USE_STATIC_LIBS"] = not self.options.get_safe("boost::shared", self.options.shared)
+        if not self.options["boost"].header_only:
+            tc.variables["Boost_USE_STATIC_LIBS"] = self.options["boost"].shared
             tc.variables["OPENVDB_DISABLE_BOOST_IMPLICIT_LINKING"] = True
 
         if self._needs_openexr:
@@ -209,18 +202,50 @@ class OpenVDBConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Create alias for Blosc target
-        with open(os.path.join(self.source_folder, "cmake", "FindBlosc.cmake"), "w") as f:
-            f.write(
-                """find_package(c-blosc)
-if(c-blosc_FOUND)
-    add_library(blosc INTERFACE)
-    target_link_libraries(blosc INTERFACE c-blosc::c-blosc)
-    add_library(Blosc::blosc ALIAS blosc)
-endif()
-"""
-            )
+        rm(self, "Find*", os.path.join(self.source_folder, "cmake"))
+        replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "find_package(Blosc ${MINIMUM_BLOSC_VERSION} REQUIRED)",
+                        "find_package(c-blosc REQUIRED CONFIG)")
+        replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "Blosc::blosc",
+                        "c-blosc::c-blosc")
+        
+        replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "find_package(TBB ${MINIMUM_TBB_VERSION} REQUIRED COMPONENTS tbb)",
+                        "find_package(TBB REQUIRED CONFIG COMPONENTS tbb)")
+        replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "if(OPENVDB_FUTURE_DEPRECATION AND FUTURE_MINIMUM_TBB_VERSION)",
+                        "if(FALSE)")
+        
+        replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "find_package(IlmBase ${MINIMUM_ILMBASE_VERSION} REQUIRED COMPONENTS Half)",
+                        "find_package(OpenEXR REQUIRED CONFIG)")
+        
+        if Version(self.version) < "9.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "find_package(IlmBase ${MINIMUM_ILMBASE_VERSION} REQUIRED)",
+                        "find_package(OpenEXR REQUIRED CONFIG)")
+  
+        if Version(self.version) >= "9.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "nanovdb", "nanovdb", "CMakeLists.txt"),
+                        "find_package(Blosc REQUIRED)",
+                        "find_package(c-blosc REQUIRED CONFIG)")
+            replace_in_file(self, os.path.join(self.source_folder, "nanovdb", "nanovdb", "CMakeLists.txt"),
+                        "Blosc::blosc",
+                        "c-blosc::c-blosc")
+        
+            replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "find_package(Boost ${MINIMUM_BOOST_VERSION} REQUIRED COMPONENTS iostreams)",
+                        """find_package(Boost REQUIRED COMPONENTS headers iostreams)
+else()
+  find_package(Boost REQUIRED COMPONENTS headers)""")
+        
+            replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "list(APPEND OPENVDB_CORE_DEPENDENT_LIBS Boost::iostreams)",
+                        """list(APPEND OPENVDB_CORE_DEPENDENT_LIBS Boost::headers Boost::iostreams)
+else()
+  list(APPEND OPENVDB_CORE_DEPENDENT_LIBS Boost::headers)""")
+        
 
     def build(self):
         self._patch_sources()
@@ -255,9 +280,12 @@ endif()
 
         self.cpp_info.components["openvdb-core"].requires = ["onetbb::onetbb"]
 
-        if self._needs_boost:
-            self.cpp_info.components["openvdb-core"].requires.append("boost::iostreams")
+        if Version(self.version) < "10.0.0":
             self.cpp_info.components["openvdb-core"].requires.append("boost::system")
+            self.cpp_info.components["openvdb-core"].requires.append("boost::iostreams")
+        elif self.options.get_safe("delayed_load", False):
+            self.cpp_info.components["openvdb-core"].requires.append("boost::iostreams")
+        self.cpp_info.components["openvdb-core"].requires.append("boost::headers")
 
         if self._needs_openexr:
             self.cpp_info.components["openvdb-core"].requires.append("openexr::openexr")  # should be "openexr::Half"
