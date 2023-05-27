@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, chdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -71,6 +71,11 @@ class UtilLinuxLibuuidConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows")
 
+    def requirements(self):
+        if self.settings.os == "Macos":
+            # Required because libintl.{a,dylib} is not distributed via libc on Macos
+            self.requires("gettext/0.21")
+
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
         self.tool_requires("m4/1.4.19")
@@ -85,6 +90,7 @@ class UtilLinuxLibuuidConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-all-programs")
         tc.configure_args.append("--enable-libuuid")
@@ -93,6 +99,9 @@ class UtilLinuxLibuuidConan(ConanFile):
         if "x86" in self.settings.arch:
             tc.extra_cflags.append("-mstackrealign")
         tc.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
         with chdir(self, self.source_folder):
