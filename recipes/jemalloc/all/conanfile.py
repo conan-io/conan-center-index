@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename, replace_in_file
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -109,7 +109,7 @@ class JemallocConan(ConanFile):
                 raise ConanInvalidConfiguration("Clang 3.9 or earlier is not supported.")
             if self.options.enable_cxx and self.settings.compiler.get_safe("libcxx") == "libc++" and \
                     Version(self.settings.compiler.version) < "10":
-                raise ConanInvalidConfiguration(f"Clang 9 or earlier with libc++ is not supported due to the missing mutex implementation.")
+                raise ConanInvalidConfiguration("Clang 9 or earlier with libc++ is not supported due to the missing mutex implementation.")
         # 3. Verify the build type
         if self.settings.build_type not in ("Release", "Debug", None):
             raise ConanInvalidConfiguration("Only Release and Debug builds are supported.")
