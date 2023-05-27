@@ -54,6 +54,17 @@ class JemallocConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _library_name(self):
+        libname = "jemalloc"
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                libname += "_s"
+        else:
+            if not self.options.shared and self.options.fPIC:
+                libname += "_pic"
+        return libname
+
     def add_missing_ac_define_description(self):
         # This function patches `configure.ac` to add the missing description in `AC_DEFINE`,
         # fixing the error reported by the newer version of `autoreconf`
@@ -193,7 +204,7 @@ class JemallocConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "jemalloc")
-        self.cpp_info.libs = ["jemalloc"] # TODO: Previously self._library_name
+        self.cpp_info.libs = [self._library_name]
         self.cpp_info.includedirs = [os.path.join(self.package_folder, "include"),
                                      os.path.join(self.package_folder, "include", "jemalloc")]
         if self.settings.compiler == "msvc":
