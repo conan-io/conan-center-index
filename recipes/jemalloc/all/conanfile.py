@@ -204,36 +204,6 @@ class JemallocConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])
 
     # @property
-    # def _autotools_args(self):
-    #     conf_args = [
-    #         "--with-jemalloc-prefix={}".format(self.options.prefix),
-    #         "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-    #         "--enable-cxx" if self.options.enable_cxx else "--disable-cxx",
-    #         "--enable-fill" if self.options.enable_fill else "--disable-fill",
-    #         "--enable-xmalloc" if self.options.enable_cxx else "--disable-xmalloc",
-    #         "--enable-readlinkat" if self.options.enable_readlinkat else "--disable-readlinkat",
-    #         "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
-    #         "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
-    #         "--enable-log" if self.options.enable_debug_logging else "--disable-log",
-    #         "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
-    #         "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
-    #     ]
-    #     if self.options.enable_prof:
-    #         conf_args.append("--enable-prof")
-    #     if self.options.shared:
-    #         conf_args.extend(["--enable-shared", "--disable-static"])
-    #     else:
-    #         conf_args.extend(["--disable-shared", "--enable-static"])
-    #     return conf_args
-
-    # def _configure_autotools(self):
-    #     if self._autotools:
-    #         return self._autotools
-    #     self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools_legacy.os_info.is_windows)
-    #     self._autotools.configure(args=self._autotools_args, configure_dir=self.source_folder)
-    #     return self._autotools
-
-    # @property
     # def _msvc_build_type(self):
     #     build_type = str(self.settings.build_type) or "Release"
     #     if not self.options.shared:
