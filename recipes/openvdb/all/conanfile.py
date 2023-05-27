@@ -78,7 +78,7 @@ class OpenVDBConan(ConanFile):
                 "apple-clang": "3.8",
                 "intel": "17",
             }
-        elif Version(self.version) == "10.0.1":
+        if Version(self.version) == "10.0.1":
             return {
                 "msvc": "1928",
                 "Visual Studio": "16.8.1",  # Should we check toolset?
@@ -96,7 +96,7 @@ class OpenVDBConan(ConanFile):
             del self.options.fPIC
         if not self._has_sse_avx:
             del self.options.simd
-        
+
         if Version(self.version) < "9.0.0":
             del self.options.nanovdb
             del self.options.nanovdb_with_openvdb
@@ -298,7 +298,7 @@ endif()
                 self.cpp_info.components["nanovdb"].requires.append("c-blosc::c-blosc")
 
             if self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.components["nanovdb"].system_libs = ["pthread"]        
+                self.cpp_info.components["nanovdb"].system_libs = ["pthread"]
 
             self.cpp_info.components["nanovdb"].defines.append("NANOVDB_USE_INTRINSICS")
 
