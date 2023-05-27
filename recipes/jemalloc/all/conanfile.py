@@ -212,20 +212,3 @@ class JemallocConan(ConanFile):
     #                               "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)", strict=False)
     #
     #     apply_conandata_patches(self)
-
-
-    # def build(self):
-    #     self._patch_sources()
-    #     if self.settings.compiler == "Visual Studio":
-    #         with tools_legacy.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools_legacy.no_op():
-    #             with tools_legacy.environment_append({"CC": "cl", "CXX": "cl"}) if self.settings.compiler == "Visual Studio" else tools_legacy.no_op():
-    #                 with tools_legacy.chdir(self.source_folder):
-    #                     # Do not use AutoToolsBuildEnvironment because we want to run configure as ./configure
-    #                     self.run("./configure {}".format(" ".join(self._autotools_args)), win_bash=tools_legacy.os_info.is_windows)
-    #         msbuild = MSBuild(self)
-    #         # Do not use the 2015 solution: unresolved external symbols: test_hooks_libc_hook and test_hooks_arena_new_hook
-    #         sln_file = os.path.join(self.source_folder, "msvc", "jemalloc_vc2017.sln")
-    #         msbuild.build(sln_file, targets=["jemalloc"], build_type=self._msvc_build_type)
-    #     else:
-    #         autotools = self._configure_autotools()
-    #         autotools.make()
