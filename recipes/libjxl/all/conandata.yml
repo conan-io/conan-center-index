@@ -23,6 +23,9 @@ patches:
     - patch_file: "patches/0002-fix-dependencies-v0.6.patch"
       patch_description: "use find_package for third party libraries"
       patch_type: "conan"
+    - patch_file: "patches/0003-fix-installation-v0.6.patch"
+      patch_description: "fix installation destination"
+      patch_type: "conan"
   "0.5.0":
     - patch_file: "patches/0001-clean-targets-v0.5.patch"
       patch_description: "remove several targets not used in conan recipe"

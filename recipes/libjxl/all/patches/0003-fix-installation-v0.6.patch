@@ -1,0 +1,35 @@
+diff --git a/lib/jxl.cmake b/lib/jxl.cmake
+index 350c175..e3750f6 100644
+--- a/lib/jxl.cmake
++++ b/lib/jxl.cmake
+@@ -476,8 +476,16 @@ if (NOT WIN32)
+   set_target_properties(jxl-static PROPERTIES OUTPUT_NAME "jxl")
+   set_target_properties(jxl_dec-static PROPERTIES OUTPUT_NAME "jxl_dec")
+ endif()
+-install(TARGETS jxl-static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-install(TARGETS jxl_dec-static DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS jxl-static
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(TARGETS jxl_dec-static
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
+ 
+ if (((NOT DEFINED "${TARGET_SUPPORTS_SHARED_LIBS}") OR
+      TARGET_SUPPORTS_SHARED_LIBS) AND NOT JPEGXL_STATIC)
+@@ -545,7 +553,10 @@ endforeach()
+ # contains symbols also in libjxl which would conflict if programs try to use
+ # both.
+ install(TARGETS jxl
+-  DESTINATION ${CMAKE_INSTALL_LIBDIR})
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
+ else()
+ add_library(jxl ALIAS jxl-static)
+ add_library(jxl_dec ALIAS jxl_dec-static)
