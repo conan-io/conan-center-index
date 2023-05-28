@@ -56,9 +56,9 @@ class OpenColorIOConan(ConanFile):
             self.requires("tinyxml/2.6.2")
         else:
             self.requires("pystring/1.1.4")
-        self.requires("imath/3.1.6")
+        self.requires("imath/3.1.8")
         if Version(self.version) >= "2.2.0":
-            self.requires("minizip-ng/3.0.9")
+            self.requires("minizip-ng/4.0.0")
 
         # for tools only
         self.requires("lcms/2.14")
@@ -78,7 +78,7 @@ class OpenColorIOConan(ConanFile):
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
