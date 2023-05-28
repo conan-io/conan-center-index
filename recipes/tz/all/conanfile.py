@@ -16,6 +16,10 @@ class TzConan(ConanFile):
     topics = ("tz", "tzdb", "time", "zone", "date")
     settings = "os", "build_type", "arch", "compiler"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -28,6 +32,10 @@ class TzConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("mawk/1.3.4-20230404")
+        if self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -38,18 +46,19 @@ class TzConan(ConanFile):
 
     def _patch_sources(self):
         # INFO: The Makefile enforces /usr/bin/awk, but we want to use tool requirements
-        awk_path = os.path.join(self.dependencies.direct_build['mawk'].package_folder, "bin", "mawk")
+        awk_path = os.path.join(self.dependencies.direct_build['mawk'].package_folder, "bin", "mawk").replace("\\", "/")
         replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "AWK=		awk", f"AWK={awk_path}")
 
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
-        autotools.make(args=["-C", self.source_folder])
+        autotools.make(args=["-C", self.source_folder.replace("\\", "/")])
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
-        autotools.install(args=["-C", self.source_folder, f"DESTDIR={self.package_folder}"])
+        destdir = self.package_folder.replace('\\', '/')
+        autotools.install(args=["-C", self.source_folder.replace("\\", "/"), f"DESTDIR={destdir}"])
         rmdir(self, os.path.join(self.package_folder, "usr", "share", "man"))
         # INFO: The library does not have a public API, it's used to build the zic and zdump tools
         rmdir(self, os.path.join(self.package_folder, "usr", "lib"))
