@@ -48,6 +48,8 @@ class FFMpegConan(ConanFile):
         "with_freetype": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
+        "with_opencore_amrwb": [True, False],
+        "with_opencore_amrnb": [True, False],
         "with_opus": [True, False],
         "with_vorbis": [True, False],
         "with_zeromq": [True, False],
@@ -125,6 +127,8 @@ class FFMpegConan(ConanFile):
         "with_freetype": True,
         "with_openjpeg": True,
         "with_openh264": True,
+        "with_opencore_amrwb": True,
+        "with_opencore_amrnb": True,
         "with_opus": True,
         "with_vorbis": True,
         "with_zeromq": False,
@@ -206,6 +210,8 @@ class FFMpegConan(ConanFile):
             "with_opus": ["avcodec"],
             "with_libx264": ["avcodec"],
             "with_libx265": ["avcodec"],
+            "with_opencore_amrwb": ["avcodec"],
+            "with_opencore_amrnb": ["avcodec"],
             "with_libvpx": ["avcodec"],
             "with_libmp3lame": ["avcodec"],
             "with_libfdk_aac": ["avcodec"],
@@ -270,6 +276,8 @@ class FFMpegConan(ConanFile):
             self.requires("openjpeg/2.5.0")
         if self.options.with_openh264:
             self.requires("openh264/2.3.1")
+        if self.options.with_opencore_amrwb or self.options.with_opencore_amrnb:
+            self.requires("opencore-amr/0.1.6")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -450,6 +458,8 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("iconv", self.options.with_libiconv),
             opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
             opt_enable_disable("libopenh264", self.options.with_openh264),
+            opt_enable_disable("libopencore-amrwb", self.options.with_opencore_amrwb),
+            opt_enable_disable("libopencore-amrnb", self.options.with_opencore_amrnb),
             opt_enable_disable("libvorbis", self.options.with_vorbis),
             opt_enable_disable("libopus", self.options.with_opus),
             opt_enable_disable("libzmq", self.options.with_zeromq),
@@ -490,7 +500,9 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
                 self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
             opt_enable_disable(
-                "gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
+                "gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc),
+            opt_enable_disable(
+                "version3", self.options.with_opencore_amrnb or self.options.with_opencore_amrnb)
         ]
 
         # Individual Component Options
@@ -907,6 +919,12 @@ class FFMpegConan(ConanFile):
             if self.options.with_openh264:
                 self.cpp_info.components["avcodec"].requires.append(
                     "openh264::openh264")
+            if self.options.with_opencore_amrwb:
+                self.cpp_info.components["avcodec"].requires.append(
+                    "opencore-amr::opencore-amrwb")
+            if self.options.with_opencore_amrwb:
+                self.cpp_info.components["avcodec"].requires.append(
+                    "opencore-amr::opencore-amrnb")
             if self.options.with_vorbis:
                 self.cpp_info.components["avcodec"].requires.append(
                     "vorbis::vorbis")
