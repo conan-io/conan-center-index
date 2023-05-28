@@ -32,7 +32,7 @@ class TzConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("mawk/1.3.4-20230404")
-        if self.settings_build.os == "Windows":
+        if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
