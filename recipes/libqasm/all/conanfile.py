@@ -74,7 +74,7 @@ class LibqasmConan(ConanFile):
         self.cpp.build.libdirs = ["."]
 
     def source(self):
-        get(self, **self.conan_data["sources"]["0.5.1"])
+        get(self, **self.conan_data["sources"]["0.5.1"], strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
