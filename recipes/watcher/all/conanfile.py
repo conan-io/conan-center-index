@@ -59,10 +59,6 @@ class WatcherConan(ConanFile):
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
             )
 
-        # https://github.com/e-dant/watcher/issues/31
-        if Version(self.version) == "0.8.3" and is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
