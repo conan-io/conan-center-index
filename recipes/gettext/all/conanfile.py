@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
 from conan.tools.scm import Version
@@ -36,8 +36,7 @@ class GetTextConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os != "Macos":
-            del self.options.shared
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -75,10 +74,6 @@ class GetTextConan(ConanFile):
         libiconv = self.dependencies["libiconv"]
         libiconv_root = unix_path(self, libiconv.package_folder)
         disable_static_or_shared = "--disable-static" if self.options.shared else "--disable-shared"
-        # Disabling nls will prevent libintl from being built.
-        # libintl.{a,dylib} is necessary on Macos as it's not contained within
-        # glibc
-        disable_nls = "--disable-nls" if self.settings.os != "Macos" else ""
         tc.configure_args.extend([
             "HELP2MAN=/bin/true",
             "EMACS=no",
@@ -86,7 +81,6 @@ class GetTextConan(ConanFile):
             "--with-libiconv-prefix={}".format(libiconv_root),
             "--with-included-gettext",
             disable_static_or_shared,
-            disable_nls,
             "--disable-dependency-tracking",
             "--enable-relocatable",
             "--disable-c++",
@@ -141,22 +135,15 @@ class GetTextConan(ConanFile):
         
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
  
-        if self.settings.os != "Macos":
-            rmdir(self, os.path.join(self.package_folder, "lib"))
-            rmdir(self, os.path.join(self.package_folder, "include"))
-
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "share", "info"))
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
 
     def package_info(self):
-        if self.settings.os == "Macos":
-            self.cpp_info.libs = ["intl"]
-            self.cpp_info.set_property("cmake_file_name", "Intl")
-            self.cpp_info.set_property("cmake_target_name", "Intl::Intl")
-        else:
-            self.cpp_info.libdirs = [""]
-            self.cpp_info.includedirs = [""]
+        self.cpp_info.libs = ["intl"]
+        self.cpp_info.set_property("cmake_file_name", "Intl")
+        self.cpp_info.set_property("cmake_target_name", "Intl::Intl")
 
         aclocal = os.path.join(self.package_folder, "res", "aclocal")
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
