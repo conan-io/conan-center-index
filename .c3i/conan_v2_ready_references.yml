@@ -1,4 +1,5 @@
 required_for_references:
+- 7bitdi
 - aaf
 - aaplus
 - abseil
@@ -7,6 +8,7 @@ required_for_references:
 - ada
 - ade
 - aeron
+- aggeom-agg
 - alac
 - alpaca
 - amgcl
@@ -246,6 +248,7 @@ required_for_references:
 - ghc-filesystem
 - giflib
 - ginkgo
+- gklib
 - glad
 - glfw
 - gli
@@ -415,6 +418,7 @@ required_for_references:
 - lua
 - luau
 - lz4
+- lzma_sdk
 - m4
 - magic_enum
 - make
@@ -429,6 +433,7 @@ required_for_references:
 - mgs
 - mikelankamp-fpm
 - mimalloc
+- miniaudio
 - minisat
 - minizip
 - minizip-ng
@@ -439,6 +444,7 @@ required_for_references:
 - msgpack-c
 - msgpack-cxx
 - msys2
+- naive-tsearch
 - namedtype
 - nameof
 - nanoflann
@@ -506,6 +512,7 @@ required_for_references:
 - pybind11
 - qhull
 - qpdf
+- quantlib
 - quill
 - quirc
 - rabbitmq-c
@@ -520,6 +527,7 @@ required_for_references:
 - readerwriterqueue
 - readline
 - readosm
+- rectpack2d
 - restbed
 - restinio
 - roaring
@@ -527,6 +535,7 @@ required_for_references:
 - rttr
 - ruy
 - s2n
+- samurai
 - scnlib
 - screen_capture_lite
 - sdbus-cpp
