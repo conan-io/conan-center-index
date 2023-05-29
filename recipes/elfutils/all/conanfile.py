@@ -75,7 +75,7 @@ class ElfutilsConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.2")
         if self.options.get_safe("libdebuginfod"):
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/8.1.1")
         if self.options.debuginfod:
             # FIXME: missing recipe for libmicrohttpd
             raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
