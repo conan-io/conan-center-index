@@ -5,7 +5,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, get, copy, export_conandata_patches, rm, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 
 import os
 
@@ -52,7 +52,7 @@ class LibmemcachedConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+        if self.settings.os not in ["Linux", "FreeBSD"] or not is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     def _patch_source(self):
