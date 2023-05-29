@@ -15,7 +15,7 @@ class AtSpi2CoreConan(ConanFile):
     homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core/"
     license = "LGPL-2.1-or-later"
     generators = "pkg_config"
-    deprecated = True
+    deprecated = "Consumers should migrate to at-spi2-core/[>=2.45.1], which includes atk and at-spi2-atk"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
