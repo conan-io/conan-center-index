@@ -1,0 +1,12 @@
+diff --git a/src/libserial/SerialPortConstants.h b/src/libserial/SerialPortConstants.h
+index f9d5dc1..0588e3e 100644
+--- a/src/libserial/SerialPortConstants.h
++++ b/src/libserial/SerialPortConstants.h
+@@ -38,6 +38,7 @@
+ #include <string>
+ #include <termios.h>
+ #include <vector>
++#include <cstdint>
+ 
+ namespace LibSerial
+ {
