@@ -4,7 +4,6 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.49.0"
