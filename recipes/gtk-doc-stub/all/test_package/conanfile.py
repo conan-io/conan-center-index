@@ -42,4 +42,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(f"gtkdocize --copy", env="conanrun")
+            self.run(f"gtkdocize --version", env="conanbuild")
