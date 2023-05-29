@@ -50,6 +50,7 @@ class LibqasmConan(ConanFile):
         }
 
     def build_requirements(self):
+        self.build_requires("cmake/3.20.1")
         self.tool_requires("m4/1.4.19")
         if self.settings.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
