@@ -17,7 +17,7 @@ class ArrowConan(ConanFile):
     license = ("Apache-2.0",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://arrow.apache.org/"
-    topics = ("memory", "gandiva", "parquet", "skyhook", "plasma", "hdfs", "csv", "cuda", "gcs", "json", "hive", "s3", "grpc")
+    topics = ("memory", "gandiva", "parquet", "skyhook", "acero", "hdfs", "csv", "cuda", "gcs", "json", "hive", "s3", "grpc")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,7 +26,7 @@ class ArrowConan(ConanFile):
         "parquet": ["auto", True, False],
         "substrait": [True, False],
         "skyhook": [True, False],
-        "plasma": [True, False],
+        "acero": [True, False],
         "cli": [True, False],
         "compute": ["auto", True, False],
         "dataset_modules":  ["auto", True, False],
@@ -34,6 +34,7 @@ class ArrowConan(ConanFile):
         "encryption": [True, False],
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
+        "plasma": [True, False, "deprecated"],
         "simd_level": [None, "default", "sse4_2", "avx2", "avx512", "neon", ],
         "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
         "with_backtrace": [True, False],
@@ -71,7 +72,7 @@ class ArrowConan(ConanFile):
         "parquet": "auto",
         "skyhook": False,
         "substrait": False,
-        "plasma": False,
+        "acero": False,
         "cli": False,
         "compute": "auto",
         "dataset_modules": "auto",
@@ -79,6 +80,7 @@ class ArrowConan(ConanFile):
         "encryption": False,
         "filesystem_layer": False,
         "hdfs_bridgs": False,
+        "plasma": "deprecated",
         "simd_level": "default",
         "runtime_simd_level": "max",
         "with_backtrace": False,
@@ -165,6 +167,8 @@ class ArrowConan(ConanFile):
                         f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
                     )
 
+        if self.options.plasma != "deprecated":
+            self.output.warning("plasma option is deprecated since Arrow 12.0.0, do not use anymore.")
         if self.options.shared:
             del self.options.fPIC
         if self.options.compute == False and not self._compute(True):
@@ -258,7 +262,7 @@ class ArrowConan(ConanFile):
 
     def _with_gflags(self, required=False):
         if required or self.options.with_gflags == "auto":
-            return bool(self.options.plasma or self._with_glog() or self._with_grpc())
+            return bool(self._with_glog() or self._with_grpc())
         else:
             return bool(self.options.with_gflags)
 
@@ -396,7 +400,7 @@ class ArrowConan(ConanFile):
         tc.variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
         tc.variables["ARROW_PARQUET"] = self._parquet()
         tc.variables["ARROW_SUBSTRAIT"] = bool(self.options.get_safe("substrait", False))
-        tc.variables["ARROW_PLASMA"] = bool(self.options.plasma)
+        tc.variables["ARROW_ACERO"] = bool(self.options.acero)
         tc.variables["ARROW_DATASET"] = self._dataset_modules()
         tc.variables["ARROW_FILESYSTEM"] = bool(self.options.filesystem_layer)
         tc.variables["PARQUET_REQUIRE_ENCRYPTION"] = bool(self.options.encryption)
@@ -504,6 +508,7 @@ class ArrowConan(ConanFile):
             for filename in glob.glob(os.path.join(self.source_folder, "cpp", "cmake_modules", "Find*.cmake")):
                 if os.path.basename(filename) not in [
                     "FindArrow.cmake",
+                    "FindArrowAcero.cmake",
                     "FindArrowCUDA.cmake",
                     "FindArrowDataset.cmake",
                     "FindArrowFlight.cmake",
@@ -515,7 +520,6 @@ class ArrowConan(ConanFile):
                     "FindArrowTesting.cmake",
                     "FindGandiva.cmake",
                     "FindParquet.cmake",
-                    "FindPlasma.cmake",
                 ]:
                     os.remove(filename)
 
@@ -579,12 +583,15 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_substrait"].names["pkg_config"] = "arrow_substrait"
             self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
 
-        if self.options.plasma:
-            self.cpp_info.components["libplasma"].libs = [self._lib_name("plasma")]
-            self.cpp_info.components["libplasma"].names["cmake_find_package"] = "plasma"
-            self.cpp_info.components["libplasma"].names["cmake_find_package_multi"] = "plasma"
-            self.cpp_info.components["libplasma"].names["pkg_config"] = "plasma"
-            self.cpp_info.components["libplasma"].requires = ["libarrow"]
+        # Plasma was deprecated in Arrow 12.0.0
+        del self.options.plasma
+
+        if self.options.acero:
+            self.cpp_info.components["libacero"].libs = [self._lib_name("acero")]
+            self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
+            self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
+            self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
+            self.cpp_info.components["libacero"].requires = ["libarrow"]
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].libs = [self._lib_name("gandiva")]
@@ -611,8 +618,10 @@ class ArrowConan(ConanFile):
 
         if self._dataset_modules():
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
+            if self._parquet():
+                self.cpp_info.components["dataset"].requires = ["libparquet"]
 
-        if (self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self._parquet())) or self.options.plasma:
+        if self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self._parquet()):
             binpath = os.path.join(self.package_folder, "bin")
             self.output.info(f"Appending PATH env var: {binpath}")
             self.env_info.PATH.append(binpath)

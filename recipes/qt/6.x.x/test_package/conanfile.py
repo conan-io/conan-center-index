@@ -5,6 +5,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.files import mkdir, chdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 from conans import tools, Meson, RunEnvironment, CMake
 from conan.errors import ConanException
@@ -50,20 +51,20 @@ class TestPackageConan(ConanFile):
 
                 value = _getenvpath('CC')
                 if value:
-                    args.append('QMAKE_CC="%s"' % value)
+                    args.append(f"QMAKE_CC=\"{value}\"")
 
                 value = _getenvpath('CXX')
                 if value:
-                    args.append('QMAKE_CXX="%s"' % value)
+                    args.append(f"QMAKE_CXX=\"{value}\"")
 
                 value = _getenvpath('LD')
                 if value:
-                    args.append('QMAKE_LINK_C="%s"' % value)
-                    args.append('QMAKE_LINK_C_SHLIB="%s"' % value)
-                    args.append('QMAKE_LINK="%s"' % value)
-                    args.append('QMAKE_LINK_SHLIB="%s"' % value)
+                    args.append(f"QMAKE_LINK_C=\"{value}\"")
+                    args.append(f"QMAKE_LINK_C_SHLIB=\"{value}\"")
+                    args.append(f"QMAKE_LINK=\"{value}\"")
+                    args.append(f"QMAKE_LINK_SHLIB=\"{value}\"")
 
-                self.run("qmake %s" % " ".join(args), run_environment=True)
+                self.run(f"qmake {' '.join(args)}", run_environment=True)
                 if tools.os_info.is_windows:
                     if is_msvc(self):
                         self.run("nmake", run_environment=True)
@@ -91,7 +92,7 @@ class TestPackageConan(ConanFile):
         with tools.environment_append(env_build.vars):
             cmake = CMake(self, set_cmake_flags=True)
             if self.settings.os == "Macos":
-                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
+                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.15' if Version(self.deps_cpp_info["qt"].version) >= "6.5.0" else "10.14"
 
             cmake.configure()
             cmake.build()

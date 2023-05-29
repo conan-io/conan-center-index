@@ -1,9 +1,10 @@
 import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.43.0"
 
@@ -20,11 +21,17 @@ class BShoshanyThreadPoolConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {"apple-clang": "10", "clang": "5", "gcc": "8", "Visual Studio": "16"}
+        return {
+            "apple-clang": "10",
+            "clang": "5",
+            "gcc": "8",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 17
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _source_subfolder(self):
@@ -48,9 +55,10 @@ class BShoshanyThreadPoolConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        try:
-            if Version(self.settings.compiler.version) < self._minimum_compilers_version[str(self.settings.compiler)]:
-                raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports C++{self._minimum_cpp_standard}. {self.settings.compiler}, {self.settings.compiler.version}")
-        except KeyError:
-            self.output.warn("Unknown compiler encountered. Assuming it supports C++17.")
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )

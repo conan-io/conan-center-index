@@ -11,23 +11,22 @@ required_conan_version = ">=1.53.0"
 
 class LuaConan(ConanFile):
     name = "lua"
-    package_type = "library"
     description = "Lua is a powerful, efficient, lightweight, embeddable scripting language."
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.lua.org/"
-    topics = ("lua", "scripting")
-    license = "MIT"
-
-    settings = "os", "compiler", "arch", "build_type"
+    topics = ("embed", "scripting")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
         "fPIC": [True, False],
-        "compile_as_cpp": [True, False]
+        "compile_as_cpp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "compile_as_cpp": False
+        "compile_as_cpp": False,
     }
 
     def export_sources(self):
@@ -45,11 +44,11 @@ class LuaConan(ConanFile):
             self.options.rm_safe("compiler.libcxx")
             self.options.rm_safe("compiler.cppstd")
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

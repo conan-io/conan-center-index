@@ -1,17 +1,20 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class LibmikmodConan(ConanFile):
     name = "libmikmod"
     description = "Module player and library supporting many formats, including mod, s3m, it, and xm."
-    topics = ("libmikmod", "audio")
+    topics = ("audio",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mikmod.sourceforge.net"
     license = "LGPL-2.1-or-later"
-    exports_sources = ["patches/*", "CMakeLists.txt"]
-    generators = "cmake"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,7 +24,7 @@ class LibmikmodConan(ConanFile):
         "with_alsa": [True, False],
         "with_oss": [True, False],
         "with_pulse": [True, False],
-        "with_coreaudio": [True, False]
+        "with_coreaudio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,13 +34,11 @@ class LibmikmodConan(ConanFile):
         "with_alsa": True,
         "with_oss": True,
         "with_pulse": True,
-        "with_coreaudio": True
+        "with_coreaudio": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-
-    _cmake = None
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,14 +53,17 @@ class LibmikmodConan(ConanFile):
             del self.options.with_oss
             del self.options.with_pulse
         # Apple
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             del self.options.with_coreaudio
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -69,59 +73,58 @@ class LibmikmodConan(ConanFile):
                 self.requires("pulseaudio/14.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self, set_cmake_flags=True)
-        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        self._cmake.definitions["ENABLE_DOC"] = False
-        self._cmake.definitions["ENABLE_DSOUND"] = self.options.get_safe("with_dsound", False)
-        self._cmake.definitions["ENABLE_MMSOUND"] = self.options.get_safe("with_mmsound", False)
-        self._cmake.definitions["ENABLE_ALSA"] = self.options.get_safe("with_alsa", False)
-        self._cmake.definitions["ENABLE_OSS"] = self.options.get_safe("with_oss", False)
-        self._cmake.definitions["ENABLE_PULSE"] = self.options.get_safe("with_pulse", False)
-        self._cmake.definitions["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_STATIC"] = not self.options.shared
+        tc.variables["ENABLE_DOC"] = False
+        tc.variables["ENABLE_DSOUND"] = self.options.get_safe("with_dsound", False)
+        tc.variables["ENABLE_MMSOUND"] = self.options.get_safe("with_mmsound", False)
+        tc.variables["ENABLE_ALSA"] = self.options.get_safe("with_alsa", False)
+        tc.variables["ENABLE_OSS"] = self.options.get_safe("with_oss", False)
+        tc.variables["ENABLE_PULSE"] = self.options.get_safe("with_pulse", False)
+        tc.variables["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        deps = CMakeDeps(self)
+        deps.generate()
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "CMAKE_SOURCE_DIR",
-                              "PROJECT_SOURCE_DIR")
+    def _patch_sources(self):
+        apply_conandata_patches(self)
 
          # Ensure missing dependencies yields errors
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "MESSAGE(WARNING",
                               "MESSAGE(FATAL_ERROR")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "drivers", "drv_alsa.c"),
+        replace_in_file(self, os.path.join(self.source_folder, "drivers", "drv_alsa.c"),
                               "alsa_pcm_close(pcm_h);",
                               "if (pcm_h) alsa_pcm_close(pcm_h);")
 
-        cmake = self._configure_cmake()
+    def build(self):
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING.LESSER", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING.LESSER", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        os.remove(os.path.join(self.package_folder, "bin", "libmikmod-config"))
-        if not self.options.shared:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows" and self.options.shared:
+            os.remove(os.path.join(self.package_folder, "bin", "libmikmod-config"))
+        else:
+            rmdir(self, os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", "libmikmod")
+        self.cpp_info.libs = collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["MIKMOD_STATIC"]
-        self.cpp_info.filenames["pkg_config"] = "libmikmod"
 
         if self.options.get_safe("with_dsound"):
             self.cpp_info.system_libs.append("dsound")
