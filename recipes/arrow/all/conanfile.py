@@ -618,6 +618,8 @@ class ArrowConan(ConanFile):
 
         if self._dataset_modules():
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
+            if self._parquet():
+                self.cpp_info.components["dataset"].requires = ["libparquet"]
 
         if self.options.cli and (self.options.with_cuda or self._with_flight_rpc() or self._parquet()):
             binpath = os.path.join(self.package_folder, "bin")
