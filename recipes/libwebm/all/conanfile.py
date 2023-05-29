@@ -39,7 +39,7 @@ class LibwebmConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.shared and not self.options.fPIC:
+        if self.settings.os != "Windows" and self.options.shared and not self.options.fPIC:
             raise ConanInvalidConfiguration("shared builds require fPIC.")
 
     def layout(self):
