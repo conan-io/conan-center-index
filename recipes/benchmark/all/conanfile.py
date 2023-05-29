@@ -55,7 +55,7 @@ class BenchmarkConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("enable_libpfm"):
-            self.requires("libpfm4/4.12.0")
+            self.requires("libpfm4/4.13.0")
 
     def build_requirements(self):
         if Version(self.version) >= "1.7.1":
