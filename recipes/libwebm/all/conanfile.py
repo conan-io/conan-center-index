@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
@@ -38,9 +37,9 @@ class LibwebmConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.os != "Windows" and self.options.shared and not self.options.fPIC:
-            raise ConanInvalidConfiguration("shared builds require fPIC.")
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -53,6 +52,7 @@ class LibwebmConan(ConanFile):
         tc.variables["ENABLE_WEBMTS"] = self.options.with_pes_ts
         tc.variables["ENABLE_WEBM_PARSER"] = self.options.with_new_parser_api
         tc.variables["ENABLE_WEBMINFO"] = False
+        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", default=True)
         tc.generate()
 
     def build(self):
