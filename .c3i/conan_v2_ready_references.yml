@@ -379,6 +379,7 @@ required_for_references:
 - librttopo
 - libsamplerate
 - libselinux
+- libserial
 - libsgp4
 - libsmacker
 - libsndfile
@@ -419,6 +420,7 @@ required_for_references:
 - luau
 - lz4
 - lzma_sdk
+- lzo
 - m4
 - magic_enum
 - make
@@ -480,6 +482,7 @@ required_for_references:
 - openmesh
 - openssl
 - opensubdiv
+- opentelemetry-proto
 - optional-lite
 - opus
 - opusfile
@@ -497,6 +500,7 @@ required_for_references:
 - physx
 - picobench
 - picojson
+- pixman
 - pkgconf
 - poco
 - popt
@@ -510,6 +514,7 @@ required_for_references:
 - pugixml
 - pulseaudio
 - pybind11
+- pystring
 - qhull
 - qpdf
 - quantlib
@@ -528,6 +533,7 @@ required_for_references:
 - readline
 - readosm
 - rectpack2d
+- replxx
 - restbed
 - restinio
 - roaring
@@ -585,6 +591,7 @@ required_for_references:
 - tinycthreadpool
 - tinyexif
 - tinymidi
+- tinyxml
 - tinyxml2
 - tl-expected
 - tlx
@@ -604,6 +611,8 @@ required_for_references:
 - vdpau
 - veque
 - vincentlaucsb-csv-parser
+- vir-simd
+- visit_struct
 - volk
 - vorbis
 - vtu11
