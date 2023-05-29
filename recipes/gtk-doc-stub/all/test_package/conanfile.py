@@ -10,6 +10,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac"
     test_type = "explicit"
+    win_bash = True # This assignment must be *here* to avoid "Cannot wrap command with different envs." in Conan 1.x
 
     @property
     def _settings_build(self):
@@ -21,7 +22,6 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows":
-            self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         self.tool_requires("automake/1.16.5")
