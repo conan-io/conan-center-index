@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
@@ -37,9 +38,9 @@ class LibwebmConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    def validate(self):
+        if self.options.shared and not self.options.fPIC:
+            raise ConanInvalidConfiguration("shared builds require fPIC.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
