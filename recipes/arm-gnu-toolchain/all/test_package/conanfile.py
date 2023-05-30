@@ -1,8 +1,5 @@
-import pprint
-
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, cmake_layout
 
 
 class TestPackageConan(ConanFile):

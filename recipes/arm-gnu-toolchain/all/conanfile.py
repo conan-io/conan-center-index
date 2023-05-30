@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, download
-from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
-import pprint
 
 
 required_conan_version = ">=1.50.0"
@@ -20,6 +19,7 @@ class ArmGnuToolchain(ConanFile):
               "cortex-m35p", "cortex-m33")
     settings = "os", "arch", 'compiler', 'build_type'
     exports_sources = "toolchain.cmake"
+    package_type = "application"
     short_paths = True
 
     @property
@@ -42,10 +42,6 @@ class ArmGnuToolchain(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        if not self.download_info:
-            raise ConanInvalidConfiguration(
-                "This package is not available for this operating system and architecture.")
-
         supported_build_operating_systems = ["Linux", "Macos", "Windows"]
         if not self._settings_build.os in supported_build_operating_systems:
             raise ConanInvalidConfiguration(
@@ -65,15 +61,6 @@ class ArmGnuToolchain(ConanFile):
             raise ConanInvalidConfiguration(
                 f"The build architecture '{self._settings_build.arch}' is not supported for {self._settings_build.os}. "
                 f"Pre-compiled binaries are only available for {supported_build_architectures[str(self._settings_build.os)]}."
-            )
-
-        if (
-            str(self.settings.os) != "baremetal" and
-            str(self.settings.arch) != str(self._settings_build.arch)
-        ):
-            # Update comment later if this works
-            raise ConanInvalidConfiguration(
-                f"This tool does not work when cross compiling to a target that is not 'baremetal'."
             )
 
     def source(self):
@@ -131,28 +118,18 @@ class ArmGnuToolchain(ConanFile):
         f = os.path.join(self.package_folder, "res/toolchain.cmake")
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
 
-        if str(self.settings.arch) == "thumbv7em":
-            float_abi = str(self.settings.arch.float_abi)
-            processor = str(self.settings.arch.processor)
+        gcc_c_flags = [
+            "-mthumb",
+            "-ffunction-sections",
+            "-fdata-sections",
+        ]
 
-            c_flags = [
-                f"-mfloat-abi={ float_abi }",
-                f"-mcpu={ processor }",
-                "-mthumb",
-                "-ffunction-sections",
-                "-fdata-sections",
-                "-fno-exceptions",
-                "-fno-rtti"
-            ]
+        linker_flags = [
+            "-mthumb",
+            "-Wl,--gc-sections",
+            "-Wl,--print-memory-usage"
+        ]
 
-            link_flags = [
-                f"-mfloat-abi={ float_abi }",
-                f"-mcpu={ processor }",
-                "-mthumb",
-                "-Wl,--gc-sections",
-                "-Wl,--print-memory-usage"
-            ]
-
-            self.conf_info.extend("tools.build:cflags", c_flags)
-            self.conf_info.extend("tools.build:cxxflags", c_flags)
-            self.conf_info.extend("tools.build:exelinkflags", link_flags)
+        self.conf_info.define("tools.build:cflags", gcc_c_flags)
+        self.conf_info.define("tools.build:cxxflags", gcc_c_flags)
+        self.conf_info.define("tools.build:exelinkflags", linker_flags)
