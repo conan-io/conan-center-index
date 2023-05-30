@@ -86,7 +86,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def requirements(self):
         self.requires("glib/2.76.2", transitive_headers=True, transitive_libs=True)
-        self.requires("gstreamer/1.19.2", transitive_headers=True, transitive_libs=True)
+        self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/1.2.13")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
@@ -122,6 +122,10 @@ class GStPluginsBaseConan(ConanFile):
             self.requires("pango/1.50.10")
 
     def validate(self):
+        gstreamer_version = Version(self.dependencies.direct_host["gstreamer"].ref.version)
+        if gstreamer_version != self.version:
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} only works with the exact same version of gstreamer but gstreamer/{gstreamer_version} has been selected.")
+
         if not self.dependencies.direct_host["glib"].options.shared and self.options.shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
