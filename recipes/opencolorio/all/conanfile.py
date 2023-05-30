@@ -73,6 +73,9 @@ class OpenColorIOConan(ConanFile):
             not self.dependencies["minizip-ng"].options.get_safe("with_zlib", False):
             raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True.")
 
+        if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
+
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
             self.tool_requires("cmake/[>=3.16 <4]")
@@ -82,6 +85,7 @@ class OpenColorIOConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         if Version(self.version) >= "2.1.0":
             tc.variables["OCIO_BUILD_PYTHON"] = False
         else:
