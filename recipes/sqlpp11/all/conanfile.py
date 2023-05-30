@@ -52,7 +52,7 @@ class Sqlpp11Conan(ConanFile):
                 if Version(self.settings.compiler.version) < minimum_version:
                     raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
             else:
-                self.output.warn(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+                self.output.warning(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
