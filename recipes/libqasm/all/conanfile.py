@@ -7,6 +7,7 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
 
+
 class LibqasmConan(ConanFile):
     name = "libqasm"
 
@@ -86,8 +87,8 @@ class LibqasmConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
         if compiler == "apple-clang":
-            if version < "13":
-                raise ConanInvalidConfiguration("libqasm requires at least apple-clang++ 13")
+            if version < "14":
+                raise ConanInvalidConfiguration("libqasm requires at least apple-clang++ 14")
         elif compiler == "clang":
             if version < "13":
                 raise ConanInvalidConfiguration("libqasm requires at least clang++ 13")
