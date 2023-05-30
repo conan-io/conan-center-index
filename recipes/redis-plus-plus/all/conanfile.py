@@ -6,17 +6,17 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class RedisPlusPlusConan(ConanFile):
     name = "redis-plus-plus"
-    homepage = "https://github.com/sewenew/redis-plus-plus"
     description = "Redis client written in C++"
-    topics = ("database", "redis", "client", "tls")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/sewenew/redis-plus-plus"
+    topics = ("database", "redis", "client", "tls")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -58,16 +58,13 @@ class RedisPlusPlusConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hiredis/1.1.0")
+        self.requires("hiredis/1.1.0", transitive_headers=True)
         if self.options.get_safe("build_async"):
             self.requires("libuv/1.44.2")
 
@@ -85,8 +82,7 @@ class RedisPlusPlusConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name}:with_tls=True requires hiredis:with_ssl=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

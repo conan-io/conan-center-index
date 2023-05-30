@@ -1,4 +1,7 @@
 sources:
+  "1.3.8":
+    url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.8.tar.gz"
+    sha256: "ad521b4a24d1591a1564f945ba6370875b501210222e324f398065251df41641"
   "1.3.7":
     url: "https://github.com/sewenew/redis-plus-plus/archive/1.3.7.tar.gz"
     sha256: "89cb83b0a23ac5825300c301814eab74aa3cdcfcd12e87d443c2692e367768ba"
@@ -15,6 +18,10 @@ sources:
     url: "https://github.com/sewenew/redis-plus-plus/archive/1.2.1.tar.gz"
     sha256: "f09c9fcc362955edb887632cd008102887278c94934d7e8c9d0acb8707671902"
 patches:
+  "1.3.8":
+    - patch_file: "patches/1.3.8-0001-fix-dependencies-injection.patch"
+      patch_description: "Robust discovery & injection of dependencies, and handle missing hiredis_ssl-config.cmake"
+      patch_type: "conan"
   "1.3.7":
     - patch_file: "patches/1.3.7-0001-fix-dependencies-injection.patch"
       patch_description: "Robust discovery & injection of dependencies, and handle missing hiredis_ssl-config.cmake"
