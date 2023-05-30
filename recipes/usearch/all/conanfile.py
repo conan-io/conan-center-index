@@ -18,6 +18,7 @@ class USearchConan(ConanFile):
     topics = ('search', 'vector', 'simd')
     settings = "os", "arch", "compiler", "build_type"
     url = 'https://github.com/conan-io/conan-center-index'
+    package_type = "header-library"
 
     # No settings/options are necessary, this is header only
     # Potentially add unit-tests in the future:
