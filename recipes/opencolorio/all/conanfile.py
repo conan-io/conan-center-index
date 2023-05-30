@@ -56,9 +56,9 @@ class OpenColorIOConan(ConanFile):
             self.requires("tinyxml/2.6.2")
         else:
             self.requires("pystring/1.1.4")
-        self.requires("imath/3.1.8")
+        self.requires("imath/3.1.6")
         if Version(self.version) >= "2.2.0":
-            self.requires("minizip-ng/4.0.0")
+            self.requires("minizip-ng/3.0.7")
 
         # for tools only
         self.requires("lcms/2.14")
