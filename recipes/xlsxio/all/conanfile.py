@@ -21,24 +21,16 @@ class XlsxioConan(ConanFile):
     options = {
         "fPIC":[True, False],
         "shared": [True, False],
-        "build_pc_files": [True, False],
-        "build_tools": [True, False],
-        "build_examples": [True, False],
         "with_libzip": [True, False],
         "with_minizip_ng": [True, False],
         "with_wide": [True, False],
-        "build_documentation": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
-        "build_pc_files": True,
-        "build_tools": True,
-        "build_examples": True,
         "with_libzip": False,
         "with_minizip_ng": False,
         "with_wide": False,
-        "build_documentation": False,
     }
     def export_sources(self):
         export_conandata_patches(self)
@@ -79,14 +71,10 @@ class XlsxioConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
-        tc.variables["BUILD_PC_FILES"] = self.options.build_pc_files
-        tc.variables["BUILD_TOOLS"] = self.options.build_tools
-        tc.variables["BUILD_EXAMPLES"] = self.options.build_examples
         tc.variables["WITH_LIBZIP"] = self.options.with_libzip
         if Version(self.version) >= "0.2.34":
             tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
         tc.variables["WITH_WIDE"] = self.options.with_wide
-        tc.variables["BUILD_DOCUMENTATION"] = self.options.build_documentation
         tc.generate()
 
         tc = CMakeDeps(self)
