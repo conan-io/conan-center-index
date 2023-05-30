@@ -156,6 +156,6 @@ class WolfSSLConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
-                self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])
+                self.cpp_info.system_libs.extend(["advapi32", "ws2_32", "crypt32"])
             elif is_apple_os(self):
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
