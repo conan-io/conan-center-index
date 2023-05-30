@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ce8337f..d60c5ae 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -350,15 +350,6 @@ add_library(webm ${libwebm_common_sources}
+             $<TARGET_OBJECTS:mkvmuxer>
+             $<TARGET_OBJECTS:mkvparser>)
+ 
+-
+-
+-if (WIN32)
+-  # Use libwebm and libwebm.lib for project and library name on Windows (instead
+-  # webm and webm.lib).
+-  set_target_properties(webm PROPERTIES PROJECT_LABEL libwebm)
+-  set_target_properties(webm PROPERTIES PREFIX lib)
+-endif ()
+-
+ add_executable(mkvparser_sample ${mkvparser_sample_sources})
+ target_link_libraries(mkvparser_sample LINK_PUBLIC webm)
+ 
