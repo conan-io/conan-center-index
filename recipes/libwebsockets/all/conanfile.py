@@ -1,9 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.56.0"
 
 
 class LibwebsocketsConan(ConanFile):
@@ -186,16 +189,10 @@ class LibwebsocketsConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
     _cmake = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -203,9 +200,9 @@ class LibwebsocketsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         if self.options.with_libuv:
@@ -217,7 +214,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         elif self.options.with_zlib == "miniz":
             self.requires("miniz/2.2.0")
 
@@ -228,33 +225,35 @@ class LibwebsocketsConan(ConanFile):
             self.requires("sqlite3/3.37.2")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.8.1")
 
     def validate(self):
-        if self.options.shared and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
-        if tools.Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+        if Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12":
             raise ConanInvalidConfiguration("{}/{} with apple-clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 16 and tools.Version(self.version) >= "4.3.2":
-            raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
+        if Version(self.version) >= "4.3.2":
+            if ("Visual" in str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 16) or  \
+                    ("msvc" == str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 192):
+                raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
             # TODO - Add hubbub package when available.
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def _get_library_extension(self, dep):
         if self.options[dep].shared:
             if self.settings.os == "Windows" :
-                if self._is_msvc:
+                if is_msvc(self):
                     return ".lib"
                 else:
                     return ".dll.a"
@@ -263,14 +262,14 @@ class LibwebsocketsConan(ConanFile):
             else:
                 return ".so"
         else:
-            if self.settings.os == "Windows" and self._is_msvc:
+            if self.settings.os == "Windows" and is_msvc(self):
                 return ".lib"
             else:
                 return ".a"
 
     @property
     def _get_library_prefix(self):
-        if self.settings.os == "Windows" :
+        if self.settings.os == "Windows":
             return ""
         return "lib"
 
@@ -278,7 +277,7 @@ class LibwebsocketsConan(ConanFile):
         return ";".join(paths).replace("\\", "/")
 
     def _find_library(self, libname, dep):
-        for path in self.deps_cpp_info[dep].lib_paths:
+        for path in self.dependencies[dep].cpp_info.libdirs:
             lib_fullpath = os.path.join(path, self._get_library_prefix + libname + self._get_library_extension(dep))
 
             print("Test : " + str(lib_fullpath))
@@ -287,188 +286,181 @@ class LibwebsocketsConan(ConanFile):
         raise ConanException("Library {} not found".format(lib_fullpath))
 
     def _find_libraries(self, dep):
-        return [self._find_library(lib, dep) for lib in self.deps_cpp_info[dep].libs]
+        return [self._find_library(lib, dep) for lib in self.dependencies[dep].cpp_info.libs]
 
-    def _configure_cmake(self):
-        if self._cmake is not None:
-            return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LWS_WITHOUT_TESTAPPS"] = True
+        tc.variables["LWS_WITHOUT_TEST_SERVER"] = True
+        tc.variables["LWS_WITHOUT_TEST_SERVER_EXTPOLL"] = True
+        tc.variables["LWS_WITHOUT_TEST_PING"] = True
+        tc.variables["LWS_WITHOUT_TEST_CLIENT"] = True
 
-        self._cmake = CMake(self)
-        self._cmake.definitions["LWS_WITHOUT_TESTAPPS"] = True
-        self._cmake.definitions["LWS_WITHOUT_TEST_SERVER"] = True
-        self._cmake.definitions["LWS_WITHOUT_TEST_SERVER_EXTPOLL"] = True
-        self._cmake.definitions["LWS_WITHOUT_TEST_PING"] = True
-        self._cmake.definitions["LWS_WITHOUT_TEST_CLIENT"] = True
-
-        self._cmake.definitions["LWS_LINK_TESTAPPS_DYNAMIC"] = True
-        self._cmake.definitions["LWS_WITH_SHARED"] = self.options.shared
-        self._cmake.definitions["LWS_WITH_STATIC"] = not self.options.shared
-        self._cmake.definitions["LWS_WITH_SSL"] = bool(self.options.with_ssl)
+        tc.variables["LWS_LINK_TESTAPPS_DYNAMIC"] = True
+        tc.variables["LWS_WITH_SHARED"] = self.options.shared
+        tc.variables["LWS_WITH_STATIC"] = not self.options.shared
+        tc.variables["LWS_WITH_SSL"] = bool(self.options.with_ssl)
 
         if self.options.with_ssl == "openssl":
-            self._cmake.definitions["LWS_OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
-            self._cmake.definitions["LWS_OPENSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["openssl"].include_paths)
+            tc.variables["LWS_OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
+            tc.variables["LWS_OPENSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["openssl"].cpp_info.includedirs)
         elif self.options.with_ssl == "mbedtls":
-            self._cmake.definitions["LWS_WITH_MBEDTLS"] = True
-            self._cmake.definitions["LWS_MBEDTLS_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("mbedtls"))
-            self._cmake.definitions["LWS_MBEDTLS_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["mbedtls"].include_paths)
+            tc.variables["LWS_WITH_MBEDTLS"] = True
+            tc.variables["LWS_MBEDTLS_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("mbedtls"))
+            tc.variables["LWS_MBEDTLS_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["mbedtls"].cpp_info.includedirs)
         elif self.options.with_ssl == "wolfssl":
-            self._cmake.definitions["LWS_WITH_WOLFSSL"] = True
-            self._cmake.definitions["LWS_WOLFSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("wolfssl"))
-            self._cmake.definitions["LWS_WOLFSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["wolfssl"].include_paths)
+            tc.variables["LWS_WITH_WOLFSSL"] = True
+            tc.variables["LWS_WOLFSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("wolfssl"))
+            tc.variables["LWS_WOLFSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["wolfssl"].cpp_info.includedirs)
         else:
-            self._cmake.definitions["LWS_WITH_WOLFSSL"] = False
+            tc.variables["LWS_WITH_WOLFSSL"] = False
 
-        self._cmake.definitions["LWS_WITH_LIBEV"] = self.options.with_libevent == "libev"
+        tc.variables["LWS_WITH_LIBEV"] = self.options.with_libevent == "libev"
         if self.options.with_libevent == "libev":
-            self._cmake.definitions["LWS_LIBEV_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libev"))
-            self._cmake.definitions["LWS_LIBEV_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["libev"].include_paths).replace("\\", "/")
+            tc.variables["LWS_LIBEV_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libev"))
+            tc.variables["LWS_LIBEV_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["libev"].cpp_info.includedirs).replace("\\", "/")
 
-        self._cmake.definitions["LWS_WITH_LIBUV"] = self.options.with_libuv
+        tc.variables["LWS_WITH_LIBUV"] = self.options.with_libuv
         if self.options.with_libuv:
-            self._cmake.definitions["LWS_LIBUV_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libuv"))
-            self._cmake.definitions["LWS_LIBUV_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["libuv"].include_paths)
+            tc.variables["LWS_LIBUV_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libuv"))
+            tc.variables["LWS_LIBUV_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["libuv"].cpp_info.includedirs)
 
-        self._cmake.definitions["LWS_WITH_LIBEVENT"] = self.options.with_libevent == "libevent"
+        tc.variables["LWS_WITH_LIBEVENT"] = self.options.with_libevent == "libevent"
         if self.options.with_libevent == "libevent":
-            self._cmake.definitions["LWS_LIBEVENT_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libevent"))
-            self._cmake.definitions["LWS_LIBEVENT_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["libevent"].include_paths)
+            tc.variables["LWS_LIBEVENT_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libevent"))
+            tc.variables["LWS_LIBEVENT_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["libevent"].cpp_info.includedirs)
 
-        self._cmake.definitions["LWS_WITH_ZLIB"] = self.options.with_zlib != False
-        self._cmake.definitions["LWS_WITH_MINIZ"] = self.options.with_zlib == "miniz"
-        self._cmake.definitions["LWS_WITH_BUNDLED_ZLIB"] = self.options.with_zlib == "bundled"
+        tc.variables["LWS_WITH_ZLIB"] = self.options.with_zlib != False
+        tc.variables["LWS_WITH_MINIZ"] = self.options.with_zlib == "miniz"
+        tc.variables["LWS_WITH_BUNDLED_ZLIB"] = self.options.with_zlib == "bundled"
         if self.options.with_zlib == "zlib":
-            self._cmake.definitions["LWS_ZLIB_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("zlib"))
-            self._cmake.definitions["LWS_ZLIB_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["zlib"].include_paths)
+            tc.variables["LWS_ZLIB_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("zlib"))
+            tc.variables["LWS_ZLIB_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["zlib"].cpp_info.includedirs)
         elif self.options.with_zlib == "miniz":
-            self._cmake.definitions["MINIZ_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("miniz"))
-            self._cmake.definitions["MINIZ_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["miniz"].include_paths)
+            tc.variables["MINIZ_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("miniz"))
+            tc.variables["MINIZ_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["miniz"].cpp_info.includedirs)
 
-        self._cmake.definitions["LWS_WITH_SQLITE3"] = self.options.with_sqlite3
+        tc.variables["LWS_WITH_SQLITE3"] = self.options.with_sqlite3
         if self.options.with_sqlite3:
-            self._cmake.definitions["LWS_SQLITE3_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("sqlite3"))
-            self._cmake.definitions["LWS_SQLITE3_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["sqlite3"].include_paths)
+            tc.variables["LWS_SQLITE3_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("sqlite3"))
+            tc.variables["LWS_SQLITE3_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["sqlite3"].cpp_info.includedirs)
 
-        self._cmake.definitions["LWS_WITH_FSMOUNT"] = self.options.with_libmount
+        tc.variables["LWS_WITH_FSMOUNT"] = self.options.with_libmount
         if self.options.with_libmount:
-            self._cmake.definitions["LWS_LIBMOUNT_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmount"))
-            self._cmake.definitions["LWS_LIBMOUNT_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["libmount"].include_paths)
+            tc.variables["LWS_LIBMOUNT_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmount"))
+            tc.variables["LWS_LIBMOUNT_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["libmount"].cpp_info.includedirs)
 
-        self._cmake.definitions["LWS_WITH_HUBBUB"] = self.options.with_hubbub
+        tc.variables["LWS_WITH_HUBBUB"] = self.options.with_hubbub
 
-        self._cmake.definitions["LWS_SSL_CLIENT_USE_OS_CA_CERTS"] = self.options.ssl_client_use_os_ca_certs
-        self._cmake.definitions["LWS_SSL_SERVER_WITH_ECDH_CERT"] = self.options.ssl_server_with_ecdh_cert
+        tc.variables["LWS_SSL_CLIENT_USE_OS_CA_CERTS"] = self.options.ssl_client_use_os_ca_certs
+        tc.variables["LWS_SSL_SERVER_WITH_ECDH_CERT"] = self.options.ssl_server_with_ecdh_cert
 
-        self._cmake.definitions["LWS_WITH_NETWORK"] = self.options.enable_network
-        self._cmake.definitions["LWS_ROLE_H1"] = self.options.role_h1
-        self._cmake.definitions["LWS_ROLE_WS"] = self.options.role_ws
-        self._cmake.definitions["LWS_ROLE_MQTT"] = self.options.role_mqtt
-        self._cmake.definitions["LWS_ROLE_DBUS"] = self.options.role_dbus
-        self._cmake.definitions["LWS_ROLE_RAW_PROXY"] = self.options.role_raw_proxy
-        self._cmake.definitions["LWS_ROLE_RAW_FILE"] = self.options.role_raw_file
-        self._cmake.definitions["LWS_WITH_HTTP2"] = self.options.enable_http2
-        self._cmake.definitions["LWS_WITH_LWSWS"] = self.options.enable_lwsws
-        self._cmake.definitions["LWS_WITH_CGI"] = self.options.enable_cgi
-        self._cmake.definitions["LWS_IPV6"] = self.options.enable_ipv6
-        self._cmake.definitions["LWS_UNIX_SOCK"] = self.options.enable_unix_sock
-        self._cmake.definitions["LWS_WITH_PLUGINS"] = self.options.enable_plugins
-        self._cmake.definitions["LWS_WITH_HTTP_PROXY"] = self.options.enable_http_proxy
-        self._cmake.definitions["LWS_WITH_ZIP_FOPS"] = self.options.enable_zip_fops
-        self._cmake.definitions["LWS_WITH_SOCKS5"] = self.options.enable_socks5
-        self._cmake.definitions["LWS_WITH_GENERIC_SESSIONS"] = self.options.enable_generic_sessions
-        self._cmake.definitions["LWS_WITH_PEER_LIMITS"] = self.options.enable_peer_limits
-        self._cmake.definitions["LWS_WITH_ACCESS_LOG"] = self.options.enable_access_log
-        self._cmake.definitions["LWS_WITH_RANGES"] = self.options.enable_ranges
-        self._cmake.definitions["LWS_WITH_SERVER_STATUS"] = self.options.enable_server_status
-        self._cmake.definitions["LWS_WITH_THREADPOOL"] = self.options.enable_threadpool
-        self._cmake.definitions["LWS_WITH_HTTP_STREAM_COMPRESSION"] = self.options.enable_http_stream_compression
-        self._cmake.definitions["LWS_WITH_HTTP_BROTLI"] = self.options.enable_http_brotli
-        self._cmake.definitions["LWS_WITH_ACME"] = self.options.enable_acme
-        self._cmake.definitions["LWS_WITH_FTS"] = self.options.enable_fts
-        self._cmake.definitions["LWS_WITH_SYS_ASYNC_DNS"] = self.options.enable_sys_async_dns
-        self._cmake.definitions["LWS_WITH_SYS_NTPCLIENT"] = self.options.enable_sys_ntpclient
-        self._cmake.definitions["LWS_WITH_SYS_DHCP_CLIENT"] = self.options.enable_sys_dhcp_client
-        self._cmake.definitions["LWS_WITH_HTTP_BASIC_AUTH"] = self.options.enable_http_basic_auth
-        self._cmake.definitions["LWS_WITH_HTTP_UNCOMMON_HEADERS"] = self.options.enable_http_uncommon_headers
+        tc.variables["LWS_WITH_NETWORK"] = self.options.enable_network
+        tc.variables["LWS_ROLE_H1"] = self.options.role_h1
+        tc.variables["LWS_ROLE_WS"] = self.options.role_ws
+        tc.variables["LWS_ROLE_MQTT"] = self.options.role_mqtt
+        tc.variables["LWS_ROLE_DBUS"] = self.options.role_dbus
+        tc.variables["LWS_ROLE_RAW_PROXY"] = self.options.role_raw_proxy
+        tc.variables["LWS_ROLE_RAW_FILE"] = self.options.role_raw_file
+        tc.variables["LWS_WITH_HTTP2"] = self.options.enable_http2
+        tc.variables["LWS_WITH_LWSWS"] = self.options.enable_lwsws
+        tc.variables["LWS_WITH_CGI"] = self.options.enable_cgi
+        tc.variables["LWS_IPV6"] = self.options.enable_ipv6
+        tc.variables["LWS_UNIX_SOCK"] = self.options.enable_unix_sock
+        tc.variables["LWS_WITH_PLUGINS"] = self.options.enable_plugins
+        tc.variables["LWS_WITH_HTTP_PROXY"] = self.options.enable_http_proxy
+        tc.variables["LWS_WITH_ZIP_FOPS"] = self.options.enable_zip_fops
+        tc.variables["LWS_WITH_SOCKS5"] = self.options.enable_socks5
+        tc.variables["LWS_WITH_GENERIC_SESSIONS"] = self.options.enable_generic_sessions
+        tc.variables["LWS_WITH_PEER_LIMITS"] = self.options.enable_peer_limits
+        tc.variables["LWS_WITH_ACCESS_LOG"] = self.options.enable_access_log
+        tc.variables["LWS_WITH_RANGES"] = self.options.enable_ranges
+        tc.variables["LWS_WITH_SERVER_STATUS"] = self.options.enable_server_status
+        tc.variables["LWS_WITH_THREADPOOL"] = self.options.enable_threadpool
+        tc.variables["LWS_WITH_HTTP_STREAM_COMPRESSION"] = self.options.enable_http_stream_compression
+        tc.variables["LWS_WITH_HTTP_BROTLI"] = self.options.enable_http_brotli
+        tc.variables["LWS_WITH_ACME"] = self.options.enable_acme
+        tc.variables["LWS_WITH_FTS"] = self.options.enable_fts
+        tc.variables["LWS_WITH_SYS_ASYNC_DNS"] = self.options.enable_sys_async_dns
+        tc.variables["LWS_WITH_SYS_NTPCLIENT"] = self.options.enable_sys_ntpclient
+        tc.variables["LWS_WITH_SYS_DHCP_CLIENT"] = self.options.enable_sys_dhcp_client
+        tc.variables["LWS_WITH_HTTP_BASIC_AUTH"] = self.options.enable_http_basic_auth
+        tc.variables["LWS_WITH_HTTP_UNCOMMON_HEADERS"] = self.options.enable_http_uncommon_headers
 
-        self._cmake.definitions["LWS_WITHOUT_EXTENSIONS"] = not self.options.enable_extensions
-        self._cmake.definitions["LWS_WITHOUT_BUILTIN_GETIFADDRS"] = not self.options.enable_builtin_getifaddrs
-        self._cmake.definitions["LWS_FALLBACK_GETHOSTBYNAME"] = self.options.enable_fallback_gethostbyname
-        self._cmake.definitions["LWS_WITHOUT_BUILTIN_SHA1"] = not self.options.enable_builtin_sha1
-        self._cmake.definitions["LWS_WITHOUT_DAEMONIZE"] = not self.options.enable_daemonize
-        self._cmake.definitions["LWS_WITH_LEJP"] = self.options.enable_lejp
-        self._cmake.definitions["LWS_WITH_STRUCT_JSON"] = self.options.enable_struct_json
-        self._cmake.definitions["LWS_WITH_STRUCT_SQLITE3"] = self.options.enable_struct_sqlite3
+        tc.variables["LWS_WITHOUT_EXTENSIONS"] = not self.options.enable_extensions
+        tc.variables["LWS_WITHOUT_BUILTIN_GETIFADDRS"] = not self.options.enable_builtin_getifaddrs
+        tc.variables["LWS_FALLBACK_GETHOSTBYNAME"] = self.options.enable_fallback_gethostbyname
+        tc.variables["LWS_WITHOUT_BUILTIN_SHA1"] = not self.options.enable_builtin_sha1
+        tc.variables["LWS_WITHOUT_DAEMONIZE"] = not self.options.enable_daemonize
+        tc.variables["LWS_WITH_LEJP"] = self.options.enable_lejp
+        tc.variables["LWS_WITH_STRUCT_JSON"] = self.options.enable_struct_json
+        tc.variables["LWS_WITH_STRUCT_SQLITE3"] = self.options.enable_struct_sqlite3
 
-        self._cmake.definitions["LWS_WITH_NO_LOGS"] = self.options.disable_logs
-        self._cmake.definitions["LWS_LOGS_TIMESTAMP"] = self.options.logs_timestamp
-        self._cmake.definitions["LWS_AVOID_SIGPIPE_IGN"] = self.options.avoid_sigpipe_ign
-        self._cmake.definitions["LWS_WITH_STATS"] = self.options.enable_stats
-        self._cmake.definitions["LWS_WITH_JOSE"] = self.options.enable_jose
-        self._cmake.definitions["LWS_WITH_GENCRYPTO"] = self.options.enable_gencrypto
-        self._cmake.definitions["LWS_WITH_SELFTESTS"] = self.options.enable_selftests
-        self._cmake.definitions["LWS_WITH_GCOV"] = self.options.enable_gcov
-        self._cmake.definitions["LWS_WITH_LWSAC"] = self.options.enable_lwsac
-        self._cmake.definitions["LWS_WITH_CUSTOM_HEADERS"] = self.options.enable_custom_headers
-        self._cmake.definitions["LWS_WITH_DISKCACHE"] = self.options.enable_diskcache
-        self._cmake.definitions["LWS_WITH_DIR"] = self.options.enable_dir
-        self._cmake.definitions["LWS_WITH_LEJP_CONF"] = self.options.enable_lejp_conf
-        self._cmake.definitions["LWS_WITH_DEPRECATED_LWS_DLL"] = self.options.enable_deprecated_lws_dll
-        self._cmake.definitions["LWS_WITH_SEQUENCER"] = self.options.enable_sequencer
-        self._cmake.definitions["LWS_WITH_EXTERNAL_POLL"] = self.options.enable_external_poll
-        self._cmake.definitions["LWS_WITH_LWS_DSH"] = self.options.enable_lws_dsh
-        self._cmake.definitions["LWS_CLIENT_HTTP_PROXYING"] = self.options.enable_external_http_proxying
-        self._cmake.definitions["LWS_WITH_FILE_OPS"] = self.options.enable_file_ops
-        self._cmake.definitions["LWS_WITH_DETAILED_LATENCY"] = self.options.enable_detailed_latency
-        self._cmake.definitions["LWS_WITH_UDP"] = self.options.enable_udp
-        self._cmake.definitions["LWS_WITH_SPAWN"] = self.options.enable_spawn
+        tc.variables["LWS_WITH_NO_LOGS"] = self.options.disable_logs
+        tc.variables["LWS_LOGS_TIMESTAMP"] = self.options.logs_timestamp
+        tc.variables["LWS_AVOID_SIGPIPE_IGN"] = self.options.avoid_sigpipe_ign
+        tc.variables["LWS_WITH_STATS"] = self.options.enable_stats
+        tc.variables["LWS_WITH_JOSE"] = self.options.enable_jose
+        tc.variables["LWS_WITH_GENCRYPTO"] = self.options.enable_gencrypto
+        tc.variables["LWS_WITH_SELFTESTS"] = self.options.enable_selftests
+        tc.variables["LWS_WITH_GCOV"] = self.options.enable_gcov
+        tc.variables["LWS_WITH_LWSAC"] = self.options.enable_lwsac
+        tc.variables["LWS_WITH_CUSTOM_HEADERS"] = self.options.enable_custom_headers
+        tc.variables["LWS_WITH_DISKCACHE"] = self.options.enable_diskcache
+        tc.variables["LWS_WITH_DIR"] = self.options.enable_dir
+        tc.variables["LWS_WITH_LEJP_CONF"] = self.options.enable_lejp_conf
+        tc.variables["LWS_WITH_DEPRECATED_LWS_DLL"] = self.options.enable_deprecated_lws_dll
+        tc.variables["LWS_WITH_SEQUENCER"] = self.options.enable_sequencer
+        tc.variables["LWS_WITH_EXTERNAL_POLL"] = self.options.enable_external_poll
+        tc.variables["LWS_WITH_LWS_DSH"] = self.options.enable_lws_dsh
+        tc.variables["LWS_CLIENT_HTTP_PROXYING"] = self.options.enable_external_http_proxying
+        tc.variables["LWS_WITH_FILE_OPS"] = self.options.enable_file_ops
+        tc.variables["LWS_WITH_DETAILED_LATENCY"] = self.options.enable_detailed_latency
+        tc.variables["LWS_WITH_UDP"] = self.options.enable_udp
+        tc.variables["LWS_WITH_SPAWN"] = self.options.enable_spawn
 
-        self._cmake.definitions["LWS_WITH_ALSA"] = False
-        self._cmake.definitions["LWS_WITH_GTK"] = False
+        tc.variables["LWS_WITH_ALSA"] = False
+        tc.variables["LWS_WITH_GTK"] = False
 
-        if tools.Version(self.version) >= "4.1.0":
-            self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
-            self._cmake.definitions["DISABLE_WERROR"] = True
+        if Version(self.version) >= "4.1.0":
+            tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
+            tc.variables["DISABLE_WERROR"] = True
 
-        # Temporary override Windows 10 SDK for Visual Studio 2019, see issue #4450
-        # CCI worker has 10.0.17763.0 SDK installed alongside with 10.0.20348 but only 20348 can be used with Visual Studio 2019
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == 16:
-            self._cmake.definitions["CMAKE_SYSTEM_VERSION"] = "10.0.20348"
-
-        self._cmake.configure()
-        return self._cmake
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, 
             cmakelists,
             "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
             "",
         )
-        if tools.Version(self.version) == "4.0.15" and self.options.with_ssl:
-            tools.replace_in_file(
+        if Version(self.version) == "4.0.15" and self.options.with_ssl:
+            replace_in_file(self, 
                 cmakelists,
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
             )
-        if tools.Version(self.version) < "4.1.0":
-            tools.replace_in_file(cmakelists, "-Werror", "")
-        if tools.Version(self.version) >= "4.1.4":
-            tools.replace_in_file(cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
+        if Version(self.version) < "4.1.0":
+            replace_in_file(self, cmakelists, "-Werror", "")
+        if Version(self.version) >= "4.1.4":
+            replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -476,8 +468,7 @@ class LibwebsocketsConan(ConanFile):
             {self._cmake_target: "Libwebsockets::{}".format(self._cmake_target)}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
@@ -486,7 +477,7 @@ class LibwebsocketsConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
@@ -502,7 +493,7 @@ class LibwebsocketsConan(ConanFile):
         pkgconfig_name = "libwebsockets" if self.options.shared else "libwebsockets_static"
         self.cpp_info.set_property("pkg_config_name", pkgconfig_name)
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_libwebsockets"].libs = collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
