@@ -33,3 +33,6 @@ patches:
     - patch_file: "patches/0002-fix-dependencies-v0.5.patch"
       patch_description: "use find_package for third party libraries"
       patch_type: "conan"
+    - patch_file: "patches/0003-fix-installation-v0.5.patch"
+      patch_description: "fix installation destination"
+      patch_type: "conan"
