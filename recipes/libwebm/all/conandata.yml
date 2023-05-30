@@ -1,8 +1,11 @@
 sources:
-  "1.0.0.29":
-    url: "https://chromium.googlesource.com/webm/libwebm/+archive/2f9fc054ab9547ca06071ec68dab9d54960abb2e.tar.gz"
+  '1.0.0.29':
+    url: 'https://chromium.googlesource.com/webm/libwebm/+archive/2f9fc054ab9547ca06071ec68dab9d54960abb2e.tar.gz'
 patches:
-  "1.0.0.29":
-    - patch_file: "patches/1.0.0.29-cmake-install-targets.patch"
-      patch_description: "Always declare the CMake install target for libwebm.a/so"
-      patch_type: "conan"
+  '1.0.0.29':
+    - patch_file: 'patches/1.0.0.29-cmake-install-targets.patch'
+      patch_description: 'Always declare the CMake install target for libwebm.a/so'
+      patch_type: 'conan'
+    - patch_file: 'patches/1.0.0.29-cmake-windows-lib-name-fix.patch'
+      patch_description: "Don't force 'lib' prefix on libraries generated for Windows."
+      patch_type: 'conan'
