@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -188,9 +189,6 @@ class LibwebsocketsConan(ConanFile):
         "enable_spawn": False
     }
 
-    exports_sources = "CMakeLists.txt"
-    _cmake = None
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -225,7 +223,8 @@ class LibwebsocketsConan(ConanFile):
             self.requires("sqlite3/3.37.2")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/[>=1.1 <4]")
+            # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
+            self.requires("openssl/1.1.1t", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
@@ -251,7 +250,7 @@ class LibwebsocketsConan(ConanFile):
         self._patch_sources()
 
     def _get_library_extension(self, dep):
-        if self.options[dep].shared:
+        if self.dependencies[dep].options.shared:
             if self.settings.os == "Windows" :
                 if is_msvc(self):
                     return ".lib"
@@ -267,26 +266,22 @@ class LibwebsocketsConan(ConanFile):
             else:
                 return ".a"
 
-    @property
-    def _get_library_prefix(self):
-        if self.settings.os == "Windows":
-            return ""
-        return "lib"
-
     def _cmakify_path_list(self, paths):
         return ";".join(paths).replace("\\", "/")
 
     def _find_library(self, libname, dep):
-        for path in self.dependencies[dep].cpp_info.libdirs:
-            lib_fullpath = os.path.join(path, self._get_library_prefix + libname + self._get_library_extension(dep))
-
-            print("Test : " + str(lib_fullpath))
+        prefix = "lib" if self.settings.os != "Windows" else ""
+        for path in self.dependencies[dep].cpp_info.libdirs:  
+            lib_fullpath = os.path.join(path, prefix + libname + self._get_library_extension(dep))
+            self.output.info("Dependency library full path : " + str(lib_fullpath))
             if os.path.isfile(lib_fullpath):
                 return lib_fullpath
         raise ConanException("Library {} not found".format(lib_fullpath))
 
     def _find_libraries(self, dep):
-        return [self._find_library(lib, dep) for lib in self.dependencies[dep].cpp_info.libs]
+        aggregated = self.dependencies[dep].cpp_info.aggregated_components()
+        result = [self._find_library(lib, dep) for lib in aggregated.libs]
+        return result
 
     def generate(self):
         tc = CMakeToolchain(self)
