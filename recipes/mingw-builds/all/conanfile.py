@@ -49,7 +49,7 @@ class MingwConan(ConanFile):
                                                 f"exception={self.settings_target.compiler.exception}, please use the same value for both.")
 
     def build_requirements(self):
-        self.build_requires("7zip/19.00")
+        self.build_requires("7zip/22.01")
 
     def build(self):
         # Source should be downloaded in the build step since it depends on specific options
