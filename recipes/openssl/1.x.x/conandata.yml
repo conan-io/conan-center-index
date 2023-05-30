@@ -30,6 +30,7 @@ sources:
     sha256: e2f8d84b523eecd06c7be7626830370300fbcc15386bf5142d72758f6963ebc6
     url:
       - "https://www.openssl.org/source/openssl-1.1.1u.tar.gz"
+      - "https://www.openssl.org/source/old/1.1.1/openssl-1.1.1u.tar.gz"
       - "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1u/openssl-1.1.1u.tar.gz"
 patches:
   1.0.2u:
