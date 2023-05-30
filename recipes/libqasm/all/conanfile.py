@@ -44,23 +44,16 @@ class LibqasmConan(ConanFile):
             self.tool_requires("bison/3.8.2")
 
     def config_options(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def layout(self):
-        self.folders.source = "."
-        self.folders.build = os.path.join("build", str(self.settings.build_type))
-        self.folders.generators = os.path.join(self.folders.build, "generators")
-
-        self.cpp.package.libs = ["cqasm"]
-        self.cpp.package.includedirs = ["include"]
-        self.cpp.package.libdirs = ["lib"]
-
-        self.cpp.source.includedirs = ["include"]
-        self.cpp.build.libdirs = ["."]
+        cmake_layout(self, src_folder=".")
 
     def source(self):
-        get(self, **self.conan_data["sources"]["0.5.4"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
