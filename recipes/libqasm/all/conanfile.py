@@ -37,6 +37,20 @@ class LibqasmConan(ConanFile):
         "tree_gen_build_tests": False
     }
 
+    @property
+    def _min_cppstd(self):
+        return "20"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "14",
+            "clang": "13",
+            "gcc": "10",
+            "msvc": "192",
+            "Visual Studio": "16"
+        }
+
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
         if self.settings.os == "Windows":
@@ -84,24 +98,14 @@ class LibqasmConan(ConanFile):
         cmake.build()
 
     def validate(self):
-        compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version)
-        if compiler == "apple-clang":
-            if version < "14":
-                raise ConanInvalidConfiguration("libqasm requires at least apple-clang++ 14")
-        elif compiler == "clang":
-            if version < "13":
-                raise ConanInvalidConfiguration("libqasm requires at least clang++ 13")
-        elif compiler == "gcc":
-            if version < "10.0":
-                raise ConanInvalidConfiguration("libqasm requires at least g++ 10.0")
-        elif compiler == "msvc":
-            if version < "19.29":
-                raise ConanInvalidConfiguration("libqasm requires at least msvc 19.29")
-        else:
-            raise ConanInvalidConfiguration("Unsupported compiler")
-        if compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "20")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
