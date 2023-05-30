@@ -89,8 +89,8 @@ class LibqasmConan(ConanFile):
             if version < "13":
                 raise ConanInvalidConfiguration("libqasm requires at least apple-clang++ 13")
         elif compiler == "clang":
-            if version < "8":
-                raise ConanInvalidConfiguration("libqasm requires at least clang++ 8")
+            if version < "13":
+                raise ConanInvalidConfiguration("libqasm requires at least clang++ 13")
         elif compiler == "gcc":
             if version < "10.0":
                 raise ConanInvalidConfiguration("libqasm requires at least g++ 10.0")
