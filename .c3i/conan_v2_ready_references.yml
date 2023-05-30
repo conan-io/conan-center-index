@@ -362,12 +362,14 @@ required_for_references:
 - libmp3lame
 - libmysqlclient
 - libnabo
+- libnfs
 - libnghttp2
 - libnop
 - libnova
 - libnuma
 - libpcap
 - libpciaccess
+- libpfm4
 - libpng
 - libpq
 - libpqxx
@@ -502,6 +504,7 @@ required_for_references:
 - picojson
 - pixman
 - pkgconf
+- plutovg
 - poco
 - popt
 - proj
@@ -622,6 +625,7 @@ required_for_references:
 - vulkan-validationlayers
 - wasmtime
 - wasmtime-cpp
+- watcher
 - wayland
 - wayland-protocols
 - websocketpp
@@ -656,6 +660,7 @@ required_for_references:
 - yajl
 - yaml-cpp
 - yasm
+- yyjson
 - zbar
 - zeromq
 - zfp
