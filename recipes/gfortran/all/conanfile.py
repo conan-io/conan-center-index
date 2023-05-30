@@ -24,7 +24,7 @@ class GFortranConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.tool_requires("7zip/19.00")
+            self.tool_requires("7zip/22.01")
 
     def build(self):
         if self.settings.os == "Windows":
