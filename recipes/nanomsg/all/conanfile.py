@@ -19,22 +19,14 @@ class NanomsgConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_doc": [True, False],
         "enable_coverage": [True, False],
         "enable_getaddrinfo_a":[True, False],
-        "enable_tests": [True, False],
-        "enable_tools": [True, False],
-        "enable_nanocat": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_doc": True,
         "enable_coverage": False,
         "enable_getaddrinfo_a":True,
-        "enable_tests": True,
-        "enable_tools": True,
-        "enable_nanocat": True,
     }
 
     def config_options(self):
@@ -56,12 +48,8 @@ class NanomsgConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["NN_STATIC_LIB"] = not self.options.shared
-        tc.variables["NN_ENABLE_DOC"] = self.options.enable_doc
         tc.variables["NN_ENABLE_COVERAGE"] = self.options.enable_coverage
         tc.variables["NN_ENABLE_GETADDRINFO_A"] = self.options.enable_getaddrinfo_a
-        tc.variables["NN_TESTS"] = self.options.enable_tests
-        tc.variables["NN_TOOLS"] = self.options.enable_tools
-        tc.variables["NN_ENABLE_NANOCAT"] = self.options.enable_nanocat
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
