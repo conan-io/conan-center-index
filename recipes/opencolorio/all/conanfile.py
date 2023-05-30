@@ -75,6 +75,8 @@ class OpenColorIOConan(ConanFile):
 
         if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
+        if Version(self.version) == "2.2.1" and self.options.shared and self.dependencies["minizip-ng"].options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} requires static build minizip-ng")
 
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
