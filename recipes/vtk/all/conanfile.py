@@ -990,11 +990,36 @@ class VtkConan(ConanFile):
                                   'project(VTK)\nlink_directories("{}")\n'.format(python_lib_folder)
                                   )
 
+        ###########
+        # Hacks required for CMakeDeps, apparently not be required with CMakeDeps2 in the future sometime
+        # https://github.com/conan-io/conan-center-index/pull/10776#issuecomment-1496800353
+        # https://github.com/conan-io/conan-center-index/pull/10776#issuecomment-1499403634
+        # Thanks to Eric for the fix: https://github.com/EricAtORS/conan-center-index/commit/a1cdc0803dca4fbff03393ee7324ee354b857789
+
         # fix detecting glew shared status
         replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "glew", "CMakeLists.txt"),
-         'set(VTK_GLEW_SHARED "${vtkglew_is_shared}")', 
+         'set(VTK_GLEW_SHARED "${vtkglew_is_shared}")',
          f'set(VTK_GLEW_SHARED "{ "ON" if str(self.dependencies["glew"].options.shared) else "OFF"}")'
         )
+
+        # fix detecting freetype shared status
+        replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "freetype", "CMakeLists.txt"),
+         'set(VTK_FREETYPE_SHARED "${vtkfreetype_is_shared}")',
+         f'set(VTK_FREETYPE_SHARED "{ "ON" if str(self.dependencies["freetype"].options.shared) else "OFF"}")'
+        )
+
+        # fix detecting jsoncpp shared status
+        replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "jsoncpp", "CMakeLists.txt"),
+         'set(VTK_JSONCPP_SHARED "${vtkjsoncpp_is_shared}")',
+         f'set(VTK_JSONCPP_SHARED "{ "ON" if str(self.dependencies["jsoncpp"].options.shared) else "OFF"}")'
+        )
+
+        # fix detecting lzma shared status
+        replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "lzma", "CMakeLists.txt"),
+         'set(VTK_LZMA_SHARED "${vtklzma_is_shared}")',
+         f'set(VTK_LZMA_SHARED "{ "ON" if str(self.dependencies["lzma"].options.shared) else "OFF"}")'
+        )
+        ###########
 
 
         cmake = CMake(self)
