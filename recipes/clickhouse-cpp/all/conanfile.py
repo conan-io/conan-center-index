@@ -40,7 +40,7 @@ class ClickHouseCppConan(ConanFile):
             self.requires("openssl/>=1.1 <4")
 
     def build_requirements(self):
-        if self.options.build_bench:
+        if self.options.enable_benchmark:
             self.requires("benchmark/1.8.0")
 
     @property
