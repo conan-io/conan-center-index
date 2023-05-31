@@ -25,7 +25,7 @@ class ClickHouseCppConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_bench": False,
+        "enable_benchmark": False,
         "with_openssl": False
     }
 
@@ -92,9 +92,6 @@ class ClickHouseCppConan(ConanFile):
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
         tc.cache_variables["WITH_SYSTEM_CITYHASH"] = True
-        if self.settings.compiler == 'clang' and self.settings.os == 'Linux':
-            if self.settings.compiler.libcxx == 'libc++':
-                tc.preprocessor_definitions['CMAKE_CXX_FLAGS'] = '-stdlib=libc++'
         tc.generate()
 
         cd = CMakeDeps(self)
