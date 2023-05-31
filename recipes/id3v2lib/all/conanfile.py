@@ -30,7 +30,7 @@ class LibwebmConan(ConanFile):
     def validate(self):
         # An issue has been opened to discuss supporting MSVC:
         # https://github.com/larsbs/id3v2lib/issues/48
-        if self.settings.compiler == "msvc":
+        if self.settings.compiler == "msvc" or self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("id3v2lib does not support Visual Studio.")
 
     def config_options(self):
