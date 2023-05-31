@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d60c5ae..10d6f17 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -350,19 +350,6 @@ add_library(webm ${libwebm_common_sources}
+             $<TARGET_OBJECTS:mkvmuxer>
+             $<TARGET_OBJECTS:mkvparser>)
+ 
+-add_executable(mkvparser_sample ${mkvparser_sample_sources})
+-target_link_libraries(mkvparser_sample LINK_PUBLIC webm)
+-
+-add_executable(mkvmuxer_sample ${mkvmuxer_sample_sources}
+-               $<TARGET_OBJECTS:webvtt_common>)
+-target_link_libraries(mkvmuxer_sample LINK_PUBLIC webm)
+-
+-add_executable(dumpvtt ${dumpvtt_sources} $<TARGET_OBJECTS:webvtt_common>)
+-target_link_libraries(dumpvtt LINK_PUBLIC webm)
+-
+-add_executable(vttdemux ${vttdemux_sources})
+-target_link_libraries(vttdemux LINK_PUBLIC webm)
+-
+ if (ENABLE_WEBMINFO)
+   add_executable(webm_info ${webm_info_sources})
+   target_link_libraries(webm_info LINK_PUBLIC webm)

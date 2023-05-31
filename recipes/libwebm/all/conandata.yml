@@ -9,3 +9,6 @@ patches:
     - patch_file: 'patches/1.0.0.29-cmake-windows-lib-name-fix.patch'
       patch_description: "Don't force 'lib' prefix on libraries generated for Windows."
       patch_type: 'conan'
+    - patch_file: 'patches/1.0.0.29-cmake-dont-build-programs.patch'
+      patch_description: "Don't build sample programs."
+      patch_type: 'conan'
