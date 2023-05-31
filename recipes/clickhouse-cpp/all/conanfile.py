@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 class ClickHouseCppConan(ConanFile):
     name = "clickhouse-cpp"
@@ -19,7 +19,7 @@ class ClickHouseCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_bench": [True, False],
+        "enable_benchmark": [True, False],
         "with_openssl": [True, False]
     }
     default_options = {
@@ -31,17 +31,17 @@ class ClickHouseCppConan(ConanFile):
 
     def requirements(self):
 
-        self.requires("lz4/1.9.3")
+        self.requires("lz4/1.9.4")
 
-        self.requires("abseil/20230125.2", transitive_headers=True)
+        self.requires("abseil/20230125.3", transitive_headers=True)
 
         self.requires("cityhash/cci.20130801")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.2")
+            self.requires("openssl/>=1.1 <4")
 
     def build_requirements(self):
         if self.options.build_bench:
-            self.requires("benchmark/1.6.0")
+            self.requires("benchmark/1.8.0")
 
     @property
     def _min_cppstd(self):
@@ -67,7 +67,7 @@ class ClickHouseCppConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
         if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Invalid configuration")
+            raise ConanInvalidConfiguration("f{self.ref} does not support shared library on Windows.")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
 
     def config_options(self):
@@ -87,7 +87,7 @@ class ClickHouseCppConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["BUILD_BENCHMARK"] =  self.options.build_bench
+        tc.variables["BUILD_BENCHMARK"] =  self.options.enable_benchmark
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
