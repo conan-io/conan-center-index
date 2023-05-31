@@ -101,7 +101,8 @@ class ChaiScriptConan(ConanFile):
     def package_info(self):
         if not self.options.header_only:
             self.cpp_info.libdirs = ["lib", os.path.join("lib", "chaiscript")]
-            self.cpp_info.libs = [f'chaiscript_stdlib-{self.version}', 'stl_extra']
+            # INFO: chaiscript provides module libraries, can not be linked directly
+            self.cpp_info.libs = []
         if self.options.get_safe("use_std_make_shared"):
             self.cpp_info.defines.append("CHAISCRIPT_USE_STD_MAKE_SHARED")
         if self.settings.os in ("Linux", "FreeBSD"):
