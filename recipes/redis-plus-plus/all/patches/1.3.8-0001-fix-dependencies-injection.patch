@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6470b32..281f6f5 100644
+index 6470b32..d372d3d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -34,8 +34,7 @@ if(REDIS_PLUS_PLUS_BUILD_ASYNC)
@@ -20,7 +20,24 @@ index 6470b32..281f6f5 100644
          list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis_ssl)
          find_package(OpenSSL REQUIRED)
          list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS ${OPENSSL_LIBRARIES})
-@@ -214,7 +212,7 @@ if(REDIS_PLUS_PLUS_BUILD_STATIC)
+@@ -163,16 +161,10 @@ endif()
+ set(HIREDIS_FEATURE_TEST_HEADER "${HIREDIS_FEATURE_TEST_INCLUDE}/hiredis/hiredis.h")
+ 
+ include(CheckSymbolExists)
+-set(CMAKE_REQUIRED_LIBRARIES_BACK ${CMAKE_REQUIRED_LIBRARIES})
+-set(CMAKE_REQUIRED_LIBRARIES ${HIREDIS_FEATURE_TEST_LIB})
+-
+ CHECK_SYMBOL_EXISTS(redisEnableKeepAliveWithInterval ${HIREDIS_FEATURE_TEST_HEADER} REDIS_PLUS_PLUS_HAS_redisEnableKeepAliveWithInterval)
+ 
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hiredis_features.h.in ${CMAKE_CURRENT_SOURCE_DIR}/${REDIS_PLUS_PLUS_SOURCE_DIR}/hiredis_features.h)
+ 
+-# Restore CMAKE_REQUIRED_LIBRARIES
+-set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACK})
+-
+ # Build static library
+ option(REDIS_PLUS_PLUS_BUILD_STATIC "Build static library" ON)
+ message(STATUS "redis-plus-plus build static library: ${REDIS_PLUS_PLUS_BUILD_STATIC}")
+@@ -214,7 +206,7 @@ if(REDIS_PLUS_PLUS_BUILD_STATIC)
  
      if(REDIS_PLUS_PLUS_BUILD_ASYNC)
          target_include_directories(${STATIC_LIB} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${REDIS_PLUS_PLUS_ASYNC_FUTURE_HEADER}>)
@@ -29,7 +46,7 @@ index 6470b32..281f6f5 100644
          if(REDIS_PLUS_PLUS_ASYNC_FUTURE STREQUAL "boost")
              target_include_directories(${STATIC_LIB} SYSTEM PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>)
          endif()
-@@ -267,8 +265,7 @@ if(REDIS_PLUS_PLUS_BUILD_SHARED)
+@@ -267,8 +259,7 @@ if(REDIS_PLUS_PLUS_BUILD_SHARED)
  
      if(REDIS_PLUS_PLUS_BUILD_ASYNC)
          target_include_directories(${SHARED_LIB} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${REDIS_PLUS_PLUS_ASYNC_FUTURE_HEADER}>)
