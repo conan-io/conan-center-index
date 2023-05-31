@@ -17,7 +17,7 @@ class TurtleConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
-        basic_layout(self, src_folder="include/turtle")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.81.0")
