@@ -90,6 +90,8 @@ class OneTBBConan(ConanFile):
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbproxy"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+        if self.settings.os == "Emscripten":
+            toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = True
         toolchain.generate()
 
     def build(self):
