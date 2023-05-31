@@ -44,7 +44,7 @@ class LibqasmConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "apple-clang": "14",
+            "apple-clang": "13",
             "clang": "13",
             "gcc": "10",
             "msvc": "192",
