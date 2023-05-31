@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d60c5ae..10d6f17 100644
+index 8db3881..501d757 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -350,19 +350,6 @@ add_library(webm ${libwebm_common_sources}
+@@ -347,19 +347,6 @@ add_library(webm ${libwebm_common_sources}
              $<TARGET_OBJECTS:mkvmuxer>
              $<TARGET_OBJECTS:mkvparser>)
  

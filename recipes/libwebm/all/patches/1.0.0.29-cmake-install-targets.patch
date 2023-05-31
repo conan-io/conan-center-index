@@ -1,8 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a83d23b..ce8337f 100644
+index a83d23b..2bcc761 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -60,21 +60,32 @@ endif ()
+@@ -40,6 +40,7 @@ add_cxx_preproc_definition("__STDC_LIMIT_MACROS")
+ include_directories("${LIBWEBM_SRC_DIR}")
+ 
+ if (MSVC)
++  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+   add_cxx_flag_if_supported("/W4")
+   # Disable MSVC warnings that suggest making code non-portable.
+   add_cxx_flag_if_supported("/wd4996")
+@@ -60,21 +61,32 @@ endif ()
  # Source list variables.
  set(dumpvtt_sources "${LIBWEBM_SRC_DIR}/dumpvtt.cc")
  
@@ -42,7 +50,7 @@ index a83d23b..ce8337f 100644
      "${LIBWEBM_SRC_DIR}/common/webmids.h")
  
  set(mkvmuxer_sample_sources
-@@ -87,11 +98,14 @@ set(mkvmuxer_tests_sources
+@@ -87,11 +99,14 @@ set(mkvmuxer_tests_sources
      "${LIBWEBM_SRC_DIR}/testing/test_util.cc"
      "${LIBWEBM_SRC_DIR}/testing/test_util.h")
  
@@ -59,7 +67,7 @@ index a83d23b..ce8337f 100644
      "${LIBWEBM_SRC_DIR}/common/webmids.h")
  
  set(mkvparser_sample_sources "${LIBWEBM_SRC_DIR}/mkvparser_sample.cc")
-@@ -284,15 +298,11 @@ set(webm_parser_tests_sources
+@@ -284,15 +299,11 @@ set(webm_parser_tests_sources
      "${LIBWEBM_SRC_DIR}/webm_parser/tests/webm_parser_tests.cc")
  
  set(webm_info_sources
@@ -76,42 +84,28 @@ index a83d23b..ce8337f 100644
      "${LIBWEBM_SRC_DIR}/webm_info.cc")
  
  set(webmts_sources
-@@ -315,12 +325,22 @@ set(webm2pes_tests_sources
-     "${LIBWEBM_SRC_DIR}/m2ts/tests/webm2pes_tests.cc")
+@@ -316,10 +327,16 @@ set(webm2pes_tests_sources
  set(webm2ts_sources "${LIBWEBM_SRC_DIR}/m2ts/vpxpes2ts_main.cc")
  
--set(webvtt_common_sources
+ set(webvtt_common_sources
 -    "${LIBWEBM_SRC_DIR}/webvtt/vttreader.cc"
-+set(webvtt_common_public_headers
-     "${LIBWEBM_SRC_DIR}/webvtt/vttreader.h"
+-    "${LIBWEBM_SRC_DIR}/webvtt/vttreader.h"
 -    "${LIBWEBM_SRC_DIR}/webvtt/webvttparser.cc"
-     "${LIBWEBM_SRC_DIR}/webvtt/webvttparser.h")
- 
-+set(webvtt_common_sources
-+    ${webvtt_common_public_headers}
-+    "${LIBWEBM_SRC_DIR}/webvtt/vttreader.cc"
-+    "${LIBWEBM_SRC_DIR}/webvtt/webvttparser.cc")
+-    "${LIBWEBM_SRC_DIR}/webvtt/webvttparser.h")
++  "${LIBWEBM_SRC_DIR}/webvtt/vttreader.cc"
++  "${LIBWEBM_SRC_DIR}/webvtt/vttreader.h"
++  "${LIBWEBM_SRC_DIR}/webvtt/webvttparser.cc"
++  "${LIBWEBM_SRC_DIR}/webvtt/webvttparser.h")
 +
 +# Public headers that will be installed with the library.
 +set(webm_public_headers
 +    ${libwebm_common_public_headers}
 +    ${mkvmuxer_public_headers}
-+    ${mkvparser_public_headers}
-+    ${webvtt_common_public_headers})
-+
++    ${mkvparser_public_headers})
+ 
  # Targets.
  add_library(mkvmuxer OBJECT ${mkvmuxer_sources})
- add_library(mkvparser OBJECT ${mkvparser_sources})
-@@ -330,6 +350,8 @@ add_library(webm ${libwebm_common_sources}
-             $<TARGET_OBJECTS:mkvmuxer>
-             $<TARGET_OBJECTS:mkvparser>)
- 
-+
-+
- if (WIN32)
-   # Use libwebm and libwebm.lib for project and library name on Windows (instead
-   # webm and webm.lib).
-@@ -359,17 +381,12 @@ if (ENABLE_WEBM_PARSER)
+@@ -359,17 +376,12 @@ if (ENABLE_WEBM_PARSER)
    include_directories(webm_parser webm_parser/include)
    add_library(webm_parser OBJECT ${webm_parser_sources})
    target_sources(webm PUBLIC $<TARGET_OBJECTS:webm_parser>)
@@ -131,7 +125,7 @@ index a83d23b..ce8337f 100644
  endif ()
  
  if (ENABLE_WEBMTS)
-@@ -451,3 +468,10 @@ if (ENABLE_IWYU)
+@@ -451,3 +463,10 @@ if (ENABLE_IWYU)
      message(STATUS "  See README.libwebm for more information.")
    endif ()
  endif ()

@@ -1,13 +1,11 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ce8337f..d60c5ae 100644
+index 2bcc761..8db3881 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -350,15 +350,6 @@ add_library(webm ${libwebm_common_sources}
+@@ -347,13 +347,6 @@ add_library(webm ${libwebm_common_sources}
              $<TARGET_OBJECTS:mkvmuxer>
              $<TARGET_OBJECTS:mkvparser>)
  
--
--
 -if (WIN32)
 -  # Use libwebm and libwebm.lib for project and library name on Windows (instead
 -  # webm and webm.lib).
