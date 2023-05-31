@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import download, rmdir
+from conan.tools.files import copy, download, rmdir
 
 
 required_conan_version = ">=1.47.0"
@@ -49,7 +49,7 @@ class MingwConan(ConanFile):
                                                 f"exception={self.settings_target.compiler.exception}, please use the same value for both.")
 
     def build_requirements(self):
-        self.build_requires("7zip/19.00")
+        self.build_requires("7zip/22.01")
 
     def build(self):
         # Source should be downloaded in the build step since it depends on specific options
@@ -62,7 +62,7 @@ class MingwConan(ConanFile):
 
     def package(self):
         target = "mingw64" if self.settings.arch == "x86_64" else "mingw32"
-        self.copy("*", dst="", src=target)
+        copy(self, "*", dst=self.package_folder, src=target)
         rmdir(self, target)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "opt", "lib", "cmake"))
