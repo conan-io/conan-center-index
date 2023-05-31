@@ -25,7 +25,8 @@ class XoshiroCppConan(ConanFile):
             "apple-clang": "10",
             "clang": "6",
             "gcc": "7",
-            "Visual Studio": "16"
+            "Visual Studio": "16",
+            "msvc": "192"
         }
 
     @property
@@ -54,7 +55,7 @@ class XoshiroCppConan(ConanFile):
                 f"{self.ref} recipe lacks information about the {compiler} compiler, "
                 f"support for the required C++{self._minimum_cpp_standard} features is assumed"
             )
-            self.output.warn(msg)
+            self.output.warning(msg)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
