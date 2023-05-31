@@ -175,7 +175,9 @@ class DCMTKConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        if self.settings.os != "Macos":
+        if self.settings.os == "Macos":
+            deps.set_property("openssl", "cmake_file_name", "openssl")
+        else:
             deps.set_property("openssl", "cmake_file_name", "OPENSSL")
         deps.set_property("openssl", "cmake_find_mode", "both")
         deps.set_property("libiconv", "cmake_file_name", "ICONV")
