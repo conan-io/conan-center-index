@@ -87,6 +87,7 @@ class ClickHouseCppConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_BENCHMARK"] =  self.options.enable_benchmark
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
