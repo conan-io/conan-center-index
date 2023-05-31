@@ -15,6 +15,11 @@ sources:
     url: "https://github.com/oneapi-src/oneTBB/archive/v2021.3.0.tar.gz"
     sha256: "8f616561603695bbb83871875d2c6051ea28f8187dbe59299961369904d1d49e"
 patches:
+  "2021.9.0":
+    - patch_description: "fix building for emscripten"
+      patch_type: "portability"
+      patch_source: "https://github.com/oneapi-src/oneTBB/pull/1006.patch"
+      patch_file: "patches/2021.9.0-emscripten.patch"
   "2021.8.0":
     - patch_description: "fix building for android with NDK >= 25"
       patch_type: "backport"
