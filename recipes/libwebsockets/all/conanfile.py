@@ -247,7 +247,6 @@ class LibwebsocketsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def _get_library_extension(self, dep):
         if self.dependencies[dep].options.shared:
@@ -448,6 +447,7 @@ class LibwebsocketsConan(ConanFile):
             replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
