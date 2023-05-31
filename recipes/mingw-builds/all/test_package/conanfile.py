@@ -4,9 +4,8 @@ from conan.tools.build import can_run
 
 
 class MinGWTestConan(ConanFile):
-    generators = "gcc"
+    generators = "gcc", "VirtualBuildEnv"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualBuildEnv"
     test_type = "explicit"
 
     def build_requirements(self):
