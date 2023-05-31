@@ -1,0 +1,42 @@
+From 126e7bf15fa4af8621814b82a3f7bd0d786f0239 Mon Sep 17 00:00:00 2001
+From: JiCheng <wejoncy@163.com>
+Date: Wed, 22 Mar 2023 07:57:22 +0800
+Subject: [PATCH] [AMX] add assembler check (#15055)
+
+### Description
+<!-- Describe your changes. -->
+
+AMX isn't supportted until assembler 2.40 even though the GCC frontend
+supports it.
+
+
+### Motivation and Context
+<!-- - Why is this change required? What problem does it solve?
+- If it fixes an open issue, please link to the issue here. -->
+---
+ cmake/onnxruntime_mlas.cmake | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/cmake/onnxruntime_mlas.cmake b/cmake/onnxruntime_mlas.cmake
+index e79e1ed9855..6292a667d4a 100644
+--- a/cmake/onnxruntime_mlas.cmake
++++ b/cmake/onnxruntime_mlas.cmake
+@@ -7,7 +7,17 @@ set(MLAS_SRC_DIR ${ONNXRUNTIME_ROOT}/core/mlas/lib)
+ set(MLAS_AMX_SUPPORTED FALSE)
+ 
+ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11)
+-  set(MLAS_AMX_SUPPORTED TRUE)
++  # match assembler version, AMX instructions are supported from 2.40
++  if (CMAKE_ASM-ATT_COMPILER_ID STREQUAL "GNU")
++    execute_process(
++        COMMAND ${CMAKE_ASM-ATT_COMPILER} --version
++        OUTPUT_VARIABLE _gas_version
++    )
++    # 2.40 or later
++    if (_gas_version MATCHES "GNU.[Aa]ssembler.*(2\\.[4-9][0-9])")
++        set(MLAS_AMX_SUPPORTED TRUE)
++    endif()
++  endif()
+ endif()
+ 
+ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")

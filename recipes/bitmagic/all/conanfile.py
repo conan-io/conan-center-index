@@ -19,10 +19,15 @@ class BitmagicConan(ConanFile):
     homepage = "http://bitmagic.io"
     topics = ("information-retrieval", "algorithm", "bit-manipulation",
               "integer-compression", "sparse-vector", "sparse-matrix", "bit-array",
-              "bit-vector", "indexing-engine", "adjacency-matrix", "associative-array")
+              "bit-vector", "indexing-engine", "adjacency-matrix", "associative-array", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        return 17
+    
     @property
     def _minimum_compilers_version(self):
         return {
@@ -38,7 +43,7 @@ class BitmagicConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
@@ -47,8 +52,7 @@ class BitmagicConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -59,6 +63,4 @@ class BitmagicConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

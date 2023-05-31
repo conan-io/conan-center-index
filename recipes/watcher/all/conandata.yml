@@ -1,4 +1,7 @@
 sources:
+  "0.8.7":
+    url: "https://github.com/e-dant/watcher/archive/release/0.8.7.tar.gz"
+    sha256: "e83eaf097f8ebe9b87bee2962e6e18f6f2597ae4e76d8d0258adc2c62fa545d2"
   "0.8.0":
     url: "https://github.com/e-dant/watcher/archive/release/0.8.0.tar.gz"
     sha256: "74530f5f6c083ec0348ec41938ae43b02bed1d125125623394f31038fec6f9d1"

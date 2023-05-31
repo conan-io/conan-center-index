@@ -17,7 +17,7 @@ class XoshiroCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("prng", "xoshiro", "header-only")
     package_type = "header-library"
-    settings = "arch", "build_type", "compiler", "os"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _min_cppstd(self):
@@ -43,7 +43,7 @@ class XoshiroCppConan(ConanFile):
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
     def source(self):
@@ -51,7 +51,7 @@ class XoshiroCppConan(ConanFile):
 
     def package(self):
         copy(self, "*.hpp", src=self.source_folder,
-             dst=os.path.join(self.package_folder, "include/xoshiro-cpp/"))
+             dst=os.path.join(self.package_folder, "include", "xoshiro-cpp"))
         copy(self, "LICENSE", src=self.source_folder,
              dst=os.path.join(self.package_folder, "licenses"))
 
