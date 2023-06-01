@@ -32,7 +32,7 @@ class EmioConan(ConanFile):
             "gcc": "11",
             "Visual Studio": "16.2",
             "msvc": "19.22",
-            "clang": "13",
+            "clang": "14",
             "apple-clang": "14",
         }
 
