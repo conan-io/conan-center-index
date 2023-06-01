@@ -1,4 +1,5 @@
 required_for_references:
+- 7bitdi
 - aaf
 - aaplus
 - abseil
@@ -7,6 +8,7 @@ required_for_references:
 - ada
 - ade
 - aeron
+- aggeom-agg
 - alac
 - alpaca
 - amgcl
@@ -246,6 +248,7 @@ required_for_references:
 - ghc-filesystem
 - giflib
 - ginkgo
+- gklib
 - glad
 - glfw
 - gli
@@ -376,6 +379,7 @@ required_for_references:
 - librttopo
 - libsamplerate
 - libselinux
+- libserial
 - libsgp4
 - libsmacker
 - libsndfile
@@ -415,6 +419,8 @@ required_for_references:
 - lua
 - luau
 - lz4
+- lzma_sdk
+- lzo
 - m4
 - magic_enum
 - make
@@ -429,6 +435,7 @@ required_for_references:
 - mgs
 - mikelankamp-fpm
 - mimalloc
+- miniaudio
 - minisat
 - minizip
 - minizip-ng
@@ -439,6 +446,7 @@ required_for_references:
 - msgpack-c
 - msgpack-cxx
 - msys2
+- naive-tsearch
 - namedtype
 - nameof
 - nanoflann
@@ -474,6 +482,7 @@ required_for_references:
 - openmesh
 - openssl
 - opensubdiv
+- opentelemetry-proto
 - optional-lite
 - opus
 - opusfile
@@ -491,6 +500,7 @@ required_for_references:
 - physx
 - picobench
 - picojson
+- pixman
 - pkgconf
 - poco
 - popt
@@ -504,8 +514,10 @@ required_for_references:
 - pugixml
 - pulseaudio
 - pybind11
+- pystring
 - qhull
 - qpdf
+- quantlib
 - quill
 - quirc
 - rabbitmq-c
@@ -520,6 +532,8 @@ required_for_references:
 - readerwriterqueue
 - readline
 - readosm
+- rectpack2d
+- replxx
 - restbed
 - restinio
 - roaring
@@ -527,6 +541,7 @@ required_for_references:
 - rttr
 - ruy
 - s2n
+- samurai
 - scnlib
 - screen_capture_lite
 - sdbus-cpp
@@ -576,6 +591,7 @@ required_for_references:
 - tinycthreadpool
 - tinyexif
 - tinymidi
+- tinyxml
 - tinyxml2
 - tl-expected
 - tlx
@@ -595,6 +611,8 @@ required_for_references:
 - vdpau
 - veque
 - vincentlaucsb-csv-parser
+- vir-simd
+- visit_struct
 - volk
 - vorbis
 - vtu11
