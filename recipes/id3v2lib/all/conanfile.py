@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -14,6 +15,7 @@ class LibwebmConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/larsbs/id3v2lib"
     license = "BSD-2-Clause"
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
 
@@ -30,7 +32,7 @@ class LibwebmConan(ConanFile):
     def validate(self):
         # An issue has been opened to discuss supporting MSVC:
         # https://github.com/larsbs/id3v2lib/issues/48
-        if self.settings.compiler == "msvc" or str(self.settings.compiler) == "Visual Studio":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("id3v2lib does not support Visual Studio.")
 
     def config_options(self):
