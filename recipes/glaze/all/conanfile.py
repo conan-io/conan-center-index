@@ -28,7 +28,7 @@ class GlazeConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
             "gcc": "12",
-            "clang": "12" if Version(self.version) > "1.0.0" else "13",
+            "clang": "12" if Version(self.version) > "1.0.0" else "14",
             "apple-clang": "13.1",
         }
 
