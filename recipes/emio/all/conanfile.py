@@ -17,6 +17,7 @@ class EmioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-library"
     no_copy_source = True
 
     def layout(self):
@@ -53,16 +54,7 @@ class EmioConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def build(self):
-        pass
-
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"),
              dst=os.path.join(self.package_folder, "include"))
-
-    def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "emio"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "emio"
-        self.cpp_info.names["cmake_find_package"] = "emio"
-        self.cpp_info.names["cmake_find_package_multi"] = "emio"
