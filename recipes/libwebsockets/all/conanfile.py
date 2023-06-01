@@ -420,10 +420,6 @@ class LibwebsocketsConan(ConanFile):
             tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
             tc.variables["DISABLE_WERROR"] = True
 
-        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) == 16) or \
-               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) == 192):
-            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.20348"
-
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
