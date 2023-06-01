@@ -37,7 +37,7 @@ class ClickHouseCppConan(ConanFile):
 
         self.requires("cityhash/cci.20130801")
         if self.options.with_openssl:
-            self.requires("openssl/>=1.1 <4")
+            self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
         if self.options.enable_benchmark:
