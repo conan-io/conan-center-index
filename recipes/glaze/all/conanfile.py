@@ -19,7 +19,7 @@ class GlazeConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 20
 
     @property
@@ -53,7 +53,7 @@ class GlazeConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
