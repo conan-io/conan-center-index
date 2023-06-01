@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path, VCVars, MSBuild
 from conan.errors import ConanInvalidConfiguration
-from conans import MSBuild, AutoToolsBuildEnvironment
-from conans.tools import vcvars, environment_append, unix_path, get_env
+from conan.tools.layout import basic_layout
+from conan.tools.env import Environment
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 
 import os
 import contextlib
@@ -46,13 +47,13 @@ class UsocketsConan(ConanFile):
     def _minimum_compilers_version(self, cppstd):
         standards = {
             "14": {
-                "Visual Studio": "15",
+                "msvc": "15",
                 "gcc": "5",
                 "clang": "3.4",
                 "apple-clang": "10",
             },
             "17": {
-                "Visual Studio": "16",
+                "msvc": "16",
                 "gcc": "7",
                 "clang": "6",
                 "apple-clang": "10",
@@ -60,9 +61,8 @@ class UsocketsConan(ConanFile):
         }
         return standards.get(cppstd) or {}
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
@@ -77,10 +77,10 @@ class UsocketsConan(ConanFile):
             self.options.eventloop = "libuv"
 
     def validate(self):
-        if self.options.eventloop == "syscall" and self.info.settings.os == "Windows":
+        if self.options.eventloop == "syscall" and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("syscall is not supported on Windows")
 
-        if self.options.eventloop == "gcd" and (self.info.settings.os != "Linux" or self.info.settings.compiler != "clang"):
+        if self.options.eventloop == "gcd" and (self.settings.os != "Linux" or self.settings.compiler != "clang"):
             raise ConanInvalidConfiguration("eventloop=gcd is only supported on Linux with clang")
 
         if Version(self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
@@ -96,10 +96,10 @@ class UsocketsConan(ConanFile):
         if not cppstd:
             return
 
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, cppstd)
 
-        minimum_version = self._minimum_compilers_version(cppstd).get(str(self.info.settings.compiler), False)
+        minimum_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler), False)
         if minimum_version:
             if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, cppstd))
@@ -108,14 +108,8 @@ class UsocketsConan(ConanFile):
 
     def configure(self):
         if bool(self._minimum_cpp_standard) == False:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
@@ -131,26 +125,28 @@ class UsocketsConan(ConanFile):
             self.requires("boost/1.81.0")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.5")
+        if self._settings_build.os == "Windows" and not self._conanfile.win_bash:
+            self.tool_requires("msys2/cci.latest")
+        if self.settings.compiler == "msvc":
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
     def _build_msvc(self):
-        with chdir(self, os.path.join(self._source_subfolder)):
+        with chdir(self, os.path.join(self.source_folder)):
             msbuild = MSBuild(self)
-            msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
+            msbuild.platform = "x86"
+            msbuild.build(project_file="uSockets.vcxproj")
 
     @contextlib.contextmanager
     def _build_context(self):
         if is_msvc(self):
-            with vcvars(self):
+            with VCVars(self):
                 env = {
                     "CC": "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(unix_path(self.deps_user_info["automake"].compile)),
@@ -165,15 +161,16 @@ class UsocketsConan(ConanFile):
                 if self.options.eventloop == "libuv":
                     env["CPPFLAGS"] = "-I" + unix_path(self.deps_cpp_info["libuv"].include_paths[0]) + " "
 
-                with environment_append(env):
+                ev = Environment(env)
+                with ev:
                     yield
         else:
             yield
 
     def _build_configure(self):
-        autotools = AutoToolsBuildEnvironment(self)
+        autotools = Autotools(self)
         autotools.fpic = self.options.get_safe("fPIC", False)
-        with chdir(self, self._source_subfolder):
+        with chdir(self, self.source_folder):
             args = ["WITH_LTO=0"]
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
@@ -187,7 +184,6 @@ class UsocketsConan(ConanFile):
             elif self.options.eventloop == "boost":
                 args.append("WITH_ASIO=1")
 
-            args.extend(f"{key}={value}" for key, value in autotools.vars.items())
             autotools.make(target="default", args=args)
 
     def build(self):
@@ -198,11 +194,15 @@ class UsocketsConan(ConanFile):
             with self._build_context():
                 self._build_configure()
 
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self._source_subfolder, "src"), keep_path=True)
-        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
-        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "src"), keep_path=True)
+        copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
+        copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
         # drop internal headers
         rmdir(self, os.path.join(self.package_folder, "include", "internal"))
 
