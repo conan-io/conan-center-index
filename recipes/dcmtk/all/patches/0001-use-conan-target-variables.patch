@@ -1,0 +1,22 @@
+diff --git a/CMake/3rdparty.cmake b/CMake/3rdparty.cmake
+index 47e34763b..5a75e4299 100644
+--- a/CMake/3rdparty.cmake
++++ b/CMake/3rdparty.cmake
+@@ -38,7 +38,7 @@ if(DCMTK_USE_FIND_PACKAGE)
+         message(STATUS "Info: DCMTK TIFF support will be enabled")
+         include_directories(${TIFF_INCLUDE_DIR} ${JPEG_INCLUDE_DIR})
+       endif()
+-      set(LIBTIFF_LIBS ${TIFF_LIBRARY} ${TIFF_EXTRA_LIBS_STATIC} ${JPEG_LIBRARY})
++      set(LIBTIFF_LIBS ${TIFF_LIBRARIES} ${TIFF_EXTRA_LIBS_STATIC} ${JPEG_LIBRARIES})
+     endif()
+   endif()
+ 
+@@ -53,7 +53,7 @@ if(DCMTK_USE_FIND_PACKAGE)
+       message(STATUS "Info: DCMTK PNG support will be enabled")
+       set(WITH_LIBPNG 1)
+       include_directories(${PNG_INCLUDE_DIR})
+-      set(LIBPNG_LIBS ${PNG_LIBRARY})
++      set(LIBPNG_LIBS ${PNG_LIBRARIES})
+     endif()
+   endif()
+ 
