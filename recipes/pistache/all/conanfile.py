@@ -54,7 +54,7 @@ class PistacheConan(ConanFile):
     def requirements(self):
         self.requires("rapidjson/cci.20220822")
         if self.options.with_ssl:
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/3.1.1")
         if self.version != "cci.20201127":
             self.requires("date/3.0.1")
 
