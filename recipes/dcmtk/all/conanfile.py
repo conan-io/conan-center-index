@@ -123,30 +123,30 @@ class DCMTKConan(ConanFile):
         tc.variables["BUILD_APPS"] = self.options.with_applications
         tc.variables["DCMTK_WITH_ICONV"] = self.options.charset_conversion == "libiconv"
         if self.options.charset_conversion == "libiconv":
-            tc.variables["WITH_LIBICONVINC"] = self.dependencies["libiconv"].package_folder
+            tc.variables["WITH_LIBICONVINC"] = self.dependencies["libiconv"].package_folder.replace("\\", "/")
         tc.variables["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
         tc.variables["DCMTK_WITH_OPENJPEG"] = False
         tc.variables["DCMTK_WITH_OPENSSL"] = self.options.with_openssl
         if self.options.with_openssl:
-            tc.variables["WITH_OPENSSLINC"] = self.dependencies["openssl"].package_folder
+            tc.variables["WITH_OPENSSLINC"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
         tc.variables["DCMTK_WITH_PNG"] = self.options.with_libpng
         if self.options.with_libpng:
-            tc.variables["WITH_LIBPNGINC"] = self.dependencies["libpng"].package_folder
+            tc.variables["WITH_LIBPNGINC"] = self.dependencies["libpng"].package_folder.replace("\\", "/")
         tc.variables["DCMTK_WITH_SNDFILE"] = False
         tc.variables["DCMTK_WITH_THREADS"] = self.options.with_multithreading
         tc.variables["DCMTK_WITH_TIFF"] = self.options.with_libtiff
         if self.options.with_libtiff:
-            tc.variables["WITH_LIBTIFFINC"] = self.dependencies["libtiff"].package_folder
+            tc.variables["WITH_LIBTIFFINC"] = self.dependencies["libtiff"].package_folder.replace("\\", "/")
         if self.settings.os != "Windows":
             tc.variables["DCMTK_WITH_WRAP"] = self.options.with_tcpwrappers
         tc.variables["DCMTK_WITH_XML"] = self.options.with_libxml2
         if self.options.with_libxml2:
-            tc.variables["WITH_LIBXMLINC"] = self.dependencies["libxml2"].package_folder
+            tc.variables["WITH_LIBXMLINC"] = self.dependencies["libxml2"].package_folder.replace("\\", "/")
             if "shared" in self.options["libxml2"]:
                 tc.variables["WITH_LIBXML2_SHARED"] = self.options["libxml2"].shared
         tc.variables["DCMTK_WITH_ZLIB"] = self.options.with_zlib
         if self.options.with_zlib:
-            tc.variables["WITH_ZLIBINC"] = self.dependencies["zlib"].package_folder
+            tc.variables["WITH_ZLIBINC"] = self.dependencies["zlib"].package_folder.replace("\\", "/")
 
         tc.variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
         tc.variables["DCMTK_ENABLE_CXX11"] = True
