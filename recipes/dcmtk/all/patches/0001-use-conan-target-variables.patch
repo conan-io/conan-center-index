@@ -1,5 +1,5 @@
 diff --git a/CMake/3rdparty.cmake b/CMake/3rdparty.cmake
-index 47e34763b..5a75e4299 100644
+index 47e34763b..2c6ed3b8d 100644
 --- a/CMake/3rdparty.cmake
 +++ b/CMake/3rdparty.cmake
 @@ -38,7 +38,7 @@ if(DCMTK_USE_FIND_PACKAGE)
@@ -10,7 +10,7 @@ index 47e34763b..5a75e4299 100644
 +      set(LIBTIFF_LIBS ${TIFF_LIBRARIES} ${TIFF_EXTRA_LIBS_STATIC} ${JPEG_LIBRARIES})
      endif()
    endif()
- 
+
 @@ -53,7 +53,7 @@ if(DCMTK_USE_FIND_PACKAGE)
        message(STATUS "Info: DCMTK PNG support will be enabled")
        set(WITH_LIBPNG 1)
@@ -19,4 +19,69 @@ index 47e34763b..5a75e4299 100644
 +      set(LIBPNG_LIBS ${PNG_LIBRARIES})
      endif()
    endif()
- 
+
+@@ -243,7 +243,6 @@ else()
+     if(WITH_LIBXMLINC)
+       set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
+       set(LIBXML_LIBDIR "${WITH_LIBXMLINC}/lib")
+-      set(LIBXML_LIBS debug "${LIBXML_LIBDIR}/libxml2_d.lib" optimized "${LIBXML_LIBDIR}/libxml2_o.lib" debug "${LIBXML_LIBDIR}/iconv_d.lib" optimized "${LIBXML_LIBDIR}/iconv_o.lib")
+       message(STATUS "Info: DCMTK XML support will be enabled")
+       set(WITH_LIBXML 1)
+       # this hides some warnings that are emitted when linking against libxmlXXX.lib instead of linking the DLL directly
+@@ -260,7 +259,6 @@ else()
+     if(WITH_LIBPNGINC)
+       set(LIBPNG_INCDIR "${WITH_LIBPNGINC}/include")
+       set(LIBPNG_LIBDIR "${WITH_LIBPNGINC}/lib")
+-      set(LIBPNG_LIBS debug "${LIBPNG_LIBDIR}/libpng_d.lib" optimized "${LIBPNG_LIBDIR}/libpng_o.lib")
+       message(STATUS "Info: DCMTK PNG support will be enabled")
+       set(WITH_LIBPNG 1)
+     else() # turn off library if library path not set
+@@ -275,7 +273,6 @@ else()
+     if(WITH_LIBTIFFINC)
+       set(LIBTIFF_INCDIR "${WITH_LIBTIFFINC}/include")
+       set(LIBTIFF_LIBDIR "${WITH_LIBTIFFINC}/lib")
+-      set(LIBTIFF_LIBS debug "${LIBTIFF_LIBDIR}/libtiff_d.lib" optimized "${LIBTIFF_LIBDIR}/libtiff_o.lib")
+       message(STATUS "Info: DCMTK TIFF support will be enabled")
+       set(WITH_LIBTIFF 1)
+     else() # turn off library if library path not set
+@@ -292,8 +289,6 @@ else()
+       set(OPENSSL_BINDIR "${WITH_OPENSSLINC}/bin")
+       set(OPENSSL_INCDIR "${WITH_OPENSSLINC}/include")
+       set(OPENSSL_LIBDIR "${WITH_OPENSSLINC}/lib")
+-      # starting with OpenSSL 1.1.0, the Windows crypt32 library is needed for a static link of OpenSSL.
+-      set(OPENSSL_LIBS "crypt32" debug "${OPENSSL_LIBDIR}/dcmtkssl_d.lib" optimized "${OPENSSL_LIBDIR}/dcmtkssl_o.lib" debug "${OPENSSL_LIBDIR}/dcmtkcrypto_d.lib" optimized "${OPENSSL_LIBDIR}/dcmtkcrypto_o.lib")
+       set(TEMP_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+       list(APPEND CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCDIR}")
+       CHECK_CXX_SOURCE_COMPILES("extern \"C\" {\n#include <openssl/ssl.h>\n}\nint main(){\n#if OPENSSL_VERSION_NUMBER < 0x10001000L\n#error OpenSSL too old\n#endif\n}\n" OPENSSL_VERSION_CHECK)
+@@ -318,7 +313,6 @@ else()
+     if(WITH_ZLIBINC)
+       set(ZLIB_INCDIR "${WITH_ZLIBINC}/include")
+       set(ZLIB_LIBDIR "${WITH_ZLIBINC}/lib")
+-      set(ZLIB_LIBS debug "${ZLIB_LIBDIR}/zlib_d.lib" optimized "${ZLIB_LIBDIR}/zlib_o.lib")
+       message(STATUS "Info: DCMTK ZLIB support will be enabled")
+       set(WITH_ZLIB 1)
+     else() # turn off library if library path not set
+@@ -333,7 +327,6 @@ else()
+     if(WITH_SNDFILEINC)
+       set(SNDFILE_INCDIR "${WITH_SNDFILEINC}/include")
+       set(SNDFILE_LIBDIR "${WITH_SNDFILEINC}/lib")
+-      set(SNDFILE_LIBS debug "${SNDFILE_LIBDIR}/libsndfile_d.lib" optimized "${SNDFILE_LIBDIR}/libsndfile_o.lib")
+       message(STATUS "Info: DCMTK SNDFILE support will be enabled")
+       set(WITH_SNDFILE 1)
+     else() # turn off library if library path not set
+@@ -348,7 +341,6 @@ else()
+     if(WITH_LIBICONVINC)
+       set(LIBICONV_INCDIR "${WITH_LIBICONVINC}/include")
+       set(LIBICONV_LIBDIR "${WITH_LIBICONVINC}/lib")
+-      set(LIBICONV_LIBS debug "${LIBICONV_LIBDIR}/libiconv_d.lib" optimized "${LIBICONV_LIBDIR}/libiconv_o.lib")
+       message(STATUS "Info: DCMTK ICONV support will be enabled")
+       set(WITH_LIBICONV 1)
+     else() # turn off library if library path not set
+@@ -371,7 +363,6 @@ else()
+       else()
+           set(OPENJPEG_INCDIR "${WITH_OPENJPEGINC1}")
+           set(OPENJPEG_LIBDIR "${WITH_OPENJPEGINC}/lib")
+-          set(OPENJPEG_LIBS debug "${OPENJPEG_LIBDIR}/openjp2_d.lib" optimized "${OPENJPEG_LIBDIR}/openjp2_o.lib")
+           message(STATUS "Info: DCMTK OpenJPEG support will be enabled")
+           set(WITH_OPENJPEG 1)
+       endif()
