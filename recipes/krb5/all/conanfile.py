@@ -113,15 +113,15 @@ class Krb5Conan(ConanFile):
         if not is_msvc(self):
             self.requires("libverto/0.3.2")
         if self.options.get_safe("with_tls") == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_tcl"):
-            self.requires("tcl/8.6.10")
+            self.requires("tcl/8.6.11")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if not is_msvc(self):
-            self.build_requires("automake/1.16.4")
+            self.build_requires("automake/1.16.5")
             self.build_requires("bison/3.8.2")
         if self._settings_build.os == "Windows":
             self.win_bash = True
