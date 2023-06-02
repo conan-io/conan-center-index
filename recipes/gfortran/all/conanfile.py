@@ -15,6 +15,8 @@ class GFortranConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
+    
+    deprecated = "gcc"
 
     def validate(self):
         if self.settings.arch != "x86_64":
