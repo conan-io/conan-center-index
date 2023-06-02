@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import can_run, valid_min_cppstd
-from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualRunEnv
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type",
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -21,10 +20,6 @@ class TestPackageConan(ConanFile):
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
-        vc = VirtualRunEnv(self)
-        vc.generate()
 
     def layout(self):
         cmake_layout(self)
