@@ -180,13 +180,22 @@ class Llvm(ConanFile):
     def configure(self):
         if self.is_windows():
             self.options.rm_safe("fPIC")  # FPIC MANAGEMENT (KB-H007)
+
+        if self.options.shared:
+            self.options.rm_safe("fPIC")  # FPIC MANAGEMENT (KB-H007)
+            self.output.warning(
+                "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
+
+    def validate(self):
+        if self.is_windows():
             if is_msvc(self):
                 if self.options.llvm_build_llvm_dylib:
                     raise ConanInvalidConfiguration(
                         "Generating libLLVM is not supported on MSVC"
                     )
 
-        # check keep_binaries_regex early to fail early
+        self.output.info(
+            f"testing if llvm/{self.version}:keep_binaries_regex is a valid pattern")
         re.compile(str(self.options.keep_binaries_regex))
 
         if self.settings.compiler.cppstd:
@@ -203,12 +212,9 @@ class Llvm(ConanFile):
                         f"Duplicate entry in enabled projects / runtime found for \"with_project_{project}\"")
 
         if self.options.shared:
-            self.options.rm_safe("fPIC")  # FPIC MANAGEMENT (KB-H007)
             if self.options.llvm_build_llvm_dylib:
                 raise ConanInvalidConfiguration(
                     "LLVM needs static compilation for dylib.")
-            self.output.warning(
-                "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("10"):
             raise ConanInvalidConfiguration(
@@ -227,9 +233,6 @@ class Llvm(ConanFile):
             if not safe_libcxx.match(str(self.settings.compiler.libcxx)):
                 raise ConanInvalidConfiguration(
                     "Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
-
-    # XXX configure is called before compiling dependencies, validate after, so to fail as early as possible moved all to configure
-    # def validate(self):
 
     # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
     # import for Apt doesn't satisfy: E9011(conan-import-tools)
