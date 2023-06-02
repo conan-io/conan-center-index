@@ -9,6 +9,11 @@ sources:
     url: "https://www.cairographics.org/releases/pixman-0.38.4.tar.gz"
     sha256: "da66d6fd6e40aee70f7bd02e4f8f76fc3f006ec879d346bae6a723025cfbdde7"
 patches:
+  "0.42.2":
+    - patch_file: "patches/0003-Adjustments-to-build-with-llvm.patch"
+      patch_description: "fix for llvm build"
+      patch_type: "portability"
+      patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/71"
   "0.40.0":
     - patch_file: "patches/0001-incompatible-pointer-types.patch"
       patch_description: "backport fix for clang build"
