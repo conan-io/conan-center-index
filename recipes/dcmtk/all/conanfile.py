@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run
+from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
@@ -91,25 +91,16 @@ class DCMTKConan(ConanFile):
             self.requires("tcp-wrappers/7.6")
 
     @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "16",
-            "msvc": "192",
-            "clang": "7",
-            "apple-clang": "10",
-        }
+    def _min_cppstd(self):
+        return 11
 
     def validate(self):
         if not can_run(self) and self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++11, which your compiler does not support."
-            )
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -123,30 +114,30 @@ class DCMTKConan(ConanFile):
         tc.variables["BUILD_APPS"] = self.options.with_applications
         tc.variables["DCMTK_WITH_ICONV"] = self.options.charset_conversion == "libiconv"
         if self.options.charset_conversion == "libiconv":
-            tc.variables["WITH_LIBICONVINC"] = self.dependencies["libiconv"].package_folder.replace("\\", "/")
+            tc.variables["WITH_LIBICONVINC"] = self.path_cleanup(self.dependencies["libiconv"].package_folder)
         tc.variables["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
         tc.variables["DCMTK_WITH_OPENJPEG"] = False
         tc.variables["DCMTK_WITH_OPENSSL"] = self.options.with_openssl
         if self.options.with_openssl:
-            tc.variables["WITH_OPENSSLINC"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+            tc.variables["WITH_OPENSSLINC"] = self.path_cleanup(self.dependencies["openssl"].package_folder)
         tc.variables["DCMTK_WITH_PNG"] = self.options.with_libpng
         if self.options.with_libpng:
-            tc.variables["WITH_LIBPNGINC"] = self.dependencies["libpng"].package_folder.replace("\\", "/")
+            tc.variables["WITH_LIBPNGINC"] = self.path_cleanup(self.dependencies["libpng"].package_folder)
         tc.variables["DCMTK_WITH_SNDFILE"] = False
         tc.variables["DCMTK_WITH_THREADS"] = self.options.with_multithreading
         tc.variables["DCMTK_WITH_TIFF"] = self.options.with_libtiff
         if self.options.with_libtiff:
-            tc.variables["WITH_LIBTIFFINC"] = self.dependencies["libtiff"].package_folder.replace("\\", "/")
+            tc.variables["WITH_LIBTIFFINC"] = self.path_cleanup(self.dependencies["libtiff"].package_folder)
         if self.settings.os != "Windows":
             tc.variables["DCMTK_WITH_WRAP"] = self.options.with_tcpwrappers
         tc.variables["DCMTK_WITH_XML"] = self.options.with_libxml2
         if self.options.with_libxml2:
-            tc.variables["WITH_LIBXMLINC"] = self.dependencies["libxml2"].package_folder.replace("\\", "/")
+            tc.variables["WITH_LIBXMLINC"] = self.path_cleanup(self.dependencies["libxml2"].package_folder)
             if "shared" in self.options["libxml2"]:
                 tc.variables["WITH_LIBXML2_SHARED"] = self.options["libxml2"].shared
         tc.variables["DCMTK_WITH_ZLIB"] = self.options.with_zlib
         if self.options.with_zlib:
-            tc.variables["WITH_ZLIBINC"] = self.dependencies["zlib"].package_folder.replace("\\", "/")
+            tc.variables["WITH_ZLIBINC"] = self.path_cleanup(self.dependencies["zlib"].package_folder)
 
         tc.variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
         tc.variables["DCMTK_ENABLE_CXX11"] = True
@@ -164,6 +155,8 @@ class DCMTKConan(ConanFile):
             tc.variables["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
         tc.variables["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
         tc.variables["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
 
         if self.settings.os == "Windows":
             tc.variables["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
@@ -282,9 +275,12 @@ class DCMTKConan(ConanFile):
             "dcmpmap" : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
         }
 
+    def path_cleanup(self, path):
+        return path.replace("\\", "/")
+
     @property
     def _dcm_datadictionary_path(self):
-        return os.path.join(self.package_folder, "bin", "share")
+        return self.path_cleanup(os.path.join(self.package_folder, "bin", "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
