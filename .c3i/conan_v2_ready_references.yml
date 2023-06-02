@@ -42,6 +42,7 @@ required_for_references:
 - autoconf
 - automake
 - avir
+- aws-c-cal
 - aws-c-common
 - aws-c-compression
 - aws-c-sdkutils
@@ -476,6 +477,7 @@ required_for_references:
 - openal
 - openal-soft
 - openapi-generator
+- opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
 - openexr
@@ -594,6 +596,7 @@ required_for_references:
 - termcap
 - threadpool
 - thrift
+- thrust
 - tinycthread
 - tinycthreadpool
 - tinyexif
@@ -604,6 +607,7 @@ required_for_references:
 - tlx
 - toml11
 - trantor
+- turtle
 - uni-algo
 - unicorn
 - univalue
@@ -646,6 +650,7 @@ required_for_references:
 - xerces-c
 - xkbcommon
 - xkeyboard-config
+- xlsxio
 - xmlsec
 - xnnpack
 - xorg
