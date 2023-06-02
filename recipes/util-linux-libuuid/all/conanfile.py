@@ -70,6 +70,11 @@ class UtilLinuxLibuuidConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.settings.compiler} {self.settings.compiler.version} does not meet the minimum version requirement of version {min_version}")
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows")
+        if self.settings.os == "Macos":
+            # FIXME: Add Macos compatibility. This is currently breaking because builds are unable to find libtool-2
+            # This is a bit puzzling given `libtool` is a tool_requires, and I haven't been able to replicate this error
+            # locally.
+            raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on Macos. Please contribute this functionality if you require it.")
 
     def requirements(self):
         if self.settings.os == "Macos":
