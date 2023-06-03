@@ -123,17 +123,17 @@ class LibdbConan(ConanFile):
                               "\n      ;;"
                               "\n    --disable-option-checking)")
 
-    def _build_msvc(self):
-        projects = ["db", "db_sql", "db_stl"]
-        if self.options.with_tcl:
-            projects.append("db_tcl")
-        msbuild = MSBuild(self)
-        upgraded = False
-        for project in projects:
-            msbuild.build(os.path.join(self.source_folder, "build_windows", "VS10", "{}.vcxproj".format(project)),
-                          build_type=self._msvc_build_type, platforms=self._msvc_platforms,
-                          upgrade_project=not upgraded)
-            upgraded = True
+    # def _build_msvc(self):
+    #     projects = ["db", "db_sql", "db_stl"]
+    #     if self.options.with_tcl:
+    #         projects.append("db_tcl")
+    #     msbuild = MSBuild(self)
+    #     upgraded = False
+    #     for project in projects:
+    #         msbuild.build(os.path.join(self.source_folder, "build_windows", "VS10", "{}.vcxproj".format(project)),
+    #                       build_type=self._msvc_build_type, platforms=self._msvc_platforms,
+    #                       upgrade_project=not upgraded)
+    #         upgraded = True
 
     def generate(self):
         if is_msvc(self):
@@ -166,38 +166,6 @@ class LibdbConan(ConanFile):
             deps = AutotoolsDeps(self)
             deps.generate()
 
-    def _configure_autotools(self):
-        # if self._autotools:
-        #     return self._autotools
-        # self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        # if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
-        #     self._autotools.flags.append("-Wno-error=implicit-function-declaration")
-        # conf_args = [
-        #     "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-        #     "--enable-mingw" if self._mingw_build else "--disable-mingw",
-        #     "--enable-compat185",
-        #     "--enable-sql",
-        # ]
-        # if self.options.with_cxx:
-        #     conf_args.extend(["--enable-cxx", "--enable-stl"])
-        # else:
-        #     conf_args.extend(["--disable-cxx", "--disable-stl"])
-
-        # if self.options.shared:
-        #     conf_args.extend(["--enable-shared", "--disable-static"])
-        # else:
-        #     conf_args.extend(["--disable-shared", "--enable-static"])
-        # if self.options.with_tcl:
-        #     conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
-        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self.source_folder, "dist"), args=conf_args)
-        if self.settings.os == "Windows" and self.options.shared:
-            replace_in_file(self, os.path.join(self.build_folder, "libtool"),
-                                  "\ndeplibs_check_method=",
-                                  "\ndeplibs_check_method=pass_all\n#deplibs_check_method=")
-            replace_in_file(self, os.path.join(self.build_folder, "Makefile"),
-                                  ".a",
-                                  ".dll.a")
-        return self._autotools
 
     @property
     def _msvc_build_type(self):
@@ -240,7 +208,7 @@ class LibdbConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         bindir = os.path.join(self.package_folder, "bin")
         libdir = os.path.join(self.package_folder, "lib")
         if is_msvc(self):

@@ -17,5 +17,6 @@ int main(int argc, char *argv[]) {
         puts("DP->close failed\n");
         return EXIT_FAILURE;
     }
+    puts("libdb test_package success!\n");
     return EXIT_SUCCESS;
 }
