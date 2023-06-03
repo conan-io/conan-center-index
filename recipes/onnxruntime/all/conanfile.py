@@ -7,6 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 import os
+import sys
 
 
 required_conan_version = ">=1.53.0"
@@ -97,6 +98,10 @@ class OnnxRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires python 3.8+ to be built as shared."
+            )
 
     def build_requirements(self):
         # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L5
@@ -109,6 +114,8 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
+        if self.version >= Version("1.15.0") and self.options.shared:
+            tc.variables["Python_EXECUTABLE"] = sys.executable
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
