@@ -1,4 +1,7 @@
 sources:
+  "3.7.1":
+    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.7.1/mongo-cxx-driver-r3.7.1.tar.gz"
+    sha256: "ff5ca5aa8966fef9174acab18cc221738500f26102d5e9c4bba508a2267f6214"
   "3.7.0":
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.7.0/mongo-cxx-driver-r3.7.0.tar.gz"
     sha256: "fb2da11178db728f63147fe4b0c7509eb49b1b02c5cb55f9bee5f927e451a0c7"
@@ -15,6 +18,13 @@ sources:
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.1/mongo-cxx-driver-r3.6.1.tar.gz"
     sha256: "83523e897ef18f7ce05d85d1632dd4ba486c264a1b89c09020163ab29e11eab7"
 patches:
+  "3.7.1":
+    - patch_file: "patches/3.7.1-0001-dirs.patch"
+      patch_description: "disable documentation features, fix directories"
+      patch_type: "conan"
+    - patch_file: "patches/3.7.1-0002-poly_use_std_define.patch"
+      patch_description: "use poly macro instead __cplusplus"
+      patch_type: "portability"
   "3.7.0":
     - patch_file: "patches/3.7.0-dirs.patch"
       patch_description: "disable documentation features, fix directories"
