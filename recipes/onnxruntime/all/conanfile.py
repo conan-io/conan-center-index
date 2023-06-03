@@ -99,6 +99,7 @@ class OnnxRuntimeConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
+            # https://github.com/microsoft/onnxruntime/blob/638146b79ea52598ece514704d3f592c10fab2f1/cmake/CMakeLists.txt#LL500C12-L500C12
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires python 3.8+ to be built as shared."
             )
