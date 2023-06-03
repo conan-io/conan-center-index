@@ -1,8 +1,18 @@
 sources:
+  "1.15.0":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.15.0.tar.gz"
+    sha256: "7752defd687138870974aa391bd5d3d16228ee449f408d11ea3716e8585c73b4"
   "1.14.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
+  "1.15.0":
+    - patch_file: "patches/1.15.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
   "1.14.1":
     - patch_file: "patches/1.14.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used (upstreamed future versions)"

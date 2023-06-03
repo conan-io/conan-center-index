@@ -62,12 +62,19 @@ class OnnxRuntimeConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _onnx_version(self):
+        return {
+            "1.14.1": "1.13.1",
+            "1.15.0": "1.14.0",
+        }[self.version]
+
     def requirements(self):
         self.requires("abseil/20230125.2")
         self.requires("protobuf/3.21.9")
         self.requires("date/3.0.1")
         self.requires("re2/20230301")
-        self.requires("onnx/1.13.1")
+        self.requires(f"onnx/{self._onnx_version}")
         self.requires("flatbuffers/1.12.0")
         self.requires("boost/1.81.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
