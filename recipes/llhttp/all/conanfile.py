@@ -49,6 +49,7 @@ class LlhttpParserConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_STATIC_LIBS"] = "ON"
         self._cmake.configure()
         return self._cmake
 
