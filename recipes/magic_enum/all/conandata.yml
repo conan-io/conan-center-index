@@ -1,4 +1,7 @@
 sources:
+  "0.9.1":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.9.1.tar.gz"
+    sha256: "864798f3146de2bb0da766f87d9a64b1742a5d109661b5bf4fdf839040b854d7"
   "0.9.0":
     url: "https://github.com/Neargye/magic_enum/archive/v0.9.0.tar.gz"
     sha256: "2fb2f602b4660f8af539ee00958132a397e138bda19aa1ceae546de3a143386b"
