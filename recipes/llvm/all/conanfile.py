@@ -216,23 +216,20 @@ class Llvm(ConanFile):
                 raise ConanInvalidConfiguration(
                     "LLVM needs static compilation for dylib.")
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("10"):
-            raise ConanInvalidConfiguration(
-                "Compiler version too low for this package.")
-
-        if is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
-            raise ConanInvalidConfiguration(
-                "An up to date version of Microsoft Visual Studio 2019 or newer is required.")
-
         if self.settings.build_type == "Debug" and not self.options.enable_debug:
             raise ConanInvalidConfiguration(
                 "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option enable_debug=True.")
 
         if not self.options.enable_unsafe_mode:
-            safe_libcxx = re.compile("^libstdc\+\+(11)?$")
-            if not safe_libcxx.match(str(self.settings.compiler.libcxx)):
-                raise ConanInvalidConfiguration(
-                    "Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
+            if self.settings.compiler == "gcc":
+                if Version(self.settings.compiler.version) < Version("10"):
+                    raise ConanInvalidConfiguration("Compiler version too low for this package.")
+            elif self.settings.compiler == "clang":
+                if not self.settings.compiler.libcxx in ['libc++']:
+                    # libc++ compiles but test linkage fails
+                    raise ConanInvalidConfiguration("Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
+            elif is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
+                raise ConanInvalidConfiguration("An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
     # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
     # import for Apt doesn't satisfy: E9011(conan-import-tools)
