@@ -20,6 +20,18 @@ index 47e34763b..2c6ed3b8d 100644
      endif()
    endif()
 
+@@ -157,9 +157,9 @@ if(DCMTK_USE_FIND_PACKAGE)
+       message(STATUS "Info: DCMTK ICONV support will be enabled")
+       set(WITH_LIBICONV 1)
+       set(LIBICONV_INCDIR ${LIBICONV_INCLUDE_DIRS} ${Iconv_INCLUDE_DIRS} ${ICONV_INCLUDE_DIR} ${LIBCHARSET_INCLUDE_DIRS})
+-      set(LIBICONV_LIBDIR ${LIBICONV_LIBDIR})
++      set(LIBICONV_LIBDIR ${ICONV_LIBDIR})
+       set(LIBICONV_LIBS ${LIBICONV_LIBRARIES} ${Iconv_LIBRARIES} ${ICONV_LIBRARIES} ${LIBCHARSET_LIBRARY})
+-      include_directories(${LIBICONV_INCDIR})
++      include_directories(${ICONV_INCDIR})
+     endif()
+   endif()
+
 @@ -243,7 +243,6 @@ else()
      if(WITH_LIBXMLINC)
        set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")

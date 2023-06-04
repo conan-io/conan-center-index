@@ -175,6 +175,8 @@ class DCMTKConan(ConanFile):
         deps.set_property("openssl", "cmake_find_mode", "both")
         deps.set_property("libiconv", "cmake_file_name", "ICONV")
         deps.set_property("libiconv", "cmake_find_mode", "both")
+        deps.set_property("libxml2", "cmake_file_name", "LIBXML2")
+        deps.set_property("libxml2", "cmake_find_mode", "both")
         deps.generate()
 
     def build(self):
