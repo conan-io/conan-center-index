@@ -1,6 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -20,7 +18,7 @@ class PackageConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
+        "shared": [False],
         "fPIC": [True, False],
         "with_json": ["jsoncpp", "nlohmann_json", "rapidjson"],
     }
@@ -59,8 +57,6 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
