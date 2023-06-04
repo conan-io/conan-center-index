@@ -140,12 +140,6 @@ class JemallocConan(ConanFile):
         ])
         if self.options.enable_prof:
             tc.configure_args.append("--enable-prof")
-        if self.options.shared:
-            tc.configure_args.append("--enable-shared")
-            tc.configure_args.append("--disable-static")
-        else:
-            tc.configure_args.append("--disable-shared")
-            tc.configure_args.append("--enable-static")
         env = tc.environment()
         if is_msvc(self):
             # Do not check whether the math library exists when compiled by MSVC
