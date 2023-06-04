@@ -225,28 +225,21 @@ class FollyConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.set_property("pkg_config_name", "libfolly")
 
-        if Version(self.version) == "2019.10.21.00":
+        if self.settings.os == "Linux":
             self.cpp_info.components["libfolly"].libs = [
-                "follybenchmark",
+                "folly_exception_counter",
+                "folly_exception_tracer",
+                "folly_exception_tracer_base",
                 "folly_test_util",
+                "follybenchmark",
                 "folly"
             ]
-        elif Version(self.version) >= "2020.08.10.00":
-            if self.settings.os == "Linux":
-                self.cpp_info.components["libfolly"].libs = [
-                    "folly_exception_counter",
-                    "folly_exception_tracer",
-                    "folly_exception_tracer_base",
-                    "folly_test_util",
-                    "follybenchmark",
-                    "folly"
-                ]
-            else:
-                self.cpp_info.components["libfolly"].libs = [
-                    "folly_test_util",
-                    "follybenchmark",
-                    "folly"
-                ]
+        else:
+            self.cpp_info.components["libfolly"].libs = [
+                "folly_test_util",
+                "follybenchmark",
+                "folly"
+            ]
 
         self.cpp_info.components["libfolly"].requires = [
             "boost::context", "boost::filesystem", "boost::program_options", "boost::regex", "boost::system", "boost::thread",
@@ -304,24 +297,23 @@ class FollyConan(ConanFile):
         self.cpp_info.components["libfolly"].set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.components["libfolly"].set_property("pkg_config_name", "libfolly")
 
-        if Version(self.version) >= "2019.10.21.00":
-            # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-            self.cpp_info.components["follybenchmark"].names["cmake_find_package"] = "follybenchmark"
-            self.cpp_info.components["follybenchmark"].names["cmake_find_package_multi"] = "follybenchmark"
-            self.cpp_info.components["folly_test_util"].names["cmake_find_package"] = "folly_test_util"
-            self.cpp_info.components["folly_test_util"].names["cmake_find_package_multi"] = "folly_test_util"
+        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
+        self.cpp_info.components["follybenchmark"].names["cmake_find_package"] = "follybenchmark"
+        self.cpp_info.components["follybenchmark"].names["cmake_find_package_multi"] = "follybenchmark"
+        self.cpp_info.components["folly_test_util"].names["cmake_find_package"] = "folly_test_util"
+        self.cpp_info.components["folly_test_util"].names["cmake_find_package_multi"] = "folly_test_util"
 
-            self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
-            self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
-            self.cpp_info.components["follybenchmark"].libs = ["follybenchmark"]
-            self.cpp_info.components["follybenchmark"].requires = ["libfolly"]
+        self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
+        self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
+        self.cpp_info.components["follybenchmark"].libs = ["follybenchmark"]
+        self.cpp_info.components["follybenchmark"].requires = ["libfolly"]
 
-            self.cpp_info.components["folly_test_util"].set_property("cmake_target_name", "Folly::folly_test_util")
-            self.cpp_info.components["folly_test_util"].set_property("pkg_config_name", "libfolly_test_util")
-            self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
-            self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
+        self.cpp_info.components["folly_test_util"].set_property("cmake_target_name", "Folly::folly_test_util")
+        self.cpp_info.components["folly_test_util"].set_property("pkg_config_name", "libfolly_test_util")
+        self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
+        self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
-        if Version(self.version) >= "2020.08.10.00" and self.settings.os == "Linux":
+        if self.settings.os == "Linux":
             # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
             self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package"] = "folly_exception_tracer_base"
             self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package_multi"] = "folly_exception_tracer_base"
