@@ -225,7 +225,7 @@ class Llvm(ConanFile):
                 if Version(self.settings.compiler.version) < Version("10"):
                     raise ConanInvalidConfiguration("Compiler version too low for this package.")
             elif self.settings.compiler == "clang":
-                if not self.settings.compiler.libcxx in ['libc++']:
+                if self.settings.compiler.libcxx in ['libc++']:
                     # libc++ compiles but test linkage fails
                     raise ConanInvalidConfiguration("Configured compiler.libcxx isn't maintained for the recipe. If you want to try it with enable_unsafe_mode=True")
             elif is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
