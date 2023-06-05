@@ -188,6 +188,9 @@ class Llvm(ConanFile):
 
     def validate(self):
         if self.is_windows():
+            if self.options.shared:
+                raise ConanInvalidConfiguration(
+                    "BUILD_SHARED_LIBS options is not supported on Windows.")
             if is_msvc(self):
                 if self.options.llvm_build_llvm_dylib:
                     raise ConanInvalidConfiguration(
