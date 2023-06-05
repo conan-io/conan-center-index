@@ -17,6 +17,7 @@ class ScnlibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eliaskosunen/scnlib"
     topics = ("parsing", "io", "scanf")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "header_only": [True, False],
@@ -54,7 +55,7 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "1.0":
-            self.requires("fast_float/3.10.1")
+            self.requires("fast_float/5.0.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

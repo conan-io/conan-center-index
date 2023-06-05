@@ -60,11 +60,16 @@ class Antlr4CppRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # As of 4.11, antlr4-cppruntime no longer requires libuuid.
-        # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
+        # 1. As of 4.10, antlr4-cppruntime no longer requires `utfcpp`.
+        # Reference: [C++] Implement standalone Unicode encoding and decoding handling
+        #      Link: https://github.com/antlr/antlr4/pull/3398
+        # 2. As of 4.11, antlr4-cppruntime no longer requires `libuuid`.
+        # Reference: [C++] Remove libuuid dependency
+        #      Link: https://github.com/antlr/antlr4/pull/3787
         # Note that the above PR points that libuuid can be removed from 4.9.3, 4.10 and 4.10.1 as well.
         # We have patched the CMakeLists.txt to drop the dependency on libuuid from aforementioned antlr versions.
-        self.requires("utfcpp/3.2.1")
+        if Version(self.version) < "4.10":
+            self.requires("utfcpp/3.2.3")
 
     def validate(self):
         # Compilation of this library on version 15 claims C2668 Error.
@@ -92,6 +97,12 @@ class Antlr4CppRuntimeConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["WITH_DEMO"] = False
+        # As of ANTLR 4.12.0, one can choose to build the shared/static library only instead of both of them
+        # Related Issue: https://github.com/antlr/antlr4/issues/3993
+        # Related PR: https://github.com/antlr/antlr4/pull/3996
+        if Version(self.version) >= "4.12":
+            tc.variables["ANTLR_BUILD_SHARED"] = self.options.shared
+            tc.variables["ANTLR_BUILD_STATIC"] = not self.options.shared
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

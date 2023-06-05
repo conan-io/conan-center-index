@@ -41,11 +41,17 @@
  
  
  ###############################################################################
-@@ -86,6 +86,19 @@ endif()
+@@ -86,6 +86,25 @@ endif()
  add_library(backward ${libtype} backward.cpp)
  target_compile_definitions(backward PUBLIC ${BACKWARD_DEFINITIONS})
  target_include_directories(backward PUBLIC ${BACKWARD_INCLUDE_DIRS})
 +target_compile_features(backward PUBLIC cxx_std_11)
++if(STACK_WALKING_LIBUNWIND)
++    if(NOT APPLE)
++        find_package(libunwind REQUIRED CONFIG)
++        target_link_libraries(backward PUBLIC libunwind::libunwind)
++    endif()
++endif()
 +if(STACK_DETAILS_DW)
 +    find_package(elfutils REQUIRED CONFIG)
 +    target_link_libraries(backward PUBLIC elfutils::libdw)

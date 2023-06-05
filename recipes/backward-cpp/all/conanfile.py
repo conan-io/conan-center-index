@@ -22,8 +22,8 @@ class BackwardCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "stack_walking" : ["unwind", "backtrace"],
-        "stack_details" : ["dw", "bfd", "dwarf", "backtrace_symbol"],
+        "stack_walking": ["unwind", "libunwind", "backtrace"],
+        "stack_details": ["dw", "bfd", "dwarf", "backtrace_symbol"],
     }
     default_options = {
         "shared": False,
@@ -39,11 +39,11 @@ class BackwardCppConan(ConanFile):
             supported_os.append("Windows")
         return supported_os
 
-    def _has_stack_walking(self, type):
-        return self.options.stack_walking == type
+    def _has_stack_walking(self, method):
+        return self.options.stack_walking == method
 
-    def _has_stack_details(self, type):
-        return False if self.settings.os == "Windows" else self.options.stack_details == type
+    def _has_stack_details(self, method):
+        return False if self.settings.os == "Windows" else self.options.stack_details == method
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -65,8 +65,11 @@ class BackwardCppConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ["Linux", "Android"]:
+            if self._has_stack_walking("libunwind"):
+                self.requires("libunwind/1.6.2", transitive_headers=True)
             if self._has_stack_details("dwarf"):
                 self.requires("libdwarf/20191104", transitive_headers=True, transitive_libs=True)
+                self.requires("libelf/0.8.13")
             if self._has_stack_details("dw"):
                 self.requires("elfutils/0.186", transitive_headers=True, transitive_libs=True)
             if self._has_stack_details("bfd"):
@@ -77,12 +80,16 @@ class BackwardCppConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if self._has_stack_walking("libunwind"):
+            if Version(self.version) < "1.6":
+                raise ConanInvalidConfiguration("Support for libunwind is only available as of 1.6.")
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Support for libunwind is only available on Linux and macOS.")
         if self.settings.os == "Macos":
-            if self.settings.arch == "armv8":
-                raise ConanInvalidConfiguration("Macos M1 not supported yet")
+            if self.settings.arch == "armv8" and Version(self.version) < "1.6":
+                raise ConanInvalidConfiguration("Support for Apple Silicon is only available as of 1.6.")
             if not self._has_stack_details("backtrace_symbol"):
-                raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
-                                                " is supported on Macos")
+                raise ConanInvalidConfiguration("Stack details other than backtrace_symbol are not supported on macOS.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,6 +97,7 @@ class BackwardCppConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["STACK_WALKING_UNWIND"] = self._has_stack_walking("unwind")
+        tc.variables["STACK_WALKING_LIBUNWIND"] = self._has_stack_walking("libunwind")
         tc.variables["STACK_WALKING_BACKTRACE"] = self._has_stack_walking("backtrace")
         tc.variables["STACK_DETAILS_AUTO_DETECT"] = False
         tc.variables["STACK_DETAILS_BACKTRACE_SYMBOL"] = self._has_stack_details("backtrace_symbol")
@@ -119,18 +127,19 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Backward")
         self.cpp_info.set_property("cmake_target_name", "Backward::Backward")
 
-        self.cpp_info.defines.append("BACKWARD_HAS_UNWIND={}".format(int(self._has_stack_walking("unwind"))))
-        self.cpp_info.defines.append("BACKWARD_HAS_BACKTRACE={}".format(int(self._has_stack_walking("backtrace"))))
+        self.cpp_info.defines.append(f"BACKWARD_HAS_UNWIND={int(self._has_stack_walking('unwind'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_LIBUNWIND={int(self._has_stack_walking('libunwind'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_BACKTRACE={int(self._has_stack_walking('backtrace'))}")
 
-        self.cpp_info.defines.append("BACKWARD_HAS_BACKTRACE_SYMBOL={}".format(int(self._has_stack_details("backtrace_symbol"))))
-        self.cpp_info.defines.append("BACKWARD_HAS_DW={}".format(int(self._has_stack_details("dw"))))
-        self.cpp_info.defines.append("BACKWARD_HAS_BFD={}".format(int(self._has_stack_details("bfd"))))
-        self.cpp_info.defines.append("BACKWARD_HAS_DWARF={}".format(int(self._has_stack_details("dwarf"))))
-        self.cpp_info.defines.append("BACKWARD_HAS_PDB_SYMBOL={}".format(int(self.settings.os == "Windows")))
+        self.cpp_info.defines.append(f"BACKWARD_HAS_BACKTRACE_SYMBOL={int(self._has_stack_details('backtrace_symbol'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_DW={int(self._has_stack_details('dw'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_BFD={int(self._has_stack_details('bfd'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_DWARF={int(self._has_stack_details('dwarf'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_PDB_SYMBOL={int(self.settings.os == 'Windows')}")
 
         self.cpp_info.libs = ["backward"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl"])
+            self.cpp_info.system_libs.extend(["dl", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "dbghelp"])
 

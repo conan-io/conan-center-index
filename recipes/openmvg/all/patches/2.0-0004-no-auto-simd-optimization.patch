@@ -1,0 +1,29 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -109,8 +109,24 @@ endif()
+ # ==============================================================================
+ set(CMAKE_MODULE_PATH
+   ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmakeFindModules)
+-include(OptimizeForArchitecture)
+-OptimizeForArchitecture()
++if(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(i[0-9]86)|(amd64)|(AMD64)")
++    if(MSVC)
++        add_definitions("-D__SSE2__")
++    endif()
++    if(USE_AVX2)
++        if(MSVC)
++            add_compile_options("/arch:AVX2")
++        else()
++            add_compile_options("-mavx2")
++        endif()
++    elseif(USE_AVX)
++        if(MSVC)
++            add_compile_options("/arch:AVX")
++        else()
++            add_compile_options("-mavx")
++        endif()
++    endif()
++endif()
+ 
+ if (UNIX AND NOT OpenMVG_BUILD_COVERAGE)
+   set(CMAKE_C_FLAGS_RELEASE "-O3")

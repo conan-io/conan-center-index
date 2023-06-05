@@ -1,4 +1,7 @@
 sources:
+  "3.3.0":
+    url: "https://github.com/SRombauts/SQLiteCpp/archive/3.3.0.tar.gz"
+    sha256: "4a37dd63cf91235ea2ef4494054700c144b3f96e93a330ef61ed53d106353e9c"
   "3.2.1":
     url: "https://github.com/SRombauts/SQLiteCpp/archive/3.2.1.tar.gz"
     sha256: "70c67d5680c47460f82a7abf8e6b0329bf2fb10795a982a6d8abc06adb42d693"

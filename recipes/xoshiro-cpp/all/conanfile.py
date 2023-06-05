@@ -1,7 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class XoshiroCppConan(ConanFile):
@@ -11,9 +16,8 @@ class XoshiroCppConan(ConanFile):
     homepage = "https://github.com/Reputeless/Xoshiro-cpp"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("prng", "xoshiro", "header-only")
+    package_type = "header-library"
     settings = "arch", "build_type", "compiler", "os"
-    generators = "cmake"
-    no_copy_source = True
 
     @property
     def _minimum_compilers_version(self):
@@ -21,48 +25,51 @@ class XoshiroCppConan(ConanFile):
             "apple-clang": "10",
             "clang": "6",
             "gcc": "7",
-            "Visual Studio": "16"
+            "Visual Studio": "16",
+            "msvc": "192"
         }
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
         return 17
 
+    def package_id(self):
+        self.info.clear()
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
-        compiler = self.settings.compiler
+        compiler = str(self.settings.compiler)
+        version = Version(self.settings.compiler.version)
         try:
-            min_version = self._minimum_compilers_version[str(compiler)]
-            if tools.Version(compiler.version) < min_version:
+            min_version = self._minimum_compilers_version[compiler]
+            if version < min_version:
                 msg = (
-                    "{} requires C++{} features which are not supported by compiler {} {}."
-                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+                    f"{self.name} requires C++{self._minimum_cpp_standard} features "
+                    f"which are not supported by compiler {compiler} {version}."
+                )
                 raise ConanInvalidConfiguration(msg)
         except KeyError:
             msg = (
-                "{} recipe lacks information about the {} compiler, "
-                "support for the required C++{} features is assumed"
-            ).format(self.name, compiler, self._minimum_cpp_standard)
-            self.output.warn(msg)
+                f"{self.ref} recipe lacks information about the {compiler} compiler, "
+                f"support for the required C++{self._minimum_cpp_standard} features is assumed"
+            )
+            self.output.warning(msg)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def package(self):
-        self.copy("*.hpp", dst="include/xoshiro-cpp",
-                  src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-    def package_id(self):
-        self.info.header_only()
+        copy(self, "*.hpp", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "include/xoshiro-cpp/"))
+        copy(self, "LICENSE", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "xoshiro-cpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "xoshiro-cpp"
+        self.cpp_info.set_property("cmake_file_name", "xoshiro-cpp")
+        self.cpp_info.set_property(
+            "cmake_target_name", "xoshiro-cpp::xoshiro-cpp")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

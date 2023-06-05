@@ -1,4 +1,9 @@
 sources:
+  "1.82.0":
+    url:
+      - "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.bz2"
+    sha256: a6e1ab9b0860e6a2881dd7b21fe9f737a095e5f33a3a874afc6a345228597ee6
   "1.81.0":
     url:
       - "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2"
@@ -52,12 +57,11 @@ sources:
   "1.71.0":
     url: "https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.bz2"
     sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
-  "1.70.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.tar.bz2"
-    sha256: "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
 patches:
+  "1.82.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
   "1.81.0":
     - patch_file: "patches/boost_1_77_mpi_check.patch"
       patch_description: "Fails the build when mpi is not configured"
@@ -88,6 +92,14 @@ patches:
       patch_description: "On POSIX systems that don't support *at APIs, compilation fails due to a missing include"
       patch_type: "official"
       patch_source: "https://github.com/boostorg/filesystem/issues/250"
+    - patch_file: "patches/1.80.0-0005-config-libcpp15.patch"
+      patch_description: "Support for libcpp15 which removes std::unary_function and std::binary_function."
+      patch_type: "portability"
+      patch_source: "https://www.boost.org/patches/1_80_0/0005-config-libcpp15.patch"
+    - patch_file: "patches/1.80.0-0006-unordered-msvc-rtcc.patch"
+      patch_description: "Fix MSVC /RTCc build runtime failures."
+      patch_type: "official"
+      patch_source: "https://www.boost.org/patches/1_80_0/0006-unordered-msvc-rtcc.patch"
   "1.79.0":
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       patch_description: "Fails the build when there is no iconv backend"
@@ -318,45 +330,5 @@ patches:
       patch_description: "This library links to boost_system, even though that library is header-only"
       patch_type: "conan"
     - patch_file: "patches/1.75.0-boost_build-with-newer-b2.patch"
-      patch_description: "Bump build_requires of 'b2' to '4.7.1' (was '4.5.0')"
-      patch_type: "conan"
-  "1.70.0":
-    - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
-      patch_description: ""
-      patch_type: "conan"
-    - patch_file: "patches/bcp_namespace_issues_1_70.patch"
-      patch_description: ""
-      patch_type: "conan"
-    - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
-      patch_description: ""
-      patch_type: "conan"
-    - patch_file: "patches/boost_core_qnx_cxx_provide___cxa_get_globals.patch"
-      patch_description: ""
-      patch_type: "conan"
-    - patch_file: "patches/python_base_prefix.patch"
-      patch_description: ""
-      patch_type: "conan"
-    - patch_file: "patches/solaris_pthread_data.patch"
-      patch_description: ""
-      patch_type: "conan"
-    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
-      patch_description: "Fails the build when there is no iconv backend"
-      patch_type: "conan"
-    - patch_file: "patches/boost_mpi_check.patch"
-      patch_description: "Fails the build when mpi is not configured"
-      patch_type: "conan"
-    - patch_file: "patches/1.69.0-contract-no-system.patch"
-      patch_description: "This library links to boost_system, even though that library is header-only"
-      patch_type: "conan"
-    - patch_file: "patches/1.69.0-locale-no-system.patch"
-      patch_description: "This library links to boost_system, even though that library is header-only"
-      patch_type: "conan"
-    - patch_file: "patches/1.69.0-random-no-system.patch"
-      patch_description: "This library links to boost_system, even though that library is header-only"
-      patch_type: "conan"
-    - patch_file: "patches/1.69.0-type_erasure-no-system.patch"
-      patch_description: "This library links to boost_system, even though that library is header-only"
-      patch_type: "conan"
-    - patch_file: "patches/1.70.0-boost_build-with-newer-b2.patch"
       patch_description: "Bump build_requires of 'b2' to '4.7.1' (was '4.5.0')"
       patch_type: "conan"
