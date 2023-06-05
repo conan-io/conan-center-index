@@ -1,5 +1,6 @@
 required_for_references:
 - 7bitdi
+- 7zip
 - aaf
 - aaplus
 - abseil
@@ -41,6 +42,7 @@ required_for_references:
 - autoconf
 - automake
 - avir
+- aws-c-cal
 - aws-c-common
 - aws-c-compression
 - aws-c-sdkutils
@@ -144,6 +146,7 @@ required_for_references:
 - cppcheck
 - cppcodec
 - cppfront
+- cppitertools
 - cpptoml
 - cppunit
 - cpputest
@@ -362,12 +365,14 @@ required_for_references:
 - libmp3lame
 - libmysqlclient
 - libnabo
+- libnfs
 - libnghttp2
 - libnop
 - libnova
 - libnuma
 - libpcap
 - libpciaccess
+- libpfm4
 - libpng
 - libpq
 - libpqxx
@@ -418,6 +423,7 @@ required_for_references:
 - lodepng
 - lua
 - luau
+- lunasvg
 - lz4
 - lzma_sdk
 - lzo
@@ -471,6 +477,7 @@ required_for_references:
 - openal
 - openal-soft
 - openapi-generator
+- opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
 - openexr
@@ -502,6 +509,7 @@ required_for_references:
 - picojson
 - pixman
 - pkgconf
+- plutovg
 - poco
 - popt
 - proj
@@ -542,6 +550,7 @@ required_for_references:
 - ruy
 - s2n
 - samurai
+- sbepp
 - scnlib
 - screen_capture_lite
 - sdbus-cpp
@@ -587,6 +596,7 @@ required_for_references:
 - termcap
 - threadpool
 - thrift
+- thrust
 - tinycthread
 - tinycthreadpool
 - tinyexif
@@ -597,6 +607,7 @@ required_for_references:
 - tlx
 - toml11
 - trantor
+- turtle
 - uni-algo
 - unicorn
 - univalue
@@ -622,6 +633,7 @@ required_for_references:
 - vulkan-validationlayers
 - wasmtime
 - wasmtime-cpp
+- watcher
 - wayland
 - wayland-protocols
 - websocketpp
@@ -638,6 +650,7 @@ required_for_references:
 - xerces-c
 - xkbcommon
 - xkeyboard-config
+- xlsxio
 - xmlsec
 - xnnpack
 - xorg
@@ -656,6 +669,7 @@ required_for_references:
 - yajl
 - yaml-cpp
 - yasm
+- yyjson
 - zbar
 - zeromq
 - zfp
