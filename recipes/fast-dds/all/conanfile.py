@@ -69,12 +69,11 @@ class FastDDSConan(ConanFile):
 
     def requirements(self):
         self.requires("tinyxml2/9.0.0")
-        self.requires("asio/1.21.0")
-        self.requires("fast-cdr/1.0.26", transitive_headers=True, transitive_libs=True)
+        self.requires("asio/1.28.0")
+        self.requires("fast-cdr/1.0.27", transitive_headers=True, transitive_libs=True)
         self.requires("foonathan-memory/0.7.3")
-        self.requires("boost/1.75.0")  # boost/1.76 is required by version 2.3.2, boost/1.75.0 required for 2.3.3 by Windows
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -90,6 +89,10 @@ class FastDDSConan(ConanFile):
             # This combination leads to an fast-dds error when linking
             # linking dynamic '*.dll' and static MT runtime
             raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.7.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -163,7 +166,6 @@ class FastDDSConan(ConanFile):
             "asio::asio",
             "tinyxml2::tinyxml2",
             "foonathan-memory::foonathan-memory",
-            "boost::boost",
         ]
         if self.settings.os in ["Linux", "FreeBSD", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs.append("pthread")
