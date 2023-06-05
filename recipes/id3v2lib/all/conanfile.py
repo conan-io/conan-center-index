@@ -69,13 +69,4 @@ class LibwebmConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "id3v2lib")
         self.cpp_info.set_property("cmake_target_name", "id3v2lib::id3v2lib")
         self.cpp_info.set_property("pkg_config_name", "id3v2lib")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["id3v2lib"].libs = ["id3v2lib"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "id3v2lib"
-        self.cpp_info.names["cmake_find_package_multi"] = "id3v2lib"
-        self.cpp_info.components["id3v2lib"].names["cmake_find_package"] = "id3v2lib"
-        self.cpp_info.components["id3v2lib"].names["cmake_find_package_multi"] = "id3v2lib"
-        self.cpp_info.components["id3v2lib"].set_property("cmake_target_name", "id3v2lib::id3v2lib")
-        self.cpp_info.components["id3v2lib"].set_property("pkg_config_name", "id3v2lib")
+        self.cpp_info.libs = ["id3v2lib"]
