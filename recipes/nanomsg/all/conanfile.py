@@ -21,12 +21,14 @@ class NanomsgConan(ConanFile):
         "fPIC": [True, False],
         "enable_coverage": [True, False],
         "enable_getaddrinfo_a":[True, False],
+        "enable_tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_coverage": False,
         "enable_getaddrinfo_a":True,
+        "enable_tools": False,
     }
 
     def config_options(self):
@@ -50,17 +52,16 @@ class NanomsgConan(ConanFile):
         tc.variables["NN_STATIC_LIB"] = not self.options.shared
         tc.variables["NN_ENABLE_COVERAGE"] = self.options.enable_coverage
         tc.variables["NN_ENABLE_GETADDRINFO_A"] = self.options.enable_getaddrinfo_a
+        tc.variables["NN_ENABLE_DOC"] = False
+        tc.variables["NN_TESTS"] = False
+        tc.variables["NN_TOOLS"] = self.options.enable_tools
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -81,6 +82,7 @@ class NanomsgConan(ConanFile):
         self.cpp_info.libs = ["nanomsg"]
         self.cpp_info.set_property("cmake_file_name", "nanomsg")
         self.cpp_info.set_property("cmake_target_name", "nanomsg::nanomsg")
+        self.cpp_info.set_property("pkg_config_name", "nanomsg")
 
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(["mswsock", "ws2_32", "advapi32"])
