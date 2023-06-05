@@ -143,31 +143,34 @@ class UsocketsConan(ConanFile):
             msbuild.platform = "x86"
             msbuild.build("uSockets.vcxproj")
 
-    # @contextlib.contextmanager
-    # def _build_context(self):
-    #     if is_msvc(self):
-    #         with VCVars(self):
-    #             env = {
-    #                 "CC": "{} cl -nologo".format(unix_path(self.source_folder, self.deps_user_info["automake"].compile)),
-    #                 "CXX": "{} cl -nologo".format(unix_path(self.source_folder, self.deps_user_info["automake"].compile)),
-    #                 "CFLAGS": "-{}".format(self.settings.compiler.runtime),
-    #                 "LD": "link",
-    #                 "NM": "dumpbin -symbols",
-    #                 "STRIP": ":",
-    #                 "AR": "{} lib".format(unix_path(self.source_folder, self.deps_user_info["automake"].ar_lib)),
-    #                 "RANLIB": ":",
-    #             }
-    #
-    #             if self.options.eventloop == "libuv":
-    #                 env["CPPFLAGS"] = "-I" + unix_path(self.source_folder, self.deps_cpp_info["libuv"].include_paths[0]) + " "
-    #
-    #             ev = Environment()
-    #             for k, v in env.items():
-    #                 ev.define(k, v)
-    #             with ev:
-    #                 yield
-    #     else:
-    #         yield
+    @contextlib.contextmanager
+    def _build_context(self):
+        if is_msvc(self):
+            env = {
+                "CC": "{} cl -nologo".format(unix_path(self.source_folder, self.deps_user_info["automake"].compile)),
+                "CXX": "{} cl -nologo".format(unix_path(self.source_folder, self.deps_user_info["automake"].compile)),
+                "CFLAGS": "-{}".format(self.settings.compiler.runtime),
+                "LD": "link",
+                "NM": "dumpbin -symbols",
+                "STRIP": ":",
+                "AR": "{} lib".format(unix_path(self.source_folder, self.deps_user_info["automake"].ar_lib)),
+                "RANLIB": ":",
+            }
+
+            if self.options.eventloop == "libuv":
+                env["CPPFLAGS"] = "-I" + unix_path(self.source_folder, self.deps_cpp_info["libuv"].include_paths[0]) + " "
+            ev = Environment()
+            for k, v in env.items():
+                ev.define(k, v)
+            vcvars = VCVars(self)
+            vcvars.generate()
+            yield
+            # with VCVars(self):
+            #
+            #     with ev:
+            #         yield
+        else:
+            yield
 
     def _build_configure(self):
         autotools = Autotools(self)
