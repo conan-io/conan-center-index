@@ -293,68 +293,68 @@ class Llvm(ConanFile):
         # https://releases.llvm.org/16.0.0/docs/CMake.html
         # https://llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
         cmake_definitions = {
-                'BUILD_SHARED_LIBS': self.options.shared,
-                'LIBOMP_ENABLE_SHARED': self.options.shared,
-                # cmake RPATH handling https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling#default-rpath-settings
-                # default behaviour for RPATH is to clear it on install
-                # skipping RPATH for build affects also RUNPATH but
-                # llvm-tblgen with BUILD_SHARED_LIBS needs it during build else build invocation fails because .so not found
-                # e.g. readelf -d bin/llvm-tblgen shows RUNPATH $ORIGIN/../lib for build and install location, which is fine in every case.
-                # Only if executed with elevated privileges this is ignored because of security concerns (it contains $ORIGIN and isn't absolute).
-                # CMAKE_SKIP_RPATH # default is fine, kept for documentation.
-                'LLVM_TARGET_ARCH': 'host',
-                'LLVM_TARGETS_TO_BUILD': self.options.targets,
-                'LLVM_BUILD_LLVM_DYLIB': self.options.llvm_build_llvm_dylib,
-                'LLVM_DYLIB_COMPONENTS': self.options.llvm_dylib_components,
-                'LLVM_LINK_LLVM_DYLIB': self.options.llvm_link_llvm_dylib,
-                # llvm default on, if set to False: lib/libLLVMTableGenGlobalISel.so recompile with -fPIC
-                'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=True),
-                'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
-                'LLVM_ENABLE_WARNINGS': True,
-                'LLVM_ENABLE_PEDANTIC': True,
-                'LLVM_ENABLE_WERROR': False,
-                # from llvm-core:
-                # Visual Studio version 16.4, which is known by miscompiling LLVM, is currently being used by conan-center-index's CCI.
-                # Let's use LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN to make that compilation pass until Visual Studio is upgraded.
-                'LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN': True,
-                'LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO': False,
-                'LLVM_BUILD_INSTRUMENTED_COVERAGE': False,
-                'LLVM_OPTIMIZED_TABLEGEN': True,  # NOT default, can speedup compilation a lot
-                'LLVM_REVERSE_ITERATION': False,
-                'LLVM_ENABLE_BINDINGS': False,  # NOT default, dont build OCaml and go bindings
-                'LLVM_CCACHE_BUILD': False,
-                'LLVM_INCLUDE_TOOLS': True,
-                'LLVM_INCLUDE_EXAMPLES': False,  # NOT default
-                'LLVM_BUILD_TESTS': False,
-                'LLVM_INCLUDE_TESTS': False,  # NOT default
-                'LLVM_INCLUDE_BENCHMARKS': False,
-                'LLVM_APPEND_VC_REV': True,
-                'LLVM_BUILD_DOCS': False,
-                'LLVM_ENABLE_IDE': False,
-                # NOT default Use terminfo database if available.
-                'LLVM_ENABLE_TERMINFO': False,
-                'LLVM_ENABLE_EH': self.options.exceptions,
-                'LLVM_ENABLE_RTTI': self.options.rtti,
-                'LLVM_ENABLE_THREADS': self.options.threads,
-                'LLVM_ENABLE_LTO': self.options.lto,
-                'LLVM_STATIC_LINK_CXX_STDLIB': self.options.static_stdlib,
-                'LLVM_ENABLE_UNWIND_TABLES': self.options.unwind_tables,
-                'LLVM_ENABLE_EXPENSIVE_CHECKS': self.options.expensive_checks,
-                'LLVM_ENABLE_ASSERTIONS': self.settings.build_type == 'Debug',
-                'LLVM_USE_NEWPM': False,
-                'LLVM_USE_OPROFILE': False,
-                'LLVM_USE_PERF': self.options.use_perf,
-                'LLVM_ENABLE_Z3_SOLVER': self.options.with_z3,
-                'LLVM_ENABLE_LIBPFM': False,
-                'LLVM_ENABLE_LIBEDIT': False,
-                'LLVM_ENABLE_FFI': self.options.with_ffi,
-                'LLVM_ENABLE_ZLIB': self.options.get_safe('with_zlib', False),
-                'LLVM_ENABLE_LIBXML2': self.options.get_safe('with_xml2', False),
-                'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
-                'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
-                'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
-                'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
-                'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
+            'BUILD_SHARED_LIBS': self.options.shared,
+            'LIBOMP_ENABLE_SHARED': self.options.shared,
+            # cmake RPATH handling https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling#default-rpath-settings
+            # default behaviour for RPATH is to clear it on install
+            # skipping RPATH for build affects also RUNPATH but
+            # llvm-tblgen with BUILD_SHARED_LIBS needs it during build else build invocation fails because .so not found
+            # e.g. readelf -d bin/llvm-tblgen shows RUNPATH $ORIGIN/../lib for build and install location, which is fine in every case.
+            # Only if executed with elevated privileges this is ignored because of security concerns (it contains $ORIGIN and isn't absolute).
+            # CMAKE_SKIP_RPATH # default is fine, kept for documentation.
+            'LLVM_TARGET_ARCH': 'host',
+            'LLVM_TARGETS_TO_BUILD': self.options.targets,
+            'LLVM_BUILD_LLVM_DYLIB': self.options.llvm_build_llvm_dylib,
+            'LLVM_DYLIB_COMPONENTS': self.options.llvm_dylib_components,
+            'LLVM_LINK_LLVM_DYLIB': self.options.llvm_link_llvm_dylib,
+            # llvm default on, if set to False: lib/libLLVMTableGenGlobalISel.so recompile with -fPIC
+            'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=True),
+            'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
+            'LLVM_ENABLE_WARNINGS': True,
+            'LLVM_ENABLE_PEDANTIC': True,
+            'LLVM_ENABLE_WERROR': False,
+            # from llvm-core:
+            # Visual Studio version 16.4, which is known by miscompiling LLVM, is currently being used by conan-center-index's CCI.
+            # Let's use LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN to make that compilation pass until Visual Studio is upgraded.
+            'LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN': True,
+            'LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO': False,
+            'LLVM_BUILD_INSTRUMENTED_COVERAGE': False,
+            'LLVM_OPTIMIZED_TABLEGEN': True,  # NOT default, can speedup compilation a lot
+            'LLVM_REVERSE_ITERATION': False,
+            'LLVM_ENABLE_BINDINGS': False,  # NOT default, dont build OCaml and go bindings
+            'LLVM_CCACHE_BUILD': False,
+            'LLVM_INCLUDE_TOOLS': True,
+            'LLVM_INCLUDE_EXAMPLES': False,  # NOT default
+            'LLVM_BUILD_TESTS': False,
+            'LLVM_INCLUDE_TESTS': False,  # NOT default
+            'LLVM_INCLUDE_BENCHMARKS': False,
+            'LLVM_APPEND_VC_REV': True,
+            'LLVM_BUILD_DOCS': False,
+            'LLVM_ENABLE_IDE': False,
+            # NOT default Use terminfo database if available.
+            'LLVM_ENABLE_TERMINFO': False,
+            'LLVM_ENABLE_EH': self.options.exceptions,
+            'LLVM_ENABLE_RTTI': self.options.rtti,
+            'LLVM_ENABLE_THREADS': self.options.threads,
+            'LLVM_ENABLE_LTO': self.options.lto,
+            'LLVM_STATIC_LINK_CXX_STDLIB': self.options.static_stdlib,
+            'LLVM_ENABLE_UNWIND_TABLES': self.options.unwind_tables,
+            'LLVM_ENABLE_EXPENSIVE_CHECKS': self.options.expensive_checks,
+            'LLVM_ENABLE_ASSERTIONS': self.settings.build_type == 'Debug',
+            'LLVM_USE_NEWPM': False,
+            'LLVM_USE_OPROFILE': False,
+            'LLVM_USE_PERF': self.options.use_perf,
+            'LLVM_ENABLE_Z3_SOLVER': self.options.with_z3,
+            'LLVM_ENABLE_LIBPFM': False,
+            'LLVM_ENABLE_LIBEDIT': False,
+            'LLVM_ENABLE_FFI': self.options.with_ffi,
+            'LLVM_ENABLE_ZLIB': self.options.get_safe('with_zlib', False),
+            'LLVM_ENABLE_LIBXML2': self.options.get_safe('with_xml2', False),
+            'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
+            'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
+            'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
+            'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
+            'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
         }
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
