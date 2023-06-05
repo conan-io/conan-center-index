@@ -1,27 +1,27 @@
 sources:
-  "3.26.3":
+  "3.26.4":
     precompiled:
       Linux:
         armv8:
-          url: "https://cmake.org/files/v3.26/cmake-3.26.3-linux-aarch64.tar.gz"
-          sha256: "7a4fbe374475db1a098b632b54e3c9180973e8a791c700deabe5408ae23ea3ce"
+          url: "https://cmake.org/files/v3.26/cmake-3.26.4-linux-aarch64.tar.gz"
+          sha256: "1c9843c92f40bee1a16baa12871693d3e190c9a222259a89e406d4d9aae6cf74"
         x86_64:
-          url: "https://cmake.org/files/v3.26/cmake-3.26.3-linux-x86_64.tar.gz"
-          sha256: "28d4d1d0db94b47d8dfd4f7dec969a3c747304f4a28ddd6fd340f553f2384dc2"
+          url: "https://cmake.org/files/v3.26/cmake-3.26.4-linux-x86_64.tar.gz"
+          sha256: "ba1e0dcc710e2f92be6263f9617510b3660fa9dc409ad2fb8190299563f952a0"
       Macos:
         universal:
-          url: "https://cmake.org/files/v3.26/cmake-3.26.3-macos10.10-universal.tar.gz"
-          sha256: "b0d39ae9ddec3f193f50ff549edb30d0b35acb6c95c12f7611dbc8afc52c8ab6"
+          url: "https://cmake.org/files/v3.26/cmake-3.26.4-macos10.10-universal.tar.gz"
+          sha256: "f30362daae58788ada07f9f0fe2b49a53dde4262e2d8fe73640045d9d6055183"
       Windows:
         armv8:
-          url: "https://cmake.org/files/v3.26/cmake-3.26.3-windows-arm64.zip"
-          sha256: "fd1d908ea54a081a092bc7f9dad0a6ba90fc5aa2644ee5cef901e3f925fce3d8"
+          url: "https://cmake.org/files/v3.26/cmake-3.26.4-windows-arm64.zip"
+          sha256: "6a9b28f318e766e40ac032b7fd2064fa9e026ff329f0ea175cbc8b15af51c45c"
         x86_64:
-          url: "https://cmake.org/files/v3.26/cmake-3.26.3-windows-x86_64.zip"
-          sha256: "91a418595cc9a97d5f679e36728dfec79ee52980f51e8814ec7b05b890708523"
+          url: "https://cmake.org/files/v3.26/cmake-3.26.4-windows-x86_64.zip"
+          sha256: "62c35427104a4f8205226f72708d71334bd36a72cf72c60d0e3a766d71dcc78a"
     code:
-      url: "https://github.com/Kitware/CMake/releases/download/v3.26.3/cmake-3.26.3.tar.gz"
-      sha256: "bbd8d39217509d163cb544a40d6428ac666ddc83e22905d3e52c925781f0f659"
+      url: "https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4.tar.gz"
+      sha256: "313b6880c291bd4fe31c0aa51d6e62659282a521e695f30d5cc0d25abbd5c208"
   "3.25.3":
     precompiled:
       Linux:
