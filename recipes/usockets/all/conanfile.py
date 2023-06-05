@@ -125,7 +125,7 @@ class UsocketsConan(ConanFile):
             self.requires("boost/1.81.0")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._conanfile.win_bash:
+        if self._settings_build.os == "Windows" and not self.win_bash:
             self.tool_requires("msys2/cci.latest")
         if self.settings.compiler == "msvc":
             self.tool_requires("automake/1.16.5")
