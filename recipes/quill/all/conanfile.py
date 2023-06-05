@@ -141,7 +141,7 @@ class QuillConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "quill", "quill", "include", "quill", "bundled", "fmt"))
         rmdir(self, os.path.join(self.source_folder, "quill", "quill", "src", "bundled", "fmt"))
 
-        if Version(self.version) >= "2.0.0":
+        if "2.0.0" <= Version(self.version) < "2.9.1":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 """set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/quill/cmake" CACHE STRING "Modules for CMake" FORCE)""",
                 """set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_LIST_DIR}/quill/cmake")"""
