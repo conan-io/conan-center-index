@@ -409,6 +409,7 @@ required_for_references:
 - libvips
 - libvpx
 - libwebp
+- libwebsockets
 - libx264
 - libx265
 - libxls
@@ -529,6 +530,7 @@ required_for_references:
 - quill
 - quirc
 - rabbitmq-c
+- ragel
 - rang
 - range-v3
 - rapidcheck
@@ -544,6 +546,7 @@ required_for_references:
 - replxx
 - restbed
 - restinio
+- ring-span-lite
 - roaring
 - robin-hood-hashing
 - rttr
@@ -604,6 +607,7 @@ required_for_references:
 - tinyxml
 - tinyxml2
 - tl-expected
+- tl-function-ref
 - tlx
 - toml11
 - trantor
@@ -670,6 +674,7 @@ required_for_references:
 - yaml-cpp
 - yasm
 - yyjson
+- z3
 - zbar
 - zeromq
 - zfp
