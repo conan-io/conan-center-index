@@ -5,4 +5,3 @@ sources:
 patches:
   "6.0.6":
     - patch_file: "patches/cmake_install_dirs.patch"
-      base_path: "source_subfolder"
