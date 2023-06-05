@@ -52,7 +52,7 @@ class LibmemcachedConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"] or not is_apple_os(self):
+        if self.settings.os not in ["Linux", "FreeBSD"] and not is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     def _patch_source(self):
