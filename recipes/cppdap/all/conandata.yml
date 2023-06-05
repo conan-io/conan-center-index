@@ -2,3 +2,9 @@ sources:
   "cci.20230526":
     url: "https://github.com/google/cppdap/archive/03cc18678ed2ed8b2424ec99dee7e4655d876db5.tar.gz"
     sha256: "b1de5020fdb3ab429973545f3f869cab909c0f81151242e694f6f7c1f9b32d2d"
+patches:
+  "cci.20230526":
+    - patch_file: "patches/0001-build-cmake-use-min-CMake-version-prior-to-project-c.patch"
+      patch_description: "correct the order of cmake min and project"
+      patch_type: "conan"
+      patch_source: "https://github.com/google/cppdap/pull/112"
