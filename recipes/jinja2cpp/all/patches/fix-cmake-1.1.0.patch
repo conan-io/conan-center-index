@@ -1,3 +1,5 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b5c8b3c..c0afc14 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -21,10 +21,6 @@ option(JINJA2CPP_STRICT_WARNINGS "Enable additional warnings and treat them as e
@@ -29,20 +31,37 @@
      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/jinja2cpp
  )
  
+diff --git a/include/jinja2cpp/template_env.h b/include/jinja2cpp/template_env.h
+index d49859e..0bd456e 100644
+--- a/include/jinja2cpp/template_env.h
++++ b/include/jinja2cpp/template_env.h
+@@ -6,6 +6,7 @@
+ #include "filesystem_handler.h"
+ #include "template.h"
+ 
++#include <mutex>
+ #include <shared_mutex>
+ #include <unordered_map>
+ 
+diff --git a/thirdparty/thirdparty-conan-build.cmake b/thirdparty/thirdparty-conan-build.cmake
+index 5aecfbd..957657f 100644
 --- a/thirdparty/thirdparty-conan-build.cmake
 +++ b/thirdparty/thirdparty-conan-build.cmake
-@@ -8,7 +8,11 @@ find_package(string-view-lite)
+@@ -6,9 +6,13 @@ find_package(optional-lite)
+ find_package(string-view-lite)
+ 
  find_package(Boost)
- set(CONAN_BOOST_PACKAGE_NAME Boost::Boost)
+-set(CONAN_BOOST_PACKAGE_NAME Boost::Boost)
  find_package(fmt)
 -find_package(rapidjson)
 +find_package(RapidJSON)
- 
--set(JINJA2_PRIVATE_LIBS_INT ${CONAN_BOOST_PACKAGE_NAME} fmt::fmt rapidjson::rapidjson)
--set(JINJA2_PUBLIC_LIBS_INT expected-lite::expected-lite variant-lite::variant-lite optional-lite::optional-lite string-view-lite::string-view-lite)
++
 +# TODO: replace conan targets by official imported targets when fixed in corresponding recipes:
 +# - CONAN_PKG::rapidjson => rapidjson
 +# - CONAN_PKG::optional-lite => nonstd::optional-lite
 +# - CONAN_PKG::variant-lite => nonstd::variant-lite
-+set(JINJA2_PRIVATE_LIBS_INT ${CONAN_BOOST_PACKAGE_NAME} fmt::fmt CONAN_PKG::rapidjson)
-+set(JINJA2_PUBLIC_LIBS_INT nonstd::expected-lite CONAN_PKG::variant-lite CONAN_PKG::optional-lite nonstd::string-view-lite)
++set(JINJA2_PRIVATE_LIBS_INT Boost::headers Boost::filesystem fmt::fmt rapidjson)
++set(JINJA2_PUBLIC_LIBS_INT nonstd::expected-lite nonstd::variant-lite nonstd::optional-lite nonstd::string-view-lite)
+ 
+-set(JINJA2_PRIVATE_LIBS_INT ${CONAN_BOOST_PACKAGE_NAME} fmt::fmt rapidjson::rapidjson)
+-set(JINJA2_PUBLIC_LIBS_INT expected-lite::expected-lite variant-lite::variant-lite optional-lite::optional-lite string-view-lite::string-view-lite)
