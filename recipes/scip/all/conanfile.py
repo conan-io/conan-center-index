@@ -79,6 +79,8 @@ class SCIPConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("boost/1.81.0")
+        self.requires("gmp/6.2.1")
         self.requires("soplex/6.0.3")
         self.requires("zlib/1.2.13")
 
