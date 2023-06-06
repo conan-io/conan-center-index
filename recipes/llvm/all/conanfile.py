@@ -348,8 +348,9 @@ class Llvm(ConanFile):
             'LLVM_ENABLE_LIBPFM': False,
             'LLVM_ENABLE_LIBEDIT': False,
             'LLVM_ENABLE_FFI': self.options.with_ffi,
-            'LLVM_ENABLE_ZLIB': self.options.get_safe('with_zlib', False),
-            'LLVM_ENABLE_LIBXML2': self.options.get_safe('with_xml2', False),
+            # FORCE_ON adds required to find_package
+            'LLVM_ENABLE_ZLIB': 'FORCE_ON' if self.options.get_safe('with_zlib', False) else False,
+            'LLVM_ENABLE_LIBXML2': 'FORCE_ON' if self.options.get_safe('with_xml2', False) else False,
             'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
             'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
             'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
