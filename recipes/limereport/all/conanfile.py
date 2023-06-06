@@ -25,11 +25,10 @@ class LimereportConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_zint": False,
-        "qt:qtquickcontrols": True,
-        "qt:qtquickcontrols2": True,
-        "qt:qtsvg": True,
-        "qt:qttools": True,
-        "qt:shared" : True
+        "qt/*:qtquickcontrols" : True,
+        "qt/*:qtquickcontrols2": True,
+        "qt/*:qtsvg": True,
+        "qt/*:qttools": True
     }
 
     def config_options(self):
