@@ -84,7 +84,7 @@ class SCIPConan(ConanFile):
         if self.options.with_gmp:
             self.requires("gmp/6.2.1")
         if self.options.with_sym == "bliss":
-            self.requires("bliss/0.73")
+            self.requires("bliss/0.77")
         self.requires("soplex/6.0.3")
         self.requires("zlib/1.2.13")
 
@@ -114,11 +114,19 @@ class SCIPConan(ConanFile):
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
             tc.variables["SOPLEX_PIC_LIBRARIES"] = "soplex"
+        if self.options.with_boost:
+            # INFO: docu states BOOST_ROOT, yet that does not exist in CMakeLists
+            tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(
+                self.dependencies["soplex"].cpp_info.includedirs,
+                self.dependencies["boost"].cpp_info.includedirs
+            )
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("sopex", "cmake_file_name", "SOPEX")
+        deps.set_property("gmp", "cmake_file_name", "GMP")
         deps.generate()
 
     def build(self):
