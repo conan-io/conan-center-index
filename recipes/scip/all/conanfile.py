@@ -66,6 +66,10 @@ class SCIPConan(ConanFile):
         comp = self.settings.compiler
         if self.options.with_sym == "bliss" and comp == 'clang' and comp.libcxx and comp.libcxx == 'libc++':
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
+        if self.dependencies["soplex"].options.with_boost and not self.options.with_boost:
+            raise ConanInvalidConfiguration("The options 'with_boost' should be aligned with 'soplex:with_boost' too.")
+        if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
+            raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
