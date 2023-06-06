@@ -29,7 +29,6 @@ class ImaglConan(ConanFile):
         "with_png": True,
         "with_jpeg": True,
     }
-    _cmake = None
 
     @property
     def _compilers_minimum_version(self):
@@ -124,4 +123,3 @@ class ImaglConan(ConanFile):
         self.cpp_info.libs = ["imaGL{}{}".format(debug_suffix, static_suffix)]
         if not self.options.shared:
             self.cpp_info.defines = ["IMAGL_STATIC=1"]
-
