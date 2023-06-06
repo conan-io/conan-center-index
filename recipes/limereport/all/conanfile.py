@@ -1,5 +1,5 @@
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import copy, get
 from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -35,10 +35,6 @@ class LimereportConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     @property
     def _minimum_compilers_version(self):
@@ -84,7 +80,6 @@ class LimereportConan(ConanFile):
 
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
