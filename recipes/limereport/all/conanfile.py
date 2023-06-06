@@ -22,7 +22,7 @@ class LimereportConan(ConanFile):
         "with_zint": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_zint": False,
         "qt:qtquickcontrols": True,
