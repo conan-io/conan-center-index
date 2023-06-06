@@ -1,9 +1,9 @@
-from conans import tools
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rm, rmdir
 from conan import ConanFile
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 import os
 
@@ -12,7 +12,7 @@ class LimereportConan(ConanFile):
     name = "limereport"
     description = "Report generator for Qt Framework"
     homepage = "https://poppler.freedesktop.org/"
-    topics = ("conan", "limereport", "pdf", "report","qt")
+    topics = ("limereport", "pdf", "report","qt")
     license = "LGPL-3.0", "GPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
@@ -74,7 +74,7 @@ class LimereportConan(ConanFile):
         tc.cache_variables["LIMEREPORT_STATIC"] = not self.options.shared
         if is_msvc(self):
             tc.variables["WINDOWS_BUILD"] = True
-        qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
+        qt_major = Version(self.deps_cpp_info["qt"].version).major
         if qt_major == 6: 
             tc.cache_variables["USE_QT6"] = True
         tc.cache_variables["ENABLE_ZINT"] = self.options.with_zint
@@ -96,9 +96,5 @@ class LimereportConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
+        qt_major = Version(self.deps_cpp_info["qt"].version).major
         self.cpp_info.libs = ["limereport-qt{}".format(qt_major)]
-        # self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtPrintSupport", "qt::qtQml", "qt::qtSvg"]
-        # # self.cpp_info.names["cmake_find_package"] = ["limereport-qt{}".format(qt_major)]
-        # # self.cpp_info.names["cmake_find_package_multi"] = ["limereport-qt{}".format(qt_major)]
-
