@@ -25,15 +25,15 @@ class SCIPConan(ConanFile):
         "fPIC": [True, False],
         "with_boost": [True, False],
         "with_gmp": [True, False],
-        "with_tpi": ["none", "omp", "tny"],
-        "with_sym": ["bliss", "none"],
+        "with_tpi": [False, "omp", "tny"],
+        "with_sym": [False, "bliss"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_boost": True,
         "with_gmp": True,
-        "with_tpi": "none",
+        "with_tpi": False,
         "with_sym": "bliss",
     }
 
@@ -79,8 +79,12 @@ class SCIPConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("gmp/6.2.1")
+        if self.options.with_boost:
+            self.requires("boost/1.81.0")
+        if self.options.with_gmp:
+            self.requires("gmp/6.2.1")
+        if self.options.with_sym == "bliss":
+            self.requires("bliss/0.73")
         self.requires("soplex/6.0.3")
         self.requires("zlib/1.2.13")
 
@@ -103,20 +107,13 @@ class SCIPConan(ConanFile):
         tc.variables["READLINE"] = False  # required for interactive stuff
         tc.variables["GMP"] = self.options.with_gmp
         tc.variables["BOOST"] = self.options.with_boost
-        tc.variables["TPI"] = self.options.with_tpi
+        tc.variables["TPI"] = self.options.with_tpi or "none"
         tc.variables["LPS"] = "spx"
-        tc.variables["SYM"] = self.options.with_sym
+        tc.variables["SYM"] = self.options.with_sym or "none"
         tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
             tc.variables["SOPLEX_PIC_LIBRARIES"] = "soplex"
-        if self.options.with_gmp:
-            tc.cache_variables["GMP_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["gmp"].cpp_info.includedirs)
-        if self.options.with_boost:
-            tc.cache_variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(  # docu states BOOST_ROOT, yet that does not exist in CMakeLists
-                self.dependencies["soplex"].cpp_info.includedirs,
-                self.dependencies["soplex"].dependencies["boost"].cpp_info.includedirs
-            )
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
@@ -144,9 +141,6 @@ class SCIPConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libdirs = ["lib"]
         self.cpp_info.libs = ["libscip" if is_msvc(self) else "scip"]
-        if self.options.with_sym == "bliss":
-            self.cpp_info.libs.append("bliss")
         if self.options.with_tpi == "omp":
             self.cpp_info.system_libs.append("-fopenmp")
