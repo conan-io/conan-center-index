@@ -8,7 +8,7 @@ from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class PackageConan(ConanFile):
@@ -53,10 +53,7 @@ class PackageConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         if self.options.header_only:
@@ -65,14 +62,13 @@ class PackageConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/9.1.0")
+        self.requires("fmt/10.0.0", transitive_headers=True)
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.clear()
 
     def validate(self):
-        # FIXME: self.info.settings.compiler does not work with header-only packages
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -80,8 +76,7 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if self.options.header_only:
@@ -112,6 +107,8 @@ class PackageConan(ConanFile):
     def package_info(self):
         if self.options.header_only:
             self.cpp_info.defines.append("FMTLOG_HEADER_ONLY")
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
         else:
             self.cpp_info.libs = ["fmtlog-shared" if self.options.shared else "fmtlog-static"]
 
