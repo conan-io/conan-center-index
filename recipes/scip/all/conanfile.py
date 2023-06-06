@@ -76,6 +76,7 @@ class SCIPConan(ConanFile):
 
     def requirements(self):
         self.requires("soplex/6.0.3")
+        self.requires("zlib/1.2.13")
 
     def configure(self):
         self.options["soplex"].with_boost = self.options.with_boost
