@@ -349,11 +349,11 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.2")
+            self.requires("glib/2.76.3")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.2.1")
+            self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
@@ -361,7 +361,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/73.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/7.1.0")
+            self.requires("harfbuzz/7.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.5")
@@ -370,7 +370,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.41.2")
+            self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
