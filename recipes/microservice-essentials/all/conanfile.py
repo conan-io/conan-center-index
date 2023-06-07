@@ -28,6 +28,15 @@ class MicroserviceEssentials(ConanFile):
         "build_examples": False
     }
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15.7",
+        }
+
     def requirements(self):
         if self.options.build_examples:
             self.requires("cpp-httplib/0.12.4")
@@ -54,7 +63,19 @@ class MicroserviceEssentials(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            tools.check_min_cppstd(self, "17")
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                "{} requires C++17, which your compiler does not support.".format(self.name)
+            )
     
     def config_options(self):
         if self.settings.os == "Windows":
