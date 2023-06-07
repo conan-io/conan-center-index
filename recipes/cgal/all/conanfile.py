@@ -1,8 +1,9 @@
 import os
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools import files
+from conan.tools.files import get, replace_in_file, rmdir, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools import scm
-from conans import CMake
 
 required_conan_version = ">=1.50.0"
 
@@ -15,62 +16,59 @@ class CgalConan(ConanFile):
                   " in computational geometry."
     topics = ("cgal", "geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+    generators = "CMakeDeps"
     short_paths = True
 
-    _cmake = None
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["CGAL_HEADER_ONLY"] = "TRUE"
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch_sources(self):
-        if scm.Version(self.version) < "5.3":
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR")
-        else:
-            files.replace_in_file(self, os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                "if(NOT PROJECT_NAME)", "if(TRUE)")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("eigen/3.3.9")
+        self.requires("boost/1.78.0")
+        self.requires("eigen/3.4.0")
         self.requires("mpfr/4.1.0")
 
     def package_id(self):
         self.info.clear()
 
+    def _patch_sources(self):
+        if scm.Version(self.version) < "5.3":
+            replace_in_file(self, os.path.join(os.path.join(self.source_folder, self._source_subfolder), "CMakeLists.txt"),
+                            "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR", strict=False)
+        else:
+            replace_in_file(self,  os.path.join(os.path.join(self.source_folder, ''), "CMakeLists.txt"),
+                            "if(NOT PROJECT_NAME)", "if(1)", strict=False)
+
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if scm.Version(self.version) < "5.3":
+            tc.variables["CGAL_HEADER_ONLY"] = True
+        tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE*", dst="licenses", src="src")
+        cmake = CMake(self)
         cmake.install()
-        files.rmdir(self, os.path.join(self.package_folder, "share"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.rmdir(self, os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "CGAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-        self.cpp_info.defines.append("CGAL_HEADER_ONLY=1")
+        self.cpp_info.set_property("cmake_find_package", "CGAL")
+        self.cpp_info.set_property("cmake_target_name", "CGAL::CGAL")
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "CGAL", "CGALConfig.cmake")])
+        if scm.Version(self.version) < "5.3":
+            self.cpp_info.defines.append("CGAL_HEADER_ONLY=1")
