@@ -7,8 +7,7 @@ import os
 required_conan_version = ">=1.53.0"
 
 class MicroserviceEssentials(ConanFile):
-    name = "microservice-essentials"
-    version = "0.1.0"
+    name = "microservice-essentials"    
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/seboste/microservice-essentials"
     license = "MIT"    
