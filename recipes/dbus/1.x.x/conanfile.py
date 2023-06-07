@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -146,6 +146,7 @@ class DbusConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         if self._meson_available:
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "# subdir('test')")
             meson = Meson(self)
             meson.configure()
             meson.build()
