@@ -954,6 +954,7 @@ class QtConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt6")
+        self.cpp_info.set_property("pkg_config_name", "qt6")
 
         self.cpp_info.names["cmake_find_package"] = "Qt6"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
@@ -994,6 +995,7 @@ class QtConan(ConanFile):
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt6::{module}")
+            self.cpp_info.components[componentname].set_property("pkg_config_name", f"Qt6{module}")
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
             if module.endswith("Private"):
@@ -1035,6 +1037,13 @@ class QtConan(ConanFile):
             core_reqs.append("glib::glib")
 
         _create_module("Core", core_reqs)
+        pkg_config_vars = [
+            "bindir=${prefix}/bin",
+            "libexecdir=${prefix}/bin",
+            "exec_prefix=${prefix}",
+        ]
+        self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
+
         if self.settings.os == "Windows":
             if Version(self.version) >= "6.3.0":
                 self.cpp_info.components["qtCore"].system_libs.append("authz")
