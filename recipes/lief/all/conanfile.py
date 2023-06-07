@@ -50,7 +50,19 @@ class LiefConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11"
+        return "14" if self.options.with_frozen else "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -84,6 +96,11 @@ class LiefConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if self.options.shared and is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio < 15 with shared:True")
@@ -120,6 +137,10 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_EXTERNAL_SPDLOG"] = True
             tc.variables["LIEF_OPT_EXTERNAL_LEAF"] = True
             tc.variables["LIEF_OPT_EXTERNAL_SPAN"] = True
+        if Version(self.version) >= "0.13.0":
+            tc.variables["LIEF_INSTALL"] = True
+            tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
+            tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
         tc.generate()
 
         deps = CMakeDeps(self)
