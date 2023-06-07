@@ -23,4 +23,3 @@ sources:
 patches:
   "5.5.2":
     - patch_file: "patches/0001-fix-for-conan.patch"
-      strip: 2

@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, rmdir, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, replace_in_file, rmdir, copy, export_conandata_patches, patch
 from conan.tools import scm
 
 required_conan_version = ">=1.50.0"
@@ -39,6 +39,8 @@ class CgalConan(ConanFile):
         else:
             replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
                             "if(NOT PROJECT_NAME)", "if(1)", strict=False)
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
+            patch(self, **it, strip=2)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -50,7 +52,6 @@ class CgalConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
