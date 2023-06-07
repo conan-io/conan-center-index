@@ -33,12 +33,8 @@ class CgalConan(ConanFile):
         self.info.clear()
 
     def _patch_sources(self):
-        if scm.Version(self.version) < "5.3":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR", strict=False)
-        else:
-            replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "if(NOT PROJECT_NAME)", "if(1)", strict=False)
+        replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "if(NOT PROJECT_NAME)", "if(1)", strict=False)
         for it in self.conan_data.get("patches", {}).get(self.version, []):
             patch(self, **it, strip=2)
 
@@ -47,8 +43,6 @@ class CgalConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if scm.Version(self.version) < "5.3":
-            tc.variables["CGAL_HEADER_ONLY"] = True
         tc.generate()
 
     def build(self):
@@ -70,5 +64,3 @@ class CgalConan(ConanFile):
         self.cpp_info.set_property("cmake_find_package", "CGAL")
         self.cpp_info.set_property("cmake_target_name", "CGAL::CGAL")
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "CGAL", "CGALConfig.cmake")])
-        if scm.Version(self.version) < "5.3":
-            self.cpp_info.defines.append("CGAL_HEADER_ONLY=1")
