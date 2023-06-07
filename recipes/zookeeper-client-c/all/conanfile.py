@@ -90,8 +90,10 @@ class ZookeeperClientCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["zookeeper", "hashtable"]
+        self.cpp_info.defines.append("USE_STATIC_LIB")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("rt")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["rt", "pthread", "m"])
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["wsock32", "ws2_32", ])
