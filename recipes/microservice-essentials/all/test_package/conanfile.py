@@ -1,11 +1,11 @@
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan import ConanFile
+from conan.tools.build import cross_building
 import os
-
-from conans import ConanFile, CMake, tools
-
 
 class TestTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "CMakeToolchain", "CMakeDeps"    
 
     def build(self):
         cmake = CMake(self)        
@@ -13,6 +13,5 @@ class TestTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            os.chdir("bin")
+        if not cross_building(self):            
             self.run(".%stest" % os.sep)
