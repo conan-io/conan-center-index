@@ -131,6 +131,7 @@ class MBitsLngsConan(ConanFile):
                 "module-mbits-lngs.cmake",
             ),
             "w",
+            encoding="UTF-8",
         ) as cfg:
             exe_ext = ".exe" if self.settings.os == "Windows" else ""
             lngs_filename = "lngs" + exe_ext
