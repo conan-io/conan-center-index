@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 
 class NanomsgConan(ConanFile):
     name = "nanomsg"
-    description = "a socket library that provides several common communication patterns."
+    description = "A socket library that provides several common communication patterns."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nanomsg/nanomsg"
