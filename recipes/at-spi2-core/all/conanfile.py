@@ -47,8 +47,6 @@ class AtSpi2CoreConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def build_requirements(self):
         self.build_requires("meson/1.1.0")
@@ -108,6 +106,3 @@ class AtSpi2CoreConan(ConanFile):
         self.cpp_info.libs = ['atspi']
         self.cpp_info.includedirs = ["include/at-spi-2.0"]
         self.cpp_info.names["pkg_config"] = "atspi-2"
-
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
