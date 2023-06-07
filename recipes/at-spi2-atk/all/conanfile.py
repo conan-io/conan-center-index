@@ -55,14 +55,14 @@ class AtSPI2AtkConan(ConanFile):
 
 
     def build_requirements(self):
-        self.build_requires("meson/1.1.0")
+        self.build_requires("meson/1.1.1")
         self.build_requires('pkgconf/1.9.3')
 
     def requirements(self):
         self.requires("at-spi2-core/2.44.1")
         self.requires("atk/2.38.0")
-        self.requires("glib/2.73.0")
-        self.requires("libxml2/2.10.4")
+        self.requires("glib/2.76.3")
+        self.requires("libxml2/2.11.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
