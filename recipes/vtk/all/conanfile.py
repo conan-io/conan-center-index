@@ -1014,10 +1014,10 @@ class VtkConan(ConanFile):
          f'set(VTK_JSONCPP_SHARED "{ "ON" if str(self.dependencies["jsoncpp"].options.shared) else "OFF"}")'
         )
 
-        # fix detecting lzma shared status
+        # fix detecting lzma shared status (note: conan calls this xz_utils)
         replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "lzma", "CMakeLists.txt"),
-         'set(VTK_LZMA_SHARED "${vtklzma_is_shared}")',
-         f'set(VTK_LZMA_SHARED "{ "ON" if str(self.dependencies["lzma"].options.shared) else "OFF"}")'
+         'set(LZMA_BUILT_AS_DYNAMIC_LIB "${vtklzma_is_shared}")',
+         f'set(LZMA_BUILT_AS_DYNAMIC_LIB "{ "ON" if str(self.dependencies["xz_utils"].options.shared) else "OFF"}")'
         )
         ###########
 
