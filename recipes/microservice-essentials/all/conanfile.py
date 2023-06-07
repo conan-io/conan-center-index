@@ -38,6 +38,9 @@ class MicroserviceEssentials(ConanFile):
             "Visual Studio": "15.7",
         }
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16.3 <4]")
+
     def requirements(self):
         if self.options.build_examples:
             self.requires("cpp-httplib/0.12.4")
