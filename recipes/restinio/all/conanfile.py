@@ -18,7 +18,7 @@ class RestinioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "RESTinio is a header-only C++14 library that gives you an embedded HTTP/Websocket server."
     topics = ("http-server", "websockets", "rest", "tls-support")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "asio": ["boost", "standalone"],
@@ -34,17 +34,17 @@ class RestinioConan(ConanFile):
     }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
 
         if Version(self.version) >= "0.6.16":
-            self.requires("fmt/9.0.0")
+            self.requires("fmt/9.1.0")
         else:
             self.requires("fmt/8.1.1")
 
-        self.requires("expected-lite/0.5.0")
+        self.requires("expected-lite/0.6.3")
         self.requires("optional-lite/3.5.0")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/2.0.0")
@@ -56,15 +56,15 @@ class RestinioConan(ConanFile):
                 self.requires("asio/1.16.1")
         else:
             if Version(self.version) >= "0.6.9":
-                self.requires("boost/1.78.0")
+                self.requires("boost/1.81.0")
             else:
                 self.requires("boost/1.73.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1n")
+            self.requires("openssl/[>=1.1 <4]")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
         if self.options.with_pcre == 1:
             self.requires("pcre/8.45")
@@ -105,8 +105,7 @@ class RestinioConan(ConanFile):
         deps.generate()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -117,7 +116,6 @@ class RestinioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "restinio")
         self.cpp_info.set_property("cmake_target_name", "restinio::restinio")

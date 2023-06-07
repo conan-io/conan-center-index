@@ -35,7 +35,7 @@ class GLibConan(ConanFile):
         "with_mount": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_elf": True,
         "with_mount": True,
@@ -66,7 +66,7 @@ class GLibConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.13")
-        self.requires("libffi/3.4.3")
+        self.requires("libffi/3.4.4")
         if Version(self.version) >= "2.73.2":
             self.requires("pcre2/10.42")
         else:
@@ -79,13 +79,13 @@ class GLibConan(ConanFile):
             self.requires("libselinux/3.3")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("libgettext/0.21")
+            self.requires("libgettext/0.21", transitive_headers=True, transitive_libs=True)
 
         if is_apple_os(self):
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 

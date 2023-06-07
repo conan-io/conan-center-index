@@ -6,6 +6,7 @@ This section gathers the most common questions from the community related to pac
 ## Contents
 
   * [What is the policy on recipe name collisions?](#what-is-the-policy-on-recipe-name-collisions)
+  * [What is the policy for naming forks?](#what-is-the-policy-for-naming-forks)
   * [What is the policy on creating packages from pre-compiled binaries?](#what-is-the-policy-on-creating-packages-from-pre-compiled-binaries)
   * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
@@ -35,14 +36,15 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
-  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
+  * [What's the policy on version ranges?](#whats-the-policy-on-version-ranges)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
   * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
-  * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)<!-- endToc -->
+  * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
+  * [Can I use full_package_mode for a requirement in my recipe?](#can-i-use-full_package_mode-for-a-requirement-in-my-recipe)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -53,6 +55,15 @@ This repository will try to follow the most well-known names for each of the rec
 However, if it is not possible and there is the case of a new recipe producing a name collision, the first recipe contributed will have precedence over it. Generally, recipes contributed to the repo won't change its name in order to not break users.
 
 For example, `GSL` is the name of `Guidelines Support Library` from Microsoft and `GNU Scientific Library` from GNU. Both libraries are commonly known as `gsl`, however, to disambiguate (if there is already a `gsl` package in this repo) we could use `ms-gsl` in the first case or `gnu-gsl` in the second.
+
+## What is the policy for naming forks?
+
+When submitting recipes, it's important to pick names which clearly identify the source. For projects which are forks of existing but diverge significantly enough
+to be unique (subject to opinion), they should be prefixed with the author or organization such as `author-name`. A good example is the [crow](https://github.com/ipkn/crow)
+which was forked [crowcpp-crow](https://github.com/CrowCpp/Crow). The original project maintains the `crow` name where as the more featured and advanced fork is `crowcpp-crow`.
+
+Forks are acceptable submissions given they have significantly divergent from the upstream. This can include adding new features, updating compiler or standard support, and actively being maintained. Changes which are not sufficient are build scripts, small bug fixes, "conan-ization" - all of these can be
+[applied as patches to the original](adding_packages/sources_and_patches.md).
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
@@ -72,7 +83,7 @@ For libraries with a too generic name, like `variant`, the name of the organizat
 
 We know that using `find_package()` and relying on the CMake behavior to find the dependencies is something that should be avoided in favor of the information provided by the package manager.
 
-Conan has an abstraction over the packages build system and description by using [generators](https://docs.conan.io/en/latest/reference/generators.html). Those generators translate the information of the dependency graph and create a suitable file that can be consumed by your build system.
+Conan has an abstraction over the packages build system and description by using [generators](https://docs.conan.io/1/reference/generators.html). Those generators translate the information of the dependency graph and create a suitable file that can be consumed by your build system.
 
 In the past, we have found that the logic of some of the CMake's find/config or pkg-config files can lead to broken scenarios due to issues with:
 
@@ -82,15 +93,15 @@ In the past, we have found that the logic of some of the CMake's find/config or 
 - Hardcoded versions of dependencies as well as build options that make overriding dependencies from the consumer not possible.
 
 We believe that the package manager should be the one responsible to handle this information in order to achieve a deterministic and controlled behavior.
-Regarding the integration with CMake, Conan already provides ways to consume those packages in the same way by using generators like [cmake_find_package](https://docs.conan.io/en/latest/reference/generators/cmake_find_package.html)* or [cmake_find_package_multi](https://docs.conan.io/en/latest/reference/generators/cmake_find_package.html) and features like [components](https://docs.conan.io/en/latest/creating_packages/package_information.html#using-components) to define internal libraries of a package and generate proper CMake targets or [build_modules](https://docs.conan.io/en/latest/reference/conanfile/attributes.html) to package build system utilities like CMake macros.
+Regarding the integration with CMake, Conan already provides ways to consume those packages in the same way by using generators like [cmake_find_package](https://docs.conan.io/1/reference/generators/cmake_find_package.html)* or [cmake_find_package_multi](https://docs.conan.io/1/reference/generators/cmake_find_package.html) and features like [components](https://docs.conan.io/1/creating_packages/package_information.html#using-components) to define internal libraries of a package and generate proper CMake targets or [build_modules](https://docs.conan.io/1/reference/conanfile/attributes.html) to package build system utilities like CMake macros.
 
-Defining the package information in the recipe is also useful in order to consume those packages from a different build system, for example using pkg-config with the [pkg_config generator](https://docs.conan.io/en/latest/reference/generators/pkg_config.html).
+Defining the package information in the recipe is also useful in order to consume those packages from a different build system, for example using pkg-config with the [pkg_config generator](https://docs.conan.io/1/reference/generators/pkg_config.html).
 
 Finally, by not allowing these files we make packages agnostic to the consumer as the logic of those files is not in the package but in the way the consumer wants the information.
 
 If you really think this is an issue and there is something missing to cover the use case of a library you want to contribute to ConanCenter, please do not hesitate to open an issue and we will be happy to hear your feedback.
 
-\* Take a look at the integrations section to learn more: https://docs.conan.io/en/latest/integrations/build_system/cmake/cmake_find_package_generator.html
+\* Take a look at the integrations section to learn more: https://docs.conan.io/1/integrations/build_system/cmake/cmake_find_package_generator.html
 
 ## Should recipes export a recipe's license?
 
@@ -154,7 +165,7 @@ Yes! You can learn more about default options in [Packaging Policy](adding_packa
 
 The project initially decided not to support the PDB files primarily due to the size of the final package, which could add an exaggerated size and not even used by users. In addition, PDB files need the source code to perform the debugging and even follow the path in which it was created and not the one used by the user, which makes it difficult to use when compared to the regular development flow with the IDE.
 
-However, there are ways to get around this, one of them is through the [/Z7](https://docs.microsoft.com/en-us/cpp/build/reference/z7-zi-zi-debug-information-format) compilation flag, which can be passed through [environment variables](https://docs.microsoft.com/en-us/cpp/build/reference/cl-environment-variables). You can use your [profile](https://docs.conan.io/en/latest/reference/profiles.html#package-settings-and-env-vars) to customize your compiler command line.
+However, there are ways to get around this, one of them is through the [/Z7](https://docs.microsoft.com/en-us/cpp/build/reference/z7-zi-zi-debug-information-format) compilation flag, which can be passed through [environment variables](https://docs.microsoft.com/en-us/cpp/build/reference/cl-environment-variables). You can use your [profile](https://docs.conan.io/1/reference/profiles.html#package-settings-and-env-vars) to customize your compiler command line.
 
 ### Why is there no option for PDB, as there is for fPIC?
 
@@ -196,7 +207,7 @@ After one month, we will welcome a PR removing the option that was deprecated.
 
 ## Can I split a project into an installer and library package?
 
-No. Some projects provide more than a simple library, but also applications. For those projects, both libraries and executables should be kept together under the same Conan package. In the past, we tried to separate popular projects, like Protobuf, and it proved to be a complex and hard task to be maintained, requiring custom patches to disable parts of the building. Also, with the [context](https://docs.conan.io/en/latest/systems_cross_building/cross_building.html#conan-v1-24-and-newer) feature, we can use the same package as build requirement, for the same build platform, and as a regular requirement, for the host platform, when cross-building. It's recommended using 2 profiles in that case, one for build platform (where the compilation tools are being executed) and one for host platform (where the generated binaries will run).
+No. Some projects provide more than a simple library, but also applications. For those projects, both libraries and executables should be kept together under the same Conan package. In the past, we tried to separate popular projects, like Protobuf, and it proved to be a complex and hard task to be maintained, requiring custom patches to disable parts of the building. Also, with the [context](https://docs.conan.io/1/systems_cross_building/cross_building.html#conan-v1-24-and-newer) feature, we can use the same package as build requirement, for the same build platform, and as a regular requirement, for the host platform, when cross-building. It's recommended using 2 profiles in that case, one for build platform (where the compilation tools are being executed) and one for host platform (where the generated binaries will run).
 
 ## What license should I use for Public Domain?
 
@@ -346,7 +357,7 @@ Since these references will be never available in ConanCenter, they will be deac
 
 If consumers activate the option explicitly (`with_intel_mkl=True`), Conan will fail because of the unknown reference.
 
-Consumers may use an [override](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
+Consumers may use an [override](https://docs.conan.io/1/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
 
 For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your `conanfile.txt`:
 
@@ -359,7 +370,7 @@ intel-mkl/2021@mycompany/stable
 
 This repository and the CI building recipes is continuously pushing to new Conan versions,
 sometimes adopting new features as soon as they are released
-([Conan client changelog](https://docs.conan.io/en/latest/changelog.html)).
+([Conan client changelog](https://docs.conan.io/1/changelog.html)).
 
 You should expect that latest revision of recipes can introduce breaking changes and new
 features that will be broken unless you also upgrade Conan client (and sometimes you will
@@ -368,9 +379,10 @@ need to modify your project if the recipe changes the binaries, flags,... it pro
 To isolate from these changes there are different strategies you can follow.
 Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
-## Why are version ranges not allowed?
+## What's the policy on version ranges?
 
-See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
+Version ranges are currently allowed on a handful of dependencies, but not for general use.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for additional details.
 
 ## How to consume a graph of shared libraries?
 
@@ -378,7 +390,7 @@ When the CI builds packages with `shared=True`, it applies the option only to th
 the requirements. As the default value for the `shared` option is usually `False`, you can expect that the dynamic
 library that has just being generated has linked all its requirements as static libraries.
 
-It is important to remark the default [package id mode](https://docs.conan.io/en/latest/creating_packages/define_abi_compatibility.html#versioning-schema)
+It is important to remark the default [package id mode](https://docs.conan.io/1/creating_packages/define_abi_compatibility.html#versioning-schema)
 used by Conan (which is the same default used by ConanCenter): `semver_direct_mode`. With this default only the major
 version of the requirements is encoded in the package ID.
 
@@ -395,7 +407,7 @@ easily achievable using `*:shared=True` in the _host_ profile and `--build` in t
 Conan will build from sources all the packages and use the shared libraries when linking.
 
 > **Note**: If you are hosting your own recipes, the proper solution for recipes would be to use something like
-> [`shared_library_package_id`](https://docs.conan.io/en/latest/reference/conanfile/methods.html?highlight=shared_library_package_id#self-info-shared-library-package-id),
+> [`shared_library_package_id`](https://docs.conan.io/1/reference/conanfile/methods.html?highlight=shared_library_package_id#self-info-shared-library-package-id),
 > that will encode this information in the package ID and ensure that any change in the static libraries that are
 > embedded into a shared one is taken into account when computing the package ID.
 >
