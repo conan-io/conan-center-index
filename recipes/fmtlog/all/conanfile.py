@@ -57,6 +57,8 @@ class PackageConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.options.header_only:
             self.package_type = "header-library"
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
 
     def layout(self):
         if self.options.header_only:
