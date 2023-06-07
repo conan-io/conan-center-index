@@ -44,8 +44,6 @@ class AtkConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
