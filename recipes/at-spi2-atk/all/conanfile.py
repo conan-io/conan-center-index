@@ -52,10 +52,6 @@ class AtSPI2AtkConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.shared:
-            self.options["at-spi2-core"].shared = True
-            self.options["atk"].shared = True
-            self.options["glib"].shared = True
 
 
     def build_requirements(self):
@@ -95,8 +91,3 @@ class AtSPI2AtkConan(ConanFile):
         self.cpp_info.libs = ['atk-bridge-2.0']
         self.cpp_info.includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.names['pkg_config'] = 'atk-bridge-2.0'
-
-    def package_id(self):
-        self.info.requires["at-spi2-core"].full_package_mode()
-        self.info.requires["atk"].full_package_mode()
-        self.info.requires["glib"].full_package_mode()
