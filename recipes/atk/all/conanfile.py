@@ -49,7 +49,7 @@ class AtkConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.2")
+        self.requires("glib/2.76.3")
 
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
@@ -62,11 +62,11 @@ class AtkConan(ConanFile):
             raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.1.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.76.2")
+            self.tool_requires("glib/2.76.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
