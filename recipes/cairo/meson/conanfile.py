@@ -88,8 +88,6 @@ class CairoConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.with_glib and self.options.shared:
-            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -121,10 +119,6 @@ class CairoConan(ConanFile):
                 self.requires("khrplatform/cci.20200529")
         if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
-
-    def package_id(self):
-        if self.info.options.with_glib and not self.dependencies["glib"].options.shared:
-            self.info.requires["glib"].full_package_mode()
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
