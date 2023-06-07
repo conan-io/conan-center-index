@@ -621,11 +621,11 @@ class VtkConan(ConanFile):
                 "libpng":            "libpng/1.6.39",
                 "proj":              "proj/9.1.1",
                 "pugixml":           "pugixml/1.13",
-                "sqlite3":           "sqlite3/3.41.1",
+                "sqlite3":           "sqlite3/3.42.0",
                 "utfcpp":            "utfcpp/3.2.3",
-                "xz_utils":          "xz_utils/5.4.0", # note: VTK calls this lzma
+                "xz_utils":          "xz_utils/5.4.2", # note: VTK calls this lzma
                 "zlib":              "zlib/1.2.13",
-                "TIFF":              "libtiff/4.4.0",
+                "TIFF":              "libtiff/4.5.0",
                 }
 
         # NOTE: You may NOT be able to just adjust the version numbers in here, without
@@ -641,22 +641,22 @@ class VtkConan(ConanFile):
             parties["theora"]  = "theora/1.1.1"
             parties["ogg"]     = "ogg/1.3.5"
             parties["netcdf"]  = "netcdf/4.8.1"
-            parties["libxml2"] = "libxml2/2.10.3"
+            parties["libxml2"] = "libxml2/2.11.4"
             parties["cgns"]    = "cgns/4.3.0"
 
         # unused dependency, mentioned in vtk but not actually used
         # parties["zfp"]     = "zfp/0.5.5"
 
         if self.options.build_all_modules:
-            parties["boost"]  = "boost/1.81.0"
+            parties["boost"]  = "boost/1.82.0"
             parties["openvr"] = "openvr/1.16.8"
             parties["odbc"]   = "odbc/2.3.11"
 
         if self._is_any_Qt_enabled:
             if self.options.qt_version == "5":
-                parties["qt"] = "qt/5.15.8"
+                parties["qt"] = "qt/5.15.9"
             else:
-                parties["qt"] = "qt/6.4.2"
+                parties["qt"] = "qt/6.5.0"
 
         return parties
 
