@@ -94,6 +94,7 @@ class EastlConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["EASTL_BUILD_BENCHMARK"] = False
         tc.variables["EASTL_BUILD_TESTS"] = False
+        tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         CMakeDeps(self).generate()
 
