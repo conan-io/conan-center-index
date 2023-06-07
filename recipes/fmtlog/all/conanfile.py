@@ -17,7 +17,8 @@ class PackageConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/MengRao/fmtlog"
-    topics = ("logging", "low-latency", "topic3")
+    topics = ("logging", "low-latency")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,6 +55,8 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.header_only:
+            self.package_type = "header-library"
 
     def layout(self):
         if self.options.header_only:
