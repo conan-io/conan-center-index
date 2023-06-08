@@ -614,18 +614,18 @@ class VtkConan(ConanFile):
                 "fmt":               "fmt/8.1.1",      # VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0
                 "freetype":          "freetype/2.13.0",
                 "glew":              "glew/2.2.0",
-                "jsoncpp":           "jsoncpp/1.9.5",
+                "jsoncpp":           "jsoncpp/1.9.4",
                 "libharu":           "libharu/2.4.3",
                 "kissfft":           "kissfft/131.1.0",
                 "lz4":               "lz4/1.9.4",
                 "libpng":            "libpng/1.6.39",
                 "proj":              "proj/9.1.1",
                 "pugixml":           "pugixml/1.13",
-                "sqlite3":           "sqlite3/3.42.0",
+                "sqlite3":           "sqlite3/3.41.1",
                 "utfcpp":            "utfcpp/3.2.3",
                 "xz_utils":          "xz_utils/5.4.2", # note: VTK calls this lzma
                 "zlib":              "zlib/1.2.13",
-                "TIFF":              "libtiff/4.5.0",
+                "TIFF":              "libtiff/4.4.0",
                 }
 
         # NOTE: You may NOT be able to just adjust the version numbers in here, without
