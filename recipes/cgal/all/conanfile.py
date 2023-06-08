@@ -35,7 +35,7 @@ class CgalConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
                         "if(NOT PROJECT_NAME)", "if(1)", strict=False)
-        for it in self.conan_data.get("patches", {}):
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
             patch(self, **it, strip=2)
 
     def source(self):
