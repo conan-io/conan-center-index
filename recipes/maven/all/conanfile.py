@@ -10,8 +10,8 @@ class MavenConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://maven.apache.org/"
+    topics = ("build", "project management")
     package_type = "application"
-    topics = ("build", "sdk", "generator", "openapi")
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
