@@ -357,6 +357,7 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmediainfo
 - libmikmod
 - libmodbus
 - libmodplug
@@ -421,6 +422,7 @@ required_for_references:
 - libzippp
 - lief
 - linux-syscall-support
+- llhttp
 - lodepng
 - lua
 - luau
@@ -538,6 +540,7 @@ required_for_references:
 - rapidjson
 - rapidxml
 - rapidyaml
+- raylib
 - re2
 - readerwriterqueue
 - readline
@@ -597,9 +600,11 @@ required_for_references:
 - tensorflow-lite
 - tensorpipe
 - termcap
+- termcolor
 - threadpool
 - thrift
 - thrust
+- timsort
 - tinycthread
 - tinycthreadpool
 - tinyexif
@@ -635,6 +640,7 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- wasmer
 - wasmtime
 - wasmtime-cpp
 - watcher
@@ -682,5 +688,6 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zpp_bits
 - zstd
 - zulu-openjdk
