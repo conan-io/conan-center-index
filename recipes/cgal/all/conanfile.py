@@ -1,8 +1,8 @@
 import os
+import textwrap
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, rmdir, copy, export_conandata_patches, patch
-from conan.tools import scm
+from conan.tools.files import get, replace_in_file, rmdir, rm, copy, save, export_conandata_patches, patch
 
 required_conan_version = ">=1.50.0"
 
@@ -35,7 +35,7 @@ class CgalConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
                         "if(NOT PROJECT_NAME)", "if(1)", strict=False)
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
+        for it in self.conan_data.get("patches", {}):
             patch(self, **it, strip=2)
 
     def source(self):
@@ -52,15 +52,32 @@ class CgalConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE*", dst="licenses", src="src")
+        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src="src")
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
+        rm(self, "*Config*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CGAL"))
+        rm(self, "Find*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CGAL"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    def _create_cmake_module_variables(self, module_file):
+        content = textwrap.dedent(f"""\
+            set(CGAL_MODULES_DIR {os.path.join(self.package_folder, "lib", "cmake", "CGAL")})
+            list(APPEND CMAKE_MODULE_PATH ${{CGAL_MODULES_DIR}})
+        """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
 
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         self.cpp_info.set_property("cmake_find_package", "CGAL")
         self.cpp_info.set_property("cmake_target_name", "CGAL::CGAL")
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "CGAL", "CGALConfig.cmake")])
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])

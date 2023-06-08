@@ -12,19 +12,6 @@ sources:
     sha256: b2b05d5616ecc69facdc24417cce0b04fb4321491d107db45103add520e3d8c3
     url: https://github.com/CGAL/cgal/releases/download/v5.5.2/CGAL-5.5.2.tar.xz
 patches:
-  "5.3.2":
-    - patch_file: "patches/0001-5.3.2-fix-for-conan.patch"
-      patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
-  "5.5":
-    - patch_file: "patches/0001-fix-for-conan.patch"
-      patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
-  "5.5.1":
-    - patch_file: "patches/0001-fix-for-conan.patch"
-      patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
-  "5.5.2":
-    - patch_file: "patches/0001-fix-for-conan.patch"
-      patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
+- patch_file: "patches/0001-fix-for-conan.patch"
+  patch_type: bugfix
+  patch_description: backport of https://github.com/CGAL/cgal/pull/7502
