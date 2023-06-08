@@ -15,16 +15,20 @@ patches:
   "5.3.2":
     - patch_file: "patches/0001-fix-for-conan.patch"
       patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
+      patch_source: https://github.com/CGAL/cgal/pull/7502
+      patch_description: Fix Eigen3 support in CGAL
   "5.5":
     - patch_file: "patches/0001-fix-for-conan.patch"
       patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
+      patch_source: https://github.com/CGAL/cgal/pull/7502
+      patch_description: Fix Eigen3 support in CGAL
   "5.5.1":
     - patch_file: "patches/0001-fix-for-conan.patch"
       patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
+      patch_source: https://github.com/CGAL/cgal/pull/7502
+      patch_description: Fix Eigen3 support in CGAL
   "5.5.2":
     - patch_file: "patches/0001-fix-for-conan.patch"
       patch_type: bugfix
-      patch_description: backport of https://github.com/CGAL/cgal/pull/7502
+      patch_source: https://github.com/CGAL/cgal/pull/7502
+      patch_description: Fix Eigen3 support in CGAL
