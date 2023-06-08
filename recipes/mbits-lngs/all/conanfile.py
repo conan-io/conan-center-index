@@ -40,10 +40,10 @@ class MBitsLngsConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            # "clang": "12",
+            "clang": "12",
             "Visual Studio": "16",
             "msvc": "192",
-            # "apple-clang": "11.0.3",
+            "apple-clang": "11.0.3",
         }
 
     def export_sources(self):
@@ -59,7 +59,7 @@ class MBitsLngsConan(ConanFile):
     def requirements(self):
         self.requires("fmt/9.1.0")
         self.requires("mbits-utfconv/1.0.3")
-        self.requires("mbits-diags/0.9.5")
+        self.requires("mbits-diags/0.9.6")
         self.requires("mbits-mstch/1.0.4")
         self.requires("mbits-args/0.12.3")
 
