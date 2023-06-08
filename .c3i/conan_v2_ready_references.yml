@@ -228,6 +228,7 @@ required_for_references:
 - flatbuffers
 - flex
 - fmt
+- fmtlog
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -243,6 +244,7 @@ required_for_references:
 - gdbm
 - gdcm
 - gdk-pixbuf
+- gegles-spdlog_setup
 - gemmlowp
 - geos
 - getopt-for-visual-studio
@@ -288,6 +290,7 @@ required_for_references:
 - homog2d
 - http_parser
 - icu
+- id3v2lib
 - iir1
 - im95able-rea
 - imake
@@ -459,6 +462,7 @@ required_for_references:
 - namedtype
 - nameof
 - nanoflann
+- nanomsg
 - nanorange
 - nas
 - nasm
