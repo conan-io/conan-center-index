@@ -1,4 +1,4 @@
-#include "lngs-test.hpp"
+#include "translations.hpp"
 #include <iostream>
 
 int main() {
