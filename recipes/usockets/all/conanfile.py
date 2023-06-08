@@ -196,8 +196,8 @@ class UsocketsConan(ConanFile):
         if Version(self.version) < "0.8.3" and is_msvc(self):
             self._build_msvc()
         else:
-            with self._build_context():
-                self._build_configure()
+            self._build_context()
+            self._build_configure()
 
     def generate(self):
         tc = AutotoolsToolchain(self)
