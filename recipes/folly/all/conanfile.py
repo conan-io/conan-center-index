@@ -66,17 +66,17 @@ class FollyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.78.0", transitive_headers=True)
+        self.requires("boost/1.78.0")
         self.requires("bzip2/1.0.8")
-        self.requires("double-conversion/3.2.1", transitive_headers=True)
-        self.requires("gflags/2.2.2", transitive_headers=True)
-        self.requires("glog/0.4.0", transitive_headers=True)
-        self.requires("libevent/2.1.12", transitive_headers=True)
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+        self.requires("double-conversion/3.2.1")
+        self.requires("gflags/2.2.2")
+        self.requires("glog/0.4.0")
+        self.requires("libevent/2.1.12")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("lz4/1.9.3")
         self.requires("snappy/1.1.9")
-        self.requires("zlib/1.2.13", transitive_headers=True)
-        self.requires("zstd/1.5.2", transitive_headers=True)
+        self.requires("zlib/1.2.13")
+        self.requires("zstd/1.5.2")
         if not is_msvc(self):
             self.requires("libdwarf/20191104")
         self.requires("libsodium/1.0.18")
@@ -84,11 +84,11 @@ class FollyConan(ConanFile):
         # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
         if self.settings.os == "Linux":
             self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.6.2", transitive_headers=True)
+            self.requires("libunwind/1.6.2")
         if "2020.08.10.00" <= Version(self.version) < "2022.01.31.00":
-            self.requires("fmt/7.1.3", transitive_headers=True)
+            self.requires("fmt/7.1.3")
         if Version(self.version) >= "2022.01.31.00":
-            self.requires("fmt/8.0.1", transitive_headers=True)  # Folly bump fmt to 8.0.1 in v2022.01.31.00
+            self.requires("fmt/8.0.1")  # Folly bump fmt to 8.0.1 in v2022.01.31.00
 
     @property
     def _required_boost_components(self):
