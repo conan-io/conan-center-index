@@ -78,6 +78,10 @@ class MBitsLngsConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration(
+                "Sorry, M1 builds are not currently supported. This project uses its own binaries during build, so cross-compilation is out of the question."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
