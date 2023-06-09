@@ -113,6 +113,12 @@ class LibrdkafkaConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        # There are references to libcrypto.lib and libssl.lib in rdkafka_ssl.c for versions >= 1.8.0
+        if Version(self.version) >= "1.8.0" and self.settings.compiler == "Visual Studio" and \
+                self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
+            rdkafka_ssl_path = os.path.join(self.build_folder, "..", "src", "src", "rdkafka_ssl.c")
+            replace_in_file(self, rdkafka_ssl_path, "libcrypto.lib", "libcryptod.lib")
+            replace_in_file(self, rdkafka_ssl_path, "libssl.lib", "libssld.lib")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
