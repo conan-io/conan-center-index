@@ -999,25 +999,25 @@ class VtkConan(ConanFile):
         # fix detecting glew shared status
         replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "glew", "CMakeLists.txt"),
          'set(VTK_GLEW_SHARED "${vtkglew_is_shared}")',
-         f'set(VTK_GLEW_SHARED "{ "ON" if str(self.dependencies["glew"].options.shared) else "OFF"}")'
+         f'set(VTK_GLEW_SHARED "{ "ON" if self.dependencies["glew"].options.shared else "OFF"}")'
         )
 
         # fix detecting freetype shared status
         replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "freetype", "CMakeLists.txt"),
          'set(VTK_FREETYPE_SHARED "${vtkfreetype_is_shared}")',
-         f'set(VTK_FREETYPE_SHARED "{ "ON" if str(self.dependencies["freetype"].options.shared) else "OFF"}")'
+         f'set(VTK_FREETYPE_SHARED "{ "ON" if self.dependencies["freetype"].options.shared else "OFF"}")'
         )
 
         # fix detecting jsoncpp shared status
         replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "jsoncpp", "CMakeLists.txt"),
          'set(VTK_JSONCPP_SHARED "${vtkjsoncpp_is_shared}")',
-         f'set(VTK_JSONCPP_SHARED "{ "ON" if str(self.dependencies["jsoncpp"].options.shared) else "OFF"}")'
+         f'set(VTK_JSONCPP_SHARED "{ "ON" if self.dependencies["jsoncpp"].options.shared else "OFF"}")'
         )
 
         # fix detecting lzma shared status (note: conan calls this xz_utils)
         replace_in_file(self, os.path.join(self.source_folder, "ThirdParty", "lzma", "CMakeLists.txt"),
          'set(LZMA_BUILT_AS_DYNAMIC_LIB "${vtklzma_is_shared}")',
-         f'set(LZMA_BUILT_AS_DYNAMIC_LIB "{ "ON" if str(self.dependencies["xz_utils"].options.shared) else "OFF"}")'
+         f'set(LZMA_BUILT_AS_DYNAMIC_LIB "{ "ON" if self.dependencies["xz_utils"].options.shared else "OFF"}")'
         )
         ###########
 
