@@ -176,7 +176,7 @@ class VulkanLoaderConan(ConanFile):
         self.cpp_info.libs = [f"vulkan{suffix}"]
 
         # allow to properly set Vulkan_INCLUDE_DIRS in CMake like generators
-        self.cpp_info.includedirs = self.dependencies["vulkan-headers"].cpp_info.aggregated_components().includedirs
+        self.cpp_info.includedirs = self.dependencies["vulkan-headers"].cpp_info.includedirs
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread", "m"]
