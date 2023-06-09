@@ -1,4 +1,6 @@
-from conan import ConanFile
+from conan import ConanFile, __version__ as conan_version
+from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
@@ -46,15 +48,17 @@ class ProtobufCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        # Since the package using protobuf-c will also need to use protoc (part of protobuf), we need to make this visible
-        self.tool_requires("protobuf/3.21.9", visible=True)
+        # Since the package using protobuf-c will also need to use protoc (part of protobuf),
+        # we want to make sure the protobuf dep is visible, but the visible param is only available in v2
+        if conan_version >= Version("2"):
+            self.tool_requires("protobuf/3.21.9", visible=True)
+        else:
+            self.tool_requires("protobuf/3.21.9")
 
     def requirements(self):
         self.requires("protobuf/3.21.9")
@@ -68,6 +72,9 @@ class ProtobufCConan(ConanFile):
         tc.cache_variables["BUILD_PROTOC"] = self.options.with_protoc
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_TESTS"] = False
+        if is_apple_os(self) and self.options.shared:
+            # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
+            tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
