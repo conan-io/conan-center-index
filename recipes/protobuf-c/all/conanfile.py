@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 import os
 
@@ -29,6 +30,10 @@ class ProtobufCConan(ConanFile):
         "with_proto3": True,
         "with_protoc": True
     }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 14)
 
     def export_sources(self):
         export_conandata_patches(self)
