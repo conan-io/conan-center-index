@@ -205,7 +205,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root")
+        protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
         protos_cmake_path = os.path.join(
             self.source_folder,
             "cmake",
