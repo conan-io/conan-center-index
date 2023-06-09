@@ -30,11 +30,12 @@ class MavenConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        for target in ("bin", "boot", "conf", "lib"):
+        # for target in ("bin", "boot", "conf", "lib"):
+        for target in ("bin", "lib"):
             copy(self, pattern="*", dst=os.path.join(self.package_folder, target), src=os.path.join(self.source_folder, target))
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = ["boot", "conf"]
+        self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
