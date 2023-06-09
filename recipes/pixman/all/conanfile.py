@@ -93,7 +93,7 @@ class PixmanConan(ConanFile):
             rename(self, os.path.join(lib_folder, f"{prefix}.a"), os.path.join(lib_folder, f"{prefix}.lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ['pixman-1']
+        self.cpp_info.libs = ['libpixman-1'] if self.settings.os == "Windows" else ['pixman-1']
         self.cpp_info.includedirs.append(os.path.join("include", "pixman-1"))
         self.cpp_info.set_property("pkg_config_name", "pixman-1")
         if self.settings.os in ("FreeBSD", "Linux"):
