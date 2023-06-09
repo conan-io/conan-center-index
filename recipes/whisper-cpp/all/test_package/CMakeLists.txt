@@ -4,10 +4,8 @@ project(test_package CXX) # if the project uses c++
 
 find_package(whisper-cpp REQUIRED CONFIG)
 find_package(Threads REQUIRED)
-if (THREADS_PREFER_PTHREAD_FLAG)
-    message("Adding -pthread argument")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -pthread")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+if(THREADS_HAVE_PTHREAD_ARG)
+    add_compile_options("-pthread")
 endif()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
