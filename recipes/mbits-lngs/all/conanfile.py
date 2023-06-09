@@ -167,23 +167,17 @@ class MBitsLngsConan(ConanFile):
             )
 
     def package_info(self):
-        self.cpp_info.set_property(
-            "cmake_build_modules",
-            [
-                os.path.join(self._cmake_install_base_path, "module-mbits-lngs.cmake"),
-            ],
-        )
+        build_dir = self._cmake_install_base_path
+        exe_module = os.path.join(build_dir, "module-mbits-lngs.cmake")
 
-        self.cpp_info.libs = ["lngs"]
-
+        self.cpp_info.builddirs = [build_dir]
+        self.cpp_info.set_property("cmake_build_modules", [exe_module])
         self.cpp_info.set_property("cmake_file_name", "mbits-lngs")
-        self.cpp_info.set_property("cmake_target_name", "mbits::liblngs")
 
-        self.cpp_info.filenames["cmake_find_package"] = "mbits-lngs"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mbits-lngs"
-        self.cpp_info.names["cmake_find_package"] = "mbits"
-        self.cpp_info.names["cmake_find_package_multi"] = "mbits"
-        self.cpp_info.components["liblngs"].set_property(
-            "cmake_target_name", "mbits::liblngs"
-        )
-        self.cpp_info.components["liblngs"].libs = ["lngs"]
+        comp = self.cpp_info.components["liblngs"]
+        comp.set_property("cmake_target_name", "mbits::liblngs")
+        comp.libs = ["lngs"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.runenv_info.append_path("PATH", bin_path)
