@@ -8,7 +8,7 @@ import os
 class DrLibsConan(ConanFile):
     name = "dr_libs"
     description = "Public domain, single file audio decoding libraries for C and C++."
-    license = ("Public Domain", "MIT No Attribution")
+    license = ("Unlicense", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mackron/dr_libs"
     topics = ("audio", "encoding", "header-only")
