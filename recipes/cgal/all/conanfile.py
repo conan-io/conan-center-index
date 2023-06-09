@@ -3,6 +3,9 @@ import textwrap
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, replace_in_file, rmdir, rm, copy, save, export_conandata_patches, patch
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.50.0"
 
@@ -18,6 +21,20 @@ class CgalConan(ConanFile):
     generators = "CMakeDeps"
     short_paths = True
 
+    @property
+    def _min_cppstd(self):
+        return "14"
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5.1",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -31,6 +48,15 @@ class CgalConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def _patch_sources(self):
         replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -59,24 +85,18 @@ class CgalConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rm(self, "*Config*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CGAL"))
         rm(self, "Find*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CGAL"))
-        self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_file_rel_path)
-        )
-
-    def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent(f"""\
-            set(CGAL_MODULES_DIR {os.path.join(self.package_folder, "lib", "cmake", "CGAL")})
-            list(APPEND CMAKE_MODULE_PATH ${{CGAL_MODULES_DIR}})
-        """)
-        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake", "CGAL")
+
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_find_package", "CGAL")
         self.cpp_info.set_property("cmake_target_name", "CGAL::CGAL")
-        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
