@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
+from conan.tools.files import copy
 from conan.tools.cmake import cmake_layout, CMake
 import os
 
@@ -12,7 +13,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("drwav/0.13.7") # Use this to load in a wav file for transcription
 
     def layout(self):
         cmake_layout(self)
