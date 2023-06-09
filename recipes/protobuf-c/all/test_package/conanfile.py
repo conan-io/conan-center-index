@@ -10,8 +10,6 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def build_requirements(self):
-        # TODO: Ideally this should not be needed (should come through the self.tested_reference_str)
-        self.tool_requires("protobuf/3.21.9")
         self.tool_requires(self.tested_reference_str)
 
     def requirements(self):
@@ -27,6 +25,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
+            # We need to be able to call protoc (from protobuf) under the hood
+            self.run("protoc --version", env="conanbuild")
             self.run("protoc-c --version", env="conanbuild")
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")

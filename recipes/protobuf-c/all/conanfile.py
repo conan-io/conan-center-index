@@ -21,13 +21,13 @@ class ProtobufCConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_proto3": [True, False],
-        "with_protoc": [True, False],
+        "with_protoc": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_proto3": True,
-        "with_protoc": True,
+        "with_protoc": True
     }
 
     def export_sources(self):
@@ -48,7 +48,8 @@ class ProtobufCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("protobuf/3.21.9")
+        # Since the package using protobuf-c will also need to use protoc (part of protobuf), we need to make this visible
+        self.tool_requires("protobuf/3.21.9", visible=True)
 
     def requirements(self):
         self.requires("protobuf/3.21.9")
@@ -96,5 +97,4 @@ class ProtobufCConan(ConanFile):
         ])
 
         bin_dir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_dir}")
-        self.env_info.PATH.append(bin_dir)
+        self.buildenv_info.append_path("PATH", bin_dir)
