@@ -9,7 +9,7 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 # don't link to ${CONAN_LIBS} or CONAN_PKG::package
 target_link_libraries(${PROJECT_NAME} PRIVATE whisper-cpp::whisper-cpp drwav::drwav)
 
-add_custom_command(TARGET test_package POST BUILD
+add_custom_command(TARGET test_package POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_CURRENT_SOURCE_DIR}/jfkmoon.wav
+        ${CMAKE_CURRENT_SOURCE_DIR}/jfk.wav
         $<TARGET_FILE_DIR:test_package>)

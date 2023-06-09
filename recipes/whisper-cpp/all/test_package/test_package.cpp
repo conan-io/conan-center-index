@@ -8,7 +8,7 @@
 int main(void) {
     // Read in from a file
     drwav wav;
-    if (!drwav_init_file(&wav, "sample.wav", nullptr)) {
+    if (!drwav_init_file(&wav, "jfk.wav", nullptr)) {
         std::cout << "Failed to read in the wav file!" << std::endl;
         return DRWAV_INVALID_FILE;
     }
