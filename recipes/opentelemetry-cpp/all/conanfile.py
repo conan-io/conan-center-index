@@ -18,6 +18,7 @@ class OpenTelemetryCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/open-telemetry/opentelemetry-cpp"
     topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -91,14 +92,14 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("ms-gsl/4.0.0")
 
         if self.options.with_abseil:
-            self.requires("abseil/20220623.0")
+            self.requires("abseil/20220623.0", transitive_headers=True)
 
         if self.options.with_otlp:
-            self.requires("protobuf/3.21.4")
+            self.requires("protobuf/3.21.9")
             if Version(self.version) <= "1.4.1":
                 self.requires("opentelemetry-proto/0.11.0")
             else:
-                self.requires("opentelemetry-proto/0.19.0")
+                self.requires("opentelemetry-proto/0.20.0")
 
             if self.options.get_safe("with_otlp_grpc"):
                 self.requires("grpc/1.50.1")
@@ -109,13 +110,13 @@ class OpenTelemetryCppConan(ConanFile):
            self.options.with_etw
         ):
            self.requires("nlohmann_json/3.11.2")
-           self.requires("openssl/1.1.1t")
+           self.requires("openssl/[>=1.1 <4]")
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
            self.options.get_safe("with_otlp_http")
         ):
-           self.requires("libcurl/7.87.0")
+           self.requires("libcurl/8.1.1")
 
         if self.options.with_prometheus:
             self.requires("prometheus-cpp/1.1.0")
@@ -157,7 +158,7 @@ class OpenTelemetryCppConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("protobuf/3.21.4")
+        self.tool_requires("protobuf/3.21.9")
         self.tool_requires("grpc/1.50.1")
 
     def _create_cmake_module_variables(self, module_file):
@@ -172,8 +173,7 @@ class OpenTelemetryCppConan(ConanFile):
         save(self, module_file, content)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -205,7 +205,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        protos_path = self.deps_user_info["opentelemetry-proto"].proto_root.replace("\\", "/")
+        protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root")
         protos_cmake_path = os.path.join(
             self.source_folder,
             "cmake",
@@ -215,10 +215,17 @@ class OpenTelemetryCppConan(ConanFile):
                 protos_cmake_path,
                 "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
                 "if(1)")
-        replace_in_file(self,
-            protos_cmake_path,
-            "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
-            f"set(PROTO_PATH \"{protos_path}\")")
+        if Version(self.version) < "1.9.0":
+            replace_in_file(self,
+                protos_cmake_path,
+                "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
+                f"set(PROTO_PATH \"{protos_path}\")")
+        else:
+            replace_in_file(self,
+                protos_cmake_path,
+                "\"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
+                f"\"{protos_path}\")")
+
         rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
 
         apply_conandata_patches(self)
