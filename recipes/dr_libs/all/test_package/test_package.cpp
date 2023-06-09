@@ -7,7 +7,7 @@
 #define BUFFER_SIZE 255
 
 int main() {
-    srand(time(nullptr));
+    srand(time(NULL));
 
     // Create fake PCM data
     std::vector<drwav_int16> buffer(BUFFER_SIZE);
