@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import check_min_vs
+from conan.tools.env import Environment
 
 import os
 import textwrap
@@ -181,6 +182,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_BENCHMARK"] = False
 
+        tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
         tc.variables["WITH_STL"] = self.options.with_stl
         tc.variables["WITH_GSL"] = self.options.with_gsl
@@ -198,11 +200,18 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
         tc.variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
-
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
+
+        if self.settings.os == "Linux":
+            env = Environment()
+            if self.dependencies["grpc"].options.shared:
+                env.append_path("LD_LIBRARY_PATH", os.path.join(self.dependencies["grpc"].package_folder, "lib"))
+            if self.dependencies["protobuf"].options.shared:
+                env.append_path("LD_LIBRARY_PATH", os.path.join(self.dependencies["protobuf"].package_folder, "lib"))
+            env.vars(self).save_script("conanbuild_loadpath")
 
     def _patch_sources(self):
         protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
