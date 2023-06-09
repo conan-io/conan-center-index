@@ -530,6 +530,9 @@ class VtkConan(ConanFile):
             "module_enable_FiltersOpenTURNS":  "NO",
             "module_enable_DomainsMicroscopy": "NO",
             "module_enable_CommonArchive":     "NO",
+
+            # OpenVR's recipe isn't v2 compatible yet
+            "module_enable_RenderingOpenVR":   "NO",
         }
 
 
