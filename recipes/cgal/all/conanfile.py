@@ -86,9 +86,83 @@ class CgalConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rm(self, "*Config*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CGAL"))
         rm(self, "Find*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CGAL"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._cmake_module_file_rel_path)
+        )
+
+    def _create_cmake_module_variables(self, module_file):
+        content = textwrap.dedent('''\
+function(CGAL_setup_CGAL_flags target)
+  # CGAL now requires C++14. `decltype(auto)` is used as a marker of
+  # C++14.
+  target_compile_features(${target} INTERFACE cxx_decltype_auto)
+
+  if(MSVC)
+    target_compile_options(${target} INTERFACE
+      "-D_SCL_SECURE_NO_DEPRECATE;-D_SCL_SECURE_NO_WARNINGS")
+    if(CMAKE_VERSION VERSION_LESS 3.11)
+      target_compile_options(${target} INTERFACE
+        /fp:strict
+        /fp:except-
+        /wd4503  # Suppress warnings C4503 about "decorated name length exceeded"
+        /bigobj  # Use /bigobj by default
+        )
+    else()
+      # The MSVC generator supports `$<COMPILE_LANGUAGE: >` since CMake 3.11.
+      target_compile_options(${target} INTERFACE
+        $<$<COMPILE_LANGUAGE:CXX>:/fp:strict>
+        $<$<COMPILE_LANGUAGE:CXX>:/fp:except->
+        $<$<COMPILE_LANGUAGE:CXX>:/wd4503>  # Suppress warnings C4503 about "decorated name length exceeded"
+        $<$<COMPILE_LANGUAGE:CXX>:/bigobj>  # Use /bigobj by default
+        )
+    endif()
+  elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.3)
+      message(STATUS "Apple Clang version ${CMAKE_CXX_COMPILER_VERSION} compiler detected")
+      message(STATUS "Boost MP is turned off for all Apple Clang versions below 11.0.3!")
+      target_compile_options(${target} INTERFACE "-DCGAL_DO_NOT_USE_BOOST_MP")
+    endif()
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    message( STATUS "Using Intel Compiler. Adding -fp-model strict" )
+    if(WIN32)
+      target_compile_options(${target} INTERFACE "/fp:strict")
+    else()
+      target_compile_options(${target} INTERFACE "-fp-model" "strict")
+    endif()
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "SunPro")
+    message( STATUS "Using SunPro compiler, using STLPort 4." )
+    target_compile_options(${target} INTERFACE
+      "-features=extensions;-library=stlport4;-D_GNU_SOURCE")
+    target_link_libraries(${target} INTERFACE "-library=stlport4")
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    if ( RUNNING_CGAL_AUTO_TEST OR CGAL_TEST_SUITE )
+      target_compile_options(${target} INTERFACE "-Wall")
+    endif()
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3)
+      message( STATUS "Using gcc version 4 or later. Adding -frounding-math" )
+      if(CMAKE_VERSION VERSION_LESS 3.3)
+        target_compile_options(${target} INTERFACE "-frounding-math")
+      else()
+        target_compile_options(${target} INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:-frounding-math>")
+      endif()
+    endif()
+    if ( "${GCC_VERSION}" MATCHES "^4.2" )
+      message( STATUS "Using gcc version 4.2. Adding -fno-strict-aliasing" )
+      target_compile_options(${target} INTERFACE "-fno-strict-aliasing" )
+    endif()
+    if ( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "alpha" )
+      message( STATUS "Using gcc on alpha. Adding -mieee -mfp-rounding-mode=d" )
+      target_compile_options(${target} INTERFACE "-mieee" "-mfp-rounding-mode=d" )
+    endif()
+  endif()
+endfunction()
+
+CGAL_setup_CGAL_flags(CGAL::CGAL)
+''')
+        save(self, module_file, content)
 
     @property
-    def _module_file_rel_path(self):
+    def _cmake_module_file_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     @property
@@ -101,3 +175,4 @@ class CgalConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.set_property("cmake_find_package", "CGAL")
         self.cpp_info.set_property("cmake_target_name", "CGAL::CGAL")
+        self.cpp_info.set_property("cmake_build_modules", [self._cmake_module_file_rel_path])
