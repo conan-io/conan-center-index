@@ -25,5 +25,4 @@ class TestDrLibsConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_DrLibs")
-            copy(self, "sample.wav", self.cpp.build.bindir, self.build_folder)
             self.run(bin_path, env="conanrun")

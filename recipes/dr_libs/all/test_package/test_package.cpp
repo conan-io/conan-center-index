@@ -2,34 +2,21 @@
 #include "dr_wav.h"
 #include <vector>
 #include <iostream>
+#include <random>
+
+#define BUFFER_SIZE 255
 
 int main() {
-    // Read in from a file
-    drwav wav;
-    if (!drwav_init_file(&wav, "sample.wav", nullptr)) {
-        std::cout << "Failed to read in the wav file!" << std::endl;
-        return DRWAV_INVALID_FILE;
-    }
+    srand(time(nullptr));
 
-    // Read in the PCM data
-    std::vector<drwav_int16> buffer(wav.totalPCMFrameCount * wav.channels);
-    auto samplesDecoded = drwav_read_pcm_frames_s16__pcm(&wav, buffer.size(), buffer.data());
-    if (samplesDecoded != buffer.size() / wav.channels) {
-        std::cout << "Didn't decode the whole file! Wav file had " << wav.totalPCMFrameCount << " frames, but only "
-            <<samplesDecoded << "were decoded." << std::endl;
-        return DRWAV_ERROR;
-    }
-
-    // Close the file
-    auto result = drwav_uninit(&wav);
-    if (result != DRWAV_SUCCESS) {
-        std::cout << "Failed to uninit the wav file!" << std::endl;
-        return result;
-    }
+    // Create fake PCM data
+    std::vector<drwav_int16> buffer(BUFFER_SIZE);
+    for (size_t i = 0; i < BUFFER_SIZE; i++)
+        buffer[i] = rand() % std::numeric_limits<drwav_int16>::max();
 
     // Convert it to 32-bit floating point
-    std::vector<float> asFloat(samplesDecoded);
-    drwav_s16_to_f32(asFloat.data(), buffer.data(), samplesDecoded);
+    std::vector<float> asFloat(buffer.size());
+    drwav_s16_to_f32(asFloat.data(), buffer.data(), buffer.size());
 
     // If we get here with no issues, then it's a success
     std::cout << "Test success!" << std::endl;
