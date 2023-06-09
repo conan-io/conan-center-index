@@ -72,7 +72,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.2")
+            self.requires("dbus/1.15.6")
 
     def validate(self):
         if self.settings.os != "Linux":
