@@ -87,6 +87,7 @@ class ProtobufCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["protobuf-c"]
+        self.cpp_info.builddirs.append(self._cmake_install_base_path)
 
         # upstream CMake config file name and target name matches the package name
 
