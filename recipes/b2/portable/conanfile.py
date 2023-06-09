@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 
@@ -139,10 +140,11 @@ class B2Conan(ConanFile):
         command += "build" if use_windows_commands else "./build.sh"
 
         if self.options.use_cxx_env:
-            cxx = os.environ.get("CXX")
+            envvars = VirtualBuildEnv(self).vars()
+            cxx = envvars.get("CXX")
             if cxx:
                 command += f" --cxx={cxx}"
-            cxxflags = os.environ.get("CXXFLAGS")
+            cxxflags = envvars.get("CXXFLAGS")
             if cxxflags:
                 command += f" --cxxflags={cxxflags}"
 
