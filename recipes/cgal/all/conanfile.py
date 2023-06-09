@@ -17,6 +17,7 @@ class CgalConan(ConanFile):
     description = "C++ library that provides easy access to efficient and reliable algorithms"\
                   " in computational geometry."
     topics = ("cgal", "geometry", "algorithms")
+    package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
     short_paths = True
