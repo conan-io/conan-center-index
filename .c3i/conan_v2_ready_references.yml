@@ -228,6 +228,7 @@ required_for_references:
 - flatbuffers
 - flex
 - fmt
+- fmtlog
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -243,6 +244,7 @@ required_for_references:
 - gdbm
 - gdcm
 - gdk-pixbuf
+- gegles-spdlog_setup
 - gemmlowp
 - geos
 - getopt-for-visual-studio
@@ -288,6 +290,7 @@ required_for_references:
 - homog2d
 - http_parser
 - icu
+- id3v2lib
 - iir1
 - im95able-rea
 - imake
@@ -357,6 +360,7 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmediainfo
 - libmikmod
 - libmodbus
 - libmodplug
@@ -409,6 +413,7 @@ required_for_references:
 - libvips
 - libvpx
 - libwebp
+- libwebsockets
 - libx264
 - libx265
 - libxls
@@ -420,6 +425,7 @@ required_for_references:
 - libzippp
 - lief
 - linux-syscall-support
+- llhttp
 - lodepng
 - lua
 - luau
@@ -456,6 +462,7 @@ required_for_references:
 - namedtype
 - nameof
 - nanoflann
+- nanomsg
 - nanorange
 - nas
 - nasm
@@ -529,6 +536,7 @@ required_for_references:
 - quill
 - quirc
 - rabbitmq-c
+- ragel
 - rang
 - range-v3
 - rapidcheck
@@ -536,6 +544,7 @@ required_for_references:
 - rapidjson
 - rapidxml
 - rapidyaml
+- raylib
 - re2
 - readerwriterqueue
 - readline
@@ -544,6 +553,7 @@ required_for_references:
 - replxx
 - restbed
 - restinio
+- ring-span-lite
 - roaring
 - robin-hood-hashing
 - rttr
@@ -594,9 +604,11 @@ required_for_references:
 - tensorflow-lite
 - tensorpipe
 - termcap
+- termcolor
 - threadpool
 - thrift
 - thrust
+- timsort
 - tinycthread
 - tinycthreadpool
 - tinyexif
@@ -604,6 +616,7 @@ required_for_references:
 - tinyxml
 - tinyxml2
 - tl-expected
+- tl-function-ref
 - tlx
 - toml11
 - trantor
@@ -631,6 +644,7 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- wasmer
 - wasmtime
 - wasmtime-cpp
 - watcher
@@ -670,6 +684,7 @@ required_for_references:
 - yaml-cpp
 - yasm
 - yyjson
+- z3
 - zbar
 - zeromq
 - zfp
@@ -677,5 +692,6 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zpp_bits
 - zstd
 - zulu-openjdk
