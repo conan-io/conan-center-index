@@ -37,7 +37,7 @@ class WhisperCppConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "14": {
-                "gcc": "6",
+                "gcc": "9",
                 "clang": "5",
                 "apple-clang": "10",
                 "Visual Studio": "15",
