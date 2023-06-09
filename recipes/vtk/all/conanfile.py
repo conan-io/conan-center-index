@@ -668,6 +668,8 @@ class VtkConan(ConanFile):
                 self.requires("xorg/system")
         for pack in self._third_party().values():
             self.requires(pack)
+        # TODO unhack this, fix up QT recipe instead?  Avoid openssl conflicts
+        self.requires("openssl/[>=1.1 <4]", override=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
