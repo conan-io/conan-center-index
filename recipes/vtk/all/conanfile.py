@@ -652,8 +652,10 @@ class VtkConan(ConanFile):
 
         if self.options.build_all_modules:
             parties["boost"]  = "boost/1.82.0"
-            parties["openvr"] = "openvr/1.16.8"
             parties["odbc"]   = "odbc/2.3.11"
+
+        if self._is_module_enabled([self.options.module_enable_RenderingOpenVR]):
+            parties["openvr"] = "openvr/1.16.8"
 
         if self._is_any_Qt_enabled:
             if self.options.qt_version == "5":
