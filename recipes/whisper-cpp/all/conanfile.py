@@ -27,12 +27,12 @@ class WhisperCppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "sanitize_thread": [True, False],
                "sanitize_address": [True, False], "sanitize_undefined": [True, False], "with_sdl2": [True, False],
                "no_avx": [True, False], "no_avx2": [True, False], "no_fma": [True, False], "no_f16c": [True, False],
-               "on_accelerate": [True, False], "with_coreml": [True, False], "coreml_allow_fallback": [True, False],
+               "no_accelerate": [True, False], "with_coreml": [True, False], "coreml_allow_fallback": [True, False],
                "with_blas": [True, False]}
     default_options = {"shared": False, "fPIC": True, "sanitize_thread": False,
                        "sanitize_address": False, "sanitize_undefined": False, "with_sdl2": False,
                        "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
-                       "on_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
+                       "no_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
                        "with_blas": False}
 
     _cmake = None
