@@ -1,6 +1,5 @@
 from conan import ConanFile, __version__ as conan_version
 from conan.tools.scm import Version
-from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
@@ -18,16 +17,17 @@ class ProtobufCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protobuf-c/protobuf-c"
     topics = ("protocol-buffers", "protocol-compiler", "serialization", "protocol-compiler")
-    package_type = "library"
+    # package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
+        # "shared": [True, False],
         "fPIC": [True, False],
         "with_proto3": [True, False],
         "with_protoc": [True, False]
     }
     default_options = {
-        "shared": False,
+        # "shared": False,
         "fPIC": True,
         "with_proto3": True,
         "with_protoc": True
@@ -45,9 +45,9 @@ class ProtobufCConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    # def configure(self):
+    #     if self.options.shared:
+    #         self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -70,11 +70,8 @@ class ProtobufCConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_PROTO3"] = self.options.with_proto3
         tc.cache_variables["BUILD_PROTOC"] = self.options.with_protoc
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_TESTS"] = False
-        if is_apple_os(self) and self.options.shared:
-            # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
-            tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -99,14 +96,10 @@ class ProtobufCConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        # upstream CMake config file name and target name matches the package name
         self.cpp_info.libs = ["protobuf-c"]
         self.cpp_info.builddirs.append(self._cmake_install_base_path)
-
-        # upstream CMake config file name and target name matches the package name
-
         self.cpp_info.set_property("cmake_build_modules", [
             os.path.join(self._cmake_install_base_path, "protobuf-gen-c.cmake")
         ])
-
-        bin_dir = os.path.join(self.package_folder, "bin")
-        self.buildenv_info.append_path("PATH", bin_dir)
+        self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
