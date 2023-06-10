@@ -65,10 +65,11 @@ class OnnxRuntimeConan(ConanFile):
 
     @property
     def _onnx_version(self):
+        version = Version(self.version)
         return {
-            "1.14.1": "1.13.1",
-            "1.15.0": "1.14.0",
-        }[self.version]
+            "1.14": "1.13.1",
+            "1.15": "1.14.0",
+        }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
         self.requires("abseil/20230125.2")
@@ -98,6 +99,8 @@ class OnnxRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+    def validate_build(self):
         if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
             # https://github.com/microsoft/onnxruntime/blob/638146b79ea52598ece514704d3f592c10fab2f1/cmake/CMakeLists.txt#LL500C12-L500C12
             raise ConanInvalidConfiguration(
