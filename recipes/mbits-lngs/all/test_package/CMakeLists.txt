@@ -3,11 +3,13 @@ project(test_package CXX)
 
 find_package(mbits-lngs REQUIRED CONFIG)
 
+set(REBUILD_RESOURCES ON CACHE BOOL "Rebuild translations before embedding")
+
 set(IDL ${CMAKE_CURRENT_SOURCE_DIR}/translations.idl)
 set(CPP ${CMAKE_CURRENT_BINARY_DIR}/translations.cpp)
 set(HPP ${CMAKE_CURRENT_BINARY_DIR}/translations.hpp)
 
-if (LNGS_REBUILD_RESOURCES)
+if (REBUILD_RESOURCES)
 add_custom_target(
     make_lngs
     COMMAND mbits::lngs res ${IDL} -o ${CPP} --include "translations.hpp"
@@ -15,7 +17,7 @@ add_custom_target(
     BYPRODUCTS ${CPP} ${HPP}
     DEPENDS ${IDL}
 )
-else(LNGS_REBUILD_RESOURCES)
+else(REBUILD_RESOURCES)
 add_custom_target(
     make_lngs
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cross_translations.cpp ${CPP}
@@ -25,7 +27,7 @@ add_custom_target(
         ${CMAKE_SOURCE_DIR}/cross_translations.cpp
         ${CMAKE_SOURCE_DIR}/cross_translations.hpp
 )
-endif()
+endif(REBUILD_RESOURCES)
 
 add_executable(${PROJECT_NAME} test_package.cpp ${CPP} ${HPP})
 target_link_libraries(${PROJECT_NAME} PRIVATE mbits::liblngs)

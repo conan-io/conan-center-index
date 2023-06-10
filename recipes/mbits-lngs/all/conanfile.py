@@ -82,14 +82,20 @@ class MBitsLngsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LNGS_TESTING"] = False
         tc.variables["LNGS_LITE"] = False
         tc.variables["LNGS_LINKED_RESOURCES"] = True
         tc.variables["LNGS_NO_PKG_CONFIG"] = True
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # this needs better discovery of a cross-compile...
+        if (
+            self.settings.os != self._settings_build.os
+            or self.settings.arch != self._settings_build.arch
+        ):
             tc.variables["LNGS_REBUILD_RESOURCES"] = False
         tc.generate()
         tc = CMakeDeps(self)

@@ -15,11 +15,17 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # this needs better discovery of a cross-compile...
-            tc.variables["LNGS_REBUILD_RESOURCES"] = False
+        if (
+            self.settings.os != self._settings_build.os
+            or self.settings.arch != self._settings_build.arch
+        ):
+            tc.variables["REBUILD_RESOURCES"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
