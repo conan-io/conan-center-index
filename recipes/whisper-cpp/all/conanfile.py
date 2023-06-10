@@ -153,3 +153,9 @@ class WhisperCppConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.libdirs = ["lib/static"]
+
+        if is_apple_os(self):
+            if not self.options.no_accelerate:
+                self.cpp_info.frameworks.append("Accelerate")
+            if self.options.with_coreml
+                self.cpp_info.frameworks.append("CoreML")
