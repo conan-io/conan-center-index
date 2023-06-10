@@ -36,6 +36,5 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             # We need to be able to call protoc (from protobuf) under the hood
             self.run("protoc --version", env="conanbuild")
-            self.run("protoc-c --version", env="conanbuild")
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
