@@ -13,8 +13,6 @@ import textwrap
 
 required_conan_version = ">=1.53.0"
 
-required_conan_version = ">=1.33.0"
-
 
 class WhisperCppConan(ConanFile):
     name = "whisper-cpp"
@@ -127,12 +125,12 @@ class WhisperCppConan(ConanFile):
                 tc.variables["WHISPER_NO_ACCELERATE"] = True
             if self.options.with_coreml:
                 tc.variables["WHISPER_COREML"] = True
-            if self.options.coreml_allow_fallback:
-                tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
+                if self.options.coreml_allow_fallback:
+                    tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
         else:
             if self.options.with_blas:
                 tc.variables["WHISPER_BLAS"] = True
-                tc.variables["WHISPER_CUBLAS"] = True
+                tc.variables["WHISPER_CLBLAST"] = True
 
         tc.generate()
 
