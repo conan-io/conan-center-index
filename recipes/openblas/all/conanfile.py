@@ -43,7 +43,7 @@ class OpenblasConan(ConanFile):
         return "build_subfolder"
 
     def export_sources(self):
-       copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+       copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,7 +71,7 @@ class OpenblasConan(ConanFile):
         return cmake
 
     def layout(self):
-        cmake_layout(self, build_folder=self._build_subfolder)
+        cmake_layout(self, src_folder="src", build_folder=self._build_subfolder)
 
     def generate(self):
         tc = CMakeToolchain(self)
