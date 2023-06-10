@@ -78,6 +78,10 @@ class ZlibConan(ConanFile):
                                       '/* may be set to #if 1 by ./configure */',
                                       '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
+        
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.15.7 <4]")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
