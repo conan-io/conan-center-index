@@ -38,7 +38,8 @@ class NativefiledialogConan(ConanFile):
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
-            generator = "vs" + {"16": "2019",
+            generator = "vs" + {"17": "2022",
+                                "16": "2019",
                                 "15": "2017",
                                 "14": "2015",
                                 "12": "2013",
