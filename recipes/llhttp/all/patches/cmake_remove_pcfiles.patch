@@ -1,0 +1,9 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,5 +67,0 @@
+-  install(FILES
+-    ${CMAKE_CURRENT_SOURCE_DIR}/libllhttp.pc
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+-  )
+-
+
