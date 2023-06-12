@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class LibwebmConan(ConanFile):
     name = "libwebm"
     description = "Library for muxing and demuxing WebM media container files"
-    topics = ("conan", "libwebm", "webm", "container", "demuxing", "muxing", "media", "audio", "video")
+    topics = ("webm", "container", "demuxing", "muxing", "media", "audio", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://chromium.googlesource.com/webm/libwebm/"
     license = "BSD-3-Clause"
