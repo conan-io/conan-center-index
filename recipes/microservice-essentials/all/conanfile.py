@@ -14,20 +14,19 @@ class MicroserviceEssentials(ConanFile):
     license = "MIT"    
     description = """microservice-essentials is a portable, independent C++ library that takes care of typical recurring concerns that occur in microservice development."""
     topics = ("microservices", "cloud-native", "request-handling")
-    settings = "os", "compiler", "arch", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain"
+    settings = "os", "compiler", "arch", "build_type"    
     package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_testing": [True, False],
-        "build_examples": [True, False]
+        "with_tests": [True, False],
+        "with_examples": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_testing": False,
-        "build_examples": False
+        "with_tests": False,
+        "with_examples": False
     }
 
     @property
@@ -43,12 +42,12 @@ class MicroserviceEssentials(ConanFile):
         self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def requirements(self):
-        if self.options.build_examples:
+        if self.options.with_examples:
             self.requires("cpp-httplib/0.12.4")
             self.requires("nlohmann_json/3.11.2")
             self.requires("openssl/3.1.0")
             self.requires("grpc/1.50.1")
-        if self.options.build_testing:
+        if self.options.with_tests:
             self.requires("catch2/3.3.2")
             self.requires("nlohmann_json/3.11.2")
 
@@ -63,6 +62,8 @@ class MicroserviceEssentials(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["BUILD_TESTING"] = self.options.with_tests
+        tc.variables["BUILD_EXAMPLES"] = self.options.with_examples
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
