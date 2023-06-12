@@ -23,5 +23,11 @@ patches:
     - patch_file: "patches/1310.140.1/dns_sd.c.patch"
   "1790.80.10":
     - patch_file: "patches/1790.80.10/Resolve-compile-problem-on-linux-platform.patch"
+      patch_description: "ensure the compilation passes on Linux: update mDNS.c, mbedtls.c and uds_daemon.c to resolve compilation errors."
+      patch_type: "bugfix"
     - patch_file: "patches/1790.80.10/Support-cross-building.patch"
+      patch_description: "allow dependencies provided by conan and support cross-building for linux:update Makefile to use dependencies provided by conan and support cross-building."
+      patch_type: "conan"
     - patch_file: "patches/1790.80.10/Add-unicast-disabled-flag.patch"
+      patch_description: "add missing unicast cropping option: update Makefile to add missing cropping option, and update uDNS.c to resolve related compilation errors."
+      patch_type: "bugfix"
