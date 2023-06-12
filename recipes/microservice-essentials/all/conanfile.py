@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import get, copy
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.53.0"
@@ -97,9 +97,4 @@ class MicroserviceEssentials(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["microservice-essentials"]
         if self.settings.os != "Windows":
-            self.cpp_info.system_libs = ["pthread"]
-
-    def test(self):
-        if not cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            self.cpp_info.system_libs = ["pthread"]    
