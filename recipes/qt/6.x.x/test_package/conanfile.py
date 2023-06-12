@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
             self.tool_requires("meson/1.0.1")
 
     def generate(self):
-        path = self.deps_cpp_info["qt"].rootpath.replace("\\", "/")
+        path = self.dependencies["qt"].package_folder.replace("\\", "/")
         folder = os.path.join(path, "bin")
         bin_folder = "bin" if self.settings.os == "Windows" else "libexec"
         save(self, "qt.conf", f"""[Paths]
