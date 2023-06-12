@@ -70,16 +70,7 @@ class LibwebmConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "WebM")
         self.cpp_info.set_property("cmake_target_name", "WebM::webm")
         self.cpp_info.set_property("pkg_config_name", "webm")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["libwebm"].libs = ["webm"]
+        self.cpp_info.libs = ["webm"]
 
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.cpp_info.components["libwebm"].system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "WebM"
-        self.cpp_info.names["cmake_find_package_multi"] = "WebM"
-        self.cpp_info.components["libwebm"].names["cmake_find_package"] = "webm"
-        self.cpp_info.components["libwebm"].names["cmake_find_package_multi"] = "webm"
-        self.cpp_info.components["libwebm"].set_property("cmake_target_name", "WebM::webm")
-        self.cpp_info.components["libwebm"].set_property("pkg_config_name", "webm")
+            self.cpp_info.system_libs.append("m")
