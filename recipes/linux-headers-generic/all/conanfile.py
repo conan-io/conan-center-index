@@ -41,3 +41,9 @@ class LinuxHeadersGenericConan(ConanFile):
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("include/*.h", src=os.path.join(self._source_subfolder, "usr"))
+
+    def package_info(self):
+        # For header-only packages, libdirs and bindirs are not used
+        # so it's necessary to set those as empty.
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
