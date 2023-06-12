@@ -19,8 +19,8 @@ sources:
         sha256: "16e41fe8fb791ffb9835643435e4828384a1890b0f916fd84b750fa01f783807"
     Windows:
       x86_64:
-        - url: "https://github.com/bazelbuild/bazel/releases/download/6.2.0/bazel-6.2.0-windows-x86_64.exe"
-          sha256: "3d119e934ffb26910fcbd44dbc5973761480f58d3a06722cb84a90e16d8c5727"
+        url: "https://github.com/bazelbuild/bazel/releases/download/6.2.0/bazel-6.2.0-windows-x86_64.exe"
+        sha256: "3d119e934ffb26910fcbd44dbc5973761480f58d3a06722cb84a90e16d8c5727"
       armv8:
         url: "https://github.com/bazelbuild/bazel/releases/download/6.2.0/bazel-6.2.0-windows-arm64.exe"
         sha256: "3c23fccd3815933452c859e8482864598b6903d3143f9f18589915bf2c0dd2d4"
