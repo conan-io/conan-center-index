@@ -63,8 +63,8 @@ class LibwebmConan(ConanFile):
         copy(self, "LICENSE.TXT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "WebM")
-        self.cpp_info.set_property("cmake_target_name", "WebM::webm")
+        self.cpp_info.set_property("cmake_file_name", "webm")
+        self.cpp_info.set_property("cmake_target_name", "webm::webm")
         self.cpp_info.set_property("pkg_config_name", "webm")
         self.cpp_info.libs = ["webm"]
 
