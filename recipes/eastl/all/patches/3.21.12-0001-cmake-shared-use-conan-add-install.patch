@@ -1,10 +1,10 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e8700dc..6410770 100644
+index e3eb444..3bc0cfd 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -10,17 +10,12 @@ project(EASTL CXX)
- option(EASTL_BUILD_BENCHMARK "Enable generation of build files for benchmark" OFF)
+@@ -11,17 +11,12 @@ option(EASTL_BUILD_BENCHMARK "Enable generation of build files for benchmark" OF
  option(EASTL_BUILD_TESTS "Enable generation of build files for tests" OFF)
+ option(EASTL_STD_ITERATOR_CATEGORY_ENABLED "Enable compatibility with std:: iterator categories" OFF)
  
 -#-------------------------------------------------------------------------------------------
 -# Compiler Flags
@@ -19,30 +19,35 @@ index e8700dc..6410770 100644
  add_library(EASTL ${EASTL_SOURCES})
 +set(CMAKE_CXX_STANDARD 14)
  
- if(EASTL_BUILD_BENCHMARK)
-     add_subdirectory(benchmark)
-@@ -46,9 +41,21 @@ target_include_directories(EASTL PUBLIC include)
+ if (MSVC)
+     set(EASTL_NATVIS_DIR "doc")
+@@ -59,16 +54,24 @@ target_include_directories(EASTL PUBLIC include)
  #-------------------------------------------------------------------------------------------
  # Dependencies
  #-------------------------------------------------------------------------------------------
 -if (NOT TARGET EABase)
 -    add_subdirectory(test/packages/EABase)
+-endif()
 +find_package(EABase REQUIRED CONFIG)
 +
 +target_link_libraries(EASTL PUBLIC EABase::EABase)
-+
+ 
+-target_link_libraries(EASTL EABase)
 +if(BUILD_SHARED_LIBS)
 +  target_compile_definitions(EASTL PUBLIC EASTL_DLL)
 +  if(MSVC OR CYGWIN)
 +    target_compile_definitions(EASTL PRIVATE "EASTL_API=__declspec(dllexport)")
 +  endif()
- endif()
++endif()
  
--target_link_libraries(EASTL EABase)
-+include(GNUInstallDirs)
+ #-------------------------------------------------------------------------------------------
+ # Installation
+ #-------------------------------------------------------------------------------------------
+-install(TARGETS EASTL DESTINATION lib)
 +install(TARGETS EASTL
 +    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-+install(DIRECTORY ${CMAKE_INSTALL_INCLUDEDIR}/EASTL DESTINATION include)
+ install(DIRECTORY include/EASTL DESTINATION include)
  
+ if (MSVC)

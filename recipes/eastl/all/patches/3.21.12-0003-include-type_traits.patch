@@ -1,0 +1,13 @@
+diff --git a/include/EASTL/internal/type_transformations.h b/include/EASTL/internal/type_transformations.h
+index 5454cfa..f6f1801 100644
+--- a/include/EASTL/internal/type_transformations.h
++++ b/include/EASTL/internal/type_transformations.h
+@@ -13,7 +13,7 @@
+ #endif
+
+ #include <limits.h>
+-
++#include <type_traits>
+
+ namespace eastl
+ {
