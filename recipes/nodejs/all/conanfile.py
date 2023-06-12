@@ -38,7 +38,7 @@ class NodejsConan(ConanFile):
         cmd = ['ldd', '--version'] if conan_version.major == "1" else ['ldd --version']
         buff = StringIO()
         self.run(cmd, buff)
-        return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue()).group(1))
+        return str(re.search(r'^ldd.+(\d{1,3}.\d{1,3})\n', buff.getvalue()).group(1))
 
     def validate(self):
         if not self.version in self.conan_data["sources"] or \
