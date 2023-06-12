@@ -22,6 +22,10 @@ class ZuluOpenJDK(ConanFile):
         folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self._settings_build.os))
         return os.path.join("include", folder)
 
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+
     def validate(self):
         supported_archs = ["x86_64", "armv8"]
         if self._settings_build.arch not in supported_archs:
