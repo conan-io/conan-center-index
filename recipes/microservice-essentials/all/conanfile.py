@@ -15,12 +15,13 @@ class MicroserviceEssentials(ConanFile):
     description = """microservice-essentials is a portable, independent C++ library that takes care of typical recurring concerns that occur in microservice development."""
     topics = ("microservices", "cloud-native", "request-handling")
     settings = "os", "compiler", "arch", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain"    
+    generators = "CMakeDeps", "CMakeToolchain"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "build_testing": [True, False],
-        "build_examples": [True, False]        
+        "build_examples": [True, False]
     }
     default_options = {
         "shared": False,
@@ -55,12 +56,13 @@ class MicroserviceEssentials(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        cmake = CMake(self)        
+        cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def generate(self):
-        tc = CMakeToolchain(self)    
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -97,4 +99,7 @@ class MicroserviceEssentials(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["microservice-essentials"]
         if self.settings.os != "Windows":
-            self.cpp_info.system_libs = ["pthread"]    
+            self.cpp_info.system_libs = ["pthread"]
+        lib_path = os.path.join(self.package_folder, "lib")
+        self.output.info("Appending PATH environment variable with : {0}".format(lib_path))
+        self.env_info.path.append(lib_path)
