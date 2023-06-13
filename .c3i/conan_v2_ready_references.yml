@@ -45,6 +45,7 @@ required_for_references:
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-io
 - aws-c-sdkutils
 - aws-checksums
 - b2
@@ -621,6 +622,7 @@ required_for_references:
 - toml11
 - trantor
 - turtle
+- tz
 - uni-algo
 - unicorn
 - univalue
