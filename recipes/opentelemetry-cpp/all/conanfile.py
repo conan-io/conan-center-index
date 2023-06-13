@@ -94,7 +94,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("abseil/20220623.0")
 
         if self.options.with_otlp:
-            self.requires("protobuf/3.21.4")
+            self.requires("protobuf/3.21.9")
             if Version(self.version) <= "1.4.1":
                 self.requires("opentelemetry-proto/0.11.0")
             else:
@@ -157,7 +157,7 @@ class OpenTelemetryCppConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("protobuf/3.21.4")
+        self.tool_requires("protobuf/3.21.9")
         self.tool_requires("grpc/1.50.1")
 
     def _create_cmake_module_variables(self, module_file):
