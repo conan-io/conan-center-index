@@ -107,7 +107,8 @@ class Llvm(ConanFile):
             'ram_per_compile_job': ['ANY'],
             'ram_per_link_job': ['ANY'],
             # conan center index ci workaround, memory consumption to high in debug builds
-            'enable_debug': [True, False],
+            # and only latest versions are enabled in ci to reduce ci runtime by days
+            'conan_center_index_limits': [True, False],
             'enable_unsafe_mode': [True, False],
         },
     }
@@ -149,7 +150,7 @@ class Llvm(ConanFile):
             # creating job pools with current free memory
             'ram_per_compile_job': '2000',
             'ram_per_link_job': '14000',
-            'enable_debug': False,
+            'conan_center_index_limits': True,
             'enable_unsafe_mode': False,
         }
     }
@@ -186,6 +187,11 @@ class Llvm(ConanFile):
             self.output.warning(
                 "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
 
+    def _is_latest_patch_level(self):
+        current_version = Version(self.version)
+        next_version = f"{current_version.major}.{current_version.minor}.{current_version.patch + 1}"
+        return not next_version in self.conan_data["sources"].keys()
+
     def validate(self):
         if self.is_windows():
             if self.options.shared:
@@ -219,9 +225,13 @@ class Llvm(ConanFile):
                 raise ConanInvalidConfiguration(
                     "LLVM needs static compilation for dylib.")
 
-        if self.settings.build_type == "Debug" and not self.options.enable_debug:
-            raise ConanInvalidConfiguration(
-                "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option enable_debug=True.")
+        if self.options.conan_center_index_limits:
+            if not self._is_latest_patch_level():
+                raise ConanInvalidConfiguration(
+                    "llvm version is disabled for conan center index ci because its not the latest patch level in the configuration without the ci would run for multiple days. You can enable it with option conan_center_index_limits=False.")
+            if self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration(
+                    "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option conan_center_index_limits=False.")
 
         if not self.options.enable_unsafe_mode:
             if self.settings.compiler == "gcc":
@@ -642,7 +652,8 @@ class Llvm(ConanFile):
         del self.info.options.use_llvm_cmake_files
         del self.info.options.ram_per_compile_job
         del self.info.options.ram_per_link_job
-        del self.info.options.enable_debug
+        del self.info.options.conan_center_index_limits
+        del self.info.options.enable_unsafe_mode
 
     def package_info(self):
         module_subfolder = os.path.join("lib", "cmake")
