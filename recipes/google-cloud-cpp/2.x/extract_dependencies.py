@@ -50,6 +50,7 @@ _PROTO_DEPS_REPLACED_NAMES = {
     "logging_type": "logging_type_type",
     "texttospeech": "cloud_texttospeech",
     "speech": "cloud_speech",
+    "trace": "devtools_cloudtrace_v2_trace",
 }
 
 # A few *.deps files are not used.
@@ -253,6 +254,13 @@ _HARD_CODED_DEPENDENCIES = {
         "api_source_info_protos",
         "api_system_parameter_protos",
         "api_usage_protos",
+    ],
+    "devtools_cloudtrace_v2_tracing_protos": [
+        "devtools_cloudtrace_v2_trace_protos",
+        "devtools_cloudtrace_v2_trace_protos",
+        "api_client_protos",
+        "api_field_behavior_protos",
+        "rpc_status_protos",
     ],
 }
 

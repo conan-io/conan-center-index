@@ -260,6 +260,10 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["logging_type_protos"].requires = ["logging_type_type_protos"]
         self.cpp_info.components["speech_protos"].requires = ["cloud_speech_protos"]
         self.cpp_info.components["texttospeech_protos"].requires = ["cloud_texttospeech_protos"]
+        self.cpp_info.components["trace_protos"].requires = [
+            "devtools_cloudtrace_v2_trace_protos",
+            "devtools_cloudtrace_v2_tracing_protos",
+        ]
 
         for component in self._components():
             # bigquery proto library predates the adoption of more consistent naming

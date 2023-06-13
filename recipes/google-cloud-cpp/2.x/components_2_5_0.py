@@ -87,7 +87,7 @@ DEPENDENCIES = {
     "tasks_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'iam_v1_iam_policy_protos', 'iam_v1_options_protos', 'iam_v1_policy_protos', 'protobuf::libprotobuf', 'rpc_status_protos', 'type_expr_protos'],
     "cloud_texttospeech_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'protobuf::libprotobuf'],
     "tpu_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'longrunning_operations_protos', 'protobuf::libprotobuf', 'rpc_status_protos'],
-    "trace_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'protobuf::libprotobuf', 'rpc_status_protos'],
+    "devtools_cloudtrace_v2_trace_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'protobuf::libprotobuf', 'rpc_status_protos'],
     "translate_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'longrunning_operations_protos', 'protobuf::libprotobuf', 'rpc_status_protos'],
     "video_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'api_resource_protos', 'grpc::_grpc', 'grpc::grpc++', 'longrunning_operations_protos', 'protobuf::libprotobuf', 'rpc_status_protos'],
     "videointelligence_protos": ['api_annotations_protos', 'api_client_protos', 'api_field_behavior_protos', 'api_http_protos', 'grpc::_grpc', 'grpc::grpc++', 'longrunning_operations_protos', 'protobuf::libprotobuf', 'rpc_status_protos'],
@@ -112,6 +112,7 @@ DEPENDENCIES = {
     "api_quota_protos": ['api_annotations_protos'],
     "api_service_protos": ['api_annotations_protos', 'api_auth_protos', 'api_backend_protos', 'api_billing_protos', 'api_client_protos', 'api_context_protos', 'api_control_protos', 'api_documentation_protos', 'api_endpoint_protos', 'api_http_protos', 'api_label_protos', 'api_log_protos', 'api_logging_protos', 'api_metric_protos', 'api_monitored_resource_protos', 'api_monitoring_protos', 'api_quota_protos', 'api_resource_protos', 'api_source_info_protos', 'api_system_parameter_protos', 'api_usage_protos'],
     "api_usage_protos": ['api_annotations_protos', 'api_visibility_protos'],
+    "devtools_cloudtrace_v2_tracing_protos": ['api_client_protos', 'api_field_behavior_protos', 'devtools_cloudtrace_v2_trace_protos', 'devtools_cloudtrace_v2_trace_protos', 'rpc_status_protos'],
 }
 
 PROTO_COMPONENTS = {
@@ -179,6 +180,8 @@ PROTO_COMPONENTS = {
     "datastream_protos",
     "debugger_protos",
     "deploy_protos",
+    "devtools_cloudtrace_v2_trace_protos",
+    "devtools_cloudtrace_v2_tracing_protos",
     "devtools_source_v1_source_context_protos",
     "dialogflow_cx_protos",
     "dlp_protos",
@@ -239,7 +242,6 @@ PROTO_COMPONENTS = {
     "talent_protos",
     "tasks_protos",
     "tpu_protos",
-    "trace_protos",
     "translate_protos",
     "type_calendar_period_protos",
     "type_color_protos",

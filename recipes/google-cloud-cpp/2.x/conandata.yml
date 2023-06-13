@@ -11,3 +11,7 @@ patches:
     - patch_file: "patches/2.5.0/003-use-conan-msvc-runtime.patch"
       patch_description: "Let Conan select the MSVC runtime"
       patch_type: conan
+    - patch_file: "patches/2.5.0/004-remove-duplicate-protos.patch"
+      patch_source: https://github.com/googleapis/google-cloud-cpp/pull/10486
+      patch_description: "Some libraries defined had duplicate symbols"
+      patch_type: backport
