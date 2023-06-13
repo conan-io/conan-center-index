@@ -3,6 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 import os
 
+required_conan_version = ">=1.53.0"
+
 class ZuluOpenJDK(ConanFile):
     name = "zulu-openjdk"
     description = "A OpenJDK distribution"
