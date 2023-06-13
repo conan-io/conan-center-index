@@ -377,6 +377,20 @@ class Llvm(ConanFile):
                     f"LLVM_USE_CRT_{build_type}": self.settings.compiler.runtime
                 }
             )
+        # Conan Center Index CI optimization, in build_type=Debug the CI is killing it because of high memory usage:
+        # quote: This option reduces link-time memory usage by reducing the amount of debug information that the linker needs to resolve.
+        # It is recommended for platforms using the ELF object format, like Linux systems when linker memory usage is too high.
+        is_platform_ELF_based = self.settings.os in [
+            'Linux', 'Android', 'FreeBSD', 'SunOS', 'AIX', 'Neutrino', 'VxWorks'
+        ]
+        if is_platform_ELF_based:
+            self.output.info(
+                f"your platform \"{self.settings.os}\" is using the ELF format, optimizing memory usage during debug build linking.")
+            cmake_definitions.update(
+                {
+                    'LLVM_USE_SPLIT_DWARF': True
+                }
+            )
         cmake.configure(
             cli_args=['--graphviz=graph/llvm.dot'],
             variables=cmake_definitions,
