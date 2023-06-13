@@ -851,6 +851,9 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
+                    set(QT_KNOWN_POLICY_QTP0001 TRUE)
+                    """))
 
         if self.settings.os in ["Windows", "iOS"]:
             contents = textwrap.dedent("""\
@@ -1352,6 +1355,9 @@ class QtConan(ConanFile):
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
         build_modules_list = []
+
+        if self.options.qtdeclarative:
+            build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
 
         def _add_build_modules_for_component(component):
             for req in self.cpp_info.components[component].requires:
