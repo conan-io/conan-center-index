@@ -45,6 +45,7 @@ required_for_references:
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-io
 - aws-c-sdkutils
 - aws-checksums
 - b2
@@ -228,6 +229,7 @@ required_for_references:
 - flatbuffers
 - flex
 - fmt
+- fmtlog
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -243,6 +245,7 @@ required_for_references:
 - gdbm
 - gdcm
 - gdk-pixbuf
+- gegles-spdlog_setup
 - gemmlowp
 - geos
 - getopt-for-visual-studio
@@ -288,6 +291,7 @@ required_for_references:
 - homog2d
 - http_parser
 - icu
+- id3v2lib
 - iir1
 - im95able-rea
 - imake
@@ -357,6 +361,7 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmediainfo
 - libmikmod
 - libmodbus
 - libmodplug
@@ -421,6 +426,7 @@ required_for_references:
 - libzippp
 - lief
 - linux-syscall-support
+- llhttp
 - lodepng
 - lua
 - luau
@@ -457,6 +463,7 @@ required_for_references:
 - namedtype
 - nameof
 - nanoflann
+- nanomsg
 - nanorange
 - nas
 - nasm
@@ -538,6 +545,7 @@ required_for_references:
 - rapidjson
 - rapidxml
 - rapidyaml
+- raylib
 - re2
 - readerwriterqueue
 - readline
@@ -597,9 +605,11 @@ required_for_references:
 - tensorflow-lite
 - tensorpipe
 - termcap
+- termcolor
 - threadpool
 - thrift
 - thrust
+- timsort
 - tinycthread
 - tinycthreadpool
 - tinyexif
@@ -612,6 +622,7 @@ required_for_references:
 - toml11
 - trantor
 - turtle
+- tz
 - uni-algo
 - unicorn
 - univalue
@@ -635,6 +646,7 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- wasmer
 - wasmtime
 - wasmtime-cpp
 - watcher
@@ -682,5 +694,6 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zpp_bits
 - zstd
 - zulu-openjdk
