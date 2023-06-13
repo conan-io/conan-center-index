@@ -224,6 +224,9 @@ class Llvm(ConanFile):
             if self.options.llvm_build_llvm_dylib:
                 raise ConanInvalidConfiguration(
                     "LLVM needs static compilation for dylib.")
+        elif self.options.llvm_link_llvm_dylib and not self.options.llvm_build_llvm_dylib:
+            raise ConanInvalidConfiguration(
+                "You can't link against dylib if you don't build dylib. Please also set llvm_build_llvm_dylib=True")
 
         if self.options.conan_center_index_limits:
             if not self._is_latest_patch_level():
