@@ -15,3 +15,7 @@ patches:
       patch_source: https://github.com/googleapis/google-cloud-cpp/pull/10486
       patch_description: "Some libraries defined had duplicate symbols"
       patch_type: backport
+    - patch_file: "patches/2.5.0/005-interface-library-properties.patch"
+      patch_source: https://github.com/googleapis/google-cloud-cpp/pull/10636
+      patch_description: "Fix problems with INTERFACE proto libraries"
+      patch_type: backport

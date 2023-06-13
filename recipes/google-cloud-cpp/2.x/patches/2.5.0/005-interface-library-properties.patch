@@ -1,0 +1,54 @@
+diff --git a/google/cloud/speech/CMakeLists.txt b/google/cloud/speech/CMakeLists.txt
+index 59546c7..51bc0b6 100644
+--- a/google/cloud/speech/CMakeLists.txt
++++ b/google/cloud/speech/CMakeLists.txt
+@@ -49,11 +49,8 @@ endif ()
+ add_library(google_cloud_cpp_speech_protos INTERFACE)
+ target_link_libraries(google_cloud_cpp_speech_protos
+                       INTERFACE google-cloud-cpp::cloud_speech_protos)
+-set_target_properties(
+-    google_cloud_cpp_speech_protos
+-    PROPERTIES EXPORT_NAME google-cloud-cpp::speech_protos
+-               VERSION "${PROJECT_VERSION}"
+-               SOVERSION "${PROJECT_VERSION_MAJOR}")
++set_target_properties(google_cloud_cpp_speech_protos
++                      PROPERTIES EXPORT_NAME google-cloud-cpp::speech_protos)
+ target_compile_options(google_cloud_cpp_speech_protos
+                        INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
+ add_library(google-cloud-cpp::speech_protos ALIAS
+diff --git a/google/cloud/texttospeech/CMakeLists.txt b/google/cloud/texttospeech/CMakeLists.txt
+index c43aa51..086d468 100644
+--- a/google/cloud/texttospeech/CMakeLists.txt
++++ b/google/cloud/texttospeech/CMakeLists.txt
+@@ -65,11 +65,8 @@ target_link_libraries(
+     PUBLIC google-cloud-cpp::grpc_utils google-cloud-cpp::common
+            google-cloud-cpp::texttospeech_protos)
+ google_cloud_cpp_add_common_options(google_cloud_cpp_texttospeech)
+-set_target_properties(
+-    google_cloud_cpp_texttospeech
+-    PROPERTIES EXPORT_NAME google-cloud-cpp::texttospeech
+-               VERSION "${PROJECT_VERSION}"
+-               SOVERSION "${PROJECT_VERSION_MAJOR}")
++set_target_properties(google_cloud_cpp_texttospeech
++                      PROPERTIES EXPORT_NAME google-cloud-cpp::texttospeech)
+ target_compile_options(google_cloud_cpp_texttospeech
+                        PUBLIC ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
+ 
+diff --git a/google/cloud/trace/CMakeLists.txt b/google/cloud/trace/CMakeLists.txt
+index 0afc230..66871f7 100644
+--- a/google/cloud/trace/CMakeLists.txt
++++ b/google/cloud/trace/CMakeLists.txt
+@@ -65,11 +65,8 @@ target_link_libraries(
+     PUBLIC google-cloud-cpp::grpc_utils google-cloud-cpp::common
+            google-cloud-cpp::trace_protos)
+ google_cloud_cpp_add_common_options(google_cloud_cpp_trace)
+-set_target_properties(
+-    google_cloud_cpp_trace
+-    PROPERTIES EXPORT_NAME google-cloud-cpp::trace
+-               VERSION "${PROJECT_VERSION}"
+-               SOVERSION "${PROJECT_VERSION_MAJOR}")
++set_target_properties(google_cloud_cpp_trace
++                      PROPERTIES EXPORT_NAME google-cloud-cpp::trace)
+ target_compile_options(google_cloud_cpp_trace
+                        PUBLIC ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
+ 
