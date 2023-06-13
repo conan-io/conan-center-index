@@ -218,41 +218,42 @@ _DEFAULT_COMPONENTS = {
 
 # `google-cloud-cpp` managems these dependencies using CMake code.
 _HARD_CODED_DEPENDENCIES = {
-"api_annotations_protos": ["api_http_protos"],
-"api_auth_protos": ["api_annotations_protos"],
-"api_client_protos": ["api_launch_stage_protos"],
-"api_metric_protos": ["api_launch_stage_protos", "api_label_protos"],
-"api_billing_protos": ["api_annotations_protos", "api_metric_protos"],
-"api_distribution_protos": ["api_annotations_protos"],
-"api_endpoint_protos": ["api_annotations_protos"],
-"api_log_protos": ["api_label_protos"],
-"api_logging_protos": ["api_annotations_protos", "api_label_protos"],
-"api_monitored_resource_protos": ["api_launch_stage_protos", "api_label_protos"],
-"api_monitoring_protos": ["api_annotations_protos"],
-"api_quota_protos": ["api_annotations_protos"],
-"api_usage_protos": ["api_annotations_protos", "api_visibility_protos"],
-"api_service_protos": [
-    "api_annotations_protos",
-    "api_auth_protos",
-    "api_backend_protos",
-    "api_billing_protos",
-    "api_client_protos",
-    "api_context_protos",
-    "api_control_protos",
-    "api_documentation_protos",
-    "api_endpoint_protos",
-    "api_http_protos",
-    "api_label_protos",
-    "api_log_protos",
-    "api_logging_protos",
-    "api_metric_protos",
-    "api_monitored_resource_protos",
-    "api_monitoring_protos",
-    "api_quota_protos",
-    "api_resource_protos",
-    "api_source_info_protos",
-    "api_system_parameter_protos",
-    "api_usage_protos"],
+    "api_annotations_protos": ["api_http_protos"],
+    "api_auth_protos": ["api_annotations_protos"],
+    "api_client_protos": ["api_launch_stage_protos"],
+    "api_metric_protos": ["api_launch_stage_protos", "api_label_protos"],
+    "api_billing_protos": ["api_annotations_protos", "api_metric_protos"],
+    "api_distribution_protos": ["api_annotations_protos"],
+    "api_endpoint_protos": ["api_annotations_protos"],
+    "api_log_protos": ["api_label_protos"],
+    "api_logging_protos": ["api_annotations_protos", "api_label_protos"],
+    "api_monitored_resource_protos": ["api_launch_stage_protos", "api_label_protos"],
+    "api_monitoring_protos": ["api_annotations_protos"],
+    "api_quota_protos": ["api_annotations_protos"],
+    "api_usage_protos": ["api_annotations_protos", "api_visibility_protos"],
+    "api_service_protos": [
+        "api_annotations_protos",
+        "api_auth_protos",
+        "api_backend_protos",
+        "api_billing_protos",
+        "api_client_protos",
+        "api_context_protos",
+        "api_control_protos",
+        "api_documentation_protos",
+        "api_endpoint_protos",
+        "api_http_protos",
+        "api_label_protos",
+        "api_log_protos",
+        "api_logging_protos",
+        "api_metric_protos",
+        "api_monitored_resource_protos",
+        "api_monitoring_protos",
+        "api_quota_protos",
+        "api_resource_protos",
+        "api_source_info_protos",
+        "api_system_parameter_protos",
+        "api_usage_protos",
+    ],
 }
 
 
@@ -282,8 +283,8 @@ def _experimental_components(source_folder):
         return _DEFAULT_EXPERIMENTAL_COMPONENTS
     # The `libraries.bzl` file is a Starlark file that simply defines some
     # variables listing all GA, experimental, and "transition", components.
-    # We want both the GA and transition components, the latter are components
-    # that recently transitioned from experimental to GA.
+    # We want to return any experimental components, the caller will skip them
+    # as they are not built by Conan.
     g = dict()
     with open(libraries) as f:
         exec(compile(f.read(), libraries, "exec"), g)
@@ -345,10 +346,10 @@ def main():
     print("}")
     proto_components = proto_components - _PROTO_DEPS_COMMON_REQUIRES
     names = ['"%s"' % c for c in proto_components]
-    joined = ',\n    '.join(sorted(names))
+    joined = ",\n    ".join(sorted(names))
     print(f"\nPROTO_COMPONENTS = {{\n    {joined}\n}}")
     names = ['"%s"' % c for c in _components(source_folder)]
-    joined = ',\n    '.join(sorted(names))
+    joined = ",\n    ".join(sorted(names))
     print(f"\nCOMPONENTS = {{\n    {joined}\n}}")
 
 
