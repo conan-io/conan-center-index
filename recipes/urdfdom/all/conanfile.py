@@ -37,10 +37,6 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return 14
 
-    @property
-    def _tests_enabled(self):
-        return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -64,10 +60,6 @@ class PackageConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
-    def build_requirements(self):
-        if self._tests_enabled:
-            self.build_requires("gtest/1.13.0")
-
     def source(self):
         # urdfdom packages its headers separately as urdfdom_headers.
         # There is no obvious benefit of doing the same for the Conan package,
@@ -84,7 +76,7 @@ class PackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["APPEND_PROJECT_NAME_TO_INCLUDEDIR"] = False
-        tc.variables["BUILD_TESTING"] = self._tests_enabled
+        tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_APPS"] = False
         if not self.options.shared:
             tc.preprocessor_definitions["URDFDOM_STATIC"] = "1"
@@ -106,8 +98,6 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if self._tests_enabled:
-            cmake.test()
 
     def package(self):
         copy(
