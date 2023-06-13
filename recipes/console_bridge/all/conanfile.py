@@ -30,10 +30,6 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return 14
 
-    @property
-    def _tests_enabled(self):
-        return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -55,16 +51,11 @@ class PackageConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
-    def build_requirements(self):
-        if self._tests_enabled:
-            self.build_requires("gtest/1.13.0")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = self._tests_enabled
         tc.generate()
         CMakeDeps(self).generate()
 
@@ -73,8 +64,6 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if self._tests_enabled:
-            cmake.test()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
