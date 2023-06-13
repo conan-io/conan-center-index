@@ -232,9 +232,6 @@ class Llvm(ConanFile):
             if not self._is_latest_patch_level():
                 raise ConanInvalidConfiguration(
                     "llvm version is disabled for conan center index ci because its not the latest patch level in the configuration without the ci would run for multiple days. You can enable it with option conan_center_index_limits=False.")
-            if self.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration(
-                    "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option conan_center_index_limits=False.")
 
         if not self.options.enable_unsafe_mode:
             if self.settings.compiler == "gcc":
