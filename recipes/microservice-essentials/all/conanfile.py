@@ -103,4 +103,5 @@ class MicroserviceEssentials(ConanFile):
             self.cpp_info.system_libs = ["pthread"]
         lib_path = os.path.join(self.package_folder, "lib")
         self.output.info("Appending PATH environment variable with : {0}".format(lib_path))
-        self.env_info.path.append(lib_path)
+        self.runenv_info.prepend_path("PATH", lib_path)
+ 
