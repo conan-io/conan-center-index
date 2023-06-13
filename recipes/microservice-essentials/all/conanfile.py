@@ -104,4 +104,3 @@ class MicroserviceEssentials(ConanFile):
         lib_path = os.path.join(self.package_folder, "lib")
         self.output.info("Appending PATH environment variable with : {0}".format(lib_path))
         self.runenv_info.prepend_path("PATH", lib_path)
- 
