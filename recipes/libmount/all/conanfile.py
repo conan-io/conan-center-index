@@ -17,7 +17,7 @@ class LibmountConan(ConanFile):
     topics = ("mount", "linux", "util-linux")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git"
-    license = "GPL-2.0-or-later"
+    license = "LGPL-2.1-or-later"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
