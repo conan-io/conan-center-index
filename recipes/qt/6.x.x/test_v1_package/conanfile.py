@@ -3,7 +3,7 @@ import shutil
 
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.files import chdir, mkdir, save
+from conan.tools.files import mkdir, chdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -18,26 +18,22 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.25.3")
         if self._meson_supported():
-            self.tool_requires("meson/1.0.1")
+            self.tool_requires("meson/1.1.0")
 
     def generate(self):
-        path = self.dependencies["qt"].package_folder.replace("\\", "/")
-        folder = os.path.join(path, "bin")
-        bin_folder = "bin" if self.settings.os == "Windows" else "libexec"
-        save(self, "qt.conf", f"""[Paths]
-Prefix = {path}
-ArchData = {folder}/archdatadir
-HostData = {folder}/archdatadir
-Data = {folder}/datadir
-Sysconf = {folder}/sysconfdir
-LibraryExecutables = {folder}/archdatadir/{bin_folder}
-HostLibraryExecutables = bin
-Plugins = {folder}/archdatadir/plugins
-Imports = {folder}/archdatadir/imports
-Qml2Imports = {folder}/archdatadir/qml
-Translations = {folder}/datadir/translations
-Documentation = {folder}/datadir/doc
-Examples = {folder}/datadir/examples""")
+        save(self, "qt.conf", """[Paths]
+Prefix = {}
+ArchData = bin/archdatadir
+HostData = bin/archdatadir
+Data = bin/datadir
+Sysconf = bin/sysconfdir
+LibraryExecutables = bin/archdatadir/bin
+Plugins = bin/archdatadir/plugins
+Imports = bin/archdatadir/imports
+Qml2Imports = bin/archdatadir/qml
+Translations = bin/datadir/translations
+Documentation = bin/datadir/doc
+Examples = bin/datadir/examples""".format(self.dependencies["qt"].package_folder.replace('\\', '/')))
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
@@ -128,18 +124,18 @@ Examples = {folder}/datadir/examples""")
         bin_path = os.path.join("qmake_folder", "bin")
         if self.settings.os == "Macos":
             bin_path = os.path.join(bin_path, "test_package.app", "Contents", "MacOS")
-        shutil.copy(os.path.join(self.generators_folder, "qt.conf"), bin_path)
+        shutil.copy("qt.conf", bin_path)
         self.run(os.path.join(bin_path, "test_package"), run_environment=True)
 
     def _test_with_meson(self):
         if self._meson_supported():
             self.output.info("Testing Meson")
-            shutil.copy(os.path.join(self.generators_folder, "qt.conf"), "meson_folder")
+            shutil.copy("qt.conf", "meson_folder")
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
 
     def _test_with_cmake_find_package_multi(self):
         self.output.info("Testing CMake_find_package_multi")
-        shutil.copy(os.path.join(self.generators_folder, "qt.conf"), "bin")
+        shutil.copy("qt.conf", "bin")
         self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
