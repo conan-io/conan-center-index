@@ -30,6 +30,7 @@ class GtsamConan(ConanFile):
         "with_TBB": [True, False],
         "with_eigen_MKL": [True, False],
         "with_eigen_MKL_OPENMP": [True, False],
+        "with_march_native": [True, False],        
         "throw_cheirality_exception": [True, False],
         "allow_deprecated_since_V4": [True, False],
         "typedef_points_to_vectors": [True, False],
@@ -43,6 +44,7 @@ class GtsamConan(ConanFile):
         "install_matlab_toolbox": [True, False],
         "install_cython_toolbox": [True, False],
         "install_cppunitlite": [True, False],
+        "use_system_eigen": [True, False],
     }
     default_options = {
         "shared": False,
@@ -54,6 +56,7 @@ class GtsamConan(ConanFile):
         "with_TBB": False,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
+        "with_march_native": False,
         "throw_cheirality_exception": True,
         "allow_deprecated_since_V4": True,
         "typedef_points_to_vectors": False,
@@ -67,6 +70,7 @@ class GtsamConan(ConanFile):
         "install_matlab_toolbox": False,
         "install_cython_toolbox": False,
         "install_cppunitlite": True,
+        "use_system_eigen": True,
     }
 
     def export_sources(self):
@@ -143,13 +147,13 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_BUILD_DOC_HTML"] = False
         tc.variables["GTSAM_BUILD_EXAMPLES_ALWAYS"] = False
         tc.variables["GTSAM_BUILD_WRAP"] = self.options.build_wrap
-        tc.variables["GTSAM_BUILD_WITH_MARCH_NATIVE"] = False
+        tc.variables["GTSAM_BUILD_WITH_MARCH_NATIVE"] = self.options.with_march_native
         tc.variables["GTSAM_WRAP_SERIALIZATION"] = self.options.wrap_serialization
         tc.variables["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
         tc.variables["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
         tc.variables["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
         tc.variables["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
-        tc.variables["GTSAM_USE_SYSTEM_EIGEN"] = True
+        tc.variables["GTSAM_USE_SYSTEM_EIGEN"] = self.options.use_system_eigen
         tc.variables["GTSAM_BUILD_TYPE_POSTFIXES"] = False
         tc.generate()
         deps = CMakeDeps(self)
