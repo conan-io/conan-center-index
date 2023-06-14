@@ -68,6 +68,9 @@ sources:
   "16.0.5":
     url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-16.0.5.tar.gz
     sha256: e0fbca476693fcafa125bc71c8535587b6d9950293122b66b262bb4333a03942
+  "16.0.6":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-16.0.6.tar.gz
+    sha256: 56b2f75fdaa95ad5e477a246d3f0d164964ab066b4619a01836ef08e475ec9d5
 
 patches:
   "13.0.0":
