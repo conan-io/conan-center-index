@@ -96,9 +96,6 @@ class MPUnitsConan(ConanFile):
         cmake.configure(build_script_folder="src")
         cmake.build()
 
-    def package_id(self):
-        self.info.clear()
-
     def package(self):
         copy(
             self,
