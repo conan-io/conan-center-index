@@ -53,7 +53,7 @@ class MPUnitsConan(ConanFile):
         self.requires("gsl-lite/0.38.0")
         self.requires("fmt/7.1.3")
         if self._use_range_v3:
-            self.requires("range-v3/0.11.0")
+            self.requires("range-v3/0.11.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
