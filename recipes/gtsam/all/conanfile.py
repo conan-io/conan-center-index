@@ -86,10 +86,10 @@ class GtsamConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("eigen/3.4.0")
+        self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
+        self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2020.3", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
