@@ -53,7 +53,7 @@ class StdgpuConan(ConanFile):
                 "gcc": "7",
                 "clang": "6",
                 "apple-clang": "6",
-                "msvc": "19.20",
+                "msvc": "192",
                 "Visual Studio": "16",
             }
         else:
@@ -63,7 +63,7 @@ class StdgpuConan(ConanFile):
                 "gcc": "9",
                 "clang": "10",
                 "apple-clang": "12",
-                "msvc": "19.20",
+                "msvc": "192",
                 "Visual Studio": "16",
             }
 
