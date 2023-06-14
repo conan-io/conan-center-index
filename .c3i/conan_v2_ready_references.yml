@@ -55,6 +55,7 @@ required_for_references:
 - bacnet-stack
 - baical-p7
 - base64
+- bazel
 - bdwgc
 - bear
 - benchmark
@@ -256,6 +257,7 @@ required_for_references:
 - ginkgo
 - gklib
 - glad
+- glaze
 - glfw
 - gli
 - glib
@@ -362,6 +364,7 @@ required_for_references:
 - liblzf
 - libmad
 - libmediainfo
+- libmemcached
 - libmikmod
 - libmodbus
 - libmodplug
@@ -453,6 +456,7 @@ required_for_references:
 - minizip
 - minizip-ng
 - mongo-c-driver
+- mozilla-build
 - mozjpeg
 - mpg123
 - ms-gsl
