@@ -78,28 +78,13 @@ class LibTinsConan(ConanFile):
         tc.variables["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
         tc.variables["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
         tc.variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
+        tc.variables["PCAP_LIBRARY"] = "libpcap::libpcap"
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("libpcap", "cmake_file_name", "PCAP")
         deps.generate()
 
-    def _patch_sources(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "FIND_PACKAGE(PCAP REQUIRED)",
-            "find_package(libpcap REQUIRED)",
-            strict=True,
-        )
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-            "${PCAP_LIBRARY}",
-            "libpcap::libpcap",
-            strict=True,
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
