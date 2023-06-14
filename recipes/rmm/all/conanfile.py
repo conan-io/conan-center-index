@@ -3,9 +3,11 @@ import textwrap
 from pathlib import Path
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -23,6 +25,16 @@ class RmmConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "7",
+            "clang": "8",
+            "apple-clang": "11.0",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -47,17 +59,26 @@ class RmmConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def _write_version_header(self):
         major, minor, patch = self.version.split(".")[:3]
         header_path = Path(self.source_folder) / "include" / "rmm" / "version_config.hpp"
         header_path.parent.mkdir(parents=True, exist_ok=True)
-        header_path.write_text(textwrap.dedent(f"""\
+        header_path.write_text(
+            textwrap.dedent(
+                f"""\
             #pragma once
             #define RMM_VERSION_MAJOR {int(major)}
             #define RMM_VERSION_MINOR {int(minor)}
             #define RMM_VERSION_PATCH {int(patch)}
-            """))
+            """
+            )
+        )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
