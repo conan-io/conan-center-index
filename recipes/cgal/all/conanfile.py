@@ -163,7 +163,7 @@ CGAL_setup_CGAL_flags(CGAL::CGAL)
 
     @property
     def _cmake_module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+        return os.path.join("lib", "cmake", "CGAL", f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _module_subfolder(self):
