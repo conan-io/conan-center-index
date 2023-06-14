@@ -41,18 +41,7 @@ class MPUnitsConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {"gcc": "10.3", "clang": "12", "apple-clang": "13", "msvc": "1928"}
-
-    @property
-    def _full_compiler_version(self):
-        compiler = self.settings.compiler
-        if compiler == "msvc":
-            if compiler.update:
-                return int(f"{compiler.version}{compiler.update}")
-            else:
-                return int(f"{compiler.version}0")
-        else:
-            return compiler.version
+        return {"gcc": "10.3", "clang": "12", "apple-clang": "13", "msvc": "192"}
 
     @property
     def _use_range_v3(self):
@@ -78,9 +67,7 @@ class MPUnitsConan(ConanFile):
 
         compiler = self.settings.compiler
         min_version = self._minimum_compilers_version.get(str(compiler))
-        if min_version and loose_lt_semver(
-            str(self._full_compiler_version), min_version
-        ):
+        if min_version and loose_lt_semver(str(compiler.version), min_version):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least {compiler} {min_version}"
             )
