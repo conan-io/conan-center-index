@@ -7,4 +7,3 @@ patches:
     - patch_file: "patches/0001-clang.patch"
       patch_description: "Allows building with Clang"
       patch_type: "portability"
-
