@@ -31,6 +31,7 @@ class LibTinsConan(ConanFile):
         "with_ack_tracker": [True, False],
         "with_wpa2": [True, False],
         "with_dot11": [True, False],
+        "with_tcp_stream_custom_data": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class LibTinsConan(ConanFile):
         "with_ack_tracker": True,
         "with_wpa2": True,
         "with_dot11": True,
+        "with_tcp_stream_custom_data": True,
     }
 
     @property
@@ -57,7 +59,7 @@ class LibTinsConan(ConanFile):
 
     def requirements(self):
         self.requires("libpcap/1.10.1", transitive_headers=True, transitive_libs=True)
-        if self.options.with_ack_tracker:
+        if self.options.with_ack_tracker or self.options.with_tcp_stream_custom_data:
             # Used in two public headers:
             # - https://github.com/mfontanini/libtins/blob/v4.4/include/tins/tcp_ip/ack_tracker.h#L38
             # - https://github.com/mfontanini/libtins/blob/v4.4/include/tins/tcp_ip/stream.h#L48
@@ -79,6 +81,7 @@ class LibTinsConan(ConanFile):
         tc.variables["LIBTINS_BUILD_SHARED"] = self.options.shared
         tc.variables["LIBTINS_ENABLE_CXX11"] = True
         tc.variables["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
+        tc.variables["LIBTINS_ENABLE_TCP_STREAM_CUSTOM_DATA"] = self.options.with_tcp_stream_custom_data
         tc.variables["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
         tc.variables["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
         tc.variables["PCAP_LIBRARY"] = "libpcap::libpcap"
