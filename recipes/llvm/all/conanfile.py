@@ -186,7 +186,17 @@ class Llvm(ConanFile):
     def _is_latest_patch_level(self):
         current_version = Version(self.version)
         next_version = f"{current_version.major}.{current_version.minor}.{current_version.patch + 1}"
-        return not next_version in self.conan_data["sources"].keys()
+
+        known_versions = []
+        for v in self.conan_data["sources"].keys():
+            v = Version(v)
+            if v.major == current_version.major and v.minor == current_version.minor:
+                known_versions.append(str(v))
+        next_version_known = next_version in known_versions
+        self.output.info(
+            f"checking if {current_version} is latest configured patch level in {known_versions}, result: {not next_version_known}")
+
+        return not next_version_known
 
     def validate(self):
         if self.is_windows():
