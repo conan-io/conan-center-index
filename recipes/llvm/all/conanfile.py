@@ -203,9 +203,12 @@ class Llvm(ConanFile):
                         "Generating libLLVM is not supported on MSVC"
                     )
 
-        self.output.info(
-            f"testing if llvm/{self.version}:keep_binaries_regex is a valid pattern")
-        re.compile(str(self.options.keep_binaries_regex))
+        try:
+            re.compile(str(self.options.keep_binaries_regex))
+        except re.error as e:
+            self.output.error(f"re.error: {e.msg}")
+            raise ConanInvalidConfiguration(
+                "Option keep_binaries_regex isn't a valid pattern")
 
         if self.settings.compiler.cppstd:
             ver = self._llvm_major_version()
