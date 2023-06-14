@@ -7,18 +7,11 @@ conan_set_vs_runtime()
 conan_set_libcxx()
 conan_output_dirs_setup()
 
-find_package(Qt6 COMPONENTS Core Network Sql Concurrent Xml Qml REQUIRED CONFIG)
+find_package(Qt6 COMPONENTS Core Network Sql Concurrent Xml REQUIRED CONFIG)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 add_executable(${PROJECT_NAME} test_package.cpp greeter.h example.qrc)
-
-qt_add_qml_module(test_package
-    URI test_package
-    VERSION 1.0
-    QML_FILES
-    test_package.qml
-)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
