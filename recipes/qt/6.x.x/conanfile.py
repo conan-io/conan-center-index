@@ -108,7 +108,6 @@ class QtConan(ConanFile):
         "with_x11": True,
 
         "gui": True,
-        "qtdeclarative": True,
         "widgets": True,
 
         "device": None,
