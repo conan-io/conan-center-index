@@ -1,4 +1,6 @@
 import os
+import re
+from io import StringIO
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -92,6 +94,19 @@ class StdgpuConan(ConanFile):
             # HIP support requires Thrust provided with ROCm.
             # The main version provided by Nvidia found in Conan is not compatible.
             self.requires("thrust/1.17.2", transitive_headers=True, transitive_libs=True)
+
+    def _cmake_new_enough(self, required_version):
+        try:
+            output = StringIO()
+            self.run("cmake --version", output)
+            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
+            return Version(m.group(1)) >= required_version
+        except:
+            return False
+
+    def build_requirements(self):
+        if Version(self.version) > "1.3.0" and not self._cmake_new_enough("3.18"):
+            self.tool_requires("cmake/3.26.4")
 
     def validate(self):
         if self.settings.compiler.cppstd:
