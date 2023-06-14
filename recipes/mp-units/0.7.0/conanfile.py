@@ -1,70 +1,121 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import Version, check_min_cppstd
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.0.0"
+
 
 class MPUnitsConan(ConanFile):
     name = "mp-units"
     homepage = "https://github.com/mpusz/units"
-    description = "Physical Units library for C++"
-    topics = ("units", "dimensions", "quantities", "dimensional-analysis", "physical-quantities", "physical-units", "system-of-units", "cpp23", "cpp20", "library", "quantity-manipulation")
+    description = "Physical Quantities and Units library for C++"
+    topics = (
+        "units",
+        "dimensions",
+        "quantities",
+        "dimensional-analysis",
+        "physical-quantities",
+        "physical-units",
+        "system-of-units",
+        "system-of-quantities",
+        "isq",
+        "si",
+        "library",
+        "quantity-manipulation",
+    )
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake_find_package_multi"
+    requires = ["gsl-lite/0.38.0", "fmt/7.1.3"]
     no_copy_source = True
+    generators = "CMakeToolchain", "CMakeDeps"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "20"
+
+    @property
+    def _minimum_compilers_version(self):
+        return {"gcc": "10.3", "clang": "12", "apple-clang": "13", "msvc": "1928"}
+
+    @property
+    def _full_compiler_version(self):
+        compiler = self.settings.compiler
+        if compiler == "msvc":
+            if compiler.update:
+                return int(f"{compiler.version}{compiler.update}")
+            else:
+                return int(f"{compiler.version}0")
+        else:
+            return compiler.version
+
+    @property
+    def _use_range_v3(self):
+        compiler = self.settings.compiler
+        version = Version(self.settings.compiler.version)
+        return "clang" in compiler and compiler.libcxx == "libc++" and version < 14
 
     def requirements(self):
-        compiler = self.settings.compiler
-        self.requires("fmt/7.1.3")
-        self.requires("gsl-lite/0.38.0")
-        if compiler == "clang" and compiler.libcxx == "libc++":
+        if self._use_range_v3:
             self.requires("range-v3/0.11.0")
 
     def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
         compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version)
-        if compiler == "gcc":
-            if version < "10.0":
-                raise ConanInvalidConfiguration("mp-units requires at least g++-10")
-        elif compiler == "clang":
-            if version < "12":
-                raise ConanInvalidConfiguration("mp-units requires at least clang++-12")
-        elif compiler == "Visual Studio":
-            if version < "16":
-                raise ConanInvalidConfiguration("mp-units requires at least Visual Studio 16.9")
-        else:
-            raise ConanInvalidConfiguration("Unsupported compiler")
-        if compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "20")
+        min_version = self._minimum_compilers_version.get(str(compiler))
+        if min_version and loose_lt_semver(
+            str(self._full_compiler_version), min_version
+        ):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least {compiler} {min_version}"
+            )
+
+    def layout(self):
+        cmake_layout(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
+    def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=os.path.join(self._source_subfolder, "src"))
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        cmake.configure(build_script_folder="src")
+        cmake.build()
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def package(self):
+        copy(
+            self,
+            "LICENSE.md",
+            self.source_folder,
+            os.path.join(self.package_folder, "licenses"),
+        )
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         compiler = self.settings.compiler
 
         # core
         self.cpp_info.components["core"].requires = ["gsl-lite::gsl-lite"]
-        if compiler == "Visual Studio":
+        if compiler == "msvc":
             self.cpp_info.components["core"].cxxflags = ["/utf-8"]
-        elif compiler == "clang" and compiler.libcxx == "libc++":
+        if self._use_range_v3:
             self.cpp_info.components["core"].requires.append("range-v3::range-v3")
 
         # rest
@@ -81,4 +132,16 @@ class MPUnitsConan(ConanFile):
         self.cpp_info.components["si-typographic"].requires = ["si"]
         self.cpp_info.components["si-uscs"].requires = ["si"]
         self.cpp_info.components["isq-iec80000"].requires = ["si"]
-        self.cpp_info.components["systems"].requires = ["isq", "isq-natural", "si", "si-cgs", "si-fps", "si-iau", "si-imperial", "si-international", "si-typographic", "si-uscs", "isq-iec80000"]
+        self.cpp_info.components["systems"].requires = [
+            "isq",
+            "isq-natural",
+            "si",
+            "si-cgs",
+            "si-fps",
+            "si-iau",
+            "si-imperial",
+            "si-international",
+            "si-typographic",
+            "si-uscs",
+            "isq-iec80000",
+        ]

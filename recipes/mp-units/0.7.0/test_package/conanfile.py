@@ -1,25 +1,26 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import Version
 import os
+
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, cmake_layout
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package_multi"
-    
-    # TODO remove when https://github.com/conan-io/conan/issues/7680 is solved (or VS2019 is updated to at least 16.9)
-    def _skip_check(self):
-        return self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= "16"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
-        if self._skip_check():
-            return
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if self._skip_check():
-            return
-        if not tools.cross_building(self.settings):
-            self.run("test_package", run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")
