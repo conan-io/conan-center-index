@@ -183,21 +183,6 @@ class Llvm(ConanFile):
             self.output.warning(
                 "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
 
-    def _is_latest_patch_level(self):
-        current_version = Version(self.version)
-        next_version = f"{current_version.major}.{current_version.minor}.{current_version.patch + 1}"
-
-        known_versions = []
-        for v in self.conan_data["sources"].keys():
-            v = Version(v)
-            if v.major == current_version.major and v.minor == current_version.minor:
-                known_versions.append(str(v))
-        next_version_known = next_version in known_versions
-        self.output.info(
-            f"checking if {current_version} is latest configured patch level in {known_versions}, result: {not next_version_known}")
-
-        return not next_version_known
-
     def validate(self):
         if self.is_windows():
             if self.options.shared:
@@ -238,7 +223,8 @@ class Llvm(ConanFile):
                 "You can't link against dylib if you don't build dylib. Please also set llvm_build_llvm_dylib=True")
 
         if self.options.conan_center_index_limits:
-            if not self._is_latest_patch_level():
+            # XXX conandata.yml is reduced in cci ci to exactly one version so we can't look it up
+            if not str(self.version) in ['13.0.1', '14.0.6', '15.0.7', '16.0.6']:
                 raise ConanInvalidConfiguration(
                     "llvm version is disabled for conan center index ci because its not the latest patch level in the configuration without the ci would run for multiple days. You can enable it with option conan_center_index_limits=False.")
 
