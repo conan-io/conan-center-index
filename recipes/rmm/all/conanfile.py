@@ -28,12 +28,13 @@ class RmmConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        # Based partially on https://github.com/rapidsai/rmm/tree/v23.06.00#get-rmm-dependencies
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "7",
+            "gcc": "9.3",
             "clang": "8",
-            "apple-clang": "11.0",
+            "apple-clang": "14.0",
         }
 
     def export_sources(self):
