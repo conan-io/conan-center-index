@@ -60,7 +60,7 @@ class LibTinsConan(ConanFile):
         if self.options.with_ack_tracker:
             self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_wpa2:
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
