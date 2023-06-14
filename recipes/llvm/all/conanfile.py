@@ -173,10 +173,6 @@ class Llvm(ConanFile):
     def is_linux(self):
         return self.settings.os == "Linux"
 
-    def _llvm_major_version(self):
-        pattern = re.compile("^(?:llvm/)?([0-9]+)")
-        return int(re.findall(pattern, str(self.version))[0])
-
     # checking options before requirements are build
     def configure(self):
         if self.is_windows():
@@ -211,7 +207,7 @@ class Llvm(ConanFile):
                 "Option keep_binaries_regex isn't a valid pattern")
 
         if self.settings.compiler.cppstd:
-            ver = self._llvm_major_version()
+            ver = Version(self.version).major
             if ver < 16:
                 check_min_cppstd(self, '14')
             elif ver >= 16:
