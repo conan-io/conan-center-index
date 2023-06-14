@@ -93,7 +93,17 @@ class GtsamConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        return ["serialization", "system", "filesystem", "thread", "date_time", "regex", "timer", "chrono"]
+        return [
+            "chrono",
+            "date_time",
+            "filesystem",
+            "program_options",
+            "regex",
+            "serialization",
+            "system",
+            "thread",
+            "timer",
+        ]
 
     def validate(self):
         miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
