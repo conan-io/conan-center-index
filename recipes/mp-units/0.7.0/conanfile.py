@@ -31,7 +31,7 @@ class MPUnitsConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    requires = ["gsl-lite/0.38.0", "fmt/7.1.3"]
+    package_type = "header-library"
     no_copy_source = True
     generators = "CMakeToolchain", "CMakeDeps"
 
