@@ -317,7 +317,7 @@ class GtsamConan(ConanFile):
             cppunitlite.libs = ["CppUnitLite"]
             cppunitlite.requires = ["boost::boost"]
 
-        if self.options.build_type_postfixes:
+        if self.options.build_type_postfixes and self.settings.build_type != "Release":
             for component in self.cpp_info.components.values():
                 component.libs = [f"{lib}{self.settings.build_type}" for lib in component.libs]
 
