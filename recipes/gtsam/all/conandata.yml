@@ -19,6 +19,9 @@ patches:
     - patch_file: "patches/4.2.0-0001-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"
+    - patch_file: "patches/4.2.0a9-0001-fix-invalid-include.patch"
+      patch_description: "Fix an invalid include for pre-C++17 compatibility"
+      patch_type: "bugfix"
   "4.1.1":
     - patch_file: "patches/4.1.1-0001-cmake-boost.patch"
       patch_description: "Use boost targets"
