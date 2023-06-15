@@ -1,4 +1,6 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import copy, get, save
+from conan.tools.scm import Version
 import os
 import shutil
 import textwrap
@@ -12,15 +14,18 @@ class SConsConan(ConanFile):
     homepage = "https://scons.org"
     topics = ("scons", "build", "configuration", "development")
     settings = "os"  # Added to let the CI test this package on all os'es
+    package_type = "application"
+    no_copy_source = True
+    short_paths = True
 
     _autotools = None
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _chmod_x(self, path):
@@ -36,19 +41,19 @@ class SConsConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "scons.cmd")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def package(self):
-        self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
 
-        if tools.Version(self.version) < 4:
+        if Version(self.version) < 4:
             shutil.copytree(os.path.join(self._source_subfolder, "engine", "SCons"),
                             os.path.join(self.package_folder, "res", "SCons"))
         else:
             shutil.copytree(os.path.join(self._source_subfolder, "SCons"),
                             os.path.join(self.package_folder, "res", "SCons"))
 
-        tools.save(self._scons_sh, textwrap.dedent("""\
+        save(self, self._scons_sh, textwrap.dedent("""\
             #!/bin/sh
 
             realpath() (
@@ -70,7 +75,7 @@ class SConsConan(ConanFile):
             exec ${PYTHON:-python3} "$currentdir/../res/SCons/__main__.py" "$@"
         """))
         self._chmod_x(self._scons_sh)
-        tools.save(self._scons_cmd, textwrap.dedent(r"""
+        save(self, self._scons_cmd, textwrap.dedent(r"""
             @echo off
             set currentdir=%~dp0
             if not defined PYTHON (
@@ -83,15 +88,19 @@ class SConsConan(ConanFile):
         # Mislead CI and create an empty header in the include directory
         include_dir = os.path.join(self.package_folder, "include")
         os.mkdir(include_dir)
-        tools.save(os.path.join(include_dir, "__nop.h"), "")
+        save(self, os.path.join(include_dir, "__nop.h"), "")
 
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         self._chmod_x(self._scons_sh)
-
         bindir = os.path.join(self.package_folder, "bin")
+
+        self.buildenv_info.append_path("PATH", bindir)
+        self.runenv_info.append_path("PATH", bindir)
+
+        # For Conan 1.x downstream consumers, can be removed once recipe is Conan 2.x only:
         self.output.info("Appending PATH environment var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 

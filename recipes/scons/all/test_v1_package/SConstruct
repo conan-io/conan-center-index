@@ -2,6 +2,5 @@ import os
 SConsignFile(os.path.join(GetLaunchDir(), "db"))
 
 SConscript('SConscript',
-           build_dir='build',
-           src='.',
+           variant_dir=GetLaunchDir(),
            duplicate=False)
