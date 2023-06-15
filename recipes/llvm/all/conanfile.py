@@ -230,6 +230,9 @@ class Llvm(ConanFile):
             if self.settings.build_type == "Debug":
                 raise ConanInvalidConfiguration(
                     "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option conan_center_index_limits=False.")
+            if self.options.shared:
+                raise ConanInvalidConfiguration(
+                    "Shared builds are disabled for cci ci for max total build time reasons. You can enable it with option conan_center_index_limits=False.")
 
         if not self.options.enable_unsafe_mode:
             if self.settings.compiler == "gcc":
