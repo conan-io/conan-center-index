@@ -284,11 +284,9 @@ class GtsamConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GTSAM")
 
-        prefix = "lib" if is_msvc(self) and not self.options.shared else ""
-
         gtsam = self.cpp_info.components["libgtsam"]
         gtsam.set_property("cmake_target_name", "gtsam")
-        gtsam.libs = [f"{prefix}gtsam"]
+        gtsam.libs = ["gtsam"]
         gtsam.requires = [f"boost::{component}" for component in self._required_boost_components]
         gtsam.requires.append("eigen::eigen")
         if self.options.with_TBB:
@@ -301,7 +299,7 @@ class GtsamConan(ConanFile):
         if self.options.build_unstable:
             gtsam_unstable = self.cpp_info.components["libgtsam_unstable"]
             gtsam_unstable.set_property("cmake_target_name", "gtsam_unstable")
-            gtsam_unstable.libs = [f"{prefix}gtsam_unstable"]
+            gtsam_unstable.libs = ["gtsam_unstable"]
             gtsam_unstable.requires = ["libgtsam"]
 
         if self.options.support_nested_dissection:
@@ -315,6 +313,10 @@ class GtsamConan(ConanFile):
             cppunitlite.set_property("cmake_target_name", "CppUnitLite")
             cppunitlite.libs = ["CppUnitLite"]
             cppunitlite.requires = ["boost::boost"]
+
+        if self.options.build_type_postfixes:
+            for component in self.cpp_info.components.values():
+                component.libs = [f"{lib}{self.settings.build_type}" for lib in component.libs]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
