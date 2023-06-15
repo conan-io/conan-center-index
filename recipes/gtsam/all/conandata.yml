@@ -48,3 +48,6 @@ patches:
     - patch_file: "patches/4.0.2-0003-cmake-project.patch"
       patch_description: "CMake: move project() after cmake_minimum_required()"
       patch_type: "conan"
+    - patch_file: "patches/4.0.2-0005-replace-ptr_fun.patch"
+      patch_description: "Replace deprecated `ptr_fun` with lambda expression for C++17"
+      patch_type: "portability"
