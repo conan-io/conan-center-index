@@ -13,10 +13,10 @@ sources:
     sha256: "8770a440f1af98c3f0d9d4dffd568de2d4c21b245e7231e987e26bc236aeb5aa"
 patches:
   "4.2.0a9":
-    - patch_file: "patches/4.2.0-0001-cmake-boost.patch"
+    - patch_file: "patches/4.1.1-0001-cmake-boost.patch"
       patch_description: "Use boost targets"
       patch_type: "conan"
-    - patch_file: "patches/4.2.0-0002-macos-rpath.patch"
+    - patch_file: "patches/4.2.0-0001-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"
   "4.1.1":
