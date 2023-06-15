@@ -17,12 +17,12 @@ sources:
 patches:
   "2021.8.0":
     - patch_description: "fix building for android with NDK >= 25"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/oneapi-src/oneTBB/pull/953.patch"
       patch_file: "patches/android-ndk25.patch"
   "2021.7.0":
     - patch_description: "fix building for android with NDK >= 25"
-      patch_type: "backport"
+      patch_type: "portability"
       patch_source: "https://github.com/oneapi-src/oneTBB/pull/953.patch"
       patch_file: "patches/android-ndk25.patch"
   "2021.6.0":

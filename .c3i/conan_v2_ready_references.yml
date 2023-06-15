@@ -1,5 +1,6 @@
 required_for_references:
 - 7bitdi
+- 7zip
 - aaf
 - aaplus
 - abseil
@@ -41,8 +42,10 @@ required_for_references:
 - autoconf
 - automake
 - avir
+- aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-io
 - aws-c-sdkutils
 - aws-checksums
 - b2
@@ -52,6 +55,7 @@ required_for_references:
 - bacnet-stack
 - baical-p7
 - base64
+- bazel
 - bdwgc
 - bear
 - benchmark
@@ -144,6 +148,7 @@ required_for_references:
 - cppcheck
 - cppcodec
 - cppfront
+- cppitertools
 - cpptoml
 - cppunit
 - cpputest
@@ -225,6 +230,7 @@ required_for_references:
 - flatbuffers
 - flex
 - fmt
+- fmtlog
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -240,6 +246,7 @@ required_for_references:
 - gdbm
 - gdcm
 - gdk-pixbuf
+- gegles-spdlog_setup
 - gemmlowp
 - geos
 - getopt-for-visual-studio
@@ -250,6 +257,7 @@ required_for_references:
 - ginkgo
 - gklib
 - glad
+- glaze
 - glfw
 - gli
 - glib
@@ -285,6 +293,7 @@ required_for_references:
 - homog2d
 - http_parser
 - icu
+- id3v2lib
 - iir1
 - im95able-rea
 - imake
@@ -354,6 +363,8 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmediainfo
+- libmemcached
 - libmikmod
 - libmodbus
 - libmodplug
@@ -362,12 +373,14 @@ required_for_references:
 - libmp3lame
 - libmysqlclient
 - libnabo
+- libnfs
 - libnghttp2
 - libnop
 - libnova
 - libnuma
 - libpcap
 - libpciaccess
+- libpfm4
 - libpng
 - libpq
 - libpqxx
@@ -379,6 +392,7 @@ required_for_references:
 - librttopo
 - libsamplerate
 - libselinux
+- libserial
 - libsgp4
 - libsmacker
 - libsndfile
@@ -403,6 +417,7 @@ required_for_references:
 - libvips
 - libvpx
 - libwebp
+- libwebsockets
 - libx264
 - libx265
 - libxls
@@ -414,10 +429,14 @@ required_for_references:
 - libzippp
 - lief
 - linux-syscall-support
+- llhttp
 - lodepng
 - lua
 - luau
+- lunasvg
 - lz4
+- lzma_sdk
+- lzo
 - m4
 - magic_enum
 - make
@@ -432,10 +451,12 @@ required_for_references:
 - mgs
 - mikelankamp-fpm
 - mimalloc
+- miniaudio
 - minisat
 - minizip
 - minizip-ng
 - mongo-c-driver
+- mozilla-build
 - mozjpeg
 - mpg123
 - ms-gsl
@@ -446,6 +467,7 @@ required_for_references:
 - namedtype
 - nameof
 - nanoflann
+- nanomsg
 - nanorange
 - nas
 - nasm
@@ -467,6 +489,7 @@ required_for_references:
 - openal
 - openal-soft
 - openapi-generator
+- opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
 - openexr
@@ -478,6 +501,7 @@ required_for_references:
 - openmesh
 - openssl
 - opensubdiv
+- opentelemetry-proto
 - optional-lite
 - opus
 - opusfile
@@ -495,7 +519,9 @@ required_for_references:
 - physx
 - picobench
 - picojson
+- pixman
 - pkgconf
+- plutovg
 - poco
 - popt
 - proj
@@ -508,11 +534,14 @@ required_for_references:
 - pugixml
 - pulseaudio
 - pybind11
+- pystring
 - qhull
 - qpdf
+- quantlib
 - quill
 - quirc
 - rabbitmq-c
+- ragel
 - rang
 - range-v3
 - rapidcheck
@@ -520,18 +549,23 @@ required_for_references:
 - rapidjson
 - rapidxml
 - rapidyaml
+- raylib
 - re2
 - readerwriterqueue
 - readline
 - readosm
+- rectpack2d
+- replxx
 - restbed
 - restinio
+- ring-span-lite
 - roaring
 - robin-hood-hashing
 - rttr
 - ruy
 - s2n
 - samurai
+- sbepp
 - scnlib
 - screen_capture_lite
 - sdbus-cpp
@@ -575,17 +609,24 @@ required_for_references:
 - tensorflow-lite
 - tensorpipe
 - termcap
+- termcolor
 - threadpool
 - thrift
+- thrust
+- timsort
 - tinycthread
 - tinycthreadpool
 - tinyexif
 - tinymidi
+- tinyxml
 - tinyxml2
 - tl-expected
+- tl-function-ref
 - tlx
 - toml11
 - trantor
+- turtle
+- tz
 - uni-algo
 - unicorn
 - univalue
@@ -600,6 +641,8 @@ required_for_references:
 - vdpau
 - veque
 - vincentlaucsb-csv-parser
+- vir-simd
+- visit_struct
 - volk
 - vorbis
 - vtu11
@@ -607,8 +650,10 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- wasmer
 - wasmtime
 - wasmtime-cpp
+- watcher
 - wayland
 - wayland-protocols
 - websocketpp
@@ -625,6 +670,7 @@ required_for_references:
 - xerces-c
 - xkbcommon
 - xkeyboard-config
+- xlsxio
 - xmlsec
 - xnnpack
 - xorg
@@ -643,6 +689,8 @@ required_for_references:
 - yajl
 - yaml-cpp
 - yasm
+- yyjson
+- z3
 - zbar
 - zeromq
 - zfp
@@ -650,5 +698,6 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zpp_bits
 - zstd
 - zulu-openjdk
