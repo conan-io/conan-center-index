@@ -75,11 +75,6 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["console_bridge"]
 
-        self.cpp_info.set_property("cmake_module_file_name", "console_bridge")
-        self.cpp_info.set_property("cmake_module_target_name", "console_bridge::console_bridge")
-        self.cpp_info.set_property("cmake_file_name", "console_bridge")
-        self.cpp_info.set_property("cmake_target_name", "console_bridge::console_bridge")
-        self.cpp_info.set_property("pkg_config_name", "console_bridge")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
