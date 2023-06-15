@@ -1324,6 +1324,9 @@ class OpenCVConan(ConanFile):
 
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
+        # Special world option merging all enabled modules into one big library file
+        tc.variables["BUILD_opencv_world"] = self.options.world
+
         # Main modules
         tc.variables["BUILD_opencv_core"] = True
         for module in OPENCV_MAIN_MODULES_OPTIONS:
