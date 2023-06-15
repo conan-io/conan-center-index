@@ -843,6 +843,10 @@ class QtConan(ConanFile):
 
         _create_private_module("Core", ["Core"])
 
+        save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_variables.cmake"), textwrap.dedent(f"""\
+                set(QT6_IS_SHARED_LIBS_BUILD {str(self.options.shared).upper()})
+                """))
+
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
 
@@ -1355,6 +1359,8 @@ class QtConan(ConanFile):
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
         build_modules_list = []
+
+        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_variables.cmake"))
 
         if self.options.qtdeclarative:
             build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
