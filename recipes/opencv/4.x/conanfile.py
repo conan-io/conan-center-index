@@ -1020,7 +1020,7 @@ class OpenCVConan(ConanFile):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
             self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True, run=can_run(self))
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-headers/1.3.239.0")
+            self.requires("vulkan-headers/1.3.250.0")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2a")
@@ -1043,7 +1043,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.39")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.5")
+            self.requires("openexr/3.1.7")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.5.0")
         if self.options.get_safe("with_webp"):
@@ -1054,7 +1054,7 @@ class OpenCVConan(ConanFile):
             self.requires("gdcm/3.0.21")
         # objdetect module dependencies
         if self.options.get_safe("with_quirc"):
-            self.requires("quirc/1.1")
+            self.requires("quirc/1.2")
         # videoio module dependencies
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
@@ -1062,10 +1062,10 @@ class OpenCVConan(ConanFile):
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/7.1.0")
+            self.requires("harfbuzz/7.3.0")
         # hdf module dependencies
         if self.options.hdf:
-            self.requires("hdf5/1.14.0")
+            self.requires("hdf5/1.14.1")
         # ovis module dependencies
         if self.options.ovis:
             self.requires("ogre/1.10.2")
