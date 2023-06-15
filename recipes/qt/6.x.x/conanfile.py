@@ -843,7 +843,7 @@ class QtConan(ConanFile):
 
         _create_private_module("Core", ["Core"])
 
-        save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_variables.cmake"), textwrap.dedent(f"""\
+        save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "conan_qt_qt6_variables.cmake"), textwrap.dedent(f"""\
                 set(QT6_IS_SHARED_LIBS_BUILD {str(self.options.shared).upper()})
                 """))
 
@@ -1360,7 +1360,7 @@ class QtConan(ConanFile):
 
         build_modules_list = []
 
-        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_variables.cmake"))
+        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "conan_qt_qt6_variables.cmake"))
 
         if self.options.qtdeclarative:
             build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
