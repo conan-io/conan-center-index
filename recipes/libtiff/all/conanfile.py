@@ -132,6 +132,9 @@ class LibtiffConan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "4.5.1":
+            deps.set_property("jbig", "cmake_target_name", "JBIG::JBIG")
+            deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
         deps.generate()
 
     def _patch_sources(self):
