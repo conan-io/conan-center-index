@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir
 
@@ -62,6 +63,12 @@ class GperftoolsConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                "gperftools recipe does not currently support Windows. Contributions are welcome."
+            )
 
     def requirements(self):
         if self.options.enable_libunwind:
