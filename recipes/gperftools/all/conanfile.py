@@ -56,6 +56,7 @@ class GperftoolsConan(ConanFile):
 
     @property
     def _build_minimal(self):
+        # Corresponds to the gperftools build_minimal option
         return not (
             self.options.build_cpu_profiler
             or self.options.build_heap_profiler
@@ -141,9 +142,14 @@ class GperftoolsConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
+            # gpreftools builds both static and shared libraries if static is enabled
+            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.so.*", os.path.join(self.package_folder, "lib"))
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "*.pdb", self.package_folder)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def _add_component(self, lib):
         self.cpp_info.components[lib].libs = [lib]
@@ -162,7 +168,8 @@ class GperftoolsConan(ConanFile):
                 self._add_component("tcmalloc_and_profiler")
 
         for component in self.cpp_info.components.values():
-            component.system_libs.extend(["pthread", "m"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                component.system_libs.extend(["pthread", "m"])
             if self.options.get_safe("enable_libunwind"):
                 component.requires.append("libunwind::libunwind")
 
