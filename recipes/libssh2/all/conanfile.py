@@ -118,9 +118,9 @@ class Libssh2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libssh2"]
-        self.cpp_info.set_property("cmake_file_name", "Libssh2")
-        self.cpp_info.set_property("cmake_target_name", "Libssh2::libssh2")
-        self.cpp_info.set_property("cmake_module_file_name", "Libssh2")
+        self.cpp_info.set_property("cmake_file_name", "libssh2")
+        self.cpp_info.set_property("cmake_target_name", "libssh2::libssh2")
+        self.cpp_info.set_property("cmake_module_file_name", "libssh2")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "libssh2")
 
