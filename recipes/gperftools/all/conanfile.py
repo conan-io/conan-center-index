@@ -2,8 +2,12 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.cmake import cmake_layout
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 
 required_conan_version = ">=1.53.0"
 
@@ -26,7 +30,9 @@ class GperftoolsConan(ConanFile):
         "build_debugalloc": [True, False],
         "dynamic_sized_delete_support": [True, False],
         "emergency_malloc": [None, True, False],
+        "enable_aggressive_decommit_by_default": [True, False],
         "enable_frame_pointers": [True, False],
+        "enable_large_alloc_report": [True, False],
         "enable_libunwind": [True, False],
         "enable_stacktrace_via_backtrace": [None, True, False],
         "sized_delete": [True, False],
@@ -42,7 +48,9 @@ class GperftoolsConan(ConanFile):
         "build_debugalloc": False,
         "dynamic_sized_delete_support": False,
         "emergency_malloc": None,
+        "enable_aggressive_decommit_by_default": False,
         "enable_frame_pointers": False,
+        "enable_large_alloc_report": False,
         "enable_libunwind": True,
         "enable_stacktrace_via_backtrace": False,
         "sized_delete": False,
@@ -93,44 +101,62 @@ class GperftoolsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["GPERFTOOLS_BUILD_STATIC"] = not self.options.shared
-        tc.variables["GPERFTOOLS_BUILD_CPU_PROFILER"] = self.options.build_cpu_profiler
-        tc.variables["GPERFTOOLS_BUILD_HEAP_PROFILER"] = self.options.build_heap_profiler
-        tc.variables["GPERFTOOLS_BUILD_HEAP_CHECKER"] = self.options.build_heap_checker
-        tc.variables["GPERFTOOLS_BUILD_DEBUGALLOC"] = self.options.build_debugalloc
-        tc.variables["gperftools_build_minimal"] = self._build_minimal
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        yes_no = lambda v: "yes" if v else "no"
+        enable = lambda feat, v: f"--enable-{feat}={yes_no(v)}"
+        args = [
+            "--prefix=",
+            enable("static", not self.options.shared),
+            enable("shared", self.options.shared),
+            enable("cpu-profiler", self.options.build_cpu_profiler),
+            enable("heap-profiler", self.options.build_heap_profiler),
+            enable("heap-checker", self.options.build_heap_checker),
+            enable("debugalloc", self.options.build_debugalloc),
+            enable("minimal", self._build_minimal),
+            enable("dynamic-sized-delete-support", self.options.dynamic_sized_delete_support),
+            enable("sized-delete", self.options.sized_delete),
+            enable("large-alloc-report", self.options.enable_large_alloc_report),
+            enable(
+                "aggressive-decommit-by-default", self.options.enable_aggressive_decommit_by_default
+            ),
+        ]
         if self._build_minimal:
             # No stack trace support will be built
-            tc.variables["gperftools_enable_libunwind"] = False
-            tc.variables["gperftools_enable_frame_pointers"] = False
-            tc.variables["gperftools_enable_stacktrace_via_backtrace"] = False
-            tc.variables["gperftools_emergency_malloc"] = False
+            args += [
+                enable("libunwind", False),
+                enable("frame-pointers", False),
+                enable("stacktrace-via-backtrace", False),
+                enable("emergency-malloc", False),
+            ]
         else:
-            tc.variables["gperftools_enable_libunwind"] = self.options.enable_libunwind
-            tc.variables["gperftools_enable_frame_pointers"] = self.options.enable_frame_pointers
+            args += [
+                enable("libunwind", self.options.enable_libunwind),
+                enable("frame-pointers", self.options.enable_frame_pointers),
+            ]
             if self.options.get_safe("enable_stacktrace_via_backtrace", False):
-                tc.variables[
-                    "gperftools_enable_stacktrace_via_backtrace"
-                ] = self.options.enable_stacktrace_via_backtrace
-            if self.options.emergency_malloc:
-                tc.variables["gperftools_emergency_malloc"] = self.options.emergency_malloc
-        tc.variables["gperftools_dynamic_sized_delete_support"] = self.options.dynamic_sized_delete_support
-        tc.variables["gperftools_sized_delete"] = self.options.sized_delete
-        if self.options.tcmalloc_alignment:
-            tc.variables["gperftools_tcmalloc_alignment"] = self.options.tcmalloc_alignment
+                args.append(
+                    enable("stacktrace-via-backtrace", self.options.enable_stacktrace_via_backtrace)
+                )
+            if self.options.emergency_malloc is not None:
+                args.append(enable("emergency-malloc", self.options.emergency_malloc))
+        if self.options.tcmalloc_alignment is not None:
+            args.append(f"--with-tcmalloc-alignment={self.options.tcmalloc_alignment}")
         if self.options.tcmalloc_pagesize:
-            tc.variables["gperftools_tcmalloc_pagesize"] = self.options.tcmalloc_pagesize
-        tc.variables["gperftools_build_benchmark"] = False
-        tc.variables["BUILD_TESTING"] = False
+            args.append(f"--with-tcmalloc-pagesize={self.options.tcmalloc_pagesize}")
+        tc.configure_args = args
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = AutotoolsDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(
@@ -139,17 +165,13 @@ class GperftoolsConan(ConanFile):
             dst=os.path.join(self.package_folder, "licenses"),
             src=self.source_folder,
         )
-        cmake = CMake(self)
-        cmake.install()
+        autotools = Autotools(self)
+        autotools.install()
 
-        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
-            # gpreftools builds both static and shared libraries if static is enabled
-            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.so.*", os.path.join(self.package_folder, "lib"))
-
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def _add_component(self, lib):
         self.cpp_info.components[lib].libs = [lib]
