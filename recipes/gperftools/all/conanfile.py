@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -49,9 +49,6 @@ class GperftoolsConan(ConanFile):
         "tcmalloc_alignment": None,
         "tcmalloc_pagesize": None,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
