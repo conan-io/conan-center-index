@@ -78,13 +78,17 @@ class GperftoolsConan(ConanFile):
         tc.variables["GPERFTOOLS_BUILD_HEAP_CHECKER"] = self.options.build_heap_checker
         tc.variables["GPERFTOOLS_BUILD_DEBUGALLOC"] = self.options.build_debugalloc
         tc.variables["gperftools_dynamic_sized_delete_support"] = self.options.dynamic_sized_delete_support
-        tc.variables["gperftools_emergency_malloc"] = self.options.emergency_malloc
+        if self.options.emergency_malloc:
+            tc.variables["gperftools_emergency_malloc"] = self.options.emergency_malloc
         tc.variables["gperftools_enable_frame_pointers"] = self.options.enable_frame_pointers
         tc.variables["gperftools_enable_libunwind"] = self.options.enable_libunwind
-        tc.variables["gperftools_enable_stacktrace_via_backtrace"] = self.options.enable_stacktrace_via_backtrace
+        if self.options.enable_stacktrace_via_backtrace:
+            tc.variables["gperftools_enable_stacktrace_via_backtrace"] = self.options.enable_stacktrace_via_backtrace
         tc.variables["gperftools_sized_delete"] = self.options.sized_delete
-        tc.variables["gperftools_tcmalloc_alignment"] = self.options.tcmalloc_alignment
-        tc.variables["gperftools_tcmalloc_pagesize"] = self.options.tcmalloc_pagesize
+        if self.options.tcmalloc_alignment:
+            tc.variables["gperftools_tcmalloc_alignment"] = self.options.tcmalloc_alignment
+        if self.options.tcmalloc_pagesize:
+            tc.variables["gperftools_tcmalloc_pagesize"] = self.options.tcmalloc_pagesize
         tc.variables["gperftools_build_benchmark"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
