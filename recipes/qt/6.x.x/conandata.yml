@@ -17,6 +17,27 @@ sources:
       - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/6.5/6.5.0/single/qt-everywhere-src-6.5.0.tar.xz"
       - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/6.5/6.5.0/single/qt-everywhere-src-6.5.0.tar.xz"
     sha256: "dba376e110e53895c7c827eea389dc12aa9c45862cd197d2f0d37ee472baf0b0"
+  "6.4.3":
+    url:
+      - "https://download.qt.io/official_releases/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://download.qt.io/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://ftp1.nluug.nl/languages/qt/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://ftp2.nluug.nl/languages/qt/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://mirror.netcologne.de/qtproject/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://mirrors.dotsrc.org/qtproject/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://master.qt.io/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://mirror.web4africa.ng/qt/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://qtproject.mirror.liquidtelecom.com/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://qt.mirror.constant.com/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+      - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/6.4/6.4.3/single/qt-everywhere-src-6.4.3.tar.xz"
+    sha256: "29a7eebdbba0ea57978dea6083709c93593a60f0f3133a3de08b9571ee8eaab4"
   "6.4.2":
     url:
       - "https://download.qt.io/archive/qt/6.4/6.4.2/single/qt-everywhere-src-6.4.2.tar.xz"
@@ -43,6 +64,10 @@ sources:
     sha256: "b90524f686224a0e5a945c1d65307e16a375348dbe275c9ac11de171fe31374a"
 patches:
   "6.5.0":
+    - base_path: "qtwebengine"
+      patch_description: "Workaround for too long .rps file name"
+      patch_file: "patches/c72097e.diff"
+  "6.4.3":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
       patch_file: "patches/c72097e.diff"
