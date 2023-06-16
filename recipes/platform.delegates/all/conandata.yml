@@ -1,7 +1,13 @@
 sources:
   "0.1.3":
-    url: https://github.com/linksplatform/Delegates/archive/refs/tags/0.1.3.zip
-    sha256: e30b2e3c8aff6ffaa366b1c66a7af79f6bc828822f428a4427a7a89e14412fec
+    source:
+      url: "https://github.com/linksplatform/Delegates/archive/refs/tags/0.1.3.zip"
+      sha256: "e30b2e3c8aff6ffaa366b1c66a7af79f6bc828822f428a4427a7a89e14412fec"
   "0.2.7":
-    url: https://github.com/linksplatform/Delegates/archive/refs/tags/cpp_0.2.7.zip
-    sha256: 440e628dba541497a4d4075b0fd97e42279c5ed73a4156fbcb06556f09109435
+    source:
+      url: "https://github.com/linksplatform/Delegates/archive/refs/tags/cpp_0.2.7.zip"
+      sha256: "440e628dba541497a4d4075b0fd97e42279c5ed73a4156fbcb06556f09109435"
+  "0.3.7":
+    source:
+      url: "https://github.com/linksplatform/Delegates/archive/refs/tags/cpp_0.3.7.zip"
+      sha256: "368C3316359151EDCDE8AC8DBC9DBACF11B011F7BDEA97B97C6F116EF802104E"
