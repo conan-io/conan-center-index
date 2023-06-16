@@ -127,3 +127,6 @@ class GperftoolsConan(ConanFile):
             self.cpp_info.libs.append("profiler")
             if "tcmalloc" in self.cpp_info.libs:
                 self.cpp_info.libs.append("tcmalloc_and_profiler")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "m"])
