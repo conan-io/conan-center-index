@@ -148,19 +148,38 @@ class GperftoolsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", self.package_folder)
 
-    def package_info(self):
-        # TODO: should split into components to avoid over-linking
-        self.cpp_info.libs = ["tcmalloc_minimal"]
-        if self.options.build_debugalloc:
-            self.cpp_info.libs.append("tcmalloc_minimal_debug")
-        if self.options.build_heap_profiler or self.options.build_heap_checker:
-            self.cpp_info.libs.append("tcmalloc")
-            if self.options.build_debugalloc:
-                self.cpp_info.libs.append("tcmalloc_debug")
-        if self.options.build_cpu_profiler:
-            self.cpp_info.libs.append("profiler")
-            if "tcmalloc" in self.cpp_info.libs:
-                self.cpp_info.libs.append("tcmalloc_and_profiler")
+    def _add_component(self, lib):
+        self.cpp_info.components[lib].libs = [lib]
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "m"])
+    def package_info(self):
+        self._add_component("tcmalloc_minimal")
+        if self.options.build_debugalloc:
+            self._add_component("tcmalloc_minimal_debug")
+        if self.options.build_heap_profiler or self.options.build_heap_checker:
+            self._add_component("tcmalloc")
+            if self.options.build_debugalloc:
+                self._add_component("tcmalloc_debug")
+        if self.options.build_cpu_profiler:
+            self._add_component("profiler")
+            if "tcmalloc" in self.cpp_info.components:
+                self._add_component("tcmalloc_and_profiler")
+
+        for component in self.cpp_info.components.values():
+            component.system_libs.extend(["pthread", "m"])
+            if self.options.get_safe("enable_libunwind"):
+                component.requires.append("libunwind::libunwind")
+
+        # Select the preferred library to link against by default
+        main_component = self.cpp_info.components["gperftools"]
+        for lib in [
+            "tcmalloc_and_profiler",
+            "tcmalloc",
+            "tcmalloc_debug",
+            "tcmalloc_minimal_debug",
+            "tcmalloc_minimal",
+        ]:
+            if lib in self.cpp_info.components:
+                main_component.requires = [lib]
+                if lib != "tcmalloc_and_profiler" and "profiler" in self.cpp_info.components:
+                    main_component.requires.append("profiler")
+                break
