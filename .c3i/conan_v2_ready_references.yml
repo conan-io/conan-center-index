@@ -4,6 +4,7 @@ required_for_references:
 - aaf
 - aaplus
 - abseil
+- absent
 - access_private
 - acl
 - ada
@@ -252,6 +253,7 @@ required_for_references:
 - getopt-for-visual-studio
 - gettext
 - gflags
+- gfortran
 - ghc-filesystem
 - giflib
 - ginkgo
@@ -405,6 +407,7 @@ required_for_references:
 - libtar
 - libtasn1
 - libtiff
+- libtins
 - libtool
 - libtorrent
 - libudev
@@ -416,6 +419,7 @@ required_for_references:
 - libverto
 - libvips
 - libvpx
+- libwebm
 - libwebp
 - libwebsockets
 - libx264
