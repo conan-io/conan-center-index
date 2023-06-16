@@ -65,7 +65,7 @@ class LibdbConan(ConanFile):
             self.requires("tcl/8.6.10")
 
     def validate(self):
-        if is_msvc(self) and check_min_vs(self, "191", raise_invalid=False):
+        if is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
             # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
             raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
             
@@ -79,11 +79,12 @@ class LibdbConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang<10 with_cxx=True")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-        else:
+        # if self._settings_build.os == "Windows":
+        #     self.win_bash = True
+        #     if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+        #         self.tool_requires("msys2/cci.latest")
+        # else:
+        if not self._settings_build.os == "Windows":
             self.tool_requires("gnu-config/cci.20201022")
 
     def layout(self):
@@ -110,10 +111,10 @@ class LibdbConan(ConanFile):
                 shutil.copy(self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_guess"),
                             os.path.join(self.source_folder, subdir, "config.guess"))
 
-        for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
-            replace_in_file(self, file,
-                                  "<PropertyGroup Label=\"Globals\">",
-                                  "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
+        #for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
+        #    replace_in_file(self, file,
+        #                          "<PropertyGroup Label=\"Globals\">",
+        #                          "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>")
 
         dist_configure = os.path.join(self.source_folder, "dist", "configure")
         replace_in_file(self, dist_configure, "../$sqlite_dir", "$sqlite_dir")
@@ -201,7 +202,28 @@ class LibdbConan(ConanFile):
                 projects.append("db_tcl")
             msbuild = MSBuild(self)
             for project in projects:
-                msbuild.build(sln=os.path.join(self.source_folder, "build_windows", "VS10", f"{project}.vcxproj"))
+                # =================================
+                # TODO: To remove once https://github.com/conan-io/conan/pull/12817 is available in conan client
+                project_file = os.path.join(self.source_folder, "build_windows", "VS10", f"{project}.vcxproj")
+                conantoolchain_props = os.path.join(self.generators_folder, "conantoolchain.props")
+                replace_in_file(
+                    self, project_file,
+                    "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
+                    f"<Import Project=\"{conantoolchain_props}\"/>\n  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
+                )
+                # replace_in_file(
+                #     self, project_file,
+                #     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\"/>",
+                #     f"<Import Project=\"{conantoolchain_props}\"/>\n  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\"/>",
+                # )
+                # =================================
+
+                msbuild.build_type = "{}{}".format(
+                    "" if self.options.shared else "Static ",
+                    "Debug" if self.settings.build_type == "Debug" else "Release",
+                )
+                msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
+                msbuild.build(sln=project_file)
         else:
             autotools = Autotools(self)
             autotools.configure(build_script_folder=os.path.join(self.source_folder, "dist"))
