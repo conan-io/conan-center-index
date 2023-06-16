@@ -44,7 +44,7 @@ class GperftoolsConan(ConanFile):
         "emergency_malloc": None,
         "enable_frame_pointers": False,
         "enable_libunwind": True,
-        "enable_stacktrace_via_backtrace": None,
+        "enable_stacktrace_via_backtrace": False,
         "sized_delete": False,
         "tcmalloc_alignment": None,
         "tcmalloc_pagesize": None,
@@ -57,9 +57,26 @@ class GperftoolsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _build_minimal(self):
+        return not (
+            self.options.build_cpu_profiler
+            or self.options.build_heap_profiler
+            or self.options.build_heap_checker
+        )
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self._build_minimal:
+            # Minimal build does not include stack trace support, so these options are irrelevant
+            self.options.rm_safe("enable_libunwind")
+            self.options.rm_safe("enable_frame_pointers")
+            self.options.rm_safe("enable_stacktrace_via_backtrace")
+            self.options.rm_safe("emergency_malloc")
+        elif self.options.enable_libunwind:
+            # enable_stacktrace_via_backtrace has no effect if libunwind is enabled
+            self.options.rm_safe("enable_stacktrace_via_backtrace")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -71,7 +88,7 @@ class GperftoolsConan(ConanFile):
             )
 
     def requirements(self):
-        if self.options.enable_libunwind:
+        if self.options.get_safe("enable_libunwind", False):
             self.requires("libunwind/1.6.2")
 
     def source(self):
@@ -84,13 +101,23 @@ class GperftoolsConan(ConanFile):
         tc.variables["GPERFTOOLS_BUILD_HEAP_PROFILER"] = self.options.build_heap_profiler
         tc.variables["GPERFTOOLS_BUILD_HEAP_CHECKER"] = self.options.build_heap_checker
         tc.variables["GPERFTOOLS_BUILD_DEBUGALLOC"] = self.options.build_debugalloc
+        tc.variables["gperftools_build_minimal"] = self._build_minimal
+        if self._build_minimal:
+            # No stack trace support will be built
+            tc.variables["gperftools_enable_libunwind"] = False
+            tc.variables["gperftools_enable_frame_pointers"] = False
+            tc.variables["gperftools_enable_stacktrace_via_backtrace"] = False
+            tc.variables["gperftools_emergency_malloc"] = False
+        else:
+            tc.variables["gperftools_enable_libunwind"] = self.options.enable_libunwind
+            tc.variables["gperftools_enable_frame_pointers"] = self.options.enable_frame_pointers
+            if self.options.get_safe("enable_stacktrace_via_backtrace", False):
+                tc.variables[
+                    "gperftools_enable_stacktrace_via_backtrace"
+                ] = self.options.enable_stacktrace_via_backtrace
+            if self.options.emergency_malloc:
+                tc.variables["gperftools_emergency_malloc"] = self.options.emergency_malloc
         tc.variables["gperftools_dynamic_sized_delete_support"] = self.options.dynamic_sized_delete_support
-        if self.options.emergency_malloc:
-            tc.variables["gperftools_emergency_malloc"] = self.options.emergency_malloc
-        tc.variables["gperftools_enable_frame_pointers"] = self.options.enable_frame_pointers
-        tc.variables["gperftools_enable_libunwind"] = self.options.enable_libunwind
-        if self.options.enable_stacktrace_via_backtrace:
-            tc.variables["gperftools_enable_stacktrace_via_backtrace"] = self.options.enable_stacktrace_via_backtrace
         tc.variables["gperftools_sized_delete"] = self.options.sized_delete
         if self.options.tcmalloc_alignment:
             tc.variables["gperftools_tcmalloc_alignment"] = self.options.tcmalloc_alignment
