@@ -317,6 +317,9 @@ class GtsamConan(ConanFile):
             cppunitlite.libs = ["CppUnitLite"]
             cppunitlite.requires = ["boost::boost"]
 
+        if is_msvc(self) and not self.options.shared:
+            for component in self.cpp_info.components.values():
+                component.libs = [f"lib{lib}" for lib in component.libs]
         if self.options.build_type_postfixes and self.settings.build_type != "Release":
             for component in self.cpp_info.components.values():
                 component.libs = [f"{lib}{self.settings.build_type}" for lib in component.libs]
