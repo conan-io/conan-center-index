@@ -4,6 +4,7 @@ required_for_references:
 - aaf
 - aaplus
 - abseil
+- absent
 - access_private
 - acl
 - ada
@@ -55,6 +56,7 @@ required_for_references:
 - bacnet-stack
 - baical-p7
 - base64
+- bazel
 - bdwgc
 - bear
 - benchmark
@@ -251,11 +253,13 @@ required_for_references:
 - getopt-for-visual-studio
 - gettext
 - gflags
+- gfortran
 - ghc-filesystem
 - giflib
 - ginkgo
 - gklib
 - glad
+- glaze
 - glfw
 - gli
 - glib
@@ -362,6 +366,7 @@ required_for_references:
 - liblzf
 - libmad
 - libmediainfo
+- libmemcached
 - libmikmod
 - libmodbus
 - libmodplug
@@ -402,6 +407,7 @@ required_for_references:
 - libtar
 - libtasn1
 - libtiff
+- libtins
 - libtool
 - libtorrent
 - libudev
@@ -413,6 +419,7 @@ required_for_references:
 - libverto
 - libvips
 - libvpx
+- libwebm
 - libwebp
 - libwebsockets
 - libx264
@@ -453,6 +460,7 @@ required_for_references:
 - minizip
 - minizip-ng
 - mongo-c-driver
+- mozilla-build
 - mozjpeg
 - mpg123
 - ms-gsl
