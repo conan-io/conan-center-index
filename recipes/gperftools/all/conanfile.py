@@ -43,7 +43,7 @@ class GperftoolsConan(ConanFile):
         "dynamic_sized_delete_support": False,
         "emergency_malloc": None,
         "enable_frame_pointers": False,
-        "enable_libunwind": False,
+        "enable_libunwind": True,
         "enable_stacktrace_via_backtrace": None,
         "sized_delete": False,
         "tcmalloc_alignment": None,
