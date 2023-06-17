@@ -73,6 +73,10 @@ sources:
     sha256: a1131358f1f9f819df73fa6bff505f2c49d176e9eef0a3aedd1fdbce3b4630e8
 
 patches:
+  "16.0.6":
+    - patch_file: "patches/16/calculate_job_pools.patch"
+      patch_type: "portability"
+      patch_description: "Calculate ninja job pools according to current available memory. Most useful in shared CI or a low memory environment."
   "16.0.5":
     - patch_file: "patches/16/calculate_job_pools.patch"
       patch_type: "portability"
