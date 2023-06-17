@@ -1,13 +1,13 @@
 sources:
-  "1.15.0":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.15.0.tar.gz"
-    sha256: "7752defd687138870974aa391bd5d3d16228ee449f408d11ea3716e8585c73b4"
+  "1.15.1":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.15.1.tar.gz"
+    sha256: "93a9b6f148639938ccbaa48d0f641d8f33312fdfcc69ee9466e11362b43917c4"
   "1.14.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
-  "1.15.0":
-    - patch_file: "patches/1.15.0-0001-cmake-dependencies.patch"
+  "1.15.1":
+    - patch_file: "patches/1.15.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used"
       patch_type: "conan"
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"

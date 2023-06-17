@@ -199,6 +199,15 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_USE_CANN"] = False
         tc.generate()
         deps = CMakeDeps(self)
+
+        if self.dependencies["flatbuffers"].options.shared:
+            deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
+
+        deps.set_property("boost::headers", "cmake_target_name", "Boost::mp11")
+        deps.set_property("date", "cmake_target_name", "date_interface")
+        deps.set_property("safeint", "cmake_target_name", "safeint_interface")
+        deps.set_property("xnnpack", "cmake_target_name", "XNNPACK")
+
         deps.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate(scope="build")
@@ -235,6 +244,8 @@ class OnnxRuntimeConan(ConanFile):
                 "common",
                 "flatbuffers",
             ]
+            if self.options.with_xnnpack:
+                onnxruntime_libs.append("providers_xnnpack")
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
         self.cpp_info.includedirs.append("include/onnxruntime/core/session")
