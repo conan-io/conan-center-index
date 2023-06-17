@@ -37,7 +37,7 @@ class GDCMConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 14
 
     def export_sources(self):
         export_conandata_patches(self)
