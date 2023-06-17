@@ -95,6 +95,9 @@ class GDCMConan(ConanFile):
         # https://sourceforge.net/p/gdcm/bugs/548/
         tc.preprocessor_definitions["CHARLS_NO_DEPRECATED_WARNING"] = "1"
 
+        #gdcm currently uses functionality that is deprecated since OpenSSL 3.0
+        tc.preprocessor_definitions["OPENSSL_API_COMPAT"] = "0x10101000L"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
