@@ -54,7 +54,7 @@ class GDCMConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("charls/2.4.1")
+        self.requires("charls/2.4.2")
         self.requires("expat/2.5.0")
         self.requires("openjpeg/2.5.0")
         self.requires("zlib/1.2.13")
