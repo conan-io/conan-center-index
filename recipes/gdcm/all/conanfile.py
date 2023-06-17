@@ -91,6 +91,10 @@ class GDCMConan(ConanFile):
 
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+
+        # https://sourceforge.net/p/gdcm/bugs/548/
+        tc.preprocessor_definitions["CHARLS_NO_DEPRECATED_WARNING"] = "1"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
