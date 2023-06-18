@@ -1,9 +1,8 @@
-#include <EASTL/algorithm.h>
-#include <vector>
+#include <EASTL/hash_map.h>
 
 int main()
 {
-    std::vector<int> vec;
-    eastl::max_element(vec.begin(), vec.end());
+    eastl::hash_map<int, int> map;
+    map[0] = 1;
     return 0;
 }
