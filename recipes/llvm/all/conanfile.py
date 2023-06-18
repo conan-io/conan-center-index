@@ -193,7 +193,7 @@ class Llvm(ConanFile):
                     raise ConanInvalidConfiguration(
                         "Generating libLLVM is not supported on MSVC"
                     )
-                if not self.settings.compiler.runtime in ['MD', 'MT', 'MTd', 'MDd']:
+                if not str(self.settings.compiler.runtime) in ['MD', 'MT', 'MTd', 'MDd']:
                     raise ConanInvalidConfiguration(
                         "Current setting for compiler runtime isn't one of MD, MT, MTd, MDd which is required for LLVM and I have no clue how to map it. Feel free to contribute it.")
 
