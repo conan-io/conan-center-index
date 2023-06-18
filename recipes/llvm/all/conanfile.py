@@ -193,6 +193,9 @@ class Llvm(ConanFile):
                     raise ConanInvalidConfiguration(
                         "Generating libLLVM is not supported on MSVC"
                     )
+                if not self.settings.compiler.runtime in ['MD', 'MT', 'MTd', 'MDd']:
+                    raise ConanInvalidConfiguration(
+                        "Current setting for compiler runtime isn't one of MD, MT, MTd, MDd which is required for LLVM and I have no clue how to map it. Feel free to contribute it.")
 
         try:
             re.compile(str(self.options.keep_binaries_regex))
@@ -244,9 +247,11 @@ class Llvm(ConanFile):
                     # libc++ compiles but test linkage fails
                     raise ConanInvalidConfiguration(
                         "Configured compiler.libcxx=libc++ will fail in test_package linking. If you want to try it set enable_unsafe_mode=True")
-            elif is_msvc(self) and Version(self.settings.compiler.version) < Version("16.4"):
-                raise ConanInvalidConfiguration(
-                    "An up to date version of Microsoft Visual Studio 2019 or newer is required. If you want to try it set enable_unsafe_mode=True")
+            elif is_msvc(self):
+                # TODO probably migration needed: https://github.com/conan-io/tribe/blob/main/design/032-msvc_support.md
+                if Version(self.settings.compiler.version) < Version("16.4"):
+                    raise ConanInvalidConfiguration(
+                        "An up to date version of Microsoft Visual Studio 2019 or newer is required. If you want to try it set enable_unsafe_mode=True")
 
     # XXX Still unsure if we should even check for this at all, errors like this would need a lot of fine tuning for each environment to be correct.
     # import for Apt doesn't satisfy: E9011(conan-import-tools)
@@ -372,6 +377,7 @@ class Llvm(ConanFile):
             build_type = str(self.settings.build_type).upper()
             cmake_definitions.update(
                 {
+                    # llvm expects: MD, MT, MTd, MDd
                     f"LLVM_USE_CRT_{build_type}": self.settings.compiler.runtime
                 }
             )
