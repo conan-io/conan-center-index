@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
@@ -11,7 +11,6 @@ from conan.tools.files import (
     get,
     replace_in_file,
 )
-from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -29,7 +28,7 @@ class EastlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/electronicarts/EASTL"
 
-    package_type = "header-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,13 +64,10 @@ class EastlConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eabase/2.09.12")
-
-    def package_id(self):
-        self.info.clear()
+        self.requires("eabase/2.09.12", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -130,8 +126,7 @@ class EastlConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
+        self.cpp_info.libs = ["EASTL"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         if self.options.shared:
