@@ -9,7 +9,7 @@ import os
 required_conan_version = ">=1.54.0"
 
 
-class Log4cxx(ConanFile):
+class Log4cxxConan(ConanFile):
     name = "log4cxx"
     description = "Logging framework for C++ patterned after Apache log4j"
     url = "https://github.com/conan-io/conan-center-index"
