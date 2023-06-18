@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
 
 required_conan_version = ">=1.53.0"
@@ -109,8 +109,6 @@ class GperftoolsConan(ConanFile):
         enable = lambda feat, v: f"--enable-{feat}={yes_no(v)}"
         args = [
             "--prefix=",
-            enable("static", not self.options.shared),
-            enable("shared", self.options.shared),
             enable("cpu-profiler", self.options.build_cpu_profiler),
             enable("heap-profiler", self.options.build_heap_profiler),
             enable("heap-checker", self.options.build_heap_checker),
@@ -148,12 +146,21 @@ class GperftoolsConan(ConanFile):
             args.append(f"--with-tcmalloc-pagesize={self.options.tcmalloc_pagesize}")
         tc.configure_args = args
         tc.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        # Disable building of tests and benchmarks in Makefile
+        for pattern in ["noinst_PROGRAMS = ", "TESTS = "]:
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "Makefile.in"),
+                pattern,
+                f"{pattern}\n_{pattern}",
+            )
+
     def build(self):
+        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
