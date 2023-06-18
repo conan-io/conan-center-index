@@ -1,18 +1,26 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import can_run
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibsecretConan(ConanFile):
     name = "libsecret"
     description = "A library for storing and retrieving passwords and other secrets"
-    topics = ("libsecret", "gobject", "password", "secret")
+    topics = ("gobject", "password", "secret")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wiki.gnome.org/Projects/Libsecret"
     license = "LGPL-2.1-or-later"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,17 +32,6 @@ class LibsecretConan(ConanFile):
         "fPIC": True,
         "with_libgcrypt": True,
     }
-
-    generators = "pkg_config"
-    _meson = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _use_gcrypt(self):
@@ -49,12 +46,15 @@ class LibsecretConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.70.1")
+        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
@@ -65,45 +65,45 @@ class LibsecretConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.build_requires("meson/0.60.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.tool_requires("meson/1.0.0")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+        if not can_run(self):
+            self.tool_requires("glib/2.76.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        defs = {}
-        defs["introspection"] = False
-        defs["manpage"] = False
-        defs["gtk_doc"] = False
-        defs["gcrypt"] = self._use_gcrypt
-        self._meson.configure(
-            defs=defs,
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder,
-            pkg_config_paths=[self.install_folder],
-        )
-        return self._meson
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if can_run(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = MesonToolchain(self)
+        tc.project_options["introspection"] = "false"
+        tc.project_options["manpage"] = "false"
+        tc.project_options["gtk_doc"] = "false"
+        tc.project_options["gcrypt"] = "true" if self._use_gcrypt else "false"
+        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
-        with tools.run_environment(self):
-            meson = self._configure_meson()
-            meson.build()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.run_environment(self):
-            meson = self._configure_meson()
-            meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
+        meson.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libsecret-1"
+        self.cpp_info.set_property("pkg_config_name", "libsecret-1")
         self.cpp_info.requires = ["glib::glib-2.0", "glib::gobject-2.0"]
         if self._use_gcrypt:
             self.cpp_info.requires.append("libgcrypt::libgcrypt")

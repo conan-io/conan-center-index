@@ -16,6 +16,7 @@ class LibibertyConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gcc.gnu.org/onlinedocs/libiberty"
     license = "LGPL-2.1"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -54,8 +55,7 @@ class LibibertyConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         rmdir(self, os.path.join(self.source_folder, "gcc"))
         rmdir(self, os.path.join(self.source_folder, "libstdc++-v3"))
 

@@ -1,7 +1,7 @@
 import os
 
-from conans import ConanFile, CMake
 from conan.tools.build import cross_building
+from conans import CMake, ConanFile
 
 
 class TestPackageConan(ConanFile):
