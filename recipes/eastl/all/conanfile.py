@@ -128,7 +128,7 @@ class EastlConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["EASTL"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.options.shared:
             self.cpp_info.defines.append("EA_DLL")
 
