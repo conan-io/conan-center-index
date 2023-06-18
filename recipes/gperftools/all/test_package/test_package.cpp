@@ -6,8 +6,7 @@
 
 int main() {
     void *p = tc_malloc(100);
-    assert(p != nullptr);
     tc_free(p);
     std::cout << TC_VERSION_STRING << std::endl;
-    return EXIT_SUCCESS;
+    return p == 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
