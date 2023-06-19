@@ -36,6 +36,8 @@ class SvgwriteConan(ConanFile):
             "gcc": "7",
             "clang": "7",
             "apple-clang": "10",
+            "Visual Studio": "16",
+            "msvc": "192",
         }
 
     def export_sources(self):
