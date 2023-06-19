@@ -1,4 +1,5 @@
 required_for_references:
+- 7bitconf
 - 7bitdi
 - 7zip
 - aaf
@@ -450,6 +451,7 @@ required_for_references:
 - mbedtls
 - md4c
 - md4qt
+- mdnsresponder
 - mdspan
 - meson
 - mgs
@@ -462,6 +464,7 @@ required_for_references:
 - mongo-c-driver
 - mozilla-build
 - mozjpeg
+- mp-units
 - mpg123
 - ms-gsl
 - msgpack-c
