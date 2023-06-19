@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
-from conan.tools.files import copy, get, load, rmdir, collect_libs
+from conan.tools.files import copy, get, load, rename, rmdir, collect_libs
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.55.0"
@@ -71,7 +71,13 @@ class OpenblasConan(ConanFile):
         comp_exe = self.conf.get("tools.build:compiler_executables")
         if comp_exe and 'fortran' in comp_exe:
             return comp_exe["fortran"]
-        return environ.get('FC')
+        return None
+
+    def export(self):
+        conan_fortran = path.join(self.export_folder, "conan_fortran")
+        copy(self, "fortran_helper.cmake", self.recipe_folder, conan_fortran)
+        rename(self, path.join(conan_fortran, "fortran_helper.cmake"),
+               path.join(conan_fortran, "CMakeLists.txt"))
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -93,12 +99,27 @@ class OpenblasConan(ConanFile):
 
     def package_id(self):
         if self.info.options.build_lapack:
-            # Capture fortran compiler in package id (if found)
+            # Capture Fortran compiler in package id using CMake
+            # Note: It is incomplete before CMake 3.24
+            import tempfile
+            import io
             f_compiler = self._fortran_compiler
-            if not f_compiler:
-                self.output.warning("None or unknown fortran compiler was used.")
-                f_compiler = True
-            self.info.options.build_lapack = f_compiler
+            if f_compiler:
+                conan_fortran = path.join(self.recipe_folder, 'conan_fortran')
+                run_cmd = f"cmake {conan_fortran} --log-level=ERROR"\
+                    + f" -DCMAKE_Fortran_COMPILER={f_compiler}"
+
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    self.run(run_cmd, cwd=tmpdir, stdout=io.StringIO())
+                    fortran_id = load(self, path.join(tmpdir, "FORTRAN_COMPILER"))
+                    if fortran_id == "0":
+                        self.output.warning("No or unknown fortran compiler was used.")
+                        f_compiler = True
+                    else:
+                        self.output.info(f"Fortran compiler: {fortran_id}")
+                        f_compiler = fortran_id
+
+                self.info.options.build_lapack = f_compiler
 
     def validate(self):
         if cross_building(self, skip_x64_x86=True):
