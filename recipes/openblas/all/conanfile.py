@@ -104,22 +104,28 @@ class OpenblasConan(ConanFile):
             import tempfile
             import io
             f_compiler = self._fortran_compiler
+
+            if not f_compiler and Version(self.version) >= "0.3.21":
+                self.output.info("Building LAPACK without Fortran")
+                return
+
+            conan_fortran = path.join(self.recipe_folder, 'conan_fortran')
+            run_cmd = f"cmake {conan_fortran} --log-level=ERROR"
+
             if f_compiler:
-                conan_fortran = path.join(self.recipe_folder, 'conan_fortran')
-                run_cmd = f"cmake {conan_fortran} --log-level=ERROR"\
-                    + f" -DCMAKE_Fortran_COMPILER={f_compiler}"
+                run_cmd += f" -DCMAKE_Fortran_COMPILER={f_compiler}"
 
-                with tempfile.TemporaryDirectory() as tmpdir:
-                    self.run(run_cmd, io.StringIO(), cwd=tmpdir)
-                    fortran_id = load(self, path.join(tmpdir, "FORTRAN_COMPILER"))
-                    if fortran_id == "0":
-                        self.output.warning("No or unknown fortran compiler was used.")
-                        f_compiler = True
-                    else:
-                        self.output.info(f"Fortran compiler: {fortran_id}")
-                        f_compiler = fortran_id
+            with tempfile.TemporaryDirectory() as tmpdir:
+                self.run(run_cmd, io.StringIO(), cwd=tmpdir)
+                fortran_id = load(self, path.join(tmpdir, "FORTRAN_COMPILER"))
+                if fortran_id == "0":
+                    self.output.warning("No or unknown fortran compiler was used.")
+                    f_compiler = True
+                else:
+                    self.output.info(f"Fortran compiler: {fortran_id}")
+                    f_compiler = fortran_id
 
-                self.info.options.build_lapack = f_compiler
+            self.info.options.build_lapack = f_compiler
 
     def validate(self):
         if cross_building(self, skip_x64_x86=True):
