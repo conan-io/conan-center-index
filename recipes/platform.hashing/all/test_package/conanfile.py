@@ -1,28 +1,35 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake
 import os
 
-
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
 
     @property
     def _extra_flags(self):
-        return self.deps_user_info["platform.hashing"].suggested_flags
+        return self.dependencies["platform.hashing"].cpp_info.get_property("suggested_flags")
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        if str(self.settings.compiler) != "msvc" and self._extra_flags:
+            tc = CMakeToolchain(self)
+            tc.variables["EXTRA_FLAGS"] = self._extra_flags
+            tc.generate()
 
     def build(self):
-        if self.settings.compiler != "Visual Studio":
-            if not self._extra_flags:
-                raise ConanException("Suggested flags are not available for os={}/arch={}".format(self.settings.os, self.settings.arch))
-
         cmake = CMake(self)
-        if self.settings.compiler != "Visual Studio":
-            cmake.definitions["EXTRA_FLAGS"] = self._extra_flags
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, env="conanrun")

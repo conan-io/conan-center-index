@@ -7,9 +7,8 @@ if(EXTRA_FLAGS)
     add_compile_options(${EXTRA_FLAGS})
 endif()
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(Platform.Hashing REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE Platform.Hashing::Platform.Hashing)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
