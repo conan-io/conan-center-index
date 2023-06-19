@@ -2,12 +2,12 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
 from conan.tools.build import cross_building
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
-from conan.tools.gnu import AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps, Autotools
+from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 
 required_conan_version = ">=1.53.0"
 
@@ -104,48 +104,57 @@ class GperftoolsConan(ConanFile):
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
-        enable = lambda feat, v: f"--enable-{feat}={yes_no(v)}"
-        args = [
-            "--prefix=",
-            enable("cpu-profiler", self.options.build_cpu_profiler),
-            enable("heap-profiler", self.options.build_heap_profiler),
-            enable("heap-checker", self.options.build_heap_checker),
-            enable("debugalloc", self.options.build_debugalloc),
-            enable("minimal", self._build_minimal),
-            enable("dynamic-sized-delete-support", self.options.dynamic_sized_delete_support),
-            enable("sized-delete", self.options.sized_delete),
-            enable("large-alloc-report", self.options.enable_large_alloc_report),
-            enable(
-                "aggressive-decommit-by-default", self.options.enable_aggressive_decommit_by_default
-            ),
-        ]
+        args = {}
+        args["prefix"] = ""
+        args["enable-cpu-profiler"] = self.options.build_cpu_profiler
+        args["enable-heap-profiler"] = self.options.build_heap_profiler
+        args["enable-heap-checker"] = self.options.build_heap_checker
+        args["enable-debugalloc"] = self.options.build_debugalloc
+        args["enable-minimal"] = self._build_minimal
+        args["enable-dynamic-sized-delete-support"] = self.options.dynamic_sized_delete_support
+        args["enable-sized-delete"] = self.options.sized_delete
+        args["enable-large-alloc-report"] = self.options.enable_large_alloc_report
+        args["enable-aggressive-decommit-by-default"] = self.options.enable_aggressive_decommit_by_default
         if self._build_minimal:
             # No stack trace support will be built
-            args += [
-                enable("libunwind", False),
-                enable("frame-pointers", False),
-                enable("stacktrace-via-backtrace", False),
-                enable("emergency-malloc", False),
-            ]
+            args["enable-libunwind"] = False
+            args["enable-frame-pointers"] = False
+            args["enable-stacktrace-via-backtrace"] = False
+            args["enable-emergency-malloc"] = False
         else:
-            args += [
-                enable("libunwind", self.options.enable_libunwind),
-                enable("frame-pointers", self.options.enable_frame_pointers),
-            ]
-            if self.options.get_safe("enable_stacktrace_via_backtrace", False):
-                args.append(
-                    enable("stacktrace-via-backtrace", self.options.enable_stacktrace_via_backtrace)
-                )
-            if self.options.emergency_malloc is not None:
-                args.append(enable("emergency-malloc", self.options.emergency_malloc))
-        if self.options.tcmalloc_alignment is not None:
-            args.append(f"--with-tcmalloc-alignment={self.options.tcmalloc_alignment}")
-        if self.options.tcmalloc_pagesize:
-            args.append(f"--with-tcmalloc-pagesize={self.options.tcmalloc_pagesize}")
-        tc.configure_args = args
+            args["enable-libunwind"] = self.options.enable_libunwind
+            args["enable-frame-pointers"] = self.options.enable_frame_pointers
+            args["enable-stacktrace-via-backtrace"] = self.options.get_safe(
+                "enable_stacktrace_via_backtrace", False
+            )
+            args["enable-emergency-malloc"] = self.options.emergency_malloc
+        args["with-tcmalloc-alignment"] = self.options.tcmalloc_alignment
+        args["with-tcmalloc-pagesize"] = self.options.tcmalloc_pagesize
+
+        # Based on https://github.com/conan-io/conan-center-index/blob/c647b1/recipes/libx264/all/conanfile.py#L94
+        if is_apple_os(self) and self.settings.arch == "armv8":
+            args["host"] = "aarch64-apple-darwin"
+            tc.extra_asflags = ["-arch arm64"]
+            tc.extra_ldflags = ["-arch arm64"]
+            if self.settings.os != "Macos":
+                xcrun = XCRun(self)
+                platform_flags = ["-isysroot", xcrun.sdk_path]
+                apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
+                if apple_min_version_flag:
+                    platform_flags.append(apple_min_version_flag)
+                tc.extra_asflags.extend(platform_flags)
+                tc.extra_cflags.extend(platform_flags)
+                tc.extra_ldflags.extend(platform_flags)
+
+        for k, v in args.items():
+            if v in [True, False]:
+                v = "yes" if v else "no"
+            if v is not None:
+                tc.configure_args.append(f"--{k}={v}")
         tc.generate()
+
         tc = AutotoolsDeps(self)
         tc.generate()
 
