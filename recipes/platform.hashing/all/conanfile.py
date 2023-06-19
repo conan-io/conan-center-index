@@ -27,10 +27,6 @@ class PlatformInterfacesConan(ConanFile):
         return os.path.join(self.source_folder, "cpp", "Platform.Hashing")
 
     @property
-    def _internal_cpp_subfolder(self):
-        return os.path.join(self._source_subfolder, "cpp", "Platform.Hashing")
-
-    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "10",
@@ -85,7 +81,7 @@ class PlatformInterfacesConan(ConanFile):
                 "armv7": "-march=armv7",
                 "armv8": "-march=armv8-a",
             }.get(str(self.settings.arch), "")
-            
+        
         self.cpp_info.set_property("suggested_flags", suggested_flags)
 
         if "-march" not in "{} {}".format(os.environ.get("CPPFLAGS", ""), os.environ.get("CXXFLAGS", "")):
@@ -98,4 +94,3 @@ class PlatformInterfacesConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "Platform.Hashing"
         self.cpp_info.names["cmake_find_package_multi"] = "Platform.Hashing"
-
