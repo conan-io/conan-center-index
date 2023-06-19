@@ -36,8 +36,8 @@ class LogrConan(ConanFile):
             fmt_ref = "fmt/9.1.0"
             spdlog_ref = "spdlog/1.11.0"
         else:
-            fmt_ref = "fmt/8.0.1"
-            spdlog_ref = "spdlog/1.9.2"
+            fmt_ref = "fmt/8.1.1"
+            spdlog_ref = "spdlog/1.10.0"
 
         self.requires(fmt_ref)
 
