@@ -1,4 +1,4 @@
-from os import path, environ
+from os import path
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
@@ -110,7 +110,7 @@ class OpenblasConan(ConanFile):
                     + f" -DCMAKE_Fortran_COMPILER={f_compiler}"
 
                 with tempfile.TemporaryDirectory() as tmpdir:
-                    self.run(run_cmd, cwd=tmpdir, stdout=io.StringIO())
+                    self.run(run_cmd, io.StringIO(), cwd=tmpdir)
                     fortran_id = load(self, path.join(tmpdir, "FORTRAN_COMPILER"))
                     if fortran_id == "0":
                         self.output.warning("No or unknown fortran compiler was used.")
