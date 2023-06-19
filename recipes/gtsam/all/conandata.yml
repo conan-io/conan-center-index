@@ -8,9 +8,6 @@ sources:
   "4.0.3":
     url: "https://github.com/borglab/gtsam/archive/4.0.3.tar.gz"
     sha256: "eaa561749edf7a2d402981828253e28aed6c717dae35738301c5ab23e2595f25"
-  "4.0.2":
-    url: "https://github.com/borglab/gtsam/archive/4.0.2.tar.gz"
-    sha256: "8770a440f1af98c3f0d9d4dffd568de2d4c21b245e7231e987e26bc236aeb5aa"
 patches:
   "4.2.0a9":
     - patch_file: "patches/4.1.1-0001-cmake-boost.patch"
@@ -33,7 +30,7 @@ patches:
     - patch_file: "patches/4.1.1-0003-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"
-    - patch_file: "patches/4.0.2-0003-cmake-project.patch"
+    - patch_file: "patches/4.0.3-0004-cmake-project.patch"
       patch_description: "CMake: move project() after cmake_minimum_required()"
       patch_type: "conan"
   "4.0.3":
@@ -46,23 +43,6 @@ patches:
     - patch_file: "patches/4.0.3-0003-macos-rpath.patch"
       patch_description: "Relocatable shared libs on Apple OS"
       patch_type: "conan"
-    - patch_file: "patches/4.0.2-0003-cmake-project.patch"
+    - patch_file: "patches/4.0.3-0004-cmake-project.patch"
       patch_description: "CMake: move project() after cmake_minimum_required()"
       patch_type: "conan"
-  "4.0.2":
-    - patch_file: "patches/4.0.2-0001-cmake-boost.patch"
-      patch_description: "Use boost targets"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.2-0002-cmake-eigen.patch"
-      patch_description: "Use Eigen include variable from CMakeDeps"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.2-0003-macos-rpath.patch"
-      patch_description: "Relocatable shared libs on Apple OS"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.2-0003-cmake-project.patch"
-      patch_description: "CMake: move project() after cmake_minimum_required()"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.2-0005-replace-ptr_fun.patch"
-      patch_description: "Replace deprecated `ptr_fun` with lambda expression for C++17"
-      patch_type: "portability"
-      patch_source: "https://github.com/borglab/gtsam/commit/4a1491876d5a96ea791c0e17204ace05f6eb206a"
