@@ -32,7 +32,9 @@ class LogrConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "0.6.0":
+        if self.options.backend != "spdlog":
+            fmt_ref = "fmt/10.0.0"
+        elif Version(self.version) >= "0.6.0":
             fmt_ref = "fmt/9.1.0"
             spdlog_ref = "spdlog/1.11.0"
         else:
