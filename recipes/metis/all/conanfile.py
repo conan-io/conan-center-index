@@ -83,7 +83,8 @@ class METISConan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.preprocessor_definitions["DEBUG"] = ""
         else:
-            tc.preprocessor_definitions["NDEBUG"] = ""
+            # NDEBUG is defined by default by CMake
+            # tc.preprocessor_definitions["NDEBUG"] = ""
             tc.preprocessor_definitions["NDEBUG2"] = ""
         bits = 64 if self.options.with_64bit_types else 32
         tc.preprocessor_definitions["IDXTYPEWIDTH"] = str(bits)
