@@ -105,10 +105,10 @@ class GtsamConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.82.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
-            self.requires("onetbb/2020.3", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
         # TODO: port metis recipe to Conan v2
         # if Version(self.version) >= "4.1" and self.options.support_nested_dissection:
         #     # Used in a public header here:
