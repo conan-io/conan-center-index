@@ -11,4 +11,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("gfortran --version", env="conanrun")
+            self.run("gfortran --version")
