@@ -1,7 +1,13 @@
 sources:
   "0.2.0":
-    url: https://github.com/linksplatform/Exceptions/archive/refs/tags/0.4.0_0.2.0.zip
-    sha256: 9e4513da667e41f0bbe776123747ac63958972edb00eaee300c495ae3b39eb9b
+    source:
+      url: "https://github.com/linksplatform/Exceptions/archive/refs/tags/0.4.0_0.2.0.zip"
+      sha256: "9e4513da667e41f0bbe776123747ac63958972edb00eaee300c495ae3b39eb9b"
   "0.3.0":
-    url: https://github.com/linksplatform/Exceptions/archive/refs/tags/cpp_0.3.0.zip
-    sha256: 08506f334098e8c9106ff357efd7f68b83a3c1f4dc03b6b97b6229b14737d0ce
+    source:
+      url: "https://github.com/linksplatform/Exceptions/archive/refs/tags/cpp_0.3.0.zip"
+      sha256: "08506f334098e8c9106ff357efd7f68b83a3c1f4dc03b6b97b6229b14737d0ce"
+  "0.3.2":
+    source:
+      url: "https://github.com/linksplatform/Exceptions/releases/download/cpp_0.3.2/platform.exceptions_0.3.2.zip"
+      sha256: "62BE3FC1AAA735D8BB7D4BB31329A2703AFA5A337FF4CD2D3A33CA12F1B4FC65"

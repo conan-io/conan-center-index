@@ -1,4 +1,5 @@
 sources:
-  "0.1.0":
-    url: https://github.com/linksplatform/Converters/archive/refs/tags/cpp_0.1.0.zip
-    sha256: a1a9e566b6628b1e09875f9ee93fb7fb600a8371d07e00a25c127e1609375d96
+  "0.2.0":
+    source:
+      url: "https://github.com/linksplatform/Converters/releases/download/cpp_0.2.0/platform.converters_0.2.0.zip"
+      sha256: "DCCB042CFE36343ED8061D48FC0176DA12590BA7328D908317211A902DF81321"
