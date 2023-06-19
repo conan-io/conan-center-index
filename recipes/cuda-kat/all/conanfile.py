@@ -73,4 +73,7 @@ class CudaKatConan(ConanFile):
         self.cpp_info.libdirs = []
 
         if is_msvc(self):
+            # Required for C++ version checks to work at
+            # https://github.com/eyalroz/cuda-kat/blob/44d381b/src/kat/detail/constexpr_by_cpp_version.hpp
+            # Otherwise MSVC will always report __cplusplus as 199711L
             self.cpp_info.cxxflags.append("/Zc:__cplusplus")
