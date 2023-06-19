@@ -82,7 +82,10 @@ class CivetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1t")
+            if Version(self.version) < "1.16":
+                self.requires("openssl/1.1.1t")
+            else:
+                self.requires("openssl/[>=1 <4]")
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.13")
 
@@ -97,11 +100,13 @@ class CivetwebConan(ConanFile):
         tc = CMakeToolchain(self)
 
         if self.options.with_ssl:
-            openssl_version = Version(str(self.dependencies["openssl"].ref.version)[:-1])
+            openssl_version = Version(self.dependencies["openssl"].ref.version)
             tc.variables["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
             tc.variables["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
-            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
-            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_1"] = openssl_version.minor == "1"
+            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.major == "1" and openssl_version.minor == "0"
+            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_1"] = openssl_version.major == "1" and openssl_version.minor == "1"
+            if Version(self.version) >= "1.16":
+                tc.variables["CIVETWEB_SSL_OPENSSL_API_3_0"] = openssl_version.major == "3"
 
         tc.variables["CIVETWEB_BUILD_TESTING"] = False
         tc.variables["CIVETWEB_CXX_ENABLE_LTO"] = False
@@ -137,7 +142,9 @@ class CivetwebConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         bin_folder = os.path.join(self.package_folder, "bin")
         for bin_file in os.listdir(bin_folder):
             if not bin_file.startswith("civetweb"):
@@ -146,6 +153,7 @@ class CivetwebConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "civetweb")
         self.cpp_info.set_property("cmake_target_name", "civetweb::civetweb-cpp" if self.options.with_cxx else "civetweb::civetweb")
+        self.cpp_info.set_property("pkg_config_name", "civetweb")
 
         self.cpp_info.components["_civetweb"].set_property("cmake_target_name", "civetweb::civetweb")
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]

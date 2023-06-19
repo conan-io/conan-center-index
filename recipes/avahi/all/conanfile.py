@@ -70,6 +70,8 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
+        if self.settings.os == "Linux":
+            tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
         AutotoolsDeps(self).generate()
         PkgConfigDeps(self).generate()

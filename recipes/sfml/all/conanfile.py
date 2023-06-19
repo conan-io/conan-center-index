@@ -17,7 +17,7 @@ class SfmlConan(ConanFile):
     topics = ("multimedia", "games", "graphics", "audio")
     homepage = "https://www.sfml-dev.org"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -58,11 +58,11 @@ class SfmlConan(ConanFile):
                 self.requires("libudev/system")
                 self.requires("xorg/system")
         if self.options.graphics:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
             self.requires("stb/cci.20220909")
         if self.options.audio:
-            self.requires("flac/1.3.3")
-            self.requires("openal/1.22.2")
+            self.requires("flac/1.4.2")
+            self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
 
     def validate(self):
@@ -72,8 +72,7 @@ class SfmlConan(ConanFile):
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
@@ -246,7 +245,7 @@ class SfmlConan(ConanFile):
                 "audio": {
                     "target": "sfml-audio",
                     "libs": [f"sfml-audio{suffix}"],
-                    "requires": ["system", "flac::flac", "openal::openal", "vorbis::vorbis"],
+                    "requires": ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"],
                     "system_libs": android(),
                 },
             })

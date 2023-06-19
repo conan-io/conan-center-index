@@ -1,4 +1,7 @@
 sources:
+  "4.5.0":
+    url: "http://download.osgeo.org/libtiff/tiff-4.5.0.tar.gz"
+    sha256: "c7a1d9296649233979fa3eacffef3fa024d73d05d589cb622727b5b08c423464"
   "4.4.0":
     url: "http://download.osgeo.org/libtiff/tiff-4.4.0.tar.gz"
     sha256: "917223b37538959aca3b790d2d73aa6e626b688e02dcda272aec24c2f498abed"
@@ -18,6 +21,10 @@ sources:
     url: "http://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz"
     sha256: "59d7a5a8ccd92059913f246877db95a2918e6c04fb9d43fd74e5c3390dac2910"
 patches:
+  "4.5.0":
+    - patch_file: "patches/4.5.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "conan"
   "4.4.0":
     - patch_file: "patches/4.4.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
@@ -35,18 +42,26 @@ patches:
       patch_description: "CMake: robust handling of dependencies"
       patch_type: "conan"
     - patch_file: "patches/4.1.0-0002-no-libm-mingw.patch"
+      patch_description: "port to MINGW: Exclude libm from MINGW since math related functions are already included in libmsvcrt.a"
+      patch_type: "portability"
       patch_source: "https://gitlab.com/libtiff/libtiff/-/merge_requests/73"
   "4.0.9":
     - patch_file: "patches/4.0.8-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
       patch_type: "conan"
     - patch_file: "patches/4.0.8-0002-no-libm-mingw.patch"
+      patch_description: "port to MINGW: Exclude libm from MINGW since math related functions are already included in libmsvcrt.a"
+      patch_type: "portability"
       patch_source: "https://gitlab.com/libtiff/libtiff/-/merge_requests/73"
   "4.0.8":
     - patch_file: "patches/4.0.8-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
       patch_type: "conan"
     - patch_file: "patches/4.0.8-0002-no-libm-mingw.patch"
+      patch_description: "port to MINGW: Exclude libm from MINGW since math related functions are already included in libmsvcrt.a"
+      patch_type: "portability"
       patch_source: "https://gitlab.com/libtiff/libtiff/-/merge_requests/73"
     - patch_file: "patches/4.0.8-0003-file-offsets-bits-mingw.patch"
+      patch_description: "port to MINGW: enable Large file support by defining _FILE_OFFSET_BITS=64"
+      patch_type: "portability"
       patch_source: "https://gitlab.com/libtiff/libtiff/-/commit/f2a3b020402943f90957552a884788e70ece6cd7"

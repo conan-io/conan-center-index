@@ -1,4 +1,7 @@
 sources:
+  "1.16":
+    url: "https://github.com/civetweb/civetweb/archive/v1.16.tar.gz"
+    sha256: "f0e471c1bf4e7804a6cfb41ea9d13e7d623b2bcc7bc1e2a4dd54951a24d60285"
   "1.15":
     url: "https://github.com/civetweb/civetweb/archive/v1.15.tar.gz"
     sha256: "90a533422944ab327a4fbb9969f0845d0dba05354f9cacce3a5005fa59f593b9"
