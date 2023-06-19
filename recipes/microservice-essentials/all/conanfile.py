@@ -96,11 +96,9 @@ class MicroserviceEssentials(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["microservice-essentials"]
         if self.settings.os != "Windows":
             self.cpp_info.system_libs = ["pthread"]
-        lib_path = os.path.join(self.package_folder, "lib")
-        self.output.info("Appending PATH environment variable with : {0}".format(lib_path))
-        self.runenv_info.prepend_path("PATH", lib_path)
