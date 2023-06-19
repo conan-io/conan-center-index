@@ -144,8 +144,12 @@ class GtsamConan(ConanFile):
                 f"{', '.join(self._required_boost_components)}"
             )
 
-        if self.options.with_TBB and not self.dependencies["onetbb"].options.tbbmalloc:
-            raise ConanInvalidConfiguration("gtsam with tbb requires onetbb:tbbmalloc=True")
+        if (
+            self.options.with_TBB
+            and self.options.default_allocator in [None, "TBB"]
+            and not self.dependencies["onetbb"].options.tbbmalloc
+        ):
+            raise ConanInvalidConfiguration("GTSAM with TBB requires onetbb:tbbmalloc=True")
 
         check_min_vs(self, "191")
 
