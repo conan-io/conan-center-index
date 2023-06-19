@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
@@ -49,14 +48,11 @@ class PlatformConvertersConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
 
         if not minimum_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warn(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
 
         elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("{}/{} requires c++{}, "
-                                            "which is not supported by {} {}.".format(
-                self.ref, self._minimum_cpp_standard, self.settings.compiler,
-                self.settings.compiler.version))
+            raise ConanInvalidConfiguration(f"{self.ref} requires c++{self._minimum_cpp_standard}, "
+                                            f"which is not supported by {self.settings.compiler} {self.settings.compiler.version}.")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
