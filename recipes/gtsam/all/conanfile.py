@@ -109,14 +109,13 @@ class GtsamConan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
             self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
+        if self.options.default_allocator == "tcmalloc":
+            self.requires("gperftools/2.10.0")
         # TODO: port metis recipe to Conan v2
         # if Version(self.version) >= "4.1" and self.options.support_nested_dissection:
         #     # Used in a public header here:
         #     # https://github.com/borglab/gtsam/blob/4.2a9/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
         #     self.requires("metis/5.1.1", transitive_headers=True, transitive_libs=True)
-        # TODO: add gperftools to ConanCenter
-        # if self.options.default_allocator == "tcmalloc":
-        #     self.requires("gperftools/2.10")
 
     @property
     def _required_boost_components(self):
@@ -295,6 +294,8 @@ class GtsamConan(ConanFile):
         gtsam.requires.append("eigen::eigen")
         if self.options.with_TBB:
             gtsam.requires.append("onetbb::onetbb")
+        if self.options.default_allocator == "tcmalloc":
+            gtsam.requires.append("gperftools::gperftools")
         if self.options.support_nested_dissection:
             gtsam.requires.append("libmetis-gtsam")
         if self.settings.os == "Windows" and Version(self.version) >= "4.0.3":
