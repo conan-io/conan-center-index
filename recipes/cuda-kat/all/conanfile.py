@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -42,8 +42,6 @@ class CudaKatConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # if self.settings.os == "Windows":
-        #     raise ConanInvalidConfiguration("CUDA-kat library are not compatible on Windows")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
@@ -73,3 +71,6 @@ class CudaKatConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
