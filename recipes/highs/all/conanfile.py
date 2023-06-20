@@ -65,7 +65,7 @@ class HiGHSConan(ConanFile):
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(target="libhighs")
+        cmake.build(target="highs")
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=join(self.package_folder, "licenses"))
