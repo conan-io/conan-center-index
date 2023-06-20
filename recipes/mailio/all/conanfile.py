@@ -57,8 +57,8 @@ class MailioConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0", transitive_headers=True)
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -84,6 +84,8 @@ class MailioConan(ConanFile):
         tc.variables["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.variables["MAILIO_BUILD_DOCUMENTATION"] = False
         tc.variables["MAILIO_BUILD_EXAMPLES"] = False
+        if Version(self.version) >= "0.22.0":
+            tc.variables["MAILIO_BUILD_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
