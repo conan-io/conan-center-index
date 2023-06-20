@@ -15,6 +15,7 @@ class SimdutfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/simdutf/simdutf"
     topics = ("unicode", "transcoding", "neon", "simd", "avx2", "sse2", "utf8", "utf16", )
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,7 +49,7 @@ class SimdutfConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -59,7 +60,6 @@ class SimdutfConan(ConanFile):
         if Version(self.version) >= "2.0.3":
             tc.variables["SIMDUTF_TOOLS"] = False
         tc.generate()
-
         deps = CMakeDeps(self)
         deps.generate()
 
