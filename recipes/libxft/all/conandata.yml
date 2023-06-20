@@ -11,4 +11,3 @@ patches:
       patch_description: "fix gcc 5 and gcc 11 compilation"
       patch_type: "portability"
       patch_source: "https://gitlab.freedesktop.org/xorg/lib/libxft/-/merge_requests/17"
-      base_path: "source_subfolder"
