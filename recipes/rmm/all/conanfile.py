@@ -5,7 +5,7 @@ from pathlib import Path
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import export_conandata_patches, get, copy
+from conan.tools.files import export_conandata_patches, get, copy, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -81,9 +81,19 @@ class RmmConan(ConanFile):
             )
         )
 
+    def _patch_sources(self):
+        # Add missing include in logger.hpp
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "include", "rmm", "logger.hpp"),
+            "#include <string>",
+            "#include <string>\n#include <array>",
+        )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._write_version_header()
+        self._patch_sources()
 
     def package(self):
         copy(
