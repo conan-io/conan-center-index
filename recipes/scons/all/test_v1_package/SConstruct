@@ -1,6 +1,0 @@
-import os
-SConsignFile(os.path.join(GetLaunchDir(), "db"))
-
-SConscript('SConscript',
-           variant_dir=GetLaunchDir(),
-           duplicate=False)

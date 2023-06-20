@@ -13,20 +13,17 @@ class SConsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://scons.org"
     topics = ("scons", "build", "configuration", "development")
-    settings = "os"  # Added to let the CI test this package on all os'es
+    settings = "os"
     package_type = "application"
     no_copy_source = True
     short_paths = True
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+    def layout(self):
+        self.folders.source = "src"
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+                  strip_root=True, destination=self.source_folder)
 
     def _chmod_x(self, path):
         if os.name == "posix":
@@ -44,13 +41,13 @@ class SConsConan(ConanFile):
         self.info.clear()
 
     def package(self):
-        copy(self, "LICENSE*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         if Version(self.version) < 4:
-            shutil.copytree(os.path.join(self._source_subfolder, "engine", "SCons"),
+            shutil.copytree(os.path.join(self.source_folder, "engine", "SCons"),
                             os.path.join(self.package_folder, "res", "SCons"))
         else:
-            shutil.copytree(os.path.join(self._source_subfolder, "SCons"),
+            shutil.copytree(os.path.join(self.source_folder, "SCons"),
                             os.path.join(self.package_folder, "res", "SCons"))
 
         save(self, self._scons_sh, textwrap.dedent("""\
@@ -85,20 +82,12 @@ class SConsConan(ConanFile):
             CALL %PYTHON% %currentdir%\\..\\res\\SCons\\__main__.py %*
         """))
 
-        # Mislead CI and create an empty header in the include directory
-        include_dir = os.path.join(self.package_folder, "include")
-        os.mkdir(include_dir)
-        save(self, os.path.join(include_dir, "__nop.h"), "")
-
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         self._chmod_x(self._scons_sh)
         bindir = os.path.join(self.package_folder, "bin")
-
-        self.buildenv_info.append_path("PATH", bindir)
-        self.runenv_info.append_path("PATH", bindir)
 
         # For Conan 1.x downstream consumers, can be removed once recipe is Conan 2.x only:
         self.output.info("Appending PATH environment var: {}".format(bindir))
