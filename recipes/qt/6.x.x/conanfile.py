@@ -783,10 +783,12 @@ class QtConan(ConanFile):
             targets.append("qvkgen")
         if self.options.widgets:
             targets.append("uic")
+        if self._settings_build.os == "Macos" and self.settings.os != "iOS":
+            targets.extend(["macdeployqt"])
+        if self.settings.os == "Windows":
+            targets.extend(["windeployqt"])
         if self.options.qttools:
             targets.extend(["qhelpgenerator", "qtattributionsscanner"])
-            if self.settings.os == "Windows":
-                targets.extend(["windeployqt"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
