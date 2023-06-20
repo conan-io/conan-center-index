@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, get, copy, rm
+from conan.tools.files import get, copy, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
@@ -43,6 +43,7 @@ class METISConan(ConanFile):
     }
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         copy(
             self,
