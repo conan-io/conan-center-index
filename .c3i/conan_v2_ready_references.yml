@@ -149,6 +149,7 @@ required_for_references:
 - cppbenchmark
 - cppcheck
 - cppcodec
+- cppdap
 - cppfront
 - cppitertools
 - cpptoml
@@ -168,6 +169,7 @@ required_for_references:
 - csvmonkey
 - ctre
 - cubicinterpolation
+- cuda-api-wrappers
 - cwalk
 - cxxopts
 - cyclonedds
@@ -206,6 +208,7 @@ required_for_references:
 - eigen
 - elfio
 - embree3
+- emio
 - enet
 - entityx
 - enum-flags
@@ -487,6 +490,7 @@ required_for_references:
 - norm
 - nsync
 - nuraft
+- octomap
 - odbc
 - ogdf
 - ogg
@@ -606,6 +610,7 @@ required_for_references:
 - stb
 - strawberryperl
 - string-view-lite
+- strong_type
 - symengine
 - tabulate
 - taocpp-json
