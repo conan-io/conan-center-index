@@ -96,9 +96,9 @@ class MicroserviceEssentials(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-
+ 
     def package_info(self):
         self.cpp_info.libs = ["microservice-essentials"]
+        self.cpp_info.bindirs.extend(["lib"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
