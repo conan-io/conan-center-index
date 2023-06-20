@@ -26,7 +26,6 @@ class Jinja2cppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports = ["CMakeLists.txt"]
 
     @property
     def _min_cppstd(self):
@@ -88,10 +87,6 @@ class Jinja2cppConan(ConanFile):
         tc.variables["JINJA2CPP_BUILD_SHARED"] = self.options.shared
         tc.variables["JINJA2CPP_DEPS_MODE"] = "conan-build"
         tc.variables["JINJA2CPP_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", 14)
-        # Conan cmake generator omits the build_type flag for MSVC multiconfiguration CMake,
-        # but provide build-type-specific runtime type flag. For now, Jinja2C++ build scripts
-        # need to know the build type is being built in order to setup internal flags correctly
-        tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
         if is_msvc(self):
             # Runtime type configuration for Jinja2C++ should be strictly '/MT' or '/MD'
             runtime = "/MD" if "MD" in msvc_runtime_flag(self) else "/MT"
