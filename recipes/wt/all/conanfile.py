@@ -29,6 +29,8 @@ class WtConan(ConanFile):
         "with_dbo": [True, False],
         "with_opengl": [True, False],
         "with_unwind": [True, False],
+        "with_haru": [True, False],
+        "raster_image": ["none", "Direct2D", "GraphicsMagick"],
         "no_std_locale": [True, False],
         "no_std_wstring": [True, False],
         "multi_threaded": [True, False],
@@ -48,6 +50,8 @@ class WtConan(ConanFile):
         "with_dbo": True,
         "with_opengl": False,
         "with_unwind": True,
+        "with_haru": False,
+        "raster_image": "none",
         "no_std_locale": False,
         "no_std_wstring": False,
         "multi_threaded": True,
@@ -120,6 +124,8 @@ class WtConan(ConanFile):
                 f"{self.ref} requires non header-only boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
+        if self.options.get_safe("raster_image", "none") == "Direct2D" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Direct2D is supported only on Windows.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -167,7 +173,7 @@ class WtConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["ENABLE_HARU"] = False
+        tc.variables["ENABLE_HARU"] = self.options.with_haru
         tc.variables["ENABLE_PANGO"] = False
         tc.variables["ENABLE_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["ENABLE_POSTGRES"] = self.options.get_safe("with_postgres", False)
@@ -180,6 +186,7 @@ class WtConan(ConanFile):
         tc.variables["ENABLE_LIBWTDBO"] = self.options.with_dbo
         tc.variables["ENABLE_OPENGL"] = self.options.with_opengl
         tc.variables["ENABLE_UNWIND"] = self.options.get_safe("with_unwind", False)
+        tc.variables["WT_WRASTERIMAGE_IMPLEMENTATION"] = self.options.get_safe("raster_image", "none")
         tc.variables["WT_NO_STD_LOCALE"] = self.options.no_std_locale
         tc.variables["WT_NO_STD_WSTRING"] = self.options.no_std_wstring
         tc.variables["MULTI_THREADED"] = self.options.multi_threaded
