@@ -1,44 +1,75 @@
-from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.52.0"
 
 
 class ThrustConan(ConanFile):
     name = "thrust"
     license = "Apache-2.0"
-    description = ("Thrust is a parallel algorithms library which resembles"
-                   "the C++ Standard Template Library (STL).")
-    topics = ("parallel", "stl", "header-only")
+    description = (
+        "Thrust is a parallel algorithms library which resembles "
+        "the C++ Standard Template Library (STL)."
+    )
+    topics = ("parallel", "stl", "header-only", "cuda", "gpgpu")
     homepage = "https://thrust.github.io/"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    options = {"device_system": ["cuda", "cpp", "omp", "tbb"]}
-    default_options = {"device_system": "tbb"}
+    options = {
+        "device_system": ["cuda", "cpp", "omp", "tbb"],
+    }
+    default_options = {
+        "device_system": "tbb",
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # TODO: https://github.com/conan-io/conan-center-index/pull/17484
+        # Otherwise CUB from system CUDA is used, which is not guaranteed to be compatible
+        # self.requires("cub/1.17.2")
+
         if self.options.device_system == "tbb":
-            self.requires("onetbb/2020.3")
-        elif self.options.device_system != "cpp":
-            self.output.warn('Conan package for {0} is not available,'
-                             ' this package will use {0} from system.'
-                             .format(str(self.options.device_system).upper()))
+            self.requires("onetbb/2021.9.0")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def package(self):
-        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*[.h|.inl]", src=os.path.join(self._source_subfolder, "thrust"),
-                      dst=os.path.join("include", "thrust"))
+        if self.options.device_system in ["cuda", "omp"]:
+            dev = str(self.options.device_system).upper()
+            self.output.warning(
+                f"Conan package for {dev} is not available,"
+                f" this package will use {dev} from system."
+            )
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
+        for pattern in ["*.h", "*.inl"]:
+            copy(
+                self,
+                pattern=pattern,
+                src=os.path.join(self.source_folder, "thrust"),
+                dst=os.path.join(self.package_folder, "include", "thrust"),
+            )
 
     def package_info(self):
-        self.cpp_info.defines = ["THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{}".format(
-            str(self.options.device_system).upper())]
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        dev = str(self.options.device_system).upper()
+        self.cpp_info.defines = [f"THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{dev}"]
+        # Since CUB and Thrust are provided separately, their versions are not guaranteed to match
+        self.cpp_info.defines += ["THRUST_IGNORE_CUB_VERSION_CHECK=1"]

@@ -80,17 +80,6 @@ configurations:
               compiler.version: ["5", "7", "9", "10", "11"]
               build_type: ["Release", "Debug"]
   - id: linux-clang
-    epochs: [0]
-    hrname: "Linux, Clang"
-    content:
-      - os: [ "Linux" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "clang":
-              compiler.libcxx: [ "libstdc++", "libc++" ]
-              compiler.version: [ "11" ]
-              build_type: [ "Release", "Debug" ]
-  - id: linux-clang
     epochs: [20211221, 20220120]
     hrname: "Linux, Clang"
     content:
@@ -99,7 +88,7 @@ configurations:
         compiler:
           - "clang":
               compiler.libcxx: ["libstdc++", "libc++"]
-              compiler.version: ["11", "12", "13"]
+              compiler.version: ["12", "13"]
               build_type: ["Release", "Debug"]
   - id: macos-clang
     epochs: [0, 20211221]
@@ -173,7 +162,7 @@ node_labels:
   Windows:
     x86_64:
       "Visual Studio":
-        default: "windows20221212"
+        default: "windows20230531"
   Macos:
     x86_64:
       "apple-clang":
