@@ -35,4 +35,3 @@ class TestPackageConan(ConanFile):
             # Scons build put executable righe here
             bin_path = os.path.join(self.recipe_folder, "test_package")
             self.run(bin_path, env="conanrun")
- 
