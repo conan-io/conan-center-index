@@ -32,10 +32,10 @@ class SonicCppConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-			"gcc": "8",
-			"clang": "7",
-			"apple-clang": "12",
-		}
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
 
     def requirements(self):
         # TODO: required string-view_lite only on __cplusplus < 201703L
