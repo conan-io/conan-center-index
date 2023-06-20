@@ -45,7 +45,3 @@ patches:
     - patch_file: "patches/cmake-0.14.1.patch"
       patch_description: "use cci packages"
       patch_type: "conan"
-  "0.13.0":
-    - patch_file: "patches/cmake-0.13.0.patch"
-      patch_description: "use cci packages"
-      patch_type: "conan"
