@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(test_package)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses REQUIRED)
 
