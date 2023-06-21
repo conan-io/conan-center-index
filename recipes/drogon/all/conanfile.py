@@ -1,12 +1,14 @@
-from conan import ConanFile
-from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
+from conan.tools.scm import Version
+
 required_conan_version = ">=1.53.0"
+
 
 class DrogonConan(ConanFile):
     name = "drogon"
@@ -101,7 +103,7 @@ class DrogonConan(ConanFile):
 
     def requirements(self):
         self.requires("trantor/1.5.11", transitive_headers=True, transitive_libs=True)
-        self.requires("jsoncpp/1.9.5", transitive_headers=True)
+        self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
