@@ -1,11 +1,10 @@
 import os
 import textwrap
-from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import export_conandata_patches, get, copy, replace_in_file
+from conan.tools.files import export_conandata_patches, get, copy, replace_in_file, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -70,17 +69,13 @@ class RmmConan(ConanFile):
         # https://github.com/rapidsai/rapids-cmake/blob/branch-23.08/rapids-cmake/cmake/write_version_file.cmake
         # https://github.com/rapidsai/rapids-cmake/blob/branch-23.08/rapids-cmake/cmake/template/version.hpp.in
         major, minor, patch = self.version.split(".")[:3]
-        header_path = Path(self.source_folder) / "include" / "rmm" / "version_config.hpp"
-        header_path.parent.mkdir(parents=True, exist_ok=True)
-        header_path.write_text(
-            textwrap.dedent(
-                f"""\
+        save(self, os.path.join(self.source_folder, "include", "rmm", "version_config.hpp"),
+            textwrap.dedent(f"""\
             #pragma once
             #define RMM_VERSION_MAJOR {int(major)}
             #define RMM_VERSION_MINOR {int(minor)}
             #define RMM_VERSION_PATCH {int(patch)}
-            """
-            )
+            """)
         )
 
     def _patch_sources(self):
