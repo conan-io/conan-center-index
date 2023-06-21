@@ -69,11 +69,11 @@ class RtklibConan(ConanFile):
     def _public_defines(self):
         # https://github.com/tomojitakasu/RTKLIB/blob/v2.4.3-b34/src/rtklib.h#L6-L15
         defs = {}
-        defs["ENAGLO"] = bool(self.options.enable_glonass)
-        defs["ENAQZS"] = bool(self.options.enable_qzss)
-        defs["ENAGAL"] = bool(self.options.enable_galileo)
-        defs["ENACMP"] = bool(self.options.enable_beidou)
-        defs["ENAIRN"] = bool(self.options.enable_irnss)
+        defs["ENAGLO"] = self.options.enable_glonass
+        defs["ENAQZS"] = self.options.enable_qzss
+        defs["ENAGAL"] = self.options.enable_galileo
+        defs["ENACMP"] = self.options.enable_beidou
+        defs["ENAIRN"] = self.options.enable_irnss
         defs["NFREQ"] = str(self.options.num_frequencies)
         defs["NEXOBS"] = str(self.options.num_ext_obs_codes)
         defs["WIN32"] = self.settings.os == "Windows"
@@ -83,7 +83,7 @@ class RtklibConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         defs = self._public_defines
-        defs["TRACE"] = bool(self.options.trace)
+        defs["TRACE"] = self.options.trace
         # TODO: add as options and set libraries correctly
         defs["LAPACK"] = False
         defs["MKL"] = False
@@ -93,12 +93,12 @@ class RtklibConan(ConanFile):
         defs["CPUTIME_IN_GPST"] = False  # cputime operated in gpst
         defs["RRCENA"] = False  # enable rrc correction
         defs["OUTSTAT_AMB"] = False  # output ambiguity parameters to solution status
-        defs["IERS_MODEL"] = False # use IERS tide model
+        defs["IERS_MODEL"] = False  # use IERS tide model
         for k, v in defs.items():
-            if v is True:
-                tc.preprocessor_definitions[k] = ""
-            elif v is not False:
+            if isinstance(v, str):
                 tc.preprocessor_definitions[k] = v
+            elif v:
+                tc.preprocessor_definitions[k] = ""
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -122,10 +122,10 @@ class RtklibConan(ConanFile):
         self.cpp_info.libs = ["rtklib"]
 
         for k, v in self._public_defines.items():
-            if v is True:
-                self.cpp_info.defines.append(k)
-            elif v is not False:
+            if isinstance(v, str):
                 self.cpp_info.defines.append(f"{k}={v}")
+            elif v:
+                self.cpp_info.defines.append(k)
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
