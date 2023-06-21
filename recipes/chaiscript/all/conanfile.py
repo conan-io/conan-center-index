@@ -38,6 +38,8 @@ class ChaiScriptConan(ConanFile):
             "gcc": "7",
             "clang": "7",
             "apple-clang": "10",
+            "Visual Studio": "15.0",
+            "msvc": "191",
         }
 
     def config_options(self):
