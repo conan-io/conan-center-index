@@ -89,5 +89,6 @@ class HiGHSConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
-        if is_msvc(self):
+        if is_msvc(self) and Version(self.version) < Version("1.5.3"):
+            # https://github.com/ERGO-Code/HiGHS/commit/7d784db29ab22003670b8b2eb494ab1a97f1815b
             self.cpp_info.defines.append("_ITERATOR_DEBUG_LEVEL=0")
