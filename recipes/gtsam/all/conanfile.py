@@ -152,10 +152,12 @@ class GtsamConan(ConanFile):
 
         check_min_vs(self, "191")
 
-        if "4.1" <= Version(self.version) < "4.2" and is_msvc(self) and self.options.shared:
+        if Version(self.version) >= "4.1" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(
-                f"{self.ref} does not support shared builds with MSVC. "
-                "See https://github.com/borglab/gtsam/issues/1087"
+                f"{self.ref} does not support shared builds with MSVC. See"
+                "https://github.com/borglab/gtsam/issues/1087"
+                if Version(self.version) < "4.2"
+                else "https://github.com/borglab/gtsam/issues/1541"
             )
 
     def source(self):
