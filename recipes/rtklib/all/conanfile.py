@@ -27,7 +27,6 @@ class RtklibConan(ConanFile):
         "enable_irnss": [True, False],
         "num_frequencies": ["ANY"],
         "num_ext_obs_codes": ["ANY"],
-        "use_iers_tide_model": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,7 +39,6 @@ class RtklibConan(ConanFile):
         "enable_irnss": True,
         "num_frequencies": 5,
         "num_ext_obs_codes": 3,
-        "use_iers_tide_model": False,
     }
 
     def export_sources(self):
@@ -86,7 +84,6 @@ class RtklibConan(ConanFile):
         tc = CMakeToolchain(self)
         defs = self._public_defines
         defs["TRACE"] = bool(self.options.trace)
-        defs["IERS_MODEL"] = bool(self.options.use_iers_tide_model)
         # TODO: add as options and set libraries correctly
         defs["LAPACK"] = False
         defs["MKL"] = False
@@ -96,6 +93,7 @@ class RtklibConan(ConanFile):
         defs["CPUTIME_IN_GPST"] = False  # cputime operated in gpst
         defs["RRCENA"] = False  # enable rrc correction
         defs["OUTSTAT_AMB"] = False  # output ambiguity parameters to solution status
+        defs["IERS_MODEL"] = False # use IERS tide model
         for k, v in defs.items():
             if v is True:
                 tc.preprocessor_definitions[k] = ""
