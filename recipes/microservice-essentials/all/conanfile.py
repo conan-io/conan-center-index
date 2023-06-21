@@ -36,6 +36,7 @@ class MicroserviceEssentials(ConanFile):
             "clang": "5",
             "apple-clang": "10",
             "Visual Studio": "15.7",
+            "msvc": "191",
         }
 
     def build_requirements(self):
