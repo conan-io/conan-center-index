@@ -182,7 +182,7 @@ class GetTextConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.configure("gettext-tools")
+        autotools.configure("gettext-runtime")
         autotools.make()
 
     def package(self):
