@@ -70,7 +70,9 @@ class SDLMixerConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sdl/2.26.1")
+        # SDL_mixer public header includes several public headers of SDL:
+        # SDL_stdinc.h, SDL_rwops.h, SDL_audio.h, SDL_endian.h and SDL_version.h
+        self.requires("sdl/2.26.1", transitive_headers=True)
         if self.options.flac:
             self.requires("flac/1.4.2")
         if self.options.mpg123:
