@@ -47,13 +47,12 @@ class SshtConan(ConanFile):
         tc.cache_variables["tests"] = False
         tc.cache_variables["python"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("fftw", "cmake_target_name", "FFTW3::FFTW3")
+        deps.generate()
 
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "src", "c", "CMakeLists.txt"),
-                        "FFTW3::FFTW3", "FFTW3::fftw3")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
