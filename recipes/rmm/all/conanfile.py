@@ -20,6 +20,7 @@ class RmmConan(ConanFile):
     topics = ("cuda", "memory-management", "memory-allocation", "rapids", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
