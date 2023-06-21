@@ -85,13 +85,15 @@ class RmmConan(ConanFile):
         )
 
     def _patch_sources(self):
-        # Add missing include in logger.hpp
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "include", "rmm", "logger.hpp"),
-            "#include <string>",
-            "#include <string>\n#include <array>",
-        )
+        if Version(self.version) < "23.08":
+            # https://github.com/rapidsai/rmm/pull/1295
+            # Add missing include in logger.hpp
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "include", "rmm", "logger.hpp"),
+                "#include <string>",
+                "#include <string>\n#include <array>",
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
