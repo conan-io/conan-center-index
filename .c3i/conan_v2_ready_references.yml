@@ -1,4 +1,5 @@
 required_for_references:
+- 7bitconf
 - 7bitdi
 - 7zip
 - aaf
@@ -148,6 +149,7 @@ required_for_references:
 - cppbenchmark
 - cppcheck
 - cppcodec
+- cppdap
 - cppfront
 - cppitertools
 - cpptoml
@@ -167,6 +169,7 @@ required_for_references:
 - csvmonkey
 - ctre
 - cubicinterpolation
+- cuda-api-wrappers
 - cwalk
 - cxxopts
 - cyclonedds
@@ -205,6 +208,7 @@ required_for_references:
 - eigen
 - elfio
 - embree3
+- emio
 - enet
 - entityx
 - enum-flags
@@ -450,6 +454,7 @@ required_for_references:
 - mbedtls
 - md4c
 - md4qt
+- mdnsresponder
 - mdspan
 - meson
 - mgs
@@ -462,6 +467,7 @@ required_for_references:
 - mongo-c-driver
 - mozilla-build
 - mozjpeg
+- mp-units
 - mpg123
 - ms-gsl
 - msgpack-c
@@ -484,6 +490,7 @@ required_for_references:
 - norm
 - nsync
 - nuraft
+- octomap
 - odbc
 - ogdf
 - ogg
@@ -603,6 +610,7 @@ required_for_references:
 - stb
 - strawberryperl
 - string-view-lite
+- strong_type
 - symengine
 - tabulate
 - taocpp-json
