@@ -70,8 +70,8 @@ class FollyConan(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.2.1", transitive_headers=True, transitive_libs=True)
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.4.0")
-        self.requires("libevent/2.1.12")
+        self.requires("glog/0.4.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("lz4/1.9.3")
         self.requires("snappy/1.1.9")
@@ -86,9 +86,9 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.6.2")
         if "2020.08.10.00" <= Version(self.version) < "2022.01.31.00":
-            self.requires("fmt/7.1.3")
+            self.requires("fmt/7.1.3", transitive_headers=True, transitive_libs=True)
         if Version(self.version) >= "2022.01.31.00":
-            self.requires("fmt/8.0.1")  # Folly bump fmt to 8.0.1 in v2022.01.31.00
+            self.requires("fmt/8.0.1", transitive_headers=True, transitive_libs=True)  # Folly bump fmt to 8.0.1 in v2022.01.31.00
 
     @property
     def _required_boost_components(self):
