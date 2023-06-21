@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
