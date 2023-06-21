@@ -36,7 +36,6 @@ class Sqlpp11Conan(ConanFile):
         }
 
     def layout(self):
-        # src_folder must use the same source folder name than the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
