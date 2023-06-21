@@ -118,6 +118,9 @@ class FmtConan(ConanFile):
 
         if self.options.header_only:
             self.cpp_info.components["_fmt"].defines.append("FMT_HEADER_ONLY=1")
+
+            self.cpp_info.libdirs = []
+            self.cpp_info.bindirs = []
         else:
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix
