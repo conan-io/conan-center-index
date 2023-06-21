@@ -119,11 +119,5 @@ class PackageConan(ConanFile):
             "urdfdom_world",
         ]
 
-        self.cpp_info.set_property("cmake_module_file_name", "urdfdom")
-        self.cpp_info.set_property("cmake_module_target_name", "urdfdom::urdfdom")
-        self.cpp_info.set_property("cmake_file_name", "urdfdom")
-        self.cpp_info.set_property("cmake_target_name", "urdfdom::urdfdom")
-        self.cpp_info.set_property("pkg_config_name", "urdfdom")
-
         if not self.options.shared:
             self.cpp_info.defines.append("URDFDOM_STATIC=1")
