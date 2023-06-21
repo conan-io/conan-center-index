@@ -67,7 +67,10 @@ class RtklibConan(ConanFile):
 
     @property
     def _public_defines(self):
+        # Values used in the public header
         # https://github.com/tomojitakasu/RTKLIB/blob/v2.4.3-b34/src/rtklib.h#L6-L15
+        # Default values are based on
+        # https://github.com/tomojitakasu/RTKLIB/blob/v2.4.3-b34/app/consapp/rnx2rtkp/gcc/makefile#L5
         defs = {}
         defs["ENAGLO"] = self.options.enable_glonass
         defs["ENAQZS"] = self.options.enable_qzss
