@@ -53,8 +53,8 @@ class SbpConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["libsbp_ENABLE_TESTS"] = True
-        tc.variables["libsbp_ENABLE_DOCS"] = True
+        tc.variables["libsbp_ENABLE_TESTS"] = False
+        tc.variables["libsbp_ENABLE_DOCS"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
