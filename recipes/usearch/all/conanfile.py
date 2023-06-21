@@ -3,21 +3,21 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 
 
-required_conan_version = '>=1.53.0'
+required_conan_version = ">=1.53.0"
 
 
 class USearchConan(ConanFile):
-    name = 'usearch'
-    license = 'Apache-2.0'
-    description = 'Smaller & Faster Single-File Vector Search Engine from Unum'
-    homepage = 'https://github.com/unum-cloud/usearch'
-    topics = ('search', 'vector', 'simd')
+    name = "usearch"
+    license = "Apache-2.0"
+    description = "Smaller & Faster Single-File Vector Search Engine from Unum"
+    homepage = "https://github.com/unum-cloud/usearch"
+    topics = ("search", "vector", "simd")
     settings = "os", "arch", "compiler", "build_type"
-    url = 'https://github.com/conan-io/conan-center-index'
+    url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
 
     # No settings/options are necessary, this is header only
@@ -28,7 +28,6 @@ class USearchConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
-
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -43,13 +42,16 @@ class USearchConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(
-            self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
-            pattern="*.hpp",
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
+        copy(
+            self,
+            pattern="index.hpp",
             dst=os.path.join(self.package_folder, "include/usearch"),
             src=os.path.join(self.source_folder, "include/usearch"),
         )
