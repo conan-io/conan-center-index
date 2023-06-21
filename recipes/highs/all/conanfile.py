@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 from os.path import join
 
 required_conan_version = ">=1.53.0"
@@ -76,7 +77,11 @@ class HiGHSConan(ConanFile):
             copy(self, pattern="*.dylib*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
         else:
             copy(self, pattern="*.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.lib", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+            if Version(self.version) >= Version("1.5.3"):
+                # https://github.com/ERGO-Code/HiGHS/commit/2c24b4cb6ecece98ed807dbeff9b27a2fbba8d37
+                copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
+            else:
+                copy(self, pattern="*.lib", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
