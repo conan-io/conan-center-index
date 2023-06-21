@@ -43,7 +43,7 @@ tasks:
       - name: "c3i/conan-v2/pr-merge"
         required_for_references: "conan_v2_ready_references.yml"
   build_single_reference:
-    package_id_cache_type: "artifactory"
+    package_id_cache_type: "none"
   cci:
     conan_v2_run_export: false
     write_comments: true
