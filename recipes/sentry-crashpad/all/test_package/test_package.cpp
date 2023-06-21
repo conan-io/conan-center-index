@@ -21,6 +21,9 @@ bool startCrashpad(const base::FilePath &db,
         db,
         db,
         url,
+#if HAS_PROXY
+        "",
+#endif
         annotations,
         arguments,
         true,
