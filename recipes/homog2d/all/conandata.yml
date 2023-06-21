@@ -1,4 +1,7 @@
 sources:
+  "2.10":
+    url: "https://github.com/skramm/homog2d/archive/refs/tags/v2.10.tar.gz"
+    sha256: "fb71f709d78c386188894b7f08a2c4690b45a5695b8d988e24efbe1216c53052"
   "2.9":
     url: "https://github.com/skramm/homog2d/archive/refs/tags/v2.9.tar.gz"
     sha256: "7784237154fd0c1beea5b1ed4349e910ce86ad463d21f4f21019f553834c1dad"

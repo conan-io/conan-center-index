@@ -13,7 +13,7 @@ class NormConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
     license = "NRL"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,7 +39,7 @@ class NormConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.10.3") # dependency of protolib actually
+        self.requires("libxml2/2.10.4") # dependency of protolib actually
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])

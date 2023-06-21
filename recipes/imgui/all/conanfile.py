@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake,  CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 import re
 
 required_conan_version = ">=1.53.0"
+
 
 class IMGUIConan(ConanFile):
     name = "imgui"
@@ -14,6 +15,7 @@ class IMGUIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ocornut/imgui"
     topics = ("gui", "graphical", "bloat-free")
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -61,9 +63,12 @@ class IMGUIConan(ConanFile):
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
+    def _match_docking_branch(self):
+        return re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+(?:\.\d+))\.docking', str(self.version))
+
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        m = re.match(r'cci\.\d{8}\+(?P<version>\d+\.\d+)\.docking', str(self.version))
+        m = self._match_docking_branch()
         version = Version(m.group('version')) if m else Version(self.version)
         backends_folder = os.path.join(
             self.source_folder,
@@ -76,6 +81,8 @@ class IMGUIConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.conf_info.define("user.imgui:with_docking", bool(self._match_docking_branch()))
+
         self.cpp_info.libs = ["imgui"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

@@ -1,0 +1,17 @@
+sources:
+  "0.2.34":
+    sha256: 726e3bc3cf571ac20e5c39b1f192f3793d24ebfdeaadcd210de74aa1ec100bb6
+    url: https://github.com/brechtsanders/xlsxio/archive/refs/tags/0.2.34.tar.gz
+  "0.2.33":
+    sha256: f221ffff7d9ba33c87411ba76b371cac202f25e07bf4e740828592e1c7e79263
+    url: https://github.com/brechtsanders/xlsxio/archive/refs/tags/0.2.33.tar.gz
+
+patches:
+  "0.2.34":
+    - patch_file: patches/0234_cmake.patch
+      patch_description: "conan build cmake support"
+      patch_type: "conan"
+  "0.2.33":
+    - patch_file: patches/0233_cmake.patch
+      patch_description: "conan build cmake support"
+      patch_type: "conan"

@@ -7,12 +7,10 @@ sources:
     url: https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.gz
 patches:
   "4.1.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.1.0-0001-windows-allow-mixed-shared-static.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.1.0-0002-windows-header-dll.patch"
+    - patch_file: "patches/4.1.0-0002-windows-header-dll.patch"
+      patch_description: "Windows header DLL"
+      patch_type: "portability"
   "4.0.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.0.2-0001-windows-allow-mixed-shared-static.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.0.2-0002-windows-header-dll.patch"
+    - patch_file: "patches/4.0.2-0002-windows-header-dll.patch"
+      patch_description: "Windows header DLL"
+      patch_type: "portability"
