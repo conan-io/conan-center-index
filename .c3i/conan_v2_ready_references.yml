@@ -1,9 +1,11 @@
 required_for_references:
+- 7bitconf
 - 7bitdi
 - 7zip
 - aaf
 - aaplus
 - abseil
+- absent
 - access_private
 - acl
 - ada
@@ -45,6 +47,7 @@ required_for_references:
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-io
 - aws-c-sdkutils
 - aws-checksums
 - b2
@@ -54,6 +57,7 @@ required_for_references:
 - bacnet-stack
 - baical-p7
 - base64
+- bazel
 - bdwgc
 - bear
 - benchmark
@@ -145,6 +149,7 @@ required_for_references:
 - cppbenchmark
 - cppcheck
 - cppcodec
+- cppdap
 - cppfront
 - cppitertools
 - cpptoml
@@ -164,6 +169,7 @@ required_for_references:
 - csvmonkey
 - ctre
 - cubicinterpolation
+- cuda-api-wrappers
 - cwalk
 - cxxopts
 - cyclonedds
@@ -202,6 +208,7 @@ required_for_references:
 - eigen
 - elfio
 - embree3
+- emio
 - enet
 - entityx
 - enum-flags
@@ -228,6 +235,7 @@ required_for_references:
 - flatbuffers
 - flex
 - fmt
+- fmtlog
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -243,16 +251,19 @@ required_for_references:
 - gdbm
 - gdcm
 - gdk-pixbuf
+- gegles-spdlog_setup
 - gemmlowp
 - geos
 - getopt-for-visual-studio
 - gettext
 - gflags
+- gfortran
 - ghc-filesystem
 - giflib
 - ginkgo
 - gklib
 - glad
+- glaze
 - glfw
 - gli
 - glib
@@ -288,6 +299,7 @@ required_for_references:
 - homog2d
 - http_parser
 - icu
+- id3v2lib
 - iir1
 - im95able-rea
 - imake
@@ -358,6 +370,7 @@ required_for_references:
 - liblzf
 - libmad
 - libmediainfo
+- libmemcached
 - libmikmod
 - libmodbus
 - libmodplug
@@ -398,6 +411,7 @@ required_for_references:
 - libtar
 - libtasn1
 - libtiff
+- libtins
 - libtool
 - libtorrent
 - libudev
@@ -409,6 +423,7 @@ required_for_references:
 - libverto
 - libvips
 - libvpx
+- libwebm
 - libwebp
 - libwebsockets
 - libx264
@@ -439,6 +454,7 @@ required_for_references:
 - mbedtls
 - md4c
 - md4qt
+- mdnsresponder
 - mdspan
 - meson
 - mgs
@@ -449,7 +465,9 @@ required_for_references:
 - minizip
 - minizip-ng
 - mongo-c-driver
+- mozilla-build
 - mozjpeg
+- mp-units
 - mpg123
 - ms-gsl
 - msgpack-c
@@ -459,6 +477,7 @@ required_for_references:
 - namedtype
 - nameof
 - nanoflann
+- nanomsg
 - nanorange
 - nas
 - nasm
@@ -471,6 +490,7 @@ required_for_references:
 - norm
 - nsync
 - nuraft
+- octomap
 - odbc
 - ogdf
 - ogg
@@ -590,6 +610,7 @@ required_for_references:
 - stb
 - strawberryperl
 - string-view-lite
+- strong_type
 - symengine
 - tabulate
 - taocpp-json
@@ -617,6 +638,7 @@ required_for_references:
 - toml11
 - trantor
 - turtle
+- tz
 - uni-algo
 - unicorn
 - univalue
