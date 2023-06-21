@@ -1,0 +1,18 @@
+# Based largely on https://github.com/tomojitakasu/RTKLIB/blob/v2.4.3-b34/app/consapp/rnx2rtkp/gcc/makefile
+cmake_minimum_required(VERSION 3.15)
+project(rtklib C)
+
+if (NOT MSVC)
+    add_compile_options(-Wall -O3 -ansi -pedantic -Wno-unused-but-set-variable)
+else()
+    add_compile_options(/W4 /O2 /D_CRT_SECURE_NO_WARNINGS)
+endif()
+
+file(GLOB_RECURSE RTKLIB_SOURCES "src/*.c")
+
+add_library(rtklib ${RTKLIB_SOURCES})
+target_include_directories(rtklib PUBLIC src)
+
+include(GNUInstallDirs)
+install(TARGETS rtklib)
+install(FILES src/rtklib.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
