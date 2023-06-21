@@ -60,7 +60,7 @@ class RmmConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options["thrust"].get_safe("backend") != "cuda":
+        if "backend" not in self.options["thrust"] or self.options["thrust"].backend != "cuda":
             self.output.warning(
                 "RMM requires the CUDA backend to be enabled in Thrust by setting thrust/*:backend=cuda."
             )
