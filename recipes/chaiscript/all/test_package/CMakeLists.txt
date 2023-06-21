@@ -5,4 +5,4 @@ find_package(chaiscript REQUIRED CONFIG)
 
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
 target_link_libraries(${CMAKE_PROJECT_NAME} chaiscript::chaiscript)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
