@@ -63,12 +63,9 @@ class Sqlpp11Conan(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "Sqlpp11")
-        self.cpp_info.set_property("cmake_target_name", "Sqlpp11::Sqlpp11")
+        self.cpp_info.set_property("cmake_target_name", "sqlpp11::sqlpp11")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Sqlpp11"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Sqlpp11"
-
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
