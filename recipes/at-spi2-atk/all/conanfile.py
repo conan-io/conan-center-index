@@ -1,5 +1,8 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rmdir
+
+from conans import Meson
 import os
 
 required_conan_version = ">=1.33.0"
@@ -21,6 +24,7 @@ class AtSPI2AtkConan(ConanFile):
         "shared": False,
         "fPIC": True,
         }
+    deprecated = "at-spi2-core"
 
     _meson = None
 
@@ -48,25 +52,21 @@ class AtSPI2AtkConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.shared:
-            self.options["at-spi2-core"].shared = True
-            self.options["atk"].shared = True
-            self.options["glib"].shared = True
 
 
     def build_requirements(self):
-        self.build_requires("meson/0.62.2")
-        self.build_requires('pkgconf/1.7.4')
+        self.build_requires("meson/1.1.1")
+        self.build_requires('pkgconf/1.9.3')
 
     def requirements(self):
         self.requires("at-spi2-core/2.44.1")
         self.requires("atk/2.38.0")
-        self.requires("glib/2.73.0")
-        self.requires("libxml2/2.9.14")
+        self.requires("glib/2.76.3")
+        self.requires("libxml2/2.11.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version],
+            strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         if self._meson:
@@ -85,14 +85,9 @@ class AtSPI2AtkConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        rmdir(self, os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ['atk-bridge-2.0']
         self.cpp_info.includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.names['pkg_config'] = 'atk-bridge-2.0'
-
-    def package_id(self):
-        self.info.requires["at-spi2-core"].full_package_mode()
-        self.info.requires["atk"].full_package_mode()
-        self.info.requires["glib"].full_package_mode()
