@@ -67,6 +67,9 @@ class RmmConan(ConanFile):
             )
 
     def _write_version_header(self):
+        # Workaround for the `rapids_cmake_write_version_file(include/rmm/version_config.hpp)` CMakeLists.txt step
+        # https://github.com/rapidsai/rapids-cmake/blob/branch-23.08/rapids-cmake/cmake/write_version_file.cmake
+        # https://github.com/rapidsai/rapids-cmake/blob/branch-23.08/rapids-cmake/cmake/template/version.hpp.in
         major, minor, patch = self.version.split(".")[:3]
         header_path = Path(self.source_folder) / "include" / "rmm" / "version_config.hpp"
         header_path.parent.mkdir(parents=True, exist_ok=True)
