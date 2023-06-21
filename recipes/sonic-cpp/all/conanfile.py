@@ -37,7 +37,7 @@ class SonicCppConan(ConanFile):
         }
 
     def requirements(self):
-        if valid_min_cppstd(self, 17):
+        if valid_max_cppstd(self, 17):
             self.requires("string-view-lite/1.7.0")
 
     def package_id(self):
