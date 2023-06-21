@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibsmackerConan(ConanFile):
@@ -19,6 +18,7 @@ class LibsmackerConan(ConanFile):
     license = "LGPL-2.1-or-later"
     description = "A C library for decoding .smk Smacker Video files"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -57,25 +57,21 @@ class LibsmackerConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
         tc = AutotoolsToolchain(self)
-        if (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-           (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180"):
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.vars(self).save_script("conanbuild_libsmacker_msvc")
+        tc.generate(env)
 
     def build(self):
         apply_conandata_patches(self)
@@ -87,8 +83,7 @@ class LibsmackerConan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
         if is_msvc(self) and self.options.shared:

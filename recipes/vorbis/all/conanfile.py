@@ -45,7 +45,7 @@ class VorbisConan(ConanFile):
             pass
 
     def requirements(self):
-        self.requires("ogg/1.3.5", transitive_headers=True)
+        self.requires("ogg/1.3.5", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")

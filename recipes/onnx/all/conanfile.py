@@ -26,11 +26,19 @@ class OnnxConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "disable_static_registration": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "disable_static_registration": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "1.13.0" and is_msvc(self):
+            return 17
+        return 11
 
     @property
     def _protobuf_version(self):
@@ -43,6 +51,8 @@ class OnnxConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version < "1.9.0":
+            del self.options.disable_static_registration
 
     def configure(self):
         if self.options.shared:
@@ -56,7 +66,7 @@ class OnnxConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
@@ -82,12 +92,15 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_COVERAGE"] = False
         tc.variables["ONNX_BUILD_TESTS"] = False
         tc.variables["ONNX_USE_LITE_PROTO"] = False
-        tc.variables["ONNXIFI_ENABLE_EXT"] = False
         tc.variables["ONNX_ML"] = True
-        tc.variables["ONNXIFI_DUMMY_BACKEND"] = False
+        if Version(self.version) < "1.13.0":
+            tc.variables["ONNXIFI_ENABLE_EXT"] = False
+            tc.variables["ONNXIFI_DUMMY_BACKEND"] = False
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        if self.version >= "1.9.0":
+            tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -140,25 +153,30 @@ class OnnxConan(ConanFile):
                 "libs": ["onnx_proto"],
                 "defines": ["ONNX_NAMESPACE=onnx", "ONNX_ML=1"],
                 "requires": ["protobuf::libprotobuf"]
-            },
-            "onnxifi": {
-                "target": "onnxifi",
-                "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["dl"])],
-            },
-            "onnxifi_dummy": {
-                "target": "onnxifi_dummy",
-                "libs": ["onnxifi_dummy"],
-                "requires": ["onnxifi"]
-            },
-            "onnxifi_loader": {
-                "target": "onnxifi_loader",
-                "libs": ["onnxifi_loader"],
-                "requires": ["onnxifi"]
-            },
-            "onnxifi_wrapper": {
-                "target": "onnxifi_wrapper"
             }
         }
+        if Version(self.version) < "1.13.0":
+            components.update(
+                {
+                    "onnxifi": {
+                        "target": "onnxifi",
+                        "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["dl"])],
+                    },
+                    "onnxifi_dummy": {
+                        "target": "onnxifi_dummy",
+                        "libs": ["onnxifi_dummy"],
+                        "requires": ["onnxifi"]
+                    },
+                    "onnxifi_loader": {
+                        "target": "onnxifi_loader",
+                        "libs": ["onnxifi_loader"],
+                        "requires": ["onnxifi"]
+                    },
+                    "onnxifi_wrapper": {
+                        "target": "onnxifi_wrapper"
+                    }
+                }
+            )
         if Version(self.version) >= "1.11.0":
             components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
         return components

@@ -5,17 +5,18 @@ from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibYAMLConan(ConanFile):
     name = "libyaml"
     description = "LibYAML is a YAML parser and emitter library."
-    topics = ("libyaml", "yaml", "parser", "emitter")
+    topics = ("yaml", "parser", "emitter")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yaml/libyaml"
     license = "MIT"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,29 +33,20 @@ class LibYAMLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["INSTALL_CMAKE_DIR"] = 'lib/cmake/libyaml'
+        tc.variables["INSTALL_CMAKE_DIR"] = "lib/cmake/libyaml"
         tc.variables["YAML_STATIC_LIB_NAME"] = "yaml"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):

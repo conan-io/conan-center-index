@@ -57,7 +57,7 @@ class ConcurrencppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.options.shared and is_msvc(self):
+        if Version(self.version) <= "0.1.5" and self.options.shared and is_msvc(self):
             # see https://github.com/David-Haim/concurrencpp/issues/75
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds with Visual Studio")
         if self.settings.compiler == "gcc":

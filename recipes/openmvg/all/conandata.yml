@@ -1,0 +1,22 @@
+sources:
+  "2.0":
+    url: "https://github.com/openMVG/openMVG/archive/refs/tags/v2.0.tar.gz"
+    sha256: "950da7d6fc370cc99ad29092fd3b46196f782af2f905e475a7262ceb96170618"
+patches:
+  "2.0":
+    - patch_file: "patches/2.0-0001-robust-dependencies.patch"
+      patch_description: "Robust discovery of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/2.0-0002-dont-force-c++11.patch"
+      patch_description: "Allow newer C++ standard than C++11"
+      patch_type: "conan"
+    - patch_file: "patches/2.0-0003-fix-non-x86.patch"
+      patch_description: "Fix build for non-x86 arch"
+      patch_type: "portability"
+      patch_source: "https://github.com/openMVG/openMVG/pull/1979"
+    - patch_file: "patches/2.0-0004-no-auto-simd-optimization.patch"
+      patch_description: "No fragile babysitting of optimization flags"
+      patch_type: "conan"
+    - patch_file: "patches/2.0-0005-msvc-bigobj.patch"
+      patch_description: "Add /bigobj for openMVG_multiview compilation"
+      patch_type: "portability"

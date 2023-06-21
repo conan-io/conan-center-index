@@ -41,10 +41,10 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared or self.options.header_only:
+        if self.options.get_safe("shared") or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
-            del self.options.shared
+            self.options.rm_safe("shared")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -115,7 +115,11 @@ class SpdlogConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+            copy(self,
+                 src=os.path.join(self.source_folder, "include"),
+                 pattern="*.h", dst=os.path.join(self.package_folder, "include"),
+                 # Unvendor bundled dependencies https://github.com/gabime/spdlog/commit/18495bf25dad3a4e8c2fe3777a5f79acecde27e3
+                 excludes=("spdlog/fmt/bundled/*"))
         else:
             cmake = CMake(self)
             cmake.install()

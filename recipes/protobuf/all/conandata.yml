@@ -21,13 +21,46 @@ sources:
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.17.1.tar.gz"
     sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"
 patches:
+  "3.21.9":
+    - patch_file: "patches/protobuf-3.21.9-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
+  "3.21.4":
+    - patch_file: "patches/protobuf-3.21.4-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
+  "3.20.0":
+    - patch_file: "patches/protobuf-3.20.0-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
   "3.19.6":
     - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
       patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
       patch_type: "portability"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/9437"
+    - patch_file: "patches/protobuf-3.19.6-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
   "3.19.4":
     - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
       patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
       patch_type: "portability"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/9437"
+    - patch_file: "patches/protobuf-3.19.4-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
+  "3.18.1":
+    - patch_file: "patches/protobuf-3.18.1-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
+  "3.17.1":
+    - patch_file: "patches/protobuf-3.17.1-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"

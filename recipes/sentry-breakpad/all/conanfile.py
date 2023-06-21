@@ -18,6 +18,7 @@ class SentryBreakpadConan(ConanFile):
     license = "Apache-2.0"
     topics = ("breakpad", "error-reporting", "crash-reporting")
     provides = "breakpad"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -52,7 +53,9 @@ class SentryBreakpadConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.requires("linux-syscall-support/cci.20200813")
+            # linux-syscal-support is a public dependency
+            # see https://github.com/conan-io/conan-center-index/pull/16752#issuecomment-1487241864 
+            self.requires("linux-syscall-support/cci.20200813", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -62,13 +65,6 @@ class SentryBreakpadConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-
-        if Version(self.version) <= "0.4.1":
-            if self.settings.os == "Android" or is_apple_os(self):
-                raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
-        if Version(self.version) <= "0.2.6":
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])

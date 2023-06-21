@@ -1,24 +1,24 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class VkBootstrapConan(ConanFile):
     name = "vk-bootstrap"
     description = "Vulkan bootstraping library."
     license = "MIT"
-    topics = ("vk-bootstrap", "vulkan")
+    topics = ("vulkan", "bootstrap", "setup")
     homepage = "https://github.com/charles-lunarg/vk-bootstrap"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,7 +39,7 @@ class VkBootstrapConan(ConanFile):
             "gcc": "5",
             "Visual Studio": "15",
             "msvc": "191",
-            "clang": "3.7" if tools_legacy.stdcpp_library(self) == "stdc++" else "6",
+            "clang": "3.7" if stdcpp_library(self) == "stdc++" else "6",
             "apple-clang": "10",
         }
 
@@ -52,19 +52,19 @@ class VkBootstrapConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("vulkan-headers/1.3.224.0")
+        if Version(self.version) < "0.7":
+            self.requires("vulkan-headers/1.3.236.0", transitive_headers=True)
+        else:
+            self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
@@ -73,18 +73,17 @@ class VkBootstrapConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

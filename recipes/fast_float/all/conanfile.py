@@ -10,10 +10,11 @@ class FastFloatConan(ConanFile):
     name = "fast_float"
     description = "Fast and exact implementation of the C++ from_chars " \
                   "functions for float and double types."
-    license = ("Apache-2.0", "MIT")
-    topics = ("fast_float", "conversion", "from_chars", "header-only")
+    license = ("Apache-2.0", "MIT", "BSL-1.0")
+    topics = ("conversion", "from_chars", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fastfloat/fast_float"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 

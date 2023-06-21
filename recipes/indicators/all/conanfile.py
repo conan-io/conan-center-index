@@ -11,12 +11,12 @@ required_conan_version = ">=1.53.0"
 
 class IndicatorsConan(ConanFile):
     name = "indicators"
-    homepage = "https://github.com/p-ranav/indicators"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Activity Indicators for Modern C++"
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/p-ranav/indicators"
+    topics = ("activity", "indicator", "loading", "spinner", "animation", "progress", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    topics = ("indicators", "activity", "indicator", "loading", "spinner", "animation", "progress")
     no_copy_source = True
 
     def layout(self):
@@ -47,5 +47,8 @@ class IndicatorsConan(ConanFile):
         copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")

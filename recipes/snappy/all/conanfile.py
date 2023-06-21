@@ -53,6 +53,8 @@ class SnappyConan(ConanFile):
         tc.variables["SNAPPY_BUILD_TESTS"] = False
         if Version(self.version) >= "1.1.8":
             tc.variables["SNAPPY_FUZZING_BUILD"] = False
+            # Don't use these avx options. These are useless.
+            # https://github.com/conan-io/conan-center-index/pull/16495
             tc.variables["SNAPPY_REQUIRE_AVX"] = False
             tc.variables["SNAPPY_REQUIRE_AVX2"] = False
             tc.variables["SNAPPY_INSTALL"] = True

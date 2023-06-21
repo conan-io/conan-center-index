@@ -56,7 +56,7 @@ class CgnsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/1.13.1")
+            self.requires("hdf5/1.14.0")
 
     def validate(self):
         if self.info.options.parallel and not (self.info.options.with_hdf5 and self.dependencies["hdf5"].options.parallel):

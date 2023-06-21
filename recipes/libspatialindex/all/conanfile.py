@@ -16,7 +16,7 @@ class LibspatialindexConan(ConanFile):
     homepage = "https://github.com/libspatialindex/libspatialindex"
     url = "https://github.com/conan-io/conan-center-index"
 
-    package_type = "explicit"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
