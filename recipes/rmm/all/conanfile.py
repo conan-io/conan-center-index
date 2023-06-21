@@ -43,12 +43,6 @@ class RmmConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def configure(self):
-        # Thrust needs to use CUDA as the backend for RMM.
-        # Disabled for ConanCenter CI.
-        # self.options["thrust"].backend = "cuda"
-        pass
-
     def requirements(self):
         self.requires("thrust/1.17.2")
         self.requires("spdlog/1.11.0")
@@ -64,6 +58,11 @@ class RmmConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if self.options["thrust"].get_safe("backend") != "cuda":
+            self.output.warning(
+                "RMM requires the CUDA backend to be enabled in Thrust by setting thrust/*:backend=cuda."
             )
 
     def _write_version_header(self):
