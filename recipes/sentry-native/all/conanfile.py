@@ -68,6 +68,9 @@ class SentryNativeConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.settings.os != "Windows" or Version(self.version) < "0.6.0":
+            del self.options.wer
+
         # Configure default transport
         if self.settings.os == "Windows":
             self.options.transport = "winhttp"
@@ -160,7 +163,8 @@ class SentryNativeConan(ConanFile):
         tc.variables["SENTRY_TRANSPORT"] = self.options.transport
         tc.variables["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["SENTRY_INTEGRATION_QT"] = self.options.qt
-        tc.variables["CRASHPAD_WER_ENABLED"] = self.options.wer
+        if self.options.get_safe("wer", False):
+            tc.variables["CRASHPAD_WER_ENABLED"] = True
         tc.generate()
         CMakeDeps(self).generate()
         if self.options.backend == "breakpad":

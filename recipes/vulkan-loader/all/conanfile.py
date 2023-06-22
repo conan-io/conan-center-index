@@ -60,7 +60,11 @@ class VulkanLoaderConan(ConanFile):
             del self.options.with_wsi_directfb
 
     def configure(self):
-        if self.options.shared:
+        if not is_apple_os(self):
+            # static builds are not supported
+            self.options.rm_safe("shared")
+            self.package_type = "shared-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
@@ -79,8 +83,6 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_directfb"):
             # TODO: directfb package
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
-        if not is_apple_os(self) and not self.options.shared:
-            raise ConanInvalidConfiguration(f"Static builds are not supported on {self.settings.os}")
         # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
         check_min_vs(self, "191")
         # TODO: to replace by some version range check

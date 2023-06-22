@@ -1,14 +1,13 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class LeptonicaConan(ConanFile):
@@ -16,17 +15,18 @@ class LeptonicaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Library containing software that is broadly useful for " \
                   "image processing and image analysis applications."
-    topics = ("leptonica", "image", "multimedia", "format", "graphics")
+    topics = ("image", "multimedia", "format", "graphics")
     homepage = "http://leptonica.org"
     license = "BSD 2-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_gif": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_openjpeg": [True, False],
@@ -52,12 +52,14 @@ class LeptonicaConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.with_tiff:
-            self.options["libtiff"].jpeg = self.options.with_jpeg
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if bool(self.options.with_jpeg):
+            self.options["*"].jpeg = self.options.with_jpeg
+            self.options["*"].with_jpeg = self.options.with_jpeg
+            self.options["*"].with_libjpeg = self.options.with_jpeg
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,8 +71,10 @@ class LeptonicaConan(ConanFile):
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
-        if self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.5")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.with_png:
             self.requires("libpng/1.6.39")
         if self.options.with_tiff:
@@ -78,20 +82,15 @@ class LeptonicaConan(ConanFile):
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
-
-    def validate(self):
-        libtiff = self.dependencies["libtiff"]
-        if libtiff.options.jpeg != self.info.options.with_jpeg:
-            raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg.")
+            self.requires("libwebp/1.3.0")
 
     def build_requirements(self):
         if self.options.with_webp or self.options.with_openjpeg:
-            self.tool_requires("pkgconf/1.9.3")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -110,10 +109,6 @@ class LeptonicaConan(ConanFile):
             pc.generate()
             env = VirtualBuildEnv(self)
             env.generate()
-            # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            env.vars(self).save_script("conanbuildenv_pkg_config_path")
 
     def _patch_sources(self):
         apply_conandata_patches(self)

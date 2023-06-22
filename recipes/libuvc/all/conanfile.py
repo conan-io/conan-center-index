@@ -5,6 +5,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -17,7 +18,7 @@ class LibuvcConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libuvc/libuvc"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -59,7 +60,7 @@ class LibuvcConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
 
@@ -87,6 +88,9 @@ class LibuvcConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_BUILD_TARGET"] = "Shared" if self.options.shared else "Static"
         tc.variables["LIBUVC_WITH_JPEG"] = bool(self.options.with_jpeg)
+        if Version(self.version) >= "0.0.7":
+            tc.variables["BUILD_EXAMPLE"] = False
+
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
