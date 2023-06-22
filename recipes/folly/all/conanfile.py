@@ -73,10 +73,10 @@ class FollyConan(ConanFile):
         self.requires("glog/0.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("lz4/1.9.3")
+        self.requires("lz4/1.9.3", transitive_libs=True)
         self.requires("snappy/1.1.9")
         self.requires("zlib/1.2.13")
-        self.requires("zstd/1.5.2")
+        self.requires("zstd/1.5.2", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/20191104")
         self.requires("libsodium/1.0.18")
