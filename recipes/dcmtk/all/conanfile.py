@@ -139,7 +139,8 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             tc.variables["WITH_ZLIBINC"] = self.path_cleanup(self.dependencies["zlib"].package_folder)
 
-        tc.variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
+        tc.cache_variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
+
         tc.variables["DCMTK_ENABLE_CXX11"] = True
 
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
@@ -294,7 +295,7 @@ class DCMTKConan(ConanFile):
 
         def register_components(components):
             for target_lib, requires in components.items():
-                self.cpp_info.components[target_lib].set_property("cmake_target_name", target_lib)
+                self.cpp_info.components[target_lib].set_property("cmake_target_name", f"DCMTK::{target_lib}")
                 self.cpp_info.components[target_lib].libs = [target_lib]
                 self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
                 self.cpp_info.components[target_lib].requires = requires
