@@ -46,7 +46,7 @@ index aa846f1..79fac88 100644
          endif()
      else()
 diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
-index 86f6668..cf441c2 100644
+index 9e39030..22403bf 100644
 --- a/blosc/CMakeLists.txt
 +++ b/blosc/CMakeLists.txt
 @@ -18,8 +18,8 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -71,8 +71,8 @@ index 86f6668..cf441c2 100644
      else()
          set(ZSTD_LOCAL_DIR ${INTERNAL_LIBS}/zstd-1.5.5)
          set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZSTD_LOCAL_DIR}
-@@ -99,8 +99,8 @@ else()
-     endif()
+@@ -100,8 +100,8 @@ else()
+     set(LIBS ${LIBS} ${CMAKE_DL_LIBS})
  endif()
  
 -if(LZ4_FOUND)
@@ -82,7 +82,7 @@ index 86f6668..cf441c2 100644
  else()
      file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
      set(SOURCES ${SOURCES} ${LZ4_FILES})
-@@ -108,10 +108,10 @@ else()
+@@ -109,10 +109,10 @@ else()
  endif()
  
  if(NOT DEACTIVATE_ZLIB)
@@ -96,14 +96,14 @@ index 86f6668..cf441c2 100644
      else()
          set(ZLIB_LOCAL_DIR ${INTERNAL_LIBS}/${ZLIB_NG_DIR})
          file(GLOB ZLIB_FILES ${ZLIB_LOCAL_DIR}/*.c)
-@@ -121,8 +121,8 @@ if(NOT DEACTIVATE_ZLIB)
+@@ -122,8 +122,8 @@ if(NOT DEACTIVATE_ZLIB)
  endif()
  
  if(NOT DEACTIVATE_ZSTD)
 -    if(ZSTD_FOUND)
 -        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
 +    if(zstd_FOUND)
-+        set(LIBS ${LIBS} ${zstd_LIBRARIES})
++        set(LIBS ${LIBS} ${zstd_LIBRARY})
      else()
          # Enable assembly code only when not using MSVC *and* x86 is there
          if((NOT MSVC) AND COMPILER_SUPPORT_SSE2)   # if SSE2 is here, this is an x86 platform

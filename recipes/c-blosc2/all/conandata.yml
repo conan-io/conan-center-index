@@ -1,7 +1,7 @@
 sources:
-  "2.9.2":
-    url: "https://github.com/Blosc/c-blosc2/archive/v2.9.2.tar.gz"
-    sha256: "5d1b7269f2f9e4ed521a980bdb7e3895e77358723af06b7d269f65686efe9732"
+  "2.9.3":
+    url: "https://github.com/Blosc/c-blosc2/archive/v2.9.3.tar.gz"
+    sha256: "1f36b7d79d973505582b9a804803b640dcc0425af3d5e676070847ac4eb38176"
   "2.8.0":
     url: "https://github.com/Blosc/c-blosc2/archive/v2.8.0.tar.gz"
     sha256: "be608cdf68deb02e0d3ee62e183942a0fe5d5d3185375b9b6566e2ae35a9bdbd"
@@ -24,8 +24,8 @@ sources:
     url: "https://github.com/Blosc/c-blosc2/archive/refs/tags/v2.2.0.tar.gz"
     sha256: "66f9977de26d6bc9ea1c0e623d873c3225e4fff709aa09b3335fd09d41d57c0e"
 patches:
-  "2.9.2":
-    - patch_file: "patches/2.9.2-0001-fix-cmake.patch"
+  "2.9.3":
+    - patch_file: "patches/2.9.3-0001-fix-cmake.patch"
       patch_description: "use cci package"
       patch_type: "conan"
   "2.8.0":
