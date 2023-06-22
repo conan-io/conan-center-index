@@ -2,3 +2,6 @@ sources:
   "1.81.0":
     url: "https://github.com/boostorg/leaf/archive/refs/tags/1.81.0.tar.gz"
     sha256: "6a2bfa8727891e844f1f95c9c68af192f4c5f53b1707acce54290932118b48c0"
+  "1.82.0":
+    url: "https://github.com/boostorg/leaf/archive/refs/tags/boost-1.82.0.tar.gz"
+    sha256: "0917b22b60a2980bf5e33a393a8545dc6a4a7006c8ca8b78280d1cdb965d75f3"
