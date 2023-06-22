@@ -1,0 +1,5 @@
+sources:
+  "0.2.0":
+    source:
+      url: "https://github.com/linksplatform/Ranges/releases/download/cpp_0.2.0/platform.ranges_0.2.0.zip"
+      sha256: "84576CDC59A460A3F132A7E6E87D2F52131D6A3B53B97BCB1D335252F65267B7"
