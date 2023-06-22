@@ -73,7 +73,3 @@ class EnttConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "EnTT::EnTT")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "EnTT"
-        self.cpp_info.names["cmake_find_package_multi"] = "EnTT"
