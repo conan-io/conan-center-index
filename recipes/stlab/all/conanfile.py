@@ -104,12 +104,14 @@ class Stlab(ConanFile):
         else:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if not minimum_version:
-                self.output.warn(f"{self.ref} requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+                self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. "
+                                 f"Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
             elif Version(str(self.settings.compiler.version)) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++20, which your compiler does not support.")
-            if self.info.settings.compiler == "clang" and str(self.info.settings.compiler.version) in ("13", "14"):
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, "
+                                                f"which your compiler does not support.")
+            if self.settings.compiler == "clang" and str(self.settings.compiler.version) in ("13", "14"):
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} currently does not work with Clang {self.info.settings.compiler.version} on CCI, it enters "
+                    f"{self.ref} currently does not work with Clang {self.settings.compiler.version} on CCI, it enters "
                     f"in an infinite build loop (smells like a compiler bug). Contributions are welcomed!")
 
     def validate(self):
