@@ -1,0 +1,4 @@
+sources:
+  "1.4":
+    url: "https://github.com/intel/intel-ipsec-mb/archive/refs/tags/v1.4.tar.gz"
+    sha256: "b441b3ecf0a9fe69ff675f2eb9fe4d1304814558a8f15f5617638ddc99e05873"
