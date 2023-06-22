@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.4
+  version: 2.0.6
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -11,15 +11,10 @@ artifactory:
   pull-request_repo_prefix: "c3i_PR-v2"
   pull-request_permission: "c3i-pr"
   logs_repo: "misc-v2"
-  # cache_repo: "cache"
 
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
-
-#slack:
-#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
-#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
 
 # Things related to Jenkins jobs:
 tasks:
@@ -29,6 +24,13 @@ tasks:
   access_request:
       request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
       max_inactivity_days: 0
+  build_single_reference:
+    package_id_cache_type: "none"
+    timeout_minutes: 600
+    large_timeout_minutes: 800
+    large_timeout_references:
+      - boost
+      - qt
   cci:
     conan_v2_run_export: false
     detailed_status_checks: false
@@ -120,7 +122,7 @@ node_labels:
   Windows:
     x86_64:
       "msvc":
-        default: "windows20221212"
+        default: "windows20230531"
   Macos:
     x86_64:
       "apple-clang":
