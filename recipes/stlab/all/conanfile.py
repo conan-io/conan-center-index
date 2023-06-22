@@ -96,7 +96,7 @@ class Stlab(ConanFile):
             # is not complete.
             raise ConanInvalidConfiguration(
                 f"Compiler Apple-Clang < 12 versions do not correctly support std::optional or std::variant, "
-                f"so we will use boost::optional and boost::variant instead. Try -o {self.name}:with_boost=True.")
+                f"so we will use boost::optional and boost::variant instead. Try -o {self.ref}:with_boost=True.")
 
     def _validate_min_compiler_version(self):
         if is_msvc(self):
@@ -104,9 +104,9 @@ class Stlab(ConanFile):
         else:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if not minimum_version:
-                self.output.warn(f"{self.name} {self.version} requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+                self.output.warn(f"{self.ref} requires C++20. Your compiler is unknown. Assuming it supports C++20.")
             elif Version(str(self.settings.compiler.version)) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.name} {self.version} requires C++20, which your compiler does not support.")
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++20, which your compiler does not support.")
             if self.info.settings.compiler == "clang" and str(self.info.settings.compiler.version) in ("13", "14"):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} currently does not work with Clang {self.info.settings.compiler.version} on CCI, it enters "
