@@ -18,6 +18,7 @@ class OpusFileConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/opusfile"
     license = "BSD-3-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -55,10 +56,10 @@ class OpusFileConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ogg/1.3.5")
-        self.requires("opus/1.3.1")
+        self.requires("ogg/1.3.5", transitive_headers=True)
+        self.requires("opus/1.3.1", transitive_headers=True)
         if self.options.http:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
