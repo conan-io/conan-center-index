@@ -1,3 +1,4 @@
+import glob
 import os
 
 from conan import ConanFile
@@ -214,8 +215,6 @@ def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
     if not conanfile.settings.get_safe("compiler.runtime"):
         return
-    from conan.tools.files import rename
-    import glob
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:
         for ext in [".dll.a", ".dll.lib", ".a"]:
