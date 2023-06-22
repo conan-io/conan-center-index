@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, chdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -76,21 +75,10 @@ class UtilLinuxLibuuidConan(ConanFile):
             # Required because libintl.{a,dylib} is not distributed via libc on Macos
             self.requires("libgettext/0.21")
 
-    def build_requirements(self):
-        self.tool_requires("libtool/2.4.7")
-        self.tool_requires("m4/1.4.19")
-        self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("bison/3.8.2")
-        self.tool_requires("autoconf/2.71")
-        self.tool_requires("automake/1.16.5")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-all-programs")
         tc.configure_args.append("--enable-libuuid")
@@ -104,8 +92,6 @@ class UtilLinuxLibuuidConan(ConanFile):
         deps.generate()
 
     def build(self):
-        with chdir(self, self.source_folder):
-            self.run("./autogen.sh")
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
