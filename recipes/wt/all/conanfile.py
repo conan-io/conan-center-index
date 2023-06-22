@@ -115,6 +115,8 @@ class WtConan(ConanFile):
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.6.2")
+        if self.options.with_haru:
+            self.requires("libharu/2.4.3")
 
     def validate(self):
         miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
