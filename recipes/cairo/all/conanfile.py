@@ -26,10 +26,11 @@ required_conan_version = ">=1.54.0"
 class CairoConan(ConanFile):
     name = "cairo"
     description = "Cairo is a 2D graphics library with support for multiple output devices"
-    topics = ("cairo", "graphics")
+    topics = ("graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cairographics.org/"
     license = ("LGPL-2.1-only", "MPL-1.1")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -85,12 +86,12 @@ class CairoConan(ConanFile):
         if self.options.get_safe("with_freetype", True):
             self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.76.1")
+            self.requires("glib/2.76.2")
         self.requires("zlib/1.2.13")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.39")
