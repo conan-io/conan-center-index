@@ -20,13 +20,11 @@ class VsgConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "shader_compiler": [True, False],
         "max_devices": [1,2,3,4],
         "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "shader_compiler": True,
         "max_devices" : 1,
         "fPIC": True,
     }
@@ -70,28 +68,13 @@ class VsgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-<<<<<<< HEAD
-        if self.version in ("1.0.3"):
-            git = Git(self)
-            glslang_url = "https://github.com/vsg-dev/glslang.git"
-            glslang_branch = "VSG-1.0.x"
-            clone_args = ['--depth', '1', '--branch', glslang_branch]
-            git.clone(url= glslang_url, args=clone_args, target ="src/glslang")
-=======
-        if self.version in ["1.0.3", "1.0.5"]:
-          git = Git(self)
-          glslang_url = "https://github.com/vsg-dev/glslang.git"
-          glslang_branch = "VSG-1.0.x"
-          clone_args = ['--depth', '1', '--branch', glslang_branch]
-          git.clone(url= glslang_url, args=clone_args, target ="src/glslang")
->>>>>>> 709f9ab55 (preparing vsg 1.0.5)
-
+ 
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 1 if self.options.shader_compiler else 0
+        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 0
         tc.variables["VSG_MAX_DEVICES"] = self.options.max_devices
         tc.generate()
 
