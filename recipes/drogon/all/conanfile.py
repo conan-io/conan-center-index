@@ -26,6 +26,7 @@ class DrogonConan(ConanFile):
         "with_orm": [True, False],
         "with_profile": [True, False],
         "with_brotli": [True, False],
+        "with_yaml_cpp": [True, False],
         "with_postgres": [True, False],
         "with_postgres_batch": [True, False],
         "with_mysql": [True, False],
@@ -40,12 +41,14 @@ class DrogonConan(ConanFile):
         "with_orm": True,
         "with_profile": False,
         "with_brotli": False,
+        "with_yaml_cpp": False,
         "with_postgres": False,
         "with_postgres_batch": False,
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
     }
+    package_type = "library"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -122,6 +125,8 @@ class DrogonConan(ConanFile):
             self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.1.0")
+        if self.options.with_yaml_cpp:
+            self.requires("yaml-cpp/0.7.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -138,6 +143,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_BROTLI"] = self.options.with_brotli
+        tc.variables["BUILD_YAML_CONFIG"] = self.options.with_yaml_cpp
         tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
         tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
