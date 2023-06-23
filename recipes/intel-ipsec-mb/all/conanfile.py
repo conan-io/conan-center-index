@@ -49,6 +49,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("nasm/2.15.05")
+        self.tool_requires("cmake/[>3.XX <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
