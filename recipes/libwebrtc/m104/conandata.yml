@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/webrtc-sdk/libwebrtc/archive/refs/heads/master.zip"
+    sha256: "98ae9b1bbc6bac517395c9374310806ec0c5654c490245d02d86b69b80a703e4"
