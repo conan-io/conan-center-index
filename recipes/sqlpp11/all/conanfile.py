@@ -30,7 +30,7 @@ class Sqlpp11Conan(ConanFile):
         return {
             "gcc": "5",
             "Visual Studio": "14",
-            "msvc": "14.1",
+            "msvc": "190",
             "clang": "3.4",
             "apple-clang": "10",
         }
