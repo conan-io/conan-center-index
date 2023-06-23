@@ -242,9 +242,9 @@ class FreetypeConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "Freetype")
-        self.cpp_info.set_property("cmake_module_target_name", "Freetype::Freetype")
         self.cpp_info.set_property("cmake_file_name", "freetype")
-        self.cpp_info.set_property("cmake_target_name", "freetype")
+        self.cpp_info.set_property("cmake_target_name", "Freetype::Freetype")
+        self.cpp_info.set_property("cmake_target_aliases", ["freetype"]) # other possible target name in upstream config file
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "freetype2")
         self.cpp_info.libs = collect_libs(self)

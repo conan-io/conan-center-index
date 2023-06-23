@@ -1,0 +1,103 @@
+--- a/src/cpp/flann/algorithms/kdtree_index.h
++++ b/src/cpp/flann/algorithms/kdtree_index.h
+@@ -37,6 +37,9 @@
+ #include <cstring>
+ #include <stdarg.h>
+ #include <cmath>
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
++#include <random>
++#endif
+ 
+ #include "flann/general.h"
+ #include "flann/algorithms/nn_index.h"
+@@ -265,8 +268,14 @@ protected:
+         /* Construct the randomized trees. */
+         for (int i = 0; i < trees_; i++) {
+             /* Randomize the order of vectors to allow for unbiased sampling. */
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
++            std::random_device rd;
++            std::mt19937 g(rd());
++            std::shuffle(ind.begin(), ind.end(), g);
++#else
+             std::random_shuffle(ind.begin(), ind.end());
+             tree_roots_[i] = divideTree(&ind[0], int(size_) );
++#endif
+         }
+         delete[] mean_;
+         delete[] var_;
+--- a/src/cpp/flann/util/heap.h
++++ b/src/cpp/flann/util/heap.h
+@@ -105,8 +105,11 @@ public:
+         count = 0;
+     }
+ 
+-    struct CompareT : public std::binary_function<T,T,bool>
++    struct CompareT
+     {
++        typedef T first_argument_type;
++        typedef T second_argument_type;
++        typedef bool result_type;
+         bool operator()(const T& t_1, const T& t_2) const
+         {
+             return t_2 < t_1;
+--- a/src/cpp/flann/util/lsh_table.h
++++ b/src/cpp/flann/util/lsh_table.h
+@@ -39,6 +39,9 @@
+ #include <iostream>
+ #include <iomanip>
+ #include <limits.h>
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
++#include <random>
++#endif
+ // TODO as soon as we use C++0x, use the code in USE_UNORDERED_MAP
+ #if USE_UNORDERED_MAP
+ #include <unordered_map>
+@@ -364,7 +367,13 @@ inline LshTable<unsigned char>::LshTable(unsigned int feature_size, unsigned int
+     // A bit brutal but fast to code
+     std::vector<size_t> indices(feature_size * CHAR_BIT);
+     for (size_t i = 0; i < feature_size * CHAR_BIT; ++i) indices[i] = i;
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
++    std::random_device rd;
++    std::mt19937 g(rd());
++    std::shuffle(indices.begin(), indices.end(),g);
++#else
+     std::random_shuffle(indices.begin(), indices.end());
++#endif
+ 
+     // Generate a random set of order of subsignature_size_ bits
+     for (unsigned int i = 0; i < key_size_; ++i) {
+--- a/src/cpp/flann/util/random.h
++++ b/src/cpp/flann/util/random.h
+@@ -34,6 +34,9 @@
+ #include <algorithm>
+ #include <cstdlib>
+ #include <cstddef>
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
++#include <random>
++#endif
+ #include <vector>
+ 
+ #include "flann/general.h"
+@@ -110,14 +113,22 @@ public:
+      */
+     void init(int n)
+     {
++#if !((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
+         static RandomGenerator generator;
++#endif
+         // create and initialize an array of size n
+         vals_.resize(n);
+         size_ = n;
+         for (int i = 0; i < size_; ++i) vals_[i] = i;
+ 
+         // shuffle the elements in the array
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
++        std::random_device rd;
++        std::mt19937 g(rd());
++        std::shuffle(vals_.begin(), vals_.end(), g);
++#else
+         std::random_shuffle(vals_.begin(), vals_.end(), generator);
++#endif
+ 
+         counter_ = 0;
+     }

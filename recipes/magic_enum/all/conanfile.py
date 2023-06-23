@@ -15,11 +15,12 @@ class MagicEnumConan(ConanFile):
         "Header-only C++17 library provides static reflection for enums, work "
         "with any enum type without any macro or boilerplate code."
     )
-    topics = ("cplusplus", "enum-to-string", "string-to-enum", "serialization",
-              "reflection", "header-only", "compile-time")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Neargye/magic_enum"
-    license = "MIT"
+    topics = ("cplusplus", "enum-to-string", "string-to-enum", "serialization",
+              "reflection", "header-only", "compile-time")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -32,6 +33,7 @@ class MagicEnumConan(ConanFile):
         return {
             "gcc": "9",
             "Visual Studio": "15",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -52,8 +54,7 @@ class MagicEnumConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -66,6 +67,4 @@ class MagicEnumConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "magic_enum")
         self.cpp_info.set_property("cmake_target_name", "magic_enum::magic_enum")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

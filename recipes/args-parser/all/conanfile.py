@@ -15,7 +15,8 @@ class ArgsParserConan(ConanFile):
     homepage = "https://github.com/igormironchik/args-parser"
     license = "MIT"
     description = "Small C++ header-only library for parsing command line arguments."
-    topics = ("args-parser", "argument", "parsing")
+    topics = ("argument", "parsing")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -33,6 +34,9 @@ class ArgsParserConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         self.info.clear()
 
@@ -45,12 +49,8 @@ class ArgsParserConan(ConanFile):
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -64,6 +64,4 @@ class ArgsParserConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "args-parser::args-parser")
         self.cpp_info.includedirs.append(os.path.join("include", "args-parser"))
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

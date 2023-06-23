@@ -1,4 +1,13 @@
 sources:
+  "0.8.1":
+    url: "https://github.com/uni-algo/uni-algo/archive/v0.8.1.tar.gz"
+    sha256: "11192280fa435a9d68131d5368d2b314201d7089e6d2f38f29a8591c9aafa776"
+  "0.8.0":
+    url: "https://github.com/uni-algo/uni-algo/archive/refs/tags/v0.8.0.tar.gz"
+    sha256: "657f124f4fb4705f948e9c0835ec88484ee4745d7b19cb2ddb772119a7ea024e"
+  "0.7.1":
+    url: "https://github.com/uni-algo/uni-algo/archive/refs/tags/v0.7.1.tar.gz"
+    sha256: "9ff1f03d6ffd81df7a2a21df353502db55d198a940da0aef0546b37ca934fdfb"
   "0.7.0":
     url: "https://github.com/uni-algo/uni-algo/archive/refs/tags/v0.7.0.tar.gz"
     sha256: "c8d078461c77fa4e50013ea4e1263466163eac9102fca2e125bd5c992de6cc2f"

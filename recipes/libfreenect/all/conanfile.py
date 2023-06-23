@@ -1,7 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
-import glob
-import shutil
+
+required_conan_version = ">=1.53.0"
 
 
 class LibfreenectConan(ConanFile):
@@ -11,7 +13,8 @@ class LibfreenectConan(ConanFile):
     homepage = "https://github.com/OpenKinect/libfreenect"
     description = "Drivers and libraries for the Xbox Kinect device."
     topics = ("usb", "camera", "kinect")
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -20,18 +23,9 @@ class LibfreenectConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,53 +33,54 @@ class LibfreenectConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libusb/1.0.24")
+        self.requires("libusb/1.0.26")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_REDIST_PACKAGE"] = True
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_FAKENECT"] = False
-        self._cmake.definitions["BUILD_C_SYNC"] = False
-        self._cmake.definitions["BUILD_CPP"] = False
-        self._cmake.definitions["BUILD_CV"] = False
-        self._cmake.definitions["BUILD_AS3_SERVER"] = False
-        self._cmake.definitions["BUILD_PYTHON"] = False
-        self._cmake.definitions["BUILD_PYTHON2"] = False
-        self._cmake.definitions["BUILD_PYTHON3"] = False
-        self._cmake.definitions["BUILD_OPENNI2_DRIVER"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_REDIST_PACKAGE"] = True
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_FAKENECT"] = False
+        tc.variables["BUILD_C_SYNC"] = False
+        tc.variables["BUILD_CPP"] = False
+        tc.variables["BUILD_CV"] = False
+        tc.variables["BUILD_AS3_SERVER"] = False
+        tc.variables["BUILD_PYTHON"] = False
+        tc.variables["BUILD_PYTHON2"] = False
+        tc.variables["BUILD_PYTHON3"] = False
+        tc.variables["BUILD_OPENNI2_DRIVER"] = False
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("APACHE20", src=self._source_subfolder, dst="licenses", keep_path=False)
-        self.copy("GPL", src=self._source_subfolder, dst="licenses", keep_path=False)
-        cmake = self._configure_cmake()
+        copy(self, "APACHE20", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "GPL", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libfreenect"
+        self.cpp_info.set_property("pkg_config_name", "libfreenect")
         self.cpp_info.libs = ["freenect"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
