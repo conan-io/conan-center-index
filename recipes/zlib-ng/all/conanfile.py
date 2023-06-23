@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class ZlibNgConan(ConanFile):
@@ -17,6 +17,7 @@ class ZlibNgConan(ConanFile):
     license ="Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/zlib-ng/"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,6 +27,7 @@ class ZlibNgConan(ConanFile):
         "with_optim": [True, False],
         "with_new_strategies": [True, False],
         "with_native_instructions": [True, False],
+        "with_reduced_mem": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,43 +37,43 @@ class ZlibNgConan(ConanFile):
         "with_optim": False,
         "with_new_strategies": True,
         "with_native_instructions": False,
+        "with_reduced_mem": False,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "2.1.0":
+            del self.options.with_reduced_mem
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.info.options.zlib_compat and not self.info.options.with_gzfileop:
             raise ConanInvalidConfiguration("The option 'with_gzfileop' must be True when 'zlib_compat' is True.")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ZLIB_ENABLE_TESTS"] = False
+        tc.variables["ZLIBNG_ENABLE_TESTS"] = False
+
         tc.variables["ZLIB_COMPAT"] = self.options.zlib_compat
         tc.variables["WITH_GZFILEOP"] = self.options.with_gzfileop
         tc.variables["WITH_OPTIM"] = self.options.with_optim
         tc.variables["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
+        if Version(self.version) >= "2.1.0":
+            tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
         tc.generate()
 
     def build(self):

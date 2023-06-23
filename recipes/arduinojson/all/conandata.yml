@@ -1,10 +1,19 @@
 sources:
+  "6.21.2":
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.21.2/ArduinoJson-v6.21.2.zip"
+    sha256: "1dc888061f6e7828f7a0a4e71bf059796e5ce202ce6ddb4e3a2e384d32b5cba0"
+  "6.21.0":
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.21.0/ArduinoJson-v6.21.0.zip"
+    sha256: "08f7cad5fca2393c40fcb479c43235a2fa7da1a40331377ddf617eda2f123583"
+  "6.20.1":
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.20.1/ArduinoJson-v6.20.1.zip"
+    sha256: "3dc53f55dcb6913b9a097263852ddc7c030f6d93c8cf00efb5d0eff3dd4bd8b9"
   "6.19.4":
-    url: "https://github.com/bblanchon/ArduinoJson/archive/v6.19.4.tar.gz"
-    sha256: "d8ceaf89b290b8109aa8eb200cf7e377c076241b25c4e9d1a601ecd74a37395b"
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.19.4/ArduinoJson-v6.19.4.zip"
+    sha256: "5d1d778a438efd298d9e378e086e1ccf7b01903315ffc8a68ec31b98d6cb3039"
   "6.18.5":
-    url: "https://github.com/bblanchon/ArduinoJson/archive/v6.18.5.tar.gz"
-    sha256: "57125b93c03c343055dbdcff874c8bfc78beb4a124097b37b69ec49120a5f359"
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.18.5/ArduinoJson-v6.18.5.zip"
+    sha256: "f10a904fa1f6372ee069ed2a5eff50530a29e9c10958a5bd24ce62eda7f7d74e"
   "6.18.0":
     url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.18.0/ArduinoJson-v6.18.0.zip"
     sha256: "2ade6a0097845d6bc0292a7f9ffa58cbd7e11a34a26616ac9e40a7754a18f1a9"

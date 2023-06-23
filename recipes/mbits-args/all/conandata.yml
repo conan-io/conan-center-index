@@ -1,4 +1,10 @@
 sources:
-  0.12.3:
+  "0.12.3":
     url: "https://github.com/mbits-libs/args/archive/v0.12.3.tar.gz"
     sha256: "1a1dc5793e927a7f8c34b77c776b4d4a88f7ce9557657d8e806fca2922bd07a0"
+patches:
+  "0.12.3":
+    - patch_file: "patches/0.12.3-0001-export-cmake-config.patch"
+      patch_description: "conan v2: drop the unneeded dependency, export cmake config"
+      patch_source: "https://github.com/mbits-libs/args/commit/f0593ed24d8edc33bcef5acaad5a2d27bf566ede"
+      patch_type: "conan"

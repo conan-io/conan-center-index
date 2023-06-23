@@ -1,9 +1,12 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 import os
-import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
+
 
 class BreakpadConan(ConanFile):
     name = "breakpad"
@@ -12,66 +15,67 @@ class BreakpadConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://chromium.googlesource.com/breakpad/breakpad/"
-    settings = "os", "compiler", "build_type", "arch"
-    provides = "breakpad"
-    exports_sources = "patches/**"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
-        "fPIC": True
+        "fPIC": True,
     }
-    _env_build = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("linux-syscall-support/cci.20200813")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Breakpad can only be built on Linux. For other OSs check sentry-breakpad")
 
-    def requirements(self):
-        self.requires("linux-syscall-support/cci.20200813")
-
-    def _configure_autotools(self):
-        if not self._env_build:
-            self._env_build = AutoToolsBuildEnvironment(self)
-            self._env_build.configure(configure_dir=self._source_subfolder)
-        return self._env_build
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        # see https://github.com/conan-io/conan/issues/12020
+        tc.configure_args.append("--libexecdir=${prefix}/bin")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        env_build = self._configure_autotools()
-        env_build.make()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        env_build = self._configure_autotools()
-        env_build.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-    def package_info( self ):
+    def package_info(self):
+        self.cpp_info.components["libbreakpad"].set_property("pkg_config_name", "breakpad")
         self.cpp_info.components["libbreakpad"].libs = ["breakpad"]
         self.cpp_info.components["libbreakpad"].includedirs.append(os.path.join("include", "breakpad"))
-        self.cpp_info.components["libbreakpad"].names["pkg_config"] = "breakpad"
-
-        self.cpp_info.components["client"].libs = ["breakpad_client"]
-        self.cpp_info.components["client"].includedirs.append(os.path.join("include", "breakpad"))
-        self.cpp_info.components["client"].names["pkg_config"] = "breakpad-client"
-
-
         self.cpp_info.components["libbreakpad"].system_libs.append("pthread")
         self.cpp_info.components["libbreakpad"].requires.append("linux-syscall-support::linux-syscall-support")
 
+        self.cpp_info.components["client"].set_property("pkg_config_name", "breakpad-client")
+        self.cpp_info.components["client"].libs = ["breakpad_client"]
+        self.cpp_info.components["client"].includedirs.append(os.path.join("include", "breakpad"))
         self.cpp_info.components["client"].system_libs.append("pthread")
         self.cpp_info.components["client"].requires.append("linux-syscall-support::linux-syscall-support")
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        # workaround to always produce a global pkgconfig file for PkgConfigDeps
+        self.cpp_info.set_property("pkg_config_name", "breakpad-do-not-use")
+
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

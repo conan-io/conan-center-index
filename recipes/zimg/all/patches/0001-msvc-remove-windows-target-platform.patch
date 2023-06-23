@@ -1,0 +1,22 @@
+--- a/_msvc/dll/dll.vcxproj
++++ b/_msvc/dll/dll.vcxproj
+@@ -43,7 +43,7 @@
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{96822C64-B0B6-49F3-A24C-F9C5FDB02DD3}</ProjectGuid>
+     <RootNamespace>dll</RootNamespace>
+-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
++    
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+--- a/_msvc/zimg/zimg.vcxproj
++++ b/_msvc/zimg/zimg.vcxproj
+@@ -37,7 +37,7 @@
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{C8629E57-4D6F-40FA-82FC-B39824195932}</ProjectGuid>
+     <RootNamespace>zimg</RootNamespace>
+-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
++    
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

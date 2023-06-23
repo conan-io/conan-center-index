@@ -1,7 +1,13 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.50.0"
 
 
 class PolymorphictValueConan(ConanFile):
@@ -13,10 +19,6 @@ class PolymorphictValueConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
@@ -32,16 +34,16 @@ class PolymorphictValueConan(ConanFile):
         }
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} "
-                             "compiler support.".format(
-                                 self.name, self.settings.compiler))
+            self.output.warning("{} recipe lacks information about the {} "
+                                "compiler support.".format(
+                                    self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
                     "{} requires C++{} support. "
                     "The current compiler {} {} does not support it.".format(
@@ -50,20 +52,24 @@ class PolymorphictValueConan(ConanFile):
                         self.settings.compiler.version))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="polymorphic_value.*", dst="include",
-                  src=self._source_subfolder)
-        self.copy("*LICENSE*", dst="licenses", keep_path=False)
+        copy(self, "polymorphic_value.*", self.source_folder,
+             os.path.join(self.package_folder, "include"))
+        copy(self, "*LICENSE*", self.source_folder,
+             os.path.join(self.package_folder, "licenses"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "polymorphic_value")
-        self.cpp_info.set_property("cmake_target_name", "polymorphic_value::polymorphic_value")
+        self.cpp_info.set_property(
+            "cmake_target_name", "polymorphic_value::polymorphic_value")
 
         self.cpp_info.names["cmake_find_package"] = "polymorphic_value"
         self.cpp_info.names["cmake_find_package_multi"] = "polymorphic_value"

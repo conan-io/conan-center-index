@@ -1,7 +1,10 @@
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.53.0"
 
 
 class NsyncConan(ConanFile):
@@ -11,21 +14,20 @@ class NsyncConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("c", "thread", "multithreading", "google")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False], "shared": [True, False]}
-    default_options = {"fPIC": True, "shared": False}
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,66 +35,59 @@ class NsyncConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True,
-                  destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["NSYNC_ENABLE_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["NSYNC_ENABLE_TESTS"] = False
+        if self.settings.os == "Windows" and self.options.shared:
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set (CMAKE_POSITION_INDEPENDENT_CODE ON)",
+            ""
+        )
 
         if self.settings.os == "Windows" and self.options.shared:
             ar_dest = \
                 "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} " \
                 "COMPONENT Development"
             rt_dest = 'RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"'
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                f"{ar_dest})", f"{ar_dest}\n{rt_dest})")
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                f"{ar_dest})",
+                f"{ar_dest}\n{rt_dest})"
+            )
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst='licenses', src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "nsync"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "nsync"
-        self.cpp_info.names["cmake_find_package"] = "nsync"
-        self.cpp_info.names["cmake_find_package_multi"] = "nsync"
-
-        self._def_compoment("nsync_c", "nsync")
-        self._def_compoment("nsync_cpp")
-
-    def _def_compoment(self, name, lib=None):
-        lib = lib if lib else name
-
-        component = self.cpp_info.components[name]
-        component.name = name
-        component.libs = [lib]
-        component.names["cmake_find_package"] = name
-        component.names["cmake_find_package_multi"] = name
-        component.names["pkg_config"] = lib
-
+        self.cpp_info.components["nsync_c"].libs = ["nsync"]
+        self.cpp_info.components["nsync_cpp"].libs = ["nsync_cpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            component.system_libs = ["pthread"]
+            self.cpp_info.components["nsync_c"].system_libs.append("pthread")
+            self.cpp_info.components["nsync_cpp"].system_libs.extend(["m", "pthread"])

@@ -3,6 +3,7 @@
 #include <ctime>
 
 #include <json_dto/pub.hpp>
+#include <json_dto/validators.hpp>
 
 // Message.
 struct message_t

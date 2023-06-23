@@ -5,6 +5,4 @@ sources:
 patches:
   "1.0.8":
     - patch_file: "patches/0001-reproducible-behavior.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-debug-build_type.patch"
-      base_path: "source_subfolder"

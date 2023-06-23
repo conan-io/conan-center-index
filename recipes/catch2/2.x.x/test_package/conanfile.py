@@ -1,24 +1,33 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import Version
-import os
+from conan import ConanFile
+from conan.tools.build import build_jobs, can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITH_MAIN"] = self.dependencies["catch2"].options.with_main
+        tc.variables["WITH_BENCHMARK"] = self.dependencies["catch2"].options.get_safe("with_benchmark", False)
+        tc.variables["WITH_PREFIX"] = self.dependencies["catch2"].options.with_prefix
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_MAIN"] = self.options["catch2"].with_main
-        cmake.definitions["WITH_BENCHMARK"] = self.options["catch2"].with_main and self.options["catch2"].with_benchmark
-        cmake.definitions["WITH_PREFIX"] = self.options["catch2"].with_prefix
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
-            if self.options["catch2"].with_main:
-                self.run(os.path.join("bin", "standalone"), run_environment=True)
-                if self.options["catch2"].with_benchmark:
-                    self.run(os.path.join("bin", "benchmark"), run_environment=True)
+        if can_run(self):
+            with chdir(self, self.build_folder):
+                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")

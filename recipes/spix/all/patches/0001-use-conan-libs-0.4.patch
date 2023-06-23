@@ -8,28 +8,3 @@
  set(CMAKE_CXX_STANDARD 14)
  
  # Hide symbols unless explicitly flagged with SPIX_EXPORT
-diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
-index 723de5e..f234bec 100644
---- a/lib/CMakeLists.txt
-+++ b/lib/CMakeLists.txt
-@@ -8,7 +8,7 @@ include(CMakePackageConfigHelpers)
- # Dependencies
- #
- find_package(Threads REQUIRED)
--find_package(AnyRPC REQUIRED)
-+find_package(anyrpc REQUIRED)
- find_package(Qt${SPIX_QT_MAJOR}
-     COMPONENTS
-         Core
-@@ -128,7 +128,7 @@ target_link_libraries(Spix
-         Qt${SPIX_QT_MAJOR}::Gui
-         Qt${SPIX_QT_MAJOR}::Quick
-     PRIVATE
--        AnyRPC::anyrpc
-+        anyrpc::anyrpc
- )
- 
- #
--- 
-2.36.1.windows.1
-

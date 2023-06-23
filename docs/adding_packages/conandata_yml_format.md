@@ -1,14 +1,14 @@
 # conandata.yml
 
-[conandata.yml](https://docs.conan.io/en/latest/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
+[conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
 file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
 1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
 In the context of ConanCenterIndex, this file is _mandatory_ and consists of two main sections that will be explained in the
 next sections with more detail:
 
-* `sources`: Library sources origin with their verification checksums. Freeform structure specific to a recipe.
-* `patches`: Details about the different patches the library needs along with details for traceability.
+* `sources`: Library sources origin with their verification checksums.
+* `patches`: A list of patches to apply and supporting information. See the [Patching Policy](sources_and_patches.md#policy-about-patching) for the criteria.
 
 <!-- toc -->
 ## Contents
@@ -38,6 +38,8 @@ next sections with more detail:
 `sources` is a top level dictionary, containing entries of sources and checksums for each of the supported versions.
 
 This is the entry that contains all the items that are downloaded from the internet and used in a recipe. This section contains one entry per version and each version should declare its own sources.
+
+> **Note**: For deciding which source to pick, see [Picking Sources](sources_and_patches.md#picking-the-sources) guide.
 
 This is a basic example of a regular library, it should satisfy most of the use cases:
 
@@ -112,7 +114,7 @@ sources:
         sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
 ```
 
-This approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
+This approach requires a special code within [build](https://docs.conan.io/1/reference/conanfile/methods.html#build) method to handle.
 
 ### Sources fields
 
@@ -132,7 +134,7 @@ Also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([w
 Sometimes sources provided by project require patching for various reasons. The `conandata.yml` file is the right place to indicate this information as well.
 
 > **Note**: Under our mission to ensure quality, patches undergo extra scrutiny. **Make sure to review** our
-> [Patching Policy](policy_patching.md) to understand the requirements before adding any.
+> [Patching Policy](sources_and_patches.md#policy-about-patching) to understand the requirements before adding any.
 
 This section follows the same pattern as the `sources` above - one entry per version with a list of patches to apply.
 
@@ -238,4 +240,4 @@ For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 
 _Optional_
 
-Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
+Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/1/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).

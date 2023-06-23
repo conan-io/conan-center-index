@@ -1,0 +1,10 @@
+sources:
+  "1.4.2":
+    url: "https://github.com/ERGO-Code/HiGHS/archive/refs/tags/v1.4.2.tar.gz"
+    sha256: "29330e284491143cd53a547c23178221df46423679a98f6684251e65cc384d2b"
+patches:
+  "1.4.2":
+    - patch_file: "patches/0001-missing-includes-msvc15-1.4.2.patch"
+      patch_description: "Add missing includes for std::tolower and std::max in MSVC15"
+      patch_type: portability
+      patch_source: "https://github.com/ERGO-Code/HiGHS/pull/1152"

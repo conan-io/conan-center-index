@@ -12,11 +12,14 @@ if(LLVM_ENABLE_ZLIB)
   list(GET ZLIB_LIBRARIES 0 ZLIB_LIBRARY)
   set_property(TARGET ZLIB::ZLIB PROPERTY LOCATION "${ZLIB_LIBRARY}")
 
+  # Additionally LLVM 11.1.0 requires the zlib lib dir to be in the library path.
+  # This is not needed for later versions and can be removed once
+  # LLVM-12 becomes the oldest supported version.
   if(UNIX)
-    # Additionally LLVM 11.1.0 requires the zlib lib dir to be in the library path.
-    # This is not needed for later versions and can be removed once
-	# LLVM-12 becomes the oldest supported version.
     set(ENV{LIBRARY_PATH} "${CONAN_LIB_DIRS_ZLIB}:$ENV{LIBRARY_PATH}")
+  elseif(WIN32)
+    file(TO_NATIVE_PATH "${CONAN_LIB_DIRS_ZLIB}" WINDOWS_ZLIB_PATH)	
+    string(APPEND CMAKE_EXE_LINKER_FLAGS " /LIBPATH:${WINDOWS_ZLIB_PATH}")
   endif()
 endif()
 

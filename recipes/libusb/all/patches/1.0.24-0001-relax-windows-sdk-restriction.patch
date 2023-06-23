@@ -1,0 +1,20 @@
+--- a/msvc/libusb_dll_2019.vcxproj
++++ b/msvc/libusb_dll_2019.vcxproj
+@@ -40,7 +40,6 @@
+     <RootNamespace>libusbdll</RootNamespace>
+     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
+     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
+-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+--- a/msvc/libusb_static_2019.vcxproj
++++ b/msvc/libusb_static_2019.vcxproj
+@@ -40,7 +40,6 @@
+     <RootNamespace>libusb</RootNamespace>
+     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
+     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
+-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">

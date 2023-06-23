@@ -63,7 +63,7 @@
  endif()
  if(ZIP_SUPPORT AND LIBDEFLATE_SUPPORT)
 -  target_link_libraries(tiff PRIVATE Deflate::Deflate)
-+  target_link_libraries(tiff PRIVATE libdeflate::libdeflate)
++  target_link_libraries(tiff PRIVATE $<IF:$<TARGET_EXISTS:libdeflate::libdeflate>,libdeflate::libdeflate,libdeflate::libdeflate_static>)
  endif()
  if(JPEG_SUPPORT)
    target_link_libraries(tiff PRIVATE JPEG::JPEG)

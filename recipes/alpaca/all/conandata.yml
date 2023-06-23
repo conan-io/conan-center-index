@@ -1,0 +1,4 @@
+sources:
+  "0.2.1":
+    url: "https://github.com/p-ranav/alpaca/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "05d49a2dc9c6a9e07c0cbc4e26caec273a8666270c82d7c3f0ede4f3a9258f4e"

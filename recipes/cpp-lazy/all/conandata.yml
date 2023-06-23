@@ -1,0 +1,13 @@
+sources:
+  "7.0.2":
+    url: "https://github.com/MarcDirven/cpp-lazy/releases/download/v7.0.2/cpp-lazy-src.zip"
+    sha256: "fb6dd0870e07050f9e0bba3ddb5f53ee35d8d9a05987f73cb0d667ca1f8348aa"
+  "6.0.0":
+    url: "https://github.com/MarcDirven/cpp-lazy/releases/download/v6.0.0/cpp-lazy-src.zip"
+    sha256: "424973eabaab8c756dae5e1795febeface65bb1dc42f474e5e2e1e4ab3effc5e"
+patches:
+  "6.0.0":
+    - patch_file: "patches/0001-support-gcc5.patch"
+      patch_description: "fix compilation errors on gcc5"
+      patch_type: "portability"
+      patch_source: "https://github.com/MarcDirven/cpp-lazy/issues/133"

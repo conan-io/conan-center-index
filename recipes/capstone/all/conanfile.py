@@ -1,5 +1,10 @@
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
-from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.53.0"
 
 
 class CapstoneConan(ConanFile):
@@ -7,75 +12,75 @@ class CapstoneConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.capstone-engine.org"
-    description = "Capstone disassembly/disassembler framework: Core (Arm, Arm64, BPF, EVM, M68K, M680X, MOS65xx, Mips, PPC, RISCV, Sparc, SystemZ, TMS320C64x, Web Assembly, X86, X86_64, XCore) + bindings."
-    topics = ("conan", 'reverse-engineering', 'disassembler', 'security', 'framework', 'arm', 'arm64', 'x86', 'sparc', 'powerpc', 'mips', 'x86-64', 'ethereum', 'systemz', 'webassembly', 'm68k', 'm0s65xx', 'm680x', 'tms320c64x', 'bpf', 'riscv')
+    description = (
+        "Capstone disassembly/disassembler framework: Core (Arm, Arm64, BPF, "
+        "EVM, M68K, M680X, MOS65xx, Mips, PPC, RISCV, Sparc, SystemZ, "
+        "TMS320C64x, Web Assembly, X86, X86_64, XCore) + bindings."
+    )
+    topics = (
+        "reverse-engineering", "disassembler", "security", "framework", "arm", "arm64",
+        "x86", "sparc", "powerpc", "mips", "x86-64", "ethereum", "systemz",
+        "webassembly", "m68k", "m0s65xx", "m680x", "tms320c64x", "bpf", "riscv",
+    )
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "use_default_alloc": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "use_default_alloc": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake",
-    _cmake = None
-    _archs = ['arm', 'm68k', 'mips', 'ppc', 'sparc', 'sysz', 'xcore', 'x86', 'tms320c64x', 'm680x', 'evm']
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "use_default_alloc": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "use_default_alloc": True,
+    }
+
+    _archs = ["arm", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
     default_options.update({a: True for a in _archs})
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        cmake = CMake(self)
-        cmake.definitions['CAPSTONE_BUILD_STATIC'] = not self.options.shared
-        cmake.definitions['CAPSTONE_BUILD_SHARED'] = self.options.shared
-        cmake.definitions['CAPSTONE_BUILD_TESTS'] = False
-        cmake.definitions['CAPSTONE_BUILD_CSTOOL'] = False
-        cmake.definitions['CAPSTONE_ARCHITECUTRE_DEFAULT'] = False
-        cmake.definitions['CAPSTONE_USE_SYS_DYN_MEM'] = self.options.use_default_alloc
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
+        tc.variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
+        tc.variables["CAPSTONE_BUILD_TESTS"] = False
+        tc.variables["CAPSTONE_BUILD_CSTOOL"] = False
+        tc.variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
+        tc.variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
         for a in self._archs:
-            cmake.definitions['CAPSTONE_%s_SUPPORT' % a.upper()] = self.options.get_safe(a)
-        runtime = self.settings.get_safe("compiler.runtime")
-        if runtime:
-            cmake.definitions['CAPSTONE_BUILD_STATIC_RUNTIME'] = 'MT' in runtime
-        cmake.configure()
-        self._cmake = cmake
-        return self._cmake
+            tc.variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
+        tc.variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE_LLVM.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # FIXME : add components, if needed
 
     def package_info(self):
+        suffix = "_dll" if is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"capstone{suffix}"]
         if self.options.shared:
-            self.cpp_info.defines.append('CAPSTONE_SHARED')
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.libs = ["capstone_dll"]
-        else:
-            self.cpp_info.libs = ["capstone"]
+            self.cpp_info.defines.append("CAPSTONE_SHARED")

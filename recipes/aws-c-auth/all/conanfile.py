@@ -1,19 +1,24 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
+
 
 class AwsCAuth(ConanFile):
     name = "aws-c-auth"
-    description = "C99 library implementation of AWS client-side authentication: standard credentials providers and signing."
+    description = (
+        "C99 library implementation of AWS client-side authentication: "
+        "standard credentials providers and signing."
+    )
     license = "Apache-2.0",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-auth"
     topics = ("aws", "amazon", "cloud", "authentication", "credentials", "providers", "signing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,33 +35,24 @@ class AwsCAuth(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
+        self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
         self.requires("aws-c-cal/0.5.13")
         if Version(self.version) < "0.6.17":
-            self.requires("aws-c-io/0.10.20")
-            self.requires("aws-c-http/0.6.13")
+            self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.6.13", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("aws-c-io/0.13.4")
-            self.requires("aws-c-http/0.6.22")
+            self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.6.22", transitive_headers=True, transitive_libs=True)
         if Version(self.version) >= "0.6.5":
-            self.requires("aws-c-sdkutils/0.1.3")
+            self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -83,11 +79,7 @@ class AwsCAuth(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-auth")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-auth")
-
-        self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
-        self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
-        self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "AWS::aws-c-auth")
-
+        # TODO: back to global scope once conan v1 support dropped
         self.cpp_info.components["aws-c-auth-lib"].libs = ["aws-c-auth"]
         self.cpp_info.components["aws-c-auth-lib"].requires = [
             "aws-c-common::aws-c-common-lib",
@@ -98,8 +90,11 @@ class AwsCAuth(ConanFile):
         if Version(self.version) >= "0.6.5":
             self.cpp_info.components["aws-c-auth-lib"].requires.append("aws-c-sdkutils::aws-c-sdkutils-lib")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        # TODO: to remove once conan v1 support dropped
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-auth"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-auth"
         self.cpp_info.names["cmake_find_package"] = "AWS"
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
+        self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
+        self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "AWS::aws-c-auth")

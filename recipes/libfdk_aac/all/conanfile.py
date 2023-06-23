@@ -1,9 +1,15 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, VisualStudioBuildEnvironment, tools
-import contextlib
-import functools
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.55.0"
 
 
 class LibFDKAACConan(ConanFile):
@@ -12,8 +18,8 @@ class LibFDKAACConan(ConanFile):
     description = "A standalone library of the Fraunhofer FDK AAC code from Android"
     license = "https://github.com/mstorsjo/fdk-aac/blob/master/NOTICE"
     homepage = "https://sourceforge.net/projects/opencore-amr/"
-    topics = ("libfdk_aac", "multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
-
+    topics = ("multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,24 +30,13 @@ class LibFDKAACConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     @property
     def _use_cmake(self):
-        return tools.Version(self.version) >= "2.0.2"
+        return Version(self.version) >= "2.0.2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,108 +44,99 @@ class LibFDKAACConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        if self._use_cmake:
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if not self._use_cmake and not self._is_msvc:
-            self.build_requires("libtool/2.4.6")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+        if not self._use_cmake and not is_msvc(self):
+            self.tool_requires("libtool/2.4.7")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_PROGRAMS"] = False
-        cmake.definitions["FDK_AAC_INSTALL_CMAKE_CONFIG_MODULE"] = False
-        cmake.definitions["FDK_AAC_INSTALL_PKGCONFIG_MODULE"] = False
-        cmake.configure()
-        return cmake
-
-    @contextlib.contextmanager
-    def _msvc_build_environment(self):
-        with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self):
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    yield
-
-    def _build_vs(self):
-        with self._msvc_build_environment():
-            # Rely on flags injected by conan
-            tools.replace_in_file("Makefile.vc",
-                                  "CFLAGS   = /nologo /W3 /Ox /MT",
-                                  "CFLAGS   = /nologo")
-            tools.replace_in_file("Makefile.vc",
-                                  "MKDIR_FLAGS = -p",
-                                  "MKDIR_FLAGS =")
-            # Build either shared or static, and don't build utility (it always depends on static lib)
-            tools.replace_in_file("Makefile.vc", "copy $(PROGS) $(bindir)", "")
-            tools.replace_in_file("Makefile.vc", "copy $(LIB_DEF) $(libdir)", "")
-            if self.options.shared:
-                tools.replace_in_file("Makefile.vc",
-                                      "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
-                                      "all: $(LIB_DEF) $(SHARED_LIB) $(IMP_LIB)")
-                tools.replace_in_file("Makefile.vc", "copy $(STATIC_LIB) $(libdir)", "")
-            else:
-                tools.replace_in_file("Makefile.vc",
-                                      "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
-                                      "all: $(STATIC_LIB)")
-                tools.replace_in_file("Makefile.vc", "copy $(IMP_LIB) $(libdir)", "")
-                tools.replace_in_file("Makefile.vc", "copy $(SHARED_LIB) $(bindir)", "")
-            self.run("nmake -f Makefile.vc")
-
-    def _build_autotools(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-            # relocatable shared lib on macOS
-            tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name @rpath/")
-            if self.settings.os == "Android" and tools.os_info.is_windows:
-                # remove escape for quotation marks, to make ndk on windows happy
-                tools.replace_in_file("configure",
-                    "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
-        autotools = self._configure_autotools()
-        autotools.make()
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return autotools
+    def generate(self):
+        if self._use_cmake:
+            tc = CMakeToolchain(self)
+            tc.variables["BUILD_PROGRAMS"] = False
+            tc.variables["FDK_AAC_INSTALL_CMAKE_CONFIG_MODULE"] = False
+            tc.variables["FDK_AAC_INSTALL_PKGCONFIG_MODULE"] = False
+            tc.generate()
+        elif is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.generate()
 
     def build(self):
         if self._use_cmake:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
+            cmake.configure()
             cmake.build()
-        elif self._is_msvc:
-            self._build_vs()
+        elif is_msvc(self):
+            makefile_vc = os.path.join(self.source_folder, "Makefile.vc")
+            replace_in_file(self, makefile_vc, "CFLAGS   = /nologo /W3 /Ox /MT", "CFLAGS   = /nologo")
+            replace_in_file(self, makefile_vc, "MKDIR_FLAGS = -p", "MKDIR_FLAGS =")
+            # Build either shared or static, and don't build utility (it always depends on static lib)
+            replace_in_file(self, makefile_vc, "copy $(PROGS) $(bindir)", "")
+            replace_in_file(self, makefile_vc, "copy $(LIB_DEF) $(libdir)", "")
+            if self.options.shared:
+                replace_in_file(
+                    self, makefile_vc,
+                    "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
+                    "all: $(LIB_DEF) $(SHARED_LIB) $(IMP_LIB)",
+                )
+                replace_in_file(self, makefile_vc, "copy $(STATIC_LIB) $(libdir)", "")
+            else:
+                replace_in_file(
+                    self, makefile_vc,
+                    "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
+                    "all: $(STATIC_LIB)",
+                )
+                replace_in_file(self, makefile_vc, "copy $(IMP_LIB) $(libdir)", "")
+                replace_in_file(self, makefile_vc, "copy $(SHARED_LIB) $(bindir)", "")
+            with chdir(self, self.source_folder):
+                self.run("nmake -f Makefile.vc")
         else:
-            self._build_autotools()
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            if self.settings.os == "Android" and self._settings_build.os == "Windows":
+                # remove escape for quotation marks, to make ndk on windows happy
+                replace_in_file(
+                    self, os.path.join(self.source_folder, "configure"),
+                    "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g",
+                )
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        self.copy(pattern="NOTICE", src=self._source_subfolder, dst="licenses")
+        copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self._use_cmake:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
             cmake.install()
-        elif self._is_msvc:
-            with self._msvc_build_environment():
-                self.run("nmake -f Makefile.vc prefix=\"{}\" install".format(self.package_folder))
+        elif is_msvc(self):
+            with chdir(self, self.source_folder):
+                self.run(f"nmake -f Makefile.vc prefix=\"{self.package_folder}\" install")
             if self.options.shared:
-                tools.rename(os.path.join(self.package_folder, "lib", "fdk-aac.dll.lib"),
+                rename(self, os.path.join(self.package_folder, "lib", "fdk-aac.dll.lib"),
                              os.path.join(self.package_folder, "lib", "fdk-aac.lib"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fdk-aac")
@@ -167,7 +153,6 @@ class LibFDKAACConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "fdk-aac"
         self.cpp_info.names["cmake_find_package"] = "FDK-AAC"
         self.cpp_info.names["cmake_find_package_multi"] = "FDK-AAC"
-        self.cpp_info.names["pkg_config"] = "fdk-aac"
         self.cpp_info.components["fdk-aac"].names["cmake_find_package"] = "fdk-aac"
         self.cpp_info.components["fdk-aac"].names["cmake_find_package_multi"] = "fdk-aac"
         self.cpp_info.components["fdk-aac"].set_property("cmake_target_name", "FDK-AAC::fdk-aac")

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <ThreadPool/ThreadPool.h>
+#include <ThreadPool.h>
 
 int main(void)
 {

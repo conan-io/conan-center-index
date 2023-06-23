@@ -1,4 +1,13 @@
 sources:
+  "2.4.2":
+    url: "https://github.com/team-charls/charls/archive/2.4.2.tar.gz"
+    sha256: "d1c2c35664976f1e43fec7764d72755e6a50a80f38eca70fcc7553cad4fe19d9"
+  "2.4.1":
+    url: "https://github.com/team-charls/charls/archive/2.4.1.tar.gz"
+    sha256: "f313f556b5acb9215961d9718c21235aafcd43bce6b357bf66f772e5692bba75"
+  "2.4.0":
+    url: "https://github.com/team-charls/charls/archive/2.4.0.tar.gz"
+    sha256: "721f4fd6a8dc3ec6a334d1c3c15d1cb9faa149afddd0eff703466c20e775c294"
   "2.3.4":
     url: "https://github.com/team-charls/charls/archive/2.3.4.tar.gz"
     sha256: "28e895a6e22daee76c24cf4d36c62bb20fd60fad0c9cfefc2eb8fa9b6045ae84"

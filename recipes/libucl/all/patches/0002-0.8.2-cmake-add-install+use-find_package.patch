@@ -1,0 +1,122 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2201988..3698b95 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,12 +5,15 @@ SET(LIBUCL_VERSION_MAJOR 0)
+ SET(LIBUCL_VERSION_MINOR 8)
+ SET(LIBUCL_VERSION_PATCH 2)
+ 
+-SET(LIBUCL_VERSION
+-        "${LIBUCL_VERSION_MAJOR}.${LIBUCL_VERSION_MINOR}.${LIBUCL_VERSION_PATCH}")
++SET(LIBUCL_VERSION "${LIBUCL_VERSION_MAJOR}.${LIBUCL_VERSION_MINOR}.${LIBUCL_VERSION_PATCH}")
+ 
+ INCLUDE(CheckCCompilerFlag)
+ INCLUDE(CheckCSourceCompiles)
+-INCLUDE(FindOpenSSL)
++IF(ENABLE_URL_SIGN)
++  FIND_PACKAGE(OpenSSL REQUIRED)
++  SET(HAVE_OPENSSL 1)
++  ADD_DEFINITIONS(-DHAVE_OPENSSL)
++ENDIF(ENABLE_URL_SIGN)
+ INCLUDE(GNUInstallDirs)
+ 
+ OPTION(ENABLE_URL_INCLUDE  "Enable urls in ucl includes (requires libcurl or libfetch) [default: OFF]" OFF)
+@@ -135,30 +138,10 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ ENDIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ 
+ IF(ENABLE_URL_INCLUDE MATCHES "ON")
+-    FIND_LIBRARY(LIBFETCH_LIBRARY NAMES fetch PATHS	PATH_SUFFIXES lib64 lib
+-                      PATHS
+-                          ~/Library/Frameworks
+-                          /Library/Frameworks
+-                          /usr/local
+-                          /usr
+-                          /sw
+-                          /opt/local
+-                          /opt/csw
+-                          /opt
+-                     DOC "Path where the libfetch library can be found")
+-    IF(LIBFETCH_LIBRARY)
+-    	FIND_FILE(HAVE_FETCH_H NAMES fetch.h PATHS /usr/include
+-    											   /opt/include
+-    											   /usr/local/include
+-    				DOC "Path to libfetch header")
+-    ELSE(LIBFETCH_LIBRARY)
+-    	# Try to find libcurl
+-        FIND_PACKAGE(CURL)
+-    	IF(NOT CURL_FOUND)
+-    		MESSAGE(WARNING "Neither libcurl nor libfetch were found, no support of URL includes in configuration")
+-    	ENDIF(NOT CURL_FOUND)
+-    ENDIF(LIBFETCH_LIBRARY)
+-ENDIF(ENABLE_URL_INCLUDE MATCHES "ON")
++  FIND_PACKAGE(CURL REQUIRED)
++  ADD_DEFINITIONS(-DCURL_FOUND)
++  SET(CURL_LIBRARIES CURL::libcurl)
++ENDIF()
+ 
+ set(SYNC_BUILTINS_TEST_SOURCE [====[
+ int main()
+@@ -249,35 +232,24 @@ TARGET_COMPILE_DEFINITIONS(ucl
+     ${UCL_COMPILE_DEFS}
+ )
+ 
+-IF(ENABLE_LUA MATCHES "ON")
+-	IF(ENABLE_LUAJIT MATCHES "ON")
+-		FindLua(VERSION_MAJOR "5" VERSION_MINOR "1" ROOT "${LUA_ROOT}")
+-		IF(NOT LUA_FOUND)
+-			MESSAGE(FATAL_ERROR "Lua not found, lua support is required")
+-		ELSE(NOT LUA_FOUND)
+-			INCLUDE_DIRECTORIES("${LUA_INCLUDE_DIR}")
+-		ENDIF(NOT LUA_FOUND)
+-	ELSE(ENABLE_LUAJIT MATCHES "ON")
+-		FindLua(VERSION_MAJOR "5" VERSION_MINOR "2" ROOT "${LUA_ROOT}")
+-		IF(NOT LUA_FOUND)
+-			FindLua(VERSION_MAJOR "5" VERSION_MINOR "1" ROOT "${LUA_ROOT}")
+-		ENDIF(NOT LUA_FOUND)
+-		IF(NOT LUA_FOUND)
+-			MESSAGE(FATAL_ERROR "Lua not found, lua support is required")
+-		ELSE(NOT LUA_FOUND)
+-			INCLUDE_DIRECTORIES("${LUA_INCLUDE_DIR}")
+-		ENDIF(NOT LUA_FOUND)
+-	ENDIF(ENABLE_LUAJIT MATCHES "ON")
++IF(ENABLE_LUA OR ENABLE_LUAJIT)
+ 	SET(UCL_LUA_SRC lua/lua_ucl.c)
+ 	ADD_LIBRARY(lua-ucl ${LIB_TYPE} ${UCL_LUA_SRC})
+ 	ADD_LIBRARY(ucl::lua ALIAS lua-ucl)
++	TARGET_LINK_LIBRARIES(lua-ucl ucl)
+ 	IF(ENABLE_LUAJIT MATCHES "ON")
+-		TARGET_LINK_LIBRARIES(lua-ucl "${LUAJIT_LIBRARY}")
++		TARGET_LINK_LIBRARIES(lua-ucl luajit::luajit)
+ 	ELSE(ENABLE_LUAJIT MATCHES "ON")
+-		TARGET_LINK_LIBRARIES(lua-ucl "${LUA_LIBRARY}")
++		TARGET_LINK_LIBRARIES(lua-ucl lua::lua)
+ 	ENDIF(ENABLE_LUAJIT MATCHES "ON")
+-	TARGET_LINK_LIBRARIES(lua-ucl ucl)
+ 	TARGET_INCLUDE_DIRECTORIES(lua-ucl PUBLIC include PRIVATE src uthash)
++	IF(ENABLE_LUA)
++		FIND_PACKAGE(lua REQUIRED CONFIG)
++		TARGET_LINK_LIBRARIES(lua-ucl lua::lua)
++	ELSEIF(ENABLE_LUAJIT)
++		FIND_PACKAGE(luajit REQUIRED CONFIG)
++		TARGET_LINK_LIBRARIES(lua-ucl luajit::luajit)
++	ENDIF()
+ 	SET_TARGET_PROPERTIES(lua-ucl PROPERTIES
+ 		VERSION ${LIBUCL_VERSION}
+ 		SOVERSION ${LIBUCL_VERSION_MAJOR}
+@@ -306,7 +278,10 @@ ENDIF(UNIX)
+ SET_TARGET_PROPERTIES(ucl PROPERTIES
+ 	PUBLIC_HEADER "${UCLHDR}")
+ 
+-INSTALL(TARGETS ucl EXPORT uclConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}
++INSTALL(TARGETS ucl EXPORT uclConfig
++		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+ 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ IF(ENABLE_UTILS MATCHES "ON")
+@@ -318,4 +293,3 @@ install(EXPORT uclConfig
+ 	NAMESPACE ucl::
+ 	DESTINATION "share/ucl"
+ )
+-

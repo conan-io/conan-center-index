@@ -17,6 +17,7 @@ class PackageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinus/unordered_dense"
     topics = ("unordered_map", "unordered_set", "hashmap", "hashset", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,15 +29,11 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15.7",
-            "msvc": "1914",
+            "msvc": "191",
             "gcc": "7",
             "clang": "7",
             "apple-clang": "11",
         }
-
-    def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -45,15 +42,14 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -64,13 +60,10 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "unordered_dense")
         self.cpp_info.set_property("cmake_target_name", "unordered_dense::unordered_dense")
-        self.cpp_info.set_property("pkg_config_name", "package")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "unordered_dense"

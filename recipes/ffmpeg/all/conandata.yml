@@ -1,4 +1,7 @@
 sources:
+  "5.1":
+    url: "https://ffmpeg.org/releases/ffmpeg-5.1.tar.bz2"
+    sha256: "32b56fb01ce90d452958ae25e91c9564abf49ed5453c127bec23c63e530aa8fa"
   "5.0":
     url: "https://ffmpeg.org/releases/ffmpeg-5.0.tar.bz2"
     sha256: "c0130b8db2c763430fd1c6905288d61bc44ee0548ad5fcd2dfd650b88432bed9"
@@ -14,3 +17,14 @@ sources:
   "4.2.1":
     url: "https://ffmpeg.org/releases/ffmpeg-4.2.1.tar.bz2"
     sha256: "682a9fa3f6864d7f0dbf224f86b129e337bc60286e0d00dffcd710998d521624"
+patches:
+  "5.1":
+    - patch_file: "patches/5.0-0001-fix-hwcontext_vulkan.patch"
+      patch_description: "Compatibility with vulkan >= 1.3.239"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
+  "5.0":
+    - patch_file: "patches/5.0-0001-fix-hwcontext_vulkan.patch"
+      patch_description: "Compatibility with vulkan >= 1.3.239"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"

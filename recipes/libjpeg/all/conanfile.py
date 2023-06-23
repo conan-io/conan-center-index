@@ -4,12 +4,13 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, NMakeToolchain
 import os
 import re
 import shutil
 
-required_conan_version = ">=1.53.0"
+
+required_conan_version = ">=1.55.0"
 
 
 class LibjpegConan(ConanFile):
@@ -57,30 +58,23 @@ class LibjpegConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not (is_msvc(self) or self. _is_clang_cl):
+            self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-            self.win_bash = True
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if is_msvc(self) or self._is_clang_cl:
-            vc = VCVars(self)
-            vc.generate()
+            # clean environment variables that might affect on the build (e.g. if set by Jenkins)
             env = Environment()
             env.define("PROFILE", None)
             env.define("TUNE", None)
             env.define("NODEBUG", None)
-            # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
-            #        So populate CL with AutotoolsToolchain cflags
-            c_flags = AutotoolsToolchain(self).cflags
-            if c_flags:
-                env.define("CL", c_flags)
-            env.vars(self).save_script("conanbuildenv_nmake")
-            # TODO: there is probably something missing here
-            # Do we really honor everything from profile (build_type, tools.build:cflags etc)?
+            env.vars(self).save_script("conanbuildenv_nmake_unset_env")
+            tc = NMakeToolchain(self)
+            tc.generate()
         else:
             env = VirtualBuildEnv(self)
             env.generate()
@@ -98,16 +92,17 @@ class LibjpegConan(ConanFile):
                 "\nccommon = -c ",
                 "\nccommon = -c -DLIBJPEG_BUILDING {}".format("" if self.options.shared else "-DLIBJPEG_STATIC "),
             )
-            # clean environment variables that might affect on the build (e.g. if set by Jenkins)
             shutil.copy("jconfig.vc", "jconfig.h")
             make_args = [
                 "nodebug=1" if self.settings.build_type != "Debug" else "",
             ]
             if self._is_clang_cl:
-                cl = os.environ.get("CC", "clang-cl")
-                link = os.environ.get("LD", "lld-link")
-                lib = os.environ.get("AR", "llvm-lib")
-                rc = os.environ.get("RC", "llvm-rc")
+                compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+                buildenv_vars = VirtualBuildEnv(self).vars()
+                cl = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl"))
+                link = buildenv_vars.get("LD", "lld-link")
+                lib = buildenv_vars.get("AR", "llvm-lib")
+                rc = compilers_from_conf.get("rc", buildenv_vars.get("RC", "llvm-rc"))
                 replace_in_file(self, "Win32.Mak", "cc     = cl", f"cc     = {cl}")
                 replace_in_file(self, "Win32.Mak", "link   = link", f"link   = {link}")
                 replace_in_file(self, "Win32.Mak", "implib = lib", f"implib = {lib}")
@@ -143,8 +138,7 @@ class LibjpegConan(ConanFile):
                 copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             autotools = Autotools(self)
-            # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-            autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.install()
             if self.settings.os == "Windows" and self.options.shared:
                 rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
             else:

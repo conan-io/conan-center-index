@@ -1,10 +1,16 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import can_run
 
+required_conan_version = ">=1.49.0"
 
 class TestPackageConan(ConanFile):
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
 
-    settings = "os", "arch"
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            self.run('genie ninja --scripts="{}"'.format(self.source_folder), run_environment=True)
+        if can_run(self):
+            self.run("genie ninja")

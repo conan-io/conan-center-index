@@ -1,4 +1,10 @@
 sources:
+  "6.4.6":
+    url: "https://github.com/Taywee/args/archive/6.4.6.tar.gz"
+    sha256: "41ed136bf9b216bf5f18b1de2a8d22a870381657e8427d6621918520b6e2239c"
+  "6.4.4":
+    url: "https://github.com/Taywee/args/archive/6.4.4.tar.gz"
+    sha256: "7dca5e33148984cf701580324846c6557990a826bd1ab7a97ccdd6d0e486302f"
   "6.4.2":
     url: "https://github.com/Taywee/args/archive/6.4.2.tar.gz"
     sha256: "882adaf179471edf0ac468bab67a0ee53979e4efe91fe4992d5b38422067dd85"

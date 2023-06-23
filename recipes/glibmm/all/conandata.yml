@@ -1,4 +1,7 @@
 sources:
+  "2.75.0":
+    url: "https://download.gnome.org/sources/glibmm/2.75/glibmm-2.75.0.tar.xz"
+    sha256: "60bb12e66488aa8ce41f0eb2f3612f89f5ddc887e3e4d45498524bf60b266b3d"
   "2.72.1":
     url: "https://download.gnome.org/sources/glibmm/2.72/glibmm-2.72.1.tar.xz"
     sha256: "2a7649a28ab5dc53ac4dabb76c9f61599fbc628923ab6a7dd74bf675d9155cd8"
@@ -7,13 +10,24 @@ sources:
     sha256: "199ace5682d81b15a1d565480b4a950682f2db6402c8aa5dd7217d71edff81d5"
 
 patches:
+  "2.75.0":
+    - patch_file: "patches/enable_static_libs_2_75_0.patch"
+      patch_type: portability
+      patch_description: enable static library build for msvc
+    - patch_file: "patches/fix_initialization_order_fiasco_2_75_0.patch"
+      patch_type: bugfix
+      patch_description: fix initialization order for static library
   "2.72.1":
     - patch_file: "patches/enable_static_libs_2_72_1.patch"
-      base_path: "source_subfolder"
+      patch_type: portability
+      patch_description: enable static library build for msvc
     - patch_file: "patches/fix_initialization_order_fiasco_2_72_1.patch"
-      base_path: "source_subfolder"
+      patch_type: bugfix
+      patch_description: fix initialization order for static library
   "2.66.4":
     - patch_file: "patches/enable_static_libs_2_66_4.patch"
-      base_path: "source_subfolder"
+      patch_type: portability
+      patch_description: enable static library build for msvc
     - patch_file: "patches/fix_initialization_order_fiasco_2_66_4.patch"
-      base_path: "source_subfolder"
+      patch_type: bugfix
+      patch_description: fix initialization order for static library

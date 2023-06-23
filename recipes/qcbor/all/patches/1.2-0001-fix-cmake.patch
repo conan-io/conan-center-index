@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 486946c..4234a59 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,10 +58,14 @@ target_compile_definitions(qcbor
+         $<$<BOOL:${QCBOR_OPT_DISABLE_FLOAT_ALL}>:USEFULBUF_DISABLE_ALL_FLOAT>
+ )
+ 
+-if (BUILD_SHARED_LIBS)
++if (0)
+     target_compile_options(qcbor PRIVATE -Os -fPIC)
+ endif()
+ 
++set_target_properties(qcbor PROPERTIES
++    WINDOWS_EXPORT_ALL_SYMBOLS ON
++)
++
+ # The math library is needed for floating-point support.
+ # To avoid need for it #define QCBOR_DISABLE_FLOAT_HW_USE
+ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+@@ -75,3 +79,12 @@ endif()
+ if (NOT BUILD_QCBOR_TEST STREQUAL "OFF")
+     add_subdirectory(test)
+ endif()
++
++include(GNUInstallDirs)
++install(TARGETS qcbor
++    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++
++install(DIRECTORY "inc/qcbor" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

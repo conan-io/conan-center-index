@@ -23,7 +23,7 @@ int main(void)
     /* provide a buffer to store errors in */
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
-    /* always cleanup */ 
+    /* always cleanup */
     curl_easy_cleanup(curl);
     printf("Succeed\n");
   } else {

@@ -1,0 +1,11 @@
+--- src/microhttpd/mhd_assert.h
++++ src/microhttpd/mhd_assert.h
+@@ -35,7 +35,7 @@
+ #define NDEBUG 1 /* Use NDEBUG by default */
+ #endif /* !_DEBUG && !NDEBUG */
+ #if defined(_DEBUG) && defined(NDEBUG)
+-#error Both _DEBUG and NDEBUG are defined
++//#error Both _DEBUG and NDEBUG are defined
+ #endif /* _DEBUG && NDEBUG */
+ #ifdef NDEBUG
+ #  define mhd_assert(ignore) ((void) 0)

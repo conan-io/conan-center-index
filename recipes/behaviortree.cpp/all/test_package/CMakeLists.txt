@@ -1,11 +1,16 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(BehaviorTreeV3 CONFIG REQUIRED)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} BT::behaviortree_cpp_v3)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+
+find_package(BehaviorTreeV3 CONFIG)
+if(TARGET BT::behaviortree_cpp_v3)
+    target_link_libraries(${PROJECT_NAME} PRIVATE BT::behaviortree_cpp_v3)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DBEHAVIORTREE_CPP_VERSION=3)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
+else()
+    find_package(BehaviorTree REQUIRED CONFIG)
+    target_link_libraries(${PROJECT_NAME} PRIVATE BT::behaviortree_cpp)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DBEHAVIORTREE_CPP_VERSION=4)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+endif()

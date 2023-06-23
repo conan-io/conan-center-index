@@ -6,7 +6,6 @@ on:
 env:
   PYTHONPATH: ${{github.workspace}}
   PYVER: "3.8"
-  SCORE_THRESHOLD: "9.5"
   REQUIREMENTS: "pylint==2.14"
 
 jobs:
@@ -21,16 +20,20 @@ jobs:
         with:
           files: |
             linter/**
+            .github/workflows/linter-conan-v2.yml
+
       - name: Get Conan v1 version
         id: parse_conan_v1_version
         if: steps.changed_files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
           cmd: yq '.conan.version' '.c3i/config_v1.yml'
+
       - uses: actions/setup-python@v4
         if: steps.changed_files.outputs.any_changed == 'true'
         with:
           python-version: ${{ env.PYVER }}
+
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
@@ -40,41 +43,19 @@ jobs:
         id: linter_recipes
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          pylint --rcfile=linter/pylintrc_recipe recipes/*/*/conanfile.py --output-format=json --output=recipes.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
+          echo '## Linter summary (recipes)' >> $GITHUB_STEP_SUMMARY
+          pylint --rcfile=linter/pylintrc_recipe `ls recipes/*/*/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --score=y --exit-zero
+          jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
+          jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
       - name: Execute linter over all test_package/recipes in the repository
         id: linter_test_package
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          pylint --rcfile=linter/pylintrc_testpackage recipes/*/*/test_*/conanfile.py --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=json --output=test_package.json --score=y --fail-under=${{ env.SCORE_THRESHOLD }}
-
-      - name: Archive production artifacts
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: linter-output
-          path: |
-            recipes.json
-            test_package.json
-
-      - name: Create report (recipes)
-        if: steps.changed_files.outputs.any_changed == 'true' && steps.linter_recipes.outcome != 'skipped' && always()
-        run: |
-          echo '## Linter summary (recipes)' >> $GITHUB_STEP_SUMMARY
-          jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}' recipes.json > recipes2.json
-          jq -r '" * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
-
-      - name: Create report (test_package)
-        if: steps.changed_files.outputs.any_changed == 'true' && steps.linter_test_package.outcome != 'skipped' && always()
-        run: |
           echo '## Linter summary (test_package)' >> $GITHUB_STEP_SUMMARY
-          jq 'map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}'  test_package.json > test_package2.json
-          jq -r '" * \(.message): \(.length)"' test_package2.json >> $GITHUB_STEP_SUMMARY
-
-      - name: Create report
-        if: steps.changed_files.outputs.any_changed == 'true' && always()
-        run: |
-          echo '> Note.- Check uploaded artifacts for a full report.' >> $GITHUB_STEP_SUMMARY
+          pylint --rcfile=linter/pylintrc_testpackage `ls recipes/*/*/test_package/conanfile.py | shuf -n 500` --output-format=json --output=recipes.json --exit-zero
+          jq '[map( select(.type=="error")) | group_by (.message)[] | {message: .[0].message, length: length}] | sort_by(.length) | reverse' recipes.json > recipes2.json
+          jq -r '.[] | " * \(.message): \(.length)"' recipes2.json >> $GITHUB_STEP_SUMMARY
 
   conanfile_recipe:
     name: Lint changed conanfile.py (v2 migration)

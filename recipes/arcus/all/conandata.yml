@@ -5,3 +5,6 @@ sources:
 patches:
   "4.9.1":
     - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/0002-protobuf-compat-ge-3.18.patch"
+      patch_description: "Compatibility with protobuf >= 3.18"
+      patch_type: "portability"

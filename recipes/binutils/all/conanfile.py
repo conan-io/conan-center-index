@@ -1,14 +1,17 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 import re
 import typing
 import unittest
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.54.0"
 
 # This recipe includes a selftest to test conversion of os/arch to triplets (and vice verse)
 # Run it using `python -m unittest conanfile.py`
@@ -17,35 +20,33 @@ required_conan_version = ">=1.43.0"
 class BinutilsConan(ConanFile):
     name = "binutils"
     description = "The GNU Binutils are a collection of binary tools."
+    package_type = "application"
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://www.gnu.org/software/binutils"
-    topics = ("binutils", "ld", "linker", "as", "assembler", "objcopy", "objdump")
+    topics = ("gnu", "ld", "linker", "as", "assembler", "objcopy", "objdump")
     settings = "os", "arch", "compiler", "build_type"
-
-    _PLACEHOLDER_TEXT = "__PLACEHOLDER__"
 
     options = {
         "multilib": [True, False],
         "with_libquadmath": [True, False],
-        "target_arch": "ANY",
-        "target_os": "ANY",
-        "target_triplet": "ANY",
-        "prefix": "ANY",
+        "target_arch": [None, "ANY"],
+        "target_os": [None, "ANY"],
+        "target_triplet": [None, "ANY"],
+        "prefix": [None, "ANY"],
     }
 
     default_options = {
         "multilib": True,
         "with_libquadmath": True,
-        "target_arch": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
-        "target_os": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
-        "target_triplet": _PLACEHOLDER_TEXT,  # Initialized in configure, checked in validate
-        "prefix": _PLACEHOLDER_TEXT,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
+        "target_arch": None,  # Initialized in configure, checked in validate
+        "target_os": None,  # Initialized in configure, checked in validate
+        "target_triplet": None,  # Initialized in configure, checked in validate
+        "prefix": None,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
@@ -56,34 +57,35 @@ class BinutilsConan(ConanFile):
         return getattr(self, "settings_target", None) or self.settings
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def config_options(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        export_conandata_patches(self)
 
     def configure(self):
-        if self.options.target_triplet == self._PLACEHOLDER_TEXT:
-            if self.options.target_arch == self._PLACEHOLDER_TEXT:
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+        if not self.options.target_triplet:
+            if not self.options.target_arch:
                 # If target triplet and target arch are not set, initialize it from the target settings
                 self.options.target_arch = str(self._settings_target.arch)
-            if self.options.target_os == self._PLACEHOLDER_TEXT:
+            if not self.options.target_os:
                 # If target triplet and target os are not set, initialize it from the target settings
                 self.options.target_os = str(self._settings_target.os)
             # Initialize the target_triplet from the target arch and target os
-            self.options.target_triplet = _GNUTriplet.from_archos(_ArchOs(arch=str(self.options.target_arch), os=str(self.options.target_os), extra=dict(self._settings_target.values_list))).triplet
+            self.options.target_triplet = _GNUTriplet.from_archos(_ArchOs(
+                arch=str(self.options.target_arch),
+                os=str(self.options.target_os),
+                extra=dict(self._settings_target.values_list))).triplet
         else:
             gnu_triplet_obj = _GNUTriplet.from_text(str(self.options.target_triplet))
             archos = _ArchOs.from_triplet(gnu_triplet_obj)
-            if self.options.target_arch == self._PLACEHOLDER_TEXT:
+            if not self.options.target_arch:
                 # If target arch is not set, deduce it from the target triplet
                 self.options.target_arch = archos.arch
-            if self.options.target_os == self._PLACEHOLDER_TEXT:
+            if not self.options.target_os:
                 # If target arch is not set, deduce it from the target triplet
                 self.options.target_os = archos.os
 
-        if self.options.prefix == self._PLACEHOLDER_TEXT:
+        if not self.options.prefix:
             self.options.prefix = f"{self.options.target_triplet}-"
 
         self.output.info(f"binutils:target_arch={self.options.target_arch}")
@@ -91,7 +93,7 @@ class BinutilsConan(ConanFile):
         self.output.info(f"binutils:target_triplet={self.options.target_triplet}")
 
     def validate(self):
-        if self.settings.compiler in ("msvc", "Visual Studio"):
+        if is_msvc(self):
             raise ConanInvalidConfiguration("This recipe does not support building binutils by this compiler")
 
         if self.options.target_os == "Macos":
@@ -99,9 +101,9 @@ class BinutilsConan(ConanFile):
 
         # Check whether the actual target_arch and target_os option are valid (they should be in settings.yml)
         # FIXME: does there exist a stable Conan API to accomplish this?
-        if self.options.target_arch not in self.settings.arch.values_range:
+        if str(self.options.target_arch) not in self.settings.arch.values_range:
             raise ConanInvalidConfiguration(f"target_arch={self.options.target_arch} is invalid (possibilities={self.settings.arch.values_range})")
-        if self.options.target_os not in self.settings.os.values_range:
+        if str(self.options.target_os) not in self.settings.os.values_range:
             raise ConanInvalidConfiguration(f"target_os={self.options.target_os} is invalid (possibilities={self.settings.os.values_range})")
 
         target_archos = _ArchOs(str(self.options.target_arch), str(self.options.target_os))
@@ -126,64 +128,79 @@ class BinutilsConan(ConanFile):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type="str"):
+                self.tool_requires("msys2/cci.latest")
+
+        if self.version >= "2.39":
+            self.tool_requires("bison/3.8.2")
+            self.tool_requires("flex/2.6.4")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _exec_prefix(self):
-        return os.path.join(self.package_folder, "bin", "exec_prefix")
+        return os.path.join("bin", "exec_prefix")
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
-        yes_no = lambda tf : "yes" if tf else "no"
-        conf_args = [
-            f"--target={self.options.target_triplet}",
-            f"--enable-multilib={yes_no(self.options.multilib)}",
-            "--with-system-zlib",
-            "--disable-nls",
-            f"--program-prefix={self.options.prefix}",
-            f"exec_prefix={tools.unix_path(self._exec_prefix)}",
-        ]
-        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return autotools
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        def yes_no(opt): return "yes" if opt else "no"
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-nls")
+        tc.configure_args.append(f"--target={self.options.target_triplet}")
+        tc.configure_args.append(f"--enable-multilib={yes_no(self.options.multilib)}")
+        tc.configure_args.append(f"--with-zlib={unix_path(self, self.dependencies['zlib'].package_folder)}")
+        tc.configure_args.append(f"--program-prefix={self.options.prefix}")
+        tc.configure_args.append("--exec_prefix=/bin/exec_prefix")
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
         autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        copy(
+            self,
+            pattern="COPYING*",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+            keep_path=False,
+        )
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
         target_bindir = os.path.join(self._exec_prefix, str(self.options.target_triplet), "bin")
-        self.output.info("Appending PATH environment variable: {}".format(target_bindir))
-        self.env_info.PATH.append(target_bindir)
+        self.cpp_info.bindirs = ["bin", target_bindir]
 
+        absolute_target_bindir = os.path.join(self.package_folder, target_bindir)
+
+        # v1 exports
+        bindir = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(bindir)
+        self.env_info.PATH.append(absolute_target_bindir)
         self.output.info(f"GNU triplet={self.options.target_triplet}")
         self.user_info.gnu_triplet = self.options.target_triplet
-
-        self.output.info(f"executable prefix={self.options.prefix}")
         self.user_info.prefix = self.options.prefix
+        self.output.info(f"executable prefix={self.options.prefix}")
+
+        # v2 exports
+        self.buildenv_info.append_path("PATH", bindir)
+        self.buildenv_info.append_path("PATH", absolute_target_bindir)
+        self.conf_info.define("user.binutils:gnu_triplet", self.options.target_triplet)
+        self.conf_info.define("user.binutils:prefix", self.options.prefix)
 
         # Add recipe path to enable running the self test in the test package.
         # Don't use this property in production code. It's unsupported.
@@ -191,7 +208,7 @@ class BinutilsConan(ConanFile):
 
 
 class _ArchOs:
-    def __init__(self, arch: str, os: str, extra: typing.Optional[typing.Dict[str, str]]=None):
+    def __init__(self, arch: str, os: str, extra: typing.Optional[typing.Dict[str, str]] = None):
         self.arch = arch
         self.os = os
         self.extra = extra if extra is not None else {}
@@ -241,16 +258,16 @@ class _ArchOs:
     @classmethod
     def from_triplet(cls, triplet: "_GNUTriplet") -> "_ArchOs":
         archs = cls.calculate_archs(triplet)
-        os = cls.calculate_os(triplet)
+        _os = cls.calculate_os(triplet)
         extra = {}
 
-        if os == "Android" and triplet.abi:
+        if _os == "Android" and triplet.abi:
             m = re.match(".*([0-9]+)", triplet.abi)
             if m:
                 extra["os.api_level"] = m.group(1)
 
         # Assume first architecture
-        return cls(arch=archs[0], os=os, extra=extra)
+        return cls(arch=archs[0], os=_os, extra=extra)
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):
@@ -300,7 +317,7 @@ class _GNUTriplet:
 
         gnu_machine = parts[0]
         parts = parts[1:]
-        if any(v in parts[-1] for v in  cls.KNOWN_GNU_ABIS):
+        if any(v in parts[-1] for v in cls.KNOWN_GNU_ABIS):
             gnu_abi = parts[-1]
             parts = parts[:-1]
         else:
@@ -324,7 +341,6 @@ class _GNUTriplet:
             gnu_os = None
 
         return cls(gnu_machine, gnu_vendor, gnu_os, gnu_abi)
-
 
     ARCH_TO_GNU_MACHINE_LUT = {
         "x86": "i686",

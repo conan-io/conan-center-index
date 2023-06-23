@@ -1,7 +1,10 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class TracyConan(ConanFile):
@@ -11,21 +14,27 @@ class TracyConan(ConanFile):
     homepage = "https://github.com/wolfpld/tracy"
     url = "https://github.com/conan-io/conan-center-index"
     license = ["BSD-3-Clause"]
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
 
     # Existing CMake tracy options with default value
     _tracy_options = {
         "enable": ([True, False], True),
+        "on_demand": ([True, False], False),
         "callstack": ([True, False], False),
+        "no_callstack": ([True, False], False),
+        "no_callstack_inlines": ([True, False], False),
         "only_localhost": ([True, False], False),
         "no_broadcast": ([True, False], False),
+        "only_ipv": ([True, False], False),
         "no_code_transfer": ([True, False], False),
         "no_context_switch": ([True, False], False),
         "no_exit": ([True, False], False),
-        "no_frame_image": ([True, False], False),
         "no_sampling": ([True, False], False),
         "no_verify": ([True, False], False),
         "no_vsync_capture": ([True, False], False),
+        "no_frame_image": ([True, False], False),
+        "no_system_tracing": ([True, False], False),
+        "delayed_init": ([True, False], False),
     }
     options = {
         "shared": [True, False],
@@ -38,58 +47,72 @@ class TracyConan(ConanFile):
         **{k: v[1] for k, v in _tracy_options.items()},
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-
+    def generate(self):
+        tc = CMakeToolchain(self)
         # Set all tracy options in the correct form
         # For example, TRACY_NO_EXIT
         for opt in self._tracy_options.keys():
             switch = getattr(self.options, opt)
-            opt = 'TRACY_' + opt.upper()
-            self._cmake.definitions[opt] = switch
-
-        self._cmake.configure()
-        return self._cmake
+            opt = f"TRACY_{opt.upper()}"
+            tc.variables[opt] = switch
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        self._cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "LICENSE", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["TracyClient"]
+        self.cpp_info.set_property("cmake_file_name", "Tracy")
+        self.cpp_info.set_property("cmake_target_name", "Tracy::TracyClient")
+        # TODO: back to global scope in conan v2
+        self.cpp_info.components["tracyclient"].libs = ["TracyClient"]
+        if self.options.shared:
+            self.cpp_info.components["tracyclient"].defines.append(
+                "TRACY_IMPORTS")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["tracyclient"].system_libs.append(
+                "pthread")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.components["tracyclient"].system_libs.append("dl")
+
+        # Tracy CMake adds options set to ON as public
+        for opt in self._tracy_options.keys():
+            switch = getattr(self.options, opt)
+            opt = f"TRACY_{opt.upper()}"
+            if switch:
+                self.cpp_info.components["tracyclient"].defines.append(opt)
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "Tracy"
+        self.cpp_info.names["cmake_find_package_multi"] = "Tracy"
+        self.cpp_info.components["tracyclient"].names["cmake_find_package"] = "TracyClient"
+        self.cpp_info.components["tracyclient"].names["cmake_find_package_multi"] = "TracyClient"
+        self.cpp_info.components["tracyclient"].set_property(
+            "cmake_target_name", "Tracy::TracyClient")

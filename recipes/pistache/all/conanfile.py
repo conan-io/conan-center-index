@@ -1,9 +1,18 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
+from conan.tools.build import check_min_cppstd
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import PkgConfigDeps
+
 import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.53.0"
 
 class PistacheConan(ConanFile):
     name = "pistache"
@@ -25,30 +34,29 @@ class PistacheConan(ConanFile):
         "with_ssl": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        if self.version == "cci.20201127":
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("rapidjson/1.1.0")
+        self.requires("rapidjson/cci.20220822")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1s")
+        if self.version != "cci.20201127":
+            self.requires("date/3.0.1")
 
     def validate(self):
         compilers = {
@@ -56,63 +64,106 @@ class PistacheConan(ConanFile):
             "clang": "6",
         }
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Pistache is only support by Linux.")
+            raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
 
         if self.settings.compiler == "clang":
             raise ConanInvalidConfiguration("Clang support is broken. See pistacheio/pistache#835.")
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
-            if tools.Version(self.settings.compiler.version) < minimum_compiler:
-                raise ConanInvalidConfiguration("Pistache requires c++17, which your compiler does not support.")
+            if Version(self.settings.compiler.version) < minimum_compiler:
+                raise ConanInvalidConfiguration(f"{self.ref} requires c++17, which your compiler does not support.")
         else:
-            self.output.warn("Pistache requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+            self.output.warn(f"{self.ref} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+
+    def build_requirements(self):
+        if self.version != "cci.20201127":
+            self.tool_requires("meson/1.0.0")
+            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PISTACHE_ENABLE_NETWORK_TESTS"] = False
-        self._cmake.definitions["PISTACHE_USE_SSL"] = self.options.with_ssl
-        # pistache requires explicit value for fPIC
-        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        if self.version == "cci.20201127":
+            tc = CMakeToolchain(self)
+            tc.variables["PISTACHE_ENABLE_NETWORK_TESTS"] = False
+            tc.variables["PISTACHE_USE_SSL"] = self.options.with_ssl
+            # pistache requires explicit value for fPIC
+            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+            tc.generate()
+
+            tc = CMakeDeps(self)
+            tc.generate()
+        else:
+            tc = MesonToolchain(self)
+            tc.project_options["PISTACHE_USE_SSL"] = self.options.with_ssl
+            tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
+            tc.project_options["PISTACHE_BUILD_TESTS"] = False
+            tc.project_options["PISTACHE_BUILD_DOCS"] = False
+            tc.generate()
+
+            tc = PkgConfigDeps(self)
+            tc.generate()
+
+            env = VirtualBuildEnv(self)
+            env.generate(scope="build")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
+        apply_conandata_patches(self)
+        if self.version != "cci.20201127":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                                    "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep']),",
+                                    "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep']),")
+
+        if self.version == "cci.20201127":
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
+        else:
+            meson = Meson(self)
+            meson.configure()
+            meson.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if self.version == "cci.20201127":
+            cmake = CMake(self)
+            cmake.install()
+        else:
+            meson = Meson(self)
+            meson.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # TODO: Pistache does not use namespace
         # TODO: Pistache variables are CamelCase e.g Pistache_BUILD_DIRS
-        self.cpp_info.filenames["cmake_find_package"] = "Pistache"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Pistache"
-        self.cpp_info.names["pkg_config"] = "libpistache"
-        suffix = "_{}".format("shared" if self.options.shared else "static")
-        self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
-        self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix
-        self.cpp_info.components["libpistache"].libs = tools.collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "Pistache")
+        self.cpp_info.set_property("cmake_target_name", "Pistache::Pistache")
+        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
+        self.cpp_info.set_property("pkg_config_name", "libpistache")
+
+        self.cpp_info.components["libpistache"].libs = collect_libs(self)
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
             self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
         if self.settings.os == "Linux":
             self.cpp_info.components["libpistache"].system_libs = ["pthread"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "Pistache"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Pistache"
+        self.cpp_info.names["cmake_find_package"] = "Pistache"
+        self.cpp_info.names["cmake_find_package_multi"] = "Pistache"
+        self.cpp_info.names["pkg_config"] = "libpistache"
+        suffix = "_{}".format("shared" if self.options.shared else "static")
+        self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
+        self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix

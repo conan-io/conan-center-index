@@ -1,17 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
+
+required_conan_version = ">=1.53.0"
 
 
 class EasyhttpcppConan(ConanFile):
     name = "easyhttpcpp"
     description = "A cross-platform HTTP client library with a focus on usability and speed"
-    license = ("MIT",)
-    topics = ("conan", "easyhttpcpp", "http", "client", "protocol")
+    license = "MIT"
+    topics = ("http", "client", "protocol")
     homepage = "https://github.com/sony/easyhttpcpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,9 +26,15 @@ class EasyhttpcppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
     short_paths = True
 
-    _cmake = None
+    @property
+    def _min_cppstd(self):
+        return "11"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -31,20 +42,13 @@ class EasyhttpcppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("poco/1.10.1")
-        if self.settings.os != "Windows":
-            self.requires("openssl/1.1.1g")
+        self.requires("poco/1.12.4", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_poco_components(self):
@@ -55,42 +59,67 @@ class EasyhttpcppConan(ConanFile):
             comps.append("enable_netssl")
         return comps
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FORCE_SHAREDLIB"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+    def validate(self):
+        if any([not self.dependencies["poco"].options.get_safe(comp, False) for comp in self._required_poco_components]):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires the following poco options enabled: {', '.join(self._required_poco_components)}"
+            )
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["FORCE_SHAREDLIB"] = self.options.shared
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if self.settings.os == "Windows" and self.options.shared:
+            tc.preprocessor_definitions["EASYHTTPCPP_DLL"] = "1"
+            tc.preprocessor_definitions["EASYHTTPCPP_API_EXPORTS"] = "1"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for comp in self._required_poco_components:
-            if not getattr(self.options["poco"], comp):
-                raise ConanInvalidConfiguration("{} requires the following poco option enabled: '{}'".format(self.name, comp))
-
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "easyhttpcppeasyhttp")
+        self.cpp_info.set_property("cmake_target_name", "easyhttpcpp::easyhttp")
+        # TODO: back to global scope in conan v2
         libsuffix = ""
         if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                if not self.options.shared:
-                    libsuffix += "md"
+            if self.settings.os == "Windows" and not self.options.shared:
+                libsuffix += "md"
             libsuffix += "d"
-        self.cpp_info.libs = ["easyhttp{}".format(libsuffix)]
+        self.cpp_info.components["easyhttp"].libs = [f"easyhttp{libsuffix}"]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("EASYHTTPCPP_DLL")
-        self.cpp_info.names["cmake_find_package"] = "easyhttpcppeasyhttp"
-        self.cpp_info.names["cmake_find_package_multi"] = "easyhttpcppeasyhttp"
+            self.cpp_info.components["easyhttp"].defines.append("EASYHTTPCPP_DLL")
+        self.cpp_info.components["easyhttp"].requires = [
+            "poco::poco_foundation", "poco::poco_data",
+            "poco::poco_datasqlite", "poco::poco_net",
+        ]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["easyhttp"].requires.append("poco::poco_netsslwin")
+        else:
+            self.cpp_info.components["easyhttp"].requires.append("poco::poco_netssl")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.filenames["cmake_find_package"] = "easyhttpcppeasyhttp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "easyhttpcppeasyhttp"
+        self.cpp_info.names["cmake_find_package"] = "easyhttpcpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "easyhttpcpp"
+        self.cpp_info.components["easyhttp"].names["cmake_find_package"] = "easyhttp"
+        self.cpp_info.components["easyhttp"].names["cmake_find_package_multi"] = "easyhttp"
+        self.cpp_info.components["easyhttp"].set_property("cmake_target_name", "easyhttpcpp::easyhttp")

@@ -1,17 +1,19 @@
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
+import shutil
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.55.0"
 
 
 class M4Conan(ConanFile):
     name = "m4"
+    package_type = "application"
     description = "GNU M4 is an implementation of the traditional Unix macro processor"
     topics = ("macro", "preprocessor")
     homepage = "https://www.gnu.org/software/m4/"
@@ -34,31 +36,16 @@ class M4Conan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
-                self.tool_requires("msys2/cci.latest")
             self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
-        env = Environment()
-        env.prepend_path("PATH", self.source_folder)
-        env.vars(self).save_script("m4buildenv_help2man_trick")
-
-        if is_msvc(self):
-            env = Environment()
-            env.define_path("AR", f"{unix_path(self, self.source_folder)}/build-aux/ar-lib lib")
-            env.define("LD", "link")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
-            env.vars(self).save_script("m4buildenv_msvc_for_autotools")
 
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
@@ -75,23 +62,37 @@ class M4Conan(ConanFile):
             ])
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 tc.extra_ldflags.append("-PDB")
-        elif self.settings.compiler == "clang":
-            if Version(self.version) < "1.4.19":
-                tc.extra_cflags.extend([
-                    "-rtlib=compiler-rt",
-                    "-Wno-unused-command-line-argument",
-                ])
+        elif self.settings.compiler == "clang" and Version(self.version) < "1.4.19":
+            tc.extra_cflags.extend([
+                "-rtlib=compiler-rt",
+                "-Wno-unused-command-line-argument",
+            ])
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
-        tc.generate()
+        env = tc.environment()
+        # help2man trick
+        env.prepend_path("PATH", self.source_folder)
+        # handle msvc
+        if is_msvc(self):
+            ar_wrapper = unix_path(self, os.path.join(self.source_folder, "build-aux", "ar-lib"))
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("AR", f"{ar_wrapper} lib")
+            env.define("LD", "link")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+        tc.generate(env)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # dummy file for configure
-        help2man = os.path.join(self.source_folder, "help2man")
-        save(self, help2man, "#!/usr/bin/env bash\n:")
-        if os.name == "posix":
-            os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
+        if shutil.which("help2man") == None:
+            # dummy file for configure
+            help2man = os.path.join(self.source_folder, "help2man")
+            save(self, help2man, "#!/usr/bin/env bash\n:")
+            if os.name == "posix":
+                os.chmod(help2man, os.stat(help2man).st_mode | 0o111)
 
     def build(self):
         self._patch_sources()
@@ -102,8 +103,7 @@ class M4Conan(ConanFile):
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):

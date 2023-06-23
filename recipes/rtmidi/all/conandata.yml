@@ -8,6 +8,7 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-add-a-separate-licence-file-0b5d67c.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/4.0.0-0002-rtmidiconfig-install-location-da51f21.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/4.0.0-0003-relocatable-macos.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "conan"

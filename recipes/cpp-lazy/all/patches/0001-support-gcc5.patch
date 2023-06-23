@@ -1,0 +1,297 @@
+diff --git a/include/Lz/FunctionTools.hpp b/include/Lz/FunctionTools.hpp
+index 5beebed..9b1e3c7 100644
+--- a/include/Lz/FunctionTools.hpp
++++ b/include/Lz/FunctionTools.hpp
+@@ -91,7 +91,7 @@ LZ_NODISCARD StringSplitter<SubString, String, char> lines(const String& string)
+  * @return The result of the sum from [from, upToAndIncluding]
+  */
+ template<class T>
+-LZ_NODISCARD constexpr T sumTo(const T from, const T upToAndIncluding) {
++LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T sumTo(const T from, const T upToAndIncluding) {
+     static_assert(std::is_integral<T>::value, "T must be integral type");
+     const T fromAbs = from < 0 ? -from : from;
+     const T toAbs = upToAndIncluding < 0 ? -upToAndIncluding : upToAndIncluding;
+@@ -114,7 +114,7 @@ LZ_NODISCARD constexpr T sumTo(const T from, const T upToAndIncluding) {
+  * @return The result of the sum from [0, upToAndIncluding]
+  */
+ template<class T>
+-LZ_NODISCARD constexpr T sumTo(const T upToAndIncluding) {
++LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T sumTo(const T upToAndIncluding) {
+     return lz::sumTo(0, upToAndIncluding);
+ }
+ 
+@@ -1241,7 +1241,7 @@ bool startsWith(IteratorA beginA, IteratorA endA, IteratorB beginB, IteratorB en
+     return std::search(std::move(beginA), std::move(endA), std::move(beginB), std::move(endB), std::move(compare)) != endA;
+ }
+ 
+-template<class IterableA, class IterableB, class BinaryPredicate = MAKE_BIN_OP(std::equal_to, internal::ValueTypeIterable<Iterable>)>
++template<class IterableA, class IterableB, class BinaryPredicate = MAKE_BIN_OP(std::equal_to, internal::ValueTypeIterable<IterableA>)>
+ bool startsWith(const IterableA& a, const IterableB& b, BinaryPredicate compare = {}) {
+     return lz::startsWith(std::begin(a), std::end(a), std::begin(b), std::end(b), std::move(compare));
+ }
+@@ -1255,7 +1255,7 @@ bool endsWith(IteratorA beginA, IteratorA endA, IteratorB beginB, IteratorB endB
+     return lz::startsWith(std::move(revBegA), std::move(revEndA), std::move(revBegB), std::move(revEndB), std::move(compare));
+ }
+ 
+-template<class IterableA, class IterableB, class BinaryPredicate = MAKE_BIN_OP(std::equal_to, internal::ValueTypeIterable<Iterable>)>
++template<class IterableA, class IterableB, class BinaryPredicate = MAKE_BIN_OP(std::equal_to, internal::ValueTypeIterable<IterableA>)>
+ bool endsWith(const IterableA& a, const IterableB& b, BinaryPredicate compare = {}) {
+     return lz::endsWith(std::begin(a), std::end(a), std::begin(b), std::end(b), std::move(compare));
+ }
+diff --git a/include/Lz/Zip.hpp b/include/Lz/Zip.hpp
+index a3e1560..95c6cf5 100644
+--- a/include/Lz/Zip.hpp
++++ b/include/Lz/Zip.hpp
+@@ -15,7 +15,7 @@ Tuple createFakeEnd(const Tuple& begin, Tuple end, IndexSequence<Is...>) {
+     // If we use begin + smallestLength, we get compile errors for non random access iterators. However, we know that we are
+     // dealing with a random access iterator, so std::next does a + internally. It is implemented this way to prevent more
+     // enable_if's from appearing
+-    return { std::next(std::get<Is>(begin), smallestLength)... };
++    return Tuple{ std::next(std::get<Is>(begin), smallestLength)... };
+ }
+ } // namespace internal
+ 
+diff --git a/include/Lz/detail/BasicIteratorView.hpp b/include/Lz/detail/BasicIteratorView.hpp
+index 176f878..b5cbff1 100644
+--- a/include/Lz/detail/BasicIteratorView.hpp
++++ b/include/Lz/detail/BasicIteratorView.hpp
+@@ -641,7 +641,7 @@ view(Iterable&& iterable) {
+ template<class IterableA, class IterableB,
+          class BinaryPredicate = MAKE_BIN_OP(std::equal_to, internal::ValueTypeIterable<IterableA>)>
+ bool equal(const IterableA& a, const IterableB& b, BinaryPredicate predicate = {}) {
+-    return std::equal(std::begin(a), std::end(a), std::begin(b), std::end(b), std::move(predicate));
++    return std::equal(std::begin(a), std::end(a), std::begin(b), std::move(predicate));
+ }
+ #    else  // ^^^ !LZ_HAS_EXECUTION vvv LZ_HAS_EXECUTION
+ /**
+diff --git a/include/Lz/detail/CartesianProductIterator.hpp b/include/Lz/detail/CartesianProductIterator.hpp
+index 554e75c..3c63d90 100644
+--- a/include/Lz/detail/CartesianProductIterator.hpp
++++ b/include/Lz/detail/CartesianProductIterator.hpp
+@@ -209,7 +209,7 @@ private:
+ 
+     template<std::size_t... Is>
+     LZ_CONSTEXPR_CXX_20 reference dereference(IndexSequence<Is...>) const {
+-        return { *std::get<Is>(_iterator)... };
++        return reference{ *std::get<Is>(_iterator)... };
+     }
+ 
+     template<std::size_t... Is>
+diff --git a/include/Lz/detail/FunctionContainer.hpp b/include/Lz/detail/FunctionContainer.hpp
+index c08d9ff..7b721a2 100644
+--- a/include/Lz/detail/FunctionContainer.hpp
++++ b/include/Lz/detail/FunctionContainer.hpp
+@@ -28,7 +28,7 @@ class FunctionContainer {
+         _isConstructed = true;
+     }
+ 
+-    constexpr void reset() noexcept {
++    LZ_CONSTEXPR_CXX_14 void reset() noexcept {
+         if (_isConstructed) {
+             _func.~Func();
+             _isConstructed = false;
+diff --git a/include/Lz/detail/LzTools.hpp b/include/Lz/detail/LzTools.hpp
+index 919688a..8f57dce 100644
+--- a/include/Lz/detail/LzTools.hpp
++++ b/include/Lz/detail/LzTools.hpp
+@@ -223,6 +223,8 @@ using Decay = typename std::decay<T>::type;
+ 
+ template<std::size_t I, class T>
+ using TupleElement = typename std::tuple_element<I, T>::type;
++
++#        define MAKE_BIN_OP(OP, VALUE_TYPE) OP<VALUE_TYPE>
+ #    else // ^^^ has cxx 11 vvv cxx > 11
+ template<std::size_t... N>
+ using IndexSequence = std::index_sequence<N...>;
+@@ -364,7 +366,7 @@ template<class Iterator>
+ struct IsRandomAccess : IsRandomAccessTag<IterCat<Iterator>> {};
+ 
+ template<LZ_CONCEPT_INTEGRAL Arithmetic>
+-inline constexpr bool isEven(const Arithmetic value) noexcept {
++LZ_CONSTEXPR_CXX_14 bool isEven(const Arithmetic value) noexcept {
+     return (value % 2) == 0;
+ }
+ 
+@@ -373,7 +375,7 @@ inline constexpr void decompose(const Ts&...) noexcept {
+ }
+ 
+ template<LZ_CONCEPT_INTEGRAL Arithmetic>
+-inline constexpr Arithmetic roundEven(const Arithmetic a, const Arithmetic b) noexcept {
++LZ_CONSTEXPR_CXX_14 Arithmetic roundEven(const Arithmetic a, const Arithmetic b) noexcept {
+     LZ_ASSERT(a != 0 && b != 0, "division by zero error");
+     if (b == 1) {
+         return a;
+diff --git a/include/Lz/detail/Optional.hpp b/include/Lz/detail/Optional.hpp
+index 12bbf3f..885a50a 100644
+--- a/include/Lz/detail/Optional.hpp
++++ b/include/Lz/detail/Optional.hpp
+@@ -39,7 +39,7 @@ public:
+     constexpr Optional(U&& value) : _value(std::forward<U>(value)), _hasValue(true) {
+     }
+ 
+-    constexpr Optional(Optional<T>&& right) noexcept(noexcept(construct(std::move(right.value())))) {
++    LZ_CONSTEXPR_CXX_14 Optional(Optional<T>&& right) noexcept {
+         if (right) {
+             construct(std::move(right.value()));
+         }
+@@ -55,7 +55,7 @@ public:
+     }
+ 
+     template<class U = T>
+-    constexpr Optional&
++    LZ_CONSTEXPR_CXX_14 Optional&
+     operator=(U&& value) noexcept {
+         if (_hasValue) {
+             _value = std::forward<U>(value);
+@@ -70,35 +70,35 @@ public:
+         return _hasValue;
+     }
+ 
+-    constexpr const T& value() const {
++    LZ_CONSTEXPR_CXX_14 const T& value() const {
+         if (_hasValue) {
+             return _value;
+         }
+         throw std::runtime_error("Cannot get uninitialized optional");
+     }
+ 
+-    constexpr T& value() {
++    LZ_CONSTEXPR_CXX_14 T& value() {
+         if (_hasValue) {
+             return _value;
+         }
+         throw std::runtime_error("Cannot get uninitialized optional");
+     }
+ 
+-    constexpr T& operator*() noexcept {
++    LZ_CONSTEXPR_CXX_14 T& operator*() noexcept {
+         return _value;
+     }
+ 
+-    constexpr const T& operator*() const noexcept {
++    LZ_CONSTEXPR_CXX_14 const T& operator*() const noexcept {
+         return _value;
+     }
+ 
+     template<class U>
+-    constexpr T value_or(U&& v) const& {
++    LZ_CONSTEXPR_CXX_14 T value_or(U&& v) const& {
+         return bool(*this) ? this->value() : static_cast<T>(std::forward<U>(v));
+     }
+ 
+     template<class U>
+-    constexpr T value_or(U&& v) && {
++    LZ_CONSTEXPR_CXX_14 T value_or(U&& v) && {
+         return bool(*this) ? std::move(this->value()) : static_cast<T>(std::forward<U>(v));
+     }
+ };
+diff --git a/include/Lz/detail/RangeIterator.hpp b/include/Lz/detail/RangeIterator.hpp
+index 34ca280..7be29b2 100644
+--- a/include/Lz/detail/RangeIterator.hpp
++++ b/include/Lz/detail/RangeIterator.hpp
+@@ -25,7 +25,7 @@ EnableIf<std::is_floating_point<ValueType>::value, std::ptrdiff_t> plusImpl(cons
+ }
+ 
+ template<class ValueType>
+-constexpr EnableIf<!std::is_floating_point<ValueType>::value, std::ptrdiff_t>
++LZ_CONSTEXPR_CXX_14 EnableIf<!std::is_floating_point<ValueType>::value, std::ptrdiff_t>
+ plusImpl(const ValueType difference, const ValueType step) noexcept {
+     return static_cast<std::ptrdiff_t>(roundEven(difference, step));
+ }
+@@ -95,23 +95,23 @@ public:
+         return *(*this + offset);
+     }
+ 
+-    constexpr RangeIterator& operator+=(const difference_type value) noexcept {
++    LZ_CONSTEXPR_CXX_14 RangeIterator& operator+=(const difference_type value) noexcept {
+         _iterator += static_cast<Arithmetic>(value) * _step;
+         return *this;
+     }
+ 
+-    LZ_NODISCARD constexpr RangeIterator operator+(const difference_type value) const noexcept {
++    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 RangeIterator operator+(const difference_type value) const noexcept {
+         RangeIterator tmp(*this);
+         tmp += value;
+         return tmp;
+     }
+ 
+-    constexpr RangeIterator operator-=(const difference_type value) noexcept {
++    LZ_CONSTEXPR_CXX_14 RangeIterator operator-=(const difference_type value) noexcept {
+         _iterator -= static_cast<Arithmetic>(value) * _step;
+         return *this;
+     }
+ 
+-    LZ_NODISCARD constexpr RangeIterator operator-(const difference_type value) const noexcept {
++    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 RangeIterator operator-(const difference_type value) const noexcept {
+         RangeIterator tmp(*this);
+         tmp -= value;
+         return tmp;
+diff --git a/include/Lz/detail/SplitIterator.hpp b/include/Lz/detail/SplitIterator.hpp
+index e4e58a3..564632e 100644
+--- a/include/Lz/detail/SplitIterator.hpp
++++ b/include/Lz/detail/SplitIterator.hpp
+@@ -26,12 +26,12 @@ class SplitIterator {
+     }
+ #    else
+     template<class T = StringType>
+-    EnableIf<std::is_same<char, T>::value, std::size_t> getDelimiterLength() const {
++    constexpr EnableIf<std::is_same<char, T>::value, std::size_t> getDelimiterLength() const {
+         return 1;
+     }
+ 
+     template<class T = StringType>
+-    EnableIf<!std::is_same<char, T>::value, std::size_t> getDelimiterLength() const {
++    LZ_CONSTEXPR_CXX_20 EnableIf<!std::is_same<char, T>::value, std::size_t> getDelimiterLength() const {
+         return _delimiter.length();
+     }
+ #    endif
+@@ -70,12 +70,12 @@ public:
+         return FakePointerProxy<decltype(**this)>(**this);
+     }
+ 
+-    constexpr friend bool operator!=(const SplitIterator& a, const SplitIterator& b) noexcept {
++    LZ_CONSTEXPR_CXX_14 friend bool operator!=(const SplitIterator& a, const SplitIterator& b) noexcept {
+         LZ_ASSERT(a._delimiter == b._delimiter, "incompatible iterator types, found different delimiters");
+         return a._currentPos != b._currentPos;
+     }
+ 
+-    constexpr friend bool operator==(const SplitIterator& a, const SplitIterator& b) noexcept {
++    LZ_CONSTEXPR_CXX_14 friend bool operator==(const SplitIterator& a, const SplitIterator& b) noexcept {
+         return !(a != b); // NOLINT
+     }
+ 
+diff --git a/include/Lz/detail/ZipIterator.hpp b/include/Lz/detail/ZipIterator.hpp
+index 085c816..50e1668 100644
+--- a/include/Lz/detail/ZipIterator.hpp
++++ b/include/Lz/detail/ZipIterator.hpp
+@@ -26,7 +26,7 @@ private:
+ 
+     template<std::size_t... I>
+     LZ_CONSTEXPR_CXX_20 reference dereference(IndexSequence<I...>) const {
+-        return { *std::get<I>(_iterators)... };
++        return reference{ *std::get<I>(_iterators)... };
+     }
+ 
+     template<std::size_t... I>
+diff --git a/include/Lz/detail/ZipLongestIterator.hpp b/include/Lz/detail/ZipLongestIterator.hpp
+index 2263cd9..4959996 100644
+--- a/include/Lz/detail/ZipLongestIterator.hpp
++++ b/include/Lz/detail/ZipLongestIterator.hpp
+@@ -48,7 +48,7 @@ private:
+ 
+     template<std::size_t... I>
+     LZ_CONSTEXPR_CXX_20 value_type dereference(IndexSequence<I...>) const {
+-        return { dereferenceOne(std::get<I>(_iterators), std::get<I>(_end))... };
++        return value_type{ dereferenceOne(std::get<I>(_iterators), std::get<I>(_end))... };
+     }
+ 
+     template<std::size_t... I>
+@@ -137,7 +137,7 @@ private:
+ 
+     template<std::size_t... I>
+     LZ_CONSTEXPR_CXX_20 value_type dereference(IndexSequence<I...>) const {
+-        return { dereferenceOne(std::get<I>(_iterators), std::get<I>(_end))... };
++        return value_type{ dereferenceOne(std::get<I>(_iterators), std::get<I>(_end))... };
+     }
+ 
+     template<std::size_t... I>

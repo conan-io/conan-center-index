@@ -1,5 +1,5 @@
---- /Source/FreeImage/MultiPage.cpp
-+++ /Source/FreeImage/MultiPage.cpp
+--- a/Source/FreeImage/MultiPage.cpp
++++ b/Source/FreeImage/MultiPage.cpp
 @@ -271,8 +271,8 @@ FreeImage_OpenMultiBitmap(FREE_IMAGE_FORMAT fif, const char *filename, BOOL crea
  					}
  				}

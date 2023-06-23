@@ -1,0 +1,31 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -122,7 +122,7 @@ if (TARGET Vulkan::Headers)
+     get_target_property(VulkanHeaders_INCLUDE_DIRS Vulkan::Headers INTERFACE_INCLUDE_DIRECTORIES)
+     get_target_property(VulkanRegistry_DIR Vulkan::Registry INTERFACE_INCLUDE_DIRECTORIES)
+ else()
+-    find_package(VulkanHeaders REQUIRED)
++    find_package(VulkanHeaders REQUIRED MODULE)
+ 
+     # xxxnsubtil: this should eventually be replaced by exported targets
+     add_library(Vulkan-Headers INTERFACE)
+@@ -174,7 +174,7 @@ if(UNIX AND NOT APPLE) # i.e. Linux
+     endif()
+ 
+     if(BUILD_WSI_WAYLAND_SUPPORT)
+-        find_package(Wayland REQUIRED)
++        find_package(Wayland REQUIRED MODULE)
+         include_directories(${WAYLAND_CLIENT_INCLUDE_DIR})
+     endif()
+ endif()
+--- a/cmake/FindVulkanHeaders.cmake
++++ b/cmake/FindVulkanHeaders.cmake
+@@ -63,7 +63,7 @@ if(DEFINED VULKAN_HEADERS_INSTALL_DIR)
+       NO_DEFAULT_PATH)
+   find_path(VulkanRegistry_DIR
+       NAMES vk.xml
+-      HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry
++      HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry
+       NO_CMAKE_FIND_ROOT_PATH
+       NO_DEFAULT_PATH)
+ else()

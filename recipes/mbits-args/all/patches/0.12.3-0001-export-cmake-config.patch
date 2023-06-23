@@ -1,0 +1,36 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3d9271c..28c176f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,9 +9,6 @@ set(PROJECT_VERSION_STABILITY "") # or "-alpha", or "-beta", or "-rc.5"
+ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+   message(STATUS "Libargs: Standalone")
+ 
+-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+-  conan_basic_setup(TARGETS)
+-
+   set(LIBARG_TESTING_DEFAULT ON)
+   set(LIBARG_INSTALL_DEFAULT ON)
+   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+@@ -123,8 +120,9 @@ target_compile_definitions(args PRIVATE LIBARGS_EXPORTING)
+ target_compile_features(args PRIVATE cxx_std_17)
+ target_include_directories(args
+   PUBLIC
+-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+-    ${CMAKE_CURRENT_BINARY_DIR}/include
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
++    $<INSTALL_INTERFACE:include>
+   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+ 
+ if (LIBARGS_SHARED)
+@@ -149,7 +147,8 @@ endif()
+ ##################################################################
+ 
+ if (LIBARGS_INSTALL)
+-  install(TARGETS args)
++  install(TARGETS args EXPORT mbits)
++  install(EXPORT mbits NAMESPACE "mbits::" DESTINATION lib/cmake)
+   install(DIRECTORY include/args DESTINATION include)
+   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/args/version.hpp" DESTINATION include/args)
+ endif()

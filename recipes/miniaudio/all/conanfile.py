@@ -1,19 +1,20 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, copy
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.layout import basic_layout
 import os
-import textwrap
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class MiniaudioConan(ConanFile):
     name = "miniaudio"
     description = "A single file audio playback and capture library."
-    topics = ("miniaudio", "header-only", "sound")
-    homepage = "https://github.com/mackron/miniaudio"
-    url = "https://github.com/conan-io/conan-center-index"
     license = ["Unlicense", "MIT-0"]
-    settings = "os", "compiler", "build_type", "arch"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mackron/miniaudio"
+    topics = ("audio", "header-only", "sound")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,66 +26,74 @@ class MiniaudioConan(ConanFile):
         "header_only": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        self.license = "miniaudio-{}".format(self.version)
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if self.options.header_only or self.options.shared:
+            self.options.rm_safe("fPIC")
+        if self.options.header_only:
+            del self.options.shared
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        if self.options.header_only:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        if self.info.options.header_only:
+            self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["MINIAUDIO_VERSION_STRING"] = self.version
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        if self.options.header_only:
+            return
+
+        tc = CMakeToolchain(self)
+        tc.variables["MINIAUDIO_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["MINIAUDIO_VERSION_STRING"] = self.version
+        tc.generate()
 
     def build(self):
         if self.options.header_only:
             return
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        self.copy(
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
             pattern="**",
-            dst="include/extras",
-            src=os.path.join(self._source_subfolder, "extras"),
+            dst=os.path.join(self.package_folder, "include", "extras"),
+            src=os.path.join(self.source_folder, "extras"),
         )
 
         if self.options.header_only:
-            self.copy(pattern="miniaudio.h", dst="include",
-                      src=self._source_subfolder)
-            self.copy(
+            copy(
+                self,
+                pattern="miniaudio.h",
+                dst=os.path.join(self.package_folder, "include"),
+                src=self.source_folder)
+            copy(
+                self,
                 pattern="miniaudio.*",
-                dst="include/extras/miniaudio_split",
-                src=os.path.join(self._source_subfolder,
-                                 "extras/miniaudio_split"),
+                dst=os.path.join(self.package_folder, "include", "extras", "miniaudio_split"),
+                src=os.path.join(self.source_folder, "extras", "miniaudio_split"),
             )
         else:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
             cmake.install()
 
     def package_info(self):
@@ -98,11 +107,10 @@ class MiniaudioConan(ConanFile):
             )
             self.cpp_info.defines.append("MA_NO_RUNTIME_LINKING=1")
 
-        if not self.options.header_only:
+        if self.options.header_only:
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
+        else:
             self.cpp_info.libs = ["miniaudio"]
             if self.options.shared:
                 self.cpp_info.defines.append("MA_DLL")
-
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
