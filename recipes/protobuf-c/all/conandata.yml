@@ -5,5 +5,5 @@ sources:
 patches:
   "1.4.1":
     - patch_file: "patches/1.4.1-cmake-protobuf-target.patch"
-      patch_description: "Fixup the build"
+      patch_description: "Fit Protobuf directory variables to official targets"
       patch_type: conan

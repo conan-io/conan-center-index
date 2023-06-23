@@ -55,6 +55,7 @@ class ProtobufCConan(ConanFile):
     def build_requirements(self):
         # Since the package using protobuf-c will also need to use protoc (part of protobuf),
         # we want to make sure the protobuf dep is visible, but the visible param is only available in v2
+        # TODO: Remove after dropping Conan 1.x
         if conan_version >= Version("2"):
             self.tool_requires("protobuf/3.21.9", visible=True)
         else:
