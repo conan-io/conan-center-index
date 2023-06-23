@@ -43,7 +43,7 @@ class DCMTKConan(ConanFile):
         "fPIC": True,
         "with_applications": False,
         "with_multithreading": True,
-        "charset_conversion": "libiconv",
+        "charset_conversion": "icu",
         "with_libxml2": True,
         "with_zlib": True,
         "with_openssl": True,
