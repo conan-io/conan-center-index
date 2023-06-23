@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -137,6 +137,8 @@ class Stlab(ConanFile):
         tc.variables["STLAB_NO_STD_COROUTINES"] = self.options.no_std_coroutines
         tc.variables["STLAB_THREAD_SYSTEM"] = self.options.thread_system
         tc.variables["STLAB_TASK_SYSTEM"] = self.options.task_system
+        if cross_building(self):
+            tc.variables["STLAB_HAVE_FUNCTIONAL_VARIANT_OPTIONAL"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
