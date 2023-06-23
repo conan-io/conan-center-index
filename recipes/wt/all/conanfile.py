@@ -227,6 +227,8 @@ class WtConan(ConanFile):
             tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
             tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list(self.dependencies["libunwind"].package_folder)
+        if self.options.with_haru:
+            tc.variables["HARU_PREFIX"] = self._cmakify_path_list(self.dependencies["libharu"].package_folder)
         if self.settings.os == "Windows":
             tc.variables["CONNECTOR_FCGI"] = False
             tc.variables["CONNECTOR_ISAPI"] = self.options.connector_isapi
@@ -300,6 +302,8 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
         if self.options.get_safe("with_unwind"):
             self.cpp_info.components["wtmain"].requires.append("libunwind::libunwind")
+        if self.options.with_haru:
+            self.cpp_info.components["wtmain"].requires.append("libharu::libharu")
 
         # wttest
         if self.options.with_test:
