@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, copy, rm, rename
+from conan.tools.files import get, rmdir, copy, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.errors import ConanInvalidConfiguration
