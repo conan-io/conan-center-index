@@ -18,14 +18,18 @@ class LibNlConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": False}
-    build_requires = ( "flex/2.6.4", "bison/3.7.6" )
 
+    def build_requirements(self):
+        self.tool_requires("bison/3.8.2")
+        self.tool_requires("flex/2.6.4")
+    
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # This is a pure C library
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -49,9 +53,7 @@ class LibNlConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib", "libnl", "cli", "cls"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib", "libnl", "cli", "qdisc"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
