@@ -66,17 +66,17 @@ class PangoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_freetype:
+        if self.options.get_safe("with_freetype", False):
             self.requires("freetype/2.13.0")
 
-        if self.options.with_fontconfig:
+        if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
-        if self.options.with_xft:
+        if self.options.get_safe("with_xft", False):
             self.requires("libxft/2.3.6")
         if (
-            self.options.with_xft
-            and self.options.with_fontconfig
-            and self.options.with_freetype
+            self.options.get_safe("with_xft", False)
+            and self.options.get_safe("with_fontconfig", False)
+            and self.options.get_safe("with_freetype", False)
         ):
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
