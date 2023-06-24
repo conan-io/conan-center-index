@@ -954,6 +954,7 @@ Examples = bin/datadir/examples""")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
+        self.cpp_info.set_property("pkg_config_name", "qt5")
 
         self.cpp_info.names["cmake_find_package"] = "Qt5"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt5"
@@ -992,6 +993,7 @@ Examples = bin/datadir/examples""")
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
+            self.cpp_info.components[componentname].set_property("pkg_config_name", f"Qt5{module}")
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
             if module.endswith("Private"):
@@ -1001,7 +1003,14 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].libs = [f"Qt5{libname}{libsuffix}"]
             if has_include_dir:
                 self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", f"Qt{module}")]
-            self.cpp_info.components[componentname].defines = [f"QT_{module.upper()}_LIB"]
+            define = module.upper()
+            if define == "TEST":
+                define = "TESTLIB"
+            elif define == "XCBQPA":
+                define = "XCB_QPA_LIB"
+            elif define.endswith("SUPPORT"):
+                define = define.replace("SUPPORT", "_SUPPORT")
+            self.cpp_info.components[componentname].defines = [f"QT_{define}_LIB"]
             if module != "Core" and "Core" not in requires:
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
@@ -1033,6 +1042,12 @@ Examples = bin/datadir/examples""")
             core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
+        pkg_config_vars = [
+            "host_bins=${prefix}/bin",
+            "exec_prefix=${prefix}",
+        ]
+        self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
+        
         if self.settings.os == "Windows":
             module = "WinMain"
             componentname = f"qt{module}"

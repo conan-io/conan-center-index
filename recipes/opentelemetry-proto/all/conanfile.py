@@ -1,10 +1,9 @@
+from conan import ConanFile
+from conan.tools.files import get, copy, save
+from conan.tools.layout import basic_layout
 import os
-from pathlib import Path
-from conans import ConanFile, tools
 
-
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.52.0"
 
 class OpenTelemetryProtoConan(ConanFile):
     name = "opentelemetry-proto"
@@ -13,24 +12,32 @@ class OpenTelemetryProtoConan(ConanFile):
     homepage = "https://github.com/open-telemetry/opentelemetry-proto"
     description = "Protobuf definitions for the OpenTelemetry protocol (OTLP)"
     topics = ("opentelemetry", "telemetry", "otlp")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
-                  strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.proto", dst="res", src=self._source_subfolder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.proto",
+            dst=os.path.join(self.package_folder, "res"),
+            src=self.source_folder,
+        )
         # satisfy KB-H014 (header_only recipes require headers)
-        tools.save(os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
+        save(self, os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
 
     def package_info(self):
-        self.user_info.proto_root = os.path.join(self.package_folder, "res")
+        self.conf_info.define("user.opentelemetry-proto:proto_root", os.path.join(self.package_folder, "res"))
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        self.cpp_info.resdirs = []
+
+        self.user_info.proto_root = os.path.join(self.package_folder, "res")

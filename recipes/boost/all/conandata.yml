@@ -1,4 +1,9 @@
 sources:
+  "1.82.0":
+    url:
+      - "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.bz2"
+    sha256: a6e1ab9b0860e6a2881dd7b21fe9f737a095e5f33a3a874afc6a345228597ee6
   "1.81.0":
     url:
       - "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2"
@@ -53,6 +58,10 @@ sources:
     url: "https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.bz2"
     sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
 patches:
+  "1.82.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
   "1.81.0":
     - patch_file: "patches/boost_1_77_mpi_check.patch"
       patch_description: "Fails the build when mpi is not configured"
