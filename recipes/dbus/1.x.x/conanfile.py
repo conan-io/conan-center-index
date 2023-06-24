@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -25,8 +25,8 @@ class DbusConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     options = {
-        "system_socket": ["ANY"],
-        "system_pid_file": ["ANY"],
+        "system_socket": [None, "ANY"],
+        "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
         "with_glib": [True, False],
         "with_systemd": [True, False],
@@ -34,8 +34,8 @@ class DbusConan(ConanFile):
         "session_socket_dir": ["ANY"],
     }
     default_options = {
-        "system_socket": "",
-        "system_pid_file": "",
+        "system_socket": None,
+        "system_pid_file": None,
         "with_x11": False,
         "with_glib": False,
         "with_systemd": False,
@@ -69,7 +69,7 @@ class DbusConan(ConanFile):
     def requirements(self):
         self.requires("expat/2.5.0")
         if self.options.with_glib:
-            self.requires("glib/2.76.0")
+            self.requires("glib/2.76.2")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/252.4")
         if self.options.with_selinux:
@@ -87,7 +87,7 @@ class DbusConan(ConanFile):
 
     def build_requirements(self):
         if self._meson_available:
-            self.tool_requires("meson/1.0.0")
+            self.tool_requires("meson/1.1.0")
         if self._meson_available or self.options.get_safe("with_systemd"):
             if not self.conf.get("tools.gnu:pkg_config",check_type=str):
                 self.tool_requires("pkgconf/1.9.3")
@@ -104,7 +104,9 @@ class DbusConan(ConanFile):
             tc.project_options["checks"] = False
             tc.project_options["doxygen_docs"] = "disabled"
             tc.project_options["modular_tests"] = "disabled"
-            tc.project_options["session_socket_dir"] = str(self.options.session_socket_dir)
+            tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+            tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+            tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
             tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
             tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
             if self.options.get_safe("with_systemd", False):
@@ -127,13 +129,14 @@ class DbusConan(ConanFile):
             tc.variables["DBUS_WITH_GLIB"] = bool(self.options.get_safe("with_glib", False))
             tc.variables["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
             tc.variables["DBUS_DISABLE_CHECKS"] = False
+            tc.variables["DBUS_SYSTEM_BUS_DEFAULT_ADDRESS"] = str(self.options.get_safe("system_socket", ""))
 
             # Conan does not provide an EXPAT_LIBRARIES CMake variable for the Expat library.
             # Define EXPAT_LIBRARIES to be the expat::expat target provided by Conan to fix linking.
             tc.variables["EXPAT_LIBRARIES"] = "expat::expat"
 
             # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
-            tc.variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.session_socket_dir)
+            tc.variables["DBUS_SESSION_SOCKET_DIR"] = str(self.options.get_safe("session_socket_dir", ""))
 
             tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = False
             tc.generate()
@@ -146,6 +149,7 @@ class DbusConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         if self._meson_available:
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "# subdir('test')")
             meson = Meson(self)
             meson.configure()
             meson.build()

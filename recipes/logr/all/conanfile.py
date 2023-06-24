@@ -12,30 +12,34 @@ required_conan_version = ">=1.50.0"
 
 class LogrConan(ConanFile):
     name = "logr"
-    license = "BSD-3-Clause"
-    homepage = "https://github.com/ngrodzitski/logr"
-    url = "https://github.com/conan-io/conan-center-index"
     description = (
         "Logger frontend substitution for spdlog, glog, etc "
         "for server/desktop applications"
     )
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/ngrodzitski/logr"
     topics = ("logger", "development", "util", "utils")
-
-    settings = "os", "compiler", "build_type", "arch"
-
-    options = {"backend": ["spdlog", "glog", "log4cplus", "boostlog", None]}
-    default_options = {"backend": "spdlog"}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "backend": ["spdlog", "glog", "log4cplus", "boostlog", None],
+    }
+    default_options = {
+        "backend": "spdlog",
+    }
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "0.6.0":
+        if self.options.backend != "spdlog":
+            fmt_ref = "fmt/10.0.0"
+        elif Version(self.version) >= "0.6.0":
             fmt_ref = "fmt/9.1.0"
             spdlog_ref = "spdlog/1.11.0"
         else:
             fmt_ref = "fmt/8.1.1"
-            spdlog_ref = "spdlog/1.9.2"
+            spdlog_ref = "spdlog/1.10.0"
 
         self.requires(fmt_ref)
 
@@ -44,9 +48,9 @@ class LogrConan(ConanFile):
         elif self.options.backend == "glog":
             self.requires("glog/0.6.0")
         elif self.options.backend == "log4cplus":
-            self.requires("log4cplus/2.0.5")
+            self.requires("log4cplus/2.1.0")
         elif self.options.backend == "boostlog":
-            self.requires("boost/1.77.0")
+            self.requires("boost/1.82.0")
 
     def package_id(self):
         self.info.settings.clear()
