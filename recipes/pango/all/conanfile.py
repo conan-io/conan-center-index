@@ -45,10 +45,6 @@ class PangoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.with_fontconfig
-            del self.options.with_xft
-        if is_msvc(self):
-            del self.options.with_freetype
 
     def configure(self):
         if self.options.shared:
@@ -56,6 +52,11 @@ class PangoConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.options.with_xft = True
+        if not self.settings.os in ["Macos", "Windows"]:
+            self.options.with_freetype = True
+            self.options.with_fontconfig = True
         if self.options.shared:
             self.options["glib"].shared = True
             self.options["harfbuzz"].shared = True
@@ -66,17 +67,17 @@ class PangoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_freetype", False):
+        if self.options.with_freetype:
             self.requires("freetype/2.13.0")
 
-        if self.options.get_safe("with_fontconfig", False):
+        if self.options.with_fontconfig:
             self.requires("fontconfig/2.14.2")
-        if self.options.get_safe("with_xft", False):
+        if self.options.with_xft:
             self.requires("libxft/2.3.6")
         if (
-            self.options.get_safe("with_xft", False)
-            and self.options.get_safe("with_fontconfig", False)
-            and self.options.get_safe("with_freetype", False)
+            self.options.with_xft
+            and self.options.with_fontconfig
+            and self.options.with_freetype
         ):
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
