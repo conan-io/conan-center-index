@@ -21,13 +21,11 @@ class ProtobufCConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        # "shared": [True, False],
         "fPIC": [True, False],
         "with_proto3": [True, False],
         "with_protoc": [True, False]
     }
     default_options = {
-        # "shared": False,
         "fPIC": True,
         "with_proto3": True,
         "with_protoc": True
@@ -45,10 +43,6 @@ class ProtobufCConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    # def configure(self):
-    #     if self.options.shared:
-    #         self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,6 +66,7 @@ class ProtobufCConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_PROTO3"] = self.options.with_proto3
         tc.cache_variables["BUILD_PROTOC"] = self.options.with_protoc
+        # FIXME: Add shared library support. It was just too hairy to figure out initially
         # tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_TESTS"] = False
         tc.generate()
