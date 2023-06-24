@@ -162,7 +162,7 @@ class PangoConan(ConanFile):
             self.info.requires["glib"].full_package_mode()
         if not self.dependencies.direct_host["harfbuzz"].options.shared:
             self.info.requires["harfbuzz"].full_package_mode()
-        if self.options.with_cairo and not self.dependencies.direct_host["cairo"].options.shared:
+        if self.info.options.with_cairo and not self.dependencies.direct_host["cairo"].options.shared:
             self.info.requires["cairo"].full_package_mode()
 
     def package_info(self):
