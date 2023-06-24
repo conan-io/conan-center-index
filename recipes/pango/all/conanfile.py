@@ -46,17 +46,18 @@ class PangoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.options.with_xft = True
+        if not self.settings.os in ["Macos", "Windows"]:
+            self.options.with_freetype = True
+            self.options.with_fontconfig = True
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-        if self.settings.os in ["FreeBSD", "Linux"]:
-            self.options.with_xft = True
-        if not self.settings.os in ["Macos", "Windows"]:
-            self.options.with_freetype = True
-            self.options.with_fontconfig = True
         if self.options.shared:
             self.options["glib"].shared = True
             self.options["harfbuzz"].shared = True
