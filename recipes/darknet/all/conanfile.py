@@ -124,6 +124,9 @@ class DarknetConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["darknet"]
+        if self.options.with_opencv:
+            # For https://github.com/pjreddie/darknet/blob/61c9d02ec461e30d55762ec7669d6a1d3c356fb2/include/darknet.h#L757
+            self.cpp_info.defines.append("OPENCV=1")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         if stdcpp_library(self):
