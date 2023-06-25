@@ -6,6 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.files import (
     apply_conandata_patches,
+    chdir,
     copy,
     export_conandata_patches,
     get,
@@ -95,9 +96,10 @@ class DarknetConan(ConanFile):
         tc.generate()
 
     def build(self):
-        self._patch_sources()
-        autotools = Autotools(self)
-        autotools.make()
+        with chdir(self, self.source_folder):
+            self._patch_sources()
+            autotools = Autotools(self)
+            autotools.make()
 
     def package(self):
         copy(
@@ -116,7 +118,7 @@ class DarknetConan(ConanFile):
             copy(
                 self,
                 pattern,
-                src=self.build_folder,
+                src=self.source_folder,
                 dst=os.path.join(self.package_folder, "lib"),
                 keep_path=False,
             )
