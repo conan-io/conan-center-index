@@ -1,4 +1,7 @@
 sources:
+  "4.5.1":
+    url: "http://download.osgeo.org/libtiff/tiff-4.5.1.tar.gz"
+    sha256: "d7f38b6788e4a8f5da7940c5ac9424f494d8a79eba53d555f4a507167dca5e2b"
   "4.5.0":
     url: "http://download.osgeo.org/libtiff/tiff-4.5.0.tar.gz"
     sha256: "c7a1d9296649233979fa3eacffef3fa024d73d05d589cb622727b5b08c423464"
@@ -21,6 +24,10 @@ sources:
     url: "http://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz"
     sha256: "59d7a5a8ccd92059913f246877db95a2918e6c04fb9d43fd74e5c3390dac2910"
 patches:
+  "4.5.1":
+    - patch_file: "patches/4.5.1-0001-cmake-dependencies.patch"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "conan"
   "4.5.0":
     - patch_file: "patches/4.5.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
