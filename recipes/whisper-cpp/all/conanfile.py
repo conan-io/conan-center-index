@@ -80,11 +80,11 @@ class WhisperCppConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sdl2:
-            self.requires("sdl/[>=2.0.0]")
+            self.requires("sdl/2.26.5")
 
         if not is_apple_os(self):
             if self.options.with_blas:
-                self.requires("openblas/[>=0.3.7]")
+                self.requires("openblas/0.3.20")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
