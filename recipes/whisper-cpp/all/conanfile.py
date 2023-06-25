@@ -19,12 +19,12 @@ class WhisperCppConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "sanitize_thread": [True, False],
-               "sanitize_address": [True, False], "sanitize_undefined": [True, False], "with_sdl2": [True, False],
+               "sanitize_address": [True, False], "sanitize_undefined": [True, False],
                "no_avx": [True, False], "no_avx2": [True, False], "no_fma": [True, False], "no_f16c": [True, False],
                "no_accelerate": [True, False], "with_coreml": [True, False], "coreml_allow_fallback": [True, False],
                "with_blas": [True, False]}
     default_options = {"shared": False, "fPIC": True, "sanitize_thread": False,
-                       "sanitize_address": False, "sanitize_undefined": False, "with_sdl2": False,
+                       "sanitize_address": False, "sanitize_undefined": False,
                        "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
                        "no_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
                        "with_blas": False}
@@ -79,9 +79,6 @@ class WhisperCppConan(ConanFile):
             )
 
     def requirements(self):
-        if self.options.with_sdl2:
-            self.requires("sdl/2.26.5")
-
         if not is_apple_os(self):
             if self.options.with_blas:
                 self.requires("openblas/0.3.20")
@@ -108,11 +105,6 @@ class WhisperCppConan(ConanFile):
             tc.variables["WHISPER_SANITIZE_ADDRESS"] = True
         if self.options.sanitize_undefined:
             tc.variables["WHISPER_SANITIZE_UNDEFINED"] = True
-        if self.options.with_sdl2:
-            if Version(self.version) >= "1.4.2":
-                tc.variables["WHISPER_SDL2"] = True
-            else:
-                tc.variables["WHISPER_SUPPORT_SDL2"] = True
         if self.options.no_avx:
             tc.variables["WHISPER_NO_AVX"] = True
         if self.options.no_avx2:
