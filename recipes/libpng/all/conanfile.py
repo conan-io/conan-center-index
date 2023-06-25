@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -126,6 +126,14 @@ class LibpngConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         if self.settings.os == "Windows":
+            if Version(self.version) <= "1.5.2":
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
+                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
+            else:
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}_static',
+                                    'OUTPUT_NAME "${PNG_LIB_NAME}')
             if not (is_msvc(self) or self._is_clang_cl):
                 if Version(self.version) < "1.6.38":
                     src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
@@ -144,18 +152,6 @@ class LibpngConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    @property
-    def _major_min_version(self):
-        return f"{Version(self.version).major}{Version(self.version).minor}"
-
-    def _library_name(self, original=False):
-        is_cl_like = is_msvc(self) or self._is_clang_cl
-        prefix = "lib" if is_cl_like else ""
-        suffix = self._major_min_version if self.settings.os == "Windows" else ""
-        suffix += "_static" if original and is_cl_like and not self.options.shared else ""
-        suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
-        return f"{prefix}png{suffix}"
-
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
@@ -164,24 +160,23 @@ class LibpngConan(ConanFile):
             rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
         else:
             rmdir(self, os.path.join(self.package_folder, "bin"))
-            old_path = os.path.join(self.package_folder, "lib", f"{self._library_name(True)}.lib")
-            new_path = os.path.join(self.package_folder, "lib", f"{self._library_name()}.lib")
-            if old_path != new_path:
-                rename(self, old_path, new_path)
         rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "PNG")
         self.cpp_info.set_property("cmake_target_name", "PNG::PNG")
         self.cpp_info.set_property("pkg_config_name", "libpng")
-        self.cpp_info.set_property("pkg_config_aliases", [f"libpng{self._major_min_version}"])
+        self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
-
-        self.cpp_info.libs = [self._library_name()]
+        prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
+        suffix = major_min_version if self.settings.os == "Windows" else ""
+        suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
 
