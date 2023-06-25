@@ -35,10 +35,12 @@ required_for_references:
 - argtable2
 - argtable3
 - arsenalgear
+- artery-font-format
 - asio
 - asmjit
 - astc-codec
 - async_simple
+- asyncly
 - asyncplusplus
 - audiofile
 - autoconf
@@ -128,6 +130,7 @@ required_for_references:
 - clara
 - clhep
 - cli11
+- clickhouse-cpp
 - clipper
 - clove-unit
 - cmake
@@ -142,6 +145,7 @@ required_for_references:
 - commata
 - concurrencpp
 - concurrentqueue
+- console_bridge
 - cpp-httplib
 - cpp-jwt
 - cpp-lazy
@@ -155,6 +159,7 @@ required_for_references:
 - cppdap
 - cppfront
 - cppitertools
+- cpprestsdk
 - cpptoml
 - cppunit
 - cpputest
@@ -171,6 +176,7 @@ required_for_references:
 - cspice
 - csvmonkey
 - ctre
+- cub
 - cubicinterpolation
 - cuda-api-wrappers
 - cuda-kat
@@ -231,6 +237,7 @@ required_for_references:
 - fast-cdr
 - fast-dds
 - fast_float
+- fastgltf
 - ffmpeg
 - fft
 - fftw
@@ -355,6 +362,7 @@ required_for_references:
 - libde265
 - libdeflate
 - libdisasm
+- libdrawille
 - libdwarf
 - libelf
 - libepoxy
@@ -415,6 +423,7 @@ required_for_references:
 - libspatialindex
 - libspng
 - libsrtp
+- libssh2
 - libsvtav1
 - libsystemd
 - libtar
@@ -513,6 +522,7 @@ required_for_references:
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
+- opencore-amr
 - openexr
 - opengl
 - opengv
@@ -589,6 +599,7 @@ required_for_references:
 - samurai
 - sbepp
 - scnlib
+- scons
 - screen_capture_lite
 - sdbus-cpp
 - sdl
@@ -596,6 +607,7 @@ required_for_references:
 - seadex-essentials
 - semimap
 - sentry-breakpad
+- sentry-crashpad
 - serd
 - sfml
 - shield
@@ -622,6 +634,7 @@ required_for_references:
 - strawberryperl
 - string-view-lite
 - strong_type
+- svgwrite
 - symengine
 - tabulate
 - taocpp-json
@@ -658,6 +671,7 @@ required_for_references:
 - uriparser
 - utf8proc
 - utfcpp
+- util-linux-libuuid
 - uvw
 - vaapi
 - variant-lite
