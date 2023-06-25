@@ -30,8 +30,7 @@ class MavenConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        # for target in ("bin", "boot", "conf", "lib"):
-        for target in ("bin", "lib"):
+        for target in ("bin", "boot", "conf", "lib"):
             copy(self, pattern="*", dst=os.path.join(self.package_folder, target), src=os.path.join(self.source_folder, target))
 
     def package_info(self):
