@@ -2,8 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, copy, get
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import export_conandata_patches, copy, get, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -93,6 +93,9 @@ class WhisperCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["WHISPER_BUILD_TESTS"] = False
         tc.variables["WHISPER_BUILD_EXAMPLES"] = False
@@ -106,7 +109,10 @@ class WhisperCppConan(ConanFile):
         if self.options.sanitize_undefined:
             tc.variables["WHISPER_SANITIZE_UNDEFINED"] = True
         if self.options.with_sdl2:
-            tc.variables["WHISPER_SDL2"] = True
+            if Version(self.version) >= "1.4.2":
+                tc.variables["WHISPER_SDL2"] = True
+            else:
+                tc.variables["WHISPER_SUPPORT_SDL2"] = True
         if self.options.no_avx:
             tc.variables["WHISPER_NO_AVX"] = True
         if self.options.no_avx2:
@@ -125,12 +131,20 @@ class WhisperCppConan(ConanFile):
                     tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
         else:
             if self.options.with_blas:
-                tc.variables["WHISPER_BLAS"] = True
-                tc.variables["WHISPER_CLBLAST"] = True
+                if Version(self.version) >= "1.4.2":
+                    tc.variables["WHISPER_OPENBLAS"] = True
+                else:
+                    tc.variables["WHISPER_SUPPORT_OPENBLAS"] = True
 
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "target_include_directories(${TARGET} PUBLIC",
+                        "target_include_directories(${TARGET} PUBLIC ${CMAKE_INCLUDE_PATH}")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
