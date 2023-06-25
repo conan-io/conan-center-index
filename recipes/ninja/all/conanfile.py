@@ -24,12 +24,15 @@ class NinjaConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
+            # Link C++ library statically on Linux so that it can run on systems
+            # with an older C++ runtime
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static-libstdc++ -static-libgcc"
         tc.generate()
 
     def build(self):

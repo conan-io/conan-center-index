@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -83,9 +83,9 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.17")
+            self.requires("libdeflate/1.18")
         if self.options.lzma:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
@@ -95,13 +95,18 @@ class LibtiffConan(ConanFile):
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
         if self.options.get_safe("webp"):
             self.requires("libwebp/1.3.0")
 
     def validate(self):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
+
+    def build_requirements(self):
+        if Version(self.version) >= "4.5.1":
+            # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
+            self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -121,15 +126,31 @@ class LibtiffConan(ConanFile):
             tc.variables["webp"] = self.options.webp
         if Version(self.version) >= "4.3.0":
             tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
+        if Version(self.version) >= "4.5.0":
+            # Disable tools, test, contrib, man & html generation
+            tc.variables["tiff-tools"] = False
+            tc.variables["tiff-tests"] = False
+            tc.variables["tiff-contrib"] = False
+            tc.variables["tiff-docs"] = False
         tc.variables["cxx"] = self.options.cxx
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
+        tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "4.5.1":
+            deps.set_property("jbig", "cmake_target_name", "JBIG::JBIG")
+            deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
+            deps.set_property("libdeflate", "cmake_file_name", "Deflate")
+            deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # remove FindXXXX for conan dependencies
+        for module in ["Deflate", "JBIG", "JPEG", "LERC", "WebP", "ZSTD", "liblzma", "LibLZMA"]:
+            rm(self, f"Find{module}.cmake", os.path.join(self.source_folder, "cmake"))
 
         # Export symbols of tiffxx for msvc shared
         replace_in_file(self, os.path.join(self.source_folder, "libtiff", "CMakeLists.txt"),
@@ -137,9 +158,10 @@ class LibtiffConan(ConanFile):
                               "set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} WINDOWS_EXPORT_ALL_SYMBOLS ON)")
 
         # Disable tools, test, contrib, man & html generation
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
-                              "add_subdirectory(man)\nadd_subdirectory(html)", "")
+        if Version(self.version) < "4.5.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
+                                  "add_subdirectory(man)\nadd_subdirectory(html)", "")
 
     def build(self):
         self._patch_sources()
@@ -148,7 +170,8 @@ class LibtiffConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
+        license_file = "COPYRIGHT" if Version(self.version) < "4.5.0" else "LICENSE.md"
+        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True, keep_path=False)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))

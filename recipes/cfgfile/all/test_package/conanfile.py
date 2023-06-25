@@ -7,12 +7,16 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+    test_type = "explicit"
 
     def layout(self):
         cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def build(self):
         if not cross_building(self, skip_x64_x86=True):
