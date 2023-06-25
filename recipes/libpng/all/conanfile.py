@@ -126,14 +126,6 @@ class LibpngConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         if self.settings.os == "Windows":
-            if Version(self.version) <= "1.5.2":
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
-                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
-            else:
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                    'OUTPUT_NAME "${PNG_LIB_NAME}_static',
-                                    'OUTPUT_NAME "${PNG_LIB_NAME}')
             if not (is_msvc(self) or self._is_clang_cl):
                 if Version(self.version) < "1.6.38":
                     src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
@@ -175,6 +167,7 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         suffix = major_min_version if self.settings.os == "Windows" else ""
+        suffix += "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
