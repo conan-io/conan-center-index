@@ -47,9 +47,6 @@ class WhisperCppConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if is_apple_os(self):
             del self.options.with_blas
