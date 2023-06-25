@@ -158,3 +158,5 @@ class WhisperCppConan(ConanFile):
                 self.cpp_info.frameworks.append("Accelerate")
             if self.options.with_coreml:
                 self.cpp_info.frameworks.append("CoreML")
+        elif self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.append["pthread"]

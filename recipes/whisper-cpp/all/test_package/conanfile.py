@@ -26,3 +26,7 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
+
+    def package_info(self):
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.append["pthread"]
