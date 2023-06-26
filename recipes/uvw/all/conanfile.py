@@ -13,13 +13,13 @@ required_conan_version = ">=1.54.0"
 class UvwConan(ConanFile):
     name = "uvw"
     description = "Header-only, event based, tiny and easy to use libuv wrapper in modern C++."
-    topics = ("libuv", "io", "networking", "header-only",)
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skypjack/uvw"
+    topics = ("libuv", "io", "networking", "header-only",)
     package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings = "compiler"
 
     @property
     def _min_cppstd(self):
@@ -29,6 +29,7 @@ class UvwConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
@@ -37,6 +38,7 @@ class UvwConan(ConanFile):
     @property
     def _required_libuv_version(self):
         return {
+            "3.1.0": "1.45.0",
             "2.12.1": "1.44.2",
             "2.11.0": "1.43.0",
             "2.10.0": "1.42.0",
