@@ -1,4 +1,7 @@
 sources:
+  "1.45.0":
+    url: "https://github.com/libuv/libuv/archive/v1.45.0.tar.gz"
+    sha256: "458e34d5ef7f3c0394a2bfd8c39d757cb1553baa5959b9b4b45df63aa027a228"
   "1.44.2":
     url: "https://github.com/libuv/libuv/archive/v1.44.2.tar.gz"
     sha256: "e6e2ba8b4c349a4182a33370bb9be5e23c51b32efb9b9e209d0e8556b73a48da"
@@ -24,6 +27,10 @@ sources:
     url: "https://github.com/libuv/libuv/archive/v1.38.1.zip"
     sha256: "0359369492742eb2a36312fffe26f80bcffe4cec981a4fd72d182b061ee14890"
 patches:
+  "1.45.0":
+    - patch_file: "patches/1.45.0/fix-cmake.patch"
+      patch_description: "separate shared and static library build"
+      patch_type: "conan"
   "1.44.2":
     - patch_file: "patches/1.44.2/fix-cmake.patch"
       patch_description: "separate shared and static library build"
