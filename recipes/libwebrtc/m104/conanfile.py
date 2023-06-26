@@ -3,6 +3,7 @@
 import fileinput
 from conan import ConanFile
 from conan.tools.files import chdir, copy, get
+from conan.errors import ConanInvalidConfiguration
 import os
 
 #required_conan_version = ">=2.0.0"
@@ -31,6 +32,11 @@ class LibWebRTCConan(ConanFile):
     
     webrtc_release = 'm104'
     webrtc_dir = 'src'
+
+
+    def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos is not yet supported by this recipe")
 
 
     def source(self):
