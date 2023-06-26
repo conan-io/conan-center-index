@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -103,6 +103,11 @@ class LibtiffConan(ConanFile):
         if self.options.get_safe("libdeflate") and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.5.1":
+            # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
+            self.tool_requires("cmake/[>=3.18 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -130,12 +135,22 @@ class LibtiffConan(ConanFile):
         tc.variables["cxx"] = self.options.cxx
         # BUILD_SHARED_LIBS must be set in command line because defined upstream before project()
         tc.cache_variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
+        tc.cache_variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "4.5.1":
+            deps.set_property("jbig", "cmake_target_name", "JBIG::JBIG")
+            deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
+            deps.set_property("libdeflate", "cmake_file_name", "Deflate")
+            deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # remove FindXXXX for conan dependencies
+        for module in ["Deflate", "JBIG", "JPEG", "LERC", "WebP", "ZSTD", "liblzma", "LibLZMA"]:
+            rm(self, f"Find{module}.cmake", os.path.join(self.source_folder, "cmake"))
 
         # Export symbols of tiffxx for msvc shared
         replace_in_file(self, os.path.join(self.source_folder, "libtiff", "CMakeLists.txt"),

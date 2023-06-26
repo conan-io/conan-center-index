@@ -40,6 +40,7 @@ _PROTO_DEPS_REPLACED_TARGETS = {
     "identity_accesscontextmanager_v1_accesscontextmanager_protos": "accesscontextmanager_protos",
     "cloud_osconfig_v1_osconfig_protos": "osconfig_protos",
     "devtools_source_v1_source_protos": "devtools_source_v1_source_context_protos",
+    "cloud_documentai_v1_documentai_protos": "documentai_protos",
 }
 
 # A few *.deps files use ad-hoc naming.
