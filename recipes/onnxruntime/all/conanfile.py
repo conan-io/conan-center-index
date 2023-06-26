@@ -7,6 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 import os
+import sys
 
 
 required_conan_version = ">=1.53.0"
@@ -62,12 +63,20 @@ class OnnxRuntimeConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _onnx_version(self):
+        version = Version(self.version)
+        return {
+            "1.14": "1.13.1",
+            "1.15": "1.14.0",
+        }[f"{version.major}.{version.minor}"]
+
     def requirements(self):
         self.requires("abseil/20230125.2")
         self.requires("protobuf/3.21.9")
         self.requires("date/3.0.1")
         self.requires("re2/20230301")
-        self.requires("onnx/1.13.1")
+        self.requires(f"onnx/{self._onnx_version}")
         self.requires("flatbuffers/1.12.0")
         self.requires("boost/1.81.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
@@ -91,6 +100,13 @@ class OnnxRuntimeConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def validate_build(self):
+        if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
+            # https://github.com/microsoft/onnxruntime/blob/638146b79ea52598ece514704d3f592c10fab2f1/cmake/CMakeLists.txt#LL500C12-L500C12
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires python 3.8+ to be built as shared."
+            )
+
     def build_requirements(self):
         # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L5
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -102,6 +118,8 @@ class OnnxRuntimeConan(ConanFile):
         tc = CMakeToolchain(self)
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
+        if self.version >= Version("1.15.0") and self.options.shared:
+            tc.variables["Python_EXECUTABLE"] = sys.executable
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
@@ -181,6 +199,15 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_USE_CANN"] = False
         tc.generate()
         deps = CMakeDeps(self)
+
+        if self.dependencies["flatbuffers"].options.shared:
+            deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
+
+        deps.set_property("boost::headers", "cmake_target_name", "Boost::mp11")
+        deps.set_property("date", "cmake_target_name", "date_interface")
+        deps.set_property("safeint", "cmake_target_name", "safeint_interface")
+        deps.set_property("xnnpack", "cmake_target_name", "XNNPACK")
+
         deps.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate(scope="build")
@@ -217,6 +244,8 @@ class OnnxRuntimeConan(ConanFile):
                 "common",
                 "flatbuffers",
             ]
+            if self.options.with_xnnpack:
+                onnxruntime_libs.append("providers_xnnpack")
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
         self.cpp_info.includedirs.append("include/onnxruntime/core/session")

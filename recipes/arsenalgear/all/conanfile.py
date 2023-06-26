@@ -59,7 +59,9 @@ class ArsenalgearConan(ConanFile):
         if Version(self.version) < "2.0.0":
             self.requires("boost/1.81.0")
             if self.settings.os in ["Linux", "Macos"]:
-                self.requires("exprtk/0.0.2")
+                # exprtk is used in public header of arsenalgear
+                # https://github.com/JustWhit3/arsenalgear-cpp/blob/v1.2.2/include/math.hpp
+                self.requires("exprtk/0.0.2", transitive_headers=True)
 
     def validate(self):
         # arsenalgear doesn't support Visual Studio(yet).
