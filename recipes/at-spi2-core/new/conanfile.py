@@ -44,15 +44,15 @@ class AtSpi2CoreConan(ConanFile):
             self.options["glib"].shared = True
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.1.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("glib/2.76.2")
+        self.requires("glib/2.76.3")
         if self.options.with_x11:
             self.requires("xorg/system")
-        self.requires("dbus/1.15.2")
+        self.requires("dbus/1.15.6")
 
     def validate(self):
         if self.options.shared and not self.options["glib"].shared:
