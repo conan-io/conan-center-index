@@ -14,6 +14,7 @@ class ExtracmakemodulesConan(ConanFile):
     no_copy_source = False
     package_type = "build-scripts"
     settings = "build_type"
+    short_paths = True
 
     def source(self):
         get(
