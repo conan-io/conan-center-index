@@ -77,7 +77,7 @@ class CapnprotoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/3.1.0")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.13")
 

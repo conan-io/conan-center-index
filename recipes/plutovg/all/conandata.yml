@@ -1,4 +1,7 @@
 sources:
+  "cci.20230205":
+    url: "https://github.com/sammycage/plutovg/archive/ccaa687ac6092ef548b840144820a757c24e718b.tar.gz"
+    sha256: "e7cb644a76612bcbaeb26f401adf7eff9cc45fbef69aadc7a9d0f84416f0ea98"
   "cci.20221030":
     url: "https://github.com/sammycage/plutovg/archive/4d0eee77ce7d1850aac4d90e20ddaaa313d83e6a.tar.gz"
     sha256: "bb44b1107d1cd41032fecdf3e16cff59a1a06f15a92527029aacb73c5c4d059e"

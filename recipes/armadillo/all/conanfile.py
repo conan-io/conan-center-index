@@ -146,7 +146,7 @@ class ArmadilloConan(ConanFile):
         )
 
         for opt in deprecated_opts:
-            self.output.warn(
+            self.output.warning(
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
@@ -165,10 +165,10 @@ class ArmadilloConan(ConanFile):
 
         if self.options.use_hdf5:
             # Use the conan dependency if the system lib isn't being used
-            self.requires("hdf5/1.12.0")
+            self.requires("hdf5/1.14.0")
 
         if self.options.use_blas == "openblas":
-            self.requires("openblas/0.3.15")
+            self.requires("openblas/0.3.20")
             # Note that if you're relying on this to build LAPACK, you _must_ have
             # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
             # without LAPACK support, which isn't obvious.
@@ -187,7 +187,7 @@ class ArmadilloConan(ConanFile):
                 self.options.use_blas == "intel_mkl"
                 or self.options.use_lapack == "intel_mkl"
             ):
-                self.output.warn(
+                self.output.warning(
                     "The intel-mkl package does not exist in CCI. To use an Intel MKL package, override this requirement with your own recipe."
                 )
             self.requires("intel-mkl/2021.4")

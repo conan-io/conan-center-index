@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.files import mkdir
+from conan.tools.files import mkdir, save, load
 from conan.tools.cmake import cmake_layout, CMake
 import os
 
@@ -16,6 +16,11 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def generate(self):
+        handler_exe = "crashpad_handler.exe" if self.settings.os == "Windows" else "crashpad_handler"
+        handler_bin_path = os.path.join(self.dependencies[self.tested_reference_str].package_folder, "bin", handler_exe)
+        save(self, os.path.join(self.build_folder, "handler_bin_path"), handler_bin_path)
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -26,6 +31,5 @@ class TestPackageConan(ConanFile):
             test_env_dir = "test_env"
             mkdir(self, test_env_dir)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            handler_exe = "crashpad_handler.exe" if self.settings.os == "Windows" else "crashpad_handler"
-            handler_bin_path = os.path.join(self.deps_cpp_info["sentry-crashpad"].bin_paths[0], handler_exe)
-            self.run(f"{bin_path} {test_env_dir} {handler_bin_path}", run_environment=True)
+            handler_bin_path = load(self, os.path.join(self.build_folder, "handler_bin_path"))
+            self.run(f"{bin_path} {test_env_dir} {handler_bin_path}", env="conanrun")

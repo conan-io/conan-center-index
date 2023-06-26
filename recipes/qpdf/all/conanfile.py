@@ -64,9 +64,7 @@ class QpdfConan(ConanFile):
         # https://qpdf.readthedocs.io/en/stable/installation.html#basic-dependencies
         self.requires("zlib/1.2.13")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1t")
-        elif self.options.with_ssl == "gnutls":
-            raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -84,20 +82,11 @@ class QpdfConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
+        if self.options.with_ssl == "gnutls":
+            raise ConanInvalidConfiguration("GnuTLS is not available in Conan Center yet.")
 
     def build_requirements(self):
-        if not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.16 <4]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
