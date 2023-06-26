@@ -19,9 +19,6 @@ patches:
     - patch_file: "patches/0.18.0/0002-cmake-fixes.patch"
       patch_description: "fix rapidyaml name, add installation"
       patch_type: "conan"
-    - patch_file: "patches/0.20.0/0003-use-cpp17.patch"
-      patch_description: "use C++17"
-      patch_type: "portability"
   "0.19.1":
     - patch_file: "patches/0.18.0/0001-fix-nlohmann-include.patch"
       patch_description: "fix include path to use cci package"
@@ -43,6 +40,3 @@ patches:
     - patch_file: "patches/0.17.0/0002-cmake-fixes.patch"
       patch_description: "fix rapidyaml name, add installation"
       patch_type: "conan"
-    - patch_file: "patches/0.17.0/0003-std-uint32_t.patch"
-      patch_description: "make uint32_t to std::uint32_t"
-      patch_type: "portability"

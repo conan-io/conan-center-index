@@ -58,13 +58,16 @@ class JsonnetConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if Version(self.version) == "0.17.0" and Version(self.settings.compiler.get_safe("cppstd")) > "17":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support C++{self.settings.compiler.cppstd}")
 
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration(f"{self.ref} does not support cross building")
