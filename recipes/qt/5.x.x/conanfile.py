@@ -1003,7 +1003,14 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].libs = [f"Qt5{libname}{libsuffix}"]
             if has_include_dir:
                 self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", f"Qt{module}")]
-            self.cpp_info.components[componentname].defines = [f"QT_{module.upper()}_LIB"]
+            define = module.upper()
+            if define == "TEST":
+                define = "TESTLIB"
+            elif define == "XCBQPA":
+                define = "XCB_QPA_LIB"
+            elif define.endswith("SUPPORT"):
+                define = define.replace("SUPPORT", "_SUPPORT")
+            self.cpp_info.components[componentname].defines = [f"QT_{define}_LIB"]
             if module != "Core" and "Core" not in requires:
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
