@@ -4,6 +4,8 @@ project(test_package CXX)
 
 find_package(crashpad REQUIRED CONFIG)
 
+add_compile_definitions(HAS_PROXY ${HAS_PROXY})
+
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE crashpad::client)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

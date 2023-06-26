@@ -19,7 +19,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.preprocessor_definitions["HAS_PROXY"] = "1" if Version(self.dependencies[self.tested_reference_str].ref.version) > "0.6.2" else "0"
+        tc.variables["HAS_PROXY"] = Version(self.dependencies[self.tested_reference_str].ref.version) > "0.6.2"
         tc.generate()
         handler_exe = "crashpad_handler.exe" if self.settings.os == "Windows" else "crashpad_handler"
         handler_bin_path = os.path.join(self.dependencies[self.tested_reference_str].package_folder, "bin", handler_exe)
