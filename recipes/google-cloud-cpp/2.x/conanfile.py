@@ -20,6 +20,7 @@ from conan.errors import ConanInvalidConfiguration
 # information. The expectation is that maintaining this script will be easier
 # than writing long lists of dependencies by hand.
 import components_2_5_0
+import components_2_12_0
 
 required_conan_version = ">=1.56.0"
 
@@ -43,18 +44,23 @@ class GoogleCloudCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports = ["components_2_5_0.py"]
+    exports = ["components_2_5_0.py",
+               "components_2_12_0.py",
+               ]
 
     short_paths = True
 
     _GA_COMPONENTS = {
         '2.5.0': components_2_5_0.COMPONENTS,
+        '2.12.0': components_2_12_0.COMPONENTS,
     }
     _PROTO_COMPONENTS = {
         '2.5.0': components_2_5_0.PROTO_COMPONENTS,
+        '2.12.0': components_2_12_0.PROTO_COMPONENTS,
     }
     _PROTO_COMPONENT_DEPENDENCIES = {
-        "2.5.0": components_2_5_0.DEPENDENCIES
+        "2.5.0": components_2_5_0.DEPENDENCIES,
+        "2.12.0": components_2_12_0.DEPENDENCIES,
     }
     # Some components require custom dependency definitions.
     _REQUIRES_CUSTOM_DEPENDENCIES = {
