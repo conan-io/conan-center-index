@@ -57,6 +57,9 @@ patches:
     - patch_file: "patches/1.8.0-0003-find-package-sqlite.patch"
       patch_description: "Fix sqlite cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-0004-remove-msvc-check.patch"
+      patch_description: "remove msvc check for C++17 support"
+      patch_type: "portability"
   "1.7.5":
     - patch_file: "patches/1.7.5-0001-disable_trantor.patch"
       patch_description: "Consume Trantor package from Conan instead of using the subproject"
@@ -70,3 +73,6 @@ patches:
     - patch_file: "patches/1.7.5-0004-find-package-jsoncpp.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.7.5-0005-remove-msvc-check.patch"
+      patch_description: "remove msvc check for C++17 support"
+      patch_type: "portability"
