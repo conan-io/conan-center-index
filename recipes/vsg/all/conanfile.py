@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, rm, rmdir, collect_libs
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version, Git
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 import os
 
