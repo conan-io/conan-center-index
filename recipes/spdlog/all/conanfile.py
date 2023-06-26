@@ -115,7 +115,11 @@ class SpdlogConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+            copy(self,
+                 src=os.path.join(self.source_folder, "include"),
+                 pattern="*.h", dst=os.path.join(self.package_folder, "include"),
+                 # Unvendor bundled dependencies https://github.com/gabime/spdlog/commit/18495bf25dad3a4e8c2fe3777a5f79acecde27e3
+                 excludes=("spdlog/fmt/bundled/*"))
         else:
             cmake = CMake(self)
             cmake.install()

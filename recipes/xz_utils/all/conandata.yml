@@ -1,4 +1,7 @@
 sources:
+  "5.4.2":
+    url: "https://tukaani.org/xz/xz-5.4.2.tar.gz"
+    sha256: "87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05"
   "5.4.0":
     url: "https://tukaani.org/xz/xz-5.4.0.tar.gz"
     sha256: "7471ef5991f690268a8f2be019acec2e0564b7b233ca40035f339fe9a07f830b"

@@ -1,12 +1,14 @@
-from conan import ConanFile
-from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
+from conan.tools.scm import Version
+
 required_conan_version = ">=1.53.0"
+
 
 class DrogonConan(ConanFile):
     name = "drogon"
@@ -24,6 +26,7 @@ class DrogonConan(ConanFile):
         "with_orm": [True, False],
         "with_profile": [True, False],
         "with_brotli": [True, False],
+        "with_yaml_cpp": [True, False],
         "with_postgres": [True, False],
         "with_postgres_batch": [True, False],
         "with_mysql": [True, False],
@@ -38,12 +41,14 @@ class DrogonConan(ConanFile):
         "with_orm": True,
         "with_profile": False,
         "with_brotli": False,
+        "with_yaml_cpp": False,
         "with_postgres": False,
         "with_postgres_batch": False,
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
     }
+    package_type = "library"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -103,7 +108,7 @@ class DrogonConan(ConanFile):
 
     def requirements(self):
         self.requires("trantor/1.5.11", transitive_headers=True, transitive_libs=True)
-        self.requires("jsoncpp/1.9.5", transitive_headers=True)
+        self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
@@ -124,6 +129,8 @@ class DrogonConan(ConanFile):
             self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.1.0")
+        if self.options.with_yaml_cpp:
+            self.requires("yaml-cpp/0.7.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -140,6 +147,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_BROTLI"] = self.options.with_brotli
+        tc.variables["BUILD_YAML_CONFIG"] = self.options.with_yaml_cpp
         tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
         tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
