@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -82,26 +83,44 @@ class AwsCCommon(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-common"))
 
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"AWS::aws-c-common": "aws-c-common::aws-c-common"}
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-common")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-common")
-
-        self.cpp_info.filenames["cmake_find_package"] = "aws-c-common"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-common"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["aws-c-common-lib"].set_property("cmake_target_name", "AWS::aws-c-common")
-        self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package"] = "aws-c-common"
-        self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package_multi"] = "aws-c-common"
-
-        self.cpp_info.components["aws-c-common-lib"].libs = ["aws-c-common"]
+        self.cpp_info.libs = ["aws-c-common"]
+        if self.options.shared:
+            self.cpp_info.defines.append("AWS_COMMON_USE_IMPORT_EXPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["aws-c-common-lib"].system_libs = ["dl", "m", "pthread", "rt"]
+            self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32"]
+            self.cpp_info.system_libs = ["bcrypt", "ws2_32"]
             if Version(self.version) >= "0.6.13":
-                self.cpp_info.components["aws-c-common-lib"].system_libs.append("shlwapi")
+                self.cpp_info.system_libs.append("shlwapi")
         if not self.options.shared:
             if is_apple_os(self):
-                self.cpp_info.components["aws-c-common-lib"].frameworks = ["CoreFoundation"]
-        self.cpp_info.components["aws-c-common-lib"].builddirs.append(os.path.join("lib", "cmake"))
+                self.cpp_info.frameworks = ["CoreFoundation"]
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

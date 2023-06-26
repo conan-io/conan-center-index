@@ -57,8 +57,8 @@ class CppServer(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asio/1.24.0")
-        self.requires("openssl/1.1.1s")
+        self.requires("asio/1.27.0")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("cppcommon/1.0.3.0")
 
     def validate(self):
