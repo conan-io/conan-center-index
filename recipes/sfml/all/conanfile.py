@@ -4,6 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -54,6 +55,8 @@ class SfmlConan(ConanFile):
         if self.options.window:
             if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
                 self.requires("opengl/system")
+                if Version(self.version) >= "2.6.0":
+                    self.requires("glad/0.1.36")
             if self.settings.os == "Linux":
                 self.requires("libudev/system")
                 self.requires("xorg/system")
@@ -64,6 +67,8 @@ class SfmlConan(ConanFile):
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
+            if Version(self.version) >= "2.6.0":
+                self.requires("minimp3/20200304")
 
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:

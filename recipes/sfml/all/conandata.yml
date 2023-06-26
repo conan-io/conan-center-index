@@ -1,8 +1,21 @@
 sources:
+  "2.6.0":
+    url: "https://www.sfml-dev.org/files/SFML-2.6.0-sources.zip"
+    sha256: "dc477fc7266641709046bd38628c909f5748bd2564b388cf6c750a9e20cdfef1"
   "2.5.1":
     url: "https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip"
     sha256: "bf1e0643acb92369b24572b703473af60bac82caf5af61e77c063b779471bb7f"
 patches:
+  "2.6.0":
+    - patch_file: "patches/2.6.0-0001-cmake-robust-find-deps.patch"
+      patch_description: "Robust discovery of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/2.6.0-0003-allow-shared-MT.patch"
+      patch_description: "Allow to build shared SFML with MT runtime"
+      patch_type: "portability"
+    - patch_file: "patches/2.6.0-0004-fix-ios.patch"
+      patch_description: "Fix iOS detection logic in CMakeLists"
+      patch_type: "portability"
   "2.5.1":
     - patch_file: "patches/0001-cmake-robust-find-deps.patch"
       patch_description: "Robust discovery of dependencies"
