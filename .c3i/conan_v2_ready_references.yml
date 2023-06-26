@@ -238,6 +238,7 @@ required_for_references:
 - fast-dds
 - fast_float
 - fastgltf
+- fff
 - ffmpeg
 - fft
 - fftw
@@ -307,6 +308,7 @@ required_for_references:
 - hdrhistogram-c
 - hidapi
 - highfive
+- highs
 - highway
 - hipony-enumerate
 - hiredis
@@ -344,6 +346,7 @@ required_for_references:
 - lemon
 - leptonica
 - lerc
+- lest
 - lexbor
 - libalsa
 - libarchive
@@ -457,6 +460,7 @@ required_for_references:
 - linux-syscall-support
 - llhttp
 - lodepng
+- logr
 - lua
 - luau
 - lunasvg
@@ -476,6 +480,7 @@ required_for_references:
 - mdspan
 - meson
 - mgs
+- microservice-essentials
 - mikelankamp-fpm
 - mimalloc
 - miniaudio
@@ -495,6 +500,7 @@ required_for_references:
 - naive-tsearch
 - namedtype
 - nameof
+- nanodbc
 - nanoflann
 - nanomsg
 - nanorange
@@ -508,6 +514,7 @@ required_for_references:
 - nodejs
 - norm
 - nsync
+- numcpp
 - nuraft
 - octomap
 - odbc
@@ -522,6 +529,7 @@ required_for_references:
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
+- opencolorio
 - opencore-amr
 - openexr
 - opengl
@@ -587,6 +595,7 @@ required_for_references:
 - readline
 - readosm
 - rectpack2d
+- redis-plus-plus
 - replxx
 - restbed
 - restinio

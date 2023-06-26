@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <iterator>
 #include <spdlog/sinks/stdout_sinks.h>
 
 #include <logr/config.hpp>
@@ -22,7 +21,7 @@ int main()
     auto logger = make_logger();
 
     logger.info( []( auto & out ){
-        fmt::format_to( out,
+        format_to( std::back_inserter(out),
                         "Welcome to logr (v{}.{}.{}), package is provided by Conan!",
                         LOGR_VERSION_MAJOR,
                         LOGR_VERSION_MINOR,
