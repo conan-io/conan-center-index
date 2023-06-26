@@ -52,7 +52,7 @@ class ExtracmakemodulesConan(ConanFile):
         cmake.install()
 
     def package_id(self):
-        self.info.settings.clear()
+        self.info.clear()
 
     def package_info(self):
         # this package is CMake files, it doesn't need an extra one generating
