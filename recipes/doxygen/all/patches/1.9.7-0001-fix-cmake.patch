@@ -1,0 +1,13 @@
+diff --git a/doc_internal/CMakeLists.txt b/doc_internal/CMakeLists.txt
+index 847c90a..40d13b8 100644
+--- a/doc_internal/CMakeLists.txt
++++ b/doc_internal/CMakeLists.txt
+@@ -19,7 +19,7 @@ else()
+     find_package(Doxygen)
+ endif()
+ 
+-configure_file(${CMAKE_SOURCE_DIR}/doc_internal/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" @ONLY)
++configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" @ONLY)
+ 
+ set(DOC_FILES
+         language.tpl

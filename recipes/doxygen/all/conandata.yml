@@ -1,4 +1,7 @@
 sources:
+  "1.9.7":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.7.src.tar.gz"
+    sha256: "87007641c38e2c392c8596f36711eb97633b984c8430f389e7bcf6323a098d94"
   "1.9.4":
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
     sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
@@ -18,6 +21,9 @@ sources:
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
     sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
 patches:
+  "1.9.7":
+    - patch_file: "patches/1.9.7-0001-fix-cmake.patch"
+      base_path: "source_subfolder"
   "1.9.4":
     - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
       patch_description: "Enable modern compilers"
