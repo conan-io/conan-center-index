@@ -142,6 +142,9 @@ class MBitsLngsConan(ConanFile):
             "w",
             encoding="UTF-8",
         ) as cfg:
+            # Provide relocatable mbits::lngs target and Mbitslngs_LNGS_EXECUTABLE cache variable
+            # TODO: some of the following logic might be disabled when conan will
+            #       allow to create executable imported targets in package_info()
             exe_ext = ".exe" if self.settings.os == "Windows" else ""
             lngs_filename = "lngs" + exe_ext
             module_folder_depth = len(
@@ -158,8 +161,7 @@ class MBitsLngsConan(ConanFile):
                         find_program(LNGS_PROGRAM lngs PATHS ENV PATH NO_DEFAULT_PATH)
                     endif()
                     if(NOT LNGS_PROGRAM)
-                        set(LNGS_REL_PATH "{lngs_rel_path}")
-                        set(LNGS_PROGRAM "${{CMAKE_CURRENT_LIST_DIR}}/${{LNGS_REL_PATH}}")
+                        set(LNGS_PROGRAM "${{CMAKE_CURRENT_LIST_DIR}}/{lngs_rel_path}")
                     endif()
                     get_filename_component(LNGS_PROGRAM "${{LNGS_PROGRAM}}" ABSOLUTE)
                     set(Mbitslngs_LNGS_EXECUTABLE ${{LNGS_PROGRAM}} CACHE FILEPATH "The lngs tool")
