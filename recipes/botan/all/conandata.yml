@@ -52,18 +52,14 @@ patches:
     - patch_file: "patches/dll-dir.patch"
       patch_description: "Backport a fix for dll directory"
       patch_type: "portability"
-      base_path: "sources"
     - patch_file: "patches/fix-unrecognized-linker-flag.patch"
       patch_description: "Backport a fix for unrecognized linker flag"
       patch_type: "portability"
-      base_path: "sources"
   "2.17.2":
     - patch_file: "patches/vs2015-install-fix.patch"
       patch_description: "Backport a fix for a build issue in VS 2015"
       patch_type: "portability"
-      base_path: "sources"
   "2.18.2":
     - patch_file: "patches/fix-amalgamation-build.patch"
       patch_description: "Backport a fix for amalgamation build"
       patch_type: "portability"
-      base_path: "sources"

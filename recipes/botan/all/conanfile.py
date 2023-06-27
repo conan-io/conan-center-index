@@ -95,7 +95,7 @@ class BotanConan(ConanFile):
         return 'arm' in str(self.settings.arch)
 
     def layout(self):
-        basic_layout(self, src_folder="sources")
+        basic_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
