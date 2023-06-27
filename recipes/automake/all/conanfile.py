@@ -1,10 +1,12 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -59,6 +61,19 @@ class AutomakeConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
+        if cross_building(self) and is_msvc(self):
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
+
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+
+            if host_arch and build_arch:
+                host = f"{host_arch}-w64-mingw32"
+                build = f"{build_arch}-w64-mingw32"
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
+                ])
         tc.configure_args.extend([
             "--datarootdir=${prefix}/res",
         ])

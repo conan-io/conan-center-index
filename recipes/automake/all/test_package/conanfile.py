@@ -1,12 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import can_run
+from conan.tools.build import can_run, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
+from conan.tools.microsoft import unix_path, is_msvc
 
 
 required_conan_version = ">=1.53.0"
@@ -50,6 +50,19 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        if cross_building(self) and is_msvc(self):
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
+
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+
+            if host_arch and build_arch:
+                host = f"{host_arch}-w64-mingw32"
+                build = f"{build_arch}-w64-mingw32"
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
+                ])
         tc.generate()
 
         env = VirtualBuildEnv(self)

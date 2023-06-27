@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc
 from contextlib import contextmanager
 import os
@@ -68,9 +69,20 @@ class TestPackageConan(ConanFile):
         with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
             self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
+
+        host = build = None
+        if cross_building(self) and is_msvc(self):
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
+
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+
+            if host_arch and build_arch:
+                host = f"{host_arch}-w64-mingw32"
+                build = f"{build_arch}-w64-mingw32"
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with self._build_context():
-            autotools.configure()
+            autotools.configure(host=host, build=build)
             autotools.make()
 
     def build(self):
