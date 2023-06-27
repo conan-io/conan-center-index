@@ -129,14 +129,18 @@ class LibpngConan(ConanFile):
             if not (is_msvc(self) or self._is_clang_cl):
                 if Version(self.version) < "1.6.38":
                     src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
-                else:
+                elif Version(self.version) == "1.6.39":
                     src_text = '''COMMAND "${CMAKE_COMMAND}"
                                  -E copy_if_different
                                  $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
                                  $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'''
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      src_text,
-                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
+                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                        src_text,
+                                        'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
+                else:
+                    # TODO: evaluate and document in what issue this patch aims to resolve, and in which scenarios it is needed
+                    # Note: the cmake logic for this has changed again in versions >=1.6.40
+                    pass
 
     def build(self):
         self._patch_sources()
@@ -167,7 +171,8 @@ class LibpngConan(ConanFile):
 
         prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         suffix = major_min_version if self.settings.os == "Windows" else ""
-        suffix += "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        if is_msvc(self) or self._is_clang_cl:
+            suffix += "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
