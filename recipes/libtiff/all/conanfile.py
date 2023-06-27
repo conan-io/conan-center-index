@@ -44,30 +44,12 @@ class LibtiffConan(ConanFile):
         "cxx":  True,
     }
 
-    @property
-    def _has_webp_option(self):
-        return Version(self.version) >= "4.0.10"
-
-    @property
-    def _has_zstd_option(self):
-        return Version(self.version) >= "4.0.10"
-
-    @property
-    def _has_libdeflate_option(self):
-        return Version(self.version) >= "4.2.0"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_webp_option:
-            del self.options.webp
-        if not self._has_zstd_option:
-            del self.options.zstd
-        if not self._has_libdeflate_option:
-            del self.options.libdeflate
 
     def configure(self):
         if self.options.shared:
@@ -82,7 +64,7 @@ class LibtiffConan(ConanFile):
     def requirements(self):
         if self.options.zlib:
             self.requires("zlib/1.2.13")
-        if self.options.get_safe("libdeflate"):
+        if self.options.libdeflate:
             self.requires("libdeflate/1.18")
         if self.options.lzma:
             self.requires("xz_utils/5.4.2")
@@ -94,13 +76,13 @@ class LibtiffConan(ConanFile):
             self.requires("mozjpeg/4.1.1")
         if self.options.jbig:
             self.requires("jbig/20160605")
-        if self.options.get_safe("zstd"):
+        if self.options.zstd:
             self.requires("zstd/1.5.5")
-        if self.options.get_safe("webp"):
+        if self.options.webp:
             self.requires("libwebp/1.3.0")
 
     def validate(self):
-        if self.options.get_safe("libdeflate") and not self.options.zlib:
+        if self.options.libdeflate and not self.options.zlib:
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def build_requirements(self):
@@ -118,14 +100,10 @@ class LibtiffConan(ConanFile):
         tc.variables["jpeg12"] = False
         tc.variables["jbig"] = self.options.jbig
         tc.variables["zlib"] = self.options.zlib
-        if self._has_libdeflate_option:
-            tc.variables["libdeflate"] = self.options.libdeflate
-        if self._has_zstd_option:
-            tc.variables["zstd"] = self.options.zstd
-        if self._has_webp_option:
-            tc.variables["webp"] = self.options.webp
-        if Version(self.version) >= "4.3.0":
-            tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
+        tc.variables["libdeflate"] = self.options.libdeflate
+        tc.variables["zstd"] = self.options.zstd
+        tc.variables["webp"] = self.options.webp
+        tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
         if Version(self.version) >= "4.5.0":
             # Disable tools, test, contrib, man & html generation
             tc.variables["tiff-tools"] = False
@@ -192,7 +170,7 @@ class LibtiffConan(ConanFile):
         self.cpp_info.requires = []
         if self.options.zlib:
             self.cpp_info.requires.append("zlib::zlib")
-        if self.options.get_safe("libdeflate"):
+        if self.options.libdeflate:
             self.cpp_info.requires.append("libdeflate::libdeflate")
         if self.options.lzma:
             self.cpp_info.requires.append("xz_utils::xz_utils")
@@ -204,9 +182,9 @@ class LibtiffConan(ConanFile):
             self.cpp_info.requires.append("mozjpeg::libjpeg")
         if self.options.jbig:
             self.cpp_info.requires.append("jbig::jbig")
-        if self.options.get_safe("zstd"):
+        if self.options.zstd:
             self.cpp_info.requires.append("zstd::zstd")
-        if self.options.get_safe("webp"):
+        if self.options.webp:
             self.cpp_info.requires.append("libwebp::libwebp")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed

@@ -118,6 +118,7 @@ required_for_references:
 - cgal
 - cgif
 - cgns
+- chaiscript
 - charls
 - chef-fun
 - chipmunk2d
@@ -401,6 +402,7 @@ required_for_references:
 - libnabo
 - libnfs
 - libnghttp2
+- libnl
 - libnop
 - libnova
 - libnuma
@@ -474,6 +476,10 @@ required_for_references:
 - matchit
 - mawk
 - mbedtls
+- mbits-args
+- mbits-mstch
+- mbits-semver
+- mbits-utfconv
 - md4c
 - md4qt
 - mdnsresponder
@@ -600,6 +606,7 @@ required_for_references:
 - restbed
 - restinio
 - ring-span-lite
+- rmm
 - roaring
 - robin-hood-hashing
 - rttr
@@ -638,8 +645,10 @@ required_for_references:
 - sqlite3
 - sqlite_orm
 - sqlitecpp
+- ssht
 - status-code
 - stb
+- stlab
 - strawberryperl
 - string-view-lite
 - strong_type
