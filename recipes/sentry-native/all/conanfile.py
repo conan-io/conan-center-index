@@ -49,6 +49,8 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if self.settings.compiler in ["msvc", "Visual Studio"]:
+            return "17"
         return "14"
 
     @property
