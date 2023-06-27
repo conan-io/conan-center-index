@@ -5,7 +5,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-from conan.tools.build import check_min_cppstd
 import os
 import textwrap
 
@@ -37,24 +36,6 @@ class SfmlConan(ConanFile):
         "network": True,
         "audio": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        # sfml 2.6.0 later requires C++17
-        # https://github.com/SFML/SFML/commit/bd1243891658340c04464f0b3715194ddde5eddf
-        return "17" if Version(self.version) >= "2.6.0" else ""
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "12",
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
-        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -93,14 +74,6 @@ class SfmlConan(ConanFile):
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
 
-        if self._min_cppstd and self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # sfml/2.6.0 uses minimp3 and glad in extlibs
@@ -119,6 +92,8 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = True
         tc.variables["WARNINGS_AS_ERRORS"] = False
+        if Version(self.version) >= "2.6.0":
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
