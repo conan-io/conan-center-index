@@ -3,7 +3,7 @@ project(METIS C)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-include(conf/gkbuild.cmake)
+include(gkbuild.cmake)
 
 find_package(gklib REQUIRED)
 
