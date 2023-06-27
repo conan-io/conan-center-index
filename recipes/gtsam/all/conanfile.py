@@ -19,6 +19,7 @@ class GtsamConan(ConanFile):
                    "smoothing and mapping (SAM) in robotics and vision")
     topics = ("mapping", "smoothing", "optimization", "factor-graphs")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,25 +29,26 @@ class GtsamConan(ConanFile):
         "build_type_postfixes": [True, False],
         "build_unstable": [True, False],
         "build_with_march_native": [True, False],
-        "build_wrap": [True, False],
         "default_allocator": [None, "STL", "BoostPool", "TBB", "tcmalloc"],
         "disable_new_timers": [True, False],
         "enable_consistency_checks": [True, False],
         "install_cppunitlite": [True, False],
-        "install_cython_toolbox": [True, False],
         "install_matlab_toolbox": [True, False],
-        "print_summary_padding_length": ["ANY"],
         "pose3_expmap": [True, False],
         "rot3_expmap": [True, False],
         "slow_but_correct_betweenfactor": [True, False],
         "support_nested_dissection": [True, False],
         "tangent_preintegration": [True, False],
         "throw_cheirality_exception": [True, False],
-        "typedef_points_to_vectors": [True, False],
         "use_quaternions": [True, False],
         "with_TBB": [True, False],
         "with_eigen_MKL": [True, False],
         "with_eigen_MKL_OPENMP": [True, False],
+
+        # Removed since v4.1
+        "build_wrap": [True, False],
+        "install_cython_toolbox": [True, False],
+        "typedef_points_to_vectors": [True, False],
         "wrap_serialization": [True, False],
     }
     default_options = {
@@ -57,26 +59,56 @@ class GtsamConan(ConanFile):
         "build_type_postfixes": True,
         "build_unstable": True,
         "build_with_march_native": False,
-        "build_wrap": False,
         "default_allocator": None,
         "disable_new_timers": False,
         "enable_consistency_checks": False,
         "install_cppunitlite": True,
-        "install_cython_toolbox": False,
         "install_matlab_toolbox": False,
-        "print_summary_padding_length": 50,
         "pose3_expmap": False,
         "rot3_expmap": False,
         "slow_but_correct_betweenfactor": False,
         "support_nested_dissection": False,
         "tangent_preintegration": False,
         "throw_cheirality_exception": True,
-        "typedef_points_to_vectors": False,
         "use_quaternions": False,
         "with_TBB": False,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
+
+        # < v4.1 only
+        "build_wrap": False,
+        "install_cython_toolbox": False,
+        "typedef_points_to_vectors": False,
         "wrap_serialization": True,
+    }
+    options_description = {
+        "allow_deprecated": "Allow use of deprecated methods/functions",
+        "build_type_postfixes": "Append the build type to the name of compiled libraries",
+        "build_unstable": "Enable building of gtsam_unstable",
+        "build_with_march_native": "Build with all instructions supported by native architecture (binary may not be portable!)",
+        "default_allocator": "Set preferred memory allocator. If unset, defaults to STL or to TBB, if with_TBB is enabled",
+        "disable_new_timers": "Disables using Boost.chrono for timing",
+        "enable_consistency_checks": "Enable expensive consistency checks",
+        "install_cppunitlite": "Install CppUnitLite library as a component",
+        "install_matlab_toolbox": "Install MATLAB toolbox",
+        "pose3_expmap": "Use Pose3::EXPMAP as the default mode. If disabled, Pose3::FIRST_ORDER will be used.",
+        "rot3_expmap": ("Ignore if GTSAM_USE_QUATERNIONS is OFF (Rot3::EXPMAP by default). "
+                        "Otherwise, enable Rot3::EXPMAP, or if disabled, use Rot3::CAYLEY."),
+        "slow_but_correct_betweenfactor": "Use the slower but correct version of BetweenFactor",
+        "support_nested_dissection": "Support Metis-based nested dissection",
+        "tangent_preintegration": "Use the new ImuFactor with integration on tangent space",
+        "throw_cheirality_exception": "Throw exception when a triangulated point is behind a camera",
+        "use_quaternions": ("Enable an internal Quaternion representation for rotations instead of rotation matrices. "
+                            "If enabled, Rot3::EXPMAP is enforced by default."),
+        "with_TBB": "Use Intel Threaded Building Blocks (TBB)",
+        "with_eigen_MKL": "Eigen will use Intel MKL if available",
+        "with_eigen_MKL_OPENMP": "Eigen, when using Intel MKL, will also use OpenMP for multithreading if available",
+
+        # < v4.1 only
+        "build_wrap": "Build Matlab/Cython wrap utility (necessary for Matlab/Cython interface)",
+        "install_cython_toolbox": "Install Cython toolbox",
+        "typedef_points_to_vectors": "Typedef Point2 and Point3 to Eigen::Vector equivalents",
+        "wrap_serialization": "Allow wrapped objects to be saved via boost.serialization",
     }
 
     def export_sources(self):
@@ -198,8 +230,6 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_BUILD_TYPE_POSTFIXES"] = self.options.build_type_postfixes
         # https://github.com/borglab/gtsam/blob/4.2a9/cmake/GtsamBuildTypes.cmake#L193
         tc.variables["GTSAM_BUILD_WITH_MARCH_NATIVE"] = self.options.build_with_march_native
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/GtsamPrinting.cmake#L15
-        tc.variables["GTSAM_PRINT_SUMMARY_PADDING_LENGTH"] = self.options.print_summary_padding_length
         # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleBoost.cmake#L36
         tc.variables["GTSAM_DISABLE_NEW_TIMERS"] = self.options.disable_new_timers
         # https://github.com/borglab/gtsam/blob/4.2a9/CppUnitLite/CMakeLists.txt#L13
