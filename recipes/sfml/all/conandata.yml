@@ -16,6 +16,9 @@ patches:
     - patch_file: "patches/2.6.0-0004-fix-ios.patch"
       patch_description: "Fix iOS detection logic in CMakeLists"
       patch_type: "portability"
+    - patch_file: "patches/2.6.0-0006-disable-warning-flags.patch"
+      patch_description: "Disable warning flags which may cause compilation errors"
+      patch_type: "portability"
   "2.5.1":
     - patch_file: "patches/2.5.1-0001-cmake-robust-find-deps.patch"
       patch_description: "Robust discovery of dependencies"
