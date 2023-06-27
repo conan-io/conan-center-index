@@ -19,7 +19,7 @@ class GlazeConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 20
 
     @property
@@ -40,11 +40,11 @@ class GlazeConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "0.2.4":
-            self.requires("fmt/9.1.0")
+            self.requires("fmt/10.0.0")
             self.requires("frozen/1.1.1")
             self.requires("nanorange/cci.20200706")
         if Version(self.version) < "0.2.3":
-            self.requires("fast_float/4.0.0")
+            self.requires("fast_float/5.2.0")
         if "0.1.5" <= Version(self.version) < "0.2.3":
             self.requires("dragonbox/1.1.3")
 
@@ -53,18 +53,12 @@ class GlazeConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+            check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++{self._minimum_cpp_standard}, which your compiler does not support.",
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
     def source(self):
