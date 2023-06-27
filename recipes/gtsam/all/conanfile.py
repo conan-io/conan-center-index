@@ -373,26 +373,15 @@ class GtsamConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
         self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
-        gtsam = self.cpp_info.components["libgtsam"]
-        gtsam.names["cmake_find_package"] = "gtsam"
-        gtsam.names["cmake_find_package_multi"] = "gtsam"
-        gtsam.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        gtsam.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.build_unstable:
-            gtsam_unstable = self.cpp_info.components["libgtsam_unstable"]
-            gtsam_unstable.names["cmake_find_package"] = "gtsam_unstable"
-            gtsam_unstable.names["cmake_find_package_multi"] = "gtsam_unstable"
-            gtsam_unstable.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            gtsam_unstable.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.get_safe("use_vendored_metis", False):
-            metis = self.cpp_info.components["libmetis-gtsam"]
-            metis.names["cmake_find_package"] = "metis-gtsam"
-            metis.names["cmake_find_package_multi"] = "metis-gtsam"
-            metis.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            metis.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.install_cppunitlite:
-            cppunitlite = self.cpp_info.components["gtsam_CppUnitLite"]
-            cppunitlite.names["cmake_find_package"] = "CppUnitLite"
-            cppunitlite.names["cmake_find_package_multi"] = "CppUnitLite"
-            cppunitlite.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            cppunitlite.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        for component_name, lib_name in [
+            ("libgtsam", "gtsam"),
+            ("libgtsam_unstable", "gtsam_unstable"),
+            ("libmetis-gtsam", "metis-gtsam"),
+            ("gtsam_CppUnitLite", "CppUnitLite"),
+        ]:
+            if component_name in self.cpp_info.components:
+                component = self.cpp_info.components[component_name]
+                component.names["cmake_find_package"] = lib_name
+                component.names["cmake_find_package_multi"] = lib_name
+                component.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                component.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
