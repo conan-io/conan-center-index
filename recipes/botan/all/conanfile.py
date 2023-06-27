@@ -9,7 +9,7 @@ from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag, VCVars
-from conan.tools.microsoft.subsystems import unix_path
+from conan.tools.microsoft import unix_path
 from conan.tools.scm import Version
 
 
