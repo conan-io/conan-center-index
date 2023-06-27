@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, valid_max_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
+
 
 class SonicCppConan(ConanFile):
     name = "sonic-cpp"
@@ -37,7 +38,9 @@ class SonicCppConan(ConanFile):
         }
 
     def requirements(self):
-        if valid_max_cppstd(self, 17):
+        cppstd = self.settings.get_safe("compiler.cppstd")
+        # Assume we would need it if not told otherwise
+        if not cppstd or cppstd < "17":
             self.requires("string-view-lite/1.7.0")
 
     def package_id(self):
