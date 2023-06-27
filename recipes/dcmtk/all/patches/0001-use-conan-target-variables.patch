@@ -34,7 +34,8 @@ index 47e34763b..2c6ed3b8d 100644
 
 @@ -243,7 +243,6 @@ else()
      if(WITH_LIBXMLINC)
-       set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
+-      set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
++      set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include/libxml2")
        set(LIBXML_LIBDIR "${WITH_LIBXMLINC}/lib")
 -      set(LIBXML_LIBS debug "${LIBXML_LIBDIR}/libxml2_d.lib" optimized "${LIBXML_LIBDIR}/libxml2_o.lib" debug "${LIBXML_LIBDIR}/iconv_d.lib" optimized "${LIBXML_LIBDIR}/iconv_o.lib")
        message(STATUS "Info: DCMTK XML support will be enabled")
