@@ -35,10 +35,12 @@ required_for_references:
 - argtable2
 - argtable3
 - arsenalgear
+- artery-font-format
 - asio
 - asmjit
 - astc-codec
 - async_simple
+- asyncly
 - asyncplusplus
 - audiofile
 - autoconf
@@ -47,6 +49,7 @@ required_for_references:
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-http
 - aws-c-io
 - aws-c-sdkutils
 - aws-checksums
@@ -112,6 +115,7 @@ required_for_references:
 - ceres-solver
 - cfgfile
 - cfitsio
+- cgal
 - cgif
 - cgns
 - charls
@@ -126,6 +130,7 @@ required_for_references:
 - clara
 - clhep
 - cli11
+- clickhouse-cpp
 - clipper
 - clove-unit
 - cmake
@@ -140,6 +145,7 @@ required_for_references:
 - commata
 - concurrencpp
 - concurrentqueue
+- console_bridge
 - cpp-httplib
 - cpp-jwt
 - cpp-lazy
@@ -149,8 +155,11 @@ required_for_references:
 - cppbenchmark
 - cppcheck
 - cppcodec
+- cppcommon
+- cppdap
 - cppfront
 - cppitertools
+- cpprestsdk
 - cpptoml
 - cppunit
 - cpputest
@@ -167,7 +176,10 @@ required_for_references:
 - cspice
 - csvmonkey
 - ctre
+- cub
 - cubicinterpolation
+- cuda-api-wrappers
+- cuda-kat
 - cwalk
 - cxxopts
 - cyclonedds
@@ -206,6 +218,7 @@ required_for_references:
 - eigen
 - elfio
 - embree3
+- emio
 - enet
 - entityx
 - enum-flags
@@ -224,6 +237,8 @@ required_for_references:
 - fast-cdr
 - fast-dds
 - fast_float
+- fastgltf
+- fff
 - ffmpeg
 - fft
 - fftw
@@ -266,6 +281,7 @@ required_for_references:
 - glib
 - glm
 - glog
+- glpk
 - glslang
 - glu
 - gmp
@@ -273,6 +289,7 @@ required_for_references:
 - gnutls
 - googleapis
 - gperf
+- gperftools
 - graphene
 - grpc
 - grpc-proto
@@ -282,6 +299,7 @@ required_for_references:
 - gstreamer
 - gtest
 - gtk
+- gtk-doc-stub
 - gurkenlaeufer
 - h3
 - h5pp
@@ -290,6 +308,7 @@ required_for_references:
 - hdrhistogram-c
 - hidapi
 - highfive
+- highs
 - highway
 - hipony-enumerate
 - hiredis
@@ -309,6 +328,7 @@ required_for_references:
 - itlib
 - jasper
 - jbig
+- jinja2cpp
 - joltphysics
 - jom
 - json-c
@@ -322,9 +342,11 @@ required_for_references:
 - kuba-zip
 - lcms
 - ldns
+- lefticus-tools
 - lemon
 - leptonica
 - lerc
+- lest
 - lexbor
 - libalsa
 - libarchive
@@ -343,6 +365,7 @@ required_for_references:
 - libde265
 - libdeflate
 - libdisasm
+- libdrawille
 - libdwarf
 - libelf
 - libepoxy
@@ -403,6 +426,7 @@ required_for_references:
 - libspatialindex
 - libspng
 - libsrtp
+- libssh2
 - libsvtav1
 - libsystemd
 - libtar
@@ -436,6 +460,7 @@ required_for_references:
 - linux-syscall-support
 - llhttp
 - lodepng
+- logr
 - lua
 - luau
 - lunasvg
@@ -455,6 +480,7 @@ required_for_references:
 - mdspan
 - meson
 - mgs
+- microservice-essentials
 - mikelankamp-fpm
 - mimalloc
 - miniaudio
@@ -462,6 +488,7 @@ required_for_references:
 - minizip
 - minizip-ng
 - mongo-c-driver
+- mongo-cxx-driver
 - mozilla-build
 - mozjpeg
 - mp-units
@@ -473,6 +500,7 @@ required_for_references:
 - naive-tsearch
 - namedtype
 - nameof
+- nanodbc
 - nanoflann
 - nanomsg
 - nanorange
@@ -486,7 +514,9 @@ required_for_references:
 - nodejs
 - norm
 - nsync
+- numcpp
 - nuraft
+- octomap
 - odbc
 - ogdf
 - ogg
@@ -499,6 +529,8 @@ required_for_references:
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
+- opencolorio
+- opencore-amr
 - openexr
 - opengl
 - opengv
@@ -508,6 +540,7 @@ required_for_references:
 - openmesh
 - openssl
 - opensubdiv
+- opentelemetry-cpp
 - opentelemetry-proto
 - optional-lite
 - opus
@@ -562,6 +595,7 @@ required_for_references:
 - readline
 - readosm
 - rectpack2d
+- redis-plus-plus
 - replxx
 - restbed
 - restinio
@@ -574,6 +608,7 @@ required_for_references:
 - samurai
 - sbepp
 - scnlib
+- scons
 - screen_capture_lite
 - sdbus-cpp
 - sdl
@@ -581,6 +616,7 @@ required_for_references:
 - seadex-essentials
 - semimap
 - sentry-breakpad
+- sentry-crashpad
 - serd
 - sfml
 - shield
@@ -606,6 +642,8 @@ required_for_references:
 - stb
 - strawberryperl
 - string-view-lite
+- strong_type
+- svgwrite
 - symengine
 - tabulate
 - taocpp-json
@@ -642,6 +680,7 @@ required_for_references:
 - uriparser
 - utf8proc
 - utfcpp
+- util-linux-libuuid
 - uvw
 - vaapi
 - variant-lite
@@ -650,6 +689,7 @@ required_for_references:
 - vincentlaucsb-csv-parser
 - vir-simd
 - visit_struct
+- vo-amrwbenc
 - volk
 - vorbis
 - vtu11
