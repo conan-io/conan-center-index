@@ -126,7 +126,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("thrift/0.17.0")
 
             if Version(self.version) >= "1.3.0":
-                self.requires("boost/1.81.0")
+                self.requires("boost/1.82.0")
 
     @property
     def _required_boost_components(self):
