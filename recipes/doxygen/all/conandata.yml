@@ -23,7 +23,8 @@ sources:
 patches:
   "1.9.7":
     - patch_file: "patches/1.9.7-0001-fix-cmake.patch"
-      base_path: "source_subfolder"
+      patch_description: "Fix relative CMake path"
+      patch_type: "portability"
   "1.9.4":
     - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
       patch_description: "Enable modern compilers"
