@@ -14,18 +14,23 @@ class KeychainConan(ConanFile):
     topics = ("keychain", "security", "credentials", "password", "cpp11")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt"]
     options = {'shared': [False, True], 'fPIC': [False, True]}
     default_options = {"shared": False, "fPIC": True}
 
-    def configure(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 11)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 11)
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -33,7 +38,7 @@ class KeychainConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Linux":
-            self.build_requires("pkgconf/1.7.3")
+            self.tool_requires("pkgconf/1.7.3")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
