@@ -115,10 +115,8 @@ class DrogonConan(ConanFile):
             self.requires("libuuid/1.0.3")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
-        if self.settings.compiler.get_safe("cppstd") == "14":
+        if self.options.with_boost:
             self.requires("boost/1.82.0", transitive_headers=True)
-        elif self.options.with_boost:
-            self.requires("boost/1.82.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_postgres"):
