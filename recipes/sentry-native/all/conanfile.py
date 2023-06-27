@@ -6,7 +6,10 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+)
+
 import os
 
 required_conan_version = ">=1.55.0"
@@ -49,7 +52,7 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if self.settings.compiler in ["msvc", "Visual Studio"]:
+        if is_msvc(self):
             return "17"
         return "14"
 
