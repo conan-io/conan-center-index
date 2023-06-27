@@ -22,10 +22,6 @@ class CuteHeadersConan(ConanFile):
         file_content = load(self, file)
         return file_content[file_content.rfind('/*'):]
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
