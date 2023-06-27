@@ -35,8 +35,6 @@ class LibWebRTCConan(ConanFile):
 
 
     def validate(self):
-        check_min_cppstd(self, "11")
-        
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Macos is not yet supported by this recipe")
 
