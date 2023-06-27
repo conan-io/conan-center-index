@@ -72,7 +72,7 @@ class GLibConan(ConanFile):
         else:
             self.requires("pcre/8.45")
         if self.options.get_safe("with_elf"):
-            self.requires("libelf/0.8.13")
+            self.requires("elfutils/0.186")
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.36.2")
         if self.options.get_safe("with_selinux"):
@@ -251,7 +251,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
 
         if self.options.get_safe("with_elf"):
-            self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
+            self.cpp_info.components["gresource"].requires.append("elfutils::libelf")  # this is actually an executable
 
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
