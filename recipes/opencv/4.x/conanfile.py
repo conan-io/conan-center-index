@@ -200,8 +200,8 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
-            # opencv doesn't support ffmpeg >= 5.0.0 until 4.5.5 
-            if Version(self.version) < "4.6.0":
+            # opencv doesn't support ffmpeg >= 5.0.0 until 4.6.0 
+            if Version(self.version) < "4.7.0":
                 self.requires("ffmpeg/4.4")
             else:
                 self.requires("ffmpeg/5.1")
