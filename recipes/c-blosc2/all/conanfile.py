@@ -71,7 +71,7 @@ class CBlosc2Conan(ConanFile):
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.13")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/1.5.5", transitive_libs=True)
 
     def build_requirements(self):
         if Version(self.version) >= "2.4.1":
