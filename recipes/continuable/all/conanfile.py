@@ -37,6 +37,28 @@ class ContinuableConan(ConanFile):
         "custom_final_callback": False,
         "immediate_types": False,
     }
+    options_description = {
+        "no_exceptions": (
+            "Exceptions are disabled and `std::error_condition` is used as error_type. "
+            "See tutorial-chaining-continuables-fail for details."
+        ),
+        "custom_error_type": (
+            "Exceptions are disabled and the type defined by `CONTINUABLE_WITH_CUSTOM_ERROR_TYPE` "
+            "is used as error_type. See tutorial-chaining-continuables-fail for details."
+        ),
+        "unhandled_exceptions": (
+            "Allows unhandled exceptions in asynchronous call hierarchies. "
+            "See tutorial-chaining-continuables-fail for details."
+        ),
+        "custom_final_callback": (
+            "Allows to customize the final callback which can be used to implement custom unhandled"
+            " asynchronous exception handlers."
+        ),
+        "immediate_types": (
+            "Don't decorate the used type erasure, "
+            "which is done to keep type names minimal for better error messages in debug builds."
+        ),
+    }
     no_copy_source = True
 
     @property
