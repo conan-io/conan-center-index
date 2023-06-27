@@ -1,8 +1,8 @@
 diff --git a/src/SFML/Audio/CMakeLists.txt b/src/SFML/Audio/CMakeLists.txt
-index d27dc6d..c1e3856 100644
+index d27dc6d..27c3386 100644
 --- a/src/SFML/Audio/CMakeLists.txt
 +++ b/src/SFML/Audio/CMakeLists.txt
-@@ -69,22 +69,21 @@ endif()
+@@ -69,19 +69,17 @@ endif()
  
  # find external libraries
  sfml_find_package(OpenAL INCLUDE "OPENAL_INCLUDE_DIR" LINK "OPENAL_LIBRARY")
@@ -23,31 +23,13 @@ index d27dc6d..c1e3856 100644
 +target_link_libraries(sfml-audio PRIVATE OpenAL::OpenAL)
  
  # minimp3 sources
--target_include_directories(sfml-audio SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/minimp3")
-+find_package(minimp3 REQUIRED CONFIG)
-+target_link_libraries(sfml-audio PRIVATE minimp3::minimp3)
- 
- if(SFML_OS_ANDROID)
-     target_link_libraries(sfml-audio PRIVATE android OpenSLES)
-@@ -92,4 +91,4 @@ endif()
+ target_include_directories(sfml-audio SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/minimp3")
+@@ -92,4 +90,4 @@ endif()
  
  target_link_libraries(sfml-audio
                        PUBLIC sfml-system
 -                      PRIVATE VORBIS FLAC)
 +                      PRIVATE Vorbis::vorbisenc Vorbis::vorbisfile FLAC::FLAC)
-diff --git a/src/SFML/Audio/SoundFileReaderMp3.cpp b/src/SFML/Audio/SoundFileReaderMp3.cpp
-index 7d980a9..8e8ca72 100644
---- a/src/SFML/Audio/SoundFileReaderMp3.cpp
-+++ b/src/SFML/Audio/SoundFileReaderMp3.cpp
-@@ -39,8 +39,6 @@
- #pragma GCC diagnostic ignored "-Wstringop-overflow"
- #endif
- 
--#include <minimp3_ex.h>
--
- #ifdef _MSC_VER
- #pragma warning(pop)
- #else
 diff --git a/src/SFML/Graphics/CMakeLists.txt b/src/SFML/Graphics/CMakeLists.txt
 index a939a98..bd6a89b 100644
 --- a/src/SFML/Graphics/CMakeLists.txt
@@ -73,17 +55,3 @@ index a939a98..bd6a89b 100644
  
  # add preprocessor symbols
  target_compile_definitions(sfml-graphics PRIVATE "STBI_FAILURE_USERMSG")
-diff --git a/src/SFML/Window/CMakeLists.txt b/src/SFML/Window/CMakeLists.txt
-index d2bdd5a..edc8d13 100644
---- a/src/SFML/Window/CMakeLists.txt
-+++ b/src/SFML/Window/CMakeLists.txt
-@@ -298,7 +298,8 @@ endif()
- target_link_libraries(sfml-window PUBLIC sfml-system)
- 
- # glad sources
--target_include_directories(sfml-window SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/glad/include")
-+find_package(glad REQUIRED CONFIG)
-+target_link_libraries(sfml-window PRIVATE glad::glad)
- 
- # When static linking on macOS, we need to add this flag for objective C to work
- if ((NOT BUILD_SHARED_LIBS) AND SFML_OS_MACOSX)

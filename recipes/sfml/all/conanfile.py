@@ -53,10 +53,9 @@ class SfmlConan(ConanFile):
 
     def requirements(self):
         if self.options.window:
+            # FIXME: use cci's glad
             if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
                 self.requires("opengl/system")
-                if Version(self.version) >= "2.6.0":
-                    self.requires("glad/0.1.36")
             if self.settings.os == "Linux":
                 self.requires("libudev/system")
                 self.requires("xorg/system")
@@ -64,11 +63,10 @@ class SfmlConan(ConanFile):
             self.requires("freetype/2.13.0")
             self.requires("stb/cci.20220909")
         if self.options.audio:
+            # FIXME: use cci's minimp3
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
-            if Version(self.version) >= "2.6.0":
-                self.requires("minimp3/20200304")
 
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
@@ -78,7 +76,9 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rmdir(self, os.path.join(self.source_folder, "extlibs"))
+        # sfml/2.6.0 uses minimp3 and glad in extlibs
+        if Version(self.version) < "2.6.0":
+            rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
         tc = CMakeToolchain(self)
