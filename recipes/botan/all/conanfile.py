@@ -180,7 +180,7 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def source(self):
-        get(conanfile=self, **self.conan_data['sources'][self.version], strip_root=True)
+        get(self, **self.conan_data['sources'][self.version], strip_root=True)
 
     def generate(self):
         if is_msvc(self):
