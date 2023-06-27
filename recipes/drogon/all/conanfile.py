@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -151,6 +152,8 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        if is_msvc(self):
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
         tc.generate()
