@@ -1,9 +1,11 @@
 required_for_references:
+- 7bitconf
 - 7bitdi
 - 7zip
 - aaf
 - aaplus
 - abseil
+- absent
 - access_private
 - acl
 - ada
@@ -33,10 +35,12 @@ required_for_references:
 - argtable2
 - argtable3
 - arsenalgear
+- artery-font-format
 - asio
 - asmjit
 - astc-codec
 - async_simple
+- asyncly
 - asyncplusplus
 - audiofile
 - autoconf
@@ -45,6 +49,8 @@ required_for_references:
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-http
+- aws-c-io
 - aws-c-sdkutils
 - aws-checksums
 - b2
@@ -54,6 +60,7 @@ required_for_references:
 - bacnet-stack
 - baical-p7
 - base64
+- bazel
 - bdwgc
 - bear
 - benchmark
@@ -108,8 +115,10 @@ required_for_references:
 - ceres-solver
 - cfgfile
 - cfitsio
+- cgal
 - cgif
 - cgns
+- chaiscript
 - charls
 - chef-fun
 - chipmunk2d
@@ -122,6 +131,7 @@ required_for_references:
 - clara
 - clhep
 - cli11
+- clickhouse-cpp
 - clipper
 - clove-unit
 - cmake
@@ -136,6 +146,7 @@ required_for_references:
 - commata
 - concurrencpp
 - concurrentqueue
+- console_bridge
 - cpp-httplib
 - cpp-jwt
 - cpp-lazy
@@ -145,8 +156,11 @@ required_for_references:
 - cppbenchmark
 - cppcheck
 - cppcodec
+- cppcommon
+- cppdap
 - cppfront
 - cppitertools
+- cpprestsdk
 - cpptoml
 - cppunit
 - cpputest
@@ -163,7 +177,10 @@ required_for_references:
 - cspice
 - csvmonkey
 - ctre
+- cub
 - cubicinterpolation
+- cuda-api-wrappers
+- cuda-kat
 - cwalk
 - cxxopts
 - cyclonedds
@@ -202,6 +219,7 @@ required_for_references:
 - eigen
 - elfio
 - embree3
+- emio
 - enet
 - entityx
 - enum-flags
@@ -220,6 +238,8 @@ required_for_references:
 - fast-cdr
 - fast-dds
 - fast_float
+- fastgltf
+- fff
 - ffmpeg
 - fft
 - fftw
@@ -228,6 +248,7 @@ required_for_references:
 - flatbuffers
 - flex
 - fmt
+- fmtlog
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -243,21 +264,25 @@ required_for_references:
 - gdbm
 - gdcm
 - gdk-pixbuf
+- gegles-spdlog_setup
 - gemmlowp
 - geos
 - getopt-for-visual-studio
 - gettext
 - gflags
+- gfortran
 - ghc-filesystem
 - giflib
 - ginkgo
 - gklib
 - glad
+- glaze
 - glfw
 - gli
 - glib
 - glm
 - glog
+- glpk
 - glslang
 - glu
 - gmp
@@ -265,6 +290,7 @@ required_for_references:
 - gnutls
 - googleapis
 - gperf
+- gperftools
 - graphene
 - grpc
 - grpc-proto
@@ -274,6 +300,7 @@ required_for_references:
 - gstreamer
 - gtest
 - gtk
+- gtk-doc-stub
 - gurkenlaeufer
 - h3
 - h5pp
@@ -282,12 +309,14 @@ required_for_references:
 - hdrhistogram-c
 - hidapi
 - highfive
+- highs
 - highway
 - hipony-enumerate
 - hiredis
 - homog2d
 - http_parser
 - icu
+- id3v2lib
 - iir1
 - im95able-rea
 - imake
@@ -300,6 +329,7 @@ required_for_references:
 - itlib
 - jasper
 - jbig
+- jinja2cpp
 - joltphysics
 - jom
 - json-c
@@ -313,9 +343,11 @@ required_for_references:
 - kuba-zip
 - lcms
 - ldns
+- lefticus-tools
 - lemon
 - leptonica
 - lerc
+- lest
 - lexbor
 - libalsa
 - libarchive
@@ -334,6 +366,7 @@ required_for_references:
 - libde265
 - libdeflate
 - libdisasm
+- libdrawille
 - libdwarf
 - libelf
 - libepoxy
@@ -357,6 +390,8 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmediainfo
+- libmemcached
 - libmikmod
 - libmodbus
 - libmodplug
@@ -367,6 +402,7 @@ required_for_references:
 - libnabo
 - libnfs
 - libnghttp2
+- libnl
 - libnop
 - libnova
 - libnuma
@@ -392,11 +428,13 @@ required_for_references:
 - libspatialindex
 - libspng
 - libsrtp
+- libssh2
 - libsvtav1
 - libsystemd
 - libtar
 - libtasn1
 - libtiff
+- libtins
 - libtool
 - libtorrent
 - libudev
@@ -408,6 +446,7 @@ required_for_references:
 - libverto
 - libvips
 - libvpx
+- libwebm
 - libwebp
 - libwebsockets
 - libx264
@@ -421,7 +460,9 @@ required_for_references:
 - libzippp
 - lief
 - linux-syscall-support
+- llhttp
 - lodepng
+- logr
 - lua
 - luau
 - lunasvg
@@ -435,11 +476,17 @@ required_for_references:
 - matchit
 - mawk
 - mbedtls
+- mbits-args
+- mbits-mstch
+- mbits-semver
+- mbits-utfconv
 - md4c
 - md4qt
+- mdnsresponder
 - mdspan
 - meson
 - mgs
+- microservice-essentials
 - mikelankamp-fpm
 - mimalloc
 - miniaudio
@@ -447,7 +494,10 @@ required_for_references:
 - minizip
 - minizip-ng
 - mongo-c-driver
+- mongo-cxx-driver
+- mozilla-build
 - mozjpeg
+- mp-units
 - mpg123
 - ms-gsl
 - msgpack-c
@@ -456,7 +506,9 @@ required_for_references:
 - naive-tsearch
 - namedtype
 - nameof
+- nanodbc
 - nanoflann
+- nanomsg
 - nanorange
 - nas
 - nasm
@@ -468,7 +520,9 @@ required_for_references:
 - nodejs
 - norm
 - nsync
+- numcpp
 - nuraft
+- octomap
 - odbc
 - ogdf
 - ogg
@@ -481,6 +535,8 @@ required_for_references:
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
+- opencolorio
+- opencore-amr
 - openexr
 - opengl
 - opengv
@@ -490,6 +546,7 @@ required_for_references:
 - openmesh
 - openssl
 - opensubdiv
+- opentelemetry-cpp
 - opentelemetry-proto
 - optional-lite
 - opus
@@ -538,15 +595,18 @@ required_for_references:
 - rapidjson
 - rapidxml
 - rapidyaml
+- raylib
 - re2
 - readerwriterqueue
 - readline
 - readosm
 - rectpack2d
+- redis-plus-plus
 - replxx
 - restbed
 - restinio
 - ring-span-lite
+- rmm
 - roaring
 - robin-hood-hashing
 - rttr
@@ -555,6 +615,7 @@ required_for_references:
 - samurai
 - sbepp
 - scnlib
+- scons
 - screen_capture_lite
 - sdbus-cpp
 - sdl
@@ -562,6 +623,7 @@ required_for_references:
 - seadex-essentials
 - semimap
 - sentry-breakpad
+- sentry-crashpad
 - serd
 - sfml
 - shield
@@ -583,10 +645,14 @@ required_for_references:
 - sqlite3
 - sqlite_orm
 - sqlitecpp
+- ssht
 - status-code
 - stb
+- stlab
 - strawberryperl
 - string-view-lite
+- strong_type
+- svgwrite
 - symengine
 - tabulate
 - taocpp-json
@@ -597,9 +663,11 @@ required_for_references:
 - tensorflow-lite
 - tensorpipe
 - termcap
+- termcolor
 - threadpool
 - thrift
 - thrust
+- timsort
 - tinycthread
 - tinycthreadpool
 - tinyexif
@@ -612,6 +680,7 @@ required_for_references:
 - toml11
 - trantor
 - turtle
+- tz
 - uni-algo
 - unicorn
 - univalue
@@ -620,6 +689,7 @@ required_for_references:
 - uriparser
 - utf8proc
 - utfcpp
+- util-linux-libuuid
 - uvw
 - vaapi
 - variant-lite
@@ -628,6 +698,7 @@ required_for_references:
 - vincentlaucsb-csv-parser
 - vir-simd
 - visit_struct
+- vo-amrwbenc
 - volk
 - vorbis
 - vtu11
@@ -635,6 +706,7 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- wasmer
 - wasmtime
 - wasmtime-cpp
 - watcher
@@ -682,5 +754,6 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zpp_bits
 - zstd
 - zulu-openjdk
