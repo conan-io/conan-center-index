@@ -47,8 +47,6 @@ class SeadexGenesisConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["fmt/*"].header_only = True
-        self.options["spdlog/*"].header_only = True
 
     def requirements(self):
         # Exposes headers and symbols: https://github.com/SeadexGmbH/genesis/blob/master/genesis/source/version.cpp
@@ -73,8 +71,6 @@ class SeadexGenesisConan(ConanFile):
                 )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
-        if not self.dependencies["fmt"].options.header_only:
-            raise ConanInvalidConfiguration("fmt must be header only!")
 
     def generate(self):
         tc = CMakeToolchain(self)
