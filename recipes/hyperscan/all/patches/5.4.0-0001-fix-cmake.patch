@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8bc6077..0fbed25 100644
+index 8bc6077..2dfdf29 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -6,7 +6,7 @@ set (HS_MINOR_VERSION 4)
@@ -40,6 +40,17 @@ index 8bc6077..0fbed25 100644
            OUTPUT_VARIABLE BUILD_DATE
            OUTPUT_STRIP_TRAILING_WHITESPACE)
  else ()
+@@ -242,8 +242,8 @@ else()
+     if (NOT RELEASE_BUILD)
+         # -Werror is most useful during development, don't potentially break
+         # release builds
+-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
+-        set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Werror")
++        #set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
++        #set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Werror")
+     endif()
+ 
+     if (DISABLE_ASSERTS)
 @@ -326,7 +326,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
          message (STATUS "Building the fat runtime requires the Unix Makefiles generator, or Ninja with CMake v3.0 or higher")
          set (FAT_RUNTIME_REQUISITES FALSE)
