@@ -179,6 +179,9 @@ class SfmlConan(ConanFile):
         def iokit():
             return ["IOKit"] if self.settings.os == "Macos" else []
 
+        def coreservices():
+            return ["CoreServices"] if self.settings.os == "Macos" else []
+
         def coregraphics():
             return ["CoreGraphics"] if self.settings.os == "iOS" else []
 
@@ -231,7 +234,7 @@ class SfmlConan(ConanFile):
                     "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
-                                  coremotion() + opengles_ios(),
+                                  coreservices() + coremotion() + opengles_ios(),
                 },
             })
         if self.options.graphics:
