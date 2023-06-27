@@ -8,8 +8,6 @@ from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, ap
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-)
-
 import os
 
 required_conan_version = ">=1.55.0"
