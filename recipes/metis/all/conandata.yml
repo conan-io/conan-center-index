@@ -8,14 +8,14 @@ sources:
 patches:
   "5.1.1":
     - patch_file: "patches/5.1.1-001-fix-coarse-graph-memory-bugs.patch"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/KarypisLab/METIS/commit/36262adecaa9720a4417a67124428061c367fd3f"
       patch_description: "Fix memory bug when coarser graph stays the same"
     - patch_file: "patches/5.1.1-002-fix-out-out-of-bounds-errors.patch"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/KarypisLab/METIS/commit/b9e8609ea16d27cf61e1ad8a38af1bfd6185eca5"
       patch_description: "Fix out out-of-bounds memory errors"
     - patch_file: "patches/5.1.1-003-reduce-maximum-memory-use.patch"
-      patch_type: "backport"
+      patch_type: "bugfix"
       patch_source: "https://github.com/KarypisLab/METIS/commit/aef54c5b2a72f9d0c3c91b008c35271560b79cac"
       patch_description: "Small changes to reduce maximum memory use"
