@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-
-import fileinput
 from conan import ConanFile
-from conan.tools.files import chdir, copy, get
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import chdir, copy, get
+from conan.tools.build import check_min_cppstd
+
 import os
+import fileinput
 
 #required_conan_version = ">=2.0.0"
 
