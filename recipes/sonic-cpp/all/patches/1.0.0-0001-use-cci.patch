@@ -1,0 +1,13 @@
+diff --git a/include/sonic/string_view.h b/include/sonic/string_view.h
+index 67dfe2f..1fb2379 100644
+--- a/include/sonic/string_view.h
++++ b/include/sonic/string_view.h
+@@ -21,7 +21,7 @@ namespace sonic_json {
+ using StringView = std::string_view;
+ }  // namespace sonic_json
+ #else
+-#include "thirdparty/string-view-lite/string_view.h"
++#include "nonstd/string_view.hpp"
+ namespace sonic_json {
+ using StringView = nonstd::string_view;
+ }  // namespace sonic_json
