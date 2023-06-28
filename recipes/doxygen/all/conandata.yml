@@ -25,10 +25,6 @@ patches:
     - patch_file: "patches/1.9.7-0001-fix-cmake.patch"
       patch_description: "Fix relative CMake path"
       patch_type: "portability"
-    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
-      patch_description: "Enable modern compilers"
-      patch_type: "portability"
-      patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
   "1.9.4":
     - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
       patch_description: "Enable modern compilers"
