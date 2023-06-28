@@ -410,7 +410,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.48.0")
+            self.requires("at-spi2-core/2.48.3")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
