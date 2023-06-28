@@ -35,10 +35,12 @@ required_for_references:
 - argtable2
 - argtable3
 - arsenalgear
+- artery-font-format
 - asio
 - asmjit
 - astc-codec
 - async_simple
+- asyncly
 - asyncplusplus
 - audiofile
 - autoconf
@@ -116,6 +118,7 @@ required_for_references:
 - cgal
 - cgif
 - cgns
+- chaiscript
 - charls
 - chef-fun
 - chipmunk2d
@@ -128,6 +131,7 @@ required_for_references:
 - clara
 - clhep
 - cli11
+- clickhouse-cpp
 - clipper
 - clove-unit
 - cmake
@@ -142,6 +146,7 @@ required_for_references:
 - commata
 - concurrencpp
 - concurrentqueue
+- console_bridge
 - cpp-httplib
 - cpp-jwt
 - cpp-lazy
@@ -155,6 +160,7 @@ required_for_references:
 - cppdap
 - cppfront
 - cppitertools
+- cpprestsdk
 - cpptoml
 - cppunit
 - cpputest
@@ -171,6 +177,7 @@ required_for_references:
 - cspice
 - csvmonkey
 - ctre
+- cub
 - cubicinterpolation
 - cuda-api-wrappers
 - cuda-kat
@@ -215,6 +222,7 @@ required_for_references:
 - emio
 - enet
 - entityx
+- entt
 - enum-flags
 - erikzenker-hsm
 - erkir
@@ -231,6 +239,8 @@ required_for_references:
 - fast-cdr
 - fast-dds
 - fast_float
+- fastgltf
+- fff
 - ffmpeg
 - fft
 - fftw
@@ -300,6 +310,7 @@ required_for_references:
 - hdrhistogram-c
 - hidapi
 - highfive
+- highs
 - highway
 - hipony-enumerate
 - hiredis
@@ -337,6 +348,7 @@ required_for_references:
 - lemon
 - leptonica
 - lerc
+- lest
 - lexbor
 - libalsa
 - libarchive
@@ -355,6 +367,7 @@ required_for_references:
 - libde265
 - libdeflate
 - libdisasm
+- libdrawille
 - libdwarf
 - libelf
 - libepoxy
@@ -390,6 +403,7 @@ required_for_references:
 - libnabo
 - libnfs
 - libnghttp2
+- libnl
 - libnop
 - libnova
 - libnuma
@@ -415,6 +429,7 @@ required_for_references:
 - libspatialindex
 - libspng
 - libsrtp
+- libssh2
 - libsvtav1
 - libsystemd
 - libtar
@@ -448,6 +463,7 @@ required_for_references:
 - linux-syscall-support
 - llhttp
 - lodepng
+- logr
 - lua
 - luau
 - lunasvg
@@ -461,15 +477,22 @@ required_for_references:
 - matchit
 - mawk
 - mbedtls
+- mbits-args
+- mbits-mstch
+- mbits-semver
+- mbits-utfconv
 - md4c
 - md4qt
 - mdnsresponder
 - mdspan
 - meson
+- metis
 - mgs
+- microservice-essentials
 - mikelankamp-fpm
 - mimalloc
 - miniaudio
+- minimp3
 - minisat
 - minizip
 - minizip-ng
@@ -479,6 +502,7 @@ required_for_references:
 - mozjpeg
 - mp-units
 - mpg123
+- mppp
 - ms-gsl
 - msgpack-c
 - msgpack-cxx
@@ -486,6 +510,7 @@ required_for_references:
 - naive-tsearch
 - namedtype
 - nameof
+- nanodbc
 - nanoflann
 - nanomsg
 - nanorange
@@ -499,6 +524,7 @@ required_for_references:
 - nodejs
 - norm
 - nsync
+- numcpp
 - nuraft
 - octomap
 - odbc
@@ -513,6 +539,8 @@ required_for_references:
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
+- opencolorio
+- opencore-amr
 - openexr
 - opengl
 - opengv
@@ -550,6 +578,7 @@ required_for_references:
 - prometheus-cpp
 - proposal
 - protobuf
+- protobuf-c
 - psimd
 - pthreadpool
 - pthreads4w
@@ -577,10 +606,12 @@ required_for_references:
 - readline
 - readosm
 - rectpack2d
+- redis-plus-plus
 - replxx
 - restbed
 - restinio
 - ring-span-lite
+- rmm
 - roaring
 - robin-hood-hashing
 - rttr
@@ -589,6 +620,7 @@ required_for_references:
 - samurai
 - sbepp
 - scnlib
+- scons
 - screen_capture_lite
 - sdbus-cpp
 - sdl
@@ -596,10 +628,12 @@ required_for_references:
 - seadex-essentials
 - semimap
 - sentry-breakpad
+- sentry-crashpad
 - serd
 - sfml
 - shield
 - sigslot
+- simde
 - simdjson
 - simdutf
 - skyr-url
@@ -617,11 +651,15 @@ required_for_references:
 - sqlite3
 - sqlite_orm
 - sqlitecpp
+- sqlpp11
+- ssht
 - status-code
 - stb
+- stlab
 - strawberryperl
 - string-view-lite
 - strong_type
+- svgwrite
 - symengine
 - tabulate
 - taocpp-json
@@ -658,6 +696,7 @@ required_for_references:
 - uriparser
 - utf8proc
 - utfcpp
+- util-linux-libuuid
 - uvw
 - vaapi
 - variant-lite
