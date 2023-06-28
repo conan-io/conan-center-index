@@ -52,8 +52,9 @@ class LibWebRTCConan(ConanFile):
 
 
     def build_requirements(self):
-        apt = package_manager.Apt(self)
-        apt.install(["libegl-dev"], update=True, check=True)
+        pass
+        #apt = package_manager.Apt(self)
+        #apt.install(["libegl-dev"], update=True, check=True)
 
 
     def _set_depot_tools_environment_variables(self):
