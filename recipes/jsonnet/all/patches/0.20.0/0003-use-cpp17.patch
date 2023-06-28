@@ -7,6 +7,7 @@ index c14c93c..b1cb1b3 100644
  endif()
 
 -set(CMAKE_CXX_STANDARD 11)
++# FIXME: This is a temporary workaround, necessary in MSVC only for version 0.20 and Conan 1.X
 +set(CMAKE_CXX_STANDARD 17)
 
 
