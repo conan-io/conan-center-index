@@ -43,6 +43,10 @@ class PackageConan(ConanFile):
         self.requires("eigen/3.3.7", transitive_headers=True)
 
     def validate(self):
+        if Version(self.version) < "2.6.4" and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported by {self.settings.os}; Try the version >= 2.6.4")
+        if Version(self.version) >= "2.6.4" and self.settings.os not in ["Linux", "Windows"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported by {self.settings.os}.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(
