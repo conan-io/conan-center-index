@@ -359,7 +359,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/73.1")
+            self.requires("icu/73.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/7.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -403,9 +403,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.2")
+            self.requires("dbus/1.15.6")
         if self.options.qtwayland:
-            self.requires("wayland/1.21.0")
+            self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.5.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
@@ -442,7 +442,7 @@ class QtConan(ConanFile):
                 self.tool_requires("bison/3.8.2")
                 self.tool_requires("flex/2.6.4")
         if self.options.qtwayland:
-            self.tool_requires("wayland/1.21.0")
+            self.tool_requires("wayland/1.22.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
