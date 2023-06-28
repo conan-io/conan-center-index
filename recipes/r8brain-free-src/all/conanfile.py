@@ -79,7 +79,7 @@ class R8brainFreeSrcConan(ConanFile):
         self.cpp_info.libs = ["r8brain"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m",])
 
         if self.options.fft == "pffft":
             self.cpp_info.defines.append("R8B_PFFFT")
