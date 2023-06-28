@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
+from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 import os
 
@@ -16,6 +17,10 @@ class DrLibsConan(ConanFile):
     no_copy_source = True
     settings = "os", "arch", "compiler", "build_type"
     package_type = "header-library"
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def layout(self):
         basic_layout(self, src_folder="src")
