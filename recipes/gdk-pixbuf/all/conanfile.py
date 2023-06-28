@@ -65,7 +65,7 @@ class GdkPixbufConan(ConanFile):
     def requirements(self):
         self.requires("glib/2.76.3", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_libpng:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_libtiff:
             self.requires("libtiff/4.5.1")
         if self.options.with_libjpeg == "libjpeg-turbo":
