@@ -49,11 +49,9 @@ class CvPlotConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "CvPlot")
         self.cpp_info.set_property("cmake_target_name", "CvPlot::CvPlot")
-        self.cpp_info.set_property("cmake_module_file_name", "CvPlot")
-        self.cpp_info.set_property("cmake_module_target_name", "CvPlot::CvPlot")
+        self.cpp_info.set_property("cmake_find_mode", "both")
 
         self.cpp_info.defines.append("CVPLOT_HEADER_ONLY")
 
