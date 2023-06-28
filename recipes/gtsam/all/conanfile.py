@@ -138,8 +138,6 @@ class GtsamConan(ConanFile):
         elif not self.options.use_vendored_metis:
             # GTSAM expects 32-bit integers for Metis
             self.options["metis"].with_64bit_types = False
-        if self.options.allow_deprecated_since_V4 != "deprecated":
-            self.output.warn("'allow_deprecated_since_V4' option is deprecated. Use 'allow_deprecated' instead.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -147,7 +145,7 @@ class GtsamConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.82.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
-        if self.options.with_TBB or self.options.default_allocator == "TBB":
+        if self.options.with_TBB:
             self.requires("onetbb/2021.9.0", transitive_headers=True)
         if self.options.default_allocator == "tcmalloc":
             self.requires("gperftools/2.10.0")
@@ -182,12 +180,17 @@ class GtsamConan(ConanFile):
                 f"{', '.join(self._required_boost_components)}"
             )
 
-        if (
-            self.options.with_TBB
-            and self.options.default_allocator in [None, "TBB"]
-            and not self.dependencies["onetbb"].options.tbbmalloc
-        ):
-            raise ConanInvalidConfiguration("GTSAM with TBB requires onetbb:tbbmalloc=True")
+        if self.options.with_TBB:
+            if self.options.default_allocator in [None, "TBB"]:
+                if not self.dependencies["onetbb"].options.tbbmalloc:
+                    raise ConanInvalidConfiguration("GTSAM with TBB requires onetbb/*:tbbmalloc=True")
+            elif self.options.default_allocator != "tcmalloc":
+                raise ConanInvalidConfiguration(
+                    "with_TBB option cannot be used with"
+                    f" default_allocator={self.options.default_allocator}"
+                )
+        elif self.options.default_allocator == "TBB":
+            raise ConanInvalidConfiguration("default_allocator=TBB requires with_TBB=True")
 
         check_min_vs(self, "191")
 
@@ -197,6 +200,11 @@ class GtsamConan(ConanFile):
                 "https://github.com/borglab/gtsam/issues/1087"
                 if Version(self.version) < "4.2"
                 else "https://github.com/borglab/gtsam/issues/1541"
+            )
+
+        if self.options.allow_deprecated_since_V4 != "deprecated":
+            self.output.warn(
+                "'allow_deprecated_since_V4' option is deprecated. Use 'allow_deprecated' instead."
             )
 
     def source(self):
@@ -276,11 +284,29 @@ class GtsamConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
         # Honor vc runtime
         if is_msvc(self):
             gtsam_build_types_cmake = os.path.join(self.source_folder, "cmake", "GtsamBuildTypes.cmake")
             replace_in_file(self, gtsam_build_types_cmake, "/MD ", f"/{msvc_runtime_flag(self)} ")
             replace_in_file(self, gtsam_build_types_cmake, "/MDd ", f"/{msvc_runtime_flag(self)} ")
+
+        if self.options.default_allocator == "tcmalloc":
+            handle_allocators_path = os.path.join(self.source_folder, "cmake", "HandleAllocators.cmake")
+            if Version(self.version) < "4.1":
+                handle_allocators_path = os.path.join(self.source_folder, "CMakeLists.txt")
+            replace_in_file(
+                self,
+                handle_allocators_path,
+                "if(GOOGLE",
+                "find_package(gperftools REQUIRED)\nset(GOOGLE_PERFTOOLS_FOUND TRUE)\nif(GOOGLE",
+            )
+            replace_in_file(
+                self,
+                handle_allocators_path,
+                'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
+                'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"',
+            )
 
     def build(self):
         self._patch_sources()
@@ -330,7 +356,7 @@ class GtsamConan(ConanFile):
         gtsam.libs = ["gtsam"]
         gtsam.requires = [f"boost::{component}" for component in self._required_boost_components]
         gtsam.requires.append("eigen::eigen")
-        if self.options.with_TBB or self.options.default_allocator == "TBB":
+        if self.options.with_TBB:
             gtsam.requires.append("onetbb::onetbb")
         if self.options.default_allocator == "tcmalloc":
             gtsam.requires.append("gperftools::gperftools")
@@ -339,7 +365,7 @@ class GtsamConan(ConanFile):
                 gtsam.requires.append("libmetis-gtsam")
             else:
                 gtsam.requires.append("metis::metis")
-        if self.settings.os == "Windows" and Version(self.version) >= "4.0.3":
+        if self.settings.os == "Windows":
             gtsam.system_libs = ["dbghelp"]
 
         if self.options.build_unstable:
