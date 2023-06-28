@@ -1,7 +1,12 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.53.0"
 
 
 class LibTomMathConan(ConanFile):
@@ -21,11 +26,8 @@ class LibTomMathConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/*"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     @property
     def _settings_build(self):
@@ -37,98 +39,91 @@ class LibTomMathConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self.build_requires("make/4.3")
-        if self.settings.compiler != "Visual Studio" and self.settings.os != "Windows" and self.options.shared:
-            self.build_requires("libtool/2.4.6")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _run_makefile(self, target=None):
-        target = target or ""
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.libs = []
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            autotools.link_flags.append("-lcrypt32")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # FIXME: should be handled by helper
-            autotools.link_flags.append("-arch arm64")
-        args = autotools.vars
-        args.update({
-            "PREFIX": self.package_folder,
-        })
-        if self.settings.compiler != "Visual Studio":
-            if tools.get_env("CC"):
-                args["CC"] = tools.get_env("CC")
-            if tools.get_env("LD"):
-                args["LD"] = tools.get_env("LD")
-            if tools.get_env("AR"):
-                args["AR"] = tools.get_env("AR")
+    def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/1.9.3")
+        if not is_msvc(self) and self.settings.os != "Windows" and self.options.shared:
+            self.tool_requires("libtool/2.4.7")
 
-            args["LIBTOOL"] = "libtool"
-        arg_str = " ".join("{}=\"{}\"".format(k, v) for k, v in args.items())
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.extra_ldflags = ["-lcrypt32"]
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+                tc.extra_ldflags.append("-arch arm64")
+            tc.make_args = [f"PREFIX={self.package_folder}"]
+            tc.generate()
 
-        with tools.environment_append(args):
-            with tools.chdir(self._source_subfolder):
-                if self.settings.compiler == "Visual Studio":
-                    if self.options.shared:
-                        target = "tommath.dll"
-                    else:
-                        target = "tommath.lib"
-                    with tools.vcvars(self):
-                        self.run("nmake -f makefile.msvc {} {}".format(
-                            target,
-                            arg_str,
-                        ), run_environment=True)
-                else:
-                    if self.settings.os == "Windows":
-                        makefile = "makefile.mingw"
-                        if self.options.shared:
-                            target = "libtommath.dll"
-                        else:
-                            target = "libtommath.a"
-                    else:
-                        if self.options.shared:
-                            makefile = "makefile.shared"
-                        else:
-                            makefile = "makefile.unix"
-                    self.run("{} -f {} {} {} -j{}".format(
-                        tools.get_env("CONAN_MAKE_PROGRAM", "make"),
-                        makefile,
-                        target,
-                        arg_str,
-                        tools.cpu_count(),
-                    ), run_environment=True)
+    @property
+    def _makefile_filename(self):
+        if is_msvc(self):
+            if self.options.shared:
+                return "makefile.msvc"
+        elif self.settings.os == "Windows" and not is_msvc(self):
+                return "makefile.mingw"
+        elif self.options.shared:
+            return "makefile.shared"
+        else:
+            return "makefile.unix"
+
+    @property
+    def _makefile_target(self):
+        if is_msvc(self):
+            return "tommath.dll" if self.options.shared else "tommath.lib"
+        elif self.settings.os == "Windows" and not is_msvc(self):
+            return "libtommath.dll" if self.options.shared else "libtommath.a"
+        return None
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        self._run_makefile()
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
+            if is_msvc(self):
+                self.run(f"nmake -f {self._makefile_filename} {self._makefile_target}")
+            else:
+                autotools = Autotools(self)
+                autotools.make(target=self._makefile_target, args=["-f", self._makefile_filename])
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.settings.os == "Windows":
-            # The mingw makefile uses `cmd`, which is only available on Windows
-            self.copy("*.a", src=self._source_subfolder, dst="lib")
-            self.copy("*.lib", src=self._source_subfolder, dst="lib")
-            self.copy("*.dll", src=self._source_subfolder, dst="bin")
-            self.copy("tommath.h", src=self._source_subfolder, dst="include")
+            # INFO: The mingw makefile uses `cmd`, which is only available on Windows
+            copy(self, "*.a", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
+            copy(self, "tommath.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
         else:
-            self._run_makefile("install")
+            with chdir(self, self.source_folder):
+                if is_msvc(self):
+                    self.run(f"nmake -f {self._makefile_filename} install")
+                else:
+                    autotools = Autotools(self)
+                    autotools.install(args=["DESTDIR=", "-f", self._makefile_filename])
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "tommath.lib"))
+        if is_msvc(self) and self.options.shared:
+            rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
+                   os.path.join(self.package_folder, "lib", "tommath.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["tommath"]
@@ -136,4 +131,6 @@ class LibTomMathConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
 
-        self.cpp_info.names["pkg_config"] = "libtommath"
+        self.cpp_info.set_property("cmake_file_name", "libtommath")
+        self.cpp_info.set_property("cmake_target_name", "libtommath")
+        self.cpp_info.set_property("pkg_config_name", "libtommath")
