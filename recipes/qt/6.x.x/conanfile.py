@@ -297,7 +297,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
@@ -305,17 +305,17 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.1")
+            self.requires("glib/2.76.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.2.1")
+            self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/6.0.0")
+            self.requires("harfbuzz/7.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.5")
@@ -324,7 +324,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.39")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
@@ -345,7 +345,7 @@ class QtConan(ConanFile):
             self.requires("zstd/1.5.5")
         if self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
-            self.requires("wayland/1.21.0")
+            self.requires("wayland/1.22.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
@@ -360,14 +360,14 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.2")
+            self.requires("dbus/1.15.6")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/3.26.4")
         self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
@@ -375,7 +375,7 @@ class QtConan(ConanFile):
             self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
-            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("nodejs/18.15.0")
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
@@ -385,7 +385,7 @@ class QtConan(ConanFile):
                 self.tool_requires("winflexbison/2.5.24")
 
         if self.options.qtwayland:
-            self.tool_requires("wayland/1.21.0")
+            self.tool_requires("wayland/1.22.0")
         if cross_building(self):
             self.tool_requires(f"qt/{self.version}")
 
