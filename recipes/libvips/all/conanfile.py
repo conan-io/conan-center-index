@@ -153,7 +153,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_pdfium:
             self.requires("pdfium/cci.20210730")
         if self.options.with_png == "libpng":
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         elif self.options.with_png == "libspng":
             self.requires("libspng/0.7.3")
         if self.options.with_poppler:
