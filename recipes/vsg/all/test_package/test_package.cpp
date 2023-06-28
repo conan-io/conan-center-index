@@ -12,22 +12,12 @@
 int main(int argc, char** argv)
 {
     vsg::CommandLine arguments(&argc, argv);
-    auto numObjects = arguments.value(100u, {"---num-objects", "-n"});
+    auto numObjects = arguments.value(1u, {"---num-objects", "-n"});
     if (arguments.errors()) return arguments.writeErrorMessages(std::cerr);
 
     using Objects = std::vector<vsg::ref_ptr<vsg::Object>>;
     Objects objects;
-    objects.reserve(numObjects);
-    for (unsigned int i = 0; i < numObjects; ++i)
-    {
-        objects.push_back(vsg::Node::create());
-    }
-
-    Objects copy_objects(numObjects);
-
-
-    copy_objects = objects;
-    copy_objects.clear();
+    objects.push_back(vsg::Node::create());
 
 
     return 0;
