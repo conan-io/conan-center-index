@@ -1,7 +1,8 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
+import textwrap
 
 
 required_conan_version = ">=1.54.0"
@@ -62,17 +63,36 @@ class LibTomMathConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        # INFO: Generate cmake target without namespace
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {self.name: f"{self.name}::{self.name}"}
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        save(self, module_file, content)
+
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
         self.cpp_info.libs = ["tommath"]
         self.cpp_info.set_property("cmake_file_name", "libtommath")
         self.cpp_info.set_property("cmake_target_name", "libtommath")
 
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "libtommath"
-        self.cpp_info.names["cmake_find_package_multi"] = "libtommath"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

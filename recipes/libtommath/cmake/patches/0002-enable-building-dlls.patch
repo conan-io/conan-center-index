@@ -3,7 +3,7 @@
 @@ -91,6 +91,14 @@ add_library(${PROJECT_NAME}
      ${HEADERS}
  )
- 
+
 +if(BUILD_SHARED_LIBS AND MSVC)
 +  target_sources(${PROJECT_NAME} PRIVATE "tommath.def")
 +endif()
@@ -15,73 +15,3 @@
  target_include_directories(${PROJECT_NAME} PUBLIC
      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
---- s_mp_rand_platform.c
-+++ s_mp_rand_platform.c
-@@ -16,6 +16,16 @@ static mp_err s_read_arc4random(void *p, size_t n)
- }
- #endif
- 
-+/* Add a dummy function for s_read_arc4random
-+ */
-+#if !defined(S_READ_ARC4RANDOM_C)
-+static mp_err s_read_arc4random(void *p, size_t n)
-+{
-+    (void)p; (void)n;
-+    return MP_ERR;
-+}
-+#endif
-+
- #if defined(_WIN32)
- #define S_READ_WINCSP_C
- 
-@@ -47,6 +57,16 @@ static mp_err s_read_wincsp(void *p, size_t n)
- }
- #endif /* WIN32 */
- 
-+/* Add a dummy function for s_read_wincsp
-+ */
-+#if !defined(S_READ_WINCSP_C)
-+static mp_err s_read_wincsp(void *p, size_t n)
-+{
-+    (void)p; (void)n;
-+    return MP_ERR;
-+}
-+#endif
-+
- #if !defined(S_READ_WINCSP_C) && defined(__linux__) && defined(__GLIBC_PREREQ)
- #if __GLIBC_PREREQ(2, 25)
- #define S_READ_GETRANDOM_C
-@@ -72,6 +92,16 @@ static mp_err s_read_getrandom(void *p, size_t n)
- #endif
- #endif
- 
-+/* Add a dummy function for s_read_getrandom
-+ */
-+#if !defined(S_READ_GETRANDOM_C)
-+static mp_err s_read_getrandom(void *p, size_t n)
-+{
-+    (void)p; (void)n;
-+    return MP_ERR;
-+}
-+#endif
-+
- /* We assume all platforms besides windows provide "/dev/urandom".
-  * In case yours doesn't, define MP_NO_DEV_URANDOM at compile-time.
-  */
-@@ -112,6 +142,16 @@ static mp_err s_read_urandom(void *p, size_t n)
- }
- #endif
- 
-+/* Add a dummy function for s_read_urandom
-+ */
-+#if !defined(S_READ_URANDOM_C)
-+static mp_err s_read_urandom(void *p, size_t n)
-+{
-+    (void)p; (void)n;
-+    return MP_ERR;
-+}
-+#endif
-+
- mp_err s_read_arc4random(void *p, size_t n);
- mp_err s_read_wincsp(void *p, size_t n);
- mp_err s_read_getrandom(void *p, size_t n);
