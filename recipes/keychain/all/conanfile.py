@@ -35,6 +35,7 @@ class KeychainConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libsecret/0.20.4")
+            self.requires("glib/2.76.0")
 
     def build_requirements(self):
         if self.settings.os == "Linux":
