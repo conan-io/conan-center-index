@@ -57,5 +57,9 @@ class ExtracmakemodulesConan(ConanFile):
 
     def package_info(self):
         # this package is CMake files, it doesn't need an extra one generating
+        self.cpp_info.includedirs = []
         self.cpp_info.set_property("cmake_find_mode", "none")
-        self.cpp_info.builddirs.append(os.path.join("res", "ECM", "cmake"))
+
+        for dirname in ["cmake", "find-modules", "kde-modules", "toolchain",
+                        "modules", "test-modules"]:
+            self.cpp_info.builddirs.append(os.path.join("res", "ECM", dirname))
