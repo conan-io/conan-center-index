@@ -74,10 +74,9 @@ class LibTomMathConan(ConanFile):
     @property
     def _makefile_filename(self):
         if is_msvc(self):
-            if self.options.shared:
-                return "makefile.msvc"
+            return "makefile.msvc"
         elif self.settings.os == "Windows" and not is_msvc(self):
-                return "makefile.mingw"
+            return "makefile.mingw"
         elif self.options.shared:
             return "makefile.shared"
         else:
@@ -122,7 +121,7 @@ class LibTomMathConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         if is_msvc(self) and self.options.shared:
-            rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
+            rename(self, os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
                    os.path.join(self.package_folder, "lib", "tommath.lib"))
 
     def package_info(self):
