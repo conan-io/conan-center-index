@@ -222,6 +222,7 @@ required_for_references:
 - emio
 - enet
 - entityx
+- entt
 - enum-flags
 - erikzenker-hsm
 - erkir
@@ -485,11 +486,13 @@ required_for_references:
 - mdnsresponder
 - mdspan
 - meson
+- metis
 - mgs
 - microservice-essentials
 - mikelankamp-fpm
 - mimalloc
 - miniaudio
+- minimp3
 - minisat
 - minizip
 - minizip-ng
@@ -499,6 +502,7 @@ required_for_references:
 - mozjpeg
 - mp-units
 - mpg123
+- mppp
 - ms-gsl
 - msgpack-c
 - msgpack-cxx
@@ -574,6 +578,7 @@ required_for_references:
 - prometheus-cpp
 - proposal
 - protobuf
+- protobuf-c
 - psimd
 - pthreadpool
 - pthreads4w
@@ -628,6 +633,7 @@ required_for_references:
 - sfml
 - shield
 - sigslot
+- simde
 - simdjson
 - simdutf
 - skyr-url
@@ -645,6 +651,7 @@ required_for_references:
 - sqlite3
 - sqlite_orm
 - sqlitecpp
+- sqlpp11
 - ssht
 - status-code
 - stb
