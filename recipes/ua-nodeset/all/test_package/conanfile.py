@@ -1,12 +1,19 @@
-from conans import ConanFile, CMake, tools
 import os
 
+from conan import ConanFile
 
-class TestUaNodeSetConan(ConanFile):
 
-    def build(self):
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
+
+    def layout(self):
         pass
 
-    def test(self):
-        assert os.path.exists(os.path.join(self.deps_user_info["ua-nodeset"].nodeset_dir, "PLCopen"))
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
+    def test(self):
+        nodeset_dir = self.dependencies["ua-nodeset"].conf_info.get("user.ua-nodeset:nodeset_dir")
+        bin_path = os.path.join(nodeset_dir, "PLCopen")
+        assert os.path.exists(bin_path)
