@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import chdir, copy, get
 from conan.tools.build import check_min_cppstd
+from conan.tools.system import package_manager
 
 import os
 import fileinput
@@ -48,6 +49,11 @@ class LibWebRTCConan(ConanFile):
 
     def export_sources(self):
         pass
+
+
+    def build_requirements(self):
+        apt = package_manager.Apt(self)
+        apt.install(["libegl-dev"], update=True, check=True)
 
 
     def _set_depot_tools_environment_variables(self):
