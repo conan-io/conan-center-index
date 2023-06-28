@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
 
 
 class ExtracmakemodulesConan(ConanFile):
@@ -22,6 +23,13 @@ class ExtracmakemodulesConan(ConanFile):
             **self.conan_data["sources"][self.version],
             destination=self.source_folder
         )
+
+    def build_requirements(self):
+        if self.version <= Version("5.80.0"):
+            self.tool_requires("cmake/[>=3.5]")
+        else:
+            self.tool_requires("cmake/[>=3.16]")
+
 
     def generate(self):
         tc = CMakeToolchain(self)
