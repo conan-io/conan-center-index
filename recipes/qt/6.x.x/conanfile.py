@@ -297,7 +297,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
-            self.requires("openssl/[>=1.1 <3]")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
@@ -950,6 +950,8 @@ class QtConan(ConanFile):
             core_reqs.append("zstd::zstd")
         if self.options.with_glib:
             core_reqs.append("glib::glib")
+        if self.options.openssl:
+            core_reqs.append("openssl::openssl") # used by QCryptographicHash 
 
         _create_module("Core", core_reqs)
         pkg_config_vars = [
