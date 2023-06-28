@@ -1,7 +1,7 @@
 sources:
   "1.9.7":
-    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.7.src.tar.gz"
-    sha256: "87007641c38e2c392c8596f36711eb97633b984c8430f389e7bcf6323a098d94"
+    url: "https://www.doxygen.nl/files/doxygen-1.9.7.repack.src.tar.gz"
+    sha256: "aa9b2118578f4d277954c8584eb7228be47cdf29e8041ce4dcba21e41dfb89f3"
   "1.9.4":
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
     sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
