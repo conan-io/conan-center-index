@@ -114,6 +114,15 @@ class ArrowConan(ConanFile):
     }
     short_paths = True
 
+    _tmp_with_gflags = None
+    _tmp_with_protobuf = None
+    _tmp_with_re2 = None
+    _tmp_with_jemalloc = None
+    _tmp_with_openssl = None
+    _tmp_with_boost = None
+    _tmp_with_glog = None
+    _tmp_with_grpc = None
+
     @property
     def _min_cppstd(self):
         # arrow >= 10.0.0 requires C++17.
@@ -158,6 +167,15 @@ class ArrowConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # FIXME: dirty workaround for the problem that `package_id()` prohibits access to `self.options` in conan v2.0
+        self._tmp_with_gflags = self._with_gflags()
+        self._tmp_with_protobuf = self._with_protobuf()
+        self._tmp_with_re2 = self._with_re2()
+        self._tmp_with_jemalloc = self._with_jemalloc()
+        self._tmp_with_openssl = self._with_openssl()
+        self._tmp_with_boost = self._with_boost()
+        self._tmp_with_glog = self._with_glog()
+        self._tmp_with_grpc = self._with_grpc()
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -327,14 +345,14 @@ class ArrowConan(ConanFile):
             self.requires("libbacktrace/cci.20210118")
 
     def package_id(self):
-        self.info.options.with_gflags = self._with_gflags()
-        self.info.options.with_protobuf = self._with_protobuf()
-        self.info.options.with_re2 = self._with_re2()
-        self.info.options.with_jemalloc = self._with_jemalloc()
-        self.info.options.with_openssl = self._with_openssl()
-        self.info.options.with_boost = self._with_boost()
-        self.info.options.with_glog = self._with_glog()
-        self.info.options.with_grpc = self._with_grpc()
+        self.info.options.with_gflags = self._tmp_with_gflags
+        self.info.options.with_protobuf = self._tmp_with_protobuf
+        self.info.options.with_re2 = self._tmp_with_re2
+        self.info.options.with_jemalloc = self._tmp_with_jemalloc
+        self.info.options.with_openssl = self._tmp_with_openssl
+        self.info.options.with_boost = self._tmp_with_boost
+        self.info.options.with_glog = self._tmp_with_glog
+        self.info.options.with_grpc = self._tmp_with_grpc
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
