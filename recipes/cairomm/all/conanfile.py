@@ -53,7 +53,7 @@ class CairommConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.shared:
-            self.dependencies["cairo"].options.shared = True
+            self.options["cairo"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
