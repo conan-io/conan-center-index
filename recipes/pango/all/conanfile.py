@@ -109,7 +109,7 @@ class PangoConan(ConanFile):
             raise ConanInvalidConfiguration("Linking a shared library against static glib can cause unexpected behavior.")
 
     def build_requirements(self):
-        self.tool_requires("glib/2.76.2")
+        self.tool_requires("glib/2.76.3")
         self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
