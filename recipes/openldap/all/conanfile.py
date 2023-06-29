@@ -1,10 +1,11 @@
 import os
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, apply_conandata_patches, rmdir, rm, copy
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
-from conan.errors import ConanInvalidConfiguration
+
 required_conan_version = ">=1.55"
 
 
@@ -37,11 +38,11 @@ class OpenldapConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
     def requirements(self):
-        self.requires("openssl/1.1.1t")
+        self.requires("openssl/[>=1.1 <4]")
         if self.options.with_cyrus_sasl:
             self.requires("cyrus-sasl/2.1.27")
 
