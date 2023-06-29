@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -26,6 +27,8 @@ class Exiv2Conan(ConanFile):
         "with_png": [True, False],
         "with_xmp": [False, "bundled", "external"],
         "with_curl": [True, False],
+        "with_brotli": [True, False],
+        "with_inih": [True, False]
     }
     default_options = {
         "shared": False,
@@ -33,6 +36,8 @@ class Exiv2Conan(ConanFile):
         "with_png": True,
         "with_xmp": "bundled",
         "with_curl": False,
+        "with_brotli": True,
+        "with_inih": True
     }
 
     provides = []
@@ -51,6 +56,9 @@ class Exiv2Conan(ConanFile):
             # recipe has bundled xmp-toolkit-sdk of old version
             # avoid conflict with a future xmp recipe
             self.provides.append("xmp-toolkit-sdk")
+        if Version(self.version) < "0.28.0":
+            del self.options.with_brotli
+            del self.options.with_inih
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -63,7 +71,11 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.5.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/8.1.2")
+        if self.options.with_brotli:
+            self.requires("brotli/1.0.9")
+        if self.options.with_inih:
+            self.requires("inih/56")
 
     def validate(self):
         if self.options.with_xmp == "external":
@@ -84,6 +96,9 @@ class Exiv2Conan(ConanFile):
         tc.variables["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_CURL"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_SSH"] = False
+        tc.variables["EXIV2_ENABLE_BMFF"] = self.options.with_brotli
+        tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.with_brotli
+        tc.variables["EXIV2_ENABLE_INIH"] = self.options.with_inih
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if is_msvc(self):
