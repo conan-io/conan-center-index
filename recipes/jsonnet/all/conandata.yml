@@ -1,4 +1,7 @@
 sources:
+  "0.20.0":
+    url: "https://github.com/google/jsonnet/archive/v0.20.0.tar.gz"
+    sha256: "77bd269073807731f6b11ff8d7c03e9065aafb8e4d038935deb388325e52511b"
   "0.19.1":
     url: "https://github.com/google/jsonnet/archive/v0.19.1.tar.gz"
     sha256: "f5a20f2dc98fdebd5d42a45365f52fa59a7e6b174e43970fea4f9718a914e887"
@@ -9,18 +12,35 @@ sources:
     url: "https://github.com/google/jsonnet/archive/v0.17.0.tar.gz"
     sha256: "076b52edf888c01097010ad4299e3b2e7a72b60a41abbc65af364af1ed3c8dbe"
 patches:
+  "0.20.0":
+    - patch_file: "patches/0.18.0/0001-fix-nlohmann-include.patch"
+      patch_description: "fix include path to use cci package"
+      patch_type: "conan"
+    - patch_file: "patches/0.18.0/0002-cmake-fixes.patch"
+      patch_description: "fix rapidyaml name, add installation"
+      patch_type: "conan"
+    - patch_file: "patches/0.20.0/0003-use-cpp17.patch"
+      patch_description: "use C++17"
+      patch_type: "portability"
+      patch_source: "https://github.com/google/jsonnet/pull/1076"
   "0.19.1":
     - patch_file: "patches/0.18.0/0001-fix-nlohmann-include.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix include path to use cci package"
+      patch_type: "conan"
     - patch_file: "patches/0.18.0/0002-cmake-fixes.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix rapidyaml name, add installation"
+      patch_type: "conan"
   "0.18.0":
     - patch_file: "patches/0.18.0/0001-fix-nlohmann-include.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix include path to use cci package"
+      patch_type: "conan"
     - patch_file: "patches/0.18.0/0002-cmake-fixes.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix rapidyaml name, add installation"
+      patch_type: "conan"
   "0.17.0":
     - patch_file: "patches/0.17.0/0001-fix-nlohmann-include.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix include path to use cci package"
+      patch_type: "conan"
     - patch_file: "patches/0.17.0/0002-cmake-fixes.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix rapidyaml name, add installation"
+      patch_type: "conan"
