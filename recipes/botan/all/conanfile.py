@@ -390,6 +390,11 @@ class BotanConan(ConanFile):
 
         build_flags.append('--without-pkg-config')
 
+        if self.settings.os == 'Linux':
+            # The current Ubuntu 18.04 runners in Conan Center Index don't have getentropy,
+            # which is enabled by default starting in Botan 3.0.0
+            build_flags.append('--without-os-feature=getentropy')
+
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
         prefix = unix_path(self, self.package_folder) if self._is_mingw_windows else self.package_folder
