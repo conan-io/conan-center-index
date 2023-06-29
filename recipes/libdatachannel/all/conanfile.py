@@ -18,7 +18,7 @@ class LibDataChannelConan(ConanFile):
     name = "libdatachannel"
     description = "C/C++ WebRTC network library featuring Data Channels, Media Transport, and WebSockets"
     topics = ("webrtc")
-    url = "https://github.com/paullouisageneau/libdatachannel"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/paullouisageneau/libdatachannel"
     license = "MPL-2.0 license"
     package_type = "library"
@@ -34,10 +34,14 @@ class LibDataChannelConan(ConanFile):
     }
 
     def config_options(self):
-        pass
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        pass
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         pass
