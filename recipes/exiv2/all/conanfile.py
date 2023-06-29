@@ -169,11 +169,14 @@ class Exiv2Conan(ConanFile):
             self.cpp_info.components["exiv2lib"].defines.append("WIN32_LEAN_AND_MEAN")
 
         # component exiv2-xmp
-        if self.options.with_xmp == "bundled" and Version(self.version) < "0.28.0":
-            self.cpp_info.components["exiv2-xmp"].set_property("cmake_target_name", "exiv2-xmp")
-            self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
-            self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
-            self.cpp_info.components["exiv2lib"].requires.append("exiv2-xmp")
+        if self.options.with_xmp == "bundled":
+            if Version(self.version) < "0.28.0":
+                self.cpp_info.components["exiv2-xmp"].set_property("cmake_target_name", "exiv2-xmp")
+                self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
+                self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
+                self.cpp_info.components["exiv2lib"].requires.append("exiv2-xmp")
+            else:
+                self.cpp_info.components["exiv2lib"].requires.append("expat::expat")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
