@@ -131,4 +131,4 @@ class LoguruConan(ConanFile):
         self.cpp_info.defines.append(f"LOGURU_REPLACE_GLOG={self.options.replace_glog}")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "dl"]
+            self.cpp_info.system_libs = ["pthread", "dl", "m"]
