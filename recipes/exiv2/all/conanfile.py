@@ -72,9 +72,9 @@ class Exiv2Conan(ConanFile):
             self.requires("expat/2.5.0")
         if self.options.with_curl:
             self.requires("libcurl/8.1.2")
-        if self.options.with_brotli:
+        if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.0.9")
-        if self.options.with_inih:
+        if self.options.get_safe("with_inih"):
             self.requires("inih/56")
 
     def validate(self):
