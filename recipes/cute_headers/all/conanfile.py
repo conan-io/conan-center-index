@@ -30,7 +30,7 @@ class CuteHeadersConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _extract_license(self):
-        file = os.path.join(self.package_folder, "include/cute_math2d.h")
+        file = os.path.join(self.source_folder, "include/cute_math2d.h")
         file_content = load(self, file)
         license_content = file_content[file_content.rfind("/*") :]
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
