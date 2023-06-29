@@ -1,0 +1,20 @@
+sources:
+  "0.18.5":
+    repo:
+      url: "https://github.com/paullouisageneau/libdatachannel/archive/refs/tags/v0.18.5.tar.gz"
+      sha256: "33cc6a024b148bbb702ac84c625336424ab862704e246eb29f7e8de6157338a1"
+    json:
+      url: "https://github.com/nlohmann/json/archive/4f8fba14066156b73f1189a2b8bd568bde5284c5.zip"
+      sha256: "fe6b388ce7576b0bfb66b18c84b90b3c5ca040007d4f907e462f965e5a268b3b"
+    libjuice:
+      url: "https://github.com/paullouisageneau/libjuice/archive/5f89b7490c2222257ee3bcd16cfa8e86caf4c72b.zip"
+      sha256: "45c97eb2faeb6e5d563f01e9b871a33e68775f78710bb7d4097234e64cd2ee23"
+    libsrtp:
+      url: "https://github.com/cisco/libsrtp/archive/a566a9cfcd619e8327784aa7cff4a1276dc1e895.zip"
+      sha256: "340bf0ed705dc882b017ef4f5c5fd235fc52aed6621326a4cc780f2f480001f0"
+    plog:
+      url: "https://github.com/SergiusTheBest/plog/archive/d8461e9d473e59fbcc1f79eee021550dcf81e618.zip"
+      sha256: "6fd86659c7d005628d6739625442896446da1565a409aa43eca72218457e8afd"
+    usrsctp:
+      url: "https://github.com/sctplab/usrsctp/archive/7c31bd35c79ba67084ce029511193a19ceb97447.zip"
+      sha256: "d04980f174e13d1d08518999973b235fff3e1b3c1dcd8b1095f390e891e08639"
