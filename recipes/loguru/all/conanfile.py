@@ -113,6 +113,7 @@ class LoguruConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["loguru"]
+        self.cpp_info.includedirs = [os.path.join("include", "loguru")]
         # https://github.com/emilk/loguru/blob/4adaa185883e3c04da25913579c451d3c32cfac1/CMakeLists.txt#L301
         self.cpp_info.set_property("cmake_file_name", "loguru")
         self.cpp_info.set_property("cmake_target_name", "loguru::loguru")
