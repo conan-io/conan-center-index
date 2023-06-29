@@ -144,6 +144,24 @@ class BotanConan(ConanFile):
     def _required_boost_components(self):
         return ['coroutine', 'system']
 
+    @property
+    def _min_compiler_version(self):
+        major_version = Version(self.version).major
+        if major_version < 3:
+            return {
+                "gcc": Version(4.8),
+                "clang": Version(4.8),
+                "Visual Studio": 14,
+                "msvc": 190,
+            }.get(str(self.settings.compiler))
+        else:
+            return {
+                "gcc":  11,
+                "clang": 14,
+                "Visual Studio": 17,
+                "msvc": 193,
+            }.get(str(self.settings.compiler))
+
     def validate(self):
         if self.options.with_boost:
             miss_boost_required_comp = any(getattr(self.options['boost'], 'without_{}'.format(boost_comp), True) for boost_comp in self._required_boost_components)
@@ -153,7 +171,14 @@ class BotanConan(ConanFile):
         compiler = self.settings.compiler
         compiler_version = Version(self.settings.compiler.version)
 
-        check_min_vs(self, 190)
+        min_compiler_version = self._min_compiler_version
+        if not min_compiler_version:
+            self.output.warning(f"{self.name} recipe lacks information about the {compiler} compiler support.")
+        else:
+            if compiler_version < min_compiler_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} doesn't work with compiler {compiler} in version '{compiler_version}'" \
+                    f", it requires at least '{min_compiler_version}'.")
 
         if compiler == 'gcc' and compiler_version >= "5" and compiler.libcxx != 'libstdc++11':
             raise ConanInvalidConfiguration(
