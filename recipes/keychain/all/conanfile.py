@@ -16,7 +16,6 @@ class KeychainConan(ConanFile):
     license = "MIT"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt"]
     options = {'shared': [False, True], 'fPIC': [False, True]}
     default_options = {"shared": False, "fPIC": True}
 
