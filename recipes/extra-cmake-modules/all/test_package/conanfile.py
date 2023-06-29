@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.build import can_run
-
+import os
 
 class ExtraCMakeModulesTestConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
