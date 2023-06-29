@@ -14,7 +14,7 @@ class UaNodeSetConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("opc-ua-specifications", "uanodeset", "normative-files", "companion-specification", "pre-built")
 
-    package_type = "application"
+    package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
 
@@ -22,8 +22,7 @@ class UaNodeSetConan(ConanFile):
         pass
 
     def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
+        self.info.clear()
 
     def build(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
