@@ -1,7 +1,7 @@
 sources:
   "0.28.0":
     url: "https://github.com/Exiv2/exiv2/releases/download/v0.28.0/exiv2-0.28.0-Source.tar.gz"
-    sha256: "04c0675caf4338bb96cd09982f1246d588bcbfe8648c0f5a30b56c7c496f1a0b"
+    sha256: "89af3b5ef7277753ef7a7b5374ae017c6b9e304db3b688f1948e73e103491f3d"
   "0.27.5":
     url: "https://github.com/Exiv2/exiv2/releases/download/v0.27.5/exiv2-0.27.5-Source.tar.gz"
     sha256: "35a58618ab236a901ca4928b0ad8b31007ebdc0386d904409d825024e45ea6e2"
