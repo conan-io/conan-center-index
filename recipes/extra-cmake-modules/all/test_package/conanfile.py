@@ -13,6 +13,7 @@ class ExtraCMakeModulesTestConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
         deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -21,4 +22,4 @@ class ExtraCMakeModulesTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run("example", env="conanrun")
+            self.run(os.path.join(self.cpp.build.bindir,"example"), env="conanrun")
