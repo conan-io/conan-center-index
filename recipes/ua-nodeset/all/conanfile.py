@@ -12,7 +12,7 @@ class UaNodeSetConan(ConanFile):
     description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("opc-ua-specifications", "uanodeset", "normative-files", "companion-specification", "pre-built")
+    topics = ("opc-ua-specifications", "uanodeset", "normative-files", "companion-specification")
 
     package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
