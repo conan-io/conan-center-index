@@ -18,9 +18,28 @@ class DrLibsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     package_type = "header-library"
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "4.7",
+            "clang": "3.4",
+            "apple-clang": "6",
+        }
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        check_min_vs(self, 180)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def layout(self):
         basic_layout(self, src_folder="src")
