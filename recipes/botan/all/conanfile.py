@@ -94,9 +94,6 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -178,6 +175,9 @@ class BotanConan(ConanFile):
 
         if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
             raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
