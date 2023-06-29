@@ -66,8 +66,8 @@ class FirebirdConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append(f"--with-builtin-tommath")
-        tc.configure_args.append(f"--with-builtin-tomcrypt")
+        tc.configure_args.append("--with-builtin-tommath")
+        tc.configure_args.append("--with-builtin-tomcrypt")
         # Reduce the amount of warnings
         tc.extra_cxxflags.append("-Wno-unused-result")
         tc.generate()
@@ -81,7 +81,7 @@ class FirebirdConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "builds/posix/Makefile.in"),
                             f"$(MAKE) {target}", "")
         replace_in_file(self, os.path.join(self.source_folder, "builds/posix/Makefile.in"),
-                        f"$(MAKE) utilities", "$(MAKE) isql gbak gfix udfsupport")
+                        "$(MAKE) utilities", "$(MAKE) isql gbak gfix udfsupport")
 
     def build(self):
         self._patch_sources()
@@ -94,8 +94,8 @@ class FirebirdConan(ConanFile):
             autotools.make()
 
     def package(self):
-        for license in ["IDPLicense.txt", "IPLicense.txt"]:
-            copy(self, license,
+        for license_file in ["IDPLicense.txt", "IPLicense.txt"]:
+            copy(self, license_file,
                  src=os.path.join(self.source_folder, "builds", "install", "misc"),
                  dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE-*",
@@ -106,7 +106,7 @@ class FirebirdConan(ConanFile):
             src=os.path.join(self.source_folder, f"gen/{self.settings.build_type}/firebird/lib"),
             dst=os.path.join(self.package_folder, "lib"))
         copy(self, "*",
-             src=os.path.join(self.source_folder, f"src/include"),
+             src=os.path.join(self.source_folder, "src/include"),
              dst=os.path.join(self.package_folder, "include"))
         fix_apple_shared_install_name(self)
 
