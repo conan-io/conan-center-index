@@ -38,7 +38,10 @@ class ExtracmakemodulesConan(ConanFile):
         tc.cache_variables["BUILD_MAN_DOCS"] = False
         tc.cache_variables["BUILD_TESTING"] = False
 
-        share_folder = os.path.join(self.package_folder, "res")
+        if self.package_folder is None:
+            share_folder = "res"
+        else:
+            share_folder = os.path.join(self.package_folder, "res")
 
         tc.cache_variables["SHARE_INSTALL_DIR"] = share_folder
         tc.generate()

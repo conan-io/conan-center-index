@@ -20,5 +20,5 @@ class ExtraCMakeModulesTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not can_run(self):
-            self.run("example", run_environment=True)
+        if can_run(self):
+            self.run("example", env="conanrun")
