@@ -96,9 +96,10 @@ class Exiv2Conan(ConanFile):
         tc.variables["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_CURL"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_SSH"] = False
-        tc.variables["EXIV2_ENABLE_BMFF"] = self.options.with_brotli
-        tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.with_brotli
-        tc.variables["EXIV2_ENABLE_INIH"] = self.options.with_inih
+        if Version(self.version) < "0.28.0":
+            tc.variables["EXIV2_ENABLE_BMFF"] = self.options.with_brotli
+            tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.with_brotli
+            tc.variables["EXIV2_ENABLE_INIH"] = self.options.with_inih
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if is_msvc(self):
