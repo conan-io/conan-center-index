@@ -32,6 +32,7 @@ class LibDataChannelConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    short_paths = True
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,6 +43,9 @@ class LibDataChannelConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+    def requirements(self):
+        self.requires("openssl/1.1.1h")
 
     def layout(self):
         pass
