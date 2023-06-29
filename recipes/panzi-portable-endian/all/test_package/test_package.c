@@ -1,4 +1,4 @@
-#include <cstdint>
+#include <stdint.h>
 
 #include <portable_endian.h>
 
