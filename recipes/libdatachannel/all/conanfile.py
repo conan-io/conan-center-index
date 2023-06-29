@@ -45,7 +45,7 @@ class LibDataChannelConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
-        self.requires("openssl/1.1.1h")
+        self.requires("openssl/[>=1.1 <4]")
 
     def layout(self):
         pass
