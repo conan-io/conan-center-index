@@ -11,6 +11,9 @@ sources:
 patches:
   "0.7.4":
     - patch_file: "patches/0.7.4-0001-allow-miniz.patch"
+      # Miniz is supported by the project, but does not currently expose a CMake
+      # option to toggle it. This can be removed once the project supports it
+      # or when the recipe moves to use Meson instead
       patch_description: "add miniz option which is written in docs/BUILD.md"
       patch_type: "portability"
   "0.7.3":
