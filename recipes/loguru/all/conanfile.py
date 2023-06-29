@@ -112,7 +112,8 @@ class LoguruConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["loguru"]
+        suffix = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"loguru{suffix}"]
         self.cpp_info.includedirs = [os.path.join("include", "loguru")]
         # https://github.com/emilk/loguru/blob/4adaa185883e3c04da25913579c451d3c32cfac1/CMakeLists.txt#L301
         self.cpp_info.set_property("cmake_file_name", "loguru")
