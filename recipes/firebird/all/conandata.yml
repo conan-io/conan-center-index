@@ -1,0 +1,4 @@
+sources:
+  "4.0.2":
+    url: "https://github.com/FirebirdSQL/firebird/archive/refs/tags/v4.0.2.tar.gz"
+    sha256: "756428b86bb9a20f0117e0ea4cf499c79214c5c15a3a31ebddd8c95ded66db3d"
