@@ -22,4 +22,5 @@ class ExtraCMakeModulesTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(os.path.join(self.cpp.build.bindir,"example"), env="conanrun")
+            runpath = os.path.join(self.build_folder, "example")
+            self.run(runpath, env="conanrun")
