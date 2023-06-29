@@ -153,7 +153,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         if is_msvc(self):
-            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
         tc.generate()
