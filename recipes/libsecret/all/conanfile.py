@@ -54,7 +54,7 @@ class LibsecretConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True)
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
@@ -68,8 +68,7 @@ class LibsecretConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if not can_run(self):
-            self.tool_requires("glib/2.76.0")
+        self.tool_requires("glib/<host_version>")
 
         if self.settings.os == "Macos":
             # Avoid using gettext from homebrew which may be linked against
@@ -84,9 +83,6 @@ class LibsecretConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
         tc = MesonToolchain(self)
         tc.project_options["introspection"] = "false"
         tc.project_options["manpage"] = "false"
