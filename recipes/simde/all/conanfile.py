@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import copy, get, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 import os
-
 
 required_conan_version = ">=1.52.0"
 
@@ -25,21 +25,32 @@ class SIMEeConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    def validate(self):
-        if self.settings.arch not in ["x86", "x86_64", "armv8"] or self.settings.os == "Emscripten":
-            raise ConanInvalidConfiguration(f"{self.ref} supports x86, x86_64, armv8 only or emscriptien.")
+    def build_requirements(self):
+        self.tool_requires("meson/1.1.1")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["tests"] = False
+        tc.generate()
+        pkg = PkgConfigDeps(self)
+        pkg.generate()
+
+    def build(self):
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
+
     def package(self):
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            pattern="*.h",
-            dst=os.path.join(self.package_folder, "include", "simde"),
-            src=os.path.join(self.source_folder, "simde"),
-        )
+        meson = Meson(self)
+        meson.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
