@@ -1,42 +1,58 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, CMakeToolchain
 import os
 
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class STTreeConan(ConanFile):
     name = "st_tree"
+    description = "A fast and flexible c++ template class for tree data structures"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "A fast and flexible c++ template class for tree data structures"
-    topics = ("stl", "container", "data-structures")
     homepage = "https://github.com/erikerlandson/st_tree"
+    topics = ("stl", "container", "data-structures", "tree", "header-only")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
-
-    def package(self):
-        self.copy("LICENSE", "licenses", self._source_subfolder)
-
-        cmake = self._configure_cmake()
-        cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_TESTS"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "st_tree"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "st_tree"
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
