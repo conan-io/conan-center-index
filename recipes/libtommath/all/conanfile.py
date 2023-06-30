@@ -3,6 +3,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
+from conan.tools.build import cross_building
 from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
 
@@ -71,7 +72,9 @@ class LibTomMathConan(ConanFile):
             tc = AutotoolsToolchain(self)
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
                 tc.extra_ldflags.append("-arch arm64")
-            tc.make_args = [f"PREFIX={self.package_folder}", "LIBTOOL=libtool"]
+                if cross_building(self):
+                    tc.make_args.append("CROSS_COMPILE=arm64-apple-m1-")
+            tc.make_args.extend([f"PREFIX={self.package_folder}", "LIBTOOL=libtool"])
             tc.generate()
 
     @property
