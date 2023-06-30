@@ -7,6 +7,7 @@ from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import build_jobs
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
 from conan.tools.microsoft import unix_path
@@ -314,12 +315,7 @@ class BotanConan(ConanFile):
 
         if is_apple_os(self):
             if self.settings.get_safe('os.version'):
-                # Required, see https://github.com/conan-io/conan-center-index/pull/3456
-                macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                       self.settings.get_safe('os.version'),
-                                                                       self.settings.get_safe('os.sdk'),
-                                                                       self.settings.get_safe('os.subsystem'),
-                                                                       self.settings.get_safe('arch'))
+                macos_min_version = macos_min_version = AutotoolsToolchain(self).apple_min_version_flag
                 botan_extra_cxx_flags.append(macos_min_version)
             macos_sdk_path = '-isysroot {}'.format(XCRun(self).sdk_path)
             botan_extra_cxx_flags.append(macos_sdk_path)
