@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.build import can_run
+from conan.tools.microsoft import is_msvc
 import os
 
 class ExtraCMakeModulesTestConan(ConanFile):
@@ -22,5 +23,9 @@ class ExtraCMakeModulesTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            runpath = os.path.join(self.build_folder, "example")
+            progname = "example"
+            if is_msvc(self):
+                progname += ".exe"
+
+            runpath = os.path.join(self.folders.build, progname)
             self.run(runpath, env="conanrun")
