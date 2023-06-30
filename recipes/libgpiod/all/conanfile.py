@@ -31,7 +31,7 @@ class LibgpiodConan(ConanFile):
     }
 
     def layout(self):
-        basic_layout(self, src_folder="source_subfolder")
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os != "Linux":
