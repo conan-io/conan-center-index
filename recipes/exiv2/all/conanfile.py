@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -78,6 +79,26 @@ class Exiv2Conan(ConanFile):
             self.requires("inih/56")
 
     def validate(self):
+        if Version(self.version) >= "0.28.0":
+            min_cppstd = 17
+
+            if self.info.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, min_cppstd)
+
+            compilers_minimum_version = {
+                "gcc": "8",
+                "Visual Studio": "15",
+                "msvc": "191",
+                "clang": "5",
+                "apple-clang": "10",
+            }
+
+            minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
+                )
+
         if self.options.with_xmp == "external":
             raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
 
@@ -162,7 +183,7 @@ class Exiv2Conan(ConanFile):
         if self.options.with_curl:
             self.cpp_info.components["exiv2lib"].requires.append("libcurl::libcurl")
         if self.options.get_safe("with_brotli"):
-            self.cpp_info.components["exiv2lib"].requires.append(["brotli::brotlidec", "brotli::brotlienc"])
+            self.cpp_info.components["exiv2lib"].requires.extend(["brotli::brotlidec", "brotli::brotlienc"])
         if self.options.get_safe("with_inih"):
             self.cpp_info.components["exiv2lib"].requires.append("inih::inireader")
 
