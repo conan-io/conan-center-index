@@ -6,7 +6,11 @@
  *      Part 2: https://youtube.com/shorts/IS6_apBewlI
  */
 
+// Disable the main function from from processing.h
+// to disable the interactive GUI for the purposes of this test
+#define main _main
 #include <processing.h>
+#undef main
 
 float speed;
 
@@ -68,4 +72,8 @@ void draw() {
         stars[a].update();
         stars[a].show();
     }
+}
+
+int main() {
+    return 0;
 }
