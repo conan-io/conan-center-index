@@ -118,6 +118,7 @@ required_for_references:
 - cgal
 - cgif
 - cgns
+- chaiscript
 - charls
 - chef-fun
 - chipmunk2d
@@ -221,6 +222,7 @@ required_for_references:
 - emio
 - enet
 - entityx
+- entt
 - enum-flags
 - erikzenker-hsm
 - erkir
@@ -401,6 +403,7 @@ required_for_references:
 - libnabo
 - libnfs
 - libnghttp2
+- libnl
 - libnop
 - libnova
 - libnuma
@@ -474,16 +477,22 @@ required_for_references:
 - matchit
 - mawk
 - mbedtls
+- mbits-args
+- mbits-mstch
+- mbits-semver
+- mbits-utfconv
 - md4c
 - md4qt
 - mdnsresponder
 - mdspan
 - meson
+- metis
 - mgs
 - microservice-essentials
 - mikelankamp-fpm
 - mimalloc
 - miniaudio
+- minimp3
 - minisat
 - minizip
 - minizip-ng
@@ -493,6 +502,7 @@ required_for_references:
 - mozjpeg
 - mp-units
 - mpg123
+- mppp
 - ms-gsl
 - msgpack-c
 - msgpack-cxx
@@ -568,6 +578,7 @@ required_for_references:
 - prometheus-cpp
 - proposal
 - protobuf
+- protobuf-c
 - psimd
 - pthreadpool
 - pthreads4w
@@ -600,6 +611,7 @@ required_for_references:
 - restbed
 - restinio
 - ring-span-lite
+- rmm
 - roaring
 - robin-hood-hashing
 - rttr
@@ -621,6 +633,7 @@ required_for_references:
 - sfml
 - shield
 - sigslot
+- simde
 - simdjson
 - simdutf
 - skyr-url
@@ -638,8 +651,11 @@ required_for_references:
 - sqlite3
 - sqlite_orm
 - sqlitecpp
+- sqlpp11
+- ssht
 - status-code
 - stb
+- stlab
 - strawberryperl
 - string-view-lite
 - strong_type
