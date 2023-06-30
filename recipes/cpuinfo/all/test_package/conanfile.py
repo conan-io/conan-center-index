@@ -16,10 +16,8 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
-        cpuinfo_version = self.dependencies["cpuinfo"].ref.version.split('.')[1]
-        self.output.info(f"cpuinfo_version {cpuinfo_version}")
         tc = CMakeToolchain(self)
-        tc.variables["CPUINFO_VERSION"] = cpuinfo_version
+        tc.variables["CPUINFO_VERSION"] = self.dependencies["cpuinfo"].ref.version.split('.')[1]
         tc.generate()
 
     def build(self):
