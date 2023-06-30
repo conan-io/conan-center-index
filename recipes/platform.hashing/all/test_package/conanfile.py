@@ -23,7 +23,6 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         if not is_msvc(self):
             tc.variables["EXTRA_FLAGS"] = self._extra_flags
-            print(f"aaaaaa {self._extra_flags}")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
