@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -22,6 +22,7 @@ class AtkConan(ConanFile):
     license = "LGPL-2.1-or-later"
     deprecated = "at-spi2-core"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -57,9 +58,15 @@ class AtkConan(ConanFile):
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
 
-        if str(self.settings.compiler) == "Visual Studio" and not self.options.shared and \
-           is_msvc_static_runtime(self) and self.dependencies["glib"].options.shared:
-            raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
+        if (
+            is_msvc(self)
+            and not self.options.shared
+            and is_msvc_static_runtime(self)
+            and self.dependencies["glib"].options.shared
+        ):
+            raise ConanInvalidConfiguration(
+                "this specific configuration is prevented due to internal c3i limitations"
+            )
 
     def build_requirements(self):
         self.tool_requires("meson/1.1.1")
@@ -108,6 +115,7 @@ class AtkConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "atk")
         self.cpp_info.libs = ["atk-1.0"]
         self.cpp_info.includedirs = [os.path.join("include", "atk-1.0")]
+
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
