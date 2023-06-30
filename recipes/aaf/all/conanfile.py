@@ -10,25 +10,38 @@ required_conan_version = ">=1.52.0"
 
 class AafConan(ConanFile):
     name = "aaf"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://sourceforge.net/projects/aaf/"
     description = (
         "A cross-platform SDK for AAF. AAF is a metadata management system and "
         "file format for use in professional multimedia creation and authoring."
     )
-    topics = ("multimedia", "crossplatform")
     license = "AAFSDKPSL-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://sourceforge.net/projects/aaf/"
+    topics = ("multimedia", "crossplatform")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "structured_storage": [True, False],
     }
     default_options = {
+        "shared": False,
+        "fPIC": True,
         "structured_storage": False,
     }
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
