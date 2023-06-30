@@ -14,10 +14,19 @@ class ArchicadApidevkitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://archicadapi.graphisoft.com/"
     license = "LicenseRef-LICENSE"
-    settings = "os", "compiler", "arch", "build_type"
+    topics = ("api", "archicad", "development", "pre-built")
+
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    topics = "api", "archicad", "development"
     short_paths = True
+
+    def layout(self):
+        pass
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def validate(self):
         if self.settings.build_type == "Debug":
