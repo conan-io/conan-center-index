@@ -10,10 +10,13 @@ required_conan_version = ">=1.53.0"
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
+    description = (
+        "Armadillo is a high quality C++ library for linear algebra and scientific computing, "
+        "aiming towards a good balance between speed and ease of use."
+    )
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://arma.sourceforge.net"
-    description = "Armadillo is a high quality C++ library for linear algebra and scientific computing, aiming towards a good balance between speed and ease of use."
     topics = (
         "linear algebra",
         "scientific computing",
@@ -25,7 +28,9 @@ class ArmadilloConan(ConanFile):
         "mkl",
         "hdf5",
     )
-    settings = "os", "compiler", "build_type", "arch"
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
