@@ -15,6 +15,7 @@ class AlembicConan(ConanFile):
     description = "Open framework for storing and sharing scene data."
     topics = ("3d", "scene", "geometry", "graphics")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
