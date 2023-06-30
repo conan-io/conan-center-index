@@ -17,11 +17,13 @@ required_conan_version = ">=1.53.0"
 
 class AravisConan(ConanFile):
     name = "aravis"
+    description = "A vision library for genicam based cameras."
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AravisProject/aravis"
-    description = "A vision library for genicam based cameras."
     topics = ("usb", "camera")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
