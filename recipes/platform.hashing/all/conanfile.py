@@ -85,16 +85,21 @@ class PlatformInterfacesConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.bindirs = []
-
-        suggested_flags = ""
-        if not is_msvc(self):
+        if is_msvc(self):
+            if Version(self.version) >= "0.5.0":
+                arch_macros = {
+                    "x86_64": "_X86_64_",
+                    "armv8": "_AARCH_",
+                }.get(str(self.settings.arch), "")
+                self.cpp_info.defines.append(arch_macros)
+        else:
             suggested_flags = {
                 "x86_64": "-march=haswell",
                 "armv7": "-march=armv7",
                 "armv8": "-march=armv8-a",
             }.get(str(self.settings.arch), "")
-        self.conf_info.define("user.platform_hashing:suggested_flags", suggested_flags)
+            self.conf_info.define("user.platform_hashing:suggested_flags", suggested_flags)
 
-        if "-march" not in "{} {}".format(os.environ.get("CPPFLAGS", ""), os.environ.get("CXXFLAGS", "")):
-            self.output.warning("platform.hashing needs to have `-march=ARCH` added to CPPFLAGS/CXXFLAGS. "
-                             f"A suggestion is available in deps_user_info[{self.name}].suggested_flags.")
+            if "-march" not in "{} {}".format(os.environ.get("CPPFLAGS", ""), os.environ.get("CXXFLAGS", "")):
+                self.output.warning("platform.hashing needs to have `-march=ARCH` added to CPPFLAGS/CXXFLAGS. "
+                                f"A suggestion is available in dependencies[{self.name}].conf_info.get(\"user.platform_hashing:suggested_flags\")")
