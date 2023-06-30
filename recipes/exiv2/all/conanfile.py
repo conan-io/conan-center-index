@@ -161,6 +161,10 @@ class Exiv2Conan(ConanFile):
             self.cpp_info.components["exiv2lib"].requires.extend(["libpng::libpng", "zlib::zlib"])
         if self.options.with_curl:
             self.cpp_info.components["exiv2lib"].requires.append("libcurl::libcurl")
+         if self.options.get_safe("with_brotli"):
+            self.cpp_info.components["exiv2lib"].requires.append(["brotli::brotlidec", "brotli::brotlienc"])
+        if self.options.get_safe("with_inih"):
+            self.cpp_info.components["exiv2lib"].requires.append("inih::inireader")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["exiv2lib"].system_libs.extend(["pthread"])
