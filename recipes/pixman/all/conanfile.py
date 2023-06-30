@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
-    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    apply_conandata_patches, copy, export_conandata_patches, get,
     rename, replace_in_file, rm, rmdir
 )
 from conan.tools.layout import basic_layout
@@ -93,7 +93,7 @@ class PixmanConan(ConanFile):
             rename(self, os.path.join(lib_folder, f"{prefix}.a"), os.path.join(lib_folder, f"{prefix}.lib"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ['libpixman-1'] if self.settings.os == "Windows" else ['pixman-1']
         self.cpp_info.includedirs.append(os.path.join("include", "pixman-1"))
         self.cpp_info.set_property("pkg_config_name", "pixman-1")
         if self.settings.os in ("FreeBSD", "Linux"):
