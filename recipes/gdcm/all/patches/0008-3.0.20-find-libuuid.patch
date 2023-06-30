@@ -5,7 +5,7 @@
  if(GDCM_USE_SYSTEM_UUID)
    # If user say so, then this is a requirement !
 -  find_package(UUID REQUIRED)
-+  find_package(libuuid REQUIRED)
++  find_package(LibUUID REQUIRED)
    set(GDCM_UUID_LIBRARIES ${UUID_LIBRARIES})
  else()
    set(GDCM_UUID_LIBRARIES "gdcmuuid")
@@ -34,7 +34,7 @@
  #endif()
  else()
 -  target_link_libraries(gdcmMSFF LINK_PRIVATE ${GDCMUUID})
-+  target_link_libraries(gdcmMSFF LINK_PRIVATE libuuid::libuuid)
++  target_link_libraries(gdcmMSFF LINK_PRIVATE LibUUID::LibUUID)
  endif()
  if(GDCM_USE_SYSTEM_JSON)
    target_link_libraries(gdcmMSFF PRIVATE json-c::json-c)
