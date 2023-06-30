@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(libXpm VERSION "${CONAN_libXpm_VERSION}" LANGUAGES C)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
-
 # ---- X11 dependency ----
 
 if(NOT WIN32)
