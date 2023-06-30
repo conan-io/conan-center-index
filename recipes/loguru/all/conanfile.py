@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, load, save, rmdir
 from conan.tools.build import check_min_cppstd
 
@@ -88,6 +89,8 @@ class LoguruConan(ConanFile):
         tc.variables["LOGURU_SCOPE_TIME_PRECISION"] = self.options.scope_time_precision
         tc.variables["LOGURU_FILENAME_WIDTH"] = self.options.filename_width
         tc.variables["LOGURU_THREADNAME_WIDTH"] = self.options.threadname_width
+        if is_msvc(self) and self.options.shared:
+            tc.preprocessor_definitions["LOGURU_EXPORT"] = "__declspec(dllexport)"
         tc.generate()
 
         deps = CMakeDeps(self)
