@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 set(EXTRA_FLAGS "" CACHE STRING "Extra compiler flags")
 separate_arguments(EXTRA_FLAGS UNIX_COMMAND ${EXTRA_FLAGS})
 if(EXTRA_FLAGS)
