@@ -43,7 +43,7 @@ class LibgpiodConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-           self.options.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
         if not self.options.enable_bindings_cxx:
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
