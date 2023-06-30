@@ -1,14 +1,14 @@
 import os
-from shutil import which
+import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import build_jobs
-from conan.tools.env import Environment
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag, VCVars
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
 from conan.tools.microsoft import unix_path
 from conan.tools.scm import Version
 
@@ -207,10 +207,27 @@ class BotanConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _cxxflags(self):
+        global_cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list))
+        env_cxxflags = VirtualBuildEnv(self).vars().get("CXXFLAGS")
+        if env_cxxflags is None:
+            env_cxxflags = os.getenv("CXXFLAGS", "")
+        cxxflags = f"{env_cxxflags} {global_cxxflags}".strip()
+        return cxxflags if cxxflags else None
+
     def generate(self):
         if is_msvc(self):
             ms = VCVars(self)
             ms.generate()
+
+        # This is to work around botan's configure script that *replaces* its
+        # standard (platform dependent) flags in presence of an environment
+        # variable ${CXXFLAGS}. Most notably, this would build botan with
+        # disabled compiler optimizations.
+        self.extra_cxxflags = self._cxxflags
+        self.buildenv.unset('CXXFLAGS')
+        VirtualBuildEnv(self).generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -307,16 +324,8 @@ class BotanConan(ConanFile):
             macos_sdk_path = '-isysroot {}'.format(XCRun(self).sdk_path)
             botan_extra_cxx_flags.append(macos_sdk_path)
 
-        # This is to work around botan's configure script that *replaces* its
-        # standard (platform dependent) flags in presence of an environment
-        # variable ${CXXFLAGS}. Most notably, this would build botan with
-        # disabled compiler optimizations.
-
-        environment_cxxflags = Environment().vars(self).get('CXXFLAGS')
-
-        if environment_cxxflags:
-            del os.environ['CXXFLAGS']
-            botan_extra_cxx_flags.append(environment_cxxflags)
+        if self.extra_cxxflags:
+            botan_extra_cxx_flags.append(self.extra_cxxflags)
 
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
@@ -456,7 +465,7 @@ class BotanConan(ConanFile):
 
     @property
     def _make_program(self):
-        return Environment().vars(self).get('CONAN_MAKE_PROGRAM', which('make') or which('mingw32-make'))
+        return os.getenv('CONAN_MAKE_PROGRAM', shutil.which('make') or shutil.which('mingw32-make'))
 
     @property
     def _gnumake_cmd(self):
