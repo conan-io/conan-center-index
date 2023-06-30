@@ -3,6 +3,7 @@ import os
 
 required_conan_version = ">=1.28.0"
 
+
 class JsonformoderncppConan(ConanFile):
     name = "jsonformoderncpp"
     homepage = "https://github.com/nlohmann/json"
@@ -13,12 +14,8 @@ class JsonformoderncppConan(ConanFile):
     no_copy_source = True
     license = "MIT"
     deprecated = "nlohmann_json"
-    options = {
-        "multiple_headers": [True, False]
-    }
-    default_options = {
-        "multiple_headers": False
-    }
+    options = {"multiple_headers": [True, False]}
+    default_options = {"multiple_headers": False}
 
     @property
     def _source_subfolder(self):
