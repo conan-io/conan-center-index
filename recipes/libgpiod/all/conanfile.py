@@ -37,12 +37,16 @@ class LibgpiodConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libgpiod supports only Linux")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+           self.options.rm_safe("fPIC")
         if not self.options.enable_bindings_cxx:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
