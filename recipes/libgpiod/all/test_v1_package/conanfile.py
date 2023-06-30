@@ -5,7 +5,7 @@ required_conan_version = ">=1.33.0"
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
