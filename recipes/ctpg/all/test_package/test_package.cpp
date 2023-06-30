@@ -1,7 +1,7 @@
 #ifdef CTPG_PLACED_CPTG_FOLDER
-#  include "ctpg/ctpg.hpp"
+#include "ctpg/ctpg.hpp"
 #else
-#  include "ctpg.hpp"
+#include "ctpg.hpp"
 #endif
 
 #include <iostream>
@@ -28,7 +28,7 @@ constexpr ctpg::parser p(
     )
 );
 
-int main(int argc, char* argv[]) {
+int main() {
     auto res = p.parse(ctpg::buffers::string_buffer("10, 20, 30"), std::cerr);
     bool success = res.has_value();
     if (success)
