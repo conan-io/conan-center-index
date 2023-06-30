@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.1.0)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
-
-find_package(Boost.SIMD REQUIRED)
+find_package(Boost.SIMD REQUIRED CONFIG)
 
 # FIXME: components from Boost.SIMD (target Boost::SIMD) don't work.
 # It should be:
