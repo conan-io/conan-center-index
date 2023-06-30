@@ -1,0 +1,5 @@
+sources:
+  "master":
+    url: "https://github.com/Siviuze/KickCAT/archive/refs/heads/master.zip"
+    sha256: "8c67da99ffe2586e1b10729ec63fbac96b2c51390633a90f8a59101a23058517"
+    strip_root: true
