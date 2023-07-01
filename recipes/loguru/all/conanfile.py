@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, load, save, rmdir
+from conan.tools.files import get, load, save, rmdir, rm
 from conan.tools.build import check_min_cppstd
 
 
@@ -113,6 +113,8 @@ class LoguruConan(ConanFile):
         
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         suffix = "d" if self.settings.build_type == "Debug" else ""
