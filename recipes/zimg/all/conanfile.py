@@ -14,11 +14,11 @@ required_conan_version = ">=1.54.0"
 class ZimgConan(ConanFile):
     name = "zimg"
     description = "Scaling, colorspace conversion, and dithering library"
-    topics = ("image", "manipulation")
-    homepage = "https://github.com/sekrit-twc/zimg"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "WTFPL"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/sekrit-twc/zimg"
+    topics = ("image", "manipulation")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
