@@ -110,9 +110,11 @@ class MailioConan(ConanFile):
             "boost::system",
             "boost::date_time",
             "boost::regex",
-            "boost::stacktrace_backtrace",
             "openssl::openssl",
         ]
+        if self.dependencies["boost"].options.get_safe("with_stacktrace_backtrace"):
+            self.cpp_info.requires.append("boost::stacktrace_backtrace")
+
         self.cpp_info.set_property("pkg_config_name", "mailio")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
