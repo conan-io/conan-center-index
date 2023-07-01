@@ -29,4 +29,4 @@ class TestPackageConan(ConanFile):
 
     def package_info(self):
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
