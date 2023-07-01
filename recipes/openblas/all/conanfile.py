@@ -43,7 +43,7 @@ class OpenblasConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
@@ -63,7 +63,7 @@ class OpenblasConan(ConanFile):
         return cmake
 
     def layout(self):
-        cmake_layout(self, src_folder="src", build_folder=self.build_folder)
+        cmake_layout(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
