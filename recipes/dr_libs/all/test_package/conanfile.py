@@ -4,7 +4,8 @@ from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
-class TestPackageConan(ConanFile):
+# It will become the standard on Conan 2.x
+class TestDrLibsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
@@ -22,5 +23,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_DrLibs")
             self.run(bin_path, env="conanrun")
