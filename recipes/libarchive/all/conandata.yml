@@ -65,7 +65,7 @@ patches:
     - patch_file: "patches/0001-3.4.3-zlib-winapi.patch"
       patch_description: "Remove broken ZLIB WINAPI check"
       patch_type: "portability"
-    - patch_file: "patches/0003-3.4.3-cmake.patch"
+    - patch_file: "patches/0003-3.5.1-cmake.patch"
       patch_description: "Make CMake cooperate with Conan"
       patch_type: "conan"
   "3.4.3":
