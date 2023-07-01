@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, rmdir, rm
@@ -48,11 +48,14 @@ class LibgpiodConan(ConanFile):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
 
+    def requirements(self):
+        self.requires("linux-headers-generic/5.13.9")
+
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("autoconf-archive/2021.02.19")
-        self.build_requires("linux-headers-generic/5.13.9")
+        self.tool_requires("libtool/2.4.6")
+        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("autoconf-archive/2021.02.19")
+        self.tool_requires("linux-headers-generic/5.13.9")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -67,6 +70,10 @@ class LibgpiodConan(ConanFile):
             "--enable-bindings-cxx={}".format(yes_no(self.options.enable_bindings_cxx)),
             "--enable-tools={}".format(yes_no(self.options.enable_tools))
         })
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
+        tc = AutotoolsDeps(self)
         tc.generate()
 
     def build(self):
