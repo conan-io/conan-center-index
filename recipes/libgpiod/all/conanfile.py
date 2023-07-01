@@ -17,6 +17,7 @@ class LibgpiodConan(ConanFile):
     description = "C library and tools for interacting with the linux GPIO character device"
     topics = ("gpio", "libgpiod", "libgpiodcxx", "linux")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
