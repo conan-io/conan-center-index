@@ -63,7 +63,7 @@ class OpenblasConan(ConanFile):
         return cmake
 
     def layout(self):
-        cmake_layout(self, source_subfolder="src")
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
