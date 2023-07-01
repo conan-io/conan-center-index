@@ -34,14 +34,6 @@ class OpenblasConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
@@ -61,7 +53,7 @@ class OpenblasConan(ConanFile):
         get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            destination=self._source_subfolder
+            destination=self.source_folder
         )
 
     @functools.lru_cache(1)
@@ -71,7 +63,7 @@ class OpenblasConan(ConanFile):
         return cmake
 
     def layout(self):
-        cmake_layout(self, src_folder="src", build_folder=self._build_subfolder)
+        cmake_layout(self, src_folder="src", build_folder=self.build_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -115,7 +107,7 @@ else()
 endif()"""
 
         replace_in_file(self,
-            os.path.join(self.source_folder, self._source_subfolder, "cmake", "f_check.cmake"),
+            os.path.join(self.source_folder, self.source_folder, "cmake", "f_check.cmake"),
             search,
             replace,
         )
@@ -123,7 +115,7 @@ endif()"""
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self._source_subfolder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
