@@ -37,10 +37,9 @@ class PbtoolsConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("This library is not compatible with Windows")
+            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
