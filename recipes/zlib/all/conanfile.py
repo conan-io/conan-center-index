@@ -32,7 +32,8 @@ class ZlibConan(ConanFile):
         is_windows = self.settings.get_safe("os") == "Windows"
         is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
         host_compiler = self.settings.get_safe("compiler")
-        return is_windows and not is_cygwin and (host_compiler == "gcc" or (host_compiler == "clang" and not self.settings.get_safe("compiler.runtime")))
+        msvc_runtime = self.settings.get_safe("compiler.runtime") != None
+        return is_windows and not is_cygwin and (host_compiler == "gcc" or (host_compiler == "clang" and not msvc_runtime))
 
     def export_sources(self):
         export_conandata_patches(self)
