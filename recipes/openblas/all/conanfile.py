@@ -34,9 +34,6 @@ class OpenblasConan(ConanFile):
     }
     short_paths = True
 
-    def export_sources(self):
-       copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -55,6 +52,15 @@ class OpenblasConan(ConanFile):
             strip_root=True,
             destination=self.source_folder
         )
+
+        if Version(self.version) <= "0.3.15":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
+                            "set(obj_defines ${defines_in})", "set(obj_defines ${defines_in})\r\n\r\n" +
+                            "list(FIND obj_defines \"RC\" def_idx)\r\n" + "if (${def_idx} GREATER -1) \r\n\t" +
+                            "list (REMOVE_ITEM obj_defines \"RC\")\r\n\t" + "list(APPEND obj_defines  \"RC=RC\")\r\n" +
+                            "endif ()\r\n" + "list(FIND obj_defines \"CR\" def_idx)\r\n" +
+                            "if (${def_idx} GREATER -1) \r\n\t" + "list (REMOVE_ITEM obj_defines \"CR\")\r\n\t" +
+                            "list(APPEND obj_defines  \"CR=CR\")\r\n" + "endif ()")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
