@@ -1,33 +1,50 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, chdir, rm, rmdir
-from conans import AutoToolsBuildEnvironment
-import functools
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.layout import basic_layout
+import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 class libxftConan(ConanFile):
     name = "libxft"
     description = 'X FreeType library'
-    topics = ("libxft", "x11", "xorg")
+    license = "X11"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.x.org/wiki/"
-    license = "X11"
-
+    topics = ("x11", "xorg")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    generators = "pkg_config"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("xorg/system")
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.0", transitive_headers=True)
         self.requires("fontconfig/2.14.2")
 
     def build_requirements(self):
@@ -36,43 +53,44 @@ class libxftConan(ConanFile):
         self.build_requires("libtool/2.4.7")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.options.shared:
-            del self.options.fPIC
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        args = ["--disable-dependency-tracking"]
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.configure(args=args, pkg_config_paths=self.build_folder)
-        return autotools
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--disable-dependency-tracking",
+        ])
+        tc.generate()
+
+        tc = PkgConfigDeps(self)
+        tc.generate()
+
+        tc = AutotoolsDeps(self)
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        with chdir(self, self._source_subfolder):
-            autotools = self._configure_autotools()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with chdir(self, self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install(args=["-j1"])
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.install()
         rm(self, "*.la", f"{self.package_folder}/lib", recursive=True)
         rmdir(self, f"{self.package_folder}/lib/pkgconfig")
         rmdir(self, f"{self.package_folder}/share")
 
     def package_info(self):
-        self.cpp_info.names['pkg_config'] = "Xft"
         self.cpp_info.set_property("pkg_config_name", "xft")
         self.cpp_info.libs = ["Xft"]
