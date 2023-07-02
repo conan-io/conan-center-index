@@ -24,7 +24,7 @@ class LibtiffConan(ConanFile):
         "fPIC": [True, False],
         "lzma": [True, False],
         "jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
-        "zlib": [True, False],
+        "zlib": [False, "zlib", "zlib-ng"],
         "libdeflate": [True, False],
         "zstd": [True, False],
         "jbig": [True, False],
@@ -36,7 +36,7 @@ class LibtiffConan(ConanFile):
         "fPIC": True,
         "lzma": True,
         "jpeg": "libjpeg",
-        "zlib": True,
+        "zlib": "zlib",
         "libdeflate": True,
         "zstd": True,
         "jbig": True,
@@ -62,8 +62,10 @@ class LibtiffConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.zlib:
+        if self.options.zlib == "zlib":
             self.requires("zlib/1.2.13")
+        elif self.options.zlib == "zlib-ng":
+            self.requires("zlib-ng/2.1.3")
         if self.options.libdeflate:
             self.requires("libdeflate/1.18")
         if self.options.lzma:
@@ -79,11 +81,15 @@ class LibtiffConan(ConanFile):
         if self.options.zstd:
             self.requires("zstd/1.5.5")
         if self.options.webp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
 
     def validate(self):
         if self.options.libdeflate and not self.options.zlib:
-            raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
+            raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=zlib or libtiff:zlib=zlib-ng")
+        if self.options.zlib == "zlib-ng":
+            zlib_ng = self.dependencies["zlib-ng"]
+            if not zlib_ng.options.zlib_compat:
+                raise ConanInvalidConfiguration(f"libtiff:zlib=zlib-ng requires the dependency option zlib-ng:zlib_compat=True")
 
     def build_requirements(self):
         if Version(self.version) >= "4.5.1":
@@ -99,7 +105,7 @@ class LibtiffConan(ConanFile):
         tc.variables["jpeg"] = bool(self.options.jpeg)
         tc.variables["jpeg12"] = False
         tc.variables["jbig"] = self.options.jbig
-        tc.variables["zlib"] = self.options.zlib
+        tc.variables["zlib"] = bool(self.options.zlib)
         tc.variables["libdeflate"] = self.options.libdeflate
         tc.variables["zstd"] = self.options.zstd
         tc.variables["webp"] = self.options.webp
@@ -168,8 +174,10 @@ class LibtiffConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
         self.cpp_info.requires = []
-        if self.options.zlib:
+        if self.options.zlib == "zlib":
             self.cpp_info.requires.append("zlib::zlib")
+        elif self.options.zlib == "zlib-ng":
+            self.cpp_info.requires.append("zlib-ng::zlib-ng")
         if self.options.libdeflate:
             self.cpp_info.requires.append("libdeflate::libdeflate")
         if self.options.lzma:
