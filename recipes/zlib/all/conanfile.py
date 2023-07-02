@@ -29,10 +29,10 @@ class ZlibConan(ConanFile):
 
     @property
     def _is_mingw(self):
-        host_os = self.settings.get_safe("os")
-        is_cygwin = host_os == "Windows" and self.settings.get_safe("os.subsystem") == "cygwin"
+        is_windows = self.settings.get_safe("os") == "Windows"
+        is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
         host_compiler = self.settings.get_safe("compiler")
-        return host_os == "Windows" and not is_cygwin and (host_compiler == "gcc" or (host_compiler == "clang" and not self.settings.get_safe("compiler.runtime")))
+        return is_windows and not is_cygwin and (host_compiler == "gcc" or (host_compiler == "clang" and not self.settings.get_safe("compiler.runtime")))
 
     def export_sources(self):
         export_conandata_patches(self)
