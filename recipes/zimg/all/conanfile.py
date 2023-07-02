@@ -94,11 +94,18 @@ class ZimgConan(ConanFile):
             platform_toolset = MSBuildToolchain(self).toolset
             conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
             for vcxproj_file in vcxproj_files:
-                replace_in_file(
-                    self, vcxproj_file,
-                    "<PlatformToolset>v142</PlatformToolset>",
-                    f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
-                )
+                if Version(self.version) >= "3.0.5":
+                    replace_in_file(
+                        self, vcxproj_file,
+                        "<PlatformToolset>v143</PlatformToolset>",
+                        f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+                    )
+                else:
+                    replace_in_file(
+                        self, vcxproj_file,
+                        "<PlatformToolset>v142</PlatformToolset>",
+                        f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+                    )
                 replace_in_file(
                     self, vcxproj_file,
                     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
