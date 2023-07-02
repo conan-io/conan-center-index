@@ -17,6 +17,7 @@ class LibpngConan(ConanFile):
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
     topics = ("png", "graphics", "image")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,6 +27,7 @@ class LibpngConan(ConanFile):
         "sse": [True, False],
         "vsx": [True, False],
         "api_prefix": ["ANY"],
+        "with_zlibng": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +37,7 @@ class LibpngConan(ConanFile):
         "sse": True,
         "vsx": True,
         "api_prefix": "",
+        "with_zlibng": False,
     }
 
     @property
@@ -92,11 +95,18 @@ class LibpngConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        if self.options.with_zlibng:
+            self.requires("zlib-ng/2.1.3")
+        else:
+            self.requires("zlib/1.2.13")
 
     def validate(self):
         if Version(self.version) < "1.6" and self.settings.arch == "armv8" and is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} currently does not building for {self.settings.os} {self.settings.arch}. Contributions are welcomed")
+        if self.options.with_zlibng:
+            zlib_ng = self.dependencies["zlib-ng"]
+            if not zlib_ng.options.zlib_compat:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option zlib-ng:zlib_compat=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
