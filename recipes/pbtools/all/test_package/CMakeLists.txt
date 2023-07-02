@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+cmake_minimum_required(VERSION 3.15)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES C)
 
 find_package(pbtools REQUIRED CONFIG)
 
-add_executable(test_package test_package.c hello_world.c)
-target_link_libraries(test_package pbtools::pbtools)
+add_executable(${PROJECT_NAME} test_package.c hello_world.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE pbtools::pbtools)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
