@@ -209,6 +209,7 @@ required_for_references:
 - doctest
 - double-conversion
 - doxygen
+- dr_libs
 - draco
 - dragonbox
 - drflac
@@ -217,6 +218,7 @@ required_for_references:
 - duckdb
 - eabase
 - earcut
+- eastl
 - easy_profiler
 - ecos
 - editline
@@ -703,6 +705,7 @@ required_for_references:
 - tinycthread
 - tinycthreadpool
 - tinyexif
+- tinygltf
 - tinymidi
 - tinyxml
 - tinyxml2
