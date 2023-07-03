@@ -5,4 +5,4 @@ find_package(effolkronium_random REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE effolkronium_random)
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
