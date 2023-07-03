@@ -1,17 +1,15 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc, unix_path, VCVars, MSBuild
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.layout import basic_layout
-from conan.tools.env import Environment
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path, MSBuild, MSBuildDeps, MSBuildToolchain
+from conan.tools.scm import Version
 
 import os
-import contextlib
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.57.0"
 
 class UsocketsConan(ConanFile):
     name = "usockets"
@@ -20,6 +18,7 @@ class UsocketsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/uNetworking/uSockets"
     topics = ("socket", "network", "web")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -47,13 +46,15 @@ class UsocketsConan(ConanFile):
     def _minimum_compilers_version(self, cppstd):
         standards = {
             "14": {
-                "msvc": "15",
+                "Visual Studio": "15",
+                "msvc": "191",
                 "gcc": "5",
                 "clang": "3.4",
                 "apple-clang": "10",
             },
             "17": {
-                "msvc": "16",
+                "Visual Studio": "16",
+                "msvc": "192",
                 "gcc": "7",
                 "clang": "6",
                 "apple-clang": "10",
@@ -67,6 +68,10 @@ class UsocketsConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _uses_msbuild(self):
+        return Version(self.version) < "0.8.3" and is_msvc(self)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -113,66 +118,87 @@ class UsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.5.1")
+            self.requires("wolfssl/5.6.3")
 
         if self.options.eventloop == "libuv":
-            self.requires("libuv/1.44.2")
+            self.requires("libuv/1.46.0")
         elif self.options.eventloop == "gcd":
             self.requires("libdispatch/5.3.2")
         elif self.options.eventloop == "boost":
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self.win_bash:
-            self.tool_requires("msys2/cci.latest")
-        if self.settings.compiler == "msvc":
-            self.tool_requires("automake/1.16.5")
+        if self._settings_build.os == "Windows" and not self._uses_msbuild:
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            if is_msvc(self):
+                self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        if self._uses_msbuild:
+            vcxproj_file = os.path.join(self.source_folder, "uSockets.vcxproj")
+            platform_toolset = MSBuildToolchain(self).toolset
+            import_conan_generators = ""
+            for props_file in ["conantoolchain.props", "conandeps.props"]:
+                props_path = os.path.join(self.generators_folder, props_file)
+                if os.path.exists(props_path):
+                    import_conan_generators += f"<Import Project=\"{props_path}\" />"
+
+            replace_in_file(
+                self, vcxproj_file,
+                "<PlatformToolset>v141</PlatformToolset>",
+                f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+            )
+            if import_conan_generators:
+                replace_in_file(
+                    self, vcxproj_file,
+                    '''<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />''',
+                    f'''{import_conan_generators}\n<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />''',
+                )
+
+    def generate(self):
+        if self._uses_msbuild:
+            tc = MSBuildToolchain(self)
+            tc.generate()
+            deps = MSBuildDeps(self)
+            deps.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            env = tc.environment()
+            if is_msvc(self):
+                compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
+                ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
+                env.define("CC", f"{compile_wrapper} cl -nologo")
+                env.define("CXX", f"{compile_wrapper} cl -nologo")
+                env.define("LD", f"{compile_wrapper} link -nologo")
+                env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+                env.define("NM", "dumpbin -symbols")
+                env.define("OBJDUMP", ":")
+                env.define("RANLIB", ":")
+                env.define("STRIP", ":")
+
+                if self.options.eventloop == "libuv":
+                    # Workaround for: https://github.com/conan-io/conan/issues/12784
+                    # Otherwise AutotoolsDeps should suffice
+                    env.append("CPPFLAGS", "-I" + unix_path(self, self.dependencies["libuv"].cpp_info.includedirs[0]))
+            tc.generate(env)
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _build_msvc(self):
         with chdir(self, os.path.join(self.source_folder)):
             msbuild = MSBuild(self)
-            msbuild.platform = "x86"
             msbuild.build("uSockets.vcxproj")
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if is_msvc(self):
-            env = {
-                "CC": "{} cl -nologo".format(unix_path(self.source_folder, self.deps_user_info["automake"].compile)),
-                "CXX": "{} cl -nologo".format(unix_path(self.source_folder, self.deps_user_info["automake"].compile)),
-                "CFLAGS": "-{}".format(self.settings.compiler.runtime),
-                "LD": "link",
-                "NM": "dumpbin -symbols",
-                "STRIP": ":",
-                "AR": "{} lib".format(unix_path(self.source_folder, self.deps_user_info["automake"].ar_lib)),
-                "RANLIB": ":",
-            }
-
-            if self.options.eventloop == "libuv":
-                env["CPPFLAGS"] = "-I" + unix_path(self.source_folder, self.deps_cpp_info["libuv"].include_paths[0]) + " "
-            ev = Environment()
-            for k, v in env.items():
-                ev.define(k, v)
-            vcvars = VCVars(self)
-            vcvars.generate()
-            yield
-            # with VCVars(self):
-            #
-            #     with ev:
-            #         yield
-        else:
-            yield
-
-    def _build_configure(self):
+    def _build_autotools(self):
         autotools = Autotools(self)
         autotools.fpic = self.options.get_safe("fPIC", False)
         with chdir(self, self.source_folder):
@@ -193,15 +219,10 @@ class UsocketsConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if Version(self.version) < "0.8.3" and is_msvc(self):
+        if self._uses_msbuild:
             self._build_msvc()
         else:
-            self._build_context()
-            self._build_configure()
-
-    def generate(self):
-        tc = AutotoolsToolchain(self)
-        tc.generate()
+            self._build_autotools()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
