@@ -1,7 +1,7 @@
 sources:
-  "0.5.1":
-    url: "https://github.com/linksplatform/Hashing/archive/refs/tags/cpp_0.5.1.tar.gz"
-    sha256: "60f9ec5b377344f064dbe8eb5fe96ebfc81d811595503b22fe7e56a4cea67e01"
+  "0.5.4":
+    url: "https://github.com/linksplatform/Hashing/archive/refs/tags/cpp_0.5.4.tar.gz"
+    sha256: "3ac8c7a0c9ae3ec963ebec051acd270b3a7a639fd85785bc275d99e47c1be7f1"
   "0.4.0":
     url: "https://github.com/linksplatform/Hashing/archive/refs/tags/cpp_0.4.0.zip"
     sha256: "afb8a27a483f636515ca4289f2bfa80fbd37c8416631f0b3ff7001d17a054320"
