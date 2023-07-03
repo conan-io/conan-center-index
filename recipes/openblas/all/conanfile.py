@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 import os
 import functools
@@ -126,6 +127,7 @@ endif()"""
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # CMake config file:
