@@ -7,7 +7,7 @@ import os
 class NanoRTConan(ConanFile):
     name = "nanort"
     description = "Single header only modern ray tracing kernel"
-    topics = ("conan", "nanort", "graphics", "raytracing")
+    topics = ("graphics", "raytracing")
     url = "https://github.com/lighttransport/nanort"
     homepage = "https://github.com/lighttransport/nanort"
     license = "MIT"
