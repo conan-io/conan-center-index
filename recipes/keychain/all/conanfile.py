@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get
+from conan.tools.files import collect_libs, copy, get, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 
 import os
@@ -45,6 +45,9 @@ class KeychainConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Ensure .dll is installed on Windows
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "TARGETS ${PROJECT_NAME}", "TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin")
 
     def generate(self):
         tc = CMakeToolchain(self)
