@@ -10,6 +10,7 @@ from conan.tools.files import (
     export_conandata_patches,
     get,
     replace_in_file,
+    rmdir,
 )
 from conan.tools.scm import Version
 
@@ -120,6 +121,7 @@ class EastlConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_info(self):
         self.cpp_info.libs = ["EASTL"]
