@@ -49,6 +49,8 @@ class KeychainConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTS"] = False
+        # Export all symbols by default to allow generating a shared library with msvc
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         pc = PkgConfigDeps(self)
         pc.generate()
