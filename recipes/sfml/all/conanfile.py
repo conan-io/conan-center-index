@@ -2,8 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -52,6 +53,7 @@ class SfmlConan(ConanFile):
 
     def requirements(self):
         if self.options.window:
+            # FIXME: use cci's glad
             if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
                 self.requires("opengl/system")
             if self.settings.os == "Linux":
@@ -61,6 +63,7 @@ class SfmlConan(ConanFile):
             self.requires("freetype/2.13.0")
             self.requires("stb/cci.20220909")
         if self.options.audio:
+            # FIXME: use cci's minimp3
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
@@ -73,7 +76,9 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rmdir(self, os.path.join(self.source_folder, "extlibs"))
+        # sfml/2.6.0 uses minimp3 and glad in extlibs
+        if Version(self.version) < "2.6.0":
+            rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -86,6 +91,9 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = True
+        tc.variables["WARNINGS_AS_ERRORS"] = False
+        if Version(self.version) >= "2.6.0":
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
@@ -99,9 +107,12 @@ class SfmlConan(ConanFile):
         cmake.build()
 
     def package(self):
+        if Version(self.version) >= "2.6.0":
+            copy(self, pattern="license.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -168,6 +179,9 @@ class SfmlConan(ConanFile):
         def iokit():
             return ["IOKit"] if self.settings.os == "Macos" else []
 
+        def coreservices():
+            return ["CoreServices"] if self.settings.os == "Macos" else []
+
         def coregraphics():
             return ["CoreGraphics"] if self.settings.os == "iOS" else []
 
@@ -220,7 +234,7 @@ class SfmlConan(ConanFile):
                     "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
-                                  coremotion() + opengles_ios(),
+                                  coreservices() + coremotion() + opengles_ios(),
                 },
             })
         if self.options.graphics:
