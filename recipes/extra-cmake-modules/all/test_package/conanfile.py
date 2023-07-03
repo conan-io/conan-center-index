@@ -30,7 +30,5 @@ class ExtraCMakeModulesTestConan(ConanFile):
             if is_msvc(self):
                 progname += ".exe"
 
-            self.output.info(f"buildpath: {self.folders.build}")
-            self.output.info(f"buildpath2: {self.cpp.build.bindir}")
-            runpath = os.path.join(self.folders.build, progname)
+            runpath = os.path.join(".", progname)
             self.run(runpath, env="conanrun")
