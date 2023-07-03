@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -47,8 +47,21 @@
+@@ -47,8 +47,22 @@
  # Dependencies
  #-------------------------------------------------------------------------------------------
  if (NOT TARGET EABase)
@@ -9,7 +9,8 @@
  endif()
  
 -target_link_libraries(EASTL EABase)
-+target_link_libraries(EASTL CONAN_PKG::eabase)
++find_package(EABase REQUIRED CONFIG)
++target_link_libraries(EASTL EABase::EABase)
  
 +if(BUILD_SHARED_LIBS)
 +  target_compile_definitions(EASTL PUBLIC EASTL_DLL)
