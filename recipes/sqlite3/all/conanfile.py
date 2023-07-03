@@ -20,9 +20,22 @@ class Sqlite3Conan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        # sqlite recommended compile-time options https://www.sqlite.org/compile.html#recommended_compile_time_options
+        "dqs": [None, 0, 1, 2, 3],
+        "threadsafe": [None, 0, 1, 2],
+        "default_memstatus": [None, 0, 1],
+        "default_wal_synchronous": [None, 0, 1, 2, 3],
+        "like_doesnt_match_blob": [None, True, False],
+        "max_expr_depth": [None, "ANY"], # integer
+        "omit_decltype": [None, True, False],
+        "omit_deprecated": [None, True, False],
+        "omit_progress_callback": [None, True, False],
+        "omit_shared_cache": [None, True, False],
+        "use_alloca": [None, True, False],
+        "omit_autoinit": [None, True, False],
+        # additional compile-time options
         "shared": [True, False],
         "fPIC": [True, False],
-        "threadsafe": [0, 1, 2],
         "enable_column_metadata": [True, False],
         "enable_dbstat_vtab": [True, False],
         "enable_explain_comments": [True, False],
@@ -49,9 +62,22 @@ class Sqlite3Conan(ConanFile):
         "enable_dbpage_vtab": [True, False],
     }
     default_options = {
+        # recommended compile-time options, use default values from source
+        "dqs": None,
+        "threadsafe": None,
+        "default_memstatus": None,
+        "default_wal_synchronous": None,
+        "like_doesnt_match_blob": None,
+        "max_expr_depth": None,
+        "omit_decltype": None,
+        "omit_deprecated": None,
+        "omit_progress_callback": None,
+        "omit_shared_cache": None,
+        "use_alloca": None,
+        "omit_autoinit": None,
+        # additional compile-time options
         "shared": False,
         "fPIC": True,
-        "threadsafe": 1,
         "enable_column_metadata": True,
         "enable_dbstat_vtab": False,
         "enable_explain_comments": False,
@@ -63,9 +89,7 @@ class Sqlite3Conan(ConanFile):
         "enable_soundex": False,
         "enable_preupdate_hook": False,
         "enable_rtree": True,
-        "use_alloca": False,
         "omit_load_extension": False,
-        "omit_deprecated": False,
         "enable_math_functions": True,
         "enable_unlock_notify": True,
         "enable_default_secure_delete": False,
@@ -112,10 +136,35 @@ class Sqlite3Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # recommended compile-time options, use defaults from source
+        if self.options.dqs:
+            tc.variables["DQS"] = self.options.dqs
+        if self.options.threadsafe:
+            tc.variables["THREADSAFE"] = self.options.threadsafe
+        if self.options.default_memstatus:
+            tc.variables["DEFAULT_MEMSTATUS"] = self.options.default_memstatus
+        if self.options.default_wal_synchronous:
+            tc.variables["DEFAULT_WAL_SYNCHRONOUS"] = self.options.default_wal_synchronous
+        if self.options.like_doesnt_match_blob:
+            tc.variables["LIKE_DOESNT_MATCH_BLOBS"] = self.options.like_doesnt_match_blob
+        if self.options.max_expr_depth: 
+            tc.variables["MAX_EXPR_DEPTH"] = self.options.max_expr_depth
+        if self.options.omit_decltype:
+            tc.variables["OMIT_DECLTYPE"] = self.options.omit_decltype
+        if self.options.omit_deprecated:
+            tc.variables["OMIT_DEPRECATED"] = self.options.omit_deprecated
+        if self.options.omit_progress_callback:            
+            tc.variables["OMIT_PROGRESS_CALLBACK"] = self.options.omit_progress_callback
+        if self.options.omit_shared_cache:
+            tc.variables["OMIT_SHARED_CACHE"] = self.options.omit_shared_cache
+        if self.options.use_alloca:
+            tc.variables["USE_ALLOCA"] = self.options.use_alloca
+        if self.options.omit_autoinit:
+            tc.variables["OMIT_AUTOINIT"] = self.options.omit_autoinit
+        # additional compile-time options
         tc.variables["SQLITE3_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["SQLITE3_VERSION"] = self.version
         tc.variables["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
-        tc.variables["THREADSAFE"] = self.options.threadsafe
         tc.variables["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
         tc.variables["ENABLE_DBSTAT_VTAB"] = self.options.enable_dbstat_vtab
         tc.variables["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
@@ -129,9 +178,7 @@ class Sqlite3Conan(ConanFile):
         tc.variables["ENABLE_RTREE"] = self.options.enable_rtree
         tc.variables["ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         tc.variables["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
-        tc.variables["USE_ALLOCA"] = self.options.use_alloca
         tc.variables["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        tc.variables["OMIT_DEPRECATED"] = self.options.omit_deprecated
         if self._has_enable_math_function_option:
             tc.variables["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
         tc.variables["HAVE_FDATASYNC"] = True
