@@ -155,7 +155,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_png == "libpng":
             self.requires("libpng/1.6.40")
         elif self.options.with_png == "libspng":
-            self.requires("libspng/0.7.3")
+            self.requires("libspng/0.7.4")
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_tiff:
