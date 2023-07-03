@@ -8,7 +8,7 @@ class ExtraCMakeModulesTestConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
 
     def build_requirements(self):
-        self.test_requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str)
 
     def generate(self):
         tc = CMakeToolchain(self)
