@@ -8,7 +8,7 @@ class NanoRTConan(ConanFile):
     name = "nanort"
     description = "Single header only modern ray tracing kernel"
     topics = ("graphics", "raytracing")
-    url = "https://github.com/lighttransport/nanort"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lighttransport/nanort"
     license = "MIT"
     #version = "0bb8ab5"
