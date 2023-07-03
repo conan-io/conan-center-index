@@ -25,7 +25,6 @@ class FooTestConan(ConanFile):
         tc = CMakeToolchain(self)
         # using armadillo > 12.x requires explicit consumer linkage against hdf5
         explicit_link_condition = Version(self.dependencies["armadillo"].ref.version) > "12"
-        self.output.warning(f"{explicit_link_condition=}")
         tc.variables["LINK_HDF5"] = explicit_link_condition
         tc.generate()
 
