@@ -53,7 +53,7 @@ class LibsecretConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.76.3", transitive_headers=True, transitive_libs=True)
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
@@ -64,7 +64,7 @@ class LibsecretConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         self.tool_requires("glib/<host_version>")
