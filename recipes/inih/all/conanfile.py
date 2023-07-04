@@ -24,10 +24,12 @@ class InihConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_inireader": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_inireader": True
     }
 
     def config_options(self):
@@ -37,8 +39,9 @@ class InihConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+        if not self.options.with_inireader:
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -48,7 +51,7 @@ class InihConan(ConanFile):
             raise ConanInvalidConfiguration("Shared inih is not supported with msvc")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -58,7 +61,7 @@ class InihConan(ConanFile):
         env.generate()
         tc = MesonToolchain(self)
         tc.project_options["distro_install"] = True
-        tc.project_options["with_INIReader"] = True
+        tc.project_options["with_INIReader"] = self.options.with_inireader
         tc.generate()
 
     def build(self):
@@ -75,14 +78,15 @@ class InihConan(ConanFile):
         fix_msvc_libname(self)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "INIReader")
+        self.cpp_info.set_property("pkg_config_name", "inih-all")
 
         self.cpp_info.components["libinih"].set_property("pkg_config_name", "inih")
         self.cpp_info.components["libinih"].libs = ["inih"]
 
-        self.cpp_info.components["inireader"].set_property("pkg_config_name", "INIReader")
-        self.cpp_info.components["inireader"].libs = ["INIReader"]
-        self.cpp_info.components["inireader"].requires = ["libinih"]
+        if self.options.with_inireader:
+            self.cpp_info.components["inireader"].set_property("pkg_config_name", "INIReader")
+            self.cpp_info.components["inireader"].libs = ["INIReader"]
+            self.cpp_info.components["inireader"].requires = ["libinih"]
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
