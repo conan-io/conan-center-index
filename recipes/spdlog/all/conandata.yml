@@ -14,3 +14,9 @@ sources:
   "1.8.5":
     url: "https://github.com/gabime/spdlog/archive/v1.8.5.tar.gz"
     sha256: "944d0bd7c763ac721398dca2bb0f3b5ed16f67cef36810ede5061f35a543b4b8"
+patches:
+  "1.11.0":
+    - patch_file: "patches/1.11.0-0001-fix-fmt10-build.patch"
+      patch_description: "Fix fmt 10.0.0 build"
+      patch_type: "conan"
+      patch_source: "https://github.com/gabime/spdlog/pull/2694"
