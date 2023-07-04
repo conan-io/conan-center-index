@@ -100,6 +100,7 @@ class XercesCConan(ConanFile):
     def build_requirements(self):
         if self.options.message_loader == "icu" and not can_run(self):
             self.tool_requires("icu/72.1")
+        self.tool_requires("cmake/3.26.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
