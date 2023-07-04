@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -120,6 +121,11 @@ class ArmadilloConan(ConanFile):
         ):
             raise ConanInvalidConfiguration(
                 "framework_accelerate can only be used on Macos"
+            )
+
+        if self.options.use_hdf5 and Version(self.version) > "12" and cross_building(self):
+            raise ConanInvalidConfiguration(
+                "Armadillo does not support cross building with hdf5. Set use_hdf5=False and try again."
             )
 
         for value, options in self._co_dependencies.items():
