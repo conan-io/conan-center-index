@@ -47,7 +47,7 @@ class OpenblasConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
-    def source(self):
+    def source(self): 
         get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
