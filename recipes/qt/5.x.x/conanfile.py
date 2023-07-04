@@ -1064,8 +1064,6 @@ Examples = bin/datadir/examples""")
             gui_reqs = []
             if self.options.with_dbus:
                 gui_reqs.append("DBus")
-            if self.options.with_freetype:
-                gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
                 gui_reqs.append("libpng::libpng")
             if self.options.get_safe("with_fontconfig", False):
@@ -1073,8 +1071,6 @@ Examples = bin/datadir/examples""")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 if self.options.qtwayland or self.options.get_safe("with_x11", False):
                     gui_reqs.append("xkbcommon::xkbcommon")
-                if self.options.get_safe("with_x11", False):
-                    gui_reqs.append("xorg::xorg")
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -1114,7 +1110,10 @@ Examples = bin/datadir/examples""")
                 _create_module("VulkanSupport", ["Core", "Gui"])
 
             if self.options.widgets:
-                _create_module("Widgets", ["Gui"])
+                widget_reqs = ["Gui"]
+                if self.options.with_freetype:
+                    widget_reqs.append("freetype::freetype")
+                _create_module("Widgets", widget_reqs)
                 _add_build_module("qtWidgets", self._cmake_qt5_private_file("Widgets"))
                 if self.settings.os not in ["iOS", "watchOS", "tvOS"]:
                     _create_module("PrintSupport", ["Gui", "Widgets"])
@@ -1131,6 +1130,10 @@ Examples = bin/datadir/examples""")
             if self.settings.os in ["Android", "Emscripten"]:
                 _create_module("EglSupport", ["Core", "Gui"])
 
+            minimal_integration_plugin_reqs = ["Core", "Gui", "EventDispatcherSupport", "FontDatabaseSupport"]
+            _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", minimal_integration_plugin_reqs)
+            if self.settings.os in ["Android", "Emscripten"]:
+                _create_plugin("QMinimalEglIntegrationPlugin", "qminimal", "platforms", minimal_integration_plugin_reqs + ["EglSupport"])
             if self.settings.os == "Windows":
                 windows_reqs = ["Core", "Gui"]
                 windows_reqs.extend(["EventDispatcherSupport", "FontDatabaseSupport", "ThemeSupport", "AccessibilitySupport"])
@@ -1204,8 +1207,7 @@ Examples = bin/datadir/examples""")
         _create_module("Sql")
         _create_module("Test")
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
-            _create_module("OpenGL", ["Gui"])
-        if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
+            _create_module("OpenGL", ["Core", "Gui", "Widgets"])
             _create_module("OpenGLExtensions", ["Gui"])
         _create_module("Concurrent")
         _create_module("Xml")
@@ -1224,7 +1226,10 @@ Examples = bin/datadir/examples""")
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
-            _create_module("QuickTest", ["Test"])
+            quick_test_reqs = ["Test", "Quick"]
+            if self.options.widgets:
+                quick_test_reqs.append("Widgets")
+            _create_module("QuickTest", quick_test_reqs)
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt5::LinguistTools")
@@ -1250,7 +1255,10 @@ Examples = bin/datadir/examples""")
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
         if self.options.qtsvg and self.options.gui:
-            _create_module("Svg", ["Gui"])
+            svg_reqs = ["Core", "Gui"]
+            if self.options.widgets:
+                svg_reqs.append("Widgets")
+            _create_module("Svg", svg_reqs)
 
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
@@ -1331,18 +1339,20 @@ Examples = bin/datadir/examples""")
             _create_plugin("GLTFSceneExportPlugin", "gltfsceneexport", "sceneparsers", [])
             _create_plugin("GLTFSceneImportPlugin", "gltfsceneimport", "sceneparsers", [])
             _create_plugin("OpenGLRendererPlugin", "openglrenderer", "renderers", [])
-            _create_plugin("Scene2DPlugin", "scene2d", "renderplugins", [])
 
             _create_module("3DAnimation", ["3DRender", "3DCore", "Gui"])
-            _create_module("3DInput", ["3DCore", "Gamepad", "Gui"])
+            _create_module("3DInput", ["3DCore"])
             _create_module("3DLogic", ["3DCore", "Gui"])
             _create_module("3DExtras", ["3DRender", "3DInput", "3DLogic", "3DCore", "Gui"])
-            _create_module("3DQuick", ["3DCore", "Quick", "Gui", "Qml"])
-            _create_module("3DQuickAnimation", ["3DAnimation", "3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
-            _create_module("3DQuickExtras", ["3DExtras", "3DInput", "3DQuick", "3DRender", "3DLogic", "3DCore", "Gui", "Qml"])
-            _create_module("3DQuickInput", ["3DInput", "3DQuick", "3DCore", "Gui", "Qml"])
-            _create_module("3DQuickRender", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
-            _create_module("3DQuickScene2D", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
+            
+            if self.options.qtdeclarative:
+                _create_plugin("Scene2DPlugin", "scene2d", "renderplugins", [])
+                _create_module("3DQuick", ["3DCore", "Quick", "Gui", "Qml"])
+                _create_module("3DQuickAnimation", ["3DAnimation", "3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
+                _create_module("3DQuickExtras", ["3DExtras", "3DInput", "3DQuick", "3DRender", "3DLogic", "3DCore", "Gui", "Qml"])
+                _create_module("3DQuickInput", ["3DInput", "3DQuick", "3DCore", "Gui", "Qml"])
+                _create_module("3DQuickRender", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
+                _create_module("3DQuickScene2D", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
 
         if self.options.qtmultimedia:
             multimedia_reqs = ["Network", "Gui"]
@@ -1363,8 +1373,10 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+                if self.options.get_safe("with_gstreamer", False):
+                    _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                if self.options.get_safe("with_libalsa", False):
+                    _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
@@ -1392,7 +1404,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
         if self.options.get_safe("qtx11extras"):
-            _create_module("X11Extras")
+            _create_module("X11Extras", ["Gui"])
 
         if self.options.qtremoteobjects:
             _create_module("RemoteObjects")
