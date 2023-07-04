@@ -48,7 +48,7 @@ class CcacheConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zstd/1.5.2")
+        self.requires("zstd/1.5.5")
         if self.options.redis_storage_backend:
             self.requires("hiredis/1.1.0")
 
@@ -67,7 +67,7 @@ class CcacheConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, that is not supported by Clang 11 + libstdc++.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.15 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
