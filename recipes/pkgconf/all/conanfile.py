@@ -74,7 +74,11 @@ class PkgConfConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
-        tc.project_options["tests"] = False
+        if Version(self.version) >= "1.7.4":
+            tc.project_options["tests"] = "disabled"
+        else:
+            tc.project_options["tests"] = False
+        
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
         tc.generate()
