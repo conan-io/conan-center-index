@@ -44,6 +44,7 @@ required_for_references:
 - asyncplusplus
 - audiofile
 - autoconf
+- autoconf-archive
 - automake
 - avir
 - aws-c-cal
@@ -187,6 +188,7 @@ required_for_references:
 - cuda-api-wrappers
 - cuda-kat
 - cute_headers
+- cvplot
 - cwalk
 - cxxopts
 - cyclonedds
@@ -214,6 +216,7 @@ required_for_references:
 - dragonbox
 - drflac
 - drmp3
+- drogon
 - drwav
 - duckdb
 - eabase
@@ -352,6 +355,7 @@ required_for_references:
 - jwt-cpp
 - kainjow-mustache
 - kangaru
+- keychain
 - khrplatform
 - kmod
 - ktx
@@ -481,6 +485,7 @@ required_for_references:
 - llhttp
 - lodepng
 - logr
+- loguru
 - lua
 - luau
 - lunasvg
@@ -489,6 +494,7 @@ required_for_references:
 - lzo
 - m4
 - magic_enum
+- mailio
 - make
 - mariadb-connector-c
 - matchit
@@ -723,6 +729,7 @@ required_for_references:
 - unordered_dense
 - unqlite
 - uriparser
+- usockets
 - utf8proc
 - utfcpp
 - util-linux-libuuid
