@@ -150,14 +150,17 @@ class RubyConan(ConanFile):
 
         # Ruby doesn't respect the --with-gmp-dir for eg. After removal of libgmp-dev on conanio/gcc10 build failed
         opt_dirs = []
-        for name, dep_cpp_info in self.deps_cpp_info.dependencies:
-            if name in ['zlib', 'openssl', 'libffi', 'libyaml', 'readline', 'gmp']:
-                root_path = unix_path(self, dep_cpp_info.rootpath)
-                tc.configure_args.append(f'--with-{name}-dir={root_path}')
+
+        # zlib always True
+        tc.configure_args.append(f'--with-zlib-dir={self.dependencies["zlib"].package_path.as_posix()}')
+        for dep in ['zlib', 'openssl', 'libffi', 'libyaml', 'readline', 'gmp']:
+            if self.options.get_safe(f'with_{dep}'):
+                root_path = self.dependencies[dep].package_path.as_posix()
+                tc.configure_args.append(f'--with-{dep}-dir={root_path}')
                 opt_dirs.append(root_path)
+
         if opt_dirs:
             sep = ';' if self.settings.os == "Windows" else ":"
-
             tc.configure_args.append(f"--with-opt-dir={sep.join(opt_dirs)}")
 
         if cross_building(self) and is_apple_os(self):
