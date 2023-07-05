@@ -29,6 +29,7 @@ class WhisperCppConan(ConanFile):
                        "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
                        "no_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
                        "with_blas": False}
+    package_type = "library"
 
     @property
     def _min_cppstd(self):
