@@ -595,7 +595,7 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if self.settings.os == "Windows":
+        if self.info.settings.os == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = f"\\\\?\\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
