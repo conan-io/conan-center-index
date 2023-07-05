@@ -18,13 +18,6 @@ sources:
     url: "https://github.com/danmar/cppcheck/archive/2.8.2.tar.gz"
     sha256: "30ba99ab54089c44b83f02e2453da046a7edff5237950d4A0eb1eba4afcb4f45"
 patches:
-  "2.11.1":
-    - patch_file: "patches/0001-cli-remove-dmake-cmake-2.10.patch"
-      patch_description: "Remove dmake tool from target ALL"
-      patch_type: "portability"
-    - patch_file: "patches/0003-pcre-debuglib-name.patch"
-      patch_description: "Consider the Debug suffix for Windows"
-      patch_type: "portability"
   "2.10.3":
     - patch_file: "patches/0001-cli-remove-dmake-cmake-2.10.patch"
       patch_description: "Remove dmake tool from target ALL"
