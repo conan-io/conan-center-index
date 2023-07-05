@@ -1,17 +1,19 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package LANGUAGES CXX)
 
-find_package(Ruby REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+find_package(Ruby REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
 )
-
-target_link_libraries(${PROJECT_NAME} Ruby::Ruby)
+target_link_libraries(${PROJECT_NAME} PRIVATE Ruby::Ruby)
 if (RUBY_STATIC_RUBY)
   target_compile_definitions(${PROJECT_NAME} PRIVATE RUBY_STATIC_RUBY)
 endif()
