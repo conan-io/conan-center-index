@@ -1,27 +1,30 @@
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy
+
+required_conan_version = ">=1.53.0"
 
 
 class SbpConan(ConanFile):
     name = "sbp"
-    license = "MIT"
-    homepage = "https://github.com/swift-nav/libsbp"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Swift Binary Protocol client library"
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/swift-nav/libsbp"
     topics = ("gnss",)
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "c"
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,41 +32,46 @@ class SbpConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue https://github.com/swift-nav/libsbp/issues/1062")
+            raise ConanInvalidConfiguration(
+                "Windows shared builds are not supported right now, "
+                "see issue https://github.com/swift-nav/libsbp/issues/1062"
+            )
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         data = self.conan_data["sources"][self.version]
+        get(self, **data["source"], strip_root=True)
+        get(self, **data["cmake"], strip_root=True, destination=os.path.join("c", "cmake", "common"))
 
-        tools.get(**data["source"], strip_root=True, destination=self._source_subfolder)
-        tools.get(**data["cmake"], strip_root=True, destination=os.path.join(self._source_subfolder, "c", "cmake", "common"))
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["libsbp_ENABLE_TESTS"] = False
-        self._cmake.definitions["libsbp_ENABLE_DOCS"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["libsbp_ENABLE_TESTS"] = False
+        tc.variables["libsbp_ENABLE_DOCS"] = False
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder="c")
         cmake.build()
 
     def package(self):
-        self.copy(
-            "LICENSE",
-            src=self._source_subfolder,
-            dst="licenses",
-            ignore_case=True,
-            keep_path=False,
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
         )
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
