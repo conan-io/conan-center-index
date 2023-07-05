@@ -2,7 +2,7 @@
 #include <iostream>
 #include <array>
 
-#include <nanort/nanort.h>
+#include "nanort.h"
 
 
 int main(void) {
