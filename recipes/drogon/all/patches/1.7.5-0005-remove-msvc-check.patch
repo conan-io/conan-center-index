@@ -1,0 +1,92 @@
+diff --git a/lib/inc/drogon/utils/any.h b/lib/inc/drogon/utils/any.h
+index 63abd2e..8ac74d8 100644
+--- a/lib/inc/drogon/utils/any.h
++++ b/lib/inc/drogon/utils/any.h
+@@ -13,7 +13,7 @@
+  */
+ 
+ #pragma once
+-#if __cplusplus >= 201703L || (defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus >= 201703L
+ #include <any>
+ #else
+ #include <boost/any.hpp>
+@@ -21,7 +21,7 @@
+ 
+ namespace drogon
+ {
+-#if __cplusplus >= 201703L || (defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus >= 201703L
+ using std::any;
+ using std::any_cast;
+ #else
+diff --git a/lib/inc/drogon/utils/optional.h b/lib/inc/drogon/utils/optional.h
+index 2dde172..297a819 100644
+--- a/lib/inc/drogon/utils/optional.h
++++ b/lib/inc/drogon/utils/optional.h
+@@ -13,7 +13,7 @@
+  */
+ 
+ #pragma once
+-#if __cplusplus >= 201703L || (defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus >= 201703L
+ #include <optional>
+ #else
+ #include <boost/optional.hpp>
+@@ -21,9 +21,9 @@
+ 
+ namespace drogon
+ {
+-#if __cplusplus >= 201703L || (defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus >= 201703L
+ using std::optional;
+ #else
+ using boost::optional;
+ #endif
+-}  // namespace drogon
+\ No newline at end of file
++}  // namespace drogon
+diff --git a/lib/inc/drogon/utils/string_view.h b/lib/inc/drogon/utils/string_view.h
+index a2362b7..074d05f 100644
+--- a/lib/inc/drogon/utils/string_view.h
++++ b/lib/inc/drogon/utils/string_view.h
+@@ -13,7 +13,7 @@
+  */
+ 
+ #pragma once
+-#if __cplusplus >= 201703L || (defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus >= 201703L
+ #include <string_view>
+ #else
+ #include <stdint.h>
+@@ -25,7 +25,7 @@
+ 
+ namespace drogon
+ {
+-#if __cplusplus >= 201703L || (defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus >= 201703L
+ using std::string_view;
+ #else
+ using boost::string_view;
+@@ -40,10 +40,10 @@ inline LogStream &operator<<(LogStream &ls, const drogon::string_view &v)
+ }
+ }  // namespace trantor
+ 
+-#if __cplusplus < 201703L && !(defined _MSC_VER && _MSC_VER > 1900)
++#if __cplusplus < 201703L
+ namespace drogon
+ {
+-#ifndef _MSC_VER
++#if 1
+ template <size_t N>
+ struct StringViewHasher;
+ 
+@@ -319,7 +319,7 @@ struct hash<drogon::string_view>
+     size_t operator()(const drogon::string_view &__str) const noexcept
+     {
+         // MSVC is having problems with non-aligned strings
+-#ifndef _MSC_VER
++#if 1
+         return drogon::StringViewHasher<sizeof(size_t)>()(__str);
+ #else
+         return drogon::ShortStringViewHasher(__str);
