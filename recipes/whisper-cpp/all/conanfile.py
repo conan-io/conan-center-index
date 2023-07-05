@@ -1,11 +1,12 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import export_conandata_patches, copy, get, replace_in_file
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -28,8 +29,6 @@ class WhisperCppConan(ConanFile):
                        "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
                        "no_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
                        "with_blas": False}
-
-    _cmake = None
 
     @property
     def _min_cppstd(self):
@@ -83,6 +82,9 @@ class WhisperCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -127,13 +129,8 @@ class WhisperCppConan(ConanFile):
 
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "target_include_directories(${TARGET} PUBLIC",
-                        "target_include_directories(${TARGET} PUBLIC ${CMAKE_INCLUDE_PATH}")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -147,7 +144,6 @@ class WhisperCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["whisper"]
         self.cpp_info.resdirs = ["res"]
-
         self.cpp_info.libdirs = ["lib", "lib/static"]
 
         if is_apple_os(self):
