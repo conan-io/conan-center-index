@@ -1,8 +1,8 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.files import copy
 from conan.tools.cmake import cmake_layout, CMake
-import os
 
 
 # It will become the standard on Conan 2.x
@@ -26,7 +26,3 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
-
-    def package_info(self):
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
