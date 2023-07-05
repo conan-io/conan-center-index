@@ -90,6 +90,7 @@ class DarknetConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        tc.fpic = self.options.get_safe("fPIC", True)
         tc.make_args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
         tc.generate()
         tc = PkgConfigDeps(self)
