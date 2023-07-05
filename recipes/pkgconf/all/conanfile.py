@@ -48,7 +48,7 @@ class PkgConfConan(ConanFile):
             self.options.rm_safe("shared")
         elif self.options.shared:
             self.options.rm_safe("fPIC")
-       
+
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -74,11 +74,11 @@ class PkgConfConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
-        if Version(self.version) >= "1.7.4":
+        if Version(self.version) >= "1.9.4":
             tc.project_options["tests"] = "disabled"
         else:
             tc.project_options["tests"] = False
-        
+
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
         tc.generate()
@@ -100,12 +100,12 @@ class PkgConfConan(ConanFile):
             if self.options.enable_lib and not self.options.shared:
                 rename(self, os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
-        
+
         if not self.options.enable_lib:
             rmdir(self, os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "include"))
 
-        
+
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
         rename(self, os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
