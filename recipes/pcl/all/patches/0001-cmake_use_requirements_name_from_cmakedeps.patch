@@ -1,0 +1,217 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,7 +31,7 @@ if(MSVC AND ("${MSVC_VERSION}" LESS 1910))
+ endif()
+ 
+ ### ---[ Find universal dependencies
+-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
++# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
+ 
+ # ---[ Include pkgconfig
+ include(FindPkgConfig)
+@@ -319,11 +319,13 @@ endif()
+ find_package(Threads REQUIRED)
+ 
+ # Eigen (required)
+-find_package(Eigen 3.3 REQUIRED)
++find_package(Eigen3 REQUIRED)
++string(TOUPPER "${CMAKE_BUILD_TYPE}" UPPER_CMAKE_BUILD_TYPE)
++set(EIGEN_INCLUDE_DIRS ${eigen_INCLUDE_DIRS_${UPPER_CMAKE_BUILD_TYPE}})
+ include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})
+ 
+ # FLANN (required)
+-find_package(FLANN 1.9.1 REQUIRED)
++find_package(flann 1.9.1 REQUIRED)
+ if(NOT (${FLANN_LIBRARY_TYPE} MATCHES ${PCL_FLANN_REQUIRED_TYPE}) AND NOT (${PCL_FLANN_REQUIRED_TYPE} MATCHES "DONTCARE"))
+   message(FATAL_ERROR "Flann was selected with ${PCL_FLANN_REQUIRED_TYPE} but found as ${FLANN_LIBRARY_TYPE}")
+ endif()
+--- a/PCLConfig.cmake.in
++++ b/PCLConfig.cmake.in
+@@ -670,8 +670,8 @@ pcl_remove_duplicate_libraries(PCL_COMPONENTS PCL_LIBRARIES)
+ 
+ # Add 3rd party libraries, as user code might include our .HPP implementations
+ list(APPEND PCL_LIBRARIES ${PCL_BOOST_LIBRARIES} ${PCL_OPENNI_LIBRARIES} ${PCL_OPENNI2_LIBRARIES} ${PCL_ENSENSO_LIBRARIES} ${PCL_davidSDK_LIBRARIES} ${PCL_DSSDK_LIBRARIES} ${PCL_RSSDK_LIBRARIES} ${PCL_RSSDK2_LIBRARIES} ${PCL_VTK_LIBRARIES})
+-if (TARGET FLANN::FLANN)
+-  list(APPEND PCL_LIBRARIES FLANN::FLANN)
++if (TARGET flann::flann)
++  list(APPEND PCL_LIBRARIES flann::flann)
+ endif()
+ 
+ if(TARGET QHULL::QHULL)
+--- a/apps/3d_rec_framework/CMakeLists.txt
++++ b/apps/3d_rec_framework/CMakeLists.txt
+@@ -98,7 +98,7 @@ endif()
+ 
+ PCL_MAKE_PKGCONFIG(${LIB_NAME} COMPONENT ${SUBSUBSYS_NAME} DESC ${SUBSUBSYS_DESC})
+ 
+-if(QHULL_FOUND)
++if(Qhull_FOUND)
+   add_executable(pcl_global_classification src/tools/global_classification.cpp)
+   target_link_libraries(pcl_global_classification pcl_apps pcl_3d_rec_framework pcl_common pcl_io pcl_filters pcl_visualization pcl_segmentation pcl_sample_consensus pcl_surface)
+ endif()
+--- a/apps/CMakeLists.txt
++++ b/apps/CMakeLists.txt
+@@ -61,7 +61,7 @@ if(VTK_FOUND)
+   PCL_ADD_EXECUTABLE(pcl_pcd_organized_multi_plane_segmentation COMPONENT ${SUBSYS_NAME} SOURCES src/pcd_organized_multi_plane_segmentation.cpp)
+   target_link_libraries(pcl_pcd_organized_multi_plane_segmentation pcl_common pcl_io pcl_filters pcl_visualization pcl_segmentation pcl_features)
+ 
+-  if(QHULL_FOUND)
++  if(Qhull_FOUND)
+     PCL_ADD_EXECUTABLE(pcl_pcd_select_object_plane COMPONENT ${SUBSYS_NAME} SOURCES src/pcd_select_object_plane.cpp)
+     target_link_libraries(pcl_pcd_select_object_plane pcl_common pcl_io pcl_filters pcl_visualization pcl_segmentation pcl_features pcl_surface)
+   endif()
+@@ -185,7 +185,7 @@ if(VTK_FOUND)
+ 
+     endif()
+ 
+-    if(QHULL_FOUND)
++    if(Qhull_FOUND)
+     PCL_ADD_EXECUTABLE(pcl_openni_3d_convex_hull COMPONENT ${SUBSYS_NAME} SOURCES src/openni_3d_convex_hull.cpp BUNDLE)
+     target_link_libraries(pcl_openni_3d_convex_hull pcl_common pcl_io pcl_filters pcl_visualization pcl_segmentation pcl_sample_consensus pcl_features pcl_surface)
+ 
+@@ -200,7 +200,7 @@ if(VTK_FOUND)
+ 
+     PCL_ADD_EXECUTABLE(pcl_ni_linemod COMPONENT ${SUBSYS_NAME} SOURCES src/ni_linemod.cpp BUNDLE)
+     target_link_libraries(pcl_ni_linemod pcl_common pcl_io pcl_filters pcl_visualization pcl_segmentation pcl_sample_consensus pcl_features pcl_surface pcl_search)
+-    endif() # QHULL_FOUND
++    endif() # Qhull_FOUND
+ 
+     PCL_ADD_EXECUTABLE(pcl_ni_agast COMPONENT ${SUBSYS_NAME} SOURCES src/ni_agast.cpp BUNDLE)
+     target_link_libraries(pcl_ni_agast pcl_common pcl_io pcl_filters pcl_visualization pcl_segmentation pcl_sample_consensus pcl_features pcl_keypoints pcl_surface pcl_search)
+@@ -241,7 +241,7 @@ foreach(subdir ${PCL_APPS_MODULES_DIRS})
+ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/${subdir}")
+ endforeach()
+ 
+-if(QHULL_FOUND)
++if(Qhull_FOUND)
+   set(incs
+     "include/pcl/${SUBSYS_NAME}/dominant_plane_segmentation.h"
+     "include/pcl/${SUBSYS_NAME}/timer.h"
+--- a/cmake/pcl_targets.cmake
++++ b/cmake/pcl_targets.cmake
+@@ -126,7 +126,8 @@ macro(PCL_SUBSYS_DEPEND _var)
+     endif()
+     if(ARGS_EXT_DEPS)
+       foreach(_dep ${ARGS_EXT_DEPS})
+-        string(TOUPPER "${_dep}_found" EXT_DEP_FOUND)
++        set(EXT_DEP_FOUND "${_dep}_FOUND")
++        message(STATUS "EXT_DEP_FOUND: ${EXT_DEP_FOUND}")
+         #Variable EXT_DEP_FOUND expands to ie. QHULL_FOUND which in turn is then used to see if the EXT_DEPS is found.
+         if(NOT ${EXT_DEP_FOUND})
+           set(${_var} FALSE)
+--- a/common/CMakeLists.txt
++++ b/common/CMakeLists.txt
+@@ -4,7 +4,7 @@ set(SUBSYS_DEPS)
+ 
+ set(build TRUE)
+ PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
+-PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} EXT_DEPS eigen boost)
++PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} EXT_DEPS Eigen3 Boost)
+ 
+ PCL_ADD_DOC("${SUBSYS_NAME}")
+ 
+--- a/doc/tutorials/content/sources/vfh_recognition/CMakeLists.txt
++++ b/doc/tutorials/content/sources/vfh_recognition/CMakeLists.txt
+@@ -16,7 +16,7 @@ include_directories(SYSTEM
+ 
+ add_executable(build_tree build_tree.cpp)
+ target_link_libraries(build_tree ${PCL_LIBRARIES} ${Boost_LIBRARIES}
+-                                 FLANN::FLANN ${HDF5_LIBRARIES})
++                                 flann::flann ${HDF5_LIBRARIES})
+ 
+ add_executable(nearest_neighbors nearest_neighbors.cpp)
+-target_link_libraries(nearest_neighbors ${PCL_LIBRARIES} ${Boost_LIBRARIES} FLANN::FLANN ${HDF5_LIBRARIES})
++target_link_libraries(nearest_neighbors ${PCL_LIBRARIES} ${Boost_LIBRARIES} flann::flann ${HDF5_LIBRARIES})
+--- a/io/CMakeLists.txt
++++ b/io/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ set(SUBSYS_NAME io)
+ set(SUBSYS_DESC "Point cloud IO library")
+ set(SUBSYS_DEPS common octree)
+-set(SUBSYS_EXT_DEPS boost eigen)
++set(SUBSYS_EXT_DEPS Boost Eigen3)
+ 
+ set(build TRUE)
+ PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
+--- a/kdtree/CMakeLists.txt
++++ b/kdtree/CMakeLists.txt
+@@ -30,7 +30,7 @@ set(impl_incs
+ set(LIB_NAME "pcl_${SUBSYS_NAME}")
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+ PCL_ADD_LIBRARY(${LIB_NAME} COMPONENT ${SUBSYS_NAME} SOURCES ${srcs} ${incs} ${impl_incs})
+-target_link_libraries("${LIB_NAME}" pcl_common FLANN::FLANN)
++target_link_libraries("${LIB_NAME}" pcl_common flann::flann)
+ set(EXT_DEPS flann)
+ PCL_MAKE_PKGCONFIG(${LIB_NAME} COMPONENT ${SUBSYS_NAME} DESC ${SUBSYS_DESC} PCL_DEPS ${SUBSYS_DEPS} EXT_DEPS ${EXT_DEPS})
+ 
+--- a/search/CMakeLists.txt
++++ b/search/CMakeLists.txt
+@@ -41,7 +41,7 @@ set(impl_incs
+ set(LIB_NAME "pcl_${SUBSYS_NAME}")
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+ PCL_ADD_LIBRARY(${LIB_NAME} COMPONENT ${SUBSYS_NAME} SOURCES ${srcs} ${incs} ${impl_incs})
+-target_link_libraries("${LIB_NAME}" pcl_common FLANN::FLANN pcl_octree pcl_kdtree)
++target_link_libraries("${LIB_NAME}" pcl_common flann::flann pcl_octree pcl_kdtree)
+ list(APPEND EXT_DEPS flann)
+ PCL_MAKE_PKGCONFIG(${LIB_NAME} COMPONENT ${SUBSYS_NAME} DESC ${SUBSYS_DESC} PCL_DEPS ${SUBSYS_DEPS})
+ 
+--- a/surface/CMakeLists.txt
++++ b/surface/CMakeLists.txt
+@@ -12,7 +12,7 @@ if(NOT build)
+   return()
+ endif()
+ 
+-if(QHULL_FOUND)
++if(Qhull_FOUND)
+   set(HULL_INCLUDES
+     "include/pcl/${SUBSYS_NAME}/concave_hull.h"
+     "include/pcl/${SUBSYS_NAME}/convex_hull.h"
+@@ -192,8 +192,12 @@ if(VTK_FOUND)
+   endif()
+ endif()
+ 
+-if(QHULL_FOUND)
+-  target_link_libraries("${LIB_NAME}" QHULL::QHULL)
++if(Qhull_FOUND)
++  if(TARGET Qhull::qhull_r)
++    target_link_libraries("${LIB_NAME}" Qhull::qhull_r)
++  else()
++    target_link_libraries("${LIB_NAME}" Qhull::qhullstatic_r)
++  endif()
+ endif()
+ 
+ PCL_MAKE_PKGCONFIG(${LIB_NAME} COMPONENT ${SUBSYS_NAME} DESC ${SUBSYS_DESC} PCL_DEPS ${SUBSYS_DEPS})
+--- a/test/features/CMakeLists.txt
++++ b/test/features/CMakeLists.txt
+@@ -91,7 +91,7 @@ if(BUILD_io)
+                ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
+   PCL_ADD_TEST(features_narf test_narf
+                FILES test_narf.cpp
+-               LINK_WITH pcl_gtest pcl_features FLANN::FLANN)
++               LINK_WITH pcl_gtest pcl_features flann::flann)
+   PCL_ADD_TEST(a_ii_normals_test test_ii_normals
+                FILES test_ii_normals.cpp
+                LINK_WITH pcl_gtest pcl_io pcl_features
+--- a/test/surface/CMakeLists.txt
++++ b/test/surface/CMakeLists.txt
+@@ -41,7 +41,7 @@ PCL_ADD_TEST(surface_poisson test_poisson
+              LINK_WITH pcl_gtest pcl_io pcl_kdtree pcl_surface pcl_features
+              ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
+ 
+-if(QHULL_FOUND)
++if(Qhull_FOUND)
+   PCL_ADD_TEST(surface_convex_hull test_convex_hull
+                FILES test_convex_hull.cpp
+                LINK_WITH pcl_gtest pcl_io pcl_kdtree pcl_surface pcl_features pcl_filters pcl_search
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -272,7 +272,7 @@ if(TARGET pcl_surface)
+   PCL_ADD_EXECUTABLE(pcl_poisson_reconstruction COMPONENT ${SUBSYS_NAME} SOURCES poisson_reconstruction.cpp)
+   target_link_libraries(pcl_poisson_reconstruction pcl_common pcl_io pcl_surface)
+ 
+-  if(QHULL_FOUND)
++  if(Qhull_FOUND)
+     PCL_ADD_EXECUTABLE(pcl_crop_to_hull COMPONENT ${SUBSYS_NAME} SOURCES crop_to_hull.cpp)
+     target_link_libraries(pcl_crop_to_hull pcl_common pcl_io pcl_filters pcl_surface)
+ 
+

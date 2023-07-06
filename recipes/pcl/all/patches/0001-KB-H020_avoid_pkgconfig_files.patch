@@ -1,0 +1,12 @@
+--- a/cmake/pcl_targets.cmake
++++ b/cmake/pcl_targets.cmake
+@@ -571,9 +571,6 @@ function(PCL_MAKE_PKGCONFIG _name)
+   else()
+     configure_file(${PROJECT_SOURCE_DIR}/cmake/pkgconfig.cmake.in ${_pc_file} @ONLY)
+   endif()
+-  install(FILES ${_pc_file}
+-          DESTINATION ${PKGCFG_INSTALL_DIR}
+-          COMPONENT pcl_${ARGS_COMPONENT})
+ endfunction()
+ 
+ ###############################################################################
