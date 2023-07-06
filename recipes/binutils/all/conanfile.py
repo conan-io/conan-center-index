@@ -164,7 +164,7 @@ class BinutilsConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.configure(args=["--sysconfdir=${prefix}/bin/etc"])
+        autotools.configure()
         autotools.make()
 
     def package(self):

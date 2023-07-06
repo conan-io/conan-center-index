@@ -1,5 +1,4 @@
 from conans import ConanFile, tools
-from conan.tools.layout import basic_layout
 from io import StringIO
 import os
 
@@ -37,9 +36,6 @@ class TestPackageConan(ConanFile):
 
     def _append_gnu_triplet(self, exe):
         return f"{self.deps_user_info['binutils'].prefix}{exe}"
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def build(self):
         if not tools.cross_building(self):
