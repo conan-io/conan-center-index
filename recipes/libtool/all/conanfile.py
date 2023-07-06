@@ -118,9 +118,11 @@ class LibtoolConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         config_guess =  self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_guess")
+        if config_guess is not None:
+            shutil.copy(config_guess, os.path.join(self.source_folder, "build-aux", "config.guess"))
         config_sub = self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_sub")
-        shutil.copy(config_sub, os.path.join(self.source_folder, "build-aux", "config.sub"))
-        shutil.copy(config_guess, os.path.join(self.source_folder, "build-aux", "config.guess"))
+        if config_sub is not None:
+            shutil.copy(config_sub, os.path.join(self.source_folder, "build-aux", "config.sub"))
 
     def build(self):
         self._patch_sources()
