@@ -91,15 +91,11 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_openssl:
-            if self.settings.os == "Windows":
-                # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.
-                self.requires("openssl/1.0.2u")
-            else:
-                self.requires("openssl/1.1.1t")
+            self.requires("openssl/1.1.1u")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.1")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
 
@@ -117,6 +113,7 @@ class DCMTKConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
 
+        cmake.definitions["DCMTK_USE_FIND_PACKAGE"] = True
         # DICOM Data Dictionaries are required
         cmake.definitions["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path
 
