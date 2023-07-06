@@ -483,7 +483,7 @@ class OpenSSLConan(ConanFile):
         command = [self._make_program]
         if install:
             command.append(f"DESTDIR={self.package_folder}")
-            command.append(f"OPENSSLDIR=/etc/ssl")
+            command.append(f"OPENSSLDIR=/res/ssl")
         if targets:
             command.extend(targets)
         if not self._use_nmake:
