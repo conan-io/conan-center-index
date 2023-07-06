@@ -9,20 +9,20 @@ required_conan_version = ">=1.53.0"
 
 class CapstoneConan(ConanFile):
     name = "capstone"
-    license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.capstone-engine.org"
     description = (
         "Capstone disassembly/disassembler framework: Core (Arm, Arm64, BPF, "
         "EVM, M68K, M680X, MOS65xx, Mips, PPC, RISCV, Sparc, SystemZ, "
         "TMS320C64x, Web Assembly, X86, X86_64, XCore) + bindings."
     )
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.capstone-engine.org"
     topics = (
         "reverse-engineering", "disassembler", "security", "framework", "arm", "arm64",
         "x86", "sparc", "powerpc", "mips", "x86-64", "ethereum", "systemz",
         "webassembly", "m68k", "m0s65xx", "m680x", "tms320c64x", "bpf", "riscv",
     )
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,8 +53,7 @@ class CapstoneConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
