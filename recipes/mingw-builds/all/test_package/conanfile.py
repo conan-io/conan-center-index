@@ -7,7 +7,7 @@ class MinGWTestConan(ConanFile):
     settings = "os", "arch"
     test_type = "explicit"
 
-    def requirements(self):
+    def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
