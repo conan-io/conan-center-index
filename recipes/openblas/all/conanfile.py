@@ -77,21 +77,21 @@ class OpenblasConan(ConanFile):
 
         if self.options.build_lapack:
             self.output.warn("Building with lapack support requires a Fortran compiler.")
-        tc.variables["NOFORTRAN"] = not self.options.build_lapack
-        tc.variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
-        tc.variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
-        tc.variables["USE_THREAD"] = self.options.use_thread
+        tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
+        tc.cache_variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        tc.cache_variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
+        tc.cache_variables["USE_THREAD"] = self.options.use_thread
 
         # Required for safe concurrent calls to OpenBLAS routines
-        tc.variables["USE_LOCKING"] = not self.options.use_thread
+        tc.cache_variables["USE_LOCKING"] = not self.options.use_thread
 
-        tc.variables[
+        tc.cache_variables[
             "MSVC_STATIC_CRT"
         ] = False  # don't, may lie to consumer, /MD or /MT is managed by conan
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
-        tc.variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
+        tc.cache_variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
 
         tc.generate()
 
