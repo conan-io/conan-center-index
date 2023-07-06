@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -55,6 +57,11 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
+
+        # FIXME: In cci's CI, execution error (error code 3221225781) is raised on msvc in shared build.
+        # This error can't be reproduced outside cci's CI.
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.name} does not support shared libraries on msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
