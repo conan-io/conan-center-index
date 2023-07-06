@@ -83,6 +83,7 @@ class OpenSSLConan(ConanFile):
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
+        "with_ssldirs": [True, False],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -397,7 +398,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "with_ssldirs", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
@@ -482,6 +483,7 @@ class OpenSSLConan(ConanFile):
         command = [self._make_program]
         if install:
             command.append(f"DESTDIR={self.package_folder}")
+            command.append(f"OPENSSLDIR=/etc/ssl")
         if targets:
             command.extend(targets)
         if not self._use_nmake:
@@ -513,7 +515,12 @@ class OpenSSLConan(ConanFile):
 
     def _make_install(self):
         with chdir(self, self.source_folder):
-            self._run_make(targets=["install_sw"], parallel=False, install=True)
+            targets = ["install_sw"]
+            if self.options.with_ssldirs:
+                targets.append("install_ssldirs")
+            if not self.options.no_fips:
+                targets.append("install_fips")
+            self._run_make(targets=targets, parallel=False, install=True)
 
     def build(self):
         self._make()
@@ -674,4 +681,3 @@ class OpenSSLConan(ConanFile):
 
         # For legacy 1.x downstream consumers, remove once recipe is 2.0 only:
         self.env_info.OPENSSL_MODULES = openssl_modules_dir
-
