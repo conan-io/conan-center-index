@@ -16,7 +16,7 @@ patches:
     - patch_file: "patches/2.20.1-0001-fix-cmake-min-version.patch"
       patch_description: "Disable useless .pc file install to avoid relying on CMake 3.21 features"
       patch_type: "conan"
-    - patch_file: "2.20.1-0002-remove-unsupported-property.patch"
+    - patch_file: "patches/2.20.1-0002-remove-unsupported-property.patch"
       patch_description: "remove DEPRECATION property is available on CMake 3.17+ (Linux C3i is 3.15 and the Conan min)"
       patch_type: "portability"
       patch_source: "https://github.com/libsdl-org/SDL_ttf/commit/e49b6030bd57b7aa3f0e4e42cb7ccc5fee876184"
