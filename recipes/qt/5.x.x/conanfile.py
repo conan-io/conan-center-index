@@ -340,7 +340,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
     def layout(self):
-        basic_layout(self, src_folder="qt5")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/1.2.13")
