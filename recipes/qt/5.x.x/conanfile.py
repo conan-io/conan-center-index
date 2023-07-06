@@ -6,6 +6,7 @@ from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc, VCVars
 from conan.tools.scm import Version
 import configparser
@@ -338,6 +339,9 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
+    def layout(self):
+        basic_layout(self, src_folder="qt5")
+
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.openssl:
@@ -445,20 +449,24 @@ class QtConan(ConanFile):
             self.tool_requires("wayland/1.22.0")
 
     def source(self):
+        destination = self.source_folder
+        if self.info.settings.os == "Windows":
+            # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
+            destination = rf"\\?\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
-            strip_root=True, destination="qt5")
+            strip_root=True, destination=destination)
 
         apply_conandata_patches(self)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            replace_in_file(self, os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+            replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
                 "  if (enable_precompiled_headers) {\n    if (is_win) {",
                 "  if (enable_precompiled_headers) {\n    if (false) {"
             )
-        replace_in_file(self, os.path.join(self.source_folder, "qt5", "qtbase", "configure.json"),
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.json"),
             "-ldbus-1d",
             "-ldbus-1"
         )
-        save(self, os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "")
+        save(self, os.path.join(self.source_folder, "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "")
 
     def generate(self):
         pc = PkgConfigDeps(self)
@@ -474,7 +482,7 @@ class QtConan(ConanFile):
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
-            env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
+            env.prepend_path("PATH", os.path.join(self.source_folder, "gnuwin32", "bin"))
         if self._settings_build.os == "Macos":
             # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
             dyld_library_path = "$DYLD_LIBRARY_PATH"
@@ -815,7 +823,7 @@ class QtConan(ConanFile):
                 save(self, ".qmake.stash" , "")
                 save(self, ".qmake.super" , "")
 
-            self.run("%s %s" % (os.path.join(self.source_folder, "qt5", "configure"), " ".join(args)))
+            self.run("%s %s" % (os.path.join(self.source_folder, "configure"), " ".join(args)))
             self.run(self._make_program())
 
     @property
@@ -841,7 +849,7 @@ Qml2Imports = bin/archdatadir/qml
 Translations = bin/datadir/translations
 Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
-        copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         for module in self._submodules:
             if not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
