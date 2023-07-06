@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -15,18 +16,14 @@ class CppcheckConan(ConanFile):
     license = "GPL-3.0-or-later"
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"have_rules": [True, False], "with_z3": [True, False, "deprecated"]}
-    default_options = {"have_rules": True, "with_z3": "deprecated"}
+    options = {"have_rules": [True, False]}
+    default_options = {"have_rules": True}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def configure(self):
-        if self.options.get_safe("with_z3") != "deprecated":
-            self.output.warning("Option \"with_z3\" is deprecated, do not use anymore.")
 
     def requirements(self):
         if self.options.get_safe("have_rules"):
@@ -40,6 +37,8 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.get_safe("have_rules", False)
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
+        if Version(self.version) >= "2.11.0":
+            tc.variables["DISABLE_DMAKE"] = True
         tc.variables["FILESDIR"] = "bin"
         tc.generate()
 
@@ -61,7 +60,6 @@ class CppcheckConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
-        del self.info.options.with_z3
 
     def package_info(self):
         self.cpp_info.includedirs = []

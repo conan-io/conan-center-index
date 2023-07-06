@@ -1,2 +1,3 @@
+spirv-headers: "cci.20210616"
 spirv-tools: "2021.2"
 vulkan-headers: "1.2.182"

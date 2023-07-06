@@ -1,0 +1,33 @@
+--- a/vtu11/inc/alias.hpp
++++ b/vtu11/inc/alias.hpp
+@@ -40,20 +40,14 @@ using Byte = unsigned char;
+     #define VTU11_ASCII_FLOATING_POINT_FORMAT "%.6g"
+ #endif
+ 
+-// To dynamically select std::filesystem where available, you could use:
+-#if defined(__cplusplus) && __cplusplus >= 201703L
+-    #if __has_include(<filesystem>) // has_include is C++17
+-        #include <filesystem>
+-        namespace vtu11fs = std::filesystem;
+-    #elif __has_include(<experimental/filesystem>)
+-        #include <experimental/filesystem>
+-        namespace vtu11fs = std::experimental::filesystem;
+-    #else
+-        #include "inc/filesystem.hpp"
+-        namespace vtu11fs = ghc::filesystem;
+-    #endif
++#if __has_include(<filesystem>) // has_include is C++17
++    #include <filesystem>
++    namespace vtu11fs = std::filesystem;
++#elif __has_include(<experimental/filesystem>)
++    #include <experimental/filesystem>
++    namespace vtu11fs = std::experimental::filesystem;
+ #else
+-    #include "vtu11/inc/filesystem.hpp"
++    #include "inc/filesystem.hpp"
+     namespace vtu11fs = ghc::filesystem;
+ #endif
+ 
+-- 
+2.34.1
+

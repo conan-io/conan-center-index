@@ -14,7 +14,7 @@ class WasmtimeCppConan(ConanFile):
     license = 'Apache-2.0'
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'https://github.com/bytecodealliance/wasmtime-cpp'
-    topics = ("webassembly", "wasm", "wasi", "c++")
+    topics = ("webassembly", "wasm", "wasi", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -28,9 +28,9 @@ class WasmtimeCppConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "apple-clang": "12.0",
-            "clang": "12.0",
-            "gcc": "10.0"
+            "apple-clang": "12",
+            "clang": "12",
+            "gcc": "10"
         }
 
     def layout(self):
@@ -43,6 +43,7 @@ class WasmtimeCppConan(ConanFile):
             "0.39.0": "0.39.1",
             "1.0.0": "1.0.1",
             "6.0.0": "6.0.1",
+            "9.0.0": "9.0.1",
         }
         self.requires(f"wasmtime/{version_map.get(version, version)}")
 
