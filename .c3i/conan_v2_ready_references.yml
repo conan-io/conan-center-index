@@ -44,6 +44,7 @@ required_for_references:
 - asyncplusplus
 - audiofile
 - autoconf
+- autoconf-archive
 - automake
 - avir
 - aws-c-cal
@@ -82,6 +83,7 @@ required_for_references:
 - boost-ext-ut
 - boost-leaf
 - box2d
+- breakpad
 - brigand
 - brotli
 - brynet
@@ -187,6 +189,7 @@ required_for_references:
 - cuda-api-wrappers
 - cuda-kat
 - cute_headers
+- cvplot
 - cwalk
 - cxxopts
 - cyclonedds
@@ -214,6 +217,7 @@ required_for_references:
 - dragonbox
 - drflac
 - drmp3
+- drogon
 - drwav
 - duckdb
 - eabase
@@ -323,6 +327,7 @@ required_for_references:
 - highs
 - highway
 - hipony-enumerate
+- hippomocks
 - hiredis
 - homog2d
 - http_parser
@@ -344,6 +349,7 @@ required_for_references:
 - jinja2cpp
 - joltphysics
 - jom
+- jpcre2
 - json-c
 - json-schema-validator
 - jsoncons
@@ -352,6 +358,7 @@ required_for_references:
 - jwt-cpp
 - kainjow-mustache
 - kangaru
+- keychain
 - khrplatform
 - kmod
 - ktx
@@ -376,6 +383,7 @@ required_for_references:
 - libcbor
 - libcds
 - libconfuse
+- libcoro
 - libcuckoo
 - libcurl
 - libde265
@@ -481,6 +489,7 @@ required_for_references:
 - llhttp
 - lodepng
 - logr
+- loguru
 - lua
 - luau
 - lunasvg
@@ -489,10 +498,12 @@ required_for_references:
 - lzo
 - m4
 - magic_enum
+- mailio
 - make
 - mariadb-connector-c
 - matchit
 - mattiasgustavsson-libs
+- maven
 - mawk
 - mbedtls
 - mbits-args
@@ -512,6 +523,7 @@ required_for_references:
 - miniaudio
 - minimp3
 - minisat
+- miniz
 - minizip
 - minizip-ng
 - mongo-c-driver
@@ -577,6 +589,7 @@ required_for_references:
 - opusfile
 - osqp
 - out_ptr
+- p-ranav-glob
 - paho-mqtt-c
 - paho-mqtt-cpp
 - patchelf
@@ -591,10 +604,13 @@ required_for_references:
 - picojson
 - pixman
 - pkgconf
+- platform.hashing
 - plutovg
 - poco
 - popt
 - portable-file-dialogs
+- pprint
+- pranav-csv2
 - proj
 - prometheus-cpp
 - proposal
@@ -610,6 +626,7 @@ required_for_references:
 - qhull
 - qpdf
 - quantlib
+- quaternions
 - quill
 - quirc
 - r8brain-free-src
@@ -655,6 +672,7 @@ required_for_references:
 - sentry-crashpad
 - sentry-native
 - serd
+- serdepp
 - sfml
 - shield
 - sigslot
@@ -664,6 +682,7 @@ required_for_references:
 - skyr-url
 - sml
 - snappy
+- snowhouse
 - soci
 - sonic-cpp
 - sophus
@@ -694,10 +713,12 @@ required_for_references:
 - taskflow
 - tcb-span
 - tcl
+- tclap
 - tensorflow-lite
 - tensorpipe
 - termcap
 - termcolor
+- thelink2012-any
 - threadpool
 - thrift
 - thrust
@@ -716,6 +737,7 @@ required_for_references:
 - trantor
 - tsl-hopscotch-map
 - turtle
+- type_safe
 - tz
 - uni-algo
 - unicorn
@@ -723,6 +745,7 @@ required_for_references:
 - unordered_dense
 - unqlite
 - uriparser
+- usockets
 - utf8proc
 - utfcpp
 - util-linux-libuuid
@@ -752,6 +775,7 @@ required_for_references:
 - websocketpp
 - wg21-linear_algebra
 - wglext
+- whisper-cpp
 - wil
 - winflexbison
 - wiringpi
