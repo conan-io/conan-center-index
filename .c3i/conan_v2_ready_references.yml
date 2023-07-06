@@ -44,6 +44,7 @@ required_for_references:
 - asyncplusplus
 - audiofile
 - autoconf
+- autoconf-archive
 - automake
 - avir
 - aws-c-cal
@@ -113,6 +114,7 @@ required_for_references:
 - celero
 - cereal
 - ceres-solver
+- certify
 - cfgfile
 - cfitsio
 - cgal
@@ -147,6 +149,7 @@ required_for_references:
 - concurrencpp
 - concurrentqueue
 - console_bridge
+- continuable
 - cpp-httplib
 - cpp-jwt
 - cpp-lazy
@@ -155,6 +158,7 @@ required_for_references:
 - cpp-sort
 - cppbenchmark
 - cppcheck
+- cppcmd
 - cppcodec
 - cppcommon
 - cppdap
@@ -170,17 +174,21 @@ required_for_references:
 - cqrlib
 - crc32c
 - create-dmg
+- croncpp
 - crunch
 - cryptopp
 - cs_libguarded
 - csm
 - cspice
 - csvmonkey
+- ctml
 - ctre
 - cub
 - cubicinterpolation
 - cuda-api-wrappers
 - cuda-kat
+- cute_headers
+- cvplot
 - cwalk
 - cxxopts
 - cyclonedds
@@ -194,6 +202,7 @@ required_for_references:
 - daw_utf_range
 - dbcppp
 - dbus
+- debug_assert
 - decimal_for_cpp
 - dirent
 - discount
@@ -202,14 +211,17 @@ required_for_references:
 - doctest
 - double-conversion
 - doxygen
+- dr_libs
 - draco
 - dragonbox
 - drflac
 - drmp3
+- drogon
 - drwav
 - duckdb
 - eabase
 - earcut
+- eastl
 - easy_profiler
 - ecos
 - editline
@@ -293,6 +305,7 @@ required_for_references:
 - gperf
 - gperftools
 - graphene
+- greatest
 - grpc
 - grpc-proto
 - gsl
@@ -316,6 +329,7 @@ required_for_references:
 - hiredis
 - homog2d
 - http_parser
+- icecream-cpp
 - icu
 - id3v2lib
 - iir1
@@ -337,8 +351,12 @@ required_for_references:
 - json-schema-validator
 - jsoncons
 - jsoncpp
+- jsonnet
 - jwt-cpp
+- kainjow-mustache
 - kangaru
+- keychain
+- khrplatform
 - kmod
 - ktx
 - kuba-zip
@@ -384,6 +402,7 @@ required_for_references:
 - libgphoto2
 - libiberty
 - libiconv
+- libinterpolate
 - libjpeg
 - libjpeg-turbo
 - libkml
@@ -420,6 +439,7 @@ required_for_references:
 - libressl
 - librttopo
 - libsamplerate
+- libsecret
 - libselinux
 - libserial
 - libsgp4
@@ -460,10 +480,12 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- linux-headers-generic
 - linux-syscall-support
 - llhttp
 - lodepng
 - logr
+- loguru
 - lua
 - luau
 - lunasvg
@@ -472,9 +494,11 @@ required_for_references:
 - lzo
 - m4
 - magic_enum
+- mailio
 - make
 - mariadb-connector-c
 - matchit
+- mattiasgustavsson-libs
 - mawk
 - mbedtls
 - mbits-args
@@ -518,6 +542,7 @@ required_for_references:
 - nasm
 - netcdf
 - nettle
+- nextsilicon-cpp-subprocess
 - ninja
 - nlohmann_json
 - nng
@@ -526,6 +551,7 @@ required_for_references:
 - nsync
 - numcpp
 - nuraft
+- nv-codec-headers
 - octomap
 - odbc
 - ogdf
@@ -574,6 +600,7 @@ required_for_references:
 - plutovg
 - poco
 - popt
+- portable-file-dialogs
 - proj
 - prometheus-cpp
 - proposal
@@ -591,11 +618,13 @@ required_for_references:
 - quantlib
 - quill
 - quirc
+- r8brain-free-src
 - rabbitmq-c
 - ragel
 - rang
 - range-v3
 - rapidcheck
+- rapidcsv
 - rapidfuzz
 - rapidjson
 - rapidxml
@@ -619,6 +648,7 @@ required_for_references:
 - s2n
 - samurai
 - sbepp
+- sbp
 - scnlib
 - scons
 - screen_capture_lite
@@ -629,6 +659,7 @@ required_for_references:
 - semimap
 - sentry-breakpad
 - sentry-crashpad
+- sentry-native
 - serd
 - sfml
 - shield
@@ -640,6 +671,7 @@ required_for_references:
 - sml
 - snappy
 - soci
+- sonic-cpp
 - sophus
 - soplex
 - soxr
@@ -658,6 +690,7 @@ required_for_references:
 - stlab
 - strawberryperl
 - string-view-lite
+- stringtoolbox
 - strong_type
 - svgwrite
 - symengine
@@ -678,6 +711,7 @@ required_for_references:
 - tinycthread
 - tinycthreadpool
 - tinyexif
+- tinygltf
 - tinymidi
 - tinyxml
 - tinyxml2
@@ -686,6 +720,7 @@ required_for_references:
 - tlx
 - toml11
 - trantor
+- tsl-hopscotch-map
 - turtle
 - tz
 - uni-algo
@@ -694,6 +729,7 @@ required_for_references:
 - unordered_dense
 - unqlite
 - uriparser
+- usockets
 - utf8proc
 - utfcpp
 - util-linux-libuuid
@@ -708,6 +744,7 @@ required_for_references:
 - vo-amrwbenc
 - volk
 - vorbis
+- vsg
 - vtu11
 - vulkan-headers
 - vulkan-loader
@@ -721,6 +758,7 @@ required_for_references:
 - wayland-protocols
 - websocketpp
 - wg21-linear_algebra
+- wglext
 - wil
 - winflexbison
 - wiringpi
