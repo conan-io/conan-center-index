@@ -18,7 +18,7 @@ class NanoRTConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-        @property
+    @property
     def _min_cppstd(self):
         return 11
 
