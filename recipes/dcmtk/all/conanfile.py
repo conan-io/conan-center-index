@@ -2,7 +2,7 @@ from conans import CMake
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 import functools
@@ -91,6 +91,8 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_openssl:
+            #todo: dcmtk 3.6.7 should already work with openssl 3.x.y
+            #but this requires additional patching because of dependency on ZLIB::ZLIB
             self.requires("openssl/1.1.1u")
         if self.options.with_libpng:
             self.requires("libpng/1.6.40")
@@ -174,8 +176,17 @@ class DCMTKConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        if Version(self.version) < "3.6.6":
+            #use find_package on all platforms
+            replace_in_file(self,
+                            os.path.join(self._source_subfolder, "CMake", "3rdparty.cmake"),
+                            "if(WIN32 AND NOT MINGW)",
+                            "if(FALSE)")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
