@@ -19,7 +19,7 @@ int main()
     clock.getElapsedTime().asSeconds();
 
 #ifdef SFML_WITH_WINDOW
-    sf::VideoMode videoMode(720, 480);
+    sf::RenderWindow window(sf::VideoMode(720, 480), "");
 #endif
 
 #ifdef SFML_WITH_GRAPHICS
