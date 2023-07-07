@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -77,6 +77,8 @@ class CapstoneConan(ConanFile):
         copy(self, "LICENSE*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         suffix = "_dll" if is_msvc(self) and self.options.shared else ""
