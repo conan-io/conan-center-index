@@ -68,7 +68,7 @@ class Openmvgconan(ConanFile):
         self.requires("coin-utils/2.11.6")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
-        if self.options.jpeg == "jpeg":
+        if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.5")
@@ -137,7 +137,7 @@ class Openmvgconan(ConanFile):
     @property
     def _openmvg_components(self):
         def jpeg():
-            if self.options.jpeg == "jpeg":
+            if self.options.jpeg == "libjpeg":
                 return ["libjpeg::libjpeg"]
             elif self.options.jpeg == "libjpeg-turbo":
                 return ["libjpeg-turbo::jpeg"]
