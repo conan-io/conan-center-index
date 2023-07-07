@@ -69,7 +69,7 @@ class LibGlvndConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/1.1.1")
-        self.build_requires("pkgconf/1.9.3")
+        self.build_requires("pkgconf/1.9.5")
 
     def layout(self):
         basic_layout(self)
