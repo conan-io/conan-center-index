@@ -70,7 +70,7 @@ class CoinCbcConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
-        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("pkgconf/1.9.5")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.tool_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
