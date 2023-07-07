@@ -159,6 +159,7 @@ class BotanConan(ConanFile):
             return {
                 "gcc":  Version(11.2),
                 "clang": 14,
+                "apple-clang": 14,
                 "Visual Studio": 17,
                 "msvc": 193,
             }.get(str(self.settings.compiler))
