@@ -88,7 +88,7 @@ class AravisConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self):
             self.tool_requires("glib/2.77.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
