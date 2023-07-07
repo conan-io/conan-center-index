@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, download, unzip, load, copy, rm
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.files import replace_in_file
 import os
 import re
 import shutil
@@ -67,6 +68,11 @@ class AndroidNDKConan(ConanFile):
         else:
             get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)],
                   destination=self.source_folder, strip_root=True)
+        # Run ndk-build in Apple Silicon with Rosetta
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            replace_in_file(self, os.path.join(self.source_folder, "ndk-build"),
+                            "$DIR/build/ndk-build ",
+                            "arch -x86_64 $DIR/build/ndk-build ")
 
     def package(self):
         copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
