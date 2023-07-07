@@ -13,10 +13,12 @@ required_conan_version = ">=1.55.0"
 class Argtable2Conan(ConanFile):
     name = "argtable2"
     description = "Argtable is an ANSI C library for parsing GNU style command line options with a minimum of fuss."
-    topics = ("argument", "parsing", "getopt")
     license = "LGPL-2.0+"
-    homepage = "http://argtable.sourceforge.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://argtable.sourceforge.net/"
+    topics = ("argument", "parsing", "getopt")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

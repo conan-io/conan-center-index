@@ -6,6 +6,7 @@ This section gathers the most common questions from the community related to pac
 ## Contents
 
   * [What is the policy on recipe name collisions?](#what-is-the-policy-on-recipe-name-collisions)
+  * [What is the policy for naming forks?](#what-is-the-policy-for-naming-forks)
   * [What is the policy on creating packages from pre-compiled binaries?](#what-is-the-policy-on-creating-packages-from-pre-compiled-binaries)
   * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
@@ -35,7 +36,7 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
-  * [Why are version ranges not allowed?](#why-are-version-ranges-not-allowed)
+  * [What's the policy on version ranges?](#whats-the-policy-on-version-ranges)
   * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
@@ -54,6 +55,15 @@ This repository will try to follow the most well-known names for each of the rec
 However, if it is not possible and there is the case of a new recipe producing a name collision, the first recipe contributed will have precedence over it. Generally, recipes contributed to the repo won't change its name in order to not break users.
 
 For example, `GSL` is the name of `Guidelines Support Library` from Microsoft and `GNU Scientific Library` from GNU. Both libraries are commonly known as `gsl`, however, to disambiguate (if there is already a `gsl` package in this repo) we could use `ms-gsl` in the first case or `gnu-gsl` in the second.
+
+## What is the policy for naming forks?
+
+When submitting recipes, it's important to pick names which clearly identify the source. For projects which are forks of existing but diverge significantly enough
+to be unique (subject to opinion), they should be prefixed with the author or organization such as `author-name`. A good example is the [crow](https://github.com/ipkn/crow)
+which was forked [crowcpp-crow](https://github.com/CrowCpp/Crow). The original project maintains the `crow` name where as the more featured and advanced fork is `crowcpp-crow`.
+
+Forks are acceptable submissions given they have significantly divergent from the upstream. This can include adding new features, updating compiler or standard support, and actively being maintained. Changes which are not sufficient are build scripts, small bug fixes, "conan-ization" - all of these can be
+[applied as patches to the original](adding_packages/sources_and_patches.md).
 
 ## What is the policy on creating packages from pre-compiled binaries?
 
@@ -369,9 +379,10 @@ need to modify your project if the recipe changes the binaries, flags,... it pro
 To isolate from these changes there are different strategies you can follow.
 Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-your-project-from-upstream-changes).
 
-## Why are version ranges not allowed?
+## What's the policy on version ranges?
 
-See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for details.
+Version ranges are currently allowed on a handful of dependencies, but not for general use.
+See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for additional details.
 
 ## How to consume a graph of shared libraries?
 

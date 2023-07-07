@@ -535,9 +535,9 @@ class BoostConan(ConanFile):
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.2")
         if self._with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118", transitive_headers=True, transitive_libs=True)
 
@@ -561,7 +561,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/4.9.3")
+            self.tool_requires("b2/4.9.6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -852,7 +852,7 @@ class BoostConan(ConanFile):
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)
         if self.settings.os == "Android":
-            # force versionless soname from boostorg/boost#206 
+            # force versionless soname from boostorg/boost#206
             # this can be applied to all versions and it's easier with a replace
             replace_in_file(self, os.path.join(self.source_folder, "boostcpp.jam"),
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix &&",
@@ -1275,6 +1275,13 @@ class BoostConan(ConanFile):
         cppflags = buildenv_vars.get("CPPFLAGS", "") + " "
         ldflags = " ".join(self.conf.get("tools.build:sharedlinkflags", default=[], check_type=list)) + " "
         asflags = buildenv_vars.get("ASFLAGS", "") + " "
+
+        sysroot = self.conf.get("tools.build:sysroot")
+        if sysroot and not is_msvc(self):
+            sysroot = sysroot.replace("\\", "/")
+            sysroot = f'"{sysroot}"' if ' ' in sysroot else sysroot
+            cppflags += f"--sysroot={sysroot} "
+            ldflags += f"--sysroot={sysroot} "
 
         if self._with_stacktrace_backtrace:
             backtrace_aggregated_cpp_info = self.dependencies["libbacktrace"].cpp_info.aggregated_components()
