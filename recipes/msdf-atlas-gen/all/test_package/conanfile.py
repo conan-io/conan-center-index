@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conan import ConanFile, tools
 import os
 
 
@@ -12,6 +12,9 @@ class TestPackageConan(ConanFile):
     @property
     def _atlas_desc_file(self):
         return os.path.join(self.build_folder, "atlas_desc.json")
+
+    def build_requirements(self):
+        self.test_requires(self.tested_reference_str)
 
     def test(self):
         if not tools.cross_building(self):

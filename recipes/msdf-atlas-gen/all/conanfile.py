@@ -1,7 +1,13 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, replace_in_file
+from conan.tools.cmake import CMake
+from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException
+
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=2.0"
 
 
 class MsdfAtlasGenConan(ConanFile):
@@ -12,8 +18,9 @@ class MsdfAtlasGenConan(ConanFile):
     description = "MSDF font atlas generator"
     topics = ("msdf-atlas-gen", "msdf", "font", "atlas")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "application"
 
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeToolchain"
     exports_sources = ["CMakeLists.txt"]
     _cmake = None
 
@@ -27,30 +34,31 @@ class MsdfAtlasGenConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def package_id(self):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         cmakelists = os.path.join(
             self._source_subfolder, "CMakeLists.txt")
 
-        tools.replace_in_file(cmakelists,
+        replace_in_file(self, cmakelists,
                               "add_subdirectory(msdfgen)", "")
-        tools.save_append(cmakelists,
-                          "install(TARGETS msdf-atlas-gen-standalone DESTINATION bin)")
+        #tools.save_append(cmakelists,
+                          #"install(TARGETS msdf-atlas-gen-standalone DESTINATION bin)")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["MSDF_ATLAS_GEN_BUILD_STANDALONE"] = True
-        self._cmake.configure()
+        self._cmake.configure(variables={
+            "MSDF_ATLAS_GEN_BUILD_STANDALONE": True
+        })
         return self._cmake
 
     def build(self):
@@ -68,4 +76,4 @@ class MsdfAtlasGenConan(ConanFile):
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        self.runenv_info.PATH.append(bin_path)
