@@ -90,7 +90,7 @@ class DbusConan(ConanFile):
             self.tool_requires("meson/1.1.1")
         if self._meson_available or self.options.get_safe("with_systemd"):
             if not self.conf.get("tools.gnu:pkg_config",check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/1.9.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
