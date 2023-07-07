@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -61,6 +62,8 @@ class ZookeeperClientCConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
+        bvenv = VirtualBuildEnv(self)
+        bvenv.generate()
 
     def build(self):
         apply_conandata_patches(self)
