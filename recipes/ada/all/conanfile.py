@@ -15,13 +15,15 @@ class AdaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ada-url/ada"
     topics = ("url", "parser", "WHATWG")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "shared": False,
     }
 
     @property
@@ -41,6 +43,13 @@ class AdaConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if Version(self.version) <= "2.0.0":
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

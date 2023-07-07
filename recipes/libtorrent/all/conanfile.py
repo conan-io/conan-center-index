@@ -88,7 +88,7 @@ class LibtorrentConan(ConanFile):
         else:
             self.requires("boost/1.76.0", transitive_headers=True)
         if self.options.enable_encryption:
-            self.requires("openssl/1.1.1t", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.enable_iconv:
             self.requires("libiconv/1.17")
 
@@ -106,20 +106,9 @@ class LibtorrentConan(ConanFile):
            (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_system):
             raise ConanInvalidConfiguration(f"{self.ref} requires boost with system, which is non-header only in boost < 1.69.0")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "2.0.4" and not self._cmake_new_enough("3.16.0"):
-            self.tool_requires("cmake/3.25.3")
+        if Version(self.version) >= "2.0.4":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
