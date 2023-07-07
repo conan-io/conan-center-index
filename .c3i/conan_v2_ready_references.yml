@@ -50,8 +50,10 @@ required_for_references:
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
+- aws-c-event-stream
 - aws-c-http
 - aws-c-io
+- aws-c-mqtt
 - aws-c-sdkutils
 - aws-checksums
 - b2
@@ -195,6 +197,7 @@ required_for_references:
 - cyclonedds
 - cyrus-sasl
 - dacap-clip
+- darknet
 - dataframe
 - date
 - dav1d
@@ -260,6 +263,7 @@ required_for_references:
 - flac
 - flann
 - flatbuffers
+- flatbush
 - flex
 - fmt
 - fmtlog
@@ -319,6 +323,7 @@ required_for_references:
 - gurkenlaeufer
 - h3
 - h5pp
+- happly
 - harfbuzz
 - hdf5
 - hdrhistogram-c
@@ -389,6 +394,7 @@ required_for_references:
 - libde265
 - libdeflate
 - libdisasm
+- libdivide
 - libdrawille
 - libdwarf
 - libelf
@@ -611,6 +617,7 @@ required_for_references:
 - portable-file-dialogs
 - pprint
 - pranav-csv2
+- pretty-name
 - proj
 - prometheus-cpp
 - proposal
@@ -803,6 +810,7 @@ required_for_references:
 - xtl
 - xtrans
 - xxhash
+- xxsds-sdsl-lite
 - xz_utils
 - yajl
 - yaml-cpp
@@ -818,4 +826,5 @@ required_for_references:
 - zmarok-semver
 - zpp_bits
 - zstd
+- zug
 - zulu-openjdk
