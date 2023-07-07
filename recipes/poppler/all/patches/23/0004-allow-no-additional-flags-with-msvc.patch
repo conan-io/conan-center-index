@@ -1,0 +1,21 @@
+Poppler tries to set additional flags depending on the compiler
+but doesn't handle MSVC. Since MSVC doesn't need additional flags
+to compile the tests, just skip the block.
+diff --git a/cmake/modules/PopplerMacros.cmake b/cmake/modules/PopplerMacros.cmake
+index 2aed0284..7896b35f 100644
+--- a/cmake/modules/PopplerMacros.cmake
++++ b/cmake/modules/PopplerMacros.cmake
+@@ -75,6 +75,8 @@ if(WIN32)
+                                 "${CMAKE_INSTALL_PREFIX}/bin" )
+ endif(WIN32)
+
++message(STATUS "ID IS: ${CMAKE_CXX_COMPILER_ID}")
++if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+   set(CMAKE_BUILD_TYPE RelWithDebInfo)
+ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+@@ -197,3 +199,4 @@ if(_compiler_flags_changed)
+     set(CMAKE_C_FLAGS_${_build_type} "${CMAKE_C_FLAGS_${_build_type}} ${_save_cflags}")
+   endforeach()
+ endif()
++endif()

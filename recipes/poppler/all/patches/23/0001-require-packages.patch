@@ -1,0 +1,77 @@
+From 57233c2df0fe1a2c7aae2828afe9800b7b138272 Mon Sep 17 00:00:00 2001
+From: Rasmus Thomsen <rasmus.thomsen@dampsoft.de>
+Date: Fri, 7 Jul 2023 08:46:18 +0200
+Subject: [PATCH] Always require packes when their option is enabled
+
+---
+ CMakeLists.txt                               | 24 +++++++-------------
+ cmake/modules/MacroOptionalFindPackage.cmake |  2 +-
+ 2 files changed, 9 insertions(+), 17 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 48c5b6e3..e27f7c79 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -191,24 +191,16 @@ else()
+ endif()
+ 
+ if (ENABLE_QT5)
+-  find_package(Qt5Core 5.12)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
+-  find_package(Qt5Gui)
+-  find_package(Qt5Xml)
+-  find_package(Qt5Widgets)
+-  find_package(Qt5Test)
+-  if (NOT (Qt5Core_FOUND AND Qt5Gui_FOUND AND Qt5Xml_FOUND AND Qt5Widgets_FOUND AND Qt5Test_FOUND))
+-    message("-- Package Qt5Core or Qt5Gui or Qt5Xml or Qt5Widgets or Qt5Test not found")
+-    set(ENABLE_QT5 OFF)
+-  endif()
++  find_package(Qt5Core 5.12 REQUIRED)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
++  find_package(Qt5Gui REQUIRED)
++  find_package(Qt5Xml REQUIRED)
++  find_package(Qt5Widgets REQUIRED)
++  find_package(Qt5Test REQUIRED)
+ endif()
+ 
+ if (ENABLE_QT6)
+   SET(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
+-  find_package(Qt6 6.2 COMPONENTS Core Gui Widgets Test QUIET)
+-  if (NOT (Qt6Core_FOUND AND Qt6Gui_FOUND AND Qt6Widgets_FOUND AND Qt6Test_FOUND))
+-    message("-- Package Qt6Core or Qt6Gui or Qt6Widgets or Qt6Test not found")
+-    set(ENABLE_QT6 OFF)
+-  endif()
++  find_package(Qt6 6.2 COMPONENTS Core Gui Widgets Test REQUIRED)
+ endif()
+ 
+ # Check for Cairo rendering backend
+@@ -309,13 +301,13 @@ else()
+ endif()
+ set(ENABLE_LIBOPENJPEG "${WITH_OPENJPEG}")
+ if(ENABLE_CMS STREQUAL "lcms2")
+-  find_package(LCMS2)
++  find_package(LCMS2 REQUIRED)
+   set(USE_CMS ${LCMS2_FOUND})
+ elseif(NOT ENABLE_CMS STREQUAL "none")
+   message(FATAL_ERROR "Invalid ENABLE_CMS value: ${ENABLE_CMS}")
+ endif()
+ if(ENABLE_LIBCURL)
+-  find_package(CURL)
++  find_package(CURL REQUIRED)
+   if(CURL_FOUND)
+     set(POPPLER_HAS_CURL_SUPPORT ON)
+   else()
+diff --git a/cmake/modules/MacroOptionalFindPackage.cmake b/cmake/modules/MacroOptionalFindPackage.cmake
+index d4ed48e3..ad1393ac 100644
+--- a/cmake/modules/MacroOptionalFindPackage.cmake
++++ b/cmake/modules/MacroOptionalFindPackage.cmake
+@@ -29,7 +29,7 @@ endmacro(_MOFP_SET_EMPTY_IF_DEFINED _package _var)
+ macro (MACRO_OPTIONAL_FIND_PACKAGE _name )
+    option(WITH_${_name} "Search for ${_name} package" ON)
+    if (WITH_${_name})
+-      find_package(${_name} ${ARGN})
++      find_package(${_name} ${ARGN} REQUIRED)
+    else (WITH_${_name})
+       string(TOUPPER ${_name} _nameUpper)
+       set(${_name}_FOUND FALSE)
+-- 
+2.25.1
+

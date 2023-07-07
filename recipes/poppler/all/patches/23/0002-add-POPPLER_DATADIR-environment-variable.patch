@@ -1,0 +1,21 @@
+commit 94509214b1c2cc3e2a643bdd4472ae28a143cea2
+Author: Martin Delille <martin@delille.org>
+Date:   Fri Jul 22 14:45:42 2022 +0200
+
+    Add POPPLER_DATADIR environment variable
+
+diff --git a/poppler/GlobalParams.cc b/poppler/GlobalParams.cc
+index 82ac1fd8..6e845501 100644
+--- a/poppler/GlobalParams.cc
++++ b/poppler/GlobalParams.cc
+@@ -411,6 +411,10 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
+ 
+ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(customPopplerDataDir)
+ {
++    if (!popplerDataDir) {
++        popplerDataDir = ::getenv("POPPLER_DATADIR");
++    }
++
+     // scan the encoding in reverse because we want the lowest-numbered
+     // index for each char name ('space' is encoded twice)
+     macRomanReverseMap = new NameToCharCode();
