@@ -30,7 +30,7 @@ class Openmvgconan(ConanFile):
         "with_openmp": [True, False],
         "with_avx": [False, "avx", "avx2"],
         "programs": [True, False],
-        "jpeg": ["libjpeg", "libjpeg-turbo"]
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"]
     }
     default_options = {
         "shared": False,
@@ -38,7 +38,7 @@ class Openmvgconan(ConanFile):
         "with_openmp": False,
         "with_avx": False,
         "programs": True,
-        "jpeg": "libjpeg"
+        "with_jpeg": "libjpeg"
     }
 
     short_paths = True
@@ -68,10 +68,12 @@ class Openmvgconan(ConanFile):
         self.requires("coin-utils/2.11.6")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
-        if self.options.jpeg == "libjpeg":
+        if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
-        elif self.options.jpeg == "libjpeg-turbo":
+        elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.1.5")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         self.requires("libpng/1.6.39")
         self.requires("libtiff/4.5.0")
 
@@ -137,10 +139,12 @@ class Openmvgconan(ConanFile):
     @property
     def _openmvg_components(self):
         def jpeg():
-            if self.options.jpeg == "libjpeg":
+            if self.options.with_jpeg == "libjpeg":
                 return ["libjpeg::libjpeg"]
-            elif self.options.jpeg == "libjpeg-turbo":
+            elif self.options.with_jpeg == "libjpeg-turbo":
                 return ["libjpeg-turbo::jpeg"]
+            elif self.options.with_jpeg == "mozjpeg":
+                return ["mozjpeg::libjpeg"]
 
         return {
             "openmvg_camera": {
