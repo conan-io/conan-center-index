@@ -562,7 +562,7 @@ class QtConan(ConanFile):
             tc.variables["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
         if self.settings.os == "Windows":
-            tc.variables["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
+            tc.variables["HOST_PERL"] = self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
@@ -951,7 +951,7 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             core_reqs.append("glib::glib")
         if self.options.openssl:
-            core_reqs.append("openssl::openssl") # used by QCryptographicHash 
+            core_reqs.append("openssl::openssl") # used by QCryptographicHash
 
         _create_module("Core", core_reqs)
         pkg_config_vars = [
