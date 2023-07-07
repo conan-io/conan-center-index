@@ -92,7 +92,7 @@ class GdkPixbufConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/1.1.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if not can_run(self):
             self.tool_requires("glib/2.77.0")
         if self.options.with_introspection:
