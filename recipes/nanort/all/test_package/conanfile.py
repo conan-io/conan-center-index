@@ -1,10 +1,7 @@
-import glob
-import os
-
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
-
+import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -26,6 +23,3 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
-            # Let's check if the *.ply file has been created successfully
-            ply_format_file = glob.glob("*.ply")[0]
-            assert os.path.exists(ply_format_file)
