@@ -162,11 +162,14 @@ class LibdbConan(ConanFile):
 
             if self.options.with_tcl:
                 tc.configure_args.append(f"--with-tcl={os.path.join(self.dependencies['tcl'].package_folder, 'lib')}")
+
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12":
+                tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
+
             tc.generate()
 
             deps = AutotoolsDeps(self)
             deps.generate()
-
 
     @property
     def _msvc_build_type(self):
