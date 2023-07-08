@@ -5,8 +5,6 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
-import pathlib
-import yaml
 
 required_conan_version = ">=1.52.0"
 
@@ -61,16 +59,11 @@ class DoxygenConan(ConanFile):
             # INFO: Doxygen uses upper case CMake variables to link/include IConv, so we are using patches for targets.
             self.requires("libiconv/1.17")
 
-    def package_id(self):
-        self.info.requires.full_version_mode()
-
     def compatibility(self):
         if (Version(conan_version).major >= 2):
-            # This will only work when host profile == build profile
-            # For some reason self.settings.compiler here returns the compiler from the build profile
             # Models libc++ compatibility and identifies Debug builds as equivalent to Release builds
             compatible_versions = [{"settings": [("compiler.version", v), ("build_type", "Release")]}
-                for v in self.settings.compiler.version.get_definition() if v <= Version(self.settings.compiler.version)]
+                for v in self.settings.compiler.version.possible_values() if v <= Version(self.settings.compiler.version)]
             return compatible_versions
         # Models Debug builds as equivalent to Release builds as this is a tool_requires package
         return [{"settings": [("build_type", "Release")]}]
