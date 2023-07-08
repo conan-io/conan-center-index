@@ -5,7 +5,7 @@ project(test_package CXX) # if the project uses c++
 find_package(vsg REQUIRED CONFIG)
 find_package(vsgXchange REQUIRED CONFIG)
 find_package(Vulkan REQUIRED CONFIG)
-find_package(Curl REQUIRED CONFIG)
+find_package(curl REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE vsgXchange::vsgXchange)
