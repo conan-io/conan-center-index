@@ -51,7 +51,8 @@ class SdlttfConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.12.1")
-        self.requires("sdl/2.26.5", transitive_headers=True)
+        # https://github.com/conan-io/conan-center-index/pull/18366#issuecomment-1625464996
+        self.requires("sdl/2.26.5", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_harfbuzz"):
             self.requires("harfbuzz/6.0.0")
 
