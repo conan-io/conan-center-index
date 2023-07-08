@@ -60,6 +60,9 @@ class OnnxRuntimeConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        # We need this to avoid double registration by both onnx and onnxruntime
+        self.options["onnx"].disable_static_registration = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
