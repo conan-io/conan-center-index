@@ -32,16 +32,6 @@ class OpenvrConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "14.1",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -60,13 +50,11 @@ class OpenvrConan(ConanFile):
         self.requires("jsoncpp/1.9.5")
 
     def validate(self):
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("OpenVR can't be compiled by {0} {1}".format(self.settings.compiler,
+                                                                                         self.settings.compiler.version))
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
