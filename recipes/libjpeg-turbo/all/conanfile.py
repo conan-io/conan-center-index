@@ -49,7 +49,7 @@ class LibjpegTurboConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= Version("3.0.0"):
+        if Version(self.version) >= "3.0.0":
             del self.options.enable12bit
             del self.options.mem_src_dst
 
@@ -112,7 +112,7 @@ class LibjpegTurboConan(ConanFile):
         tc.variables["WITH_JPEG8"] = self.options.libjpeg8_compatibility
         tc.variables["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
         tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
-        if Version(self.version) < Version("3.0.0"):
+        if Version(self.version) < "3.0.0":
             tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
             tc.variables["WITH_12BIT"] = self.options.enable12bit
         if is_msvc(self):
