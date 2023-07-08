@@ -7,12 +7,12 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.59.0"
+required_conan_version = ">=1.53.0"
 
 class OpenvrConan(ConanFile):
     name = "openvr"
     description = "API and runtime that allows access to VR hardware from applications have specific knowledge of the hardware they are targeting."
-    topics = ("vr")
+    topics = ("vr",)
     package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ValveSoftware/openvr"
@@ -98,7 +98,7 @@ class OpenvrConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        copy(self, pattern="openvr_api*.dll", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self.source_folder, "bin"), keep_path=False)
+        copy(self, "openvr_api*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
@@ -117,6 +117,3 @@ class OpenvrConan(ConanFile):
 
         if is_apple_os(self):
             self.cpp_info.frameworks.append("Foundation")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["pkg_config"] = "openvr"
