@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
