@@ -53,7 +53,7 @@ class VsgXchangeConan(ConanFile):
 
     def requirements(self):
         self.requires("vulkan-loader/1.3.239.0")
-        self.requires("vsg/[>1.0.3]")
+        self.requires("vsg/1.0.3")
         #optional
         if self.options.with_curl:
             self.requires("libcurl/8.0.0")
@@ -76,14 +76,13 @@ class VsgXchangeConan(ConanFile):
                 )
 
     def source(self):
-       get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)       
-
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = False
 
-        tc.variables["VSG_MACRO_DIR"] = os.path.join(self.deps_cpp_info["vsg"].rootpath, "lib/cmake/vsg/").replace("\\","/")
+        tc.variables["VSG_MACRO_DIR"] = os.path.join(self.dependencies["vsg"].cpp_info.libdirs[0], "cmake/vsg/").replace("\\","/")
 
         tc.generate()
 
