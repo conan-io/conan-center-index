@@ -5,6 +5,7 @@ from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, is_msv
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 
 import glob
 import os
@@ -282,6 +283,7 @@ class LibdbConan(ConanFile):
             if not self.options.shared:
                 # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
                 rm(self, "*-{}.a".format(".".join(self._major_minor_version)), libdir)
+            fix_apple_shared_install_name(self)
 
     @property
     def _major_minor_version(self):
