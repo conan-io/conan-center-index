@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2ae4486..436ff4d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,6 +23,8 @@ endif()
+ set(VSG_MIN_VERSION 1.0.3)
+ find_package(vsg ${VSG_MIN_VERSION})
+
++include(${VSG_MACRO_DIR}/vsgMacros.cmake)
++
+ vsg_setup_dir_vars()
+ vsg_setup_build_vars()
+
