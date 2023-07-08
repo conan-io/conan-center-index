@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -130,6 +131,8 @@ class JoltPhysicsConan(ConanFile):
             tc.variables["USE_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.variables["JPH_DEBUG_RENDERER"] = self.options.debug_renderer
         tc.variables["JPH_PROFILE_ENABLED"] = self.options.profile
+        if Version(self.version) >= "3.0.0":
+            tc.variables["ENABLE_ALL_WARNINGS"] = False
         tc.generate()
 
     def build(self):
