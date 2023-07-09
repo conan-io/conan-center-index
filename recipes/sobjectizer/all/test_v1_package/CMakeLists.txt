@@ -4,7 +4,7 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(sonjectizer REQUIRED CONFIG)
+find_package(sobjectizer REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.cpp)
 melitarget_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
