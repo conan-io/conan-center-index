@@ -70,6 +70,7 @@ class Clipper2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["CLIPPER2_UTILS"] = False
         tc.variables["CLIPPER2_EXAMPLES"] = False
         tc.variables["CLIPPER2_TESTS"] = False
