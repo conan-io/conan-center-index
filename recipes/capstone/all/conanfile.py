@@ -61,12 +61,16 @@ class CapstoneConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
-        tc.variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
+        if Version(self.version) < "5.0":
+            tc.variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
+            tc.variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
         tc.variables["CAPSTONE_BUILD_TESTS"] = False
         tc.variables["CAPSTONE_BUILD_CSTOOL"] = False
         tc.variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
-        tc.variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
+        if Version(self.version) < "5.0":
+            tc.variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
+        else:
+            tc.variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
             tc.variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
         tc.variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
@@ -86,7 +90,7 @@ class CapstoneConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        suffix = "_dll" if is_msvc(self) and self.options.shared else ""
+        suffix = "_dll" if is_msvc(self) and self.options.shared and Version(self.version) < "5.0" else ""
         self.cpp_info.libs = [f"capstone{suffix}"]
         if self.options.shared:
             self.cpp_info.defines.append("CAPSTONE_SHARED")
