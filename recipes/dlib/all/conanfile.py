@@ -76,13 +76,13 @@ class DlibConan(ConanFile):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.40")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.3.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.42.0")
         if self.options.with_openblas:
             self.requires("openblas/0.3.17")
 
