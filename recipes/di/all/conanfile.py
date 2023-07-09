@@ -20,8 +20,15 @@ class DiConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_extensions": [True, False], "diagnostics_level": [0, 1, 2]}
-    default_options = {"with_extensions": False, "diagnostics_level": 1}
+    options = {
+        "with_extensions": [True, False],
+        "diagnostics_level": [0, 1, 2]
+    }
+    default_options = {
+        "with_extensions": False,
+        "diagnostics_level": 1
+    }
+    exports = ["BSL-1.0.txt"]
     no_copy_source = True
 
     @property
@@ -34,23 +41,24 @@ class DiConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "10",
-            "Visual Studio": "15"
+            "Visual Studio": "15",
+            "msvc": "191"
         }
-
-    def export_sources(self):
-        copy(self, "BSL-1.0.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def configure(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         compiler = str(self.settings.compiler)
         if compiler not in self._compilers_minimum_version:
-            self.output.warning(f"{self.name} recipe lacks information about the {compiler} compiler standard version support")
-            self.output.warning(f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
+            self.output.warning(
+                f"{self.name} recipe lacks information about the {compiler} compiler standard version support")
+            self.output.warning(
+                f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
             return
         version = Version(self.settings.compiler.version)
         if version < self._compilers_minimum_version[compiler]:
-            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -66,12 +74,12 @@ class DiConan(ConanFile):
     def package(self):
         copy(self, "BSL-1.0.txt",
              dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+             src=self.recipe_folder)
         if self.options.with_extensions:
             copy(self, "*.hpp",
                  dst=os.path.join(self.package_folder, "include", "boost", "di", "extension"),
-                src=os.path.join(self.source_folder, "extension", "include", "boost", "di", "extension"),
-                keep_path=True)
+                 src=os.path.join(self.source_folder, "extension", "include", "boost", "di", "extension"),
+                 keep_path=True)
         copy(self, "di.hpp",
              dst=os.path.join(self.package_folder, "include", "boost"),
              src=os.path.join(self.source_folder, "include", "boost"))
@@ -80,4 +88,5 @@ class DiConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.defines.append(f"BOOST_DI_CFG_DIAGNOSTICS_LEVEL={self.options.diagnostics_level}")
+        self.cpp_info.defines.append(
+            f"BOOST_DI_CFG_DIAGNOSTICS_LEVEL={self.options.diagnostics_level}")
