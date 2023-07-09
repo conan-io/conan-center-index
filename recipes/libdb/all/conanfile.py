@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rename, rm, rmdir
 from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, is_msvc, check_min_vs, unix_path, vs_layout
@@ -210,22 +210,29 @@ class LibdbConan(ConanFile):
                 # TODO: To remove once https://github.com/conan-io/conan/pull/12817 is available in conan client
                 project_file = os.path.join(self.source_folder, "build_windows", "VS10", f"{project}.vcxproj")
                 conantoolchain_props = os.path.join(self.generators_folder, "conantoolchain.props")
+                toolset = MSBuildToolchain(self).toolset
+                replace_in_file(
+                    self, project_file,
+                    "</ProjectConfiguration>",
+                    f"  <PlatformToolset>{toolset}</PlatformToolset>\n    </ProjectConfiguration>",
+                )
+                replace_in_file(
+                    self, project_file,
+                    "</CharacterSet>",
+                    f"</CharacterSet>\n    <PlatformToolset>{toolset}</PlatformToolset>",
+                )
                 replace_in_file(
                     self, project_file,
                     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
                     f"<Import Project=\"{conantoolchain_props}\"/>\n  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
                 )
-                # replace_in_file(
-                #     self, project_file,
-                #     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\"/>",
-                #     f"<Import Project=\"{conantoolchain_props}\"/>\n  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\"/>",
-                # )
                 # =================================
 
-                msbuild.build_type = "{}{}".format(
+                build_type = "{}{}".format(
                     "" if self.options.shared else "Static ",
                     "Debug" if self.settings.build_type == "Debug" else "Release",
                 )
+                msbuild.build_type = build_type if Version(conan_version).major >= 2 else f"\"{build_type}\""
                 msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
                 msbuild.build(sln=project_file)
         else:
