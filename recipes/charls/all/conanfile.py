@@ -63,7 +63,10 @@ class CharlsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CHARLS_INSTALL"] = True
+        tc.cache_variables["CHARLS_BUILD_FUZZ_TEST"] = False
+        tc.cache_variables["CHARLS_BUILD_SAMPLES"] = False
+        tc.cache_variables["CHARLS_BUILD_TESTS"] = False
+        tc.cache_variables["CHARLS_INSTALL"] = True
         tc.generate()
 
     def build(self):
