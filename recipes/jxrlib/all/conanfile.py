@@ -15,6 +15,7 @@ class JxrlibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
     topics = ("jxr", "jpeg", "xr")
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
