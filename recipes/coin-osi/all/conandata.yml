@@ -1,4 +1,7 @@
 sources:
+  "0.108.8":
+    url: "https://github.com/coin-or/Osi/archive/releases/0.108.8.tar.gz"
+    sha256: "8b01a49190cb260d4ce95aa7e3948a56c0917b106f138ec0a8544fadca71cf6a"
   "0.108.7":
     url: "https://github.com/coin-or/Osi/archive/releases/0.108.7.tar.gz"
     sha256: "f1bc53a498585f508d3f8d74792440a30a83c8bc934d0c8ecf8cd8bc0e486228"

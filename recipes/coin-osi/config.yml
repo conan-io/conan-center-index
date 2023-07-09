@@ -1,4 +1,6 @@
 versions:
+  "0.108.8":
+    folder: "all"
   "0.108.7":
     folder: "all"
   "0.108.6":
