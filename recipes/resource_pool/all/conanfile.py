@@ -1,10 +1,10 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conans.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -12,6 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class ResourcePool(ConanFile):
     name = "resource_pool"
+    version = "cci.20210322"
     description = "C++ header only library purposed to create pool of some resources like keepalive connections"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
