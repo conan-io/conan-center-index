@@ -50,6 +50,7 @@ class HighwayConan(ConanFile):
     def configure(self):
         if Version(self.version) < "0.16.0":
             del self.options.shared
+            self.package_type = "static-library"
         elif self.options.shared:
             self.options.rm_safe("fPIC")
 
