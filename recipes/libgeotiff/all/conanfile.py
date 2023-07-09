@@ -43,7 +43,7 @@ class LibgeotiffConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libtiff/4.4.0")
+        self.requires("libtiff/4.5.1")
         self.requires("proj/9.1.1")
 
     def source(self):
