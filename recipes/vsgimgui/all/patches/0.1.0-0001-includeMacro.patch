@@ -1,0 +1,94 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index eb0a39c..1ae1ff5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,34 +23,11 @@ if (VULKAN_SDK)
+ endif()
+ 
+ find_package(vsg 1.0.5)
++include(${VSG_MACRO_PATH}/vsgMacros.cmake)
+ 
+ vsg_setup_dir_vars()
+ vsg_setup_build_vars()
+ 
+-if ( (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/imgui/imgui.h) OR
+-     (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/implot/implot.h) )
+-    find_package(Git QUIET)
+-
+-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-                    RESULT_VARIABLE GIT_SUBMOD_RESULT)
+-
+-    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+-        message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+-    endif()
+-endif()
+-
+-vsg_copy_imgui_headers(
+-    FILES
+-        ${VSGIMGUI_SOURCE_DIR}/src/imgui/imgui.h
+-        ${VSGIMGUI_SOURCE_DIR}/src/imgui/imconfig.h
+-        ${VSGIMGUI_SOURCE_DIR}/src/imgui/imgui_internal.h
+-        ${VSGIMGUI_SOURCE_DIR}/src/imgui/imstb_textedit.h
+-        ${VSGIMGUI_SOURCE_DIR}/src/imgui//misc/cpp/imgui_stdlib.h
+-        ${VSGIMGUI_SOURCE_DIR}/src/implot/implot.h
+-        ${VSGIMGUI_SOURCE_DIR}/src/implot/implot_internal.h
+-)
+-
+ vsg_add_target_clang_format(
+     FILES
+         include/vsgImGui/RenderImGui.h
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2226b13..2598b4d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -10,33 +10,18 @@ set(HEADERS
+     ${HEADER_PATH}/SendEventsToImGui.h
+     ${HEADER_PATH}/RenderImGui.h
+     ${HEADER_PATH}/Texture.h
+-    imgui/imconfig.h
+-    imgui/imgui_internal.h
+-    imgui/imstb_rectpack.h
+-    imgui/imstb_textedit.h
+-    imgui/imstb_truetype.h
+-    imgui/misc/cpp/imgui_stdlib.h
+-    implot/implot.h
+-    implot/implot_internal.h
++    
+ )
+ 
+ set(SOURCES
+     vsgImGui/RenderImGui.cpp
+     vsgImGui/SendEventsToImGui.cpp
+     vsgImGui/Texture.cpp
+-    imgui/imgui.cpp
+-    imgui/imgui_demo.cpp
+-    imgui/imgui_draw.cpp
+-    imgui/imgui_tables.cpp
+-    imgui/imgui_widgets.cpp
+-    imgui/backends/imgui_impl_vulkan.cpp
+-    imgui/misc/cpp/imgui_stdlib.cpp
+-    implot/implot.cpp
+-    implot/implot_demo.cpp
+-    implot/implot_items.cpp
++    
+ )
+ 
+-
++find_package(imgui CONFIG REQUIRED)
++find_package(implot CONFIG REQUIRED)
+ add_library(vsgImGui ${HEADERS} ${SOURCES})
+ 
+ # add definitions to enable building vsgImGui as part of submodule
+@@ -63,8 +48,11 @@ target_include_directories(vsgImGui PUBLIC
+ target_link_libraries(vsgImGui
+     PUBLIC
+         vsg::vsg
++		imgui::imgui
++		implot::implot
+     PRIVATE
+         ${EXTRA_LIBRARIES}
++		
+ )
+ 
+ install(TARGETS vsgImGui ${INSTALL_TARGETS_DEFAULT_FLAGS})
