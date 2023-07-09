@@ -1,7 +1,7 @@
 sources:
   "6.2.1":
-    url: "https://gmplib.org/download/gmp/gmp-6.2.1.tar.bz2"
-    sha256: "eae9326beb4158c386e39a356818031bd28f3124cf915f8c5b1dc4c7a36b4d7c"
+    url: "https://github.com/alisw/GMP/archive/refs/tags/v6.2.1.tar.gz"
+    sha256: "fb776e19e0267053c3d6ffef0dcc001fb441da0e2b5224cfd9656aa2f1b8614d"
   "6.2.0":
     url: "https://gmplib.org/download/gmp/gmp-6.2.0.tar.bz2"
     sha256: "f51c99cb114deb21a60075ffb494c1a210eb9d7cb729ed042ddb7de9534451ea"
