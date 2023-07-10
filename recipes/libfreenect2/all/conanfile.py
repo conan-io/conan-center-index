@@ -49,7 +49,7 @@ class Libfreenect2Conan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.24")
-        self.requires("libjpeg-turbo/2.1.1")
+        self.requires("libjpeg-turbo/2.1.5")
         if self.options.with_opencl:
             self.requires("opencl-headers/2021.04.29")
             self.requires("opencl-icd-loader/2021.04.29")
