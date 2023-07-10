@@ -50,7 +50,7 @@ class XlsxioConan(ConanFile):
         if self.options.with_wide:
             self.options["expat"].char_type = "ushort"
         if self.options.get_safe("with_minizip_ng"):
-            self.options["minizip_ng"].mz_compatibility = True
+            self.options["minizip-ng"].mz_compatibility = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,8 +61,8 @@ class XlsxioConan(ConanFile):
         elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
             self.requires("minizip-ng/3.0.8")
         else:
-            self.requires("minizip/1.2.12")
-        self.requires("expat/2.4.9")
+            self.requires("minizip/1.2.13")
+        self.requires("expat/2.5.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,8 +110,6 @@ class XlsxioConan(ConanFile):
         ziplib = None
         if self.options.with_libzip:
             ziplib = "libzip::libzip"
-        elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
-            ziplib = "minizip-ng::minizip-ng"
         else:
             ziplib = "minizip::minizip"
 
