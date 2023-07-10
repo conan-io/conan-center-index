@@ -1,32 +1,39 @@
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import stdcpp_library
+from conan.tools.files import (
+    apply_conandata_patches,
+    chdir,
+    copy,
+    export_conandata_patches,
+    get,
+    replace_in_file,
+)
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
 
 
 class DarknetConan(ConanFile):
     name = "darknet"
+    description = "Darknet is a neural network frameworks written in C"
     license = "YOLO"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://pjreddie.com/darknet/"
-    description = "Darknet is a neural network frameworks written in C"
-    topics = ("darknet", "neural network", "deep learning")
+    topics = ("neural network", "deep learning")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_opencv": [True, False]
+        "with_opencv": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_opencv": False,
     }
-    exports_sources = ['patches/*']
-    generators = "pkg_config"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _lib_to_compile(self):
@@ -43,56 +50,87 @@ class DarknetConan(ConanFile):
             return ".so"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "Makefile"),
+        apply_conandata_patches(self)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "Makefile"),
             "SLIB=libdarknet.so",
-            "SLIB=libdarknet" + self._shared_lib_extension
+            f"SLIB=libdarknet{self._shared_lib_extension}",
         )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "Makefile"),
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "Makefile"),
             "all: obj backup results $(SLIB) $(ALIB) $(EXEC)",
-            "all: obj backup results " + self._lib_to_compile
+            f"all: obj backup results {self._lib_to_compile}",
         )
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.with_opencv:
+            # Requires OpenCV 2.x
+            self.requires("opencv/2.4.13.7")
 
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("This library is not compatible with Windows")
 
-    def requirements(self):
-        if self.options.with_opencv:
-            self.requires("opencv/2.4.13.7")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
-                  strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.fpic = self.options.get_safe("fPIC", True)
+        tc.make_args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        with tools.chdir(self._source_subfolder):
-            with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
-                args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.fpic = self.options.get_safe("fPIC", True)
-                env_build.make(args=args)
+        with chdir(self, self.source_folder):
+            self._patch_sources()
+            autotools = Autotools(self)
+            autotools.make()
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        copy(
+            self,
+            "LICENSE*",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
+        copy(
+            self,
+            "*.h",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
+        for pattern in ["*.so", "*.dylib", "*.a"]:
+            copy(
+                self,
+                pattern,
+                src=self.source_folder,
+                dst=os.path.join(self.package_folder, "lib"),
+                keep_path=False,
+            )
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["darknet"]
-        if self.settings.os == "Linux":
+        if self.options.with_opencv:
+            # For https://github.com/pjreddie/darknet/blob/61c9d02ec461e30d55762ec7669d6a1d3c356fb2/include/darknet.h#L757
+            self.cpp_info.defines.append("OPENCV=1")
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
-        if tools.stdcpp_library(self):
-            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
+        if stdcpp_library(self):
+            self.cpp_info.system_libs.append(stdcpp_library(self))
