@@ -47,19 +47,22 @@ class XlsxioConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+        if self.options.with_wide:
+            self.options["expat"].char_type = "ushort"
+        if self.options.get_safe("with_minizip_ng"):
+            self.options["minizip_ng"].mz_compatibility = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_libzip:
-            self.requires("libzip/1.7.3")
+            self.requires("libzip/1.9.2")
         elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
             self.requires("minizip-ng/3.0.8")
         else:
             self.requires("minizip/1.2.12")
         self.requires("expat/2.4.9")
-        if self.options.with_wide:
-            self.options["expat"].char_type="ushort"
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -104,17 +107,30 @@ class XlsxioConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "xlsxio")
         self.cpp_info.set_property("pkg_config_name", "xlsxio")
 
+        ziplib = None
+        if self.options.with_libzip:
+            ziplib = "libzip::libzip"
+        elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
+            ziplib = "minizip-ng::minizip-ng"
+        else:
+            ziplib = "minizip::minizip"
+
         self.cpp_info.components["xlsxio_read"].set_property("cmake_target_name", "xlsxio::xlsxio_read")
         self.cpp_info.components["xlsxio_read"].set_property("cmake_module_target_name", "xlsxio::xlsxio_read")
         self.cpp_info.components["xlsxio_read"].set_property("pkg_config_name", "libxlsxio_read")
+        self.cpp_info.components["xlsxio_read"].libs = ["xlsxio_read"]
+        self.cpp_info.components["xlsxio_read"].requires = ["expat::expat", ziplib]
         self.cpp_info.components["xlsxio_write"].set_property("cmake_target_name", "xlsxio::xlsxio_write")
         self.cpp_info.components["xlsxio_write"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write")
         self.cpp_info.components["xlsxio_write"].set_property("pkg_config_name", "libxlsxio_write")
+        self.cpp_info.components["xlsxio_write"].libs = ["xlsxio_write"]
+        self.cpp_info.components["xlsxio_write"].requires = ["expat::expat", ziplib]
         if self.options.with_wide:
             self.cpp_info.components["xlsxio_readw"].set_property("cmake_target_name", "xlsxio::xlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].set_property("pkg_config_name", "libxlsxio_readw")
-
+            self.cpp_info.components["xlsxio_readw"].libs = ["xlsxio_readw"]
+            self.cpp_info.components["xlsxio_write"].requires = ["expat::expat", ziplib]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
