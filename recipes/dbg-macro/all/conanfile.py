@@ -1,6 +1,8 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, copy
+from conan.tools.build import check_min_cppstd
+from conan.errors import ConanInvalidConfiguration
 
 
 class DbgMacroConan(ConanFile):
@@ -13,31 +15,26 @@ class DbgMacroConan(ConanFile):
     settings = ("compiler", )
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def configure(self):
         minimal_cpp_standard = "11"
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            check_min_cppstd(self, minimal_cpp_standard)
 
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and int(f"{self.settings.compiler.version}") < 5:
             raise ConanInvalidConfiguration(
-                "dbg-mcro can't be used by {0} {1}".format(
+                "dbg-macro can't be used by {0} {1}".format(
                     self.settings.compiler,
                     self.settings.compiler.version
                 )
             )
 
     def package(self):
-        self.copy("dbg.h", dst="include", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "dbg.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
