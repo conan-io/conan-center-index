@@ -83,7 +83,7 @@ class Exiv2Conan(ConanFile):
             min_cppstd = 17
 
             if self.settings.compiler.cppstd:
-                check_min_cppstd(self, self.min_cppstd)
+                check_min_cppstd(self, min_cppstd)
             check_min_vs(self, 191)
 
             compilers_minimum_version = {
