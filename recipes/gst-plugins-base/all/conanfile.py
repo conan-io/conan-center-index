@@ -98,8 +98,8 @@ class GStPluginsBaseConan(ConanFile):
             del self.options.with_xorg
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
-        self.requires("glib/2.72.0")
+        self.requires("zlib/1.2.13")
+        self.requires("glib/2.76.3")
         self.requires("gstreamer/1.19.2")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
@@ -118,11 +118,11 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
             if self.options.with_libpng:
-                self.requires("libpng/1.6.37")
+                self.requires("libpng/1.6.40")
             if self.options.with_libjpeg == "libjpeg":
-                self.requires("libjpeg/9d")
+                self.requires("libjpeg/9e")
             elif self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.2")
+                self.requires("libjpeg-turbo/2.1.5")
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
