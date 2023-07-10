@@ -47,6 +47,7 @@ required_for_references:
 - autoconf-archive
 - automake
 - avir
+- aws-c-auth
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
@@ -190,6 +191,7 @@ required_for_references:
 - cubicinterpolation
 - cuda-api-wrappers
 - cuda-kat
+- cunit
 - cute_headers
 - cvplot
 - cwalk
@@ -270,6 +272,7 @@ required_for_references:
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
+- foxglove-schemas-protobuf
 - fp16
 - freeglut
 - freetype
@@ -346,6 +349,7 @@ required_for_references:
 - imgui
 - incbin
 - indicators
+- inih
 - inja
 - intel-neon2sse
 - itlib
@@ -410,6 +414,7 @@ required_for_references:
 - libgettext
 - libgpg-error
 - libgphoto2
+- libharu
 - libiberty
 - libiconv
 - libinterpolate
@@ -444,6 +449,7 @@ required_for_references:
 - libpqxx
 - libpsl
 - libqrencode
+- libraw
 - librdkafka
 - librealsense
 - libressl
@@ -526,6 +532,7 @@ required_for_references:
 - microservice-essentials
 - mikelankamp-fpm
 - mimalloc
+- mingw-builds
 - miniaudio
 - minimp3
 - minisat
@@ -550,6 +557,7 @@ required_for_references:
 - nanoflann
 - nanomsg
 - nanorange
+- nanort
 - nas
 - nasm
 - netcdf
@@ -561,6 +569,7 @@ required_for_references:
 - nodejs
 - norm
 - nsync
+- nudb
 - numcpp
 - nuraft
 - nv-codec-headers
@@ -574,6 +583,7 @@ required_for_references:
 - openal
 - openal-soft
 - openapi-generator
+- openblas
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
@@ -742,6 +752,7 @@ required_for_references:
 - tlx
 - toml11
 - trantor
+- troldal-zippy
 - tsl-hopscotch-map
 - turtle
 - type_safe
@@ -824,7 +835,9 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zookeeper-client-c
 - zpp_bits
 - zstd
 - zug
 - zulu-openjdk
+- zxing-cpp
