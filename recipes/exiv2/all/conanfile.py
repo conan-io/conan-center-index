@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -76,28 +76,27 @@ class Exiv2Conan(ConanFile):
         if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_inih"):
-            self.requires("inih/56")
+            self.requires("inih/57")
 
     def validate(self):
         if Version(self.version) >= "0.28.0":
             min_cppstd = 17
 
-            if self.info.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, min_cppstd)
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, self.min_cppstd)
+            check_min_vs(self, 191)
 
             compilers_minimum_version = {
                 "gcc": "8",
-                "Visual Studio": "15",
-                "msvc": "191",
                 "clang": "5",
                 "apple-clang": "10",
             }
-
-            minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
-                )
+            if not is_msvc(self):
+                minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+                if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration(
+                        f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
+                    )
 
         if self.options.with_xmp == "external":
             raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
