@@ -118,20 +118,25 @@ class XlsxioConan(ConanFile):
         self.cpp_info.components["xlsxio_read"].set_property("pkg_config_name", "libxlsxio_read")
         self.cpp_info.components["xlsxio_read"].libs = ["xlsxio_read"]
         self.cpp_info.components["xlsxio_read"].requires = ["expat::expat", ziplib]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["xlsxio_read"].system_libs.append("pthread")
+
         self.cpp_info.components["xlsxio_write"].set_property("cmake_target_name", "xlsxio::xlsxio_write")
         self.cpp_info.components["xlsxio_write"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write")
         self.cpp_info.components["xlsxio_write"].set_property("pkg_config_name", "libxlsxio_write")
         self.cpp_info.components["xlsxio_write"].libs = ["xlsxio_write"]
         self.cpp_info.components["xlsxio_write"].requires = ["expat::expat", ziplib]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["xlsxio_write"].system_libs.append("pthread")
+
         if self.options.with_wide:
             self.cpp_info.components["xlsxio_readw"].set_property("cmake_target_name", "xlsxio::xlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].set_property("pkg_config_name", "libxlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].libs = ["xlsxio_readw"]
-            self.cpp_info.components["xlsxio_write"].requires = ["expat::expat", ziplib]
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components["xlsxio_readw"].requires = ["expat::expat", ziplib]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["xlsxio_readw"].system_libs.append("pthread")
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "xlsxio"
