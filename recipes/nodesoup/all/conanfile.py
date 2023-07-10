@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -49,6 +49,9 @@ class NodesoupConan(ConanFile):
             if Version(self.settings.compiler.version) < "5.0" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
                 raise ConanInvalidConfiguration("The version of libstdc++(11) of the current compiler does not support building nodesoup")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -60,6 +63,7 @@ class NodesoupConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
