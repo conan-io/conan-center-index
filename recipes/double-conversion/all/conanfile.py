@@ -46,6 +46,11 @@ class DoubleConversionConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+
+        if(self.settings.os == "Windows" and self.settings.build_type == "Debug"):
+            tc.preprocessor_definitions["_DEBUG"] = 1
+            tc.preprocessor_definitions["_ITERATOR_DEBUG_LEVEL"] = 2
+
         tc.generate()
 
     def build(self):
