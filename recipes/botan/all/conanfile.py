@@ -315,6 +315,7 @@ class BotanConan(ConanFile):
 
         if is_apple_os(self):
             if self.settings.get_safe('os.version'):
+                # Required, see https://github.com/conan-io/conan-center-index/pull/3456
                 macos_min_version = macos_min_version = AutotoolsToolchain(self).apple_min_version_flag
                 botan_extra_cxx_flags.append(macos_min_version)
             macos_sdk_path = '-isysroot {}'.format(XCRun(self).sdk_path)
