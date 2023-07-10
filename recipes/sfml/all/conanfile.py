@@ -203,6 +203,9 @@ class SfmlConan(ConanFile):
         def opengles_ios():
             return ["OpenGLES"] if self.settings.os == "iOS" else []
 
+        def objc():
+            return ["-ObjC"] if not self.options.shared and self.settings.os == "Macos" else []
+
         suffix = "" if self.options.shared else "-s"
         suffix += "-d" if self.settings.build_type == "Debug" else ""
 
@@ -235,6 +238,7 @@ class SfmlConan(ConanFile):
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
                                   coreservices() + coremotion() + opengles_ios(),
+                    "exelinkflags": objc(),
                 },
             })
         if self.options.graphics:
@@ -278,6 +282,7 @@ class SfmlConan(ConanFile):
                 requires = values.get("requires", [])
                 system_libs = values.get("system_libs", [])
                 frameworks = values.get("frameworks", [])
+                exelinkflags = values.get("exelinkflags", [])
                 # TODO: Properly model COMPONENTS names in CMakeDeps for find_package() call
                 #       (see https://github.com/conan-io/conan/issues/10258)
                 #       It should be:
@@ -291,6 +296,7 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components[component].requires = requires
                 self.cpp_info.components[component].system_libs = system_libs
                 self.cpp_info.components[component].frameworks = frameworks
+                self.cpp_info.components[component].exelinkflags = exelinkflags
 
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
