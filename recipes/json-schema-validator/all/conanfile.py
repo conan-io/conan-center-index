@@ -26,11 +26,11 @@ class JsonSchemaValidatorConan(ConanFile):
         "json_diagnostics": [True, False],
     }
     options_description = {
-        "json_diagnostics": {
-            "Defines JSON_DIAGNOSTICS=1 for the nlohmann_json library.",
-            "Refer https://json.nlohmann.me/api/macros/json_diagnostics/",
+        "json_diagnostics": (
+            "Defines JSON_DIAGNOSTICS=1 for the nlohmann_json library. "
+            "Refer https://json.nlohmann.me/api/macros/json_diagnostics/ "
             "This macro enables extended diagnostics for exception messages."
-        }
+        )
     }
     default_options = {
         "shared": False,
