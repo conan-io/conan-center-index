@@ -227,7 +227,7 @@ class BotanConan(ConanFile):
         # standard (platform dependent) flags in presence of an environment
         # variable ${CXXFLAGS}. Most notably, this would build botan with
         # disabled compiler optimizations.
-        self.extra_cxxflags = self._cxxflags
+        self._extra_cxxflags = self._cxxflags
         self.buildenv.unset('CXXFLAGS')
         VirtualBuildEnv(self).generate()
 
@@ -320,8 +320,8 @@ class BotanConan(ConanFile):
             macos_sdk_path = '-isysroot {}'.format(XCRun(self).sdk_path)
             botan_extra_cxx_flags.append(macos_sdk_path)
 
-        if self.extra_cxxflags:
-            botan_extra_cxx_flags.append(self.extra_cxxflags)
+        if self._extra_cxxflags:
+            botan_extra_cxx_flags.append(self._extra_cxxflags)
 
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
