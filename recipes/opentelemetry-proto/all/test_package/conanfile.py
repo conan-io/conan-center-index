@@ -1,6 +1,8 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
+from conan.tools.files import save, load
+from conan.tools.layout import basic_layout
 
 
 class TestPackageConan(ConanFile):
@@ -8,17 +10,15 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def layout(self):
-        pass
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def test(self):
-        if conan_version.major >= 2:
-            res_folder = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root")
-        else:
-            # TODO: to remove in conan v2
-            res_folder = self.deps_user_info["opentelemetry-proto"].proto_root
+    def generate(self):
+        save(self, "proto_root", self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root"))
 
+    def test(self):
+        res_folder = load(self, "proto_root")
         proto_path = os.path.join(res_folder, "opentelemetry", "proto", "common", "v1", "common.proto")
         assert os.path.isfile(proto_path)
