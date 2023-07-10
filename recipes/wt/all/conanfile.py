@@ -232,11 +232,17 @@ class WtConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
         replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
         replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
         if self.settings.os != "Windows":
             replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
+
+        if self.options.with_ssl:
+            # Ensure the conan-generated config is used for OpenSSL when required as a dependency
+            replace_in_file(self, cmakelists, "find_package(OpenSSL)", "find_package(OpenSSL CONFIG REQUIRED)")
+        else:
+            # Avoid searching for OpenSSL if it is not required
+            replace_in_file(self, cmakelists, "find_package(OpenSSL)", "")
 
         # Do not pollute rpath of shared libs of the install tree on macOS please
         replace_in_file(self,
