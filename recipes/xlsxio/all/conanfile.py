@@ -107,11 +107,8 @@ class XlsxioConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "xlsxio")
         self.cpp_info.set_property("pkg_config_name", "xlsxio")
 
-        ziplib = None
-        if self.options.with_libzip:
-            ziplib = "libzip::libzip"
-        else:
-            ziplib = "minizip::minizip"
+        ziplib = "libzip::libzip" if self.options.with_libzip else "minizip::minizip"
+        xlsxio_macro = "BUILD_XLSXIO_SHARED" if self.options.shared else "BUILD_XLSXIO_STATIC"
 
         self.cpp_info.components["xlsxio_read"].set_property("cmake_target_name", "xlsxio::xlsxio_read")
         self.cpp_info.components["xlsxio_read"].set_property("cmake_module_target_name", "xlsxio::xlsxio_read")
@@ -120,6 +117,7 @@ class XlsxioConan(ConanFile):
         self.cpp_info.components["xlsxio_read"].requires = ["expat::expat", ziplib]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["xlsxio_read"].system_libs.append("pthread")
+        self.cpp_info.components["xlsxio_read"].defines.append(xlsxio_macro)
 
         self.cpp_info.components["xlsxio_write"].set_property("cmake_target_name", "xlsxio::xlsxio_write")
         self.cpp_info.components["xlsxio_write"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write")
@@ -128,6 +126,7 @@ class XlsxioConan(ConanFile):
         self.cpp_info.components["xlsxio_write"].requires = ["expat::expat", ziplib]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["xlsxio_write"].system_libs.append("pthread")
+        self.cpp_info.components["xlsxio_write"].defines.append(xlsxio_macro)
 
         if self.options.with_wide:
             self.cpp_info.components["xlsxio_readw"].set_property("cmake_target_name", "xlsxio::xlsxio_readw")
@@ -137,6 +136,7 @@ class XlsxioConan(ConanFile):
             self.cpp_info.components["xlsxio_readw"].requires = ["expat::expat", ziplib]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["xlsxio_readw"].system_libs.append("pthread")
+            self.cpp_info.components["xlsxio_readw"].defines.append(xlsxio_macro)
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "xlsxio"
