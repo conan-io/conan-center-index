@@ -146,6 +146,8 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
         self.cpp_info.set_property("cmake_target_name", "CycloneDDS::CycloneDDS")
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS")
+        # TODO: back to global scope in conan v2
+        self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
 
         requires = []
         if self.options.with_shm:
@@ -171,17 +173,11 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "CycloneDDS"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "CycloneDDS"
         self.cpp_info.names["cmake_find_package"] = "CycloneDDS"
         self.cpp_info.names["cmake_find_package_multi"] = "CycloneDDS"
-        self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
         self.cpp_info.components["CycloneDDS"].names["cmake_find_package"] = "ddsc"
         self.cpp_info.components["CycloneDDS"].names["cmake_find_package_multi"] = "ddsc"
-        self.cpp_info.components["CycloneDDS"].build_modules["cmake_find_package"] = build_modules
-        self.cpp_info.components["CycloneDDS"].build_modules["cmake_find_package_multi"] = build_modules
         self.cpp_info.components["CycloneDDS"].set_property("cmake_target_name", "CycloneDDS::ddsc")
-        self.cpp_info.components["CycloneDDS"].set_property("cmake_file_name", "CycloneDDS::ddsc")
         self.cpp_info.components["CycloneDDS"].set_property("pkg_config_name", "CycloneDDS")
         if self._has_idlc():
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
@@ -190,5 +186,3 @@ class CycloneDDSConan(ConanFile):
             self.cpp_info.components["idl"].names["cmake_find_package_multi"] = "idl"
             self.cpp_info.components["idl"].set_property("cmake_target_name", "CycloneDDS::idl")
             self.cpp_info.components["idl"].set_property("cmake_file_name", "CycloneDDS::idl")
-            self.cpp_info.components["idl"].build_modules["cmake_find_package"] = build_modules
-            self.cpp_info.components["idl"].build_modules["cmake_find_package_multi"] = build_modules
