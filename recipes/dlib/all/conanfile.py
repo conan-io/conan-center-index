@@ -70,21 +70,21 @@ class DlibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.40")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.38.5")
         if self.options.with_openblas:
-            self.requires("openblas/0.3.17")
+            self.requires("openblas/0.3.20")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
