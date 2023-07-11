@@ -1,9 +1,10 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import export_conandata_patches, apply_conandata_patches
 import functools
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.53.0"
 
 
 class Librasterlite2Conan(ConanFile):
@@ -52,8 +53,7 @@ class Librasterlite2Conan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,40 +61,40 @@ class Librasterlite2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
-        self.requires("cairo/1.17.4")
+        self.requires("cairo/1.17.6")
         self.requires("freetype/2.11.1")
         self.requires("giflib/5.2.1")
         self.requires("libcurl/7.80.0")
         self.requires("libgeotiff/1.7.1")
-        self.requires("libjpeg/9d")
-        self.requires("libpng/1.6.37")
+        self.requires("libjpeg/9e")
+        self.requires("libpng/1.6.40")
         self.requires("libspatialite/5.0.1")
         self.requires("libtiff/4.3.0")
-        self.requires("libxml2/2.9.13")
-        self.requires("sqlite3/3.38.1")
-        self.requires("zlib/1.2.12")
+        self.requires("libxml2/2.9.14")
+        self.requires("sqlite3/3.38.5")
+        self.requires("zlib/1.2.13")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.2.4")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.2.10")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
 
     def validate(self):
         if self._is_msvc:
             raise ConanInvalidConfiguration("Visual Studio not supported yet")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        self.build_requires("libtool/2.4.7")
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -104,8 +104,7 @@ class Librasterlite2Conan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # Disable tests, tools and examples
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
                               "SUBDIRS = headers src test tools examples",
