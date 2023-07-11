@@ -12,10 +12,11 @@ required_conan_version = ">=1.54.0"
 class HighwayConan(ConanFile):
     name = "highway"
     description = "Performance-portable, length-agnostic SIMD with runtime dispatch"
-    topics = ("simd",)
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/highway"
+    topics = ("simd", "neon", "avx", "sse",)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,6 +50,7 @@ class HighwayConan(ConanFile):
     def configure(self):
         if Version(self.version) < "0.16.0":
             del self.options.shared
+            self.package_type = "static-library"
         elif self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -71,6 +73,7 @@ class HighwayConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["HWY_ENABLE_EXAMPLES"] = False
+        tc.variables["HWY_ENABLE_TESTS"] = False
         tc.generate()
 
     def _patch_sources(self):
@@ -93,6 +96,7 @@ class HighwayConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["hwy"].set_property("pkg_config_name", "libhwy")
