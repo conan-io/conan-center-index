@@ -1,3 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c615094..b10d9c9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -164,7 +164,7 @@ endif()
+ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+   # Enable C++11 support to use std::atomic
+-  if(CASS_USE_STD_ATOMIC)
++  if(1)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+   endif()
+ 
 diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
 index 9052472..3f65adb 100644
 --- a/cmake/Dependencies.cmake
