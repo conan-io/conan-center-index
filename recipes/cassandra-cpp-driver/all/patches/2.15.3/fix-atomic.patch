@@ -12,12 +12,12 @@ index 2ad0103..f977bf9 100644
 -  MEMORY_ORDER_RELEASE = std::memory_order_release,
 -  MEMORY_ORDER_ACQ_REL = std::memory_order_acq_rel,
 -  MEMORY_ORDER_SEQ_CST = std::memory_order_seq_cst
-+  MEMORY_ORDER_RELAXED = static_cast<int>(std::memory_order_relaxed),
-+  MEMORY_ORDER_CONSUME = static_cast<int>(std::memory_order_consume),
-+  MEMORY_ORDER_ACQUIRE = static_cast<int>(std::memory_order_acquire),
-+  MEMORY_ORDER_RELEASE = static_cast<int>(std::memory_order_release),
-+  MEMORY_ORDER_ACQ_REL = static_cast<int>(std::memory_order_acq_rel),
-+  MEMORY_ORDER_SEQ_CST = static_cast<int>(std::memory_order_seq_cst)
++  MEMORY_ORDER_RELAXED = static_cast<std::underlying_type<std::memory_order>::type>(std::memory_order_relaxed),
++  MEMORY_ORDER_CONSUME = static_cast<std::underlying_type<std::memory_order>::type>(std::memory_order_consume),
++  MEMORY_ORDER_ACQUIRE = static_cast<std::underlying_type<std::memory_order>::type>(std::memory_order_acquire),
++  MEMORY_ORDER_RELEASE = static_cast<std::underlying_type<std::memory_order>::type>(std::memory_order_release),
++  MEMORY_ORDER_ACQ_REL = static_cast<std::underlying_type<std::memory_order>::type>(std::memory_order_acq_rel),
++  MEMORY_ORDER_SEQ_CST = static_cast<std::underlying_type<std::memory_order>::type>(std::memory_order_seq_cst)
  };
 
  template <class T>

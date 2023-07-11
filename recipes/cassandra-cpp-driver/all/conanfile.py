@@ -57,7 +57,7 @@ class CassandraCppDriverConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libuv/1.44.2")
+        self.requires("libuv/1.46.0")
         self.requires("http_parser/2.9.4")
         self.requires("rapidjson/cci.20220822")
 
@@ -69,7 +69,7 @@ class CassandraCppDriverConan(ConanFile):
             self.requires("zlib/1.2.13")
 
         if self.options.use_atomic == "boost":
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
