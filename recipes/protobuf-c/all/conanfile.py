@@ -57,8 +57,8 @@ class ProtobufCConan(ConanFile):
 
     def package_id(self):
         # INFO: Protobuf-C provides a C library interface and an executable only.
-        self.info.settings.rm_safe("compiler.libcxx")
-        self.info.settings.rm_safe("compiler.cppstd")
+        del self.info.settings.compiler.libcxx
+        del self.info.settings.compiler.cppstd
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -117,6 +117,6 @@ class ProtobufCConan(ConanFile):
             self.cpp_info.builddirs.append(self._cmake_install_base_path)
             # TODO: This won't be needed once upstream PR (https://github.com/protobuf-c/protobuf-c/pull/555) gets merged
             self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_install_base_path, "protobuf-c.cmake")])
-
+            self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
             # TODO: Remove after dropping Conan 1.x
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

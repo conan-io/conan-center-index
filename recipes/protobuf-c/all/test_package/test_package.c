@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "hero.pb-c.h"
+#include "protobuf-c/protobuf-c.h"
 
 int main()
 {
@@ -8,6 +10,7 @@ int main()
     hero.name = "the_storyteller";
 
     printf("The hero's name is %s.\n", hero.name);
+    printf("Protobuf-C version: %s\n", protobuf_c_version());
 
-    return 0;
+    return EXIT_SUCCESS;
 }
