@@ -131,14 +131,10 @@ class CycloneDDSConan(ConanFile):
         rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
         copy(self, "CycloneDDS_idlc.cmake",
                    src=os.path.join(self.source_folder, os.pardir, "cmake"),
-                   dst=os.path.join(self.package_folder, self._module_path, "CycloneDDS"))
+                   dst=os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
         if self.settings.os == "Windows":
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
-
-    @property
-    def _module_path(self):
-        return os.path.join("lib", "cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
@@ -146,7 +142,6 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS")
         # TODO: back to global scope in conan v2
         self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
-
         requires = []
         if self.options.with_shm:
             requires.append("iceoryx::iceoryx_binding_c")
@@ -165,8 +160,8 @@ class CycloneDDSConan(ConanFile):
 
         # Provide CycloneDDS::idlc target
         build_modules = [
-            os.path.join(self._module_path, "CycloneDDS", "CycloneDDS_idlc.cmake"),
-            os.path.join(self._module_path, "CycloneDDS", "idlc", "Generate.cmake"),
+            os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
+            os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
