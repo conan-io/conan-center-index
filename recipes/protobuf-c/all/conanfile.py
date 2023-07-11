@@ -81,13 +81,10 @@ class ProtobufCConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_PROTO3"] = self.options.with_proto3
         tc.cache_variables["BUILD_PROTOC"] = self.options.with_protoc
-        # FIXME: Add shared library support. It was just too hairy to figure out initially
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_TESTS"] = False
-        tc.cache_variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.generate()
         tc = CMakeDeps(self)
-        tc.set_property("protobuf", "cmake_find_mode", "both")
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
