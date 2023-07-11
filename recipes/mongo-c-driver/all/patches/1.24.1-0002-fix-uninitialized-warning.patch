@@ -1,0 +1,13 @@
+diff --git a/src/libbson/src/bson/bson-iter.c b/src/libbson/src/bson/bson-iter.c
+index 00aa5c5..38e9c2b 100644
+--- a/src/libbson/src/bson/bson-iter.c
++++ b/src/libbson/src/bson/bson-iter.c
+@@ -2146,7 +2146,7 @@ bson_iter_visit_all (bson_iter_t *iter,             /* INOUT */
+ 
+    if (iter->err_off) {
+       if (unsupported && visitor->visit_unsupported_type &&
+-          bson_utf8_validate (key, strlen (key), false)) {
++          key != NULL && bson_utf8_validate (key, strlen (key), false)) {
+          visitor->visit_unsupported_type (iter, key, bson_type, data);
+          return false;
+       }
