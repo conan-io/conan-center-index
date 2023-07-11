@@ -164,6 +164,7 @@ class CycloneDDSConan(ConanFile):
             os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
+        self.cpp_info.build_dirs = [os.path.join("lib", "cmake")]
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "CycloneDDS"
