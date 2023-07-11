@@ -141,8 +141,6 @@ class CycloneDDSConan(ConanFile):
         return os.path.join("lib", "cmake")
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_module_file_name", "CycloneDDS")
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
         self.cpp_info.set_property("cmake_target_name", "CycloneDDS::CycloneDDS")
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS")
