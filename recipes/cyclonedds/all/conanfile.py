@@ -178,4 +178,3 @@ class CycloneDDSConan(ConanFile):
             self.cpp_info.components["idl"].names["cmake_find_package"] = "idl"
             self.cpp_info.components["idl"].names["cmake_find_package_multi"] = "idl"
             self.cpp_info.components["idl"].set_property("cmake_target_name", "CycloneDDS::idl")
-            self.cpp_info.components["idl"].set_property("cmake_file_name", "CycloneDDS::idl")
