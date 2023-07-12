@@ -49,7 +49,7 @@ class LibIdnConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
