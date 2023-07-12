@@ -315,6 +315,7 @@ required_for_references:
 - gperf
 - gperftools
 - graphene
+- graphthewy
 - greatest
 - grpc
 - grpc-proto
@@ -370,6 +371,7 @@ required_for_references:
 - jsoncpp
 - jsonnet
 - jwt-cpp
+- jxrlib
 - kainjow-mustache
 - kangaru
 - keychain
@@ -510,6 +512,7 @@ required_for_references:
 - lua
 - luau
 - lunasvg
+- luple
 - lz4
 - lzma_sdk
 - lzo
@@ -610,6 +613,7 @@ required_for_references:
 - optional-lite
 - opus
 - opusfile
+- orcania
 - osqp
 - out_ptr
 - p-ranav-glob
@@ -734,6 +738,7 @@ required_for_references:
 - strong_type
 - svgwrite
 - symengine
+- szip
 - tabulate
 - taocpp-json
 - taocpp-pegtl
