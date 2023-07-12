@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 import os
@@ -83,6 +84,9 @@ class OpenblasConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
 
         tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
