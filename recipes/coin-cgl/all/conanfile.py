@@ -49,7 +49,7 @@ class CoinCglConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.6")
+        self.requires("coin-utils/2.11.9")
         self.requires("coin-osi/0.108.7")
         self.requires("coin-clp/1.17.7")
 
