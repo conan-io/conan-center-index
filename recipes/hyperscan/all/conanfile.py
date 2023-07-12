@@ -89,6 +89,7 @@ class HyperscanConan(ConanFile):
         tc.variables["BUILD_AVX512"] = self.options.build_avx512
         tc.variables["FAT_RUNTIME"] = self.options.fat_runtime
         tc.variables["BUILD_CHIMERA"] = self.options.build_chimera
+        tc.variables["BUILD_EXAMPLES"] = False
         if self.options.dump_support != "auto":
             tc.variables["DUMP_SUPPORT"] = self.options.dump_support
         tc.generate()
