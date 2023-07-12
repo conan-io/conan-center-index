@@ -57,8 +57,10 @@ class ProtobufCConan(ConanFile):
 
     def package_id(self):
         # INFO: Protobuf-C provides a C library interface and an executable only.
-        del self.info.settings.compiler.libcxx
-        del self.info.settings.compiler.cppstd
+        if self.info.settings.get_safe("compiler.libcxx"):
+            del self.info.settings.compiler.libcxx
+        if self.info.settings.get_safe("compiler.cppstd"):
+            del self.info.settings.compiler.cppstd
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -81,7 +83,6 @@ class ProtobufCConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_PROTO3"] = self.options.with_proto3
         tc.cache_variables["BUILD_PROTOC"] = self.options.with_protoc
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_TESTS"] = False
         tc.generate()
         tc = CMakeDeps(self)
