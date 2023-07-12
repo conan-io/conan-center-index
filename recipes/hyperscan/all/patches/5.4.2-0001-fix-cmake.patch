@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7757916..1059ba1 100644
+index 7757916..6f05b5b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -6,7 +6,7 @@ set (HS_MINOR_VERSION 4)
@@ -126,7 +126,20 @@ index 7757916..1059ba1 100644
  if (NOT CORRECT_PCRE_VERSION)
      message(STATUS "PCRE ${PCRE_REQUIRED_VERSION} or above not found")
  endif()
-@@ -562,14 +563,14 @@ set(RAGEL_C_FLAGS "-Wno-unused")
+@@ -548,10 +549,12 @@ if (CORRECT_PCRE_VERSION AND PCRE_BUILD_SOURCE AND BUILD_STATIC_LIBS)
+     set(BUILD_CHIMERA TRUE)
+ endif()
+ 
++if(0)
+ add_subdirectory(unit)
+ if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
+     add_subdirectory(tools)
+ endif()
++endif()
+ if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
+     add_subdirectory(chimera)
+ endif()
+@@ -562,14 +565,14 @@ set(RAGEL_C_FLAGS "-Wno-unused")
  endif()
  
  set_source_files_properties(
@@ -143,7 +156,7 @@ index 7757916..1059ba1 100644
      PROPERTIES
          COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
-@@ -1230,28 +1231,28 @@ else (FAT_RUNTIME)
+@@ -1230,28 +1233,28 @@ else (FAT_RUNTIME)
         list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
         set_target_properties(hs_exec_core2 PROPERTIES
             COMPILE_FLAGS "-march=core2"
@@ -176,7 +189,7 @@ index 7757916..1059ba1 100644
                 )
         endif (BUILD_AVX512)
         if (BUILD_AVX512VBMI)
-@@ -1259,7 +1260,7 @@ else (FAT_RUNTIME)
+@@ -1259,7 +1262,7 @@ else (FAT_RUNTIME)
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_avx512vbmi>)
             set_target_properties(hs_exec_avx512vbmi PROPERTIES
                 COMPILE_FLAGS "${ICELAKE_FLAG}"
@@ -185,7 +198,7 @@ index 7757916..1059ba1 100644
                 )
         endif (BUILD_AVX512VBMI)
  
-@@ -1294,14 +1295,14 @@ else (FAT_RUNTIME)
+@@ -1294,14 +1297,14 @@ else (FAT_RUNTIME)
          set_target_properties(hs_exec_shared_core2 PROPERTIES
              COMPILE_FLAGS "-march=core2"
              POSITION_INDEPENDENT_CODE TRUE
@@ -202,7 +215,7 @@ index 7757916..1059ba1 100644
              )
          add_library(hs_exec_shared_avx2 OBJECT ${hs_exec_SRCS} ${hs_exec_avx2_SRCS})
          list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_avx2>)
-@@ -1317,7 +1318,7 @@ else (FAT_RUNTIME)
+@@ -1317,7 +1320,7 @@ else (FAT_RUNTIME)
              set_target_properties(hs_exec_shared_avx512 PROPERTIES
                  COMPILE_FLAGS "${SKYLAKE_FLAG}"
                  POSITION_INDEPENDENT_CODE TRUE
@@ -211,7 +224,7 @@ index 7757916..1059ba1 100644
                  )
          endif (BUILD_AVX512)
          if (BUILD_AVX512VBMI)
-@@ -1326,7 +1327,7 @@ else (FAT_RUNTIME)
+@@ -1326,7 +1329,7 @@ else (FAT_RUNTIME)
              set_target_properties(hs_exec_shared_avx512vbmi PROPERTIES
                  COMPILE_FLAGS "${ICELAKE_FLAG}"
                  POSITION_INDEPENDENT_CODE TRUE
