@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         return os.path.join(self.build_folder, "protobuf-c_with_protoc")
 
     def _has_protoc_support(self):
-        load(self, self._probuf_c_option_file) == "True"
+        return load(self, self._probuf_c_option_file) == "True"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
