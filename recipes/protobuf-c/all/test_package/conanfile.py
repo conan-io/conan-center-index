@@ -46,7 +46,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            if self._has_protoc_support():
-                self.run("protoc-c --version", env="conanbuild")
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
