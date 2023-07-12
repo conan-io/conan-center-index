@@ -179,6 +179,7 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].set_property("pkg_config_name", "CycloneDDS")
         if self._has_idlc():
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.env_info.PATH.append(os.path.join(self.package_folder, "lib"))
             self.cpp_info.components["idl"].libs = ["cycloneddsidl"]
             self.cpp_info.components["idl"].names["cmake_find_package"] = "idl"
             self.cpp_info.components["idl"].names["cmake_find_package_multi"] = "idl"
