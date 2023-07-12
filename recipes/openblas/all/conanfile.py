@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs
+from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.errors import ConanInvalidConfiguration
 import os
 import functools
 
@@ -53,7 +52,10 @@ class OpenblasConan(ConanFile):
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
+            self.output.warning("Cross-building has only been tested for x86_64 to armv8. Proceed with caution.")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self,
@@ -113,6 +115,8 @@ class OpenblasConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
+        
         if Version(self.version) < "0.3.21":
             if Version(self.version) >= "0.3.12":
                 search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
