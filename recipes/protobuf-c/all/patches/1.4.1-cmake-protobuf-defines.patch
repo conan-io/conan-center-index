@@ -1,0 +1,28 @@
+diff --git a/build-cmake/CMakeLists.txt b/build-cmake/CMakeLists.txt
+index 57059bf..b45c484 100644
+--- a/build-cmake/CMakeLists.txt
++++ b/build-cmake/CMakeLists.txt
+@@ -58,10 +58,6 @@ INCLUDE_DIRECTORIES(${MAIN_DIR}/protobuf-c)
+ IF(BUILD_PROTOC)
+ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}) # for generated files
+ 
+-if (MSVC AND NOT BUILD_SHARED_LIBS)
+-	SET(Protobuf_USE_STATIC_LIBS ON)
+-endif (MSVC AND NOT BUILD_SHARED_LIBS)
+-
+ FIND_PACKAGE(Protobuf CONFIG REQUIRED)
+ 
+ if (BUILD_PROTO3)
+@@ -98,12 +94,6 @@ ADD_EXECUTABLE(protoc-gen-c ${PROTOC_GEN_C_SRC} protobuf-c/protobuf-c.pb.cc prot
+ 
+ TARGET_LINK_LIBRARIES(protoc-gen-c protobuf::libprotoc protobuf::libprotobuf)
+ 
+-IF (MSVC AND BUILD_SHARED_LIBS)
+-	TARGET_COMPILE_DEFINITIONS(protoc-gen-c PRIVATE -DPROTOBUF_USE_DLLS)
+-	GET_FILENAME_COMPONENT(PROTOBUF_DLL_DIR ${Protobuf_PROTOC_EXECUTABLE} DIRECTORY)
+-	FILE(GLOB PROTOBUF_DLLS ${PROTOBUF_DLL_DIR}/*.dll)
+-	FILE(COPY ${PROTOBUF_DLLS} DESTINATION ${CMAKE_BINARY_DIR})
+-ENDIF (MSVC AND BUILD_SHARED_LIBS)
+ 
+ IF(CMAKE_HOST_UNIX)
+ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
