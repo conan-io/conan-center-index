@@ -68,9 +68,9 @@ class SobjectizerConan(ConanFile):
 
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
-            self.output.warn(
+            self.output.warning(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
+            self.output.warning(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
