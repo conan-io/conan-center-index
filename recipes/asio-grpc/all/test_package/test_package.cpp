@@ -11,7 +11,7 @@
 #endif
 
 int main() {
-  agrpc::GrpcContext grpc_context{std::make_unique<grpc::CompletionQueue>()};
+  agrpc::GrpcContext grpc_context;
 
   boost::asio::post(grpc_context, [] {});
 
