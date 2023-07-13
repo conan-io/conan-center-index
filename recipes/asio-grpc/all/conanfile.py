@@ -11,13 +11,14 @@ required_conan_version = ">=1.50.0"
 
 class AsioGrpcConan(ConanFile):
     name = "asio-grpc"
-    description = ("Asynchronous gRPC with Asio/unified executors")
-    homepage = "https://github.com/Tradias/asio-grpc"
-    url = "https://github.com/conan-io/conan-center-index"
+    description = "Asynchronous gRPC with Asio/unified executors"
     license = "Apache-2.0"
-    topics = ("cpp", "asynchronous", "grpc", "asio", "asynchronous-programming", "cpp17", "coroutine", "cpp20", "executors")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Tradias/asio-grpc"
+    topics = ("cpp", "asynchronous", "grpc", "asio", "asynchronous-programming", "cpp17", "coroutine", "cpp20", "executors", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
     options = {
         "backend": ["boost", "asio", "unifex"],
         "local_allocator": ["auto", "memory_resource", "boost_container", "recycling_allocator"],
@@ -26,6 +27,7 @@ class AsioGrpcConan(ConanFile):
         "backend": "boost",
         "local_allocator": "auto",
     }
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -39,16 +41,6 @@ class AsioGrpcConan(ConanFile):
             "clang": "6",
             "apple-clang": "11",
         }
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
     def configure(self):
         self._local_allocator_option = self.options.local_allocator
@@ -78,6 +70,21 @@ class AsioGrpcConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+        else:
+            self.output.warning(
+                f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports"
+                f" C++{self._min_cppstd}."
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -98,8 +105,11 @@ class AsioGrpcConan(ConanFile):
         rm(self, "asio-grpc*", os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
-        
+
         self.cpp_info.requires = ["grpc::grpc++_unsecure"]
         if self.options.backend == "boost":
             self.cpp_info.defines = ["AGRPC_BOOST_ASIO"]
