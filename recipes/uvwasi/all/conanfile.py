@@ -47,6 +47,7 @@ class UVWasiConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["WITH_SYSTEM_LIBUV"] = True
         tc.variables["UVWASI_BUILD_TESTS"] = False
         tc.generate()
