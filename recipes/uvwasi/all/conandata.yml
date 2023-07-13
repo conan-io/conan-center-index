@@ -1,0 +1,10 @@
+sources:
+  "0.0.18":
+    url: "https://github.com/nodejs/uvwasi/archive/refs/tags/v0.0.18.tar.gz"
+    sha256: "4e5d2447df0922eda42488c411cd07806f0a6b55e7f98edecd5562b317daf8e3"
+patches:
+  "0.0.18":
+    - patch_file: "patches/0.0.18-0001-fix-cmake.patch"
+      patch_description: "add installation, disable CMAKE_MACOSX_RPATH, separate static and shared build"
+      patch_type: "conan"
+      patch_source: "https://github.com/nodejs/uvwasi/pull/210"
