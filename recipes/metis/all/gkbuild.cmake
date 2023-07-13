@@ -25,23 +25,23 @@ endif()
 if(CYGWIN)
   set(GK_COPTIONS "${GK_COPTIONS} -DCYGWIN")
 endif()
-if(CMAKE_COMPILER_IS_GNUCC)
-# GCC opts.
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  # GCC opts.
   set(GK_COPTIONS "${GK_COPTIONS} -std=c99 -fno-strict-aliasing")
-if(VALGRIND)
-  set(GK_COPTIONS "${GK_COPTIONS} -march=x86-64 -mtune=generic")
-else()
-  # -march=native is not a valid flag on PPC:
-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "power|ppc|powerpc|ppc64|powerpc64" OR (APPLE AND CMAKE_OSX_ARCHITECTURES MATCHES "ppc|ppc64"))
-    set(GK_COPTIONS "${GK_COPTIONS} -mtune=native")
+  if(VALGRIND)
+    set(GK_COPTIONS "${GK_COPTIONS} -march=x86-64 -mtune=generic")
   else()
-    set(GK_COPTIONS "${GK_COPTIONS} -march=native")
+    # -march=native is not a valid flag on PPC:
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "power|ppc|powerpc|ppc64|powerpc64" OR (APPLE AND CMAKE_OSX_ARCHITECTURES MATCHES "ppc|ppc64"))
+      set(GK_COPTIONS "${GK_COPTIONS} -mtune=native")
+    else()
+      set(GK_COPTIONS "${GK_COPTIONS} -march=native")
+    endif()
   endif()
-endif()
-# GCC warnings.
+  # GCC warnings.
   set(GK_COPTIONS "${GK_COPTIONS} -Werror -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -Wno-unused-label")
 elseif(${CMAKE_C_COMPILER_ID} MATCHES "Sun")
-# Sun insists on -xc99.
+  # Sun insists on -xc99.
   set(GK_COPTIONS "${GK_COPTIONS} -xc99")
 endif()
 
