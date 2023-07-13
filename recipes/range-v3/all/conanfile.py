@@ -17,7 +17,7 @@ class Rangev3Conan(ConanFile):
     homepage = "https://github.com/ericniebler/range-v3"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
-    description = "Experimental range library for C++11/14/17"
+    description = "Range library for C++14/17/20, basis for C++20's std::ranges"
     topics = ("range", "range-library", "proposal", "iterator", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
