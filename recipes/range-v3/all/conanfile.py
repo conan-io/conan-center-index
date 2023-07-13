@@ -36,7 +36,7 @@ class Rangev3Conan(ConanFile):
             return "17"
         else:
             return "14"
-    
+
     def layout(self):
         basic_layout(self)
 
@@ -67,6 +67,8 @@ class Rangev3Conan(ConanFile):
             self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.bindirs = []
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package"] = "meta"
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package_multi"] = "meta"
         if is_msvc(self):
