@@ -26,6 +26,7 @@ class CycloneDDSConan(ConanFile):
         "with_ssl": [True, False],
         "with_shm" : [True, False],
         "enable_security" : [True, False],
+        "enable_discovery" : [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,6 +34,7 @@ class CycloneDDSConan(ConanFile):
         "with_ssl": False,
         "with_shm": False,
         "enable_security": False,
+        "enable_discovery": True,
     }
 
     short_paths = True
@@ -71,7 +73,7 @@ class CycloneDDSConan(ConanFile):
         if self.options.with_shm:
             self.requires("iceoryx/2.0.2")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.options.enable_security and not self.options.shared:
@@ -85,20 +87,8 @@ class CycloneDDSConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.2")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -117,6 +107,8 @@ class CycloneDDSConan(ConanFile):
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         tc.variables["ENABLE_SHM"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
+        tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
+        tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -143,7 +135,7 @@ class CycloneDDSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
-        self.cpp_info.set_property("cmake_target_name", "CycloneDDS::ddsc")
+        self.cpp_info.set_property("cmake_target_name", "CycloneDDS::CycloneDDS")
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS")
         # TODO: back to global scope in conan v2
         self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]

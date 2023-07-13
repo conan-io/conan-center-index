@@ -3,7 +3,6 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -16,7 +15,8 @@ class GsoapConan(ConanFile):
     license = ("gSOAP-1.3b", "GPL-2.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/gsoap2"
-    topics = ("gsoap", "logging")
+    topics = ("logging",)
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -49,22 +49,21 @@ class GsoapConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
             self.requires("zlib/1.2.13")
 
     def build_requirements(self):
         if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
             self.tool_requires(f"gsoap/{self.version}")
 
-        if is_msvc(self, build_context=True):
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
-            self.tool_requires("bison/3.7.6")
+            self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)

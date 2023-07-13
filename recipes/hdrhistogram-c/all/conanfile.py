@@ -14,7 +14,7 @@ class HdrhistogramcConan(ConanFile):
     homepage = "https://github.com/HdrHistogram/HdrHistogram_c"
     description = "'C' port of High Dynamic Range (HDR) Histogram"
     topics = ("libraries", "c", "histogram")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -45,8 +45,7 @@ class HdrhistogramcConan(ConanFile):
         self.requires("zlib/1.2.13")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

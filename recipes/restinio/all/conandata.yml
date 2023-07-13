@@ -1,4 +1,7 @@
 sources:
+  "0.6.18":
+    url: "https://github.com/Stiffstream/restinio/archive/v.0.6.18.tar.gz"
+    sha256: "16fa041f4603746c6cd0f29ab126d02d220034535e7019c6ca1b8b9f58bfeee0"
   "0.6.17":
     url: "https://github.com/Stiffstream/restinio/archive/v.0.6.17.tar.gz"
     sha256: "0140b23f50bb964f6917d1f99205476eba92203dc586673bdf2ea48d7406f2c4"

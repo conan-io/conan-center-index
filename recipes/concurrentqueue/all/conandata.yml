@@ -1,10 +1,13 @@
 sources:
+  "1.0.4":
+    url: "https://github.com/cameron314/concurrentqueue/archive/refs/tags/v1.0.4.tar.gz"
+    sha256: "87fbc9884d60d0d4bf3462c18f4c0ee0a9311d0519341cac7cbd361c885e5281"
   "1.0.3":
-    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.3.zip
-    sha256: 5e9e229a1791e8299dcd4bd73ac1be1953424a903818feb7afd929eb16094ef5
+    url: "https://github.com/cameron314/concurrentqueue/archive/refs/tags/v1.0.3.tar.gz"
+    sha256: "eb37336bf9ae59aca7b954db3350d9b30d1cab24b96c7676f36040aa76e915e8"
   "1.0.2":
-    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.2.zip
-    sha256: 6dc85de0e38a014471fe3c653e3e21dc38a5f069cfc031a90fa59f0a45f7584f
+    url: "https://github.com/cameron314/concurrentqueue/archive/refs/tags/v1.0.2.tar.gz"
+    sha256: "c3aeb97c97169f743a53ca33812ea2ab61dd06dfd28319ca3f0a0771372fc7fc"
   "1.0.1":
-    url: https://github.com/cameron314/concurrentqueue/archive/v1.0.1.zip
-    sha256: b31dca11745ef331756109af838e3689462fbbc2c52dda9f7e1c416778f1f35b
+    url: "https://github.com/cameron314/concurrentqueue/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "7e715c793001e01851448320e8a416b80342b2e75db46d4c978e990a506060e6"

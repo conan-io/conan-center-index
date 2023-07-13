@@ -15,7 +15,7 @@ class CpuFeaturesConan(ConanFile):
     homepage = "https://github.com/google/cpu_features"
     description = "A cross platform C99 library to get cpu features at runtime."
     topics = ("cpu", "features", "cpuid")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,8 +43,7 @@ class CpuFeaturesConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

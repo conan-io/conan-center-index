@@ -7,7 +7,7 @@ find gklib from conan
  # Build libmetis.
 -add_library(metis ${METIS_LIBRARY_TYPE} ${GKlib_sources} ${metis_sources})
 +add_library(metis ${METIS_LIBRARY_TYPE} ${metis_sources})
-+find_package(gklib REQUIRED)
++find_package(gklib CONFIG REQUIRED)
 +target_link_libraries(metis PRIVATE gklib::gklib)
  if(UNIX)
 -  target_link_libraries(metis m)

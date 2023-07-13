@@ -18,6 +18,7 @@ class SentryBreakpadConan(ConanFile):
     license = "Apache-2.0"
     topics = ("breakpad", "error-reporting", "crash-reporting")
     provides = "breakpad"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -52,7 +53,9 @@ class SentryBreakpadConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.requires("linux-syscall-support/cci.20200813")
+            # linux-syscal-support is a public dependency
+            # see https://github.com/conan-io/conan-center-index/pull/16752#issuecomment-1487241864 
+            self.requires("linux-syscall-support/cci.20200813", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
