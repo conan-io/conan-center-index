@@ -38,7 +38,7 @@ class Rangev3Conan(ConanFile):
             return "14"
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
