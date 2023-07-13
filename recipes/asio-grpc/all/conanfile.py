@@ -22,10 +22,12 @@ class AsioGrpcConan(ConanFile):
     options = {
         "backend": ["boost", "asio", "unifex"],
         "local_allocator": ["auto", "memory_resource", "boost_container", "recycling_allocator"],
+        "grpc_link" : ["grpc++", "grpc++_unsecure", None]
     }
     default_options = {
         "backend": "boost",
         "local_allocator": "auto",
+        "grpc_link" : ["grpc++_unsecure"]
     }
     no_copy_source = True
 
@@ -109,8 +111,8 @@ class AsioGrpcConan(ConanFile):
         self.cpp_info.libdirs = []
 
         build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
-
-        self.cpp_info.requires = ["grpc::grpc++_unsecure"]
+        if self.options["grpc_link"] is not None:
+            self.cpp_info.requires = [f"grpc::{self.options['grpc_link']}"]
         if self.options.backend == "boost":
             self.cpp_info.defines = ["AGRPC_BOOST_ASIO"]
             self.cpp_info.requires.append("boost::headers")
