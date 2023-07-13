@@ -56,7 +56,7 @@ class SdbusCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libsystemd/253.3")
+        self.requires("libsystemd/253.6")
 
     def validate(self):
         if self.info.settings.os != "Linux":
