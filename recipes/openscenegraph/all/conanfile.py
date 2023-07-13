@@ -125,18 +125,18 @@ class OpenSceneGraphConanFile(ConanFile):
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
             self.requires("asio/1.22.1")
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.81.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.83.1")
+            self.requires("libcurl/8.0.1")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.6")
         if self.options.with_freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
         if self.options.with_gdal:
             self.requires("gdal/3.4.3")
         if self.options.get_safe("with_gif"):
@@ -148,11 +148,11 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/9e")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.5")
+            self.requires("openexr/3.1.7")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.40")
         if self.options.with_tiff:
-            self.requires("libtiff/4.3.0")
+            self.requires("libtiff/4.5.1")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
 
