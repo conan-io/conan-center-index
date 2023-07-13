@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -89,6 +90,10 @@ class WasmMicroRuntimeConan(ConanFile):
             return 1 if value else 0
 
         tc = CMakeToolchain(self)
+        # FIXME: it should use assembler code instead of C++ on MSVC
+        if is_msvc(self):
+            tc.variables["WAMR_BUILD_INVOKE_NATIVE_GENERAL"] = 1
+
         # interpreters
         tc.variables["WAMR_BUILD_INTERP"] = is_enabled(self.options.with_interp)
         if self.options.with_interp:
@@ -123,6 +128,8 @@ class WasmMicroRuntimeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["iwasm" if self.options.shared else "vmlib"]
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("COMPILING_WASM_RUNTIME_API=0")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
