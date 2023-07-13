@@ -76,11 +76,11 @@ class METISConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["VALGRIND"] = self.options.with_valgrind
-        tc.variables["OPENMP"] = self.options.with_openmp
-        tc.variables["PCRE"] = self.options.with_pcre
-        tc.variables["GKREGEX"] = self.settings.os == "Windows" or self.options.enable_gkregex
-        tc.variables["GKRAND"] = self.options.enable_gkrand
+        tc.cache_variables["VALGRIND"] = self.options.with_valgrind
+        tc.cache_variables["OPENMP"] = self.options.with_openmp
+        tc.cache_variables["PCRE"] = self.options.with_pcre
+        tc.cache_variables["GKREGEX"] = self.settings.os == "Windows" or self.options.enable_gkregex
+        tc.cache_variables["GKRAND"] = self.options.enable_gkrand
         if self.settings.build_type == "Debug":
             tc.preprocessor_definitions["DEBUG"] = ""
         else:
