@@ -6,7 +6,6 @@
 
 int main() {
   dds_entity_t participant;
-  dds_entity_t topic;
 
   /* Create a Participant. */
   participant = dds_create_participant (DDS_DOMAIN_DEFAULT, NULL, NULL);
