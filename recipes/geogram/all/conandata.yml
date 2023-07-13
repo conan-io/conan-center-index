@@ -1,0 +1,11 @@
+sources:
+  "1.8.4":
+    # url: "https://github.com/BrunoLevy/geogram/archive/refs/tags/v1.8.4.tar.gz"
+    # sha256: "5453385c644b1a3411a0723281f40bef9cf9165984d0e0b08153d32508a1994b"
+    url: "https://github.com/BrunoLevy/geogram/releases/download/v1.8.4/geogram_1.8.4.tar.gz"
+    sha256: "98e9c2de1dfad795296ea62262c6b3d74000ef5d2cd903af33189592ea0a8a6f"
+patches:
+  "1.8.4":
+    - patch_file: "patches/0001-Map-VORPALINE_BUILD_DYNAMIC-to-BUILD_SHARED_LIBS.patch"
+      patch_description: "correct the order of cmake min and project"
+      patch_type: "conan"

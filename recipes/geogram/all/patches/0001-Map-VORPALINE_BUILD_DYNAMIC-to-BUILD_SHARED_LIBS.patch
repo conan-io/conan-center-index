@@ -1,0 +1,65 @@
+--- a/cmake/platforms/Darwin-aarch64-clang-dynamic/config.cmake
++++ b/cmake/platforms/Darwin-aarch64-clang-dynamic/config.cmake
+@@ -1,3 +1,3 @@
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Darwin-clang.cmake)
+ 
+--- a/cmake/platforms/Darwin-clang-dynamic/config.cmake
++++ b/cmake/platforms/Darwin-clang-dynamic/config.cmake
+@@ -1,5 +1,5 @@
+ set(VORPALINE_ARCH_64 true)
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Darwin-clang.cmake)
+ # Enable SSE3 instruction set
+ add_flags(CMAKE_CXX_FLAGS -m64 -msse3)
+--- a/cmake/platforms/Linux32-gcc-Raspberry/config.cmake
++++ b/cmake/platforms/Linux32-gcc-Raspberry/config.cmake
+@@ -1,4 +1,4 @@
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Linux-gcc.cmake)
+ 
+ set(ARM_FLAGS -mcpu=cortex-a53  -mfpu=neon-fp-armv8 -mfloat-abi=hard -mlittle-endian -munaligned-access)
+--- a/cmake/platforms/Linux64-clang-dynamic/config.cmake
++++ b/cmake/platforms/Linux64-clang-dynamic/config.cmake
+@@ -1,5 +1,5 @@
+ set(VORPALINE_ARCH_64 true)
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Linux-clang.cmake)
+ add_flags(CMAKE_CXX_FLAGS -m64)
+ add_flags(CMAKE_C_FLAGS -m64)
+--- a/cmake/platforms/Linux64-gcc-dynamic/config.cmake
++++ b/cmake/platforms/Linux64-gcc-dynamic/config.cmake
+@@ -1,5 +1,5 @@
+ set(VORPALINE_ARCH_64 true)
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Linux-gcc.cmake)
+ add_flags(CMAKE_CXX_FLAGS -m64)
+ add_flags(CMAKE_C_FLAGS -m64)
+--- a/cmake/platforms/Linux64-icc-dynamic/config.cmake
++++ b/cmake/platforms/Linux64-icc-dynamic/config.cmake
+@@ -1,5 +1,5 @@
+ set(VORPALINE_ARCH_64 true)
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Linux-icc.cmake)
+ add_flags(CMAKE_CXX_FLAGS -m64)
+ add_flags(CMAKE_C_FLAGS -m64)
+--- a/cmake/platforms/Win-vs-dynamic-generic/config.cmake
++++ b/cmake/platforms/Win-vs-dynamic-generic/config.cmake
+@@ -5,7 +5,7 @@ else()
+ set(VORPALINE_ARCH_32 true)
+ message(STATUS "Configuring 32 bits build")
+ endif()
+-set(VORPALINE_BUILD_DYNAMIC true)
++set(VORPALINE_BUILD_DYNAMIC ${BUILD_SHARED_LIBS})
+ include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Windows-vs.cmake)
+ 
+ 
+-- 
+2.41.0
+
