@@ -19,11 +19,10 @@ class DbgMacroConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def configure(self):
-        minimal_cpp_standard = "11"
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, minimal_cpp_standard)
+    def validate(self):
+        check_min_cppstd(self, 17)
 
+    def configure(self):
         if self.settings.compiler == "gcc" and int(f"{self.settings.compiler.version}") < 5:
             raise ConanInvalidConfiguration(
                 "dbg-macro can't be used by {0} {1}".format(
