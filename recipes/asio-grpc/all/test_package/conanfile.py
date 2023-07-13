@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.env import VirtualRunEnv
 import os
 
 
@@ -16,8 +17,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+
+        envvars = VirtualRunEnv(self).vars()
         cmake.configure()
-        cmake.build()
+        with envvars.apply():
+            cmake.build()
 
     def test(self):
         if can_run(self):
