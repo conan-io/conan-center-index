@@ -35,6 +35,7 @@ class StructoptConan(ConanFile):
             "Visual Studio": "15.0",
             "clang": "5",
             "apple-clang": "10",
+            "msvc": "191",
         }
 
     def export_sources(self):
