@@ -17,9 +17,17 @@ sources:
 patches:
   "1.50.2":
     - patch_file: "patches/v1.50.x/001-disable-cppstd-override.patch"
+      patch_description: "disable cpp std override"
+      patch_type: "portability"
   "1.48.4":
     - patch_file: "patches/v1.48.x/001-disable-cppstd-override.patch"
+      patch_description: "disable cpp std override"
+      patch_type: "portability"
   "1.47.5":
     - patch_file: "patches/v1.47.x/001-disable-cppstd-override.patch"
+      patch_description: "disable cpp std override"
+      patch_type: "portability"
   "1.46.7":
     - patch_file: "patches/v1.46.x/001-disable-cppstd-override.patch"
+      patch_description: "disable cpp std override"
+      patch_type: "portability"
