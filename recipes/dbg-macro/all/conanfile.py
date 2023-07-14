@@ -24,22 +24,31 @@ class DbgMacroConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 17
+ 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15.7",
+            "msvc": "193",
+        }
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
-
+ 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.compiler.get_safe("cppstd"): 
             check_min_cppstd(self, self._min_cppstd)
-
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration(
-                f"dbg-mcro can't be used by {self.settings.compiler} {self.settings.compiler.version}"
-            )
+ 
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
