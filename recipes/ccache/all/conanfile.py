@@ -68,6 +68,7 @@ class CcacheConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.15 <4]")
+        self.tool_requires("pkgconf/1.9.3") # for zstd
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -77,6 +78,7 @@ class CcacheConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
         tc.variables["HIREDIS_FROM_INTERNET"] = False
+        tc.variables["ZSTD_FROM_INTERNET"] = False
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
         tc.generate()
