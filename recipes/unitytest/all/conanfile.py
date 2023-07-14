@@ -1,18 +1,17 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import copy, get, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
 
 
-class UnityTestConan(ConanFile):
-    name = "unitytest"
+class UnityConan(ConanFile):
+    name = "unity"
     description = "Unity Test is a unit testing framework built for C, with a focus on working with embedded toolchains"
-    topics = ("unitytest", "unit-test", "tdd", "bdd")
-    license = "BSL-1.0"
-    homepage = "https://github.com/ThrowTheSwitch/Unity"
+    topics = ("unit-test", "tdd", "bdd", "testing")
+    license = "MIT"
+    homepage = "http://www.throwtheswitch.org"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -25,8 +24,8 @@ class UnityTestConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "fixture_extension": True,
-        "memory_extension": True,
+        "fixture_extension": False,
+        "memory_extension": False,
     }
 
     def config_options(self):
@@ -36,6 +35,8 @@ class UnityTestConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,8 +62,5 @@ class UnityTestConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "UnityTest")
-        self.cpp_info.set_property("cmake_target_name", "UnityTest::UnityTest")
         self.cpp_info.libs = ["unity"]
         self.cpp_info.includedirs = ["include", "include/unity"]
