@@ -67,7 +67,8 @@ class ExtracmakemodulesConan(ConanFile):
         self.info.clear()
 
     def package_info(self):
-        # this package is CMake files, it doesn't need an extra one generating
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.set_property("cmake_find_mode", "none")
 
