@@ -556,6 +556,7 @@ required_for_references:
 - mpg123
 - mppp
 - ms-gsl
+- msdf-atlas-gen
 - msgpack-c
 - msgpack-cxx
 - msys2
