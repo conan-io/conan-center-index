@@ -60,7 +60,7 @@ class Log4cxxConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("apr/[>=1.6]")
+        self.requires("apr/1.7.0")
         self.requires("apr-util/[>=1.6]")
         if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.requires("odbc/[>=2.3]")
