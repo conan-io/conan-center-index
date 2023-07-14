@@ -27,21 +27,41 @@ patches:
       patch_file: "patches/0.3.10-0001-Fix-libm-linking-and-fortran-detection.patch"
       patch_description: "Fix libm linking, fortran detection and intel fortran"
       patch_type: "conan"
+    -
+      patch_file: "patches/0.3.10-0002-Macro-collision-winnt-SDK.patch"
+      patch_description: "Add workaround for another macro name collision with Windows 10 SDK winnt.h"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/xianyi/OpenBLAS/pull/3276/files"
   "0.3.12":
     -
       patch_file: "patches/0.3.12-0001-Fix-libm-linking-and-fortran-detection.patch"
       patch_description: "Fix libm linking, fortran detection and intel fortran"
       patch_type: "conan"
+    -
+      patch_file: "patches/0.3.12-0002-Macro-collision-winnt-SDK.patch"
+      patch_description: "Add workaround for another macro name collision with Windows 10 SDK winnt.h"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/xianyi/OpenBLAS/pull/3276/files"
   "0.3.13":
     -
       patch_file: "patches/0.3.13-0001-Fix-libm-linking-and-fortran-detection.patch"
       patch_description: "Fix libm linking, fortran detection and intel fortran"
       patch_type: "conan"
+    -
+      patch_file: "patches/0.3.13-0002-Macro-collision-winnt-SDK.patch"
+      patch_description: "Add workaround for another macro name collision with Windows 10 SDK winnt.h"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/xianyi/OpenBLAS/pull/3276/files"
   "0.3.15":
     -
       patch_file: "patches/0.3.15-0001-Fix-libm-linking-and-fortran-detection.patch"
       patch_description: "Fix libm linking, fortran detection and intel fortran"
       patch_type: "conan"
+    -
+      patch_file: "patches/0.3.15-0002-Macro-collision-winnt-SDK.patch"
+      patch_description: "Add workaround for another macro name collision with Windows 10 SDK winnt.h"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/xianyi/OpenBLAS/pull/3276/files"
   "0.3.17":
     -
       patch_file: "patches/0.3.17-0001-Fix-libm-linking-and-fortran-detection.patch"
