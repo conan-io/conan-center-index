@@ -386,7 +386,8 @@ class QtConan(ConanFile):
             self.requires("xkbcommon/1.5.0")
             self.requires("xorg/system")
         if self.options.get_safe("opengl", "no") != "no":
-            self.requires("opengl/system")
+            if self.settings.os not in ["Android"]:
+                self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
@@ -1076,7 +1077,8 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
             if self.options.get_safe("opengl", "no") != "no":
-                gui_reqs.append("opengl::opengl")
+                if self.settings.os not in ["Android"]:
+                    gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
                 if is_apple_os(self):
@@ -1091,6 +1093,8 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
+            if self.settings.os == "Android":
+                self.cpp_info.components["qtGui"].system_libs.extend(["EGL", "GLESv2"])
 
             event_dispatcher_reqs = ["Core", "Gui"]
             if self.options.with_glib:
