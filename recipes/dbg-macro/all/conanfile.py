@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 
 class DbgMacroConan(ConanFile):
@@ -20,15 +21,16 @@ class DbgMacroConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        if self.settings.compiler.get_safe('cppstd'):
+            check_min_cppstd(self, 17)
 
-        if self.settings.compiler == "gcc" and int(f"{self.settings.compiler.version}") < 8:
-            raise ConanInvalidConfiguration(
-                "dbg-macro can't be used by {0} {1}".format(
-                    self.settings.compiler,
-                    self.settings.compiler.version
-                )
-            )
+        min_versions = {
+            "gcc": 8
+        }
+
+        compiler = self.settings.compiler
+        if str(compiler) in min_versions and Version(compiler.version) < min_versions[str(compiler)]:
+            raise ConanInvalidConfiguration("dbg-macro requires C++17 which your compiler does not support.")
 
     def package(self):
         copy(self, "dbg.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
