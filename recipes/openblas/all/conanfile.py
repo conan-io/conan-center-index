@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
 from conan.tools.files import copy, get, load, rename, rmdir, collect_libs
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=1.55.0"
 
@@ -200,6 +201,7 @@ class OpenblasConan(ConanFile):
         cmake.install()
         rmdir(self, path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
         if self.options.build_lapack:
             copy(self, pattern="FORTRAN_COMPILER",
