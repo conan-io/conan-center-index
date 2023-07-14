@@ -55,7 +55,6 @@ class ExtracmakemodulesConan(ConanFile):
         cm_folder = "{}-{}".format(self.name, self.version)
         lic_folder_st = os.path.join(cm_folder, "LICENSES")
         lic_folder = os.path.join(self.source_folder, lic_folder_st)
-        self.output.info("license folder: {}".format(lic_folder))
 
         lic_folder_inst = os.path.join(self.package_folder, "licenses")
         copy(self, "*", src=lic_folder, dst=lic_folder_inst)
