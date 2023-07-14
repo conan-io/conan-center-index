@@ -3,7 +3,7 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 import os
 
 
@@ -88,6 +88,8 @@ class ProtobufCConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
+        tc.generate()
+        tc = VirtualRunEnv(self)
         tc.generate(scope="build")
 
     def build(self):
