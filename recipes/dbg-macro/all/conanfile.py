@@ -11,7 +11,7 @@ class DbgMacroConan(ConanFile):
     homepage = "https://github.com/sharkdp/dbg-macro"
     license = "MIT"
     description = "A dbg(...) macro for C++"
-    topics = ("conan", "debugging", "macro", "pretty-printing", "header-only")
+    topics = ("debugging", "macro", "pretty-printing", "header-only")
     settings = ("compiler", )
     no_copy_source = True
 
@@ -22,8 +22,7 @@ class DbgMacroConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-    def configure(self):
-        if self.settings.compiler == "gcc" and int(f"{self.settings.compiler.version}") < 5:
+        if self.settings.compiler == "gcc" and int(f"{self.settings.compiler.version}") < 8:
             raise ConanInvalidConfiguration(
                 "dbg-macro can't be used by {0} {1}".format(
                     self.settings.compiler,
