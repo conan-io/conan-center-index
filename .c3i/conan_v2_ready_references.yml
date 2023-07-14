@@ -418,6 +418,7 @@ required_for_references:
 - libfreenect
 - libfuse
 - libgcrypt
+- libgeotiff
 - libgettext
 - libgpg-error
 - libgphoto2
@@ -683,6 +684,7 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rtm
 - rttr
 - ruy
 - s2n
@@ -710,6 +712,7 @@ required_for_references:
 - simdjson
 - simdutf
 - simple-websocket-server
+- sjson-cpp
 - skyr-url
 - sml
 - snappy
