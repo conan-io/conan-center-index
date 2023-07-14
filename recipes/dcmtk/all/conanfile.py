@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy, rm
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
@@ -32,9 +32,8 @@ class DCMTKConan(ConanFile):
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
         "with_tcpwrappers": [True, False],
-        "builtin_dictionary": [None, True, False],
         "builtin_private_tags": [True, False],
-        "external_dictionary": [None, True, False],
+        "default_dict": [None, "external", "builtin"],
         "wide_io": [True, False],
         "enable_stl": [True, False],
     }
@@ -50,11 +49,10 @@ class DCMTKConan(ConanFile):
         "with_libpng": True,
         "with_libtiff": True,
         "with_tcpwrappers": False,
-        "builtin_dictionary": None,
         "builtin_private_tags": False,
-        "external_dictionary": None,
         "wide_io": False,
         "enable_stl": True,
+        "default_dict": None,
     }
 
     def layout(self):
@@ -96,7 +94,7 @@ class DCMTKConan(ConanFile):
         return 11
 
     def validate(self):
-        if not can_run(self) and self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if not cross_building(self) and self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
 
@@ -148,13 +146,8 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_WITH_DOXYGEN"] = False
 
         tc.variables["DCMTK_ENABLE_PRIVATE_TAGS"] = self.options.builtin_private_tags
-        if self.options.external_dictionary is not None:
-            if Version(self.version) < "3.6.7":
-                tc.variables["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
-            else:
-                tc.variables["DCMTK_DEFAULT_DICT"] = self.options.external_dictionary
-        if self.options.builtin_dictionary is not None:
-            tc.variables["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
+        if self.options.default_dict is not None:
+            tc.variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
         tc.variables["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
         tc.variables["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
         if not valid_min_cppstd(self, self._min_cppstd):
@@ -202,7 +195,7 @@ class DCMTKConan(ConanFile):
 
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {target: f"DCMTK::{target}" for target in self._dcmtk_components}
+            {target: f"{target}" for target in self._dcmtk_components}
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -296,7 +289,7 @@ class DCMTKConan(ConanFile):
 
         def register_components(components):
             for target_lib, requires in components.items():
-                self.cpp_info.components[target_lib].set_property("cmake_target_name", f"DCMTK::{target_lib}")
+                self.cpp_info.components[target_lib].set_property("cmake_target_name", f"{target_lib}")
                 self.cpp_info.components[target_lib].libs = [target_lib]
                 self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
                 self.cpp_info.components[target_lib].requires = requires

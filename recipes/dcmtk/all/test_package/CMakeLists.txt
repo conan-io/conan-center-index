@@ -4,4 +4,4 @@ project(test_package)
 find_package(DCMTK REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} DCMTK::dcmdata)
+target_link_libraries(${PROJECT_NAME} dcmdata)
