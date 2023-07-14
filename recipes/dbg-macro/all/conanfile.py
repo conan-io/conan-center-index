@@ -37,7 +37,7 @@ class DbgMacroConan(ConanFile):
         }
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
