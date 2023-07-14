@@ -13,16 +13,14 @@ class UnityConan(ConanFile):
     license = "MIT"
     homepage = "http://www.throwtheswitch.org"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "fixture_extension": [True, False],
         "memory_extension": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "fixture_extension": False,
         "memory_extension": False,
@@ -33,8 +31,6 @@ class UnityConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
