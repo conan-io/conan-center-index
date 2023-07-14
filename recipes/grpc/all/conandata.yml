@@ -12,7 +12,7 @@ sources:
     url: "https://github.com/grpc/grpc/archive/v1.47.5.tar.gz"
     sha256: "bf47a9b6903f0b6ca77c4584601ea6ef93efdad905e20b78a23417a362bc2190"
   "1.46.7":
-    url: "https://github.com/grpc/grpc/archive/v1.46.3.tar.gz"
+    url: "https://github.com/grpc/grpc/archive/v1.46.7.tar.gz"
     sha256: "1f9cf306a79e9a76ff36f2f0563b72c84ab9f2592372a742a234f360ae733e54"
 patches:
   "1.50.2":
