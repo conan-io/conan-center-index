@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, save, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs, unix_path
@@ -265,7 +265,7 @@ class NCursesConan(ConanFile):
 
     @property
     def _module_file(self):
-        return "CursesFindModuleBackwardCompat.cmake".format(self.name)
+        return "CursesFindModuleBackwardCompat.cmake"
 
     def package_info(self):
         module_rel_path = os.path.join(self._module_subfolder, self._module_file)
