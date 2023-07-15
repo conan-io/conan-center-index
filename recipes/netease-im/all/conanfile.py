@@ -117,16 +117,12 @@ class NetEaseIMConan(ConanFile):
         if self.options.with_nim:
             self.cpp_info.libs.append(
                 "nim_cpp_wrapper{}".format(library_postfix))
-            self.cpp_info.libs.append("nim")
         if self.options.with_chatroom:
             self.cpp_info.libs.append(
                 "nim_chatroom_cpp_wrapper{}".format(library_postfix))
-            self.cpp_info.libs.append("nim_chatroom")
         if self.options.with_qchat:
             self.cpp_info.libs.append(
                 "nim_qchat_cpp_wrapper{}".format(library_postfix))
-            self.cpp_info.libs.append("nim_qchat")
-        self.cpp_info.libs.append("h_available")
 
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.append("AppKit")
