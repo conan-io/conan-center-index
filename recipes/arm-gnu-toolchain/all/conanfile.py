@@ -117,19 +117,3 @@ class ArmGnuToolchain(ConanFile):
 
         f = os.path.join(self.package_folder, "res/toolchain.cmake")
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
-
-        gcc_c_flags = [
-            "-mthumb",
-            "-ffunction-sections",
-            "-fdata-sections",
-        ]
-
-        linker_flags = [
-            "-mthumb",
-            "-Wl,--gc-sections",
-            "-Wl,--print-memory-usage"
-        ]
-
-        self.conf_info.define("tools.build:cflags", gcc_c_flags)
-        self.conf_info.define("tools.build:cxxflags", gcc_c_flags)
-        self.conf_info.define("tools.build:exelinkflags", linker_flags)
