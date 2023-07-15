@@ -32,7 +32,7 @@ class NetEaseIMConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if self.settings.os not in ["Linux", "Windows", "Macos"]:
+        if self.settings.os not in ["Windows", "Macos"]:
             raise ConanInvalidConfiguration(
                 f"{self.ref} unsupported platform."
             )
