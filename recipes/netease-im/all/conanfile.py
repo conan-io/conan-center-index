@@ -104,7 +104,7 @@ class NetEaseIMConan(ConanFile):
             copy(self, "*.a", dst=dst_lib_folder,
                  src=src_lib_folder)
         copy(self, "*.h", dst=dst_include_folder, src=src_include_folder)
-        copy(self, "IntegrationGuide.md", dst=os.path.join(self.package_folder, "licenses"),
+        copy(self, "README.md", dst=os.path.join(self.package_folder, "licenses"),
              src=os.path.join(self.build_folder, "wrapper"))
 
     def package_info(self):
