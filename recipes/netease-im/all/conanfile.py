@@ -9,7 +9,7 @@ class NetEaseIMConan(ConanFile):
     description = "NetEase IM cross-platform C++ SDK"
     license = "GNU Public License or the Artistic License"
     homepage = "https://yunxin.163.com/"
-    url = "https://github.com/netease-im/netease-conan-index"
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("im", "nim", "nertc", "netease IM", "netease")
     settings = "os", "arch", "compiler", "build_type"
     options = {
