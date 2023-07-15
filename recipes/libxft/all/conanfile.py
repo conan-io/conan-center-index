@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, chdir, rm, rmdir, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
