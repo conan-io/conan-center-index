@@ -17,6 +17,9 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def imports(self):
+        self.copy("*.dylib", dst="bin", src="lib")
+
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")

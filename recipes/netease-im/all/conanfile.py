@@ -53,7 +53,6 @@ class NetEaseIMConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_CXX_STANDARD"] = "11"
         tc.variables["CMAKE_BUILD_TYPE"] = "Release" if self.settings.build_type == "Release" else "Debug"
         tc.variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         tc.generate()
@@ -87,8 +86,7 @@ class NetEaseIMConan(ConanFile):
         if self.settings.os == "Linux":
             copy(self, "*.*", dst=dst_lib_folder, src=src_lib_folder)
         if self.settings.os == "Macos":
-            copy(self, "libh_available.dylib", dst=os.path.join(
-                self.package_folder, "lib"), src=os.path.join(self.source_folder, "lib"))
+            copy(self, "libh_available.dylib", dst=dst_lib_folder, src=src_lib_folder)
             if self.options.with_nim:
                 copy(self, "libnim.dylib", dst=dst_lib_folder, src=src_lib_folder)
             if self.options.with_chatroom:
