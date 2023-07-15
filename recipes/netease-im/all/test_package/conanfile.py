@@ -7,12 +7,6 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake_find_package"
-    options = {
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "fPIC": True,
-    }
 
     def layout(self):
         cmake_layout(self, src_folder=".")
