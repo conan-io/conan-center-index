@@ -7,7 +7,7 @@ from conan.tools.gnu import AutotoolsToolchain, Autotools, PkgConfigDeps, Autoto
 from conan.tools.microsoft import unix_path, is_msvc
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
-from conans.errors import ConanException, ConanInvalidConfiguration, ConanExceptionInUserConanfileMethod
+from conan.errors import ConanException, ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.58.0"
@@ -132,7 +132,7 @@ class TkConan(ConanFile):
         if build_system is None:
             build_system = self._get_default_build_system()
         if build_system not in ["win", "unix", "macosx"]:
-            raise ConanExceptionInUserConanfileMethod("Invalid build system: {}".format(build_system))
+            raise ConanInvalidConfiguration("Invalid build system: {}".format(build_system))
         return os.path.join(self.source_folder, self.source_folder, build_system)
 
     def _build_nmake(self, target="release"):
