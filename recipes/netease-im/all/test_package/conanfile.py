@@ -23,10 +23,6 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        dst_folder=f"build/{self.settings.build_type}"
-        self.copy("*.dylib", dst=dst_folder, src="lib")
-
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
