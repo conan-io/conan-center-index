@@ -152,3 +152,12 @@ node_labels:
         default: "linux_gcc_${compiler.version}_ubuntu16.04"
       "clang":
         default: "linux_clang_${compiler.version}_ubuntu16.04"
+
+
+pod_size:
+  # Map with references that need special memory resources to compile.
+  #   - Can be only by name or by name/version.
+  #   - name/version notation takes preference over the name only one
+  #   - Both notations can be combined for the same reference name
+  xlarge:
+    - "pcl"
