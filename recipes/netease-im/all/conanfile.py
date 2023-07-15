@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get
+from conan.tools.files import get, copy
+import os
 
 
 class NetEaseIMConan(ConanFile):
@@ -31,13 +32,13 @@ class NetEaseIMConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if self.settings.os in ["iOS", "Android"]:
+        if self.settings.os not in ["Linux", "Windows", "Macos"]:
             raise ConanInvalidConfiguration(
                 f"{self.ref} unsupported platform."
             )
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -58,48 +59,55 @@ class NetEaseIMConan(ConanFile):
         tc.generate()
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)])
+        get(self, **self.conan_data["sources"][self.version]
+            [str(self.settings.os)][str(self.settings.arch)])
         cmake = CMake(self)
         cmake.configure(build_script_folder="wrapper")
         cmake.build(target="install")
 
     def package(self):
+        src_lib_folder = os.path.join(self.build_folder, "lib")
+        dst_lib_folder = os.path.join(self.package_folder, "lib")
+        src_bin_folder = os.path.join(self.build_folder, "bin")
+        dst_bin_folder = os.path.join(self.package_folder, "bin")
+        src_include_folder = os.path.join(self.build_folder, "include")
+        dst_include_folder = os.path.join(self.package_folder, "include")
         if self.settings.os == "Windows":
-            self.copy("h_available.dll", "bin", "bin")
+            copy(self, "h_available.dll", dst=dst_bin_folder, src=src_bin_folder)
             if self.options.with_nim:
-                self.copy("nim.dll", "bin", "bin")
+                copy(self, "nim.dll", dst=dst_bin_folder, src=src_bin_folder)
             if self.options.with_chatroom:
-                self.copy("nim_chatroom.dll", "bin", "bin")
+                copy(self, "nim_chatroom.dll",
+                     dst=dst_bin_folder, src=src_bin_folder)
             if self.options.with_qchat:
-                self.copy("nim_qchat.dll", "bin", "bin")
+                copy(self, "nim_qchat.dll", dst=dst_bin_folder, src=src_bin_folder)
             if self.options.with_http_tools:
-                self.copy("nim_http_tools.dll", "bin", "bin")
+                copy(self, "nim_http_tools.dll",
+                     dst=dst_bin_folder, src=src_bin_folder)
         if self.settings.os == "Linux":
-            self.copy("libh_available.so", "lib", "lib")
-            if self.options.with_nim:
-                self.copy("libnim.so", "lib", "lib")
-            if self.options.with_chatroom:
-                self.copy("libnim_chatroom.so", "lib", "lib")
-            if self.options.with_qchat:
-                self.copy("libnim_qchat.so", "lib", "lib")
-            if self.options.with_http_tools:
-                self.copy("libnim_http_tools.so", "lib", "lib")
+            copy(self, "*.*", dst=dst_lib_folder, src=src_lib_folder)
         if self.settings.os == "Macos":
-            self.copy("libh_available.dylib", "lib", "lib")
+            copy(self, "libh_available.dylib", dst=os.path.join(
+                self.package_folder, "lib"), src=os.path.join(self.source_folder, "lib"))
             if self.options.with_nim:
-                self.copy("libnim.dylib", "lib", "lib")
+                copy(self, "libnim.dylib", dst=dst_lib_folder, src=src_lib_folder)
             if self.options.with_chatroom:
-                self.copy("libnim_chatroom.dylib", "lib", "lib")
+                copy(self, "libnim_chatroom.dylib",
+                     dst=dst_lib_folder, src=src_lib_folder)
             if self.options.with_qchat:
-                self.copy("libnim_qchat.dylib", "lib", "lib")
+                copy(self, "libnim_qchat.dylib",
+                     dst=dst_lib_folder, src=src_lib_folder)
             if self.options.with_http_tools:
-                self.copy("libnim_http_tools.dylib", "lib", "lib")
+                copy(self, "libnim_http_tools.dylib",
+                     dst=dst_lib_folder, src=src_lib_folder)
         if self.settings.os == "Windows":
-            self.copy("*.lib", "lib", "lib")
+            copy(self, "*.lib", dst=dst_lib_folder, src=src_lib_folder)
         if self.settings.os in ["Linux", "Macos"]:
-            self.copy("*.a", "lib", "lib", symlinks=True)
-        self.copy("*.h", "include", "include")
-        self.copy("IntegrationGuide.md", "licenses", "wrapper")
+            copy(self, "*.a", dst=dst_lib_folder,
+                 src=src_lib_folder)
+        copy(self, "*.h", dst=dst_include_folder, src=src_include_folder)
+        copy(self, "IntegrationGuide.md", dst=os.path.join(self.package_folder, "licenses"),
+             src=os.path.join(self.build_folder, "wrapper"))
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib"]
@@ -109,18 +117,28 @@ class NetEaseIMConan(ConanFile):
             library_postfix = "_d"
         self.cpp_info.libs.append("nim_wrapper_util{}".format(library_postfix))
         if self.options.with_nim:
-            self.cpp_info.libs.append("nim_cpp_wrapper{}".format(library_postfix))
+            self.cpp_info.libs.append(
+                "nim_cpp_wrapper{}".format(library_postfix))
         if self.options.with_chatroom:
-            self.cpp_info.libs.append("nim_chatroom_cpp_wrapper{}".format(library_postfix))
+            self.cpp_info.libs.append(
+                "nim_chatroom_cpp_wrapper{}".format(library_postfix))
         if self.options.with_qchat:
-            self.cpp_info.libs.append("nim_qchat_cpp_wrapper{}".format(library_postfix))
-        self.cpp_info.frameworks.append("AppKit")
-        self.cpp_info.frameworks.append("Foundation")
-        self.cpp_info.frameworks.append("SystemConfiguration")
-        self.cpp_info.frameworks.append("IOKit")
-        self.cpp_info.frameworks.append("CFNetwork")
-        self.cpp_info.frameworks.append("CoreGraphics")
-        self.cpp_info.frameworks.append("Security")
-        self.cpp_info.frameworks.append("CoreServices")
-        self.cpp_info.frameworks.append("CoreFoundation")
-        self.cpp_info.frameworks.append("CoreText")
+            self.cpp_info.libs.append(
+                "nim_qchat_cpp_wrapper{}".format(library_postfix))
+
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.append("AppKit")
+            self.cpp_info.frameworks.append("Foundation")
+            self.cpp_info.frameworks.append("SystemConfiguration")
+            self.cpp_info.frameworks.append("IOKit")
+            self.cpp_info.frameworks.append("CFNetwork")
+            self.cpp_info.frameworks.append("CoreGraphics")
+            self.cpp_info.frameworks.append("Security")
+            self.cpp_info.frameworks.append("CoreServices")
+            self.cpp_info.frameworks.append("CoreFoundation")
+            self.cpp_info.frameworks.append("CoreText")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.append("rt")
+            self.cpp_info.system_libs.append("m")
