@@ -5,6 +5,7 @@ sources:
   "1.50.2":
     url: "https://github.com/grpc/grpc/archive/v1.50.2.tar.gz"
     sha256: "e941752638a92f21e27566903e1eb9b4a6380d70ca5ce91116b4cff6cb8fe2f2"
+
   "1.47.5":
     url: "https://github.com/grpc/grpc/archive/v1.47.5.tar.gz"
     sha256: "bf47a9b6903f0b6ca77c4584601ea6ef93efdad905e20b78a23417a362bc2190"
