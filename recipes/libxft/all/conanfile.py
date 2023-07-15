@@ -4,6 +4,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.build import cross_building
+import os
 
 required_conan_version = ">=1.52.0"
 
@@ -80,8 +81,9 @@ class libxftConan(ConanFile):
 
 
     def package(self):
-        copy(self, pattern="LICENSE", dst="licenses", src=self.source_folder)
-        copy(self, pattern="COPYING", dst="licenses", src=self.source_folder)
+        license_dir = os.path.join(self.package_folder, "licenses")
+        copy(self, pattern="LICENSE", dst=license_dir, src=self.source_folder)
+        copy(self, pattern="COPYING", dst=license_dir, src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
         rm(self, "*.la", f"{self.package_folder}/lib", recursive=True)
