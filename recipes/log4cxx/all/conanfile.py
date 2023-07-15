@@ -143,14 +143,41 @@ class Log4cxxConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"log4cxx": "log4cxx::log4cxx"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "log4cxx")
         self.cpp_info.set_property("cmake_target_name", "log4cxx")
         self.cpp_info.set_property("pkg_config_name", "liblog4cxx")
-        self.cpp_info.libs = ["log4cxx"]
         if not self.options.shared:
             self.cpp_info.defines = ["LOG4CXX_STATIC"]
+        self.cpp_info.libs = ["log4cxx"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["odbc32"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "liblog4cxx"
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
