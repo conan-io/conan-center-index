@@ -125,6 +125,8 @@ class Log4cxxConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        if Version(self.version) < "0.13.0":
+            tc.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
         tc.generate()
 
     def build(self):
