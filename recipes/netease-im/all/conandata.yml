@@ -1,5 +1,8 @@
 sources:
   "9.10.0":
+    All:
+      url: "https://yx-web-nosdn.netease.im/package/nim-win32-ia32-9-10-0-755-build-1848858.tar.gz"
+      sha256: "38493ea4593f043f83258716c2c4a04a3ec9652e47bd4fa89870c37aa2cc1760"
     Windows:
       x86:
         url: "https://yx-web-nosdn.netease.im/package/nim-win32-ia32-9-10-0-755-build-1848858.tar.gz"
@@ -22,6 +25,9 @@ sources:
         url: "https://yx-web-nosdn.netease.im/package/nim-darwin-arm64-9-10-0-755-build-1848858.tar.gz"
         sha256: "ab81e9219ffa8a93f75655e8215817923c166123ae3ff1f93610abac5d50f123"
   "9.12.1":
+    All:
+      url: "https://yx-web-nosdn.netease.im/package/nim-win32-ia32-9-12-1-1050-build-1997163.tar.gz"
+      sha256: "e132145021f618b5b1cbfb960d5a88185a05109b6b45fd64c3f74b312bd5be04"
     Windows:
       x86:
         url: "https://yx-web-nosdn.netease.im/package/nim-win32-ia32-9-12-1-1050-build-1997163.tar.gz"

@@ -41,11 +41,10 @@ class NetEaseIMConan(ConanFile):
             del self.options.fPIC
 
     def layout(self):
-        src_folder = f"build/{self.settings.build_type}"
-        cmake_layout(self, src_folder=src_folder)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version]["All"])
 
     def generate(self):
         tc = CMakeToolchain(self)
