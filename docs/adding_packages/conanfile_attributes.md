@@ -53,7 +53,8 @@ The mandatory license attribute of each recipe **should** be a [SPDX license](ht
 
 Where the SPDX guidelines do not apply, packages should do the following:
 
-* When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project falls under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
+* Packages without a license or closed source cannot be accepted in ConanCenter, even if the code is publicly available in Github or other platforms.
+* When some package is under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. The author original intent and files should be respected, and the relevant files defining the "public domain" status should be the ones packaged in the "licenses" folder, for example the source repository README. The ``license`` field should be as close as the original one as possible, like ``license = "Public-domain"``.
 * When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains the custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206).
 
 
