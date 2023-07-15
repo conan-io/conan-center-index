@@ -85,10 +85,11 @@ class GrpcConan(ConanFile):
 
     def requirements(self):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
-        if is_msvc(self) and Version(self.version) < "1.47":
-            self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
-        elif Version(self.version) < "1.47":
-            self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) < "1.47":
+            if is_msvc(self):
+                self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
+            else:
+                self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("abseil/20230125.2", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
