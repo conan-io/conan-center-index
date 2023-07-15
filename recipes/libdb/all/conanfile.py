@@ -66,9 +66,10 @@ class LibdbConan(ConanFile):
             self.requires("tcl/8.6.10")
 
     def validate(self):
-        # if is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
-        #     # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
-        #     raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
+        if is_msvc(self) and check_min_vs(self, "191", raise_invalid=False):
+            # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
+            # Currently won't work with anything newer than Visual Studio 2019
+            raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
             
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration(f"{self.ref} Macos Apple Sillicon is currently not supported. Contributions are welcomed!")
@@ -80,11 +81,6 @@ class LibdbConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang<10 with_cxx=True")
 
     def build_requirements(self):
-        # if self._settings_build.os == "Windows":
-        #     self.win_bash = True
-        #     if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-        #         self.tool_requires("msys2/cci.latest")
-        # else:
         if not self._settings_build.os == "Windows":
             self.tool_requires("gnu-config/cci.20201022")
 
@@ -113,8 +109,10 @@ class LibdbConan(ConanFile):
                             os.path.join(self.source_folder, subdir, "config.guess"))
 
         for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
+            # The WindowsTargetPlatformVersion selected below will depend on what Windows SDK is installed.
             replace_in_file(self, file,
                                   "<PropertyGroup Label=\"Globals\">",
+                                  # 10.0 should select the "latest" SDK available, but doesn't always work. It may be necessary to specify a specific version
                                   "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
                                   #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>")
                                   #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>")

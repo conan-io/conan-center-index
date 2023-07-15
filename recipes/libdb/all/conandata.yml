@@ -7,4 +7,3 @@ patches:
     - patch_file: "patches/0001-rename_atomic_compare_exchange.patch"
     - patch_file: "patches/0002-no-conditional-tcl-include.patch"
     - patch_file: "patches/0003-msvc-db_tcl-add-static-configuration.patch"
-      #- patch_file: "patches/0004-msvc-tcl-include-conanbuildinfo-props.patch"
