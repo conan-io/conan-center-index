@@ -10,7 +10,7 @@ class NetEaseIMConan(ConanFile):
     license = "GNU Public License or the Artistic License"
     homepage = "https://yunxin.163.com/"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("im", "nim", "nertc", "netease IM", "netease")
+    topics = ("im", "nim", "nertc", "netease im", "netease")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
