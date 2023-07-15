@@ -66,9 +66,9 @@ class LibdbConan(ConanFile):
             self.requires("tcl/8.6.10")
 
     def validate(self):
-        if is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
-            # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
-            raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
+        # if is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
+        #     # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
+        #     raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
             
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration(f"{self.ref} Macos Apple Sillicon is currently not supported. Contributions are welcomed!")
@@ -112,10 +112,12 @@ class LibdbConan(ConanFile):
                 shutil.copy(self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_guess"),
                             os.path.join(self.source_folder, subdir, "config.guess"))
 
-        #for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
-        #    replace_in_file(self, file,
-        #                          "<PropertyGroup Label=\"Globals\">",
-        #                          "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>")
+        for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
+            replace_in_file(self, file,
+                                  "<PropertyGroup Label=\"Globals\">",
+                                  "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+                                  #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>")
+                                  #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>")
 
         dist_configure = os.path.join(self.source_folder, "dist", "configure")
         replace_in_file(self, dist_configure, "../$sqlite_dir", "$sqlite_dir")
@@ -124,18 +126,6 @@ class LibdbConan(ConanFile):
                               "\n    --datarootdir=*)"
                               "\n      ;;"
                               "\n    --disable-option-checking)")
-
-    # def _build_msvc(self):
-    #     projects = ["db", "db_sql", "db_stl"]
-    #     if self.options.with_tcl:
-    #         projects.append("db_tcl")
-    #     msbuild = MSBuild(self)
-    #     upgraded = False
-    #     for project in projects:
-    #         msbuild.build(os.path.join(self.source_folder, "build_windows", "VS10", "{}.vcxproj".format(project)),
-    #                       build_type=self._msvc_build_type, platforms=self._msvc_platforms,
-    #                       upgrade_project=not upgraded)
-    #         upgraded = True
 
     def generate(self):
         if is_msvc(self):
@@ -184,18 +174,6 @@ class LibdbConan(ConanFile):
     @property
     def _msvc_arch(self):
         return self._msvc_platforms[str(self.settings.arch)]
-
-    # def _build_msvc(self):
-    #     projects = ["db", "db_sql", "db_stl"]
-    #     if self.options.with_tcl:
-    #         projects.append("db_tcl")
-    #     msbuild = MSBuild(self)
-    #     upgraded = False
-    #     for project in projects:
-    #         msbuild.build(os.path.join(self.source_folder, "build_windows", "VS10", "{}.vcxproj".format(project)),
-    #                       build_type=self._msvc_build_type, platforms=self._msvc_platforms,
-    #                       upgrade_project=not upgraded)
-    #         upgraded = True
 
     def build(self):
         self._patch_sources()
