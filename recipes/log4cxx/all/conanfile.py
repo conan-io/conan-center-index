@@ -60,16 +60,15 @@ class Log4cxxConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("apr/1.7.0")
-        self.requires("apr-util/[>=1.6]")
+        self.requires("apr-util/1.6.1")
         if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
-            self.requires("odbc/[>=2.3]")
+            self.requires("odbc/2.3.11")
         if self.options.get_safe("with_smtp_appender"):
-            self.requires("libesmtp/[>=1.0]")
+            self.requires("libesmtp/1.1.0")
         if self.options.get_safe("with_fmt_layout"):
-            self.requires("fmt/[>=9.0]")
+            self.requires("fmt/9.1.0")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/[>=5.15 <6]")
+            self.requires("qt/5.15")
 
     @property
     def _compilers_minimum_version(self):
