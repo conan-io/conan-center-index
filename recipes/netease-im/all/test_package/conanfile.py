@@ -8,6 +8,9 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake_find_package"
 
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
     def layout(self):
         cmake_layout(self, src_folder=".")
 
