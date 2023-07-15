@@ -1,4 +1,7 @@
 sources:
+  "1.0.4":
+    url: "https://github.com/google/highway/archive/1.0.4.tar.gz"
+    sha256: "faccd343935c9e98afd1016e9d20e0b8b89d908508d1af958496f8c2d3004ac2"
   "1.0.3":
     url: "https://github.com/google/highway/archive/1.0.3.tar.gz"
     sha256: "566fc77315878473d9a6bd815f7de78c73734acdcb745c3dde8579560ac5440e"
