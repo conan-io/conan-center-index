@@ -17,12 +17,12 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if cross_building(self) and hasattr(self, "settings_build"):
+        if not cross_building(self):
             self.tool_requires(self.tested_reference_str)
 
     def generate(self):
         VirtualRunEnv(self).generate()
-        if cross_building(self) and hasattr(self, "settings_build"):
+        if cross_building(self):
             VirtualBuildEnv(self).generate()
         else:
             VirtualRunEnv(self).generate(scope="build")
@@ -31,11 +31,13 @@ class TestPackageConan(ConanFile):
         tc.generate()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if not cross_building(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
-        if can_run(self):
+        if not cross_building(self) and can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+
