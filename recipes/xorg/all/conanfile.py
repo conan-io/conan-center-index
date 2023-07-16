@@ -23,6 +23,12 @@ class XorgConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def requirements(self):
+        # This is necessary to prevent other packages in the dependency tree from using the "libuuid" recipe
+        # which conflicts with the system installation of `util-linux-libuuid` that `xorg` installs. See #17427, #17485
+        # This has no functional bearing on xorg, however, as it links against the system library installed in util-linux-libs
+        self.requires("util-linux-libuuid/2.39")
+
     def system_requirements(self):
         apt = package_manager.Apt(self)
         apt.install(["libx11-dev", "libx11-xcb-dev", "libfontenc-dev", "libice-dev", "libsm-dev", "libxau-dev", "libxaw7-dev",
