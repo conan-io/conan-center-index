@@ -42,11 +42,13 @@ class LibgpiodConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("linux-headers-generic/5.13.9")
+
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("autoconf-archive/2021.02.19")
-        self.build_requires("linux-headers-generic/5.13.9")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
