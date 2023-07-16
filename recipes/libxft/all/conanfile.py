@@ -41,10 +41,10 @@ class libxftConan(ConanFile):
                   destination=self.source_folder, strip_root=True)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def generate(self):
         # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
