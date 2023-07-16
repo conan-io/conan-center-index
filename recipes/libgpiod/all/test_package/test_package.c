@@ -2,6 +2,6 @@
 
 int main(int argc, char *argv[]) {
     struct gpiod_chip *chip;
-    chip = gpiod_chip_open_by_name("gpiochip0");
+    chip = gpiod_chip_open("/dev/gpiochip0");
     return 0;
 }
