@@ -70,7 +70,7 @@ class LibgpiodConan(ConanFile):
         files.copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-        files.rm(self, "*.la", self.package_folder)
+        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
