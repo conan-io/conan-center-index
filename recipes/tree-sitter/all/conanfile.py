@@ -1,7 +1,11 @@
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake
+from conan.tools.layout import basic_layout
+import conan.tools.files as tools
 import functools
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class TreeSitterConan(ConanFile):
@@ -11,6 +15,9 @@ class TreeSitterConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tree-sitter.github.io/tree-sitter"
     license = "MIT"
+    
+    package_type = "library"
+    
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -21,12 +28,8 @@ class TreeSitterConan(ConanFile):
         "shared": False,
     }
 
-    generators = "cmake"
+    generators = "CMakeToolchain", "CMakeDeps"
     exports_sources = "CMakeLists.txt"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,25 +41,29 @@ class TreeSitterConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        basic_layout(self, src_folder="source")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def source(self):
+        tools.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        tools.copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "tree-sitter"
+        self.cpp_info.set_property("cmake_file_name", "tree-sitter")
+        self.cpp_info.builddirs = ["cmake"]
         self.cpp_info.libs = ["tree-sitter"]
