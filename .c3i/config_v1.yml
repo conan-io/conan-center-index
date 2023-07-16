@@ -192,9 +192,9 @@ pod_size:
   #   - name/version notation takes preference over the name only one
   #   - Both notations can be combined for the same reference name
   large:
-    - "pcl"
     - "duckdb"
     - "ceres-solver"
   xlarge:
     - "llvm"
     - "opengv"
+    - "pcl"
