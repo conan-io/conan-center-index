@@ -7,16 +7,12 @@ include(GenerateExportHeader)
 # Check if the source files have .cc extension, which indicates C++
 file(GLOB SOURCE_FILES "src/src/*.c" "src/src/*.cc")
 
-message(STATUS "sources: ${SOURCE_FILES}")
-
 # Set the linker language based on the file extension
 if(SOURCE_FILES MATCHES ".*\\.cc$")
     set(LINKER_LANGUAGE CXX)
 else()
     set(LINKER_LANGUAGE C)
 endif()
-
-message(STATUS "link language: ${LINKER_LANGUAGE}")
 
 file(WRITE api.h [[
 #pragma once
