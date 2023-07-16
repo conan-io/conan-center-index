@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake
 from conan.tools.layout import basic_layout
 import conan.tools.files as tools
-import functools
 import os
 
 required_conan_version = ">=1.53.0"
@@ -42,7 +41,7 @@ class TreeSitterConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def layout(self):
-        basic_layout(self, src_folder="source")
+        basic_layout(self, src_folder="src")
 
     def source(self):
         tools.get(self, **self.conan_data["sources"][self.version], strip_root=True)

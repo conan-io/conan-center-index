@@ -3,16 +3,16 @@ project(tree-sitter C)
 
 # Use cmake script instead of Makefile to support MSVC + follow fPIC option
 
-file(GLOB SOURCES RELATIVE "${PROJECT_SOURCE_DIR}" source/lib/src/*.c)
-list(REMOVE_ITEM SOURCES source/lib/src/lib.c)
+file(GLOB SOURCES RELATIVE "${PROJECT_SOURCE_DIR}" src/lib/src/*.c)
+list(REMOVE_ITEM SOURCES src/lib/src/lib.c)
 
-file(GLOB HEADERS source/lib/include/tree_sitter/*.h)
+file(GLOB HEADERS src/lib/include/tree_sitter/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source/lib/include>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source/lib/src>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/include>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/src>
 )
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
