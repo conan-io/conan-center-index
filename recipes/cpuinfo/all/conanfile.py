@@ -12,10 +12,10 @@ class CpuinfoConan(ConanFile):
     description = "cpuinfo is a library to detect essential for performance " \
                   "optimization information about host CPU."
     license = "BSD-2-Clause"
-    topics = ("cpu", "cpuid", "cpu-cache", "cpu-model", "instruction-set", "cpu-topology")
-    homepage = "https://github.com/pytorch/cpuinfo"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/pytorch/cpuinfo"
+    topics = ("cpu", "cpuid", "cpu-cache", "cpu-model", "instruction-set", "cpu-topology")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,9 +65,10 @@ class CpuinfoConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                              "SET_PROPERTY(TARGET clog PROPERTY POSITION_INDEPENDENT_CODE ON)",
-                              "")
+        if self.version < "cci.20230714":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                "SET_PROPERTY(TARGET clog PROPERTY POSITION_INDEPENDENT_CODE ON)",
+                                "")
 
     def build(self):
         self._patch_sources()
@@ -83,6 +84,8 @@ class CpuinfoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libcpuinfo")
-        self.cpp_info.libs = ["cpuinfo", "clog"]
+        self.cpp_info.libs = ["cpuinfo"]
+        if self.version < "cci.20230714":
+            self.cpp_info.libs.append("clog")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
