@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(Boost.SIMD REQUIRED CONFIG)
-
 # FIXME: components from Boost.SIMD (target Boost::SIMD) don't work.
 # It should be:
 # find_package(BOOST REQUIRED COMPONENTS SIMD)
 # See https://github.com/conan-io/conan-center-index/issues/6682 for details.
-find_package(Boost REQUIRED COMPONENTS date_time) #  COMPONENTS SIMD)
+
+find_package(Boost.SIMD REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} Boost::headers Boost::SIMD)
-# FIXME: recipe should transitively sets proper minimum cxx standard.
-# See https://github.com/conan-io/conan/issues/7772 about revising cxx std model.
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
