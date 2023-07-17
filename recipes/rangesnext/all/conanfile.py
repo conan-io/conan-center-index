@@ -30,8 +30,10 @@ class RangesnextConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "10",
+            "clang": "13",
+            "apple-clang": "13.3",
+            "msvc": "193",
             "Visual Studio": "19",
-            "clang": "13"
         }
 
     def layout(self):
