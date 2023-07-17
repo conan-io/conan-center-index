@@ -172,13 +172,13 @@ class GdalConan(ConanFile):
             self.requires("cryptopp/8.7.0")
 
         if self.options.with_curl:
-            self.requires("libcurl/7.85.0")
+            self.requires("libcurl/8.1.2")
 
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
 
         if self.options.with_expat:
-            self.requires("expat/2.4.9")
+            self.requires("expat/2.5.0")
 
         if self.options.with_exr:
             self.requires("openexr/3.1.5")
@@ -188,7 +188,7 @@ class GdalConan(ConanFile):
             self.requires("freexl/1.0.6")
 
         if self.options.with_geos:
-            self.requires("geos/3.11.0")
+            self.requires("geos/3.11.2")
 
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
@@ -208,13 +208,13 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
 
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
 
         if self.options.with_libdeflate:
-            self.requires("libdeflate/1.12")
+            self.requires("libdeflate/1.18")
 
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
@@ -223,7 +223,7 @@ class GdalConan(ConanFile):
             self.requires("libkml/1.3.0")
 
         if self.options.with_libtiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.0")
 
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
@@ -246,19 +246,19 @@ class GdalConan(ConanFile):
             self.requires("openjpeg/2.5.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1u")
 
         if self.options.with_pcre:
             self.requires("pcre/8.45")
 
         if self.options.with_pcre2:
-            self.requires("pcre2/10.40")
+            self.requires("pcre2/10.42")
 
         if self.options.with_pg:
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
 
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
 
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
@@ -267,28 +267,28 @@ class GdalConan(ConanFile):
             self.requires("poppler/21.07.0")
 
         if self.options.with_proj:
-            self.requires("proj/9.0.1")
+            self.requires("proj/9.1.1")
 
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.39.3")
+            self.requires("sqlite3/3.42.0")
 
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.0")
 
         if self.options.with_xerces:
-            self.requires("xerces-c/3.2.3")
+            self.requires("xerces-c/3.2.4")
 
         if self.options.with_xml2:
-            self.requires("libxml2/2.9.14")
+            self.requires("libxml2/2.11.4")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
 
     def package_id(self):
         del self.info.options.with_crypto
