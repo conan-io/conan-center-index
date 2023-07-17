@@ -1,13 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import (
-    export_conandata_patches,
-    get,
-    copy,
-    apply_conandata_patches,
-)
-from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy, save, rmdir
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -23,8 +18,9 @@ class MBitsLngsConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mbits-os/lngs"
-    topics = "gettext"
+    topics = ("gettext", "locale",)
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "static-library"
     options = {
         "fPIC": [True, False],
     }
@@ -46,9 +42,6 @@ class MBitsLngsConan(ConanFile):
             "apple-clang": "11.0.3",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -68,16 +61,9 @@ class MBitsLngsConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
         if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(
-                str(self.settings.compiler), False
-            )
-            if (
-                minimum_version
-                and Version(self.settings.compiler.version) < minimum_version
-            ):
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,17 +78,13 @@ class MBitsLngsConan(ConanFile):
         tc.variables["LNGS_LITE"] = False
         tc.variables["LNGS_LINKED_RESOURCES"] = True
         tc.variables["LNGS_NO_PKG_CONFIG"] = True
-        if (
-            self.settings.os != self._settings_build.os
-            or self.settings.arch != self._settings_build.arch
-        ):
+        if cross_building(self) and hasattr(self, "settings_build"):
             tc.variables["LNGS_REBUILD_RESOURCES"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -110,6 +92,10 @@ class MBitsLngsConan(ConanFile):
     @property
     def _cmake_install_base_path(self):
         return os.path.join("lib", "cmake")
+
+    @property
+    def _cmake_targets_module_file(self):
+        return os.path.join(self._cmake_install_base_path, "mbits-lngs-targets.cmake")
 
     def package(self):
         copy(
@@ -120,42 +106,17 @@ class MBitsLngsConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, self._cmake_install_base_path))
 
-        os.unlink(
-            os.path.join(
-                self.package_folder, self._cmake_install_base_path, "mbits-lngs.cmake"
-            )
-        )
-        os.unlink(
-            os.path.join(
-                self.package_folder,
-                self._cmake_install_base_path,
-                "mbits-lngs-{}.cmake".format(str(self.settings.build_type).lower()),
-            )
-        )
-        with open(
-            os.path.join(
-                self.package_folder,
-                self._cmake_install_base_path,
-                "module-mbits-lngs.cmake",
-            ),
-            "w",
-            encoding="UTF-8",
-        ) as cfg:
-            # Provide relocatable mbits::lngs target and Mbitslngs_LNGS_EXECUTABLE cache variable
-            # TODO: some of the following logic might be disabled when conan will
-            #       allow to create executable imported targets in package_info()
-            exe_ext = ".exe" if self.settings.os == "Windows" else ""
-            lngs_filename = "lngs" + exe_ext
-            module_folder_depth = len(
-                os.path.normpath(self._cmake_install_base_path).split(os.path.sep)
-            )
-            lngs_rel_path = "{}bin/{}".format(
-                "".join(["../"] * module_folder_depth), lngs_filename
-            )
-            cfg.write(
-                textwrap.dedent(
-                    """\
+
+        # Provide relocatable mbits::lngs target and Mbitslngs_LNGS_EXECUTABLE cache variable
+        # TODO: some of the following logic might be disabled when conan will
+        #       allow to create executable imported targets in package_info()
+        module_folder_depth = len(os.path.normpath(self._cmake_install_base_path).split(os.path.sep))
+        lngs_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), "lngs")
+        save(self, os.path.join(self.package_folder, self._cmake_targets_module_file),
+             textwrap.dedent(
+                    f"""\
                 if(NOT TARGET mbits::lngs)
                     if(CMAKE_CROSSCOMPILING)
                         find_program(LNGS_PROGRAM lngs PATHS ENV PATH NO_DEFAULT_PATH)
@@ -168,24 +129,14 @@ class MBitsLngsConan(ConanFile):
                     add_executable(mbits::lngs IMPORTED)
                     set_property(TARGET mbits::lngs PROPERTY IMPORTED_LOCATION ${{Mbitslngs_LNGS_EXECUTABLE}})
                 endif()
-            """.format(
-                        lngs_rel_path=lngs_rel_path
-                    )
-                )
-            )
+            """)
+        )
 
     def package_info(self):
-        build_dir = self._cmake_install_base_path
-        exe_module = os.path.join(build_dir, "module-mbits-lngs.cmake")
-
-        self.cpp_info.builddirs = [build_dir]
-        self.cpp_info.set_property("cmake_build_modules", [exe_module])
+        self.cpp_info.builddirs = [self._cmake_install_base_path ]
+        self.cpp_info.set_property("cmake_build_modules", [self._cmake_targets_module_file])
         self.cpp_info.set_property("cmake_file_name", "mbits-lngs")
 
         comp = self.cpp_info.components["liblngs"]
         comp.set_property("cmake_target_name", "mbits::liblngs")
         comp.libs = ["lngs"]
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.runenv_info.append_path("PATH", bin_path)
