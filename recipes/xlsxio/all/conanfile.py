@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -64,6 +65,11 @@ class XlsxioConan(ConanFile):
             self.requires("minizip/1.2.13")
         self.requires("expat/2.5.0")
 
+    def validate(self):
+        if Version(self.version) >= "0.2.34":
+            if self.options.with_libzip and self.options.with_minizip_ng:
+                raise ConanInvalidConfiguration("with_libzip and with_minizip_ng are mutually exclusive")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -107,7 +113,8 @@ class XlsxioConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "xlsxio")
         self.cpp_info.set_property("pkg_config_name", "xlsxio")
 
-        ziplib = "libzip::libzip" if self.options.with_libzip else "minizip::minizip"
+        ziplib = "libzip::libzip" if self.options.with_libzip else "minizip-ng::minizip-ng"
+
         xlsxio_macro = "BUILD_XLSXIO_SHARED" if self.options.shared else "BUILD_XLSXIO_STATIC"
 
         self.cpp_info.components["xlsxio_read"].set_property("cmake_target_name", "xlsxio::xlsxio_read")
