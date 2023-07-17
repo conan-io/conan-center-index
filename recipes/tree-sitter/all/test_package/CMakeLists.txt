@@ -3,5 +3,5 @@ project(test_package C)
 
 find_package(tree-sitter REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} src/test_package.c)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} tree-sitter::tree-sitter)
