@@ -32,9 +32,9 @@ class LibXpmConan(ConanFile):
         copy(self, "CMakeLists.txt",
              src=self.recipe_folder,
              dst=os.path.join(self.export_sources_folder, "src"))
-        copy(self, "windows",
-             src=self.recipe_folder,
-             dst=os.path.join(self.export_sources_folder, "src"))
+        copy(self, "*",
+             src=os.path.join(self.recipe_folder, "windows"),
+             dst=os.path.join(self.export_sources_folder, "src", "windows"))
 
     def config_options(self):
         if self.settings.os == "Windows":
