@@ -26,6 +26,7 @@ class CycloneDDSConan(ConanFile):
         "with_ssl": [True, False],
         "with_shm" : [True, False],
         "enable_security" : [True, False],
+        "enable_discovery" : [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,6 +34,7 @@ class CycloneDDSConan(ConanFile):
         "with_ssl": False,
         "with_shm": False,
         "enable_security": False,
+        "enable_discovery": True,
     }
 
     short_paths = True
@@ -105,6 +107,8 @@ class CycloneDDSConan(ConanFile):
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         tc.variables["ENABLE_SHM"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
+        tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
+        tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -131,7 +135,7 @@ class CycloneDDSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
-        self.cpp_info.set_property("cmake_target_name", "CycloneDDS::ddsc")
+        self.cpp_info.set_property("cmake_target_name", "CycloneDDS::CycloneDDS")
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS")
         # TODO: back to global scope in conan v2
         self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
