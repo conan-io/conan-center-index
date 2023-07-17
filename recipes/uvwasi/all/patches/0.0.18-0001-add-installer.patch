@@ -1,0 +1,36 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f71c36d..c0d139e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -137,6 +137,31 @@ if(UVWASI_BUILD_TESTS)
+     )
+ endif()
+ 
++include(GNUInstallDirs)
++
++if (NOT BUILD_SHARED_LIBS)
++install(
++    TARGETS uvwasi_a
++    EXPORT ${target_export_name}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++else()
++install(
++    TARGETS uvwasi
++    EXPORT ${target_export_name}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++endif()
++install(
++    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/uvwasi
++    FILES_MATCHING PATTERN "*.h"
++)
++
+ message(STATUS "summary of uvwasi build options:
+ 
+     Install prefix:  ${CMAKE_INSTALL_PREFIX}

@@ -1,35 +1,28 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f71c36d..a92e629 100644
+index c0d139e..40e642f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -14,13 +14,13 @@ cmake_dependent_option(UVWASI_BUILD_TESTS
- 
+@@ -15,7 +15,7 @@ cmake_dependent_option(UVWASI_BUILD_TESTS
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
  
--if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
-+if(0)
-   list(APPEND uvwasi_cflags -fvisibility=hidden --std=gnu89)
+ if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+-  list(APPEND uvwasi_cflags -fvisibility=hidden --std=gnu89)
++  list(APPEND uvwasi_cflags --std=gnu89)
    list(APPEND uvwasi_cflags -Wall -Wsign-compare -Wextra -Wstrict-prototypes)
    list(APPEND uvwasi_cflags -Wno-unused-parameter)
  endif()
- 
--if(APPLE)
-+if(0)
-    set(CMAKE_MACOSX_RPATH ON)
- endif()
- 
 @@ -31,8 +31,8 @@ endif()
  option(WITH_SYSTEM_LIBUV "Link to a system libuv library instead of bundling" OFF)
  
  if (WITH_SYSTEM_LIBUV)
 -  find_package(LibUV REQUIRED)
 -  include_directories(${LIBUV_INCLUDE_DIR})
-+  find_package(libuv REQUIRED)
++  find_package(Libuv REQUIRED)
 +  include_directories(${libuv_INCLUDE_DIR})
  else (WITH_SYSTEM_LIBUV)
    include(FetchContent)
    ## https://libuv.org
-@@ -92,28 +92,29 @@ if(ASAN AND CMAKE_C_COMPILER_ID MATCHES "AppleClang|GNU|Clang")
+@@ -92,26 +92,28 @@ if(ASAN AND CMAKE_C_COMPILER_ID MATCHES "AppleClang|GNU|Clang")
      set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
  endif()
  
@@ -61,40 +54,5 @@ index f71c36d..a92e629 100644
 +    target_link_libraries(uvwasi PRIVATE ${libuv_LIBRARIES})
 +endif()
  endif()
--
  
- ## Test targets.
- if(UVWASI_BUILD_TESTS)
-@@ -137,6 +138,32 @@ if(UVWASI_BUILD_TESTS)
-     )
- endif()
  
-+
-+include(GNUInstallDirs)
-+
-+if (NOT BUILD_SHARED_LIBS)
-+install(
-+    TARGETS uvwasi_a
-+    EXPORT ${target_export_name}
-+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+)
-+else()
-+install(
-+    TARGETS uvwasi
-+    EXPORT ${target_export_name}
-+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+)
-+endif()
-+install(
-+    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/uvwasi
-+    FILES_MATCHING PATTERN "*.h"
-+)
-+
- message(STATUS "summary of uvwasi build options:
- 
-     Install prefix:  ${CMAKE_INSTALL_PREFIX}
