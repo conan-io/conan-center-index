@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -22,7 +22,7 @@ class ArchicadApidevkitConan(ConanFile):
     short_paths = True
 
     def layout(self):
-        pass
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -40,9 +40,6 @@ class ArchicadApidevkitConan(ConanFile):
         if not str(self.settings.arch) in ("x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} is not supported yet.")
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration(
-                "This recipe does not support this compiler version")
 
     def build(self):
         devkit, licenses = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
