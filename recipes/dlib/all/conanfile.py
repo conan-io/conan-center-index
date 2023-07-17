@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, copy, rmdir
+from conan.tools.files import get, replace_in_file, copy, rmdir, collect_libs, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -110,15 +110,20 @@ class DlibConan(ConanFile):
         ]:
             replace_in_file(self, cmake_file, "${PNG_LIBRARIES}", "PNG::PNG")
         # robust sqlite3 injection
-        replace_in_file(self, dlib_cmakelists, "find_library(sqlite sqlite3)", "find_package(SQLite3 REQUIRED)")
-        replace_in_file(self, dlib_cmakelists, "find_path(sqlite_path sqlite3.h)", "")
-        replace_in_file(self, dlib_cmakelists, "if (sqlite AND sqlite_path)", "if(1)")
-        replace_in_file(self, dlib_cmakelists, "${sqlite}", "SQLite::SQLite3")
+        if self.options.with_sqlite3:
+            replace_in_file(self, dlib_cmakelists, "find_library(sqlite sqlite3)", "find_package(SQLite3 REQUIRED)")
+            replace_in_file(self, dlib_cmakelists, "find_path(sqlite_path sqlite3.h)", "")
+            replace_in_file(self, dlib_cmakelists, "if (sqlite AND sqlite_path)", "if(1)")
+            replace_in_file(self, dlib_cmakelists, "${sqlite}", "SQLite::SQLite3")
         # robust libwebp injection
         if self._has_with_webp_option:
             replace_in_file(self, dlib_cmakelists, "include(cmake_utils/find_libwebp.cmake)", "find_package(WebP REQUIRED)")
             replace_in_file(self, dlib_cmakelists, "if (WEBP_FOUND)", "if(1)")
             replace_in_file(self, dlib_cmakelists, "${WEBP_LIBRARY}", "WebP::webp")
+        if self.options.with_png:
+            replace_in_file(self, dlib_cmakelists, "include(cmake_utils/find_libpng.cmake)", "find_package(PNG REQUIRED)")
+        if self.options.with_jpeg:
+            replace_in_file(self, dlib_cmakelists, "include(cmake_utils/find_libjpeg.cmake)", "find_package(JPEG REQUIRED)")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -129,7 +134,6 @@ class DlibConan(ConanFile):
 
         tc.variables["DLIB_ISO_CPP_ONLY"] = False
         tc.variables["DLIB_NO_GUI_SUPPORT"] = True
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         # Configure external dependencies
         tc.variables["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
         if self._has_with_webp_option:
@@ -171,12 +175,14 @@ class DlibConan(ConanFile):
             os.path.join("include", "dlib", "external", "pybind11", "tools")
         ]:
             rmdir(self, os.path.join(self.package_folder, dir_to_remove))
+        rm(self, "*.txt", os.path.join(self.package_folder, "include", "dlib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "dlib")
         self.cpp_info.set_property("cmake_target_name", "dlib::dlib")
         self.cpp_info.set_property("pkg_config_name", "dlib-1")
-        self.cpp_info.libs = ["dlib"]
+        # INFO: Unix systems use dlib as library name, but on Windows it includes settings, e.g dlib19.24.0_release_64bit_msvc1933.lib
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
