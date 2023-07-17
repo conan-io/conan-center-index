@@ -129,7 +129,7 @@ class DlibConan(ConanFile):
 
         tc.variables["DLIB_ISO_CPP_ONLY"] = False
         tc.variables["DLIB_NO_GUI_SUPPORT"] = True
-
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         # Configure external dependencies
         tc.variables["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
         if self._has_with_webp_option:
