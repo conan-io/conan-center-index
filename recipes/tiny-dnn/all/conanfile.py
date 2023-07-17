@@ -34,6 +34,7 @@ class TinyDnnConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "10",
+            "msvc": "190",
             "Visual Studio": "14",
         }
 
@@ -62,9 +63,6 @@ class TinyDnnConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # TODO: if you move this recipe to CMakeDeps, be aware that tiny-dnn
-        #       relies on CMake variables which are not defined in CMakeDeps, only
-        #       in cmake_find_package. So patch it before.
         tc = CMakeToolchain(self)
         tc.variables["USE_TBB"] = self.options.with_tbb
         tc.variables["USE_GEMMLOWP"] = False
@@ -73,10 +71,14 @@ class TinyDnnConan(ConanFile):
         tc.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "tiny_dnn", "util", "image.h"), "third_party/", "")
+        replace_in_file(self,
+                        os.path.join(self.source_folder, "tiny_dnn", "util", "image.h"),
+                        "third_party/", "")
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
