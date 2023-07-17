@@ -15,11 +15,11 @@ class XnnpackConan(ConanFile):
                   "neural network inference operators for ARM, WebAssembly, " \
                   "and x86 platforms."
     license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/google/XNNPACK"
     topics = ("neural-network", "inference", "multithreading", "inference-optimization",
               "matrix-multiplication", "simd")
-    homepage = "https://github.com/google/XNNPACK"
-    url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -46,7 +46,6 @@ class XnnpackConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -56,7 +55,7 @@ class XnnpackConan(ConanFile):
     def requirements(self):
         self.requires("cpuinfo/cci.20220228")
         self.requires("fp16/cci.20210320")
-        #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15      
+        #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
         self.requires("pthreadpool/cci.20210218", transitive_headers=True)
         self.requires("fxdiv/cci.20200417")
 
@@ -69,8 +68,7 @@ class XnnpackConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -100,7 +98,7 @@ class XnnpackConan(ConanFile):
         # The CMake scripts don't use targets prefixed with `namespace::`
         # so we can coerce CMakeDeps to define the exact target names that
         # are expected. This works in tandem with the file
-        # `CMAKE_PROJECT_XNNPACK_INCLUDE` which ensure an early call to 
+        # `CMAKE_PROJECT_XNNPACK_INCLUDE` which ensure an early call to
         # the relevant `find_package`
         deps.set_property("cpuinfo", "cmake_target_name", "cpuinfo")
         deps.set_property("cpuinfo", "cmake_target_aliases", ["clog"] )
