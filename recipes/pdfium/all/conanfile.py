@@ -1,5 +1,8 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get
+from conan.tools.scm import Version
+from conans import CMake, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -64,17 +67,17 @@ class PdfiumConan(ConanFile):
         }
         min_compiler_version = minimum_compiler_versions.get(str(self.settings.compiler))
         if min_compiler_version:
-            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+            if Version(self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("pdfium needs at least compiler version {}".format(min_compiler_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version]["pdfium-cmake"],
+        get(self, **self.conan_data["sources"][self.version]["pdfium-cmake"],
                   destination="pdfium-cmake", strip_root=True)
-        tools.get(**self.conan_data["sources"][self.version]["pdfium"],
+        get(self, **self.conan_data["sources"][self.version]["pdfium"],
                   destination=self._source_subfolder)
-        tools.get(**self.conan_data["sources"][self.version]["trace_event"],
+        get(self, **self.conan_data["sources"][self.version]["trace_event"],
                   destination=os.path.join(self._source_subfolder, "base", "trace_event", "common"))
-        tools.get(**self.conan_data["sources"][self.version]["chromium_build"],
+        get(self, **self.conan_data["sources"][self.version]["chromium_build"],
                   destination=os.path.join(self._source_subfolder, "build"))
 
     def _configure_cmake(self):
