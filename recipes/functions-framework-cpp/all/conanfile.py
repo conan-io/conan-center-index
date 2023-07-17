@@ -102,16 +102,6 @@ class FunctionsFrameworkCppConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["FUNCTIONS_FRAMEWORK_CPP_TEST_EXAMPLES"] = False
-
-        self._cmake.configure()
-        return self._cmake
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = False
