@@ -4,4 +4,4 @@ project(test_package C)
 find_package(libgpiod REQUIRED CONFIG)
 
 add_executable(${CMAKE_PROJECT_NAME} test_package.c)
-target_link_libraries(${CMAKE_PROJECT_NAME} libgpiod::libgpiod)
+target_link_libraries(${CMAKE_PROJECT_NAME} libgpiod::gpiod)
