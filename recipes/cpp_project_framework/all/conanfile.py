@@ -12,7 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class CppProjectFrameworkConan(ConanFile):
     name = "cpp_project_framework"
-    description = "C++ Project Framework is a framework for creating C++ project."
+    description = "C++ Project Framework is a framework for creating C++ projects."
     license = "AGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sheepgrass/cpp_project_framework"
@@ -30,6 +30,7 @@ class CppProjectFrameworkConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "7",
             "clang": "6",
             "apple-clang": "10",
@@ -42,8 +43,8 @@ class CppProjectFrameworkConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.os not in ("Linux", "Windows"):
-            raise ConanInvalidConfiguration(f"{self.name} is just supported for Linux and Windows")
+        if self.settings.os not in ("Linux", "FreeBSD", "Windows"):
+            raise ConanInvalidConfiguration(f"{self.name} is only supported on Linux and Windows")
 
         compiler = self.settings.compiler
 
@@ -52,7 +53,7 @@ class CppProjectFrameworkConan(ConanFile):
 
         if compiler in ("gcc", "clang"):
             if not compiler.get_safe("libcxx", "").startswith("libstdc++"):
-                raise ConanInvalidConfiguration(f"only supported {compiler} with libstdc++")
+                raise ConanInvalidConfiguration(f"{self.name} is only supported {compiler} with libstdc++")
 
         min_version = self._minimum_compilers_version.get(str(compiler))
         if not min_version:

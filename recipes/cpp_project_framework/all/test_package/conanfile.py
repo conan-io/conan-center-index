@@ -11,6 +11,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("gtest/1.13.0")
 
     def layout(self):
         cmake_layout(self)
