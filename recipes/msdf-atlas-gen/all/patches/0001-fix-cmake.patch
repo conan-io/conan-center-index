@@ -1,0 +1,42 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,9 +7,11 @@
+ set(MSDFGEN_USE_OPENMP OFF CACHE INTERNAL "Build with OpenMP support for multithreaded code (disabled for atlas gen)" FORCE)
+ set(MSDFGEN_USE_CPP11 ON CACHE INTERNAL "Build with C++11 enabled (always enabled for atlas gen)" FORCE)
+ set(MSDFGEN_INSTALL OFF CACHE BOOL "Generate installation target for msdfgen")
+-add_subdirectory(msdfgen)
+ 
++
+ find_package(Threads REQUIRED)
++find_package(msdfgen REQUIRED)
++find_package(artery-font-format REQUIRED)
+ 
+ file(GLOB_RECURSE msdf-atlas-gen_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+     "msdf-atlas-gen/*.h"
+@@ -24,19 +26,12 @@
+ add_library(msdf-atlas-gen ${msdf-atlas-gen_SOURCES} ${msdf-atlas-gen_HEADERS})
+ add_library(msdf-atlas-gen::msdf-atlas-gen ALIAS msdf-atlas-gen)
+ set_target_properties(msdf-atlas-gen PROPERTIES PUBLIC_HEADER "${msdf-atlas-gen_HEADERS}")
+-target_include_directories(msdf-atlas-gen
+-INTERFACE
+-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+-PRIVATE
+-    ${CMAKE_CURRENT_SOURCE_DIR}/msdfgen/include # for lodepng.h
+-    ${CMAKE_CURRENT_SOURCE_DIR}/artery-font-format
+-)
+ 
+ if (MSVC)
+     target_compile_definitions(msdf-atlas-gen PUBLIC _CRT_SECURE_NO_WARNINGS)
+ endif()
+ target_compile_features(msdf-atlas-gen PUBLIC cxx_std_11)
+-target_link_libraries(msdf-atlas-gen PUBLIC Threads::Threads msdfgen::msdfgen msdfgen::msdfgen-ext)
++target_link_libraries(msdf-atlas-gen PUBLIC Threads::Threads msdfgen::msdfgen msdfgen::msdfgen-ext artery-font-format::artery-font-format)
+ 
+ # TODO make these public in msdfgen so that this doesn't have to be repeated here
+ if(FREETYPE_WITH_PNG)
+@@ -58,3 +53,5 @@
+     target_compile_features(msdf-atlas-gen-standalone PUBLIC cxx_std_11)
+     target_link_libraries(msdf-atlas-gen-standalone PUBLIC msdf-atlas-gen::msdf-atlas-gen)
+ endif()
++
++install(TARGETS msdf-atlas-gen-standalone DESTINATION bin)
