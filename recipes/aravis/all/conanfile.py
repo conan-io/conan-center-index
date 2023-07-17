@@ -84,7 +84,7 @@ class AravisConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.1")
+        self.tool_requires("meson/1.2.0")
         if hasattr(self, "settings_build") and cross_building(self):
             self.tool_requires("glib/2.77.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
