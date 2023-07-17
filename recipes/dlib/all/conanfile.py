@@ -1,11 +1,10 @@
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, replace_in_file, copy, rmdir, collect_libs
+from conan.tools.files import get, replace_in_file, copy, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-import functools
 import os
 
 
@@ -67,6 +66,9 @@ class DlibConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
@@ -80,12 +82,6 @@ class DlibConan(ConanFile):
             self.requires("sqlite3/3.42.0")
         if self.options.with_openblas:
             self.requires("openblas/0.3.20")
-
-    def validate(self):
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("dlib doesn't support macOS M1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -177,7 +173,7 @@ class DlibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "dlib")
         self.cpp_info.set_property("cmake_target_name", "dlib::dlib")
         self.cpp_info.set_property("pkg_config_name", "dlib-1")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["dlib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
