@@ -50,9 +50,9 @@ tasks:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
     report_issue_append: false
   validate_infrastructure:
-     macos_executors: 2
-     windows_executors: 4
-     open_docs_pull-request: false
+    macos_executors: 2
+    windows_executors: 4
+    open_docs_pull-request: false
 
 configurations:
   - id: linux-gcc
