@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -157,3 +158,7 @@ class WolfSSLConan(ConanFile):
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])
+                if Version(self.version) >= "5.6.0":
+                    self.cpp_info.system_libs.append("crypt32")
+            elif is_apple_os(self) and Version(self.version) >= "5.6.0":
+                self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])

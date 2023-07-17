@@ -1,0 +1,22 @@
+diff --git a/cmake/Macros.cmake b/cmake/Macros.cmake
+index e0118eb..85a7714 100644
+--- a/cmake/Macros.cmake
++++ b/cmake/Macros.cmake
+@@ -66,8 +66,6 @@ macro(sfml_add_library target)
+         add_library(${target} ${THIS_SOURCES})
+     endif()
+ 
+-    set_file_warnings(${THIS_SOURCES})
+-
+     # define the export symbol of the module
+     string(REPLACE "-" "_" NAME_UPPER "${target}")
+     string(TOUPPER "${NAME_UPPER}" NAME_UPPER)
+@@ -265,8 +263,6 @@ macro(sfml_add_example target)
+         add_executable(${target} ${target_input})
+     endif()
+ 
+-    set_file_warnings(${target_input})
+-
+     # set the debug suffix
+     set_target_properties(${target} PROPERTIES DEBUG_POSTFIX -d)
+ 
