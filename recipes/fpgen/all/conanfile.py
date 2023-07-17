@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -12,7 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class FpgenConan(ConanFile):
     name = "fpgen"
-    description = " Functional programming in C++ using C++20 coroutines."
+    description = "Functional programming in C++ using C++20 coroutines."
     license = ["MPL2"]
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jay-tux/fpgen/"
@@ -43,11 +43,8 @@ class FpgenConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler == "clang":
-            if "clang" not in str(self.version):
-                raise ConanInvalidConfiguration(f"Use '{self.version}-clang' for Clang support.")
-            if not self.settings.compiler.libcxx == "libc++":
-                raise ConanInvalidConfiguration(f"Use 'compiler.libcxx=libc++' for {self.name} on Clang.")
+        if self.settings.compiler == "clang" and not self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"Use 'compiler.libcxx=libc++' with Clang for {self.name}.")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
