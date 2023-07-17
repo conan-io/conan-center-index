@@ -1,10 +1,8 @@
-
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, replace_in_file, copy, rmdir
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -47,7 +45,6 @@ class DlibConan(ConanFile):
         "with_openblas": True,
     }
 
-
     @property
     def _has_with_webp_option(self):
         return Version(self.version) >= "19.24"
@@ -82,6 +79,10 @@ class DlibConan(ConanFile):
             self.requires("sqlite3/3.42.0")
         if self.options.with_openblas:
             self.requires("openblas/0.3.20")
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, "11")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -158,9 +159,7 @@ class DlibConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE.txt", "licenses", os.path.join(self.source_folder, "dlib"), keep_path=False)
-
-        # Remove configuration files
+        copy(self, "LICENSE.txt", src=os.path.join(self.source_folder, "dlib"), dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
         for dir_to_remove in [
             os.path.join("lib", "cmake"),
             os.path.join("lib", "pkgconfig"),
