@@ -56,8 +56,6 @@ class LibgpiodConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        tc.configure_args.append("--enable-shared={}".format(yes_no(self.options.shared)))
-        tc.configure_args.append("--enable-static={}".format(yes_no(not self.options.shared)))
         tc.configure_args.append("--enable-bindings-cxx={}".format(yes_no(self.options.enable_bindings_cxx)))
         tc.configure_args.append("--enable-tools={}".format(yes_no(self.options.enable_tools)))
         tc.generate()
