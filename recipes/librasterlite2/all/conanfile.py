@@ -68,36 +68,36 @@ class Librasterlite2Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("cairo/1.17.4")
-        self.requires("freetype/2.11.1")
+        self.requires("cairo/1.17.6")
+        self.requires("freetype/2.13.0")
         self.requires("giflib/5.2.1")
-        self.requires("libcurl/7.80.0")
+        self.requires("libcurl/8.1.2")
         self.requires("libgeotiff/1.7.1")
-        self.requires("libjpeg/9d")
-        self.requires("libpng/1.6.37")
+        self.requires("libjpeg/9e")
+        self.requires("libpng/1.6.40")
         self.requires("libspatialite/5.0.1")
-        self.requires("libtiff/4.3.0")
-        self.requires("libxml2/2.9.13")
-        self.requires("sqlite3/3.38.1")
-        self.requires("zlib/1.2.12")
+        self.requires("libtiff/4.5.1")
+        self.requires("libxml2/2.11.4")
+        self.requires("sqlite3/3.42.0")
+        self.requires("zlib/1.2.13")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.4.0")
+            self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.3.1")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.3")
+            self.requires("lz4/1.9.4")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
 
     def validate(self):
         if self._is_msvc:
             raise ConanInvalidConfiguration("Visual Studio not supported yet")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("libtool/2.4.7")
+        self.build_requires("pkgconf/1.9.5")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
