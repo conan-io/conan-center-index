@@ -210,6 +210,7 @@ required_for_references:
 - dbus
 - debug_assert
 - decimal_for_cpp
+- dice-template-library
 - dirent
 - discount
 - dlpack
@@ -251,6 +252,7 @@ required_for_references:
 - expat
 - expected-lite
 - exprtk
+- extra-cmake-modules
 - ezc3d
 - faac
 - fakeit
@@ -691,6 +693,7 @@ required_for_references:
 - samurai
 - sbepp
 - sbp
+- scip
 - scnlib
 - scons
 - screen_capture_lite
@@ -740,6 +743,7 @@ required_for_references:
 - string-view-lite
 - stringtoolbox
 - strong_type
+- structopt
 - svgwrite
 - symengine
 - szip
@@ -778,8 +782,10 @@ required_for_references:
 - turtle
 - type_safe
 - tz
+- ua-nodeset
 - uni-algo
 - unicorn
+- unity
 - univalue
 - unordered_dense
 - unqlite
