@@ -1,0 +1,9 @@
+--- doc/headers/Makefile.am
++++ doc/headers/Makefile.am
+@@ -23,5 +23,6 @@
+ 
+ copy_headers:
+ 	cp -f $(top_srcdir)/CUnit/Headers/*.h .
++	cp -f $(top_builddir)/CUnit/Headers/*.h .
+ 	cp -f $(top_srcdir)/CUnit/Sources/Win/Win.h .
+ 
