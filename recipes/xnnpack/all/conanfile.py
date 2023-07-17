@@ -63,9 +63,15 @@ class XnnpackConan(ConanFile):
         check_min_vs(self, 192)
         compiler = self.info.settings.compiler
         compiler_version = Version(compiler.version)
-        if (compiler == "gcc" and compiler_version < "6") or \
-           (compiler == "clang" and compiler_version < "5"):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        if self.version < "cci.20230715":
+            if (compiler == "gcc" and compiler_version < "6") or \
+                (compiler == "clang" and compiler_version < "5"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        else:
+            # since cci.20230715, xnnpack requires avx512 header file
+            if (compiler == "gcc" and compiler_version < "11") or \
+                (compiler == "clang" and compiler_version < "8"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
