@@ -52,7 +52,7 @@ class LibIdnConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -62,7 +62,7 @@ class LibIdnConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
