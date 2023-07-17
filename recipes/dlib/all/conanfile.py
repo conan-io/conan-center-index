@@ -85,6 +85,8 @@ class DlibConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, "11")
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared on Windows. See https://github.com/davisking/dlib/issues/1483.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
