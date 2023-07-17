@@ -13,7 +13,8 @@ class DbgMacroConan(ConanFile):
     license = "MIT"
     description = "A dbg(...) macro for C++"
     topics = ("debugging", "macro", "pretty-printing", "header-only")
-    settings = ("compiler", )
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
 
