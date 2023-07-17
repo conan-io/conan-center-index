@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, replace_in_file, copy, rmdir
 from conan.tools.build import collect_libs
-from conan import Version
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import functools
 import os
