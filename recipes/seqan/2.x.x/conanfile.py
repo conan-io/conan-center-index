@@ -45,16 +45,15 @@ class SeqanConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
+        if not minimum_version:
+            self.output.warning(
+                f"{self.name} requires C++{self._min_cppstd}. "
+                f"Your compiler is unknown. Assuming it supports C++{self._min_cppstd}."
+            )
+        elif Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
                     f"{self.name} requires C++{self._min_cppstd}, which your compiler does not fully support."
                 )
-        else:
-            self.output.warning(
-                f"{self.name} requires C++{self._min_cppstd}. Y"
-                f"our compiler is unknown. Assuming it supports C++{self._min_cppstd}."
-            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -77,3 +76,6 @@ class SeqanConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        if self.settings.os == "Windows":
+            self.cpp_info.defines = ["NOMINMAX"]
