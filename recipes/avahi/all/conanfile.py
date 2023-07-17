@@ -41,11 +41,11 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
+        self.requires("glib/2.76.3")
         self.requires("expat/2.5.0")
         self.requires("libdaemon/0.14")
-        self.requires("dbus/1.15.2")
-        self.requires("gdbm/1.19")
+        self.requires("dbus/1.15.6")
+        self.requires("gdbm/1.23")
         self.requires("libevent/2.1.12")
 
     def validate(self):
@@ -53,7 +53,7 @@ class AvahiConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def build_requirements(self):
-        self.tool_requires("glib/2.75.2")
+        self.tool_requires("glib/2.76.3")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
