@@ -181,7 +181,7 @@ class GdalConan(ConanFile):
             self.requires("freexl/1.0.6")
 
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.11.2")
 
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
@@ -248,7 +248,7 @@ class GdalConan(ConanFile):
             self.requires("pcre2/10.42")
 
         if self.options.with_pg:
-            self.requires("libpq/14.5")
+            self.requires("libpq/14.7")
 
         if self.options.with_png:
             self.requires("libpng/1.6.40")
@@ -272,10 +272,10 @@ class GdalConan(ConanFile):
             self.requires("libwebp/1.3.1")
 
         if self.options.with_xerces:
-            self.requires("xerces-c/3.2.3")
+            self.requires("xerces-c/3.2.4")
 
         if self.options.with_xml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.11.4")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
