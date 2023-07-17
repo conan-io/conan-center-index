@@ -6,6 +6,7 @@ from conan.tools.build import can_run
 
 
 class TestPacakgeConan(ConanFile):
+    test_type = "explicit"
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
 
@@ -22,5 +23,5 @@ class TestPacakgeConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindir[0], "test_package")
+            cmd = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(cmd, env="conanrun")
