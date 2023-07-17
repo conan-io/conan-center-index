@@ -12,7 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class ImmerConan(ConanFile):
     name = "immer"
-    description = "Postmodern immutable and persistent data structures for C++---value semantics at scale"
+    description = "Postmodern immutable and persistent data structures for C++ - value semantics at scale"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/arximboldi/immer"
