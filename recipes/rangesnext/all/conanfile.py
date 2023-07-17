@@ -30,8 +30,6 @@ class RangesnextConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "10",
-            "clang": "13",
-            "apple-clang": "13.3",
             "msvc": "193",
             "Visual Studio": "19",
         }
@@ -45,6 +43,9 @@ class RangesnextConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+
+        if "clang" in str(self.settings.compiler):
+            raise ConanInvalidConfiguration("rangesnext is not compatible with Clang")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version or Version(self.settings.compiler.version) < minimum_version:
