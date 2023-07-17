@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.apple import is_apple_os
 import os
 
 
@@ -84,6 +85,9 @@ class ProtobufCConan(ConanFile):
         tc.cache_variables["BUILD_PROTO3"] = self.options.with_proto3
         tc.cache_variables["BUILD_PROTOC"] = self.options.with_protoc
         tc.cache_variables["BUILD_TESTS"] = False
+        if self.options.with_protoc and is_apple_os(self) and self.options.shared:
+            # INFO: Workaround against SIP on macOS for consumers while invoking protoc-gen-c when protobuf lib is shared
+            tc.variables["CMAKE_INSTALL_RPATH"] = os.path.join(self.dependencies["protobuf"].package_folder, "lib")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -117,7 +121,7 @@ class ProtobufCConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libprotobuf-c")
 
         if self.options.with_protoc:
-            self.cpp_info.builddirs.append(self._cmake_install_base_path)
+            self.cpp_info.builddirs = [self._cmake_install_base_path]
             # TODO: This won't be needed once upstream PR (https://github.com/protobuf-c/protobuf-c/pull/555) gets merged
             self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_install_base_path, "protobuf-c.cmake")])
             self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
