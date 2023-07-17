@@ -8,6 +8,7 @@ from conan.tools.files import mkdir
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
+    test_type = "explicit"
 
 
     def requirements(self):
