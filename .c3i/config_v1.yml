@@ -61,6 +61,10 @@ tasks:
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
     report_issue_append: false
+ validate_infrastructure:
+    macos_executors: 2
+    windows_executors: 4
+    open_docs_pull-request: true
 
 # Profile configurations to build packages
 configurations:
