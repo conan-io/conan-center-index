@@ -46,17 +46,17 @@ class PdfiumConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("freetype/2.10.4")
-        self.requires("icu/69.1")
-        self.requires("lcms/2.11")
-        self.requires("openjpeg/2.4.0")
+        self.requires("freetype/2.13.0")
+        self.requires("icu/73.2")
+        self.requires("lcms/2.14")
+        self.requires("openjpeg/2.5.0")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.5")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("pkgconf/1.9.5")
 
     def validate(self):
         if self.settings.compiler.cppstd:
