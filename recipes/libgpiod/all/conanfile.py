@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools import files
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -59,6 +59,8 @@ class LibgpiodConan(ConanFile):
         tc.configure_args.append("--enable-bindings-cxx={}".format(yes_no(self.options.enable_bindings_cxx)))
         tc.configure_args.append("--enable-tools={}".format(yes_no(self.options.enable_tools)))
         tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
         autotools = Autotools(self)
