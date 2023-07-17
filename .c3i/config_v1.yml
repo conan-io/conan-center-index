@@ -64,7 +64,7 @@ tasks:
   validate_infrastructure:
     macos_executors: 2
     windows_executors: 4
-     open_docs_pull-request: true
+      open_docs_pull-request: true
 
 # Profile configurations to build packages
 configurations:
