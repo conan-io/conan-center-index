@@ -21,7 +21,7 @@ class SeqanConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/seqan/seqan"
-    topics = ("conan", "cpp98", "cpp11", "cpp14", "cpp17", "algorithms", "data structures", "biological sequences", "header-only")
+    topics = ("algorithms", "data structures", "biological sequences", "header-only")
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -35,9 +35,10 @@ class SeqanConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5",
-            "Visual Studio": "14",
             "clang": "3.4",
             "apple-clang": "3.4",
+            "msvc": "190",
+            "Visual Studio": "14",
         }
 
     def configure(self):
