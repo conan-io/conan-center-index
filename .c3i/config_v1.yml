@@ -61,6 +61,10 @@ tasks:
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
     report_issue_append: false
+  validate_infrastructure:
+    macos_executors: 2
+    windows_executors: 4
+    open_docs_pull-request: true
 
 # Profile configurations to build packages
 configurations:
@@ -76,7 +80,7 @@ configurations:
               compiler.version: [ "5", "7", "9", "10" ]
               build_type: [ "Release", "Debug" ]
   - id: linux-gcc
-    epochs: [20211221, 20220120]
+    epochs: [20211221, 20220120, 20230606]
     hrname: "Linux, GCC"
     content:
       - os: ["Linux"]
@@ -87,7 +91,7 @@ configurations:
               compiler.version: ["5", "7", "9", "10", "11"]
               build_type: ["Release", "Debug"]
   - id: linux-clang
-    epochs: [20211221, 20220120]
+    epochs: [20211221, 20220120, 20230606]
     hrname: "Linux, Clang"
     content:
       - os: ["Linux"]
@@ -109,7 +113,7 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
   - id: macos-clang
-    epochs: [20220120]
+    epochs: [20220120, 20230606]
     hrname: "macOS, Clang"
     content:
       - os: [ "Macos" ]
@@ -134,7 +138,7 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
   - id: macos-m1-clang
-    epochs: [20220120]
+    epochs: [20220120, 20230606]
     hrname: "macOS, Clang (M1/arm64)"
     build_profile:
       os: "Macos"
@@ -148,7 +152,7 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
   - id: windows-visual_studio
-    epochs: [0, 20211221, 20220120]
+    epochs: [0, 20211221, 20220120, 20230606]
     hrname: "Windows, Visual Studio"
     content:
       - os: [ "Windows" ]
@@ -192,9 +196,9 @@ pod_size:
   #   - name/version notation takes preference over the name only one
   #   - Both notations can be combined for the same reference name
   large:
-    - "pcl"
     - "duckdb"
     - "ceres-solver"
   xlarge:
     - "llvm"
     - "opengv"
+    - "pcl"
