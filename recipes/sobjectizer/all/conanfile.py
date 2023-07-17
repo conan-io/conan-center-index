@@ -6,7 +6,7 @@ from conan.tools.files import get, copy, rmdir, collect_libs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class SobjectizerConan(ConanFile):
@@ -39,7 +39,7 @@ class SobjectizerConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def _compiler_support_lut(self):
         if self.version >= Version("5.8.0"):
