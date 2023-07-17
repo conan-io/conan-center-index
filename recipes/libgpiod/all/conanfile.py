@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools import files
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
@@ -7,13 +7,15 @@ import os
 
 required_conan_version = ">=1.57.0"
 
+
 class LibgpiodConan(ConanFile):
     name = "libgpiod"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/"
     license = "LGPL-2.1-or-later"
     description = "C library and tools for interacting with the linux GPIO character device"
-    topics = ("gpio", "libgpiod", "libgpiodcxx", "linux")
+    topics = ("gpio", "libgpiodcxx", "linux")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,7 +29,7 @@ class LibgpiodConan(ConanFile):
         "enable_bindings_cxx": False,
         "enable_tools": False,
     }
-    
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libgpiod supports only Linux")
@@ -43,15 +45,15 @@ class LibgpiodConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("linux-headers-generic/5.13.9")
+        self.requires("linux-headers-generic/5.14.9")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("autoconf-archive/2021.02.19")
+        self.build_requires("libtool/2.4.7")
+        self.build_requires("pkgconf/1.9.5")
+        self.build_requires("autoconf-archive/2022.09.03")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -69,11 +71,11 @@ class LibgpiodConan(ConanFile):
         autotools.make()
 
     def package(self):
-        files.copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-        files.rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.components["gpiod"].libs = ["gpiod"]
