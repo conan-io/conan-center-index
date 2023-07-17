@@ -35,10 +35,11 @@ class SimpleYamlConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16.3",
             "gcc": "10",
             "clang": "11",
             "apple-clang": "13.3",
+            "msvc": "193",
+            "Visual Studio": "16.3",
         }
 
     def layout(self):
@@ -85,10 +86,3 @@ class SimpleYamlConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        self.cpp_info.set_property("cmake_file_name", "simple-yaml")
-        self.cpp_info.set_property("cmake_target_name", "simple-yaml::simple-yaml")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "simple-yaml"
-        self.cpp_info.names["cmake_find_package_multi"] = "simple-yaml"
