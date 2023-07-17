@@ -109,6 +109,7 @@ class LibGit2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         tc.variables["THREADSAFE"] = self.options.threadsafe
         tc.variables["USE_SSH"] = self.options.with_libssh2
         tc.variables["USE_ICONV"] = self.options.get_safe("with_iconv", False)
