@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -30,9 +31,10 @@ class CotilaConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
-            "Visual Studio": "15.7",
             "clang": "6.0",
             "apple-clang": "10",
+            "Visual Studio": "15.7",
+            "msvc": "193",
         }
 
     def layout(self):
@@ -42,6 +44,9 @@ class CotilaConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("cotila currently does not support MSVC. "
+                                            "See https://github.com/calebzulawski/cotila/issues/36.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
