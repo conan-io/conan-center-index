@@ -12,7 +12,6 @@ required_conan_version = ">=1.52.0"
 
 class ResourcePool(ConanFile):
     name = "resource_pool"
-    version = "cci.20210322"
     description = "C++ header only library purposed to create pool of some resources like keepalive connections"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
