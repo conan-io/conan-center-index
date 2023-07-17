@@ -40,12 +40,13 @@ class YasConan(ConanFile):
     def _extract_license(self):
         header = load(self, os.path.join(self.source_folder, "include", "yas", "binary_oarchive.hpp"))
         license_contents = header[: header.find("#")].replace("//", "").replace("\n ", "\n").lstrip()
-        save(self, "LICENSE", license_contents)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self._extract_license()
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+        copy(self, "*",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
