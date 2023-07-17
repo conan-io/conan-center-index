@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["IGN_CMAKE_VER"] = Version(self.dependencies["ignition-cmake"].ref.version).major
+        tc.variables["IGN_CMAKE_VER"] = self.dependencies["ignition-cmake"].ref.version.major
         tc.generate()
 
     def build(self):
