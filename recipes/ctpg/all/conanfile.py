@@ -33,10 +33,11 @@ class CTPGConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15",
-            "gcc": "7",
-            "clang": "5.0",
-            "apple-clang": "9.1",
+            "gcc": "8",
+            "clang": "12",
+            "apple-clang": "12.0",
+            "msvc": "192",
+            "Visual Studio": "16",
         }
 
     def layout(self):
