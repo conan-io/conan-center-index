@@ -4,7 +4,7 @@ import shutil
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, copy, replace_in_file, patch, export_conandata_patches
-from conan.tools.env.environment import Environment
+from conan.tools.env import Environment
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
@@ -132,12 +132,11 @@ class NvclothConan(ConanFile):
     def _get_build_type(self):
         if self.settings.build_type == "Debug":
             return "debug"
-        elif self.settings.build_type == "RelWithDebInfo":
+        if self.settings.build_type == "RelWithDebInfo":
             return "checked"
-        elif self.settings.build_type == "Release":
+        if self.settings.build_type == "Release":
             return "release"
-        else:
-            raise ConanInvalidConfiguration("Invalid build type")
+        raise ConanInvalidConfiguration("Invalid build type")
 
     def _get_target_build_platform(self):
         return {
