@@ -5,4 +5,3 @@ sources:
 patches:
   "2.206":
     - patch_file: patches/0001-fix-cmakelists.patch
-      base_path: source_subfolder
