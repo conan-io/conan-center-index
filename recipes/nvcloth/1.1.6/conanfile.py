@@ -158,7 +158,7 @@ class NvclothConan(ConanFile):
 
         print(nvcloth_build_subfolder)
 
-        copy(self, pattern="NvCloth/license.txt", dst="licenses", src=nvcloth_source_subfolder, keep_path=False)
+        copy(self, pattern="NvCloth/license.txt", dst=os.path.join(self.package_folder, "licenses"), src=nvcloth_source_subfolder, keep_path=False)
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "NvCloth", "include"))
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "NvCloth", "extensions", "include"))
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "PxShared", "include"))
