@@ -3,7 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -53,7 +54,10 @@ class CCTagConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.80.0")
         self.requires("eigen/3.4.0")
-        self.requires("onetbb/2020.3")
+        if Version(self.version) < "1.0.3":
+            self.requires("onetbb/2020.3")
+        else:
+            self.requires("onetbb/2021.5.0")
         self.requires("opencv/4.5.5")
 
     @property
@@ -74,7 +78,7 @@ class CCTagConan(ConanFile):
                 f"{', '.join(self._required_boost_components)}",
             )
 
-        if self.settings.compiler == "Visual Studio" and not self.options.shared and \
+        if is_msvc(self) and not self.options.shared and \
            is_msvc_static_runtime(self) and self.dependencies["onetbb"].options.shared:
             raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
 
