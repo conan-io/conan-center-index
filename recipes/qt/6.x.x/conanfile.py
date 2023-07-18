@@ -8,7 +8,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
@@ -210,6 +210,14 @@ class QtConan(ConanFile):
         if self.options.multiconfiguration:
             del self.settings.build_type
 
+        # If we are cross-compiling we need to enable these options primarily
+        #for the _native_ Qt build, because the builing Qt with the cross
+        # compiler requires the native Qt tools
+        if cross_building(self):
+            self.options["qt"].qttools = True
+            self.options["qt"].gui = True
+            self.options["qt"].widgets = True
+
         def _enablemodule(mod):
             if mod != "qtbase":
                 setattr(self.options, mod, True)
@@ -393,6 +401,11 @@ class QtConan(ConanFile):
         ms = VirtualBuildEnv(self)
         ms.generate()
 
+        if cross_building(self):
+            filecontents="include(qt_host_info)\n"
+            filecontents+="include(conan_qt_executables_variables)\n"
+            save(self, os.path.join(self.generators_folder, "Qt6HostInfoConfig.cmake"), filecontents)
+
         tc = CMakeDeps(self)
         tc.set_property("libdrm", "cmake_file_name", "Libdrm")
         tc.set_property("libdrm::libdrm_libdrm", "cmake_target_name", "Libdrm::Libdrm")
@@ -556,6 +569,8 @@ class QtConan(ConanFile):
                 self.output.warning(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
         if self.options.cross_compile:
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
+        if cross_building(self):
+            tc.variables["Qt6HostInfo_DIR"] = self.generators_folder
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
@@ -755,6 +770,9 @@ class QtConan(ConanFile):
             if module != "qtbase" and not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        qt6_host_info_cmake_orig = os.path.join(self.package_folder, "lib", "cmake", "Qt6HostInfo", "Qt6HostInfoConfig.cmake")
+        qt6_host_info_cmake = os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "qt_host_info.cmake")
+        rename(self, qt6_host_info_cmake_orig, qt6_host_info_cmake)
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             rm(self, mask, self.package_folder, recursive=True)
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
@@ -776,7 +794,7 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
         filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
-        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
+        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake", "qtpaths"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
