@@ -12,7 +12,7 @@ class GnuLibConanFile(ConanFile):
     name = "gnulib"
     description = ("Gnulib is a central location for common GNU code, "
                    "intended to be shared among GNU packages.")
-    license = ("GPL-3.0-or-later", "LGPL-3.0-or-later", "Unlicense")
+    license = ("GPL-3.0-or-later", "LGPL-3.0-or-later", "Public-domain")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gnulib/"
     topics = ("library", "gnu")
