@@ -1,4 +1,7 @@
 sources:
+  "20.37.1":
+    url: "https://github.com/ETLCPP/etl/archive/20.37.1.tar.gz"
+    sha256: "73c29678e478eca9243c1d0c98e727a2249a7973d1429a847c669bccc65dca88"
   "20.37.0":
     url: "https://github.com/ETLCPP/etl/archive/20.37.0.tar.gz"
     sha256: "94ffb30dc38b9f40566ba7c4ef0c233bca23cfcb4e6c400fcf981729a46413eb"

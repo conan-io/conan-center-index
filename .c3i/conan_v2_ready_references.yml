@@ -47,6 +47,7 @@ required_for_references:
 - autoconf-archive
 - automake
 - avir
+- aws-c-auth
 - aws-c-cal
 - aws-c-common
 - aws-c-compression
@@ -190,6 +191,7 @@ required_for_references:
 - cubicinterpolation
 - cuda-api-wrappers
 - cuda-kat
+- cunit
 - cute_headers
 - cvplot
 - cwalk
@@ -205,9 +207,11 @@ required_for_references:
 - daw_json_link
 - daw_utf_range
 - dbcppp
+- dbg-macro
 - dbus
 - debug_assert
 - decimal_for_cpp
+- dice-template-library
 - dirent
 - discount
 - dlpack
@@ -231,6 +235,7 @@ required_for_references:
 - editline
 - edlib
 - effcee
+- effolkronium-random
 - egl
 - eigen
 - elfio
@@ -248,6 +253,7 @@ required_for_references:
 - expat
 - expected-lite
 - exprtk
+- extra-cmake-modules
 - ezc3d
 - faac
 - fakeit
@@ -256,6 +262,7 @@ required_for_references:
 - fast-dds
 - fast_float
 - fastgltf
+- fernandovelcic-hexdump
 - fff
 - ffmpeg
 - fft
@@ -270,6 +277,7 @@ required_for_references:
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
+- foxglove-schemas-protobuf
 - fp16
 - freeglut
 - freetype
@@ -310,6 +318,7 @@ required_for_references:
 - gperf
 - gperftools
 - graphene
+- graphthewy
 - greatest
 - grpc
 - grpc-proto
@@ -346,8 +355,12 @@ required_for_references:
 - imgui
 - incbin
 - indicators
+- indirect_value
+- influxdb-cpp
+- inih
 - inja
 - intel-neon2sse
+- inversify-cpp
 - itlib
 - jasper
 - jbig
@@ -361,6 +374,7 @@ required_for_references:
 - jsoncpp
 - jsonnet
 - jwt-cpp
+- jxrlib
 - kainjow-mustache
 - kangaru
 - keychain
@@ -407,9 +421,12 @@ required_for_references:
 - libfreenect
 - libfuse
 - libgcrypt
+- libgeotiff
 - libgettext
 - libgpg-error
 - libgphoto2
+- libgpiod
+- libharu
 - libiberty
 - libiconv
 - libinterpolate
@@ -444,6 +461,7 @@ required_for_references:
 - libpqxx
 - libpsl
 - libqrencode
+- libraw
 - librdkafka
 - librealsense
 - libressl
@@ -499,6 +517,7 @@ required_for_references:
 - lua
 - luau
 - lunasvg
+- luple
 - lz4
 - lzma_sdk
 - lzo
@@ -508,6 +527,7 @@ required_for_references:
 - make
 - mariadb-connector-c
 - matchit
+- mathter
 - mattiasgustavsson-libs
 - maven
 - mawk
@@ -526,6 +546,7 @@ required_for_references:
 - microservice-essentials
 - mikelankamp-fpm
 - mimalloc
+- mingw-builds
 - miniaudio
 - minimp3
 - minisat
@@ -540,6 +561,7 @@ required_for_references:
 - mpg123
 - mppp
 - ms-gsl
+- msdf-atlas-gen
 - msgpack-c
 - msgpack-cxx
 - msys2
@@ -550,6 +572,7 @@ required_for_references:
 - nanoflann
 - nanomsg
 - nanorange
+- nanort
 - nas
 - nasm
 - netcdf
@@ -561,6 +584,7 @@ required_for_references:
 - nodejs
 - norm
 - nsync
+- nudb
 - numcpp
 - nuraft
 - nv-codec-headers
@@ -568,12 +592,14 @@ required_for_references:
 - odbc
 - ogdf
 - ogg
+- ois
 - onetbb
 - onnx
 - onnxruntime
 - openal
 - openal-soft
 - openapi-generator
+- openblas
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
@@ -593,6 +619,7 @@ required_for_references:
 - optional-lite
 - opus
 - opusfile
+- orcania
 - osqp
 - out_ptr
 - p-ranav-glob
@@ -661,18 +688,21 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rtm
 - rttr
 - ruy
 - s2n
 - samurai
 - sbepp
 - sbp
+- scip
 - scnlib
 - scons
 - screen_capture_lite
 - sdbus-cpp
 - sdl
 - sdl_image
+- sdl_ttf
 - seadex-essentials
 - semimap
 - sentry-breakpad
@@ -686,6 +716,8 @@ required_for_references:
 - simde
 - simdjson
 - simdutf
+- simple-websocket-server
+- sjson-cpp
 - skyr-url
 - sml
 - snappy
@@ -694,6 +726,7 @@ required_for_references:
 - sonic-cpp
 - sophus
 - soplex
+- source_location
 - soxr
 - span-lite
 - spdlog
@@ -712,8 +745,10 @@ required_for_references:
 - string-view-lite
 - stringtoolbox
 - strong_type
+- structopt
 - svgwrite
 - symengine
+- szip
 - tabulate
 - taocpp-json
 - taocpp-pegtl
@@ -732,6 +767,7 @@ required_for_references:
 - timsort
 - tinycthread
 - tinycthreadpool
+- tinydir
 - tinyexif
 - tinygltf
 - tinymidi
@@ -739,15 +775,19 @@ required_for_references:
 - tinyxml2
 - tl-expected
 - tl-function-ref
+- tllist
 - tlx
 - toml11
 - trantor
+- troldal-zippy
 - tsl-hopscotch-map
 - turtle
 - type_safe
 - tz
+- ua-nodeset
 - uni-algo
 - unicorn
+- unity
 - univalue
 - unordered_dense
 - unqlite
@@ -777,6 +817,7 @@ required_for_references:
 - wasmtime
 - wasmtime-cpp
 - watcher
+- wavelet_buffer
 - wayland
 - wayland-protocols
 - websocketpp
@@ -824,7 +865,9 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zookeeper-client-c
 - zpp_bits
 - zstd
 - zug
 - zulu-openjdk
+- zxing-cpp
