@@ -1,4 +1,7 @@
 sources:
+  "cci.20230718":
+    url: "https://github.com/google/XNNPACK/archive/98d809fa866180ebd962997e24a86437a27948d6.tar.gz"
+    sha256: "3d136ac187567261dd6a7ea42c0d986d02e29f7b7c1f252066a88d7845511044"
   "cci.20220801":
     url: "https://github.com/google/XNNPACK/archive/8e3d3359f9bec608e09fac1f7054a2a14b1bd73c.tar.gz"
     sha256: "c82327543249bd333034bbaa0300ed1fc9c7060fa73673a285042e3f042540e0"
