@@ -207,6 +207,7 @@ required_for_references:
 - daw_json_link
 - daw_utf_range
 - dbcppp
+- dbg-macro
 - dbus
 - debug_assert
 - decimal_for_cpp
@@ -424,6 +425,7 @@ required_for_references:
 - libgettext
 - libgpg-error
 - libgphoto2
+- libgpiod
 - libharu
 - libiberty
 - libiconv
