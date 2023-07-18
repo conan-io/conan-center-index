@@ -97,7 +97,7 @@ class LibGit2Conan(ConanFile):
 
     def validate(self):
         if self.options.with_https == "security":
-            if not is_apple_os(self.settings.os):
+            if not is_apple_os(self):
                 raise ConanInvalidConfiguration("security is only valid for Apple products")
         elif self.options.with_https == "winhttp":
             if self.settings.os != "Windows":
@@ -144,6 +144,7 @@ class LibGit2Conan(ConanFile):
         if Version(self.version) >= "1.4.0":
             tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_CLAR"] = False
+        tc.variables["BUILD_CLI"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["USE_HTTP_PARSER"] = "system"
         tc.variables["REGEX_BACKEND"] = self.options.with_regex
@@ -170,5 +171,7 @@ class LibGit2Conan(ConanFile):
         self.cpp_info.libs = ["git2"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32"])
+            if Version(self.version) >= "1.7.0":
+                self.cpp_info.system_libs.append("secur32")
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.threadsafe:
             self.cpp_info.system_libs.append("pthread")
