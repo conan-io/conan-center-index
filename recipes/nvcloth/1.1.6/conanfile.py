@@ -34,14 +34,18 @@ class NvclothConan(ConanFile):
         "use_dx11": False
     }
 
+    @property
+    def _source_subfolder(self):
+        return "src"
+
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder=self._source_subfolder)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, self._source_subfolder))
         export_conandata_patches(self)
 
     def config_options(self):
