@@ -109,7 +109,10 @@ class WaveletBufferConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "wavelet_buffer")
         self.cpp_info.set_property("cmake_target_name", "wavelet_buffer::wavelet_buffer")
-        self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"] if Version(self.version) < "0.6.0" else ["wavelet_buffer"]
+        if Version(self.version) >= "0.6.0":
+            self.cpp_info.libs = ["wavelet_buffer", "streamvbyte", "fpzip"]
+        else:
+            self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
         self.cpp_info.requires = ["blaze::blaze", "cimg::cimg"]
         if self.options.jpeg == "libjpeg-turbo":
             self.cpp_info.requires.append("libjpeg-turbo::jpeg")
