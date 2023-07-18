@@ -207,9 +207,11 @@ required_for_references:
 - daw_json_link
 - daw_utf_range
 - dbcppp
+- dbg-macro
 - dbus
 - debug_assert
 - decimal_for_cpp
+- dice-template-library
 - dirent
 - discount
 - dlpack
@@ -251,6 +253,7 @@ required_for_references:
 - expat
 - expected-lite
 - exprtk
+- extra-cmake-modules
 - ezc3d
 - faac
 - fakeit
@@ -315,6 +318,7 @@ required_for_references:
 - gperf
 - gperftools
 - graphene
+- graphthewy
 - greatest
 - grpc
 - grpc-proto
@@ -370,6 +374,7 @@ required_for_references:
 - jsoncpp
 - jsonnet
 - jwt-cpp
+- jxrlib
 - kainjow-mustache
 - kangaru
 - keychain
@@ -416,9 +421,11 @@ required_for_references:
 - libfreenect
 - libfuse
 - libgcrypt
+- libgeotiff
 - libgettext
 - libgpg-error
 - libgphoto2
+- libgpiod
 - libharu
 - libiberty
 - libiconv
@@ -510,6 +517,7 @@ required_for_references:
 - lua
 - luau
 - lunasvg
+- luple
 - lz4
 - lzma_sdk
 - lzo
@@ -553,6 +561,7 @@ required_for_references:
 - mpg123
 - mppp
 - ms-gsl
+- msdf-atlas-gen
 - msgpack-c
 - msgpack-cxx
 - msys2
@@ -610,6 +619,7 @@ required_for_references:
 - optional-lite
 - opus
 - opusfile
+- orcania
 - osqp
 - out_ptr
 - p-ranav-glob
@@ -678,12 +688,14 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rtm
 - rttr
 - ruy
 - s2n
 - samurai
 - sbepp
 - sbp
+- scip
 - scnlib
 - scons
 - screen_capture_lite
@@ -705,6 +717,7 @@ required_for_references:
 - simdjson
 - simdutf
 - simple-websocket-server
+- sjson-cpp
 - skyr-url
 - sml
 - snappy
@@ -732,8 +745,10 @@ required_for_references:
 - string-view-lite
 - stringtoolbox
 - strong_type
+- structopt
 - svgwrite
 - symengine
+- szip
 - tabulate
 - taocpp-json
 - taocpp-pegtl
@@ -769,8 +784,10 @@ required_for_references:
 - turtle
 - type_safe
 - tz
+- ua-nodeset
 - uni-algo
 - unicorn
+- unity
 - univalue
 - unordered_dense
 - unqlite
