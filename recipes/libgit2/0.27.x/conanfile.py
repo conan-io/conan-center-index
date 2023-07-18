@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.apple import is_apple_os
 import os
@@ -40,6 +40,9 @@ class LibGit2Conan(ConanFile):
         "with_https": "openssl",
         "with_sha1": "collisiondetection",
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -103,7 +106,6 @@ class LibGit2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         tc.variables["THREADSAFE"] = self.options.threadsafe
         tc.variables["USE_SSH"] = self.options.with_libssh2
         tc.variables["USE_ICONV"] = self.options.get_safe("with_iconv", False)
@@ -117,23 +119,8 @@ class LibGit2Conan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self,
-                        os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                        "FIND_PKGLIBRARIES(LIBSSH2 libssh2)",
-                        "FIND_PACKAGE(Libssh2 REQUIRED)\n"
-                        "\tSET(LIBSSH2_FOUND ON)\n"
-                        "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
-                        "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
-                        "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
-
-        replace_in_file(self,
-                        os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                        "FIND_PKGLIBRARIES(CURL libcurl)",
-                        "FIND_PACKAGE(CURL REQUIRED)\n")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

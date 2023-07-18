@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 88eb9ec..0dc7f87 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,8 +11,8 @@
+ # Install:
+ # > cmake --build . --target install
+ 
+-PROJECT(libgit2 C)
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
++PROJECT(libgit2 C)
+ CMAKE_POLICY(SET CMP0015 NEW)
+ IF(POLICY CMP0051)
+ 	CMAKE_POLICY(SET CMP0051 NEW)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 213dd79..6e4f1c8 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -347,7 +347,11 @@ ENDIF()
+ 
+ # Optional external dependency: libssh2
+ IF (USE_SSH)
+-	FIND_PKGLIBRARIES(LIBSSH2 libssh2)
++	FIND_PACKAGE(Libssh2 REQUIRED)
++	SET(LIBSSH2_FOUND ON)
++	SET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})
++	SET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})
++	SET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})
+ ENDIF()
+ IF (LIBSSH2_FOUND)
+ 	SET(GIT_SSH 1)
