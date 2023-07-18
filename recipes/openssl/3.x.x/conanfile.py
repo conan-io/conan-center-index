@@ -9,6 +9,7 @@ from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 
 import fnmatch
 import os
+from pathlib import Path
 import textwrap
 
 required_conan_version = ">=1.57.0"
@@ -517,7 +518,7 @@ class OpenSSLConan(ConanFile):
 
     def build(self):
         self._make()
-        self.run(f"{self._perl} {self.source_folder}/configdata.pm --dump")
+        self.run(f"{self._perl} {Path(self.source_folder).as_posix()}/configdata.pm --dump")
 
     @property
     def _make_program(self):
