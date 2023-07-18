@@ -979,10 +979,10 @@ class QtConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.components["qtCore"].system_libs.append("authz")
+            self.cpp_info.components["qtCore"].system_libs.append("synchronization")
         if is_msvc(self):
             self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
             self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
-            self.cpp_info.components["qtCore"].system_libs.append("synchronization")
             self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
@@ -1029,7 +1029,8 @@ class QtConan(ConanFile):
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
                 _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
-                    "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
+                    "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32",
+                    "shcore", "d3d9", "runtimeobject" ]
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 self.cpp_info.components["qtQAndroidIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
