@@ -37,6 +37,7 @@ class OpenTelemetryProtoConan(ConanFile):
         self.conf_info.define("user.opentelemetry-proto:proto_root",
                               os.path.join(self.package_folder, "res"))
         self.cpp_info.resdirs = ["res"]
+        self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
