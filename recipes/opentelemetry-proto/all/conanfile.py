@@ -15,7 +15,7 @@ class OpenTelemetryProtoConan(ConanFile):
     description = "Protobuf definitions for the OpenTelemetry protocol (OTLP)"
     topics = ("opentelemetry", "telemetry", "otlp", "pre-built")
 
-    package_type = "application"
+    package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
