@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-
 project(hunspell VERSION "${CONAN_hunspell_VERSION}" LANGUAGES CXX)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS KEEP_RPATHS)
-set(src src/hunspell)
+set(src src/src/hunspell)
 
 # ---- Configure hunvisapi.h ----
 
@@ -50,13 +47,7 @@ set_target_properties(
 # ---- Install ----
 
 include(GNUInstallDirs)
-
-install(
-    TARGETS hunspell
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-)
+install(TARGETS hunspell)
 
 install(
     FILES
