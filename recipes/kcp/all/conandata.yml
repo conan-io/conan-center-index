@@ -8,7 +8,5 @@ sources:
 patches:
   "1.5":
     - patch_file: "patches/0001-kcp-remove-add_library-STATIC.patch"
-      base_path: "source_subfolder"
   "1.7":
     - patch_file: "patches/0001-kcp-remove-add_library-STATIC.patch"
-      base_path: "source_subfolder"
