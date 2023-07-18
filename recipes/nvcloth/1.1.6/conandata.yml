@@ -5,8 +5,8 @@ sources:
 patches:
   "1.1.6":
     - patch_file: "patches/0001-PsAllocator-include-typeinfo.patch"
-      base_path: "source_subfolder"
+      base_path: "."
     - patch_file: "patches/0002-CallbackFix.patch"
-      base_path: "source_subfolder"
+      base_path: "."
     - patch_file: "patches/0003-PsAllocator.patch"
-      base_path: "source_subfolder"
+      base_path: "."

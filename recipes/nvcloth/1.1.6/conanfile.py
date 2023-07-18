@@ -1,11 +1,15 @@
 import os
 import shutil
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import get, rmdir, copy, replace_in_file, patch, export_conandata_patches, apply_conandata_patches
+from conan.tools.env.environment import Environment
+from conans.model.version import Version
 from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc_static_runtime, is_msvc
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.53.0"
 
 class NvclothConan(ConanFile):
     name = "nvcloth"
@@ -30,23 +34,50 @@ class NvclothConan(ConanFile):
         "use_dx11": False
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def layout(self):
+        cmake_layout(self)
     
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+    
+    def generate(self):
+        cmake = CMakeToolchain(self)
+        if not self.options.shared:
+            cmake.variables["PX_STATIC_LIBRARIES"] = 1
+        cmake.variables["STATIC_WINCRT"] = is_msvc_static_runtime(self)
+
+        cmake.variables["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
+        cmake.variables["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
+
+        cmake.variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
+
+        cmake.generate()
+        cmake = CMakeDeps(self)
+        cmake.generate()
+    
+    def build(self):
+        self._patch_sources()
+        self._remove_samples()
+
+        env = Environment()
+        env.define("GW_DEPS_ROOT", os.path.abspath(self.source_folder))
+        envvars = env.vars(self, scope="build")
+        with envvars.apply():
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
     
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
@@ -56,65 +87,47 @@ class NvclothConan(ConanFile):
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
             raise ConanInvalidConfiguration("Current build_type is not supported")
 
-        if is_msvc(self) and tools.Version(self.settings.compiler.version) < 9:
+        if is_msvc(self) and Version(self.settings.compiler.version) < 9:
             raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        cmake = CMakeToolchain(self)
         if not self.options.shared:
-            cmake.definitions["PX_STATIC_LIBRARIES"] = 1
-        cmake.definitions["STATIC_WINCRT"] = is_msvc_static_runtime(self)
+            cmake.variables["PX_STATIC_LIBRARIES"] = 1
+        cmake.variables["STATIC_WINCRT"] = is_msvc_static_runtime(self)
 
-        cmake.definitions["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
-        cmake.definitions["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
+        cmake.variables["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
+        cmake.variables["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
 
-        cmake.definitions["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
+        cmake.variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
 
-        cmake.configure(
-            build_folder=os.path.join(self.build_folder, self._build_subfolder)
-        )
         return cmake
     
     def _remove_samples(self):
-        tools.rmdir(os.path.join(self._source_subfolder, "NvCloth", "samples"))
+        rmdir(self, os.path.join(self.source_folder, "NvCloth", "samples"))
 
     def _patch_sources(self):
         # There is no reason to force consumer of PhysX public headers to use one of
         # NDEBUG or _DEBUG, since none of them relies on NDEBUG or _DEBUG
-        tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "PxShared", "include", "foundation", "PxPreprocessor.h"),
+        replace_in_file(self, os.path.join(self.source_folder, "PxShared", "include", "foundation", "PxPreprocessor.h"),
                               "#error Exactly one of NDEBUG and _DEBUG needs to be defined!",
                               "// #error Exactly one of NDEBUG and _DEBUG needs to be defined!")
         shutil.copy(
-            os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h"),
-            os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.origin")
+            os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h"),
+            os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h.origin")
         )
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        for each_patch in self.conan_data["patches"][self.version]:
+            patch(self, **each_patch)
         
         if self.settings.build_type == "Debug":
             shutil.copy(
-                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h"),
-                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.patched")
+                os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h"),
+                os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h.patched")
             )
             shutil.copy(
-                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.origin"),
-                os.path.join(self.build_folder, self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h")
+                os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h.origin"),
+                os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h")
             )
-    
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def build(self):
-        with tools.environment_append({"GW_DEPS_ROOT": os.path.abspath(self._source_subfolder)}):
-            self._patch_sources()
-            self._remove_samples()
-            cmake = self._configure_cmake()
-            cmake.build()
 
     def _get_build_type(self):
         if self.settings.build_type == "Debug":
@@ -136,26 +149,25 @@ class NvclothConan(ConanFile):
     def package(self):
         if self.settings.build_type == "Debug":
             shutil.copy(
-                os.path.join(self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h.patched"),
-                os.path.join(self._source_subfolder, "NvCloth/include/NvCloth/Callbacks.h")
+                os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h.patched"),
+                os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h")
             )
-        nvcloth_source_subfolder = os.path.join(self.build_folder, self._source_subfolder)
-        nvcloth_build_subfolder = os.path.join(self.build_folder, self._build_subfolder)
+        nvcloth_source_subfolder = self.source_folder
+        nvcloth_build_subfolder = self.build_folder
 
-        self.copy(pattern="NvCloth/license.txt", dst="licenses", src=nvcloth_source_subfolder, keep_path=False)
-        self.copy("*.h", dst="include", src=os.path.join(nvcloth_source_subfolder, "NvCloth", "include"))
-        self.copy("*.h", dst="include", src=os.path.join(nvcloth_source_subfolder, "NvCloth", "extensions", "include"))
-        self.copy("*.h", dst="include", src=os.path.join(nvcloth_source_subfolder, "PxShared", "include"))
-        self.copy("*.a", dst="lib", src=nvcloth_build_subfolder, keep_path=False)
-        self.copy("*.lib", dst="lib", src=nvcloth_build_subfolder, keep_path=False)
-        self.copy("*.dylib*", dst="lib", src=nvcloth_build_subfolder, keep_path=False)
-        self.copy("*.dll", dst="bin", src=nvcloth_build_subfolder, keep_path=False)
-        self.copy("*.so", dst="lib", src=nvcloth_build_subfolder, keep_path=False)
+        print(nvcloth_build_subfolder)
+
+        copy(self, pattern="NvCloth/license.txt", dst="licenses", src=nvcloth_source_subfolder, keep_path=False)
+        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "NvCloth", "include"))
+        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "NvCloth", "extensions", "include"))
+        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "PxShared", "include"))
+        copy(self, "*.a", dst=os.path.join(self.package_folder, "lib"), src=nvcloth_build_subfolder, keep_path=False)
+        copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=nvcloth_build_subfolder, keep_path=False)
+        copy(self, "*.dylib*", dst=os.path.join(self.package_folder, "lib"), src=nvcloth_build_subfolder, keep_path=False)
+        copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=nvcloth_build_subfolder, keep_path=False)
+        copy(self, "*.so", dst=os.path.join(self.package_folder, "lib"), src=nvcloth_build_subfolder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "nvcloth"
-        self.cpp_info.names["cmake_find_package_multi"] = "nvcloth"
-
         if self.settings.build_type == "Debug":
             debug_suffix = "DEBUG"
         else:
@@ -170,6 +182,10 @@ class NvclothConan(ConanFile):
         else:
             self.cpp_info.libs = ["NvCloth{}".format(debug_suffix)]
 
+        self.cpp_info.includedirs = ['include']
+        self.cpp_info.libdirs = ['lib']
+        self.cpp_info.bindirs = ['bin']
+        
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.system_libs.append("m")
