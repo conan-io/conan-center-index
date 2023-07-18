@@ -1,7 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
-from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
@@ -26,12 +25,6 @@ class GnuLibConanFile(ConanFile):
 
     def package_id(self):
         self.info.clear()
-
-    def validate(self):
-        if conan_version.major >= 2 and self.settings.os == "Windows":
-            # Currently fails with 'configure: error: could not determine .../automake-1.16/ar-lib "lib -nologo" interface'.
-            # https://github.com/conan-io/conan-center-index/pull/18602#issuecomment-1639763920
-            raise ConanInvalidConfiguration("Windows is currently not supported by the gnulib recipe. Contributions are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, filename="gnulib.tar.gz")

@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, save, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -17,10 +17,8 @@ class TestPackageConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -33,8 +31,6 @@ class TestPackageConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        env = VirtualRunEnv(self)
-        env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         tc.generate()
 
@@ -46,7 +42,9 @@ class TestPackageConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            # FIXME: otherwise fails with 'configure: error: could not determine .../automake-1.16/ar-lib "lib -nologo" interface'.
+            # env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            env.define("AR", unix_path(self, os.path.join(self.build_folder, "build-aux", "ar-lib")))
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -61,7 +59,7 @@ class TestPackageConan(ConanFile):
         # self.run("gnulib-tool --list")
         self.run("gnulib-tool --import getopt-posix")
         autotools = Autotools(self)
-        # Can simply do autotools.autoreconf(self.build_folder) in Conan v2 instead
+        # Can simply do autotools.autoreconf(self.build_folder) in Conan v2
         with chdir(self, self.build_folder):
             self.run("autoreconf -fiv")
         autotools.configure(self.build_folder)
