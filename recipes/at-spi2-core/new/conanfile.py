@@ -40,8 +40,6 @@ class AtSpi2CoreConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def build_requirements(self):
         self.tool_requires("meson/1.1.1")
@@ -55,7 +53,7 @@ class AtSpi2CoreConan(ConanFile):
         self.requires("dbus/1.15.6")
 
     def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
+        if self.options.shared and not  self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
@@ -123,6 +121,3 @@ class AtSpi2CoreConan(ConanFile):
         self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
         self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
-
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
