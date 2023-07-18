@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.12)
 project(strmbas)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
-set(DSROOT "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/Samples/Win7Samples/multimedia/directshow/baseclasses")
+set(DSROOT "${CMAKE_CURRENT_SOURCE_DIR}/src/Samples/Win7Samples/multimedia/directshow/baseclasses")
 
 file(GLOB SOURCES "${DSROOT}/*.cpp")
 file(GLOB HEADERS "${DSROOT}/*.h")
@@ -20,8 +17,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${DSROOT})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE=1 _UNICODE=1)
 
+include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
   PUBLIC_HEADER DESTINATION include)
