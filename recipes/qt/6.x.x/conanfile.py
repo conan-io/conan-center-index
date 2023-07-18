@@ -3,7 +3,7 @@ import glob
 import os
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
@@ -285,8 +285,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
-        if cross_building(self):
-            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
+        if cross_building(self) and Version(conan_version) <"1.58.0":
+            raise ConanInvalidConfiguration("for cross compiling qt 6 conan version 1.58 or later is required")
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
@@ -371,14 +371,14 @@ class QtConan(ConanFile):
         self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
             self.tool_requires("nodejs/16.3.0")
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
-            if self.settings.os != "Windows":
+            if self._settings_build.os != "Windows":
                 self.tool_requires("bison/3.8.2")
                 self.tool_requires("flex/2.6.4")
             else:
@@ -561,7 +561,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             tc.variables["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
@@ -595,7 +595,7 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = f"\\\\?\\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
