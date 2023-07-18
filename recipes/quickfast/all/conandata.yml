@@ -8,7 +8,5 @@ sources:
 patches:
   "1.5":
     - patch_file: "patches/00001-fix-boost-asio.patch"
-      base_path: "source_subfolder"
   "cci.20170314":
     - patch_file: "patches/00002-fix-boost-asio.patch"
-      base_path: "source_subfolder"

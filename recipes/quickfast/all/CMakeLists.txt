@@ -27,23 +27,23 @@
 cmake_minimum_required(VERSION 3.13)
 project(quickfast CXX)
 
-include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(Boost REQUIRED CONFIG)
+find_package(XercesC REQUIRED CONFIG)
 
 file(GLOB SOURCES
-	source_subfolder/src/Application/*.cpp
-	source_subfolder/src/Common/*.cpp
-	source_subfolder/src/Codecs/*.cpp
-	source_subfolder/src/Communication/*.cpp
-	source_subfolder/src/Messages/*.cpp
+	src/src/Application/*.cpp
+	src/src/Common/*.cpp
+	src/src/Codecs/*.cpp
+	src/src/Communication/*.cpp
+	src/src/Messages/*.cpp
 )
 
 file(GLOB HEADERS RELATIVE ${PROJECT_SOURCE_DIR}
-	source_subfolder/src/Application/*.h
-	source_subfolder/src/Common/*.h
-	source_subfolder/src/Codecs/*.h
-	source_subfolder/src/Communication/*.h
-	source_subfolder/src/Messages/*.h
+	src/src/Application/*.h
+	src/src/Common/*.h
+	src/src/Codecs/*.h
+	src/src/Communication/*.h
+	src/src/Messages/*.h
 )
 
 add_library(quickfast ${HEADERS} ${SOURCES})
@@ -55,21 +55,14 @@ else()
 endif()
 
 target_compile_features(quickfast PUBLIC cxx_std_11)
+target_include_directories(quickfast PUBLIC src/src)
+target_link_libraries(${PROJECT_NAME} Boost::boost XercesC::XercesC)
 
-target_include_directories(quickfast PUBLIC
-	source_subfolder/src
-)
-
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-
-install(TARGETS quickfast
-    RUNTIME DESTINATION bin
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-)
+include(GNUInstallDirs)
+install(TARGETS quickfast)
 
 foreach (HEADER ${HEADERS})
-	file(RELATIVE_PATH HEADER_REL ${PROJECT_SOURCE_DIR}/source_subfolder/src ${PROJECT_SOURCE_DIR}/${HEADER})
+	file(RELATIVE_PATH HEADER_REL ${PROJECT_SOURCE_DIR}/src/src ${PROJECT_SOURCE_DIR}/${HEADER})
 	get_filename_component(HEADER_DIR ${HEADER_REL} DIRECTORY)
     install(FILES ${HEADER} DESTINATION include/quickfast/${HEADER_DIR})
 endforeach()
