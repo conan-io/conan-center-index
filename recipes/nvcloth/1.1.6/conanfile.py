@@ -3,11 +3,11 @@ import shutil
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get, rmdir, copy, replace_in_file, patch, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, rmdir, copy, replace_in_file, patch, export_conandata_patches
 from conan.tools.env.environment import Environment
-from conans.model.version import Version
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc_static_runtime, is_msvc
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -35,15 +35,15 @@ class NvclothConan(ConanFile):
     }
 
     def layout(self):
-        cmake_layout(self)
-    
+        cmake_layout(self, src_folder="src")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -51,7 +51,7 @@ class NvclothConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-    
+
     def generate(self):
         cmake = CMakeToolchain(self)
         if not self.options.shared:
@@ -66,7 +66,7 @@ class NvclothConan(ConanFile):
         cmake.generate()
         cmake = CMakeDeps(self)
         cmake.generate()
-    
+
     def build(self):
         self._patch_sources()
         self._remove_samples()
@@ -78,7 +78,7 @@ class NvclothConan(ConanFile):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
-    
+
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
             raise ConanInvalidConfiguration("Current os is not supported")
@@ -102,7 +102,7 @@ class NvclothConan(ConanFile):
         cmake.variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
 
         return cmake
-    
+
     def _remove_samples(self):
         rmdir(self, os.path.join(self.source_folder, "NvCloth", "samples"))
 
@@ -118,7 +118,7 @@ class NvclothConan(ConanFile):
         )
         for each_patch in self.conan_data["patches"][self.version]:
             patch(self, **each_patch)
-        
+
         if self.settings.build_type == "Debug":
             shutil.copy(
                 os.path.join(self.source_folder, "NvCloth/include/NvCloth/Callbacks.h"),
@@ -136,7 +136,9 @@ class NvclothConan(ConanFile):
             return "checked"
         elif self.settings.build_type == "Release":
             return "release"
-    
+        else:
+            raise ConanInvalidConfiguration("Invalid build type")
+
     def _get_target_build_platform(self):
         return {
             "Windows" : "windows",
@@ -185,7 +187,7 @@ class NvclothConan(ConanFile):
         self.cpp_info.includedirs = ['include']
         self.cpp_info.libdirs = ['lib']
         self.cpp_info.bindirs = ['bin']
-        
+
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.system_libs.append("m")
