@@ -1,3 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8264158..374a21c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,8 +11,8 @@
+ # Install:
+ # > cmake --build . --target install
+ 
+-PROJECT(libgit2 C)
+ CMAKE_MINIMUM_REQUIRED(VERSION 3.5.1)
++PROJECT(libgit2 C)
+ CMAKE_POLICY(SET CMP0015 NEW)
+ IF(POLICY CMP0051)
+ 	CMAKE_POLICY(SET CMP0051 NEW)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index dff1d94..abd9c45 100644
 --- a/src/CMakeLists.txt
