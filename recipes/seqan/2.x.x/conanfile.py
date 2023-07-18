@@ -51,9 +51,9 @@ class SeqanConan(ConanFile):
                 f"Your compiler is unknown. Assuming it supports C++{self._min_cppstd}."
             )
         elif Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._min_cppstd}, which your compiler does not fully support."
-                )
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++{self._min_cppstd}, which your compiler does not fully support."
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
