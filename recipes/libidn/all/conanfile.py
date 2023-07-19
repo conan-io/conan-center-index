@@ -1,11 +1,13 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, rmdir
+from conan.tools.build import cross_building
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import get, rmdir, export_conandata_patches, apply_conandata_patches, copy, chdir, replace_in_file, rm
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.microsoft import unix_path, is_msvc
 from conan.tools.scm import Version
-from conans import AutoToolsBuildEnvironment, tools
-import contextlib
-import functools
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -17,29 +19,18 @@ class LibIdnConan(ConanFile):
     topics = ("libidn", "encode", "decode", "internationalized", "domain", "name")
     license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-        "threads": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-        "threads": True,
-    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"shared": [True, False], "fPIC": [True, False], "threads": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "threads": True}
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,7 +38,7 @@ class LibIdnConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -59,79 +50,82 @@ class LibIdnConan(ConanFile):
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.5")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
-
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.libs = []
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        tc.libs = []
         if not self.options.shared:
-            autotools.defines.append("LIBIDN_STATIC")
-        if self.settings.compiler == "Visual Studio":
+            tc.defines.append("LIBIDN_STATIC")
+        if is_msvc(self):
             if Version(self.settings.compiler.version) >= "12":
-                autotools.flags.append("-FS")
-            autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
+                tc.extra_cflags.append("-FS")
+            tc.extra_ldflags += ["-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths]
         yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
+        tc.configure_args += [
             "--enable-threads={}".format(yes_no(self.options.threads)),
-            "--with-libiconv-prefix={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)),
+            "--with-libiconv-prefix={}".format(unix_path(self, self.dependencies["libiconv"].cpp_info.libdirs[0])),  # FIXME
             "--disable-nls",
             "--disable-rpath",
         ]
-        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return autotools
+        tc.generate()
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
+            env = Environment()
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_msvc")
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if is_msvc(self):
             if self.settings.arch in ("x86_64", "armv8", "armv8.3"):
                 ssize = "signed long long int"
             else:
                 ssize = "signed long int"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "stringprep.h"),
-                                  "ssize_t", ssize)
-        with self._build_context():
-            autotools = self._configure_autotools()
+            replace_in_file(self, os.path.join(self.source_folder, "lib", "stringprep.h"), "ssize_t", ssize)
+
+    def build(self):
+        self._patch_sources()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make(args=["V=1"])
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
             autotools.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["idn"]
-        self.cpp_info.names["pkg_config"] = "libidn"
+        self.cpp_info.set_property("pkg_config_name", "libidn")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threads:
                 self.cpp_info.system_libs = ["pthread"]
@@ -139,7 +133,7 @@ class LibIdnConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines = ["LIBIDN_STATIC"]
 
+        # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
-
