@@ -1,9 +1,5 @@
 
 
-macro(link_static_plateform_integration_plugin_if_needed target)
-endmacro()
-
-
 macro(add_qt_exe lib )
     
     find_package(Qt5 COMPONENTS ${lib} REQUIRED CONFIG)
