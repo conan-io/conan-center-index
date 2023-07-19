@@ -194,16 +194,16 @@ class OpenCVConan(ConanFile):
                 # opencv < 4.5.3 doesn't support openexr >= 3
                 self.requires("openexr/2.5.7")
             else:
-                self.requires("openexr/3.1.7")
+                self.requires("openexr/3.1.9")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.5.1")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/4.4.3")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.7.0")
+            self.requires("onetbb/2021.9.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
