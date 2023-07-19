@@ -1,3 +1,4 @@
+import glob
 import os
 import textwrap
 
@@ -205,6 +206,9 @@ class OneTBBConan(ConanFile):
         replace_in_file(self, linux_include, "= gcc", "= $(CC)")
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
             replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "release", "debug")
+        for inc_file in glob.glob(os.path.join(self.source_folder, "build", "*.inc")):
+            # Fix 'ar: two different operation options specified' due to unrecognized -m64 flag in 2020.04
+            replace_in_file(self, inc_file, "LIB_LINK_FLAGS += -m64", "LIB_LINK_FLAGS += ", strict=False)
 
     def build(self):
         self._patch_sources()
@@ -297,6 +301,7 @@ class OneTBBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TBB")
+        self.cpp_info.set_property("cmake_target_name", "TBB::TBB")
 
         suffix = "_debug" if self.settings.build_type == "Debug" else ""
 
