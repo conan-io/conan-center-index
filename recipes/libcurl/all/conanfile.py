@@ -185,7 +185,7 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.6.3")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.54.0")
+            self.requires("libnghttp2/1.55.1")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
