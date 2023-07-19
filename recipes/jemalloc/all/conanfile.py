@@ -137,7 +137,7 @@ class JemallocConan(ConanFile):
             "--enable-log" if self.options.enable_debug_logging else "--disable-log",
             "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
             "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
-            "--with-lg-vaddr=48" if self.settings.arch in ['x86_64', 'arm64', 'armv8'] else '',
+            "--with-lg-vaddr=48" if self.settings.arch in ['x86_64', 'armv8', 'armv8.3'] else '',
         ])
 
         if self.options.enable_prof:
