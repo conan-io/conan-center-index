@@ -12,7 +12,14 @@ class JsonconsConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/danielaparker/jsoncons"
-    topics = ("json", "csv", "cpp", "json-serialization", "cbor", "json-parser", "messagepack", "json-pointer", "json-patch", "json-diff", "bson", "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser", "csv-reader", "jsonschema", "json-construction", "streaming-json-read", "header-only")
+    topics = (
+        "json", "csv", "json-serialization", "cbor", "json-parser",
+        "messagepack", "json-pointer", "json-patch", "json-diff", "bson",
+        "ubjson", "json-parsing", "jsonpath", "jmespath", "csv-parser",
+        "csv-reader", "jsonschema", "json-construction", "streaming-json-read",
+        "header-only",
+    )
+    pckage_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -23,19 +30,13 @@ class JsonconsConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(
-            self, 
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        # Folders not used for header-only
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
