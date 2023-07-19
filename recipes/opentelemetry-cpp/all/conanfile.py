@@ -110,14 +110,14 @@ class OpenTelemetryCppConan(ConanFile):
            self.options.get_safe("with_otlp_http") or
            self.options.with_etw
         ):
-           self.requires("nlohmann_json/3.11.2")
-           self.requires("openssl/[>=1.1 <4]")
+            self.requires("nlohmann_json/3.11.2")
+            self.requires("openssl/[>=1.1 <4]")
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
            self.options.get_safe("with_otlp_http")
         ):
-           self.requires("libcurl/8.1.1")
+            self.requires("libcurl/8.1.1")
 
         if self.options.with_prometheus:
             self.requires("prometheus-cpp/1.1.0")
@@ -152,7 +152,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if Version(self.version) >= "1.10":
             if self.options.with_otlp and not self.options.get_safe("with_otlp_grpc") and not self.options.get_safe("with_otlp_http"):
-                raise ConanInvalidConfiguration(f"'with_otlp' requires either 'with_otlp_grpc' or 'with_otlp_http' to be enabled")
+                raise ConanInvalidConfiguration("'with_otlp' requires either 'with_otlp_grpc' or 'with_otlp_http' to be enabled")
 
             if self.options.with_jaeger:
                 raise ConanInvalidConfiguration("Jeager-Support has been removed in opentelemetry-cpp >= 1.10")
