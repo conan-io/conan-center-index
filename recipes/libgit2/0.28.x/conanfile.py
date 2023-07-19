@@ -1,5 +1,5 @@
 from conan.tools.apple import is_apple_os
-from conan.tools.files import get, rmdir, copy, replace_in_file
+from conan.tools.files import get, rmdir, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
@@ -43,6 +43,9 @@ class LibGit2Conan(ConanFile):
     
     def _is_apple_os(self):
         return self.settings.os in ['Macos', 'iOS', 'watchOS', 'tvOS']
+    
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -131,17 +134,8 @@ class LibGit2Conan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                        "FIND_PKGLIBRARIES(LIBSSH2 libssh2)",
-                        "FIND_PACKAGE(Libssh2 REQUIRED)\n"
-                        "\tSET(LIBSSH2_FOUND ON)\n"
-                        "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
-                        "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
-                        "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
