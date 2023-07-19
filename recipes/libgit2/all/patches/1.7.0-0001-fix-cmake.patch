@@ -17,6 +17,22 @@ index 955aea3..ff94eb8 100644
  		list(APPEND LIBGIT2_PC_LIBS "-lhttp_parser")
  		add_feature_info(http-parser ON "http-parser support (system)")
  	else()
+diff --git a/cmake/SelectHTTPSBackend.cmake b/cmake/SelectHTTPSBackend.cmake
+index d149416..33473ee 100644
+--- a/cmake/SelectHTTPSBackend.cmake
++++ b/cmake/SelectHTTPSBackend.cmake
+@@ -9,6 +9,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+ endif()
+ 
+ if(USE_HTTPS)
++	if(WIN32)
++		list(APPEND LIBGIT2_SYSTEM_LIBS "secur32")
++		list(APPEND LIBGIT2_PC_LIBS "-lsecur32")
++	endif()
++
+ 	# Auto-select TLS backend
+ 	sanitizebool(USE_HTTPS)
+ 	if(USE_HTTPS STREQUAL ON)
 diff --git a/cmake/SelectSSH.cmake b/cmake/SelectSSH.cmake
 index 968a631..386f184 100644
 --- a/cmake/SelectSSH.cmake
