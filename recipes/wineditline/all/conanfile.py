@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import copy, get
 
 required_conan_version = ">=1.53.0"
 
@@ -27,7 +27,7 @@ class WineditlineConan(ConanFile):
     provides = "editline"
 
     def export_sources(self):
-        export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", dst=self.export_sources_folder, src=self.recipe_folder)
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -48,7 +48,7 @@ class WineditlineConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        copy(self, "CMakeLists.txt", dst=self.source_folder, src=self.export_sources_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
