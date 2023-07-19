@@ -46,9 +46,13 @@ class NvclothConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
+        self.settings.rm_safe("Windows.shared")
+        self.settings.rm_safe("Macos.shared")
+        self.settings.rm_safe("Android.shared")
+        self.settings.rm_safe("iOS.shared")
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -89,19 +93,6 @@ class NvclothConan(ConanFile):
 
         if is_msvc(self) and Version(self.settings.compiler.version) < 9:
             raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
-
-    def _configure_cmake(self):
-        cmake = CMakeToolchain(self)
-        if not self.options.shared:
-            cmake.variables["PX_STATIC_LIBRARIES"] = 1
-        cmake.variables["STATIC_WINCRT"] = is_msvc_static_runtime(self)
-
-        cmake.variables["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
-        cmake.variables["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
-
-        cmake.variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
-
-        return cmake
 
     def _remove_samples(self):
         rmdir(self, os.path.join(self.source_folder, "NvCloth", "samples"))
@@ -155,9 +146,6 @@ class NvclothConan(ConanFile):
             )
         nvcloth_source_subfolder = self.source_folder
         nvcloth_build_subfolder = self.build_folder
-
-        print(nvcloth_build_subfolder)
-
         copy(self, pattern="NvCloth/license.txt", dst=os.path.join(self.package_folder, "licenses"), src=nvcloth_source_subfolder, keep_path=False)
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "NvCloth", "include"))
         copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(nvcloth_source_subfolder, "NvCloth", "extensions", "include"))
