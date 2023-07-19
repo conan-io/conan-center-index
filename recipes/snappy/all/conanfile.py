@@ -22,7 +22,7 @@ class SnappyConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_bmi2": [True, False, "auto"],
-        "with_ssse3": [True, False "auto"],
+        "with_ssse3": [True, False, "auto"],
     }
     default_options = {
         "shared": False,
