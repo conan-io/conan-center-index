@@ -54,7 +54,7 @@ class PoshlibConan(ConanFile):
             self,
             os.path.join(self.source_folder, "posh.h"),
             "defined _ARM",
-            "defined _ARM || defined __arm64",
+            "defined _ARM || defined __arm64 || defined __aarch64__",
         )
 
     def build(self):
