@@ -3,14 +3,13 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, save
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualBuildEnv"
     test_type = "explicit"
 
     _cmake = None
@@ -204,7 +203,11 @@ class TestPackageConan(ConanFile):
         tc.variables["TEST_PACKAGE_QT_SHARED_LIBS"] = qt_options.shared
         
         tc.generate()
-            
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
+
     def build(self):
         
         cmake = self._getOrCreateCMake()
