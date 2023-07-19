@@ -125,12 +125,10 @@ class Log4cxxConan(ConanFile):
             tc.variables["LOG4CXX_INSTALL_PDB"] = False
         tc.generate()
 
-        deps = CMakeDeps(self)
-        deps.set_property("apr", "cmake_target_name", "APR")
-        deps.set_property("apr-util", "cmake_target_name", "APR-Util")
+        tc = CMakeDeps(self)
         if Version(self.version) < "0.13.0":
-            deps.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
-        deps.generate()
+            tc.set_property("expat", "cmake_target_name", "EXPAT::EXPAT")
+        tc.generate()
 
     def build(self):
         self._patch_sources()
