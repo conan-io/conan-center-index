@@ -40,17 +40,16 @@ class LibGit2Conan(ConanFile):
         "with_https": "openssl",
         "with_sha1": "collisiondetection",
     }
+    
+    def _isMacOS(self):
+        return self.settings.os in ['Macos', 'iOS', 'watchOS', 'tvOS']
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.with_ntlmclient
 
-        if self.settings.os not in ['Macos', 'iOS', 'watchOS', 'tvOS']:
+        if not self._isMacOS():
             del self.options.with_iconv
-
-        if self.settings.os == "Macos":
-            self.options.with_regex = "regcomp_l"
 
     def configure(self):
         if self.options.shared:
