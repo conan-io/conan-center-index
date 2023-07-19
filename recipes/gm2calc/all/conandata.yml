@@ -11,4 +11,3 @@ sources:
 patches:
   "1.7.5":
     - patch_file: "patches/0001-update-1.7.5-to-FindMathematica-3.6.0.patch"
-      base_path: "source_subfolder"
