@@ -41,14 +41,14 @@ class LibGit2Conan(ConanFile):
         "with_sha1": "collisiondetection",
     }
     
-    def _isMacOS(self):
+    def _is_apple_os(self):
         return self.settings.os in ['Macos', 'iOS', 'watchOS', 'tvOS']
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if not self._isMacOS():
+        if not self._is_apple_os():
             del self.options.with_iconv
 
     def configure(self):
@@ -72,13 +72,13 @@ class LibGit2Conan(ConanFile):
         self.requires("zlib/1.2.13")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.10.0")
+            self.requires("libssh2/1.11.0")
         if self._need_openssl:
             self.requires("openssl/1.1.1u")
         if self._need_mbedtls:
-            self.requires("mbedtls/3.1.0")
-        if self._isMacOS() and self.options.with_iconv:
-            self.requires("libiconv/1.16")
+            self.requires("mbedtls/3.2.1")
+        if self._is_apple_os() and self.options.with_iconv:
+            self.requires("libiconv/1.17")
 
     def validate(self):
         if self.options.with_https == "security":
