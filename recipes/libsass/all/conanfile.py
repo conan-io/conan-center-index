@@ -51,6 +51,10 @@ class LibsassConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _msbuild_configuration(self):
+        return "Debug" if self.settings.build_type == "Debug" else "Release"
+
     def generate(self):
         if not is_msvc(self):
             tc = AutotoolsToolchain(self)
@@ -66,24 +70,44 @@ class LibsassConan(ConanFile):
         else:
             with chdir(self, self.source_folder):
                 tc = MSBuildToolchain(self)
-                tc.platforms = {"x86": "Win32", "x86_64": "Win64"}
+                tc.configuration = self._msbuild_configuration
                 tc.properties["LIBSASS_STATIC_LIB"] = "" if self.options.shared else "true"
                 wpo_enabled = any(re.finditer("(^| )[/-]GL($| )", os.environ.get("CFLAGS", "")))
                 tc.properties["WholeProgramOptimization"] = "true" if wpo_enabled else "false"
                 tc.generate()
 
     def _patch_sources(self):
-        makefile = os.path.join(self.source_folder, "Makefile")
-        replace_in_file(self, makefile, "CFLAGS   += -O2", "")
-        replace_in_file(self, makefile, "CXXFLAGS += -O2", "")
-        replace_in_file(self, makefile, "LDFLAGS  += -O2", "")
+        if is_msvc(self):
+            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
+            vcxproj_files = [os.path.join(self.source_folder, "win", "libsass.vcxproj")]
+            platform_toolset = MSBuildToolchain(self).toolset
+            import_conan_generators = ""
+            for props_file in ["conantoolchain.props", "conandeps.props"]:
+                props_path = os.path.join(self.generators_folder, props_file)
+                if os.path.exists(props_path):
+                    import_conan_generators += f'<Import Project="{props_path}" />'
+            for vcxproj_file in vcxproj_files:
+                for exiting_toolset in ["v120", "v140", "v141", "v142", "v143"]:
+                    replace_in_file(self, vcxproj_file,
+                        f"<PlatformToolset>{exiting_toolset}</PlatformToolset>",
+                        f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
+                if props_path:
+                    replace_in_file(self, vcxproj_file,
+                        '<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />',
+                        f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
+        else:
+            makefile = os.path.join(self.source_folder, "Makefile")
+            replace_in_file(self, makefile, "CFLAGS   += -O2", "")
+            replace_in_file(self, makefile, "CXXFLAGS += -O2", "")
+            replace_in_file(self, makefile, "LDFLAGS  += -O2", "")
 
     def build(self):
         self._patch_sources()
         with chdir(self, self.source_folder):
             if is_msvc(self):
                 msbuild = MSBuild(self)
-                msbuild.build(os.path.join("win", "libsass.sln"))
+                msbuild.build_type = self._msbuild_configuration
+                msbuild.build(sln=os.path.join("win", "libsass.sln"))
             else:
                 save(self, path="VERSION", content=f"{self.version}")
                 autotools = Autotools(self)
