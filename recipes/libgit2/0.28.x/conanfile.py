@@ -77,7 +77,7 @@ class LibGit2Conan(ConanFile):
             self.requires("openssl/1.1.1u")
         if self._need_mbedtls:
             self.requires("mbedtls/3.1.0")
-        if self.settings.os in ['Macos', 'iOS', 'watchOS', 'tvOS'] and self.options.with_iconv:
+        if self._isMacOS() and self.options.with_iconv:
             self.requires("libiconv/1.16")
 
     def validate(self):
