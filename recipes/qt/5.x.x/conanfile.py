@@ -1110,10 +1110,7 @@ Examples = bin/datadir/examples""")
                 _create_module("VulkanSupport", ["Core", "Gui"])
 
             if self.options.widgets:
-                widget_reqs = ["Gui"]
-                if self.options.with_freetype:
-                    widget_reqs.append("freetype::freetype")
-                _create_module("Widgets", widget_reqs)
+                _create_module("Widgets", ["Gui"])
                 _add_build_module("qtWidgets", self._cmake_qt5_private_file("Widgets"))
                 if self.settings.os not in ["iOS", "watchOS", "tvOS"]:
                     _create_module("PrintSupport", ["Gui", "Widgets"])
