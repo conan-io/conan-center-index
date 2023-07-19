@@ -66,10 +66,16 @@ patches:
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
       patch_file: "patches/c72097e.diff"
+    - base_path: "qtbase/cmake"
+      patch_description: "Fix pri helpers, see PR #6668 and QTBUG-95569"
+      patch_file: "patches/qt6.5.0-pri-helpers-fix.diff"
   "6.5.0":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
       patch_file: "patches/c72097e.diff"
+    - base_path: "qtbase/cmake"
+      patch_description: "Fix pri helpers, see PR #6668 and QTBUG-95569"
+      patch_file: "patches/qt6.5.0-pri-helpers-fix.diff"
   "6.4.2":
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers"
