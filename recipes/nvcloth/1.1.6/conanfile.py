@@ -28,7 +28,6 @@ class NvclothConan(ConanFile):
         "use_dx11": [True, False]
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "use_cuda": False,
         "use_dx11": False
@@ -49,10 +48,13 @@ class NvclothConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def configure(self):
-        self.settings.rm_safe("Windows.shared")
-        self.settings.rm_safe("Macos.shared")
-        self.settings.rm_safe("Android.shared")
-        self.settings.rm_safe("iOS.shared")
+        if self.settings.os in ["Windows", "Macos"]:
+            self.options.shared = True
+        elif self.settings.os in ["iOS", "Android"]:
+            self.options.shared = False
+        else:
+            self.options.shared = False
+        
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
