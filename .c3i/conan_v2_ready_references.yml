@@ -242,6 +242,7 @@ required_for_references:
 - embree3
 - emio
 - enet
+- enhex-generic_serialization
 - entityx
 - entt
 - enum-flags
@@ -659,6 +660,7 @@ required_for_references:
 - pystring
 - qhull
 - qpdf
+- qt
 - quantlib
 - quaternions
 - quill
