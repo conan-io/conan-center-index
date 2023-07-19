@@ -8,7 +8,5 @@ sources:
 patches:
   "1.4.14":
     - patch_file: "patches/fix-cmake-1.4.14.patch"
-      base_path: "source_subfolder"
   "1.4.13":
     - patch_file: "patches/fix-export-symbols-and-cmake.patch"
-      base_path: "source_subfolder"
