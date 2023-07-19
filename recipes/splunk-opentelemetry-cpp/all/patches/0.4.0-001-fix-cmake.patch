@@ -1,0 +1,26 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.5.1)
++cmake_minimum_required(VERSION 3.15)
+ 
+ project(SplunkOpenTelemetry CXX)
+ 
+@@ -6,8 +6,6 @@
+ include(GenerateExportHeader)
+ 
+ set(PACKAGE_VERSION "0.1.0")
+-
+-set(CMAKE_CXX_STANDARD 11)
+ 
+ option(SPLUNK_CPP_TESTS "Enable building of tests" OFF)
+ option(SPLUNK_CPP_EXAMPLES "Enable building of examples" ON)
+@@ -36,7 +34,7 @@
+ 
+ target_link_libraries(SplunkOpenTelemetry
+   PUBLIC
+-  ${OPENTELEMETRY_CPP_LIBRARIES}
++  opentelemetry-cpp::opentelemetry-cpp
+   gRPC::grpc++
+   protobuf::libprotobuf
+   ${SPLUNK_CPP_JAEGER_EXPORTER_LIBS}
