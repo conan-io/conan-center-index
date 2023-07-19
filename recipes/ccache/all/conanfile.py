@@ -68,7 +68,6 @@ class CcacheConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.15 <4]")
-        self.tool_requires("pkgconf/1.9.3") # for zstd
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -87,6 +86,7 @@ class CcacheConan(ConanFile):
         deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
         deps.set_property("hiredis", "cmake_find_mode", "module")
         deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
+        deps.set_property("zstd", "cmake_find_mode", "module")
         deps.generate()
 
     def build(self):
