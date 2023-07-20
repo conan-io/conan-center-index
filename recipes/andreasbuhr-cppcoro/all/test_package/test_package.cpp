@@ -1,8 +1,9 @@
-#include <vector>
-#include <iostream>
 #include <cppcoro/generator.hpp>
 #include <cppcoro/task.hpp>
 #include <cppcoro/sync_wait.hpp>
+
+#include <vector>
+#include <iostream>
 
 cppcoro::generator<int> intYielder() {
 	co_yield 0;

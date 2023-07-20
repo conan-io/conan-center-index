@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 find_package(cppcoro CONFIG REQUIRED)
 
