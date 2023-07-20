@@ -1,11 +1,13 @@
-from conans import ConanFile, CMake, tools
-import os
+from conan import ConanFile
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join(self.deps_cpp_info["objectbox-generator"].rootpath, "bin", "objectbox-generator")
-            self.run(bin_path + " -help", run_environment=True)
+        self.run("objectbox-generator -help")
