@@ -111,7 +111,6 @@ class OsgearthConan(ConanFile):
 
         self.requires("zlib/1.2.13")  # override
         self.requires("libtiff/4.5.1")  # override
-        self.requires("openssl/1.1.1u")  # override
         self.requires("libpng/1.6.40")  # override
 
         # if self.options.build_triton_nodekit:
