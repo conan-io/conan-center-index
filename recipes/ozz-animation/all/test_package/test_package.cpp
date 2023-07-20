@@ -1,7 +1,7 @@
-#include <iostream>
-
 #include "ozz/base/log.h"
 #include "ozz/base/io/stream.h"
+
+#include <iostream>
 
 int main()
 {
