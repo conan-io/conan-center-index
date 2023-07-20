@@ -133,13 +133,14 @@ class LLVMOpenMpConan(ConanFile):
             self.cpp_info.cxxflags = ["-fopenmp"]
         elif self.settings.compiler == "intel-cc":
             self.cpp_info.cxxflags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.cflags = self.cpp_info.cxxflags
+        self.cpp_info.libs = ["omp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenMP"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenMP"
-        self.cpp_info.builddirs.append(os.path.join(self.package_folder, 'lib', 'cmake'))
+        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
