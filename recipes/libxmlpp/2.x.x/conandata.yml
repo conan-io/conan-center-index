@@ -9,7 +9,5 @@ sources:
 patches:
   "5.0.1":
     - patch_file: "patches/5.0.1-0001-enable_static_builds_on_msvc.patch"
-      base_path: "source_subfolder"
   "2.42.1":
     - patch_file: "patches/2.42.1-0001-enable_static_builds_on_msvc.patch"
-      base_path: "source_subfolder"
