@@ -29,9 +29,10 @@
  * for inclusion in OpenLDAP software.
  */
 
+#include "openldap.h"
+
 #include <stdio.h>
 #include <cstdlib>
-#include "openldap.h"
 
 static int do_uri_create(LDAPURLDesc *lud) {
   char *uri;
