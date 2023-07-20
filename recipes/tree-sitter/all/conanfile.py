@@ -1,8 +1,8 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake
-from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy
 import os
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import get, copy
 
 required_conan_version = ">=1.53.0"
 
@@ -39,11 +39,10 @@ class TreeSitterConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
 
     def build(self):
         cmake = CMake(self)
@@ -61,6 +60,4 @@ class TreeSitterConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "tree-sitter")
-        self.cpp_info.builddirs = ["cmake"]
         self.cpp_info.libs = ["tree-sitter"]
