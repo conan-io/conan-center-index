@@ -6,18 +6,17 @@ add_definitions(-D_HAS_AUTO_PTR_ETC)
 
 # Flags
 if(MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWINDOWS -DNOMINMAX")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWINDOWS -DNOMINMAX -D_WIN32")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated -Wno-deprecated-declarations")
+	add_definitions(-Dlinux)
 endif()
 
 # Conan
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-find_package(EXPAT REQUIRED)
+find_package(expat REQUIRED)
 
 # Macros
-set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_LIST_DIR}/src)
 
 # Sources
 set(OFX_HEADER_DIR "${SOURCE_SUBFOLDER}/include")
@@ -50,7 +49,7 @@ add_library(OfxHost
 	${OFX_HOSTSUPPORT_HEADER_FILES}
 	${OFX_HOSTSUPPORT_LIBRARY_FILES})
 
-target_link_libraries(OfxHost PUBLIC EXPAT::EXPAT)
+target_link_libraries(OfxHost PUBLIC expat::expat)
 
 target_include_directories(OfxHost PUBLIC
 	${OFX_HEADER_DIR}
@@ -68,7 +67,5 @@ install(FILES
 	${OFX_HOSTSUPPORT_HEADER_FILES}
 	DESTINATION "include")
 
-install(TARGETS OfxSupport OfxHost
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
-	ARCHIVE DESTINATION lib)
+include(GNUInstallDirs)
+install(TARGETS OfxSupport OfxHost)
