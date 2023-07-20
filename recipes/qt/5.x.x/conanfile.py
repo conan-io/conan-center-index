@@ -1338,7 +1338,10 @@ Examples = bin/datadir/examples""")
             _create_plugin("OpenGLRendererPlugin", "openglrenderer", "renderers", [])
 
             _create_module("3DAnimation", ["3DRender", "3DCore", "Gui"])
-            _create_module("3DInput", ["3DCore"])
+            t3dinput_reqs = ["3DCore"]
+            if self.options.qtgamepad:
+                t3dinput_reqs.append("Gamepad")
+            _create_module("3DInput", t3dinput_reqs)
             _create_module("3DLogic", ["3DCore", "Gui"])
             _create_module("3DExtras", ["3DRender", "3DInput", "3DLogic", "3DCore", "Gui"])
             
