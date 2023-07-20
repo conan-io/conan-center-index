@@ -5,4 +5,3 @@ sources:
 patches:
   "cci.20200430":
     - patch_file: "patches/001-fix-cmake-targets.patch"
-      base_path: "source_subfolder"

@@ -1,38 +1,34 @@
-from conans import CMake, ConanFile, tools
-import glob
 import os
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class CoseCConan(ConanFile):
     name = "cose-c"
+    description = "Implementation of COSE in C using cn-cbor and openssl"
     license = "BSD-3-Clause"
-    homepage = "https://github.com/cose-wg/COSE-C"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """Implementation of COSE in C using cn-cbor and openssl"""
-    topics = ("cbor")
-    exports_sources =  ["CMakeLists.txt", "patches/**"]
-    settings = "os", "compiler", "build_type", "arch"
+    homepage = "https://github.com/cose-wg/COSE-C"
+    topics = "cbor"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": ["openssl", "mbedtls"]
+        "with_ssl": ["openssl", "mbedtls"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": "openssl"
+        "with_ssl": "openssl",
     }
-    generators = "cmake", "cmake_find_package"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,50 +36,53 @@ class CoseCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cn-cbor/1.0.0")
+        self.requires("cn-cbor/1.0.0", transitive_headers=True)
 
         if self.options.with_ssl == "mbedtls":
-            self.requires("mbedtls/2.23.0")
+            self.requires("mbedtls/2.25.0", transitive_headers=True)
         else:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("COSE-C-*")[0], self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["COSE_C_COVERALLS"] = False
-        self._cmake.definitions["COSE_C_BUILD_TESTS"] = False
-        self._cmake.definitions["COSE_C_BUILD_DOCS"] = False
-        self._cmake.definitions["COSE_C_BUILD_DUMPER"] = False
-        self._cmake.definitions["COSE_C_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
-        self._cmake.definitions["COSE_C_USE_FIND_PACKAGE"] = True
-        self._cmake.definitions["COSE_C_EXPORT_TARGETS"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["COSE_C_COVERALLS"] = False
+        tc.variables["COSE_C_BUILD_TESTS"] = False
+        tc.variables["COSE_C_BUILD_DOCS"] = False
+        tc.variables["COSE_C_BUILD_DUMPER"] = False
+        tc.variables["COSE_C_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
+        tc.variables["COSE_C_USE_FIND_PACKAGE"] = True
+        tc.variables["COSE_C_EXPORT_TARGETS"] = True
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "secur32", "crypt32", "bcrypt"])
         if self.settings.os == "Macos":
