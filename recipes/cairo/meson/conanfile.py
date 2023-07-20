@@ -5,15 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    rename,
-    replace_in_file,
-    rm,
-    rmdir)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -101,24 +93,24 @@ class CairoConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.0", transitive_headers=True)
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.14.2", transitive_headers=True)
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_glib:
             self.requires("glib/2.78.0")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
-                self.requires("xorg/system")
+                self.requires("xorg/system", transitive_headers=True)
         if self.options.get_safe("with_opengl") == "desktop":
-            self.requires("opengl/system")
+            self.requires("opengl/system", transitive_headers=True)
             if self.settings.os == "Windows":
                 self.requires("glext/cci.20210420")
                 self.requires("wglext/cci.20200813")
                 self.requires("khrplatform/cci.20200529")
         if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("egl/system")
+            self.requires("egl/system", transitive_headers=True)
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):

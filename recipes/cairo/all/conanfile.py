@@ -5,19 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    replace_in_file,
-    rename,
-    rm,
-    rmdir
-)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rename, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps, Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import unix_path, is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
@@ -84,20 +75,20 @@ class CairoConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.0", transitive_headers=True)
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.14.2", transitive_headers=True)
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
-                self.requires("xorg/system")
+                self.requires("xorg/system", transitive_headers=True)
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.76.3")
+            self.requires("glib/2.76.3", transitive_headers=True)
         self.requires("zlib/1.2.13")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.40")
 
     def package_id(self):
-        if self.options.get_safe("with_glib") and not self.dependencies["glib"].options.shared:
+        if self.info.options.get_safe("with_glib") and not self.dependencies["glib"].options.shared:
             self.info.requires["glib"].full_package_mode()
 
     def validate(self):
@@ -127,7 +118,7 @@ class CairoConan(ConanFile):
             return "yes" if value else "no"
 
         def dep_path(dependency):
-            return unix_path(self, self.deps_cpp_info[dependency].rootpath)
+            return unix_path(self, self.dependencies[dependency].package_folder)
 
         tc = AutotoolsToolchain(self, namespace=namespace)
         tc.configure_args += [
@@ -138,7 +129,7 @@ class CairoConan(ConanFile):
             f"--enable-xlib={is_enabled(self.options.get_safe('with_xlib'))}",
             f"--enable-xlib_xrender={is_enabled(self.options.get_safe('with_xlib_xrender'))}",
             f"--enable-xcb={is_enabled(self.options.get_safe('xcb'))}",
-            "--disable-gtk-doc"
+            "--disable-gtk-doc",
         ]
         if is_msvc(self):
             tc.make_args +=  [
@@ -150,7 +141,7 @@ class CairoConan(ConanFile):
                 f"LIBPNG_PATH={dep_path('libpng')}",
                 f"PIXMAN_PATH={dep_path('pixman')}",
                 f"FREETYPE_PATH={dep_path('freetype')}",
-                f"GOBJECT_PATH={dep_path('glib')}"
+                f"GOBJECT_PATH={dep_path('glib')}",
             ]
             tc.extra_cflags += ["-FS"]
 
@@ -176,10 +167,10 @@ class CairoConan(ConanFile):
         deps = AutotoolsDeps(self)
         if is_msvc(self):
             cppflags = deps.vars().get("CPPFLAGS")
-            deps.environment.append('CFLAGS', cppflags.replace("/I", "-I"))
+            deps.environment.append("CFLAGS", cppflags.replace("/I", "-I"))
             ldflags = deps.vars().get("LDFLAGS")
-            deps.environment.define('LDFLAGS', ldflags.replace("/LIBPATH:", "-LIBPATH:"))
-            deps.environment.append('LDFLAGS', deps.vars().get("LIBS"))
+            deps.environment.define("LDFLAGS", ldflags.replace("/LIBPATH:", "-LIBPATH:"))
+            deps.environment.append("LDFLAGS", deps.vars().get("LIBS"))
 
         deps.generate()
 
@@ -187,12 +178,9 @@ class CairoConan(ConanFile):
         apply_conandata_patches(self)
 
         def fix_freetype_version():
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "configure.ac"),
-                "FREETYPE_MIN_VERSION=9.7.3",
-                f"FREETYPE_MIN_VERSION={Version(self.dependencies['freetype'].ref.version)}"
-            )
+            replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
+                            "FREETYPE_MIN_VERSION=9.7.3",
+                            f"FREETYPE_MIN_VERSION={Version(self.dependencies['freetype'].ref.version)}")
 
         def exclude_tests_and_docs_from_build():
             makefile_am = os.path.join(self.source_folder, "Makefile.am")
@@ -204,21 +192,30 @@ class CairoConan(ConanFile):
 
         if self.options.get_safe("with_freetype"):
             replace_in_file(self, os.path.join(self.source_folder, "src", "cairo-ft-font.c"),
-                                  "#if HAVE_UNISTD_H", "#ifdef HAVE_UNISTD_H")
+                            "#if HAVE_UNISTD_H",
+                            "#ifdef HAVE_UNISTD_H")
 
         if is_msvc(self):
             # https://cairographics.org/end_to_end_build_for_win32/
             win32_common = os.path.join(self.source_folder, "build", "Makefile.win32.common")
-            replace_in_file(self, win32_common, "-MD ", f"-{self.settings.compiler.runtime} ")
-            replace_in_file(self, win32_common, "-MDd ", f"-{self.settings.compiler.runtime} ")
-            replace_in_file(self, win32_common, "$(PIXMAN_PATH)/lib/pixman-1.lib",
-                            self.deps_cpp_info["pixman"].libs[0] + ".lib")
-            replace_in_file(self, win32_common, "$(FREETYPE_PATH)/lib/freetype.lib",
-                            self.deps_cpp_info["freetype"].libs[0] + ".lib")
-            replace_in_file(self, win32_common, "$(ZLIB_PATH)/lib/zlib1.lib",
-                            self.deps_cpp_info["zlib"].libs[0] + ".lib")
-            replace_in_file(self, win32_common, "$(LIBPNG_PATH)/lib/libpng16.lib",
-                            self.deps_cpp_info["libpng"].libs[0] + ".lib")
+            replace_in_file(self, win32_common,
+                            "-MD ",
+                            f"-{msvc_runtime_flag(self)} ")
+            replace_in_file(self, win32_common,
+                            "-MDd ",
+                            f"-{msvc_runtime_flag(self)} ")
+            replace_in_file(self, win32_common,
+                            "$(PIXMAN_PATH)/lib/pixman-1.lib",
+                            self.dependencies["pixman"].cpp_info.libs[0] + ".lib")
+            replace_in_file(self, win32_common,
+                            "$(FREETYPE_PATH)/lib/freetype.lib",
+                            self.dependencies["freetype"].cpp_info.libs[0] + ".lib")
+            replace_in_file(self, win32_common,
+                            "$(ZLIB_PATH)/lib/zlib1.lib",
+                            self.dependencies["zlib"].cpp_info.libs[0] + ".lib")
+            replace_in_file(self, win32_common,
+                            "$(LIBPNG_PATH)/lib/libpng16.lib",
+                            self.dependencies["libpng"].cpp_info.libs[0] + ".lib")
 
     def build(self):
         self._patch_sources()
@@ -233,7 +230,7 @@ class CairoConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
             src = os.path.join(self.source_folder, "src")
             inc = os.path.join(self.package_folder, "include", "cairo")
