@@ -44,7 +44,7 @@ static int ReadFile(const char filename[], uint8_t *data[], size_t *size)
 int main(int argc, char *argv[])
 {
     int ret = EXIT_FAILURE;
-    
+
     if (argc < 2) {
         fprintf(stderr, "Need at least one argument\n");
         return ret;

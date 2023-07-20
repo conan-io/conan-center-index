@@ -1,11 +1,14 @@
 --- a/lib/jxl.cmake
 +++ b/lib/jxl.cmake
-@@ -334,7 +334,7 @@ if (JPEGXL_ENABLE_SKCMS)
+@@ -334,7 +334,10 @@ if (JPEGXL_ENABLE_SKCMS)
      list(APPEND JPEGXL_INTERNAL_LIBS skcms)
    endif ()
  else ()
 -  list(APPEND JPEGXL_INTERNAL_LIBS lcms2)
-+  list(APPEND JPEGXL_INTERNAL_LIBS ${CONAN_LIBS_LCMS})
++  find_package(lcms REQUIRED CONFIG)
++  find_package(brotli REQUIRED CONFIG)
++  find_package(highway REQUIRED CONFIG)
++  link_libraries(lcms::lcms highway::highway brotli::brotli)
  endif ()
  
  if (NOT JPEGXL_ENABLE_TRANSCODE_JPEG)
