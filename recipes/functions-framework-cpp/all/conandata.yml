@@ -5,4 +5,3 @@ sources:
 patches:
   "1.0.0":
     - patch_file: "patches/0001-dont-skip-namelink.patch"
-      base_path: "source_subfolder"
