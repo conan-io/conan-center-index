@@ -1,0 +1,15 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -17,7 +17,11 @@
+ 
+ include(Common)
+ 
+-if(CMAKE_PROJECT_NAME STREQUAL "scc")
++find_package(fmt REQUIRED CONFIG)
++find_package(spdlog REQUIRED CONFIG)
++find_package(Boost REQUIRED CONFIG)
++if(TRUE)
++elseif(CMAKE_PROJECT_NAME STREQUAL "scc")
+     message(STATUS "Building SCC in standalone mode")
+     include(GNUInstallDirs)
+     include(ConanInline)
