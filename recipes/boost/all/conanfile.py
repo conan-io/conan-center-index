@@ -1203,7 +1203,7 @@ class BoostConan(ConanFile):
         compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
         if cxx:
-            return cxx
+            return shutil.which(cxx) or cxx
         if is_apple_os(self) and self.settings.compiler == "apple-clang":
             return XCRun(self).cxx
         compiler_version = str(self.settings.compiler.version)
@@ -1608,7 +1608,7 @@ class BoostConan(ConanFile):
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
-                if is_msvc(self) and (not self._shared or n in self._dependencies["static_only"]):
+                if (is_msvc(self) or self._is_clang_cl) and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
                 return libprefix + n
 
