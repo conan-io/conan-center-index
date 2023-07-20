@@ -30,7 +30,7 @@ class LibmnlConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libmnl is only supported on Linux")
         if self.options.shared:
-           self.options.rm_safe("fPIC")
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
     
