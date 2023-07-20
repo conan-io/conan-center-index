@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
-project(flatcc_example)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.15)
+project(flatcc_example LANGUAGES C)
 
 find_package(flatcc REQUIRED CONFIG)
 
