@@ -14,4 +14,3 @@ sources:
 patches:
   "1.4.1":
     - patch_file: "patches/no-delayload-libeay32.patch"
-      base_path: "source_subfolder"
