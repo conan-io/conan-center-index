@@ -7,10 +7,10 @@ index 2616d0669..6fa4cf5f7 100644
  
  if(MSVC)
 -    find_package(PThreads REQUIRED)
-+    #find_package(PThreads REQUIRED)
++    find_package(PThreads REQUIRED)
 +    set(PThreads_FOUND TRUE)
-+    set(PThreads_LIBRARIES "${CONAN_LIBS_PTHREADS4W}")
-+    set(PThreads_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_PTHREADS4W}")
++    set(PThreads_LIBRARIES "${pthreads4w_LIBS}")
++    set(PThreads_INCLUDE_DIRS "${pthreads4w_INCLUDE_DIRS}")
      set(FLINT_USES_PTHREAD ON CACHE BOOL "Use POSIX Threads.")
  else()
      option(CMAKE_THREAD_PREFER_PTHREAD "Prefer pthreads" yes)
