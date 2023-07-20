@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" const TSLanguage *tree_sitter_cpp(void);
-
 int main() {
   TSParser *parser = ts_parser_new();
   ts_parser_set_language(parser, tree_sitter_cpp());

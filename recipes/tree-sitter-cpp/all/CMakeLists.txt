@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 project(tree-sitter-cpp C CXX)
 
 find_package(tree-sitter REQUIRED CONFIG)
@@ -9,9 +9,9 @@ file(GLOB SOURCE_FILES "src/src/*.c" "src/src/*.cc")
 
 # Set the linker language based on the file extension
 if(SOURCE_FILES MATCHES ".*\\.cc$")
-    set(LINKER_LANGUAGE CXX)
+    set(LINKER_LANGUAGE stdc++)
 else()
-    set(LINKER_LANGUAGE C)
+    set(LINKER_LANGUAGE c)
 endif()
 
 file(WRITE api.h [[
@@ -20,15 +20,17 @@ file(WRITE api.h [[
 #include "tree_sitter_cpp_export.h"
 
 #ifdef __cplusplus
-
 extern "C" {
-    TREE_SITTER_CPP_EXPORT const TSLanguage *tree_sitter_cpp(void);
-}
+#endif
 
+const TSLanguage *tree_sitter_cpp(void);
+
+#ifdef __cplusplus
+}
 #endif
 ]])
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
