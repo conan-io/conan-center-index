@@ -17,15 +17,9 @@ sources:
 patches:
   "4.038":
     - patch_file: "patches/0001-split-opt-and-debug-build-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-msvc-patches.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-add-msvc_link-sh.patch"
-      base_path: "source_subfolder"
   "4.034":
     - patch_file: "patches/0001-split-opt-and-debug-build-install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-patches.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-add-msvc_link-sh.patch"
-      base_path: "source_subfolder"
