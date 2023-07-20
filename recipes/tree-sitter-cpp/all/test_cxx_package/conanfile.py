@@ -6,6 +6,7 @@ from conan.tools.build import can_run
 
 
 class TestPacakgeConan(ConanFile):
+    name = "tree-sitter-cpp-test"
     test_type = "explicit"
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
