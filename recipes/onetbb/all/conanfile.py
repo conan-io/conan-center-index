@@ -206,3 +206,7 @@ class OneTBBConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "tbb"
         tbb.names["cmake_find_package"] = "tbb"
         tbb.names["cmake_find_package_multi"] = "tbb"
+
+        # To be able to build statically, see https://github.com/oneapi-src/oneTBB/issues/802#issuecomment-1062799037
+        if not self.options.shared:
+            self.cpp_info.defines = ["__TBB_DYNAMIC_LOAD_ENABLED=0"]
