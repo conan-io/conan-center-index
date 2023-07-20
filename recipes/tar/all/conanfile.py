@@ -1,61 +1,65 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class TarConan(ConanFile):
     name = "tar"
     description = "GNU Tar provides the ability to create tar archives, as well as various other kinds of manipulation."
-    topics = ("tar", "archive")
     license = "GPL-3-or-later"
-    homepage = "https://www.gnu.org/software/tar/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.gnu.org/software/tar/"
+    topics = "archive"
+
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    def requirements(self):
-        self.requires("bzip2/1.0.8")
-        self.requires("lzip/1.21")
-        self.requires("xz_utils/5.2.5")
-
-    def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("This recipe does not support Windows builds of tar")  # FIXME: fails on MSVC and mingw-w64
-        if not self.options["bzip2"].build_executable:
-            raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("This recipe does not support Windows builds of tar")  # FIXME: fails on MSVC and mingw-w64
+        # if not self.dependencies["bzip2"].options.build_executable:
+        #     raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
+    def build_requirements(self):
+        self.tool_requires("bzip2/1.0.8")
+        self.tool_requires("lzip/1.23")
+        self.tool_requires("xz_utils/5.4.4")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.generate()
         bzip2_exe = "bzip2"  # FIXME: get from bzip2 recipe
         lzip_exe = "lzip"  # FIXME: get from lzip recipe
         lzma_exe = "lzma"  # FIXME: get from xz_utils recipe
         xz_exe = "xz"  # FIXME: get from xz_utils recipe
-        args = [
+        tc.configure_args += [
             "--disable-acl",
             "--disable-nls",
             "--disable-rpath",
@@ -69,30 +73,37 @@ class TarConan(ConanFile):
             "--with-xz={}".format(xz_exe),
             # "--without-zstd",  # FIXME: this will use system zstd (current zstd recipe does not build programs)
         ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "gnu", "faccessat.c"),
+                "_GL_INCLUDING_UNISTD_H",
+                "_GL_INCLUDING_UNISTD_H_NOP",
+            )
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "gnu", "faccessat.c"),
-                                  "_GL_INCLUDING_UNISTD_H", "_GL_INCLUDING_UNISTD_H_NOP")
-        autotools = self._configure_autotools()
+        self._patch_sources()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
         tar_bin = os.path.join(self.package_folder, "bin", "tar")
-        self.user_info.tar = tar_bin
+        self.conf_info.define("user.tar:tar", tar_bin)
         self.env_info.TAR = tar_bin
+
+        # TODO: to remove in conan v2
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)
+        self.user_info.tar = tar_bin
