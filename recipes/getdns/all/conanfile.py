@@ -1,18 +1,26 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import glob
 import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class GetDnsConan(ConanFile):
     name = "getdns"
     description = "A modern asynchronous DNS API"
-    topics = "conan", "getdns", "asynchronous", "event"
     license = "BSD-3-Clause"
-    homepage = "https://getdnsapi.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://getdnsapi.net/"
+    topics = ("asynchronous", "event")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -33,9 +41,6 @@ class GetDnsConan(ConanFile):
         "with_libuv": True,
         "with_libidn2": True,
     }
-    generators = "cmake", "pkg_config", "cmake_find_package"
-
-    _cmake = None
 
     @property
     def _with_libev(self):
@@ -53,32 +58,37 @@ class GetDnsConan(ConanFile):
         else:
             return self.options.stub_only
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        self.options.stub_only = self._stub_only
+        self.options.with_libev = self._with_libev
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1j")
+        self.requires("openssl/[>=1.1 <4]")
         if self._with_libev:
             self.requires("libev/4.33")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libuv:
-            self.requires("libuv/1.41.0")
+            self.requires("libuv/1.45.0")
         if self.options.with_libidn2:
             self.requires("libidn2/2.3.0")
         if self.options.tls == "gnutls":
-            self.requires("nettle/3.6")
+            self.requires("nettle/3.8.1")
             # FIXME: missing gnutls recipe
             raise ConanInvalidConfiguration("gnutls is not (yet) available on cci")
         if not self._stub_only:
@@ -86,62 +96,63 @@ class GetDnsConan(ConanFile):
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("getdns-{}".format(self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-        self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
-        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        self._cmake.definitions["ENABLE_STUB_ONLY"] = self._stub_only
-        self._cmake.definitions["BUILD_LIBEV"] = self._with_libev
-        self._cmake.definitions["BUILD_LIBEVENT2"] = self.options.with_libevent
-        self._cmake.definitions["BUILD_LIBUV"] = self.options.with_libuv
-        self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn2
-        self._cmake.definitions["USE_GNUTLS"] = self.options.tls == "gnutls"
-        self._cmake.definitions["BUILD_TESTING"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Windows":
+            tc.variables["CMAKE_REQUIRED_LIBRARIES"] = "ws2_32"
+        tc.variables["OPENSSL_USE_STATIC_LIBS"] = not self.dependencies["openssl"].options.shared
+        tc.variables["ENABLE_SHARED"] = self.options.shared
+        tc.variables["ENABLE_STATIC"] = not self.options.shared
+        tc.variables["ENABLE_STUB_ONLY"] = self._stub_only
+        tc.variables["BUILD_LIBEV"] = self._with_libev
+        tc.variables["BUILD_LIBEVENT2"] = self.options.with_libevent
+        tc.variables["BUILD_LIBUV"] = self.options.with_libuv
+        tc.variables["USE_LIBIDN2"] = self.options.with_libidn2
+        tc.variables["USE_GNUTLS"] = self.options.tls == "gnutls"
+        tc.variables["BUILD_TESTING"] = False
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.set_property("libidn2::libidn2", "cmake_target_name", "Libidn2::Libidn2")
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
 
-        self._cmake.configure()
-        return self._cmake
+    def _patch_sources(self):
+        apply_conandata_patches(self)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         # Use FindOpenSSL.cmake to let check_function_exists succeed
         # Remove other cmake modules as they use FindPkgConfig
         for fn in glob.glob("Find*cmake"):
             if "OpenSSL" not in fn:
                 os.unlink(fn)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        self.info.options.stub_only = self._stub_only
-        self.info.options.with_libev = self._with_libev
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         libsuffix = ""
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             libsuffix = "_static"
 
         self.cpp_info.components["libgetdns"].libs = ["getdns" + libsuffix]
         self.cpp_info.components["libgetdns"].includedirs.append(os.path.join("include", "getdns"))
-        self.cpp_info.components["libgetdns"].names["pkg_config"]= "getdns"
+        self.cpp_info.components["libgetdns"].set_property("pkg_config_name", "getdns")
         self.cpp_info.components["libgetdns"].requires = ["openssl::openssl"]
         if self.options.with_libidn2:
             self.cpp_info.components["libgetdns"].requires.append("libidn2::libidn2")
@@ -152,19 +163,19 @@ class GetDnsConan(ConanFile):
 
         if self.options.with_libevent:
             self.cpp_info.components["dns_ex_event"].libs = ["getdns_ex_event" + libsuffix]
-            self.cpp_info.components["dns_ex_event"].requires= ["libgetdns", "libevent::libevent"]
-            self.cpp_info.components["dns_ex_event"].names["pkg_config"]= "getdns_ext_event"
+            self.cpp_info.components["dns_ex_event"].requires = ["libgetdns", "libevent::libevent"]
+            self.cpp_info.components["dns_ex_event"].set_property("pkg_config_name", "getdns_ext_event")
 
         if self._with_libev:
             self.cpp_info.components["dns_ex_ev"].libs = ["getdns_ex_ev" + libsuffix]
             self.cpp_info.components["dns_ex_ev"].requires = ["libgetdns", "libev::libev"]
-            self.cpp_info.components["dns_ex_ev"].names["pkg_config"]= "getdns_ext_ev"
+            self.cpp_info.components["dns_ex_ev"].set_property("pkg_config_name", "getdns_ext_ev")
 
         if self.options.with_libuv:
             self.cpp_info.components["dns_ex_uv"].libs = ["getdns_ex_uv" + libsuffix]
             self.cpp_info.components["dns_ex_uv"].requires = ["libgetdns", "libuv::libuv"]
-            self.cpp_info.components["dns_ex_uv"].names["pkg_config"]= "getdns_ext_uv"
+            self.cpp_info.components["dns_ex_uv"].set_property("pkg_config_name", "getdns_ext_uv")
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)

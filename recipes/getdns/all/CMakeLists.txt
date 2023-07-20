@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(libidn2 REQUIRED)
 
-if(WIN32)
-    set(CMAKE_REQUIRED_LIBRARIES ws2_32)
-endif()
+link_libraries(
+    libidn2::libidn2
+)
 
-add_subdirectory(source_subfolder)
+add_subdirectory(src)
