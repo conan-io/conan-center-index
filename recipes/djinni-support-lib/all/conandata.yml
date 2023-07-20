@@ -5,5 +5,4 @@ sources:
 patches:
   "0.0.1":
     - patch_file: "patches/cmake_install.patch"
-      base_path: "source_subfolder"
 
