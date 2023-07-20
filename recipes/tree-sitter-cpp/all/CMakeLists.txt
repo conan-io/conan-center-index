@@ -7,11 +7,14 @@ include(GenerateExportHeader)
 # Check if the source files have .cc extension, which indicates C++
 file(GLOB SOURCE_FILES "src/src/*.c" "src/src/*.cc")
 
-# Set the linker language based on the file extension
-if(SOURCE_FILES MATCHES ".*\\.cc$")
-    set(LINKER_LANGUAGE stdc++)
-else()
-    set(LINKER_LANGUAGE c)
+# MSVC provides its own C++ standard library implementation
+if(NOT MSVC)
+    # Set the linker language based on the file extension
+    if(SOURCE_FILES MATCHES ".*\\.cc$")
+        set(LANG_LIB stdc++)
+    else()
+        set(LANG_LIB c)
+    endif()
 endif()
 
 file(WRITE api.h [[
