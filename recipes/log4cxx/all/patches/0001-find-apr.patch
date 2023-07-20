@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -25,10 +25,12 @@ if(NOT BUILD_SHARED_LIBS)
+@@ -25,12 +25,14 @@ if(NOT BUILD_SHARED_LIBS)
  endif()
  
  # Find Apache Runtime
@@ -15,3 +15,6 @@
  
  find_package( Threads REQUIRED )
  
+ # Find expat for XML parsing
+-find_package(EXPAT REQUIRED)
++find_package(EXPAT REQUIRED MODULE)
