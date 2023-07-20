@@ -49,12 +49,12 @@ int main() {
   file_desc_id = ANcreatef(an_id, AN_FILE_DESC);
 
   /*
-   * Write the annotation to the file description.  
+   * Write the annotation to the file description.
    */
   status_32 = ANwriteann(file_desc_id, FILE_DESC_TXT, (int32) strlen(FILE_DESC_TXT));
 
   /*
-   * Create a vgroup in the V interface.  Note that the vgroup's ref number 
+   * Create a vgroup in the V interface.  Note that the vgroup's ref number
    * is set to -1 for creating and the access mode is "w" for writing.
    */
   status_n = Vstart(file_id);
@@ -63,13 +63,13 @@ int main() {
 
   /*
    * Obtain the tag and ref number of the vgroup for subsequent
-   * references.  
+   * references.
    */
   vgroup_tag = (uint16) VQuerytag(vgroup_id);
   vgroup_ref = (uint16) VQueryref(vgroup_id);
 
   /*
-   * Create the data label for the vgroup identified by its tag 
+   * Create the data label for the vgroup identified by its tag
    * and ref number.
    */
   data_label_id = ANcreate(an_id, vgroup_tag, vgroup_ref, AN_DATA_LABEL);
@@ -80,7 +80,7 @@ int main() {
   status_32 = ANwriteann(data_label_id, DATA_LABEL_TXT, (int32) strlen(DATA_LABEL_TXT));
 
   /*
-   * Create the data description for the vgroup identified by its tag 
+   * Create the data description for the vgroup identified by its tag
    * and ref number.
    */
   data_desc_id = ANcreate(an_id, vgroup_tag, vgroup_ref, AN_DATA_DESC);
