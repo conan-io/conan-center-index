@@ -37,6 +37,7 @@ required_for_references:
 - arsenalgear
 - artery-font-format
 - asio
+- asio-grpc
 - asmjit
 - astc-codec
 - async_simple
@@ -242,6 +243,7 @@ required_for_references:
 - embree3
 - emio
 - enet
+- enhex-generic_serialization
 - entityx
 - entt
 - enum-flags
@@ -277,6 +279,7 @@ required_for_references:
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
+- forestdb
 - foxglove-schemas-protobuf
 - fp16
 - freeglut
@@ -637,6 +640,7 @@ required_for_references:
 - picojson
 - pixman
 - pkgconf
+- platform.delegates
 - platform.hashing
 - plutovg
 - poco
@@ -659,6 +663,7 @@ required_for_references:
 - pystring
 - qhull
 - qpdf
+- qt
 - quantlib
 - quaternions
 - quill
