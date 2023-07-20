@@ -1,33 +1,49 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+
+required_conan_version = ">=1.53.0"
 
 
 class XegeConan(ConanFile):
     name = "xege"
+    description = "Easy Graphics Engine, a lite graphics library in Windows"
     license = "LGPLv2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xege.org/"
-    description = "Easy Graphics Engine, a lite graphics library in Windows"
     topics = ("ege", "graphics", "gui")
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration(
-                "This library is only compatible for Windows")
+            raise ConanInvalidConfiguration("This library is only compatible with Windows")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -35,24 +51,25 @@ class XegeConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("*.h", dst="include", src=self._source_subfolder+"/src")
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "*.h",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "src"))
+        for pattern in ["*.lib", "*.so*", "*.a"]:
+            copy(self, pattern,
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=self.build_folder,
+                 keep_path=False)
+        copy(self, "*.dll",
+             dst=os.path.join(self.package_folder, "bin"),
+             src=self.build_folder,
+             keep_path=False)
 
     def package_info(self):
         if self.settings.arch == "x86_64":
             self.cpp_info.libs = ["graphics64"]
         else:
             self.cpp_info.libs = ["graphics"]
-        self.cpp_info.system_libs = [
-            "gdiplus",
-            "uuid",
-            "msimg32",
-            "gdi32",
-            "imm32",
-            "ole32",
-            "oleaut32"
-        ]
+        self.cpp_info.system_libs = ["gdiplus", "uuid", "msimg32", "gdi32", "imm32", "ole32", "oleaut32"]
