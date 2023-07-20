@@ -1,15 +1,16 @@
-#include <stdexcept>
-#include <iostream>
 #include "TFile.h"
 #include "TTree.h"
 #include "TTreeReader.h"
 #include "Event.hpp"
 
+#include <iostream>
+#include <stdexcept>
 
 void check(bool result, std::string message) {
-    if (!result) { throw std::runtime_error("ERROR : testrootdictionaries failed : " + message); }
+    if (!result) {
+        throw std::runtime_error("ERROR : testrootdictionaries failed : " + message);
+    }
 }
-
 
 void create_test_file(std::string name, const int Nevent, const int Npart) {
     auto tfile = TFile::Open(name.c_str(), "RECREATE");
@@ -30,7 +31,6 @@ void create_test_file(std::string name, const int Nevent, const int Npart) {
     delete tfile;
 }
 
-
 void read_test_file(std::string name, const int Nevent, const int Npart) {
     auto tfile = TFile::Open(name.c_str(), "READ");
     auto tree = tfile->Get<TTree>("tree");
@@ -48,7 +48,6 @@ void read_test_file(std::string name, const int Nevent, const int Npart) {
     }
 }
 
-
 int main() {
     std::cout << "--- testrootdictionaries " << std::endl;
     const std::string fname = "testevents.root";
@@ -59,5 +58,3 @@ int main() {
     std::cout << "--- testrootdictionaries... ok." << std::endl;
     return 0;
 }
-
-
