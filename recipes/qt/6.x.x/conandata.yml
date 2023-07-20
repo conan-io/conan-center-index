@@ -1,4 +1,14 @@
 sources:
+  "6.5.2":
+    url:
+      - "https://download.qt.io/official_releases/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+      - "https://download.qt.io/archive/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+      - "https://master.qt.io/archive/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+      - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/6.5/6.5.2/single/qt-everywhere-src-6.5.2.tar.xz"
+    sha256: "cde57be663d0f875759797298bdc37a936d517c39f2013e4e6ece5e12edeed12"
   "6.5.1":
     url:
       - "https://download.qt.io/official_releases/qt/6.5/6.5.1/single/qt-everywhere-src-6.5.1.tar.xz"
@@ -62,6 +72,10 @@ sources:
       - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.3/6.3.2/single/qt-everywhere-src-6.3.2.tar.xz"
     sha256: "b90524f686224a0e5a945c1d65307e16a375348dbe275c9ac11de171fe31374a"
 patches:
+  "6.5.2":
+    - "base_path": "qtwebengine"
+      "patch_description": "Workaround for too long .rps file name"
+      "patch_file": "patches/c72097e.diff"
   "6.5.1":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
