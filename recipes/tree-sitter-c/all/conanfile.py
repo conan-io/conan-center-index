@@ -16,6 +16,7 @@ class TreeSitterCConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     package_type = "shared-library"
+    generators = "CMakeToolchain", "CMakeDeps"
     options = {
         "fPIC": [True, False],
     }
@@ -41,7 +42,7 @@ class TreeSitterCConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("tree-sitter/0.20.6", transitive_headers=True, transitive_libs=True)
+        self.requires("tree-sitter/0.20.8", transitive_headers=True, transitive_libs=True)
 
     def build(self):
         cmake = CMake(self)
@@ -59,6 +60,4 @@ class TreeSitterCConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "tree-sitter-c")
-        self.cpp_info.builddirs = ["cmake"]
         self.cpp_info.libs = ["tree-sitter-c"]
