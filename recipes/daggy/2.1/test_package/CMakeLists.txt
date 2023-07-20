@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.21.0)
-project(DaggyPackageTest)
+cmake_minimum_required(VERSION 3.15)
+project(DaggyPackageTest LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(daggy REQUIRED)
+find_package(daggy REQUIRED CONFIG)
 
 if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
