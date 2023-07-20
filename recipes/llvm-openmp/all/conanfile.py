@@ -4,8 +4,10 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, save
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, rename, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -21,7 +23,7 @@ class LLVMOpenMpConan(ConanFile):
                    "implementation.")
     license = "Apache-2.0 WITH LLVM-exception"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/llvm/llvm-project/tree/master/openmp"
+    homepage = "https://github.com/llvm/llvm-project/blob/main/openmp"
     topics = ("llvm", "openmp", "parallelism")
 
     package_type = "library"
@@ -35,13 +37,6 @@ class LLVMOpenMpConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def _supports_compiler(self):
         supported_compilers_by_os = {
             "Linux": ["clang", "gcc", "intel-cc"],
@@ -51,18 +46,38 @@ class LLVMOpenMpConan(ConanFile):
         the_compiler, the_os = self.settings.compiler.value, self.settings.os.value
         return the_compiler in supported_compilers_by_os.get(the_os, [])
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self._supports_compiler():
-            raise ConanInvalidConfiguration("llvm-openmp doesn't support compiler: {} on OS: {}.".
-                                            format(self.settings.compiler, self.settings.os))
-
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if not self._supports_compiler():
+            raise ConanInvalidConfiguration("llvm-openmp doesn't support compiler: "
+                                            f"{self.settings.compiler} on OS: {self.settings.os}.")
+        if Version(self.version) >= "17":
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, 17)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
         if (
             Version(self.version) <= "10.0.0"
             and is_apple_os(self)
@@ -70,10 +85,31 @@ class LLVMOpenMpConan(ConanFile):
         ):
             raise ConanInvalidConfiguration("ARM v8 not supported")
 
+    def build_requirements(self):
+        if Version(self.version) >= "17":
+            self.tool_requires("cmake/[>=3.20 <4]")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) > "14":
+            get(self, **self.conan_data["sources"][self.version]["openmp"], strip_root=True)
+            get(self, **self.conan_data["sources"][self.version]["cmake"], strip_root=True, destination=self.export_sources_folder)
+            copy(self, "*.cmake",
+                 src=os.path.join(self.export_sources_folder, "Modules"),
+                 dst=os.path.join(self.source_folder, "cmake"))
+        elif Version(self.version) == "14":
+            # v14 source archives also includes a cmake/ directory in the archive root
+            get(self, **self.conan_data["sources"][self.version], destination=self.export_sources_folder)
+            rmdir(self, self.source_folder)
+            rename(self, os.path.join(self.export_sources_folder, f"openmp-{self.version}.src"), self.source_folder)
+            copy(self, "*.cmake",
+                 src=os.path.join(self.export_sources_folder, "cmake", "Modules"),
+                 dst=os.path.join(self.source_folder, "cmake"))
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = CMakeToolchain(self)
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
         tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
