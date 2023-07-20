@@ -108,7 +108,7 @@ class LibGit2Conan(ConanFile):
                 raise ConanInvalidConfiguration("win32 is only valid on Windows")
 
         if self.options.with_regex == "regcomp" or self.options.with_regex == "regcomp_l":
-            if self.settings.compiler == "Visual Studio":
+            if is_msvc(self):
                 raise ConanInvalidConfiguration("{} isn't supported by Visual Studio".format(self.options.with_regex))
 
         if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.options.with_regex == "regcomp_l":
