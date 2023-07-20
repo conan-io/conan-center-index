@@ -9,7 +9,5 @@ sources:
 patches:
   "1.16.1":
     - patch_file: "patches/enable_static_lib_1_16_1.patch"
-      base_path: "source_subfolder"
   "1.14.3":
     - patch_file: "patches/enable_static_lib_1_14_3.patch"
-      base_path: "source_subfolder"
