@@ -1,5 +1,6 @@
-#include <iostream>
 #include <imaGL/imaGL.h>
+
+#include <iostream>
 
 int main() {
     try {
