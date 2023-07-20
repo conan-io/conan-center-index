@@ -10,12 +10,12 @@
  # Dependencies
 -find_path(OPENTRACING_INCLUDE_DIR NAMES opentracing/tracer.h)
 -find_library(OPENTRACING_LIB opentracing)
-+find_package(OpenTracing REQUIRED)
++find_package(OpenTracing REQUIRED CONFIG)
  find_package(ZLIB REQUIRED)
 -find_library(MSGPACK_LIB msgpack)
 -find_package(CURL)
-+find_package(msgpack REQUIRED)
-+find_package(CURL REQUIRED)
++find_package(msgpack REQUIRED CONFIG)
++find_package(CURL REQUIRED CONFIG)
  find_package(Threads REQUIRED)
  
 -# Code Sanitizers
@@ -30,7 +30,7 @@
  
  # Outputs
 -set(DATADOG_LINK_LIBRARIES ${OPENTRACING_LIB} ${CURL_LIBRARIES} ${ZLIB_LIBRARIES} Threads::Threads)
-+set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::CURL msgpack::msgpack ZLIB::ZLIB Threads::Threads)
++set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::libcurl msgpack-cxx ZLIB::ZLIB Threads::Threads)
  
  ## Shared lib
  if(BUILD_SHARED)
