@@ -17,10 +17,11 @@ class MpdecimalConan(ConanFile):
     name = "mpdecimal"
     description = "mpdecimal is a package for correctly-rounded arbitrary precision decimal floating point arithmetic."
     license = "BSD-2-Clause"
-    topics = ("mpdecimal", "multiprecision", "library")
+    topics = ("multiprecision", "library")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bytereef.org/mpdecimal"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -64,9 +65,9 @@ class MpdecimalConan(ConanFile):
 
     def build_requirements(self):
         if is_msvc(self):
-            self.tool_requires("automake/1.16.4")
+            self.tool_requires("automake/1.16.5")
         else:
-            # required to suppport windows as a build machine
+            # required to support windows as a build machine
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -117,7 +118,7 @@ class MpdecimalConan(ConanFile):
         libmpdecpp_folder = source_dir / "libmpdec++"
         vcbuild_folder = build_dir / "vcbuild"
         arch_ext = "{}".format(32 if self.settings.arch == "x86" else 64)
-        dist_folder = vcbuild_folder / "dist{}".format(arch_ext)
+        dist_folder = vcbuild_folder / f"dist{arch_ext}"
         mkdir(self, dist_folder)
 
         copy(self, "Makefile.vc", libmpdec_folder, build_dir)
@@ -142,14 +143,14 @@ class MpdecimalConan(ConanFile):
 
         copy(self, "mpdecimal.h", libmpdec_folder, dist_folder)
         if self.options.shared:
-            copy(self, "libmpdec-{}.dll".format(self.version), libmpdec_folder, dist_folder)
-            copy(self, "libmpdec-{}.dll.exp".format(self.version), libmpdec_folder, dist_folder)
-            copy(self, "libmpdec-{}.dll.lib".format(self.version), libmpdec_folder, dist_folder)
+            copy(self, f"libmpdec-{self.version}.dll", libmpdec_folder, dist_folder)
+            copy(self, f"libmpdec-{self.version}.dll.exp", libmpdec_folder, dist_folder)
+            copy(self, f"libmpdec-{self.version}.dll.lib", libmpdec_folder, dist_folder)
         else:
-            copy(self, "libmpdec-{}.lib".format(self.version), libmpdec_folder, dist_folder)
+            copy(self, f"libmpdec-{self.version}.lib", libmpdec_folder, dist_folder)
         if self.options.cxx:
             copy(self, "decimal.hh", libmpdecpp_folder, dist_folder)
-            copy(self, "libmpdec++-{}.lib".format(self.version), libmpdecpp_folder, dist_folder)
+            copy(self, f"libmpdec++-{self.version}.lib", libmpdecpp_folder, dist_folder)
 
     @property
     def _shared_suffix(self):
@@ -162,10 +163,13 @@ class MpdecimalConan(ConanFile):
     @property
     def _target_names(self):
         libsuffix = self._shared_suffix if self.options.shared else ".a"
-        versionsuffix = ".{}".format(self.version) if self.options.shared else ""
-        suffix = "{}{}".format(versionsuffix, libsuffix) if is_apple_os(
-            self) or self.settings.os == "Windows" else "{}{}".format(libsuffix, versionsuffix)
-        return "libmpdec{}".format(suffix), "libmpdec++{}".format(suffix)
+        versionsuffix = f".{self.version}" if self.options.shared else ""
+        suffix = (
+            f"{versionsuffix}{libsuffix}"
+            if is_apple_os(self) or self.settings.os == "Windows"
+            else f"{libsuffix}{versionsuffix}"
+        )
+        return f"libmpdec{suffix}", f"libmpdec++{suffix}"
 
     def build(self):
         apply_conandata_patches(self)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package)
+project(test_package LANGUAGES CXX)
 
 enable_testing()
 

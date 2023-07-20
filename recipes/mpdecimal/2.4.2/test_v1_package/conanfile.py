@@ -8,11 +8,9 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["MPDECIMAL_CXX"] = self.options["mpdecimal"].cxx
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {tools.cpu_count()}",
-                     run_environment=True)
+        if not tools.cross_building(self.settings):
+            self.run("{} 13 100".format(os.path.join("bin", "test_package")), run_environment=True)
