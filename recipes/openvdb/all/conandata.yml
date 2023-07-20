@@ -5,4 +5,3 @@ sources:
 patches:
   "8.0.1":
     - patch_file: "patches/0001-Find-packages-fixes.patch"
-      base_path: "source_subfolder"
