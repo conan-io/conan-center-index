@@ -1,22 +1,23 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc_static_runtime
+
+required_conan_version = ">=1.53.0"
 
 
 class CoConan(ConanFile):
     name = "co"
+    description = "A go-style coroutine library in C++11 and more."
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/idealvin/co"
-    license = "MIT"
-    description = "A go-style coroutine library in C++11 and more."
-    topics = ("co", "coroutine", "c++11")
+    topics = ("coroutine", "c++11")
 
-    deprecated = "cocoyaxi"
-
-    exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake", "cmake_find_package"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,16 +31,10 @@ class CoConan(ConanFile):
         "with_libcurl": False,
         "with_openssl": False,
     }
+    deprecated = "cocoyaxi"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,13 +42,29 @@ class CoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_libcurl:
-            self.requires("libcurl/7.79.1")
+            self.requires("libcurl/[>=7]")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1l")
+            self.requires("openssl/[>=1.1 <4]")
+
+    def validate(self):
+        if self.options.with_libcurl:
+            if not self.options.with_openssl:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires with_openssl=True when using with_libcurl=True"
+                )
+            if self.options["libcurl"].with_ssl != "openssl":
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires libcurl:with_ssl='openssl' to be enabled"
+                )
+            if not self.options["libcurl"].with_zlib:
+                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_zlib=True to be enabled")
 
     def build_requirements(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
@@ -61,44 +72,31 @@ class CoConan(ConanFile):
             self.build_requires("cmake/3.20.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if not self.options.shared:
+            tc.variables["FPIC"] = self.options.get_safe("fPIC", False)
+        tc.variables["STATIC_VS_CRT"] = is_msvc_static_runtime(self)
+        tc.variables["WITH_LIBCURL"] = self.options.with_libcurl
+        tc.variables["WITH_OPENSSL"] = self.options.with_openssl
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if not self.options.shared:
-            self._cmake.definitions["FPIC"] = self.options.get_safe("fPIC", False)
-        runtime = self.settings.get_safe("compiler.runtime")
-        if runtime:
-            self._cmake.definitions["STATIC_VS_CRT"] = "MT" in runtime
-        self._cmake.definitions["WITH_LIBCURL"] = self.options.with_libcurl
-        self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["co"]
-        self.cpp_info.names["cmake_find_package"] = "co"
-        self.cpp_info.names["cmake_find_package_multi"] = "co"
-
-    def validate(self):
-        if self.options.with_libcurl:
-            if not self.options.with_openssl:
-                raise ConanInvalidConfiguration(f"{self.name} requires with_openssl=True when using with_libcurl=True")
-            if self.options["libcurl"].with_ssl != "openssl":
-                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_ssl='openssl' to be enabled")
-            if not self.options["libcurl"].with_zlib:
-                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_zlib=True to be enabled")
