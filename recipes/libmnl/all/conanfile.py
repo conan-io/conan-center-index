@@ -18,6 +18,7 @@ class LibmnlConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    package_type = "library"
 
     def layout(self):
         basic_layout(self, src_folder="src")
