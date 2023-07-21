@@ -41,6 +41,8 @@ class LibUSBCompatConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "CMakeLists.txt.in", src=self.recipe_folder, dst=self.export_sources_folder)
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -182,7 +184,7 @@ class LibUSBCompatConan(ConanFile):
             autotools.autoreconf()
             autotools.configure()
         if self.settings.os == "Windows":
-            cmakelists_in = load(self, "CMakeLists.txt.in")
+            cmakelists_in = load(self, os.path.join(self.export_sources_folder, "CMakeLists.txt.in"))
             sources, headers = self._extract_autotools_variables()
             save(
                 self,
