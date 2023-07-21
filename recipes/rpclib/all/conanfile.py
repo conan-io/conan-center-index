@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, export_conandata_patches, get, rmdir, rename
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 
@@ -92,6 +92,8 @@ class rpclibConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for dll in (self.package_path / "lib").glob("*.dll"):
+            rename(self, dll, self.package_path / "bin" / dll.name)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "rpclib")
@@ -111,3 +113,5 @@ class rpclibConan(ConanFile):
         self.cpp_info.components["_rpc"].libs = ["rpc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_rpc"].system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["_rpc"].system_libs = ["ws2_32", "mswsock"]
