@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
 
@@ -70,6 +71,7 @@ class Rvo2Conan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["RVO"]
