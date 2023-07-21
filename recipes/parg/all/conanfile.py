@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
@@ -47,7 +48,7 @@ class PargConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -61,6 +62,7 @@ class PargConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["parg"]
