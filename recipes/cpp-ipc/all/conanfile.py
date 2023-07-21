@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
@@ -54,7 +55,7 @@ class CppIPCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.name} does not support Apple platform")
 
         if self.settings.compiler.get_safe("cppstd"):
