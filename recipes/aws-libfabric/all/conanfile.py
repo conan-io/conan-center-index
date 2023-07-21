@@ -90,7 +90,7 @@ class LibfabricConan(ConanFile):
         for p in self._providers:
             tc.configure_args.append("--enable-{}={}".format(p, yes_no_dl(getattr(self.options, p))))
         if self.options.with_libnl:
-            tc.configure_args.append("--with-libnl={}".format(unix_path(self, self.dependencies["libnl"].package_folder))),
+            tc.configure_args.append("--with-libnl={}".format(unix_path(self, self.dependencies["libnl"].package_folder)))
         else:
             tc.configure_args.append("--with-libnl=no")
         if self.settings.build_type == "Debug":
