@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
 
@@ -42,12 +43,9 @@ class RtklibConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(
-            self,
-            "CMakeLists.txt",
+        copy(self, "CMakeLists.txt",
             src=self.recipe_folder,
-            dst=os.path.join(self.export_sources_folder, "src"),
-        )
+            dst=os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -98,8 +96,12 @@ class RtklibConan(ConanFile):
         defs["RRCENA"] = False  # enable rrc correction
         defs["OUTSTAT_AMB"] = False  # output ambiguity parameters to solution status
         defs["IERS_MODEL"] = False  # use IERS tide model
+        if is_apple_os(self):
+            # Add baud rates missing from termios.h for stream.c
+            defs["B460800"] = 460800
+            defs["B921600"] = 921600
         for k, v in defs.items():
-            if isinstance(v, str):
+            if type(v) in (str, int):
                 tc.preprocessor_definitions[k] = v
             elif v:
                 tc.preprocessor_definitions[k] = ""
@@ -113,12 +115,9 @@ class RtklibConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE.txt",
+        copy(self, "LICENSE.txt",
             dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+            src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
@@ -126,7 +125,7 @@ class RtklibConan(ConanFile):
         self.cpp_info.libs = ["rtklib"]
 
         for k, v in self._public_defines.items():
-            if isinstance(v, str):
+            if type(v) in (str, int):
                 self.cpp_info.defines.append(f"{k}={v}")
             elif v:
                 self.cpp_info.defines.append(k)

@@ -1,4 +1,5 @@
 #include <rtklib.h>
+#undef lock
 
 #include <cstdlib>
 #include <iostream>
