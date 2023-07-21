@@ -25,7 +25,7 @@ class TinyXmlConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_stl": False,
+        "with_stl": True,
     }
 
     exports_sources = "CMakeLists.txt"
