@@ -2,6 +2,7 @@ import os
 import textwrap
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 
@@ -75,6 +76,7 @@ class mdnsdConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"libmdnsd": "mdnsd::mdnsd"}
         )
+        fix_apple_shared_install_name(self)
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
