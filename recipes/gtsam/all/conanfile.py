@@ -41,7 +41,6 @@ class GtsamConan(ConanFile):
         "tangent_preintegration": [True, False],
         "throw_cheirality_exception": [True, False],
         "use_quaternions": [True, False],
-        "use_vendored_metis": [True, False],
         "with_TBB": [True, False],
         "with_eigen_MKL": [True, False],
         "with_eigen_MKL_OPENMP": [True, False],
@@ -72,7 +71,6 @@ class GtsamConan(ConanFile):
         "tangent_preintegration": False,
         "throw_cheirality_exception": True,
         "use_quaternions": False,
-        "use_vendored_metis": False,
         "with_TBB": False,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
@@ -102,7 +100,6 @@ class GtsamConan(ConanFile):
         "throw_cheirality_exception": "Throw exception when a triangulated point is behind a camera",
         "use_quaternions": ("Enable an internal Quaternion representation for rotations instead of rotation matrices. "
                             "If enabled, Rot3::EXPMAP is enforced by default."),
-        "use_vendored_metis": "Use Metis provided with GTSAM instead of installing it from Conan",
         "with_TBB": "Use Intel Threaded Building Blocks (TBB)",
         "with_eigen_MKL": "Eigen will use Intel MKL if available",
         "with_eigen_MKL_OPENMP": "Eigen, when using Intel MKL, will also use OpenMP for multithreading if available",
@@ -133,11 +130,9 @@ class GtsamConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.options.with_TBB:
             self.options["onetbb"].tbbmalloc = True
-        if not self.options.support_nested_dissection:
-            self.options.rm_safe("use_vendored_metis")
-        elif not self.options.use_vendored_metis:
-            # GTSAM expects 32-bit integers for Metis
-            self.options["metis"].with_64bit_types = False
+        if self.options.allow_deprecated_since_V4 != "deprecated":
+            self.output.warn("'allow_deprecated_since_V4' option is deprecated. Use 'allow_deprecated' instead.")
+
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -149,10 +144,11 @@ class GtsamConan(ConanFile):
             self.requires("onetbb/2021.9.0", transitive_headers=True)
         if self.options.default_allocator == "tcmalloc":
             self.requires("gperftools/2.10.0")
-        if self.options.support_nested_dissection and not self.options.use_vendored_metis:
-            # Used in a public header here:
-            # https://github.com/borglab/gtsam/blob/4.2a9/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
-            self.requires("metis/5.1.1", transitive_headers=True)
+        # TODO: add use_vendored_metis=False option
+        # if self.options.support_nested_dissection and not self.options.use_vendored_metis:
+        #     # Used in a public header here:
+        #     # https://github.com/borglab/gtsam/blob/4.2a9/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
+        #     self.requires("metis/5.1.1", transitive_headers=True)
 
     @property
     def _required_boost_components(self):
@@ -252,7 +248,7 @@ class GtsamConan(ConanFile):
         # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleEigen.cmake#L3
         tc.variables["GTSAM_USE_SYSTEM_EIGEN"] = True
         # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleMetis.cmake#L11
-        tc.variables["GTSAM_USE_SYSTEM_METIS"] = not self.options.get_safe("use_vendored_metis", False)
+        tc.variables["GTSAM_USE_SYSTEM_METIS"] = False
         # https://github.com/borglab/gtsam/blob/4.2a9/gtsam/3rdparty/CMakeLists.txt#L76
         tc.variables["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
         # https://github.com/borglab/gtsam/blob/4.2a9/matlab/CMakeLists.txt#L14-L15
@@ -361,10 +357,7 @@ class GtsamConan(ConanFile):
         if self.options.default_allocator == "tcmalloc":
             gtsam.requires.append("gperftools::gperftools")
         if self.options.support_nested_dissection:
-            if self.options.use_vendored_metis:
-                gtsam.requires.append("libmetis-gtsam")
-            else:
-                gtsam.requires.append("metis::metis")
+            gtsam.requires.append("libmetis-gtsam")
         if self.settings.os == "Windows":
             gtsam.system_libs = ["dbghelp"]
 
@@ -374,7 +367,7 @@ class GtsamConan(ConanFile):
             gtsam_unstable.libs = ["gtsam_unstable"]
             gtsam_unstable.requires = ["libgtsam"]
 
-        if self.options.get_safe("use_vendored_metis", False):
+        if self.options.support_nested_dissection:
             metis = self.cpp_info.components["libmetis-gtsam"]
             metis.set_property("cmake_target_name", "metis-gtsam")
             if Version(self.version) >= "4.1":
