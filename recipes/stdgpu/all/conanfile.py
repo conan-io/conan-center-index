@@ -164,3 +164,12 @@ class StdgpuConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["stdgpu"]
+
+        if self.options.backend == "openmp":
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.cpp_info.cxxflags = ["-Xpreprocessor", "-fopenmp"]
+            elif self.settings.compiler == "gcc":
+                self.cpp_info.cxxflags = ["-fopenmp"]
+            elif self.settings.compiler == "intel":
+                self.cpp_info.cxxflags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+            self.cpp_info.cflags = self.cpp_info.cxxflags
