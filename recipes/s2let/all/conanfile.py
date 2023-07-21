@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rm
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
@@ -74,6 +74,7 @@ class S2let(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rm(self, "*.cmake", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["s2let"]
