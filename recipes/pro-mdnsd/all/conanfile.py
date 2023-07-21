@@ -4,7 +4,7 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, rename
 
 required_conan_version = ">=1.53.0"
 
@@ -70,13 +70,15 @@ class mdnsdConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
+        for dll in (self.package_path / "lib").glob("*.dll"):
+            rename(self, dll, self.package_path / "bin" / dll.name)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"libmdnsd": "mdnsd::mdnsd"}
         )
-        fix_apple_shared_install_name(self)
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -99,7 +101,7 @@ class mdnsdConan(ConanFile):
         self.cpp_info.set_property("cmake_target_aliases", ["mdnsd::mdnsd"])
         self.cpp_info.libs = ["mdnsd"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs = ["ws2_32", "wsock32"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "mdnsd"
