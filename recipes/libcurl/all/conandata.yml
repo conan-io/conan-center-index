@@ -1,4 +1,7 @@
 sources:
+  "8.2.0":
+    url: "https://curl.se/download/curl-8.2.0.tar.gz"
+    sha256: "c67849462d171a3fee08b605cdd837d18ee22ecc3ee2c6a0393c9cec5d1a137e"
   "8.1.2":
     url: "https://curl.se/download/curl-8.1.2.tar.gz"
     sha256: "2e5a9b8fcdc095bdd2f079561f369de71c5eb3b80f00a702fbe9a8b8d9897891"
@@ -38,9 +41,3 @@ sources:
   "7.78.0":
     url: "https://curl.se/download/curl-7.78.0.tar.gz"
     sha256: "ed936c0b02c06d42cf84b39dd12bb14b62d77c7c4e875ade022280df5dcc81d7"
-  "7.77.0":
-    url: "https://curl.se/download/curl-7.77.0.tar.gz"
-    sha256: "b0a3428acb60fa59044c4d0baae4e4fc09ae9af1d8a3aa84b2e3fbcd99841f77"
-  "7.76.0":
-    url: "https://curl.se/download/curl-7.76.0.tar.gz"
-    sha256: "3b4378156ba09e224008e81dcce854b7ce4d182b1f9cfb97fe5ed9e9c18c6bd3"
