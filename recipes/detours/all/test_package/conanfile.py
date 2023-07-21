@@ -27,6 +27,6 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join("bin", "test_package")
             buffer = io.StringIO()
-            self.run(f'{bin_path} "{os.path.join(self.build_folder, "bin")}"', stdout=buffer)
+            self.run(f'{bin_path} "{os.path.join(self.build_folder, "bin")}"', buffer)
             print(buffer.getvalue())
             assert "I found your message! It was 'A secret text'! I am 1337! :^)" in buffer.getvalue()

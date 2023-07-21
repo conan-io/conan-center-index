@@ -60,7 +60,6 @@ class DetoursConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.generate()
 
-
     def _patch_sources(self):
         if is_msvc(self):
             replace_in_file(
