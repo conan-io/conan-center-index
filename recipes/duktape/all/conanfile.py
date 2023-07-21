@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, collect_libs
 
 required_conan_version = ">=1.53.0"
 
@@ -76,6 +76,6 @@ class DuktapeConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["duktape"]
+        self.cpp_info.libs = collect_libs(self)
         if not self.options.shared and self.settings.os in ("Linux", "FreeBSD", "SunOS"):
             self.cpp_info.system_libs = ["m"]
