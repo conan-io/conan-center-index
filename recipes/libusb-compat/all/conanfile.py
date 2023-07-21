@@ -4,6 +4,7 @@ import shlex
 
 from conan import ConanFile
 from conan.errors import ConanException
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rmdir, save
@@ -210,6 +211,7 @@ class LibUSBCompatConan(ConanFile):
             os.unlink(os.path.join(self.package_folder, "bin", "libusb-config"))
             os.unlink(os.path.join(self.package_folder, "lib", "libusb.la"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libusb")
