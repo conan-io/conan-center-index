@@ -22,7 +22,7 @@ class AsioGrpcConan(ConanFile):
     options = {
         "backend": ["boost", "asio", "unifex"],
         "local_allocator": ["auto", "memory_resource", "boost_container", "recycling_allocator"],
-        "grpc_link" : ["grpc++", "grpc++_unsecure"]
+        "grpc_link" : ["grpc++", "grpc++_unsecure", "none"]
     }
     default_options = {
         "backend": "boost",
@@ -57,7 +57,9 @@ class AsioGrpcConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} 'recycling_allocator' cannot be used in combination with the 'unifex' backend.")
 
     def requirements(self):
-        self.requires("grpc/1.50.1", transitive_headers=True)
+        tlibs: bool = False if self.options.grpc_link == "none" else True
+        self.requires("grpc/1.50.1", transitive_headers=True,
+                      transitive_libs=tlibs)
         if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
             self.requires("boost/1.81.0")
         if self.options.backend == "asio":
@@ -115,7 +117,16 @@ class AsioGrpcConan(ConanFile):
         self.cpp_info.libdirs = []
 
         build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
-        self.cpp_info.requires.append(f"grpc::{self.options.grpc_link}")
+
+
+        #if the user chooses "none" for grpc_link, then we enforce it above in the requires() clause.
+        #We still need to depend on _SOME_ component of grpc here though, else conan complains
+        if self.options.grpc_link != "none":
+            self.cpp_info.requires.append(f"grpc::{self.options.grpc_link}")
+        else:
+            self.cpp_info.requires.append(f"grpc::grpc++")
+
+
         if self.options.backend == "boost":
             self.cpp_info.defines = ["AGRPC_BOOST_ASIO"]
             self.cpp_info.requires.append("boost::headers")

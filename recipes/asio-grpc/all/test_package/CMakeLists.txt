@@ -1,11 +1,25 @@
 cmake_minimum_required(VERSION 3.14)
 project(test_package LANGUAGES CXX)
 
+option(GRPC_LINK_MANUAL "link grpc library manually here rather than via asio-grpc dependency" OFF)
+
 find_package(asio-grpc REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE asio-grpc::asio-grpc)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_link_libraries(${PROJECT_NAME} PRIVATE asio-grpc::asio-grpc)
+
+
+if(GRPC_LINK_MANUAL)
+  message(STATUS "LINKING GRPC REQUIREMENTS MANUALLY!")
+  find_package(gRPC REQUIRED)
+  find_package(Protobuf REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PRIVATE gRPC::grpc++)
+endif()
+
+
+
+
 
 # See https://github.com/chriskohlhoff/asio/issues/955
 target_compile_definitions(${PROJECT_NAME}

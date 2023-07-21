@@ -1,19 +1,28 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualRunEnv
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps",   "VirtualRunEnv"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
+
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.dependencies["asio-grpc"].options.grpc_link == "none":
+            #need to manually link the grpc library, add an option to tell cmake to do that
+            tc.cache_variables["GRPC_LINK_MANUAL"] = True
+
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
