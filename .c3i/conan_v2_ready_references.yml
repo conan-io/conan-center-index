@@ -13,6 +13,7 @@ required_for_references:
 - aeron
 - aggeom-agg
 - alac
+- alembic
 - alpaca
 - amgcl
 - amqp-cpp
@@ -25,6 +26,7 @@ required_for_references:
 - apr
 - apr-util
 - apriltag
+- archicad-apidevkit
 - arcus
 - arduinojson
 - arg_router
@@ -37,6 +39,7 @@ required_for_references:
 - arsenalgear
 - artery-font-format
 - asio
+- asio-grpc
 - asmjit
 - astc-codec
 - async_simple
@@ -143,6 +146,7 @@ required_for_references:
 - cmake
 - cmocka
 - cmp
+- cn-cbor
 - cnpy
 - coin-cgl
 - coin-clp
@@ -172,6 +176,7 @@ required_for_references:
 - cpptoml
 - cppunit
 - cpputest
+- cppzmq
 - cpr
 - cpu_features
 - cpuinfo
@@ -231,17 +236,21 @@ required_for_references:
 - earcut
 - eastl
 - easy_profiler
+- easyhttpcpp
 - ecos
 - editline
 - edlib
+- edyn
 - effcee
 - effolkronium-random
 - egl
+- egl-headers
 - eigen
 - elfio
 - embree3
 - emio
 - enet
+- enhex-generic_serialization
 - entityx
 - entt
 - enum-flags
@@ -277,6 +286,7 @@ required_for_references:
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
+- forestdb
 - foxglove-schemas-protobuf
 - fp16
 - freeglut
@@ -526,6 +536,7 @@ required_for_references:
 - mailio
 - make
 - mariadb-connector-c
+- marisa
 - matchit
 - mathter
 - mattiasgustavsson-libs
@@ -637,6 +648,7 @@ required_for_references:
 - picojson
 - pixman
 - pkgconf
+- platform.delegates
 - platform.hashing
 - plutovg
 - poco
@@ -656,9 +668,11 @@ required_for_references:
 - pugixml
 - pulseaudio
 - pybind11
+- pybind11_json
 - pystring
 - qhull
 - qpdf
+- qt
 - quantlib
 - quaternions
 - quill
@@ -765,6 +779,7 @@ required_for_references:
 - thrift
 - thrust
 - timsort
+- tiny-dnn
 - tinycthread
 - tinycthreadpool
 - tinydir
@@ -779,6 +794,7 @@ required_for_references:
 - tlx
 - toml11
 - trantor
+- tree-sitter
 - troldal-zippy
 - tsl-hopscotch-map
 - turtle
