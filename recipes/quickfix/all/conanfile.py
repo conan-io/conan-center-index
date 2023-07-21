@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, collect_libs
 
 required_conan_version = ">=1.53.0"
 
@@ -103,7 +103,7 @@ class QuickfixConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["quickfix"]
+        self.cpp_info.libs = collect_libs(self)
 
         if self.options.with_ssl:
             self.cpp_info.defines.append("HAVE_SSL=1")
