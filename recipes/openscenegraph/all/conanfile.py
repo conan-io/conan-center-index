@@ -42,7 +42,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_gif": [True, False],
         "with_gta": [True, False],
         "with_jasper": [True, False],
-        "with_jpeg": [True, False],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg", False],
         "with_openexr": [True, False],
         "with_png": [True, False],
         "with_tiff": [True, False],
@@ -70,7 +70,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_gif": True,
         "with_gta": False,
         "with_jasper": False,
-        "with_jpeg": True,
+        "with_jpeg": "libjpeg",
         "with_openexr": False,
         "with_png": True,
         "with_tiff": True,
@@ -130,29 +130,33 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
             self.requires("asio/1.22.1")
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/8.1.2")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.6")
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_gdal:
-            self.requires("gdal/3.4.3")
+            self.requires("gdal/3.5.2")
         if self.options.get_safe("with_gif"):
             self.requires("giflib/5.2.1")
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.33")
-        if self.options.get_safe("with_jpeg"):
+            self.requires("jasper/4.0.0")
+        if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
+        elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.5")
+        elif self.options.get_safe("with_jpeg") == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.7")
+            self.requires("openexr/3.1.5")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.39")
         if self.options.with_tiff:
-            self.requires("libtiff/4.5.1")
+            self.requires("libtiff/4.5.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
 
@@ -217,7 +221,7 @@ class OpenSceneGraphConanFile(ConanFile):
         cmake.definitions["OSG_WITH_ZEROCONF"] = False
         cmake.definitions["OSG_WITH_LIBLAS"] = False
         cmake.definitions["OSG_WITH_GIF"] = self.options.get_safe("with_gif", False)
-        cmake.definitions["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
+        cmake.definitions["OSG_WITH_JPEG"] = bool(self.options.get_safe("with_jpeg", False))
         cmake.definitions["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
         cmake.definitions["OSG_WITH_TIFF"] = self.options.with_tiff
 
@@ -390,8 +394,12 @@ class OpenSceneGraphConanFile(ConanFile):
         setup_plugin("vtf")
         setup_plugin("ktx")
 
-        if self.options.get_safe("with_jpeg"):
+        if self.options.get_safe("with_jpeg") == "libjpeg":
             setup_plugin("jpeg").requires.append("libjpeg::libjpeg")
+        elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
+            setup_plugin("jpeg").requires.append("libjpeg-turbo::jpeg")
+        elif self.options.get_safe("with_jpeg") == "mozjpeg":
+            setup_plugin("jpeg").requires.append("mozjpeg::libjpeg")       
 
         if self.options.with_jasper:
             setup_plugin("jp2").requires.append("jasper::jasper")
