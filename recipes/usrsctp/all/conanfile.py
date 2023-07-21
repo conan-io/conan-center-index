@@ -52,6 +52,7 @@ class UsrsctpConan(ConanFile):
         tc.variables["sctp_build_shared_lib"] = self.options.shared
         tc.variables["sctp_build_programs"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         tc.generate()
 
     def build(self):
