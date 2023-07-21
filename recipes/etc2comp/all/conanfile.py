@@ -72,6 +72,6 @@ class Etc2compConan(ConanFile):
         )
 
     def package_info(self):
-        self.cpp_info.libs = ["EtcLib"]
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
