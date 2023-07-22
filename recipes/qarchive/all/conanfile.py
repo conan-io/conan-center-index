@@ -105,6 +105,7 @@ class QarchiveConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "QArchive")
         self.cpp_info.libs = ["QArchive"]
         self.cpp_info.includedirs.append(os.path.join("include", "QArchive"))
+        self.cpp_info.requires = ["qt::qtCore", "libarchive::libarchive"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "QArchive"
