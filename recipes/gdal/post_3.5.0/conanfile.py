@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import apply_conandata_patches, get, files
 from conan.errors import ConanInvalidConfiguration
 from conans import CMake
@@ -728,10 +729,10 @@ class GdalConan(ConanFile):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
         files.rmdir(self, os.path.join(self.package_folder, "share"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
 
