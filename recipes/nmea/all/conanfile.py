@@ -14,7 +14,7 @@ class NmeaConan(ConanFile):
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://nmea.sourceforge.net/"
-    topics = ("nmea", "geospatial")
+    topics = ("nmea", "geospatial", "gnss", "gps", "navigation")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
