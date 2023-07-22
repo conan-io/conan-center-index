@@ -105,7 +105,7 @@ class OsgearthConan(ConanFile):
         self.requires("opengl/system")
         self.requires("gdal/3.4.3")
         self.requires("openscenegraph/3.6.5")
-        self.requires("libcurl/8.0.1")
+        self.requires("libcurl/8.2.0")
         self.requires("lerc/2.2")
         self.requires("rapidjson/1.1.0")
 
