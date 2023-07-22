@@ -6,6 +6,7 @@ from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, 
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 from conan.tools.scm import Version
 import os
+import sys
 import textwrap
 
 required_conan_version = ">=1.53.0"
@@ -29,7 +30,7 @@ class Exiv2Conan(ConanFile):
         "with_xmp": [False, "bundled", "external"],
         "with_curl": [True, False],
         "with_brotli": [True, False],
-        "with_inih": [True, False]
+        "with_inih": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,7 +39,7 @@ class Exiv2Conan(ConanFile):
         "with_xmp": "bundled",
         "with_curl": False,
         "with_brotli": True,
-        "with_inih": True
+        "with_inih": True,
     }
 
     provides = []
