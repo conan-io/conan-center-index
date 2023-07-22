@@ -290,6 +290,10 @@ class GdalConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
+    def build_requirements(self):
+        # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
+        self.tool_requires("cmake/[>=3.18 <4]")
+
     def package_id(self):
         del self.info.options.with_crypto
 
