@@ -1,9 +1,9 @@
 #include "liquid/liquid.h"
 
-#include <iostream>
+#include <stdio.h>
 
 int main(int argc, char **argv)
 {
-  std::cout << liquid_libversion();
+  puts(liquid_libversion());
   return 0;
 }
