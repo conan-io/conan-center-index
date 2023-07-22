@@ -1,0 +1,82 @@
+--- a/CMake/install_config.cmake
++++ b/CMake/install_config.cmake
+@@ -48,4 +48,4 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config/realsense2.pc"
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+ )
+ 
+-install(CODE "execute_process(COMMAND ldconfig)")
++# install(CODE "execute_process(COMMAND ldconfig)")
+--- a/CMake/libusb_config.cmake
++++ b/CMake/libusb_config.cmake
+@@ -1,14 +1,5 @@
+ if (NOT TARGET usb)
+-    find_library(LIBUSB_LIB usb-1.0)
+-    find_path(LIBUSB_INC libusb.h HINTS PATH_SUFFIXES libusb-1.0)
+-    include(FindPackageHandleStandardArgs)
+-    find_package_handle_standard_args(usb "libusb not found; using internal version" LIBUSB_LIB LIBUSB_INC)
+-    if (USB_FOUND AND NOT USE_EXTERNAL_USB)
+-        add_library(usb INTERFACE)
+-        target_include_directories(usb INTERFACE ${LIBUSB_INC})
+-        target_link_libraries(usb INTERFACE ${LIBUSB_LIB})
+-    else()
+-        include(CMake/external_libusb.cmake)
+-    endif()
+-    install(TARGETS usb EXPORT realsense2Targets)
++    find_package(libusb REQUIRED CONFIG)
++    add_library(usb INTERFACE IMPORTED)
++    set_property(TARGET usb PROPERTY INTERFACE_LINK_LIBRARIES libusb::libusb)
+ endif()
+--- a/CMake/windows_config.cmake
++++ b/CMake/windows_config.cmake
+@@ -57,8 +57,9 @@ macro(os_target_config)
+         if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+             message("Preparing Windows 7 drivers" )
+             make_directory(${CMAKE_CURRENT_BINARY_DIR}/drivers/)
+-            file(GLOB DRIVERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/" "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/*")
+-            foreach(item IN LISTS DRIVERS)
++            file(GLOB DRIVERS "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/" "${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/*")
++            foreach(_driver_path IN LISTS DRIVERS)
++                get_filename_component(item ${_driver_path} NAME)
+                 message("Copying ${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item} to ${CMAKE_CURRENT_BINARY_DIR}/drivers/" )
+                 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/win7/drivers/${item}" "${CMAKE_CURRENT_BINARY_DIR}/drivers/${item}" COPYONLY)
+             endforeach()
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,7 +7,7 @@ set(REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+ include_directories(${REPO_ROOT})
+ 
+ include(CMake/lrs_options.cmake)
+-include(CMake/connectivity_check.cmake)
++set(INTERNET_CONNECTION ON)
+ #Deprecation message, should be removed in future releases
+ if(${FORCE_LIBUVC} OR ${FORCE_WINUSB_UVC} OR ${ANDROID_USB_HOST_UVC})
+     MESSAGE(DEPRECATION "FORCE_LIBUVC, FORCE_WINUSB_UVC and ANDROID_USB_HOST_UVC are deprecated, use FORCE_RSUSB_BACKEND instead")
+--- a/common/fw/CMakeLists.txt
++++ b/common/fw/CMakeLists.txt
+@@ -64,16 +64,16 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER Resources)
+ 
+ function(target_binary url version sha1 symbol ext)
+   set(binary "${CMAKE_CURRENT_BINARY_DIR}/${symbol}-${version}${ext}")
+-  message(STATUS "${url}/${symbol}-${version}${ext}")
+-  file(DOWNLOAD "${url}/${symbol}-${version}${ext}" "${binary}"
+-       EXPECTED_HASH SHA1=${sha1}
+-       STATUS status)
+-  list(GET status 0 error_code)
+-  if (NOT ${error_code} EQUAL 0)
+-    message(FATAL_ERROR "Download firmwnare (${status}) - ${url}")
+-  else()
+-    message(STATUS "Download firmware ${status} for ${symbol}-${version}${ext}")
+-  endif()
++#  message(STATUS "${url}/${symbol}-${version}${ext}")
++file(COPY "${CMAKE_SOURCE_DIR}/${symbol}-${version}${ext}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
++#       EXPECTED_HASH SHA1=${sha1}
++#       STATUS status)
++#  list(GET status 0 error_code)
++#  if (NOT ${error_code} EQUAL 0)
++#    message(FATAL_ERROR "Download firmwnare (${status}) - ${url}")
++#  else()
++#    message(STATUS "Download firmware ${status} for ${symbol}-${version}${ext}")
++#  endif()
+   string(TOUPPER ${symbol} SYMBOL)
+   string(REPLACE "." "," version_commas ${version})
+   string(REPLACE "\\" "\\\\" binary_escaped "${binary}")
