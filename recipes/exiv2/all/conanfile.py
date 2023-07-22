@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
@@ -97,6 +97,10 @@ class Exiv2Conan(ConanFile):
                     raise ConanInvalidConfiguration(
                         f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
                     )
+        else:
+            # https://github.com/Exiv2/exiv2/tree/v0.27.7#217-building-with-c11-and-other-compilers
+            if self.settings.compiler.cppstd:
+                check_max_cppstd(self, 14)
 
         if self.options.with_xmp == "external":
             raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
