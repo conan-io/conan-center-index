@@ -123,6 +123,9 @@ class ImageMagicConan(ConanFile):
             self.requires("openjpeg/2.5.0")
         if self.options.with_pango:
             self.requires("pango/1.50.10")
+            self.requires("glib/2.76.3")  # override
+            self.requires("cairo/1.17.6")  # override
+            self.requires("fontconfig/2.14.2")  # override
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_tiff:
@@ -131,7 +134,7 @@ class ImageMagicConan(ConanFile):
             self.requires("libwebp/1.3.1")
         if self.options.with_xml2:
             self.requires("libxml2/2.10.3")
-        if self.options.with_freetype:
+        if self.options.with_freetype or self.options.with_pango:  # or to override
             self.requires("freetype/2.13.0")
         if self.options.with_djvu:
             # FIXME: missing djvu recipe
