@@ -1,11 +1,10 @@
-import functools
+from conan import ConanFile
+from conan.tools.files import get, copy
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class HunspellConan(ConanFile):
     name = "hunspell"
@@ -16,6 +15,8 @@ class HunspellConan(ConanFile):
     homepage = "https://hunspell.github.io/"
     topics = "spell", "spell-check"
     license = "MPL-1.1", "GPL-2.0-or-later", "LGPL-2.1-or-later"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,10 +26,10 @@ class HunspellConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
-    # FIXME: Remove once the pending upstream PR for CMake support is merged
-    exports_sources = "CMakeLists.txt"
-    no_copy_source = True
+
+    def export_sources(self):
+        # FIXME: Remove once the pending upstream PR for CMake support is merged
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,30 +37,40 @@ class HunspellConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # NOTE: The source contains a pre-configured hunvisapi.h and it would
         #       prevent no_copy_source and building without patches.
         h = os.path.join(self.source_folder, "src", "hunspell", "hunvisapi.h")
         os.remove(h)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CONAN_hunspell_VERSION"] = self.version
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["HUNSPELL_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["CONAN_hunspell_VERSION"] = self.version
+        tc.generate()
 
     def build(self):
-        self._configure_cmake().build()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.build()
 
     def package(self):
-        self._configure_cmake().install()
-        self.copy("COPYING", "licenses")
-        self.copy("COPYING.LESSER", "licenses")
-        self.copy("license.hunspell", "licenses")
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "COPYING*",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"),
+             keep_path=False)
+        copy(self, "license.hunspell",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"),
+             keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["hunspell"]

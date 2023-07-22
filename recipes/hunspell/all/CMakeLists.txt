@@ -1,12 +1,13 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 
 project(hunspell VERSION "${CONAN_hunspell_VERSION}" LANGUAGES CXX)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS KEEP_RPATHS)
-set(src src/hunspell)
+set(src "${HUNSPELL_SRC_DIR}/src/hunspell")
 
 # ---- Configure hunvisapi.h ----
+
+# This must be confirmed, off seems like the best default
+SET(HAVE_VISIBILITY 0)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-fvisibility=hidden HAVE_VISIBILITY)
