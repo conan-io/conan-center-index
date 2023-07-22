@@ -1,4 +1,7 @@
 sources:
+  "1.3.7":
+    url: "https://github.com/Shmoopty/veque/archive/v1.3.7.tar.gz"
+    sha256: "f67ae3ce3f3e16e60f63bc8d4df0c606a6dfbc8651e01cba5a6c4ed1209349b1"
   "1.3.6":
     url: "https://github.com/Shmoopty/veque/archive/v1.3.6.tar.gz"
     sha256: "9d149b415d948529ac166c962501c59605ef24b3a8ab8561956a6d05f14870ea"
