@@ -15,10 +15,20 @@ patches:
   "api.252009":
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
       base_path: "source_subfolder"
+    - patch_file: "patches/0013-libclang-15.diff"
+      patch_description: "Render state notation: use clang-15.0.6.1 for header parsing"
+      patch_type: bugfix
+      patch_source: "https://github.com/DiligentGraphics/DiligentTools/commit/b9f1d30d03237a3ff14c053aaf8bed0818d0e88c"
+      base_path: "source_subfolder"
   "api.252005":
     - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
       base_path: "source_subfolder"
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0013-libclang-15.diff"
+      patch_description: "Render state notation: use clang-15.0.6.1 for header parsing"
+      patch_type: bugfix
+      patch_source: "https://github.com/DiligentGraphics/DiligentTools/commit/b9f1d30d03237a3ff14c053aaf8bed0818d0e88c"
       base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0006-2.5.2-use-imgui-from-conan.diff"
@@ -34,6 +44,11 @@ patches:
     - patch_file: "patches/0011-2.5.2-use-conan-dependencies-part2.diff"
       base_path: "source_subfolder"
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0013-libclang-15.diff"
+      patch_description: "Render state notation: use clang-15.0.6.1 for header parsing"
+      patch_type: bugfix
+      patch_source: "https://github.com/DiligentGraphics/DiligentTools/commit/b9f1d30d03237a3ff14c053aaf8bed0818d0e88c"
       base_path: "source_subfolder"
   "cci.20211009":
     - patch_file: "patches/0001-use-imgui-from-conan.diff"
