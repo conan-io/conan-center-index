@@ -4,7 +4,5 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(hunspell REQUIRED CONFIG)
-
-add_executable(test_package test_package.cxx)
-target_link_libraries(test_package PRIVATE hunspell::hunspell)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package/
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package/)
