@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -25,6 +27,18 @@ class HunspellConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "gcc": "7",
+        }
+
+    def validate(self):
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version:
+            if Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration( "{self.name} requires at least {self.settings.compiler} {min_version}")
 
     def export_sources(self):
         # FIXME: Remove once the pending upstream PR for CMake support is merged
