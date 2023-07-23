@@ -6,9 +6,6 @@ set(src "${HUNSPELL_SRC_DIR}/src/hunspell")
 
 # ---- Configure hunvisapi.h ----
 
-# This must be confirmed, off seems like the best default
-SET(HAVE_VISIBILITY 0)
-
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(-fvisibility=hidden HAVE_VISIBILITY)
 configure_file("${src}/hunvisapi.h.in" hunvisapi.h @ONLY)
