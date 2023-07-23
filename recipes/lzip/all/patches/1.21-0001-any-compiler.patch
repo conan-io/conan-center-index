@@ -7,7 +7,7 @@
 -CPPFLAGS=
 -CXXFLAGS='-Wall -W -O2'
 -LDFLAGS=
-+#CXX=g++
++CXX="${CXX:-g++}"
 +#CPPFLAGS=
 +#CXXFLAGS='-Wall -W -O2'
 +#LDFLAGS=
@@ -18,8 +18,8 @@
  	{
 -	CXX=c++
 -	CXXFLAGS=-O2
-+	echo "hello" # CXX=c++
-+	echo "hello" # CXXFLAGS=-O2
++	echo  "" # CXX=c++
++	# CXXFLAGS=-O2
  	}
  
  # Loop over all args

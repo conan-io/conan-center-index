@@ -7,7 +7,7 @@
 -CPPFLAGS=
 -CXXFLAGS='-Wall -W -O2'
 -LDFLAGS=
-+#CXX=g++
++CXX="${CXX:-g++}"
 +#CPPFLAGS=
 +#CXXFLAGS='-Wall -W -O2'
 +#LDFLAGS=
