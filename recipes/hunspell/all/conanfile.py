@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
@@ -29,12 +30,18 @@ class HunspellConan(ConanFile):
     }
 
     @property
+    def _minimum_cpp_standard(self):
+        return 11
+
+    @property
     def _minimum_compilers_version(self):
         return {
             "gcc": "7",
         }
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if min_version:
             if Version(self.settings.compiler.version) < min_version:
