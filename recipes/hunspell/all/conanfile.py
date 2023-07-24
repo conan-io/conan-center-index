@@ -45,7 +45,7 @@ class HunspellConan(ConanFile):
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if min_version:
             if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration( "{self.name} requires at least {self.settings.compiler} {min_version}")
+                raise ConanInvalidConfiguration(f"{self.name} requires at least {self.settings.compiler} {min_version}")
 
     def export_sources(self):
         # FIXME: Remove once the pending upstream PR for CMake support is merged
