@@ -22,9 +22,6 @@ class IntxConan(ConanFile):
     def _min_cppstd(self):
         return 20
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -37,10 +34,6 @@ class IntxConan(ConanFile):
             "clang": "15",
             "apple-clang": "14.1",
         }
-
-
-    def requirements(self):
-        pass
 
     def package_id(self):
         self.info.clear()
@@ -57,9 +50,6 @@ class IntxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
