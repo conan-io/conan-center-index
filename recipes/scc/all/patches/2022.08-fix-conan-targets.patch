@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -17,7 +17,11 @@
+@@ -17,7 +17,12 @@
  
  include(Common)
  
@@ -8,6 +8,7 @@
 +find_package(fmt REQUIRED CONFIG)
 +find_package(spdlog REQUIRED CONFIG)
 +find_package(Boost REQUIRED CONFIG)
++find_package(systemc REQUIRED CONFIG)
 +if(TRUE)
 +elseif(CMAKE_PROJECT_NAME STREQUAL "scc")
      message(STATUS "Building SCC in standalone mode")

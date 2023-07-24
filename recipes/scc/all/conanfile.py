@@ -53,6 +53,8 @@ class SystemcComponentsConan(ConanFile):
         self.requires("zlib/1.2.13")
         self.requires("boost/1.82.0")
         self.requires("gsl-lite/0.40.0")
+        self.requires("spdlog/1.10.0")
+        self.requires("systemc/2.3.4")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
