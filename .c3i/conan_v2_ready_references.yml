@@ -42,6 +42,7 @@ required_for_references:
 - asio-grpc
 - asmjit
 - astc-codec
+- astro-informatics-so3
 - async_simple
 - asyncly
 - asyncplusplus
@@ -281,10 +282,12 @@ required_for_references:
 - ffmpeg
 - fft
 - fftw
+- fire-hpp
 - flac
 - flann
 - flatbuffers
 - flatbush
+- flecs
 - flex
 - fmt
 - fmtlog
@@ -293,10 +296,15 @@ required_for_references:
 - foonathan-memory
 - forestdb
 - foxglove-schemas-protobuf
+- foxi
 - fp16
 - freeglut
+- freeimage
 - freetype
+- freexl
+- fribidi
 - frozen
+- fruit
 - ftxui
 - function2
 - fxdiv
@@ -378,6 +386,7 @@ required_for_references:
 - inja
 - intel-neon2sse
 - inversify-cpp
+- iqa
 - itlib
 - jasper
 - jbig
@@ -443,6 +452,7 @@ required_for_references:
 - libgpg-error
 - libgphoto2
 - libgpiod
+- libgta
 - libharu
 - libiberty
 - libiconv
@@ -455,6 +465,7 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmbus
 - libmediainfo
 - libmemcached
 - libmikmod
