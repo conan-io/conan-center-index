@@ -29,6 +29,7 @@ class IntxConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        pass
 
     def package_id(self):
         self.info.clear()
