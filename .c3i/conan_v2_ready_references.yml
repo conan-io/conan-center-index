@@ -13,6 +13,7 @@ required_for_references:
 - aeron
 - aggeom-agg
 - alac
+- alembic
 - alpaca
 - amgcl
 - amqp-cpp
@@ -25,6 +26,7 @@ required_for_references:
 - apr
 - apr-util
 - apriltag
+- archicad-apidevkit
 - arcus
 - arduinojson
 - arg_router
@@ -37,6 +39,7 @@ required_for_references:
 - arsenalgear
 - artery-font-format
 - asio
+- asio-grpc
 - asmjit
 - astc-codec
 - async_simple
@@ -57,6 +60,7 @@ required_for_references:
 - aws-c-mqtt
 - aws-c-sdkutils
 - aws-checksums
+- aws-libfabric
 - b2
 - b64
 - backport-cpp
@@ -143,6 +147,7 @@ required_for_references:
 - cmake
 - cmocka
 - cmp
+- cn-cbor
 - cnpy
 - coin-cgl
 - coin-clp
@@ -172,6 +177,7 @@ required_for_references:
 - cpptoml
 - cppunit
 - cpputest
+- cppzmq
 - cpr
 - cpu_features
 - cpuinfo
@@ -231,12 +237,15 @@ required_for_references:
 - earcut
 - eastl
 - easy_profiler
+- easyhttpcpp
 - ecos
 - editline
 - edlib
+- edyn
 - effcee
 - effolkronium-random
 - egl
+- egl-headers
 - eigen
 - elfio
 - embree3
@@ -260,9 +269,13 @@ required_for_references:
 - fakeit
 - farmhash
 - fast-cdr
+- fast-cpp-csv-parser
 - fast-dds
+- fast_double_parser
 - fast_float
 - fastgltf
+- fastpfor
+- fastprng
 - fernandovelcic-hexdump
 - fff
 - ffmpeg
@@ -278,6 +291,7 @@ required_for_references:
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
+- forestdb
 - foxglove-schemas-protobuf
 - fp16
 - freeglut
@@ -310,6 +324,7 @@ required_for_references:
 - glm
 - glog
 - glpk
+- glshaderpp
 - glslang
 - glu
 - gmp
@@ -354,6 +369,7 @@ required_for_references:
 - imake
 - imath
 - imgui
+- imguizmo
 - incbin
 - indicators
 - indirect_value
@@ -431,6 +447,7 @@ required_for_references:
 - libiberty
 - libiconv
 - libinterpolate
+- libipt
 - libjpeg
 - libjpeg-turbo
 - libkml
@@ -441,6 +458,7 @@ required_for_references:
 - libmediainfo
 - libmemcached
 - libmikmod
+- libmnl
 - libmodbus
 - libmodplug
 - libmorton
@@ -472,6 +490,7 @@ required_for_references:
 - libselinux
 - libserial
 - libsgp4
+- libslz
 - libsmacker
 - libsndfile
 - libsodium
@@ -527,8 +546,10 @@ required_for_references:
 - mailio
 - make
 - mariadb-connector-c
+- marisa
 - matchit
 - mathter
+- matio
 - mattiasgustavsson-libs
 - maven
 - mawk
@@ -626,7 +647,9 @@ required_for_references:
 - p-ranav-glob
 - paho-mqtt-c
 - paho-mqtt-cpp
+- parg
 - patchelf
+- pbtools
 - pcapplusplus
 - pcg-cpp
 - pcre
@@ -658,6 +681,7 @@ required_for_references:
 - pugixml
 - pulseaudio
 - pybind11
+- pybind11_json
 - pystring
 - qhull
 - qpdf
@@ -687,6 +711,7 @@ required_for_references:
 - replxx
 - restbed
 - restinio
+- rg-etc1
 - ring-span-lite
 - rmm
 - roaring
@@ -711,6 +736,7 @@ required_for_references:
 - sentry-breakpad
 - sentry-crashpad
 - sentry-native
+- seqan
 - serd
 - serdepp
 - sfml
@@ -741,6 +767,7 @@ required_for_references:
 - sqlitecpp
 - sqlpp11
 - ssht
+- st_tree
 - status-code
 - stb
 - stlab
@@ -768,6 +795,7 @@ required_for_references:
 - thrift
 - thrust
 - timsort
+- tiny-dnn
 - tinycthread
 - tinycthreadpool
 - tinydir
@@ -782,6 +810,7 @@ required_for_references:
 - tlx
 - toml11
 - trantor
+- tree-sitter
 - troldal-zippy
 - tsl-hopscotch-map
 - turtle
@@ -826,6 +855,7 @@ required_for_references:
 - websocketpp
 - wg21-linear_algebra
 - wglext
+- whereami
 - whisper-cpp
 - wil
 - winflexbison
@@ -849,6 +879,7 @@ required_for_references:
 - xorg-makedepend
 - xorg-proto
 - xoshiro-cpp
+- xsd
 - xsimd
 - xtensor
 - xtl
