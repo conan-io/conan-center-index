@@ -70,12 +70,16 @@ class OpenVDBConan(ConanFile):
         self.requires("boost/1.82.0", transitive_headers=True)
         # onetbb/2021.x fails with "'tbb::split' has not been declared"
         self.requires("onetbb/2020.3", transitive_headers=True)
-        self.requires("openexr/2.5.7", transitive_headers=True)  # required for IlmBase::Half
+        if Version(self.version) >= "8.2.0":
+            self.requires("openexr/3.1.7", transitive_headers=True)
+        else:
+            self.requires("openexr/2.5.7", transitive_headers=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_exr:
             # Not necessary now. Required for IlmBase::IlmImf
-            self.requires("openexr/2.5.7", transitive_headers=True)
+            # self.requires("openexr/2.5.7", transitive_headers=True)
+            pass
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.4")
         if self.options.with_log4cplus:
@@ -139,6 +143,8 @@ class OpenVDBConan(ConanFile):
         tc.variables["OPENEXR_USE_STATIC_LIBS"] = not self.dependencies["openexr"].options.shared
 
         tc.variables["OPENVDB_DISABLE_BOOST_IMPLICIT_LINKING"] = True
+
+        tc.variables["OPENVDB_FUTURE_DEPRECATION"] = False
 
         tc.generate()
 
