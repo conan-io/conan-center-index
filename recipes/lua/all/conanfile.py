@@ -16,6 +16,7 @@ class LuaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.lua.org/"
     topics = ("embed", "scripting")
+    provides = "lua"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
