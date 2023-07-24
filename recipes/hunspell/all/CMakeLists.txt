@@ -26,6 +26,8 @@ add_library(
     "${src}/suggestmgr.cxx"
 )
 
+target_compile_features(hunspell PRIVATE cxx_std_11)
+
 if(MSVC)
   target_compile_options(hunspell PRIVATE /wd4267 /wd4996)
 endif()
