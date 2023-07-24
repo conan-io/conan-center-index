@@ -58,13 +58,6 @@ class CorradeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        try:
-            check_min_vs(self, 193)
-        except ConanInvalidConfiguration:
-            pass
-        else:
-            raise ConanInvalidConfiguration("Corrade doesn't build with VS 2022")
-
         check_min_vs(self, 190)
         if not self.options.with_utility and (
             self.options.with_testsuite or self.options.with_interconnect or self.options.with_pluginmanager
@@ -100,8 +93,7 @@ class CorradeConan(ConanFile):
         if is_msvc(self):
             tc.variables["MSVC2015_COMPATIBILITY"] = vs_ide_version(self) == "14"
             tc.variables["MSVC2017_COMPATIBILITY"] = vs_ide_version(self) == "15"
-            tc.variables["MSVC2019_COMPATIBILITY"] = vs_ide_version(self) == "16"
-            tc.variables["MSVC2022_COMPATIBILITY"] = vs_ide_version(self) == "17"
+            tc.variables["MSVC2019_COMPATIBILITY"] = vs_ide_version(self) in ("16", "17")
 
         tc.generate()
         tc = CMakeDeps(self)
