@@ -47,6 +47,7 @@ sources:
 patches:
   "7.8.0":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+    - patch_file: "patches/fix-alternative-operator-error-7.8.0.patch"
   "7.7.5":
     - patch_file: "patches/0001-cmake-fix-module.patch"
   "7.7.4":
