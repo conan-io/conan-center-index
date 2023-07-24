@@ -1,17 +1,23 @@
-import functools
-from conans import ConanFile, CMake, tools
-from conans.tools import ConanInvalidConfiguration
+import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
+
 
 class LibslzConan(ConanFile):
     name = "libslz"
     description = "Simple, modern libpng alternative "
-    topics = ("zlib", "compression",)
     license = "X11"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.libslz.org/"
+    topics = ("zlib", "compression")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,14 +27,9 @@ class LibslzConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,31 +37,34 @@ class LibslzConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if is_msvc(self):
-            raise ConanInvalidConfiguration("{}/{} does not support Visual Studio.".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
