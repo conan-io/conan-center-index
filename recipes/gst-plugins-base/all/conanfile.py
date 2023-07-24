@@ -85,8 +85,8 @@ class GStPluginsBaseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.2", transitive_headers=True, transitive_libs=True)
-        self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.76.2", transitive_libs=True)
+        self.requires(f"gstreamer/{self.version}", transitive_libs=True)
         self.requires("zlib/1.2.13")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
