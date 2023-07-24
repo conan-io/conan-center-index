@@ -68,6 +68,7 @@ class LibpngConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -102,11 +103,13 @@ class LibpngConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["PNG_TESTS"] = False
-        tc.variables["PNG_SHARED"] = self.options.shared
-        tc.variables["PNG_STATIC"] = not self.options.shared
-        tc.variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
-        tc.variables["PNG_PREFIX"] = self.options.api_prefix
+        tc.cache_variables["PNG_TESTS"] = False
+        tc.cache_variables["PNG_SHARED"] = self.options.shared
+        tc.cache_variables["PNG_STATIC"] = not self.options.shared
+        tc.cache_variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
+        tc.cache_variables["PNG_PREFIX"] = self.options.api_prefix
+        if Version(self.version) < "1.6.38":
+            tc.cache_variables["CMAKE_PROJECT_libpng_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         if self._has_neon_support:
             tc.variables["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
         if self._has_msa_support:
@@ -125,22 +128,6 @@ class LibpngConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self.settings.os == "Windows":
-            if not (is_msvc(self) or self._is_clang_cl):
-                if Version(self.version) < "1.6.38":
-                    src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
-                elif Version(self.version) == "1.6.39":
-                    src_text = '''COMMAND "${CMAKE_COMMAND}"
-                                 -E copy_if_different
-                                 $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
-                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'''
-                    replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                        src_text,
-                                        'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
-                else:
-                    # TODO: evaluate and document in what issue this patch aims to resolve, and in which scenarios it is needed
-                    # Note: the cmake logic for this has changed again in versions >=1.6.40
-                    pass
 
     def build(self):
         self._patch_sources()
