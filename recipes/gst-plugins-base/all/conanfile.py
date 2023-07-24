@@ -85,7 +85,7 @@ class GStPluginsBaseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.2", transitive_libs=True)
+        self.requires("glib/2.76.3", transitive_libs=True)
         self.requires(f"gstreamer/{self.version}", transitive_libs=True)
         self.requires("zlib/1.2.13")
         if self.options.get_safe("with_libalsa"):
@@ -140,7 +140,7 @@ class GStPluginsBaseConan(ConanFile):
             raise ConanInvalidConfiguration("OpenGL support with Wayland requires 'with_egl' turned on!")
 
     def build_requirements(self):
-        self.tool_requires("glib/2.76.2")
+        self.tool_requires("glib/2.76.3")
         self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
