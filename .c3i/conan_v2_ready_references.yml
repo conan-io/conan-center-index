@@ -660,7 +660,6 @@ required_for_references:
 - pystring
 - qhull
 - qpdf
-- qt
 - quantlib
 - quaternions
 - quill
