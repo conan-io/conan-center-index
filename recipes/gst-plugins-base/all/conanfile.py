@@ -686,22 +686,5 @@ class GStPluginsBaseConan(ConanFile):
             self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
 
         # TODO: remove the following when only Conan 2.0 is supported
-        self.cpp_info.components["gstreamer-plugins-base-1.0"].names["pkg_config"] = "gstreamer-plugins-base-1.0"
-        self.cpp_info.components["gstreamer-allocators-1.0"].names["pkg_config"] = "gstreamer-allocators-1.0"
-        self.cpp_info.components["gstreamer-app-1.0"].names["pkg_config"] = "gstreamer-app-1.0"
-        self.cpp_info.components["gstreamer-audio-1.0"].names["pkg_config"] = "gstreamer-audio-1.0"
-        self.cpp_info.components["gstreamer-fft-1.0"].names["pkg_config"] = "gstreamer-fft-1.0"
-        self.cpp_info.components["gstreamer-gl-1.0"].names["pkg_config"] = "gstreamer-gl-1.0"
-        self.cpp_info.components["gstreamer-gl-prototypes-1.0"].names["pkg_config"] = "gstreamer-gl-prototypes-1.0"
-        self.cpp_info.components["gstreamer-gl-egl-1.0"].names["pkg_config"] = "gstreamer-gl-egl-1.0"
-        self.cpp_info.components["gstreamer-gl-wayland-1.0"].names["pkg_config"] = "gstreamer-gl-wayland-1.0"
-        self.cpp_info.components["gstreamer-gl-x11-1.0"].names["pkg_config"] = "gstreamer-gl-x11-1.0"
-        self.cpp_info.components["gstreamer-pbutils-1.0"].names["pkg_config"] = "gstreamer-pbutils-1.0"
-        self.cpp_info.components["gstreamer-riff-1.0"].names["pkg_config"] = "gstreamer-riff-1.0"
-        self.cpp_info.components["gstreamer-rtp-1.0"].names["pkg_config"] = "gstreamer-rtp-1.0"
-        self.cpp_info.components["gstreamer-rtsp-1.0"].names["pkg_config"] = "gstreamer-rtsp-1.0"
-        self.cpp_info.components["gstreamer-sdp-1.0"].names["pkg_config"] = "gstreamer-sdp-1.0"
-        self.cpp_info.components["gstreamer-tag-1.0"].names["pkg_config"] = "gstreamer-tag-1.0"
-        self.cpp_info.components["gstreamer-video-1.0"].names["pkg_config"] = "gstreamer-video-1.0"
         if self.options.shared:
             self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
