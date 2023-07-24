@@ -10,7 +10,7 @@ required_conan_version = ">=1.54.0"
 
 class GeosConan(ConanFile):
     name = "geos"
-    description = "C++11 library for performing operations on two-dimensional vector geometries"
+    description = "C++14 library for performing operations on two-dimensional vector geometries"
     license = "LGPL-2.1"
     topics = ("osgeo", "geometry", "topology", "geospatial")
     homepage = "https://trac.osgeo.org/geos"
@@ -49,7 +49,7 @@ class GeosConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
