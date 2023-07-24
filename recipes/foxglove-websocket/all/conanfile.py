@@ -20,10 +20,12 @@ class FoxgloveWebSocketConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "asio": ["boost", "standalone", False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "asio": "standalone"
     }
 
     settings = "os", "arch", "compiler", "build_type"
@@ -79,7 +81,7 @@ class FoxgloveWebSocketConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.options["websocketpp"].asio = "standalone"
+        self.options["websocketpp"].asio = self.options.asio
 
         if self.options.shared:
             self.options.rm_safe("fPIC")
