@@ -75,7 +75,7 @@ class ITKConan(ConanFile):
         self.requires("hdf5/1.14.1")
         self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.5.0")
+        self.requires("libtiff/4.5.1")
         self.requires("openjpeg/2.5.0")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/1.2.13")
