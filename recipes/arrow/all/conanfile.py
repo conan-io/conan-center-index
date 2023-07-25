@@ -162,111 +162,125 @@ class ArrowConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _options(self):
+        try:
+            return self.options
+        except Exception:
+            return self.info.options
+
+    @property
+    def _settings(self):
+        try:
+            return self.settings
+        except Exception:
+            return self.info.settings
+
     def _compute(self, required=False):
-        if required or self.options.compute == "auto":
-            return bool(self._parquet() or self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
+        if required or self._options.compute == "auto":
+            return bool(self._parquet() or self._dataset_modules()) or bool(self._options.get_safe("substrait", False))
         else:
-            return bool(self.options.compute)
+            return bool(self._options.compute)
 
     def _parquet(self, required=False):
-        if required or self.options.parquet == "auto":
-            return bool(self.options.get_safe("substrait", False))
+        if required or self._options.parquet == "auto":
+            return bool(self._options.get_safe("substrait", False))
         else:
-            return bool(self.options.parquet)
+            return bool(self._options.parquet)
 
     def _dataset_modules(self, required=False):
-        if required or self.options.dataset_modules == "auto":
-            return bool(self.options.get_safe("substrait", False))
+        if required or self._options.dataset_modules == "auto":
+            return bool(self._options.get_safe("substrait", False))
         else:
-            return bool(self.options.dataset_modules)
+            return bool(self._options.dataset_modules)
 
     def _with_jemalloc(self, required=False):
-        if required or self.options.with_jemalloc == "auto":
-            return bool("BSD" in str(self.settings.os))
+        if required or self._options.with_jemalloc == "auto":
+            return bool("BSD" in str(self._settings.os))
         else:
-            return bool(self.options.with_jemalloc)
+            return bool(self._options.with_jemalloc)
 
     def _with_re2(self, required=False):
-        if required or self.options.with_re2 == "auto":
-            if self.options.gandiva or self.options.parquet:
+        if required or self._options.with_re2 == "auto":
+            if self._options.gandiva or self._options.parquet:
                 return True
             if Version(self) >= "7.0.0" and (self._compute() or self._dataset_modules()):
                 return True
             return False
         else:
-            return bool(self.options.with_re2)
+            return bool(self._options.with_re2)
 
     def _with_protobuf(self, required=False):
-        if required or self.options.with_protobuf == "auto":
-            return bool(self.options.gandiva or self._with_flight_rpc() or self.options.with_orc or self.options.get_safe("substrait", False))
+        if required or self._options.with_protobuf == "auto":
+            return bool(self._options.gandiva or self._with_flight_rpc() or self._options.with_orc or self._options.get_safe("substrait", False))
         else:
-            return bool(self.options.with_protobuf)
+            return bool(self._options.with_protobuf)
 
     def _with_flight_rpc(self, required=False):
-        if required or self.options.with_flight_rpc == "auto":
-            return bool(self.options.get_safe("with_flight_sql", False))
+        if required or self._options.with_flight_rpc == "auto":
+            return bool(self._options.get_safe("with_flight_sql", False))
         else:
-            return bool(self.options.with_flight_rpc)
+            return bool(self._options.with_flight_rpc)
 
     def _with_gflags(self, required=False):
-        if required or self.options.with_gflags == "auto":
+        if required or self._options.with_gflags == "auto":
             return bool(self._with_glog() or self._with_grpc())
         else:
-            return bool(self.options.with_gflags)
+            return bool(self._options.with_gflags)
 
     def _with_glog(self, required=False):
-        if required or self.options.with_glog == "auto":
+        if required or self._options.with_glog == "auto":
             return False
         else:
-            return bool(self.options.with_glog)
+            return bool(self._options.with_glog)
 
     def _with_grpc(self, required=False):
-        if required or self.options.with_grpc == "auto":
+        if required or self._options.with_grpc == "auto":
             return self._with_flight_rpc()
         else:
-            return bool(self.options.with_grpc)
+            return bool(self._options.with_grpc)
 
     def _with_boost(self, required=False):
-        if required or self.options.with_boost == "auto":
-            if self.options.gandiva:
+        if required or self._options.with_boost == "auto":
+            if self._options.gandiva:
                 return True
             version = Version(self.version)
             if version.major == "1":
-                if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
+                if self._parquet() and self._settings.compiler == "gcc" and self._settings.compiler.version < Version("4.9"):
                     return True
             elif version.major >= "2":
-                if is_msvc(self):
+                if str(self._settings.compiler) in ["msvc", "Visual Studio"]:
                     return True
             return False
         else:
-            return bool(self.options.with_boost)
+            return bool(self._options.with_boost)
 
     def _with_thrift(self, required=False):
         # No self.options.with_thift exists
         return bool(required or self._parquet())
 
     def _with_utf8proc(self, required=False):
-        if required or self.options.with_utf8proc == "auto":
-            return bool(self._compute() or self.options.gandiva)
+        if required or self._options.with_utf8proc == "auto":
+            return bool(self._compute() or self._options.gandiva)
         else:
-            return bool(self.options.with_utf8proc)
+            return bool(self._options.with_utf8proc)
 
     def _with_llvm(self, required=False):
-        if required or self.options.with_llvm == "auto":
-            return bool(self.options.gandiva)
+        if required or self._options.with_llvm == "auto":
+            return bool(self._options.gandiva)
         else:
-            return bool(self.options.with_llvm)
+            return bool(self._options.with_llvm)
 
     def _with_openssl(self, required=False):
-        if required or self.options.with_openssl == "auto":
-            return bool(self.options.encryption or self._with_flight_rpc() or self.options.with_s3)
+        if required or self._options.with_openssl == "auto":
+            return bool(self._options.encryption or self._with_flight_rpc() or self._options.with_s3)
         else:
-            return bool(self.options.with_openssl)
+            return bool(self._options.with_openssl)
 
     def _with_rapidjson(self):
-        if self.options.with_json:
+        if self._options.with_json:
             return True
-        if Version(self.version) >= "7.0.0" and self.options.encryption:
+        if Version(self.version) >= "7.0.0" and self._options.encryption:
             return True
         return False
 
