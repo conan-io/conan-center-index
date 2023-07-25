@@ -7,10 +7,10 @@ sources:
     sha256: "058c01828692bf193cb862372651c572fcc43babbf2d664674409511b9f54e5b"
 patches:
   "0.10":
-    - patch_file: "patches/0001-cmake-minimum-required.patch"
-      patch_description: "declare cmake_minimum_required first"
+    - patch_file: "patches/0001-cmake.patch"
+      patch_description: "declare cmake_minimum_required first, fix Iconv search"
       patch_type: "portability"
   "cci.20210701":
-    - patch_file: "patches/0001-cmake-minimum-required.patch"
-      patch_description: "declare cmake_minimum_required first"
+    - patch_file: "patches/0001-cmake.patch"
+      patch_description: "declare cmake_minimum_required first, fix Iconv search"
       patch_type: "portability"
