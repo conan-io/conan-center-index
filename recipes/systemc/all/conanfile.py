@@ -12,10 +12,8 @@ required_conan_version = ">=1.53.0"
 
 class SystemcConan(ConanFile):
     name = "systemc"
-    description = (
-        "SystemC is a set of C++ classes and macros which provide "
-        "an event-driven simulation interface."
-    )
+    description = ("SystemC is a set of C++ classes and macros which provide "
+                   "an event-driven simulation interface.")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.accellera.org/"
@@ -81,8 +79,6 @@ class SystemcConan(ConanFile):
                 f"GCC {self.settings.compiler.version} is not supported by SystemC on Conan v1"
             )
 
-
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -105,8 +101,12 @@ class SystemcConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, "NOTICE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "NOTICE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
