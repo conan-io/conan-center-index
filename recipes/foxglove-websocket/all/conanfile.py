@@ -20,7 +20,7 @@ class FoxgloveWebSocketConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "asio": ["boost", "standalone", False],
+        "asio": ["boost", "standalone"],
     }
     default_options = {
         "shared": False,
