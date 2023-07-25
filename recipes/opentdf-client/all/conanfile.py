@@ -128,5 +128,5 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
         if Version(self.version) < "1.1.0":
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
-        if Version(self.version) >= "1.5.0":
+        if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
