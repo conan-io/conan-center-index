@@ -156,12 +156,12 @@ class OpenCVConan(ConanFile):
             del self.options.contrib_freetype
             del self.options.contrib_sfm
         if not self.options.dnn:
-            del self.options.dnn_cuda
+            self.options.rm_safe("dnn_cuda")
         if not self.options.with_cuda:
             del self.options.with_cublas
             del self.options.with_cudnn
             del self.options.with_cufft
-            del self.options.dnn_cuda
+            self.options.rm_safe("dnn_cuda")
             del self.options.cuda_arch_bin
         if bool(self.options.with_jpeg):
             if self.options.get_safe("with_jpeg2000") == "jasper":
