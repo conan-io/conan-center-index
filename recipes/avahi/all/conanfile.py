@@ -49,7 +49,7 @@ class AvahiConan(ConanFile):
         self.requires("libevent/2.1.12")
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def build_requirements(self):
@@ -71,7 +71,7 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
         AutotoolsDeps(self).generate()
