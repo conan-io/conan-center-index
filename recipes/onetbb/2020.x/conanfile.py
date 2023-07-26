@@ -4,12 +4,13 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import chdir, copy, get, replace_in_file, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.intel import IntelCC
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import VCVars, is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -75,7 +76,7 @@ class OneTBBConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "8.0":
                 raise ConanInvalidConfiguration(f"{self.name} {self.version} couldn't be built by apple-clang < 8.0")
         if not self.options.shared:
@@ -132,7 +133,7 @@ class OneTBBConan(ConanFile):
             "x86": "ia32",
             "x86_64": "intel64",
             "armv7": "armv7",
-            "armv8": "arm64" if (self.settings.os == "iOS" or self.settings.os == "Macos") else "aarch64",
+            "armv8": "arm64" if (self.settings.os == "iOS" or is_apple_os(self)) else "aarch64",
         }[str(self.settings.arch)]
         tc.make_args.append(f"arch={arch}")
 
@@ -152,7 +153,7 @@ class OneTBBConan(ConanFile):
             else:
                 tc.make_args.append("compiler=gcc")
 
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 # runtime is supposed to track the version of the c++ stdlib,
                 # the version of glibc, and the version of the linux kernel.
                 # However, it isn't actually used anywhere other than for
@@ -162,7 +163,7 @@ class OneTBBConan(ConanFile):
                 # Setting it to a dummy value prevents TBB from calling gcc.
                 tc.make_args.append("runtime=gnu")
         elif str(self._base_compiler) in ["Visual Studio", "msvc"]:
-            if "MT" in msvc_runtime_flag(self):
+            if is_msvc_static_runtime(self):
                 runtime = "vc_mt"
             else:
                 if is_msvc(self):
@@ -283,7 +284,7 @@ class OneTBBConan(ConanFile):
                 keep_path=False,
             )
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             extension = "so"
             if self.options.shared:
                 copy(
