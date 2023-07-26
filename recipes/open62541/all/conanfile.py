@@ -244,19 +244,13 @@ class Open62541Conan(ConanFile):
         with open(submodule_filename, 'r') as submodule_stream:
             submodules_data = yaml.safe_load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
-                filename = os.path.basename(submodule["url"])
-                archive_name = submodule["archive_pattern"].format(
-                    version=os.path.splitext(filename.replace('v', ''))[0])
-
-                submodule_data = {
-                    "url": submodule["url"],
-                    "sha256": submodule["sha256"]
-                }
-
-                get(self, **submodule_data)
-                submodule_source = os.path.join(self.source_folder, path)
-                rmdir(self, submodule_source)
-                rename(self, archive_name, submodule_source)
+                archive_name = os.path.splitext(
+                    os.path.basename(submodule["url"]))[0]
+                get(self, url=submodule["url"],
+                    sha256=submodule["sha256"],
+                    destination=path,
+                    filename=archive_name,
+                    strip_root=True)
 
     def _get_log_level(self):
         return {
