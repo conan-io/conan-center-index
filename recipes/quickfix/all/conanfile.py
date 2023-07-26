@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, collect_libs
@@ -61,7 +62,7 @@ class QuickfixConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("QuickFIX cannot be built as shared lib on Windows")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if is_apple_os(self) and self.settings.arch == "armv8":
             # See issue: https://github.com/quickfix/quickfix/issues/206
             raise ConanInvalidConfiguration("QuickFIX doesn't support ARM compilation")
 
