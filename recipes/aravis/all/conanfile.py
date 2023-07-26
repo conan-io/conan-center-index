@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, rm, rmdir
@@ -50,7 +50,7 @@ class AravisConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
 
     def configure(self):
@@ -79,7 +79,7 @@ class AravisConan(ConanFile):
             raise ConanInvalidConfiguration("Static runtime is not supported on Windows due to GLib issues")
         if self.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration("Shared Aravis cannot link to static GLib")
-        if self.settings.os == "Macos" and self.dependencies["glib"].options.shared:
+        if is_apple_os(self) and self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "macOS builds are disabled when glib is shared until "
                 "conan-io/conan#7324 gets merged to fix macOS SIP issue #8443"
