@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
@@ -101,7 +102,7 @@ class openfx(ConanFile):
 
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["GL"])
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation", "OpenGL"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
