@@ -74,7 +74,7 @@ class OpenFstConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("OpenFst is only supported on linux")
 
         compilers = {
