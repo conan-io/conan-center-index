@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
@@ -69,5 +69,5 @@ class ConanRecipe(ConanFile):
             self.cpp_info.system_libs = ["m", "rt", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["setupapi"]
-        elif self.settings.os == "Macos":
+        elif is_apple_os(self):
             self.cpp_info.frameworks = ["IOKit", "Foundation", "CoreFoundation"]
