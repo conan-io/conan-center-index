@@ -76,5 +76,5 @@ class LibfuseConan(ConanFile):
         self.cpp_info.libs = ["fuse3"]
         self.cpp_info.includedirs = [os.path.join("include", "fuse3")]
         self.cpp_info.system_libs = ["pthread"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "rt"])

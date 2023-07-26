@@ -77,5 +77,5 @@ class LibfuseConan(ConanFile):
         self.cpp_info.system_libs = ["pthread"]
         # libfuse requires this define to compile successfully
         self.cpp_info.defines = ["_FILE_OFFSET_BITS=64"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
