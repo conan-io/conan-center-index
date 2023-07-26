@@ -61,7 +61,7 @@ class IceoryxConan(ConanFile):
     def requirements(self):
         if self.options.toml_config:
             self.requires("cpptoml/0.1.1", transitive_headers=True)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("acl/2.3.1", transitive_headers=True)
 
     def validate(self):
@@ -170,10 +170,10 @@ class IceoryxConan(ConanFile):
             return ["rt"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         def atomic():
-            return ["atomic"] if self.settings.os == "Linux" else []
+            return ["atomic"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         def acl():
-            return ["acl::acl"] if self.settings.os == "Linux" else []
+            return ["acl::acl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         def cpptoml():
             return ["cpptoml::cpptoml"] if self.options.toml_config else []
