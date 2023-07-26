@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, rename
 
@@ -87,7 +88,7 @@ class CoseCConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "secur32", "crypt32", "bcrypt"])
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
         if self.options.with_ssl == "mbedtls":
             self.cpp_info.defines.append("COSE_C_USE_MBEDTLS")
