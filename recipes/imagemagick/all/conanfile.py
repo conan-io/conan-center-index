@@ -442,7 +442,7 @@ class ImageMagicConan(ConanFile):
         if is_msvc(self):
             if not self.options.shared:
                 self.cpp_info.components["MagickCore"].libs.append(self._libname("coders"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["MagickCore"].system_libs.append("pthread")
 
         self.cpp_info.components["MagickCore"].defines.append(f"MAGICKCORE_QUANTUM_DEPTH={self.options.quantum_depth}")
