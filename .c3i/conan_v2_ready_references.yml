@@ -161,6 +161,7 @@ required_for_references:
 - console_bridge
 - continuable
 - cpp-httplib
+- cpp-ipc
 - cpp-jwt
 - cpp-lazy
 - cpp-optparse
@@ -309,13 +310,18 @@ required_for_references:
 - function2
 - fxdiv
 - g3log
+- gainput
 - gamma
+- gcem
 - gdbm
 - gdcm
 - gdk-pixbuf
 - gegles-spdlog_setup
 - gemmlowp
+- genie
+- geographiclib
 - geos
+- geotrans
 - getopt-for-visual-studio
 - gettext
 - gflags
@@ -326,6 +332,9 @@ required_for_references:
 - gklib
 - glad
 - glaze
+- glbinding
+- glew
+- glext
 - glfw
 - gli
 - glib
@@ -338,12 +347,14 @@ required_for_references:
 - gmp
 - gnu-config
 - gnutls
+- godot_headers
 - googleapis
 - gperf
 - gperftools
 - graphene
 - graphthewy
 - greatest
+- greg7mdp-gtl
 - grpc
 - grpc-proto
 - gsl
@@ -353,6 +364,7 @@ required_for_references:
 - gtest
 - gtk
 - gtk-doc-stub
+- gumbo-parser
 - gurkenlaeufer
 - h3
 - h5pp
@@ -477,6 +489,7 @@ required_for_references:
 - libmp3lame
 - libmysqlclient
 - libnabo
+- libnfnetlink
 - libnfs
 - libnghttp2
 - libnl
@@ -569,6 +582,7 @@ required_for_references:
 - mbits-mstch
 - mbits-semver
 - mbits-utfconv
+- mcap
 - md4c
 - md4qt
 - mdnsresponder
