@@ -1,0 +1,38 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 319aa57..084271b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,7 +32,7 @@ set( CMAKE_CXX_EXTENSIONS OFF )
+ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
+ 
+ # Fetching deps
+-add_subdirectory( deps )
++#add_subdirectory( deps )
+ 
+ # Adding specific compiler flags
+ if( CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
+@@ -63,7 +63,7 @@ if ( CPPCHECK_FOUND AND CMAKE_BUILD_TYPE STREQUAL "Debug" )
+ endif()
+ 
+ # Format the code
+-if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
++if(FALSE)
+     option( FORMAT "Format the code using clang-format" ON )
+     if( FORMAT )
+         find_program( CLANG_FORMAT_EXECUTABLE clang-format )
+@@ -97,7 +97,7 @@ else()
+ endif()
+ 
+ # Compiling examples
+-add_subdirectory( examples )
++#add_subdirectory( examples )
+ 
+ # Setting installation paths
+ target_include_directories( osmanip INTERFACE
+@@ -150,4 +150,4 @@ install( FILES
+ 
+ export( EXPORT osmanipTargets
+     FILE "${CMAKE_CURRENT_BINARY_DIR}/osmanipTargets.cmake"
+-)
+\ No newline at end of file
++)

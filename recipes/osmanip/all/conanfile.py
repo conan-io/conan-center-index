@@ -52,7 +52,7 @@ class OsmanipConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.82.0")
         if Version(self.version) < "4.2.0":
             self.requires("arsenalgear/1.2.2", transitive_headers=True)
         else:
