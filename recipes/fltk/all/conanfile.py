@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
 
@@ -117,7 +118,7 @@ class FltkConan(ConanFile):
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
             if self.options.with_gl:
                 self.cpp_info.system_libs.extend(["GL", "GLU"])
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.frameworks = ["Cocoa", "OpenGL", "IOKit", "Carbon", "CoreFoundation", "CoreVideo"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid"]
