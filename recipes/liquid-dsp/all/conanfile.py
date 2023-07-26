@@ -1,9 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, rm
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-
 import os
 
 required_conan_version = ">=1.57.0"
@@ -54,17 +55,12 @@ class LiquidDspConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _rename_libraries(self):
-        with chdir(self, self.source_folder):
-            if self.settings.os == "Windows" and self.options.shared:
-                rename(self, "libliquid.so", "libliquid.dll")
-            elif self.settings.os == "Windows" and not self.options.shared:
-                rename(self, "libliquid.a", "libliquid.lib")
-            elif self.settings.os == "Macos" and not self.options.shared:
-                rename(self, "libliquid.ar", "libliquid.a")
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -102,7 +98,6 @@ class LiquidDspConan(ConanFile):
         apply_conandata_patches(self)
 
         with chdir(self, self.source_folder):
-            #self.run(os.path.join(self.source_folder, "./bootstrap.sh"))
             autotools = Autotools(self)
             autotools.autoreconf()
             autotools.configure()
@@ -113,9 +108,6 @@ class LiquidDspConan(ConanFile):
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.install()
-
-        #if not self.options.shared:
-        #    rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
         rm(self, "*.a" if self.options.shared else "*.[so|dylib]*", os.path.join(self.package_folder, "lib"))
 
