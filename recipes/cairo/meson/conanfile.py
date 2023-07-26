@@ -67,12 +67,12 @@ class CairoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_xlib
             del self.options.with_xlib_xrender
             del self.options.with_xcb
             del self.options.with_symbol_lookup
-        if self.settings.os in ["Macos", "Windows"]:
+        if self.settings.os == "Windows" or is_apple_os(self):
             del self.options.with_opengl
 
     def configure(self):
@@ -100,7 +100,7 @@ class CairoConan(ConanFile):
             self.requires("libpng/1.6.40")
         if self.options.with_glib:
             self.requires("glib/2.78.0")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system", transitive_headers=True)
         if self.options.get_safe("with_opengl") == "desktop":
@@ -150,7 +150,7 @@ class CairoConan(ConanFile):
         options["png"] = is_enabled(self.options.with_png)
         options["freetype"] = is_enabled(self.options.with_freetype)
         options["fontconfig"] = is_enabled(self.options.with_fontconfig)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             options["xcb"] = is_enabled(self.options.with_xcb)
             options["xlib"] = is_enabled(self.options.with_xlib)
         else:
@@ -179,7 +179,7 @@ class CairoConan(ConanFile):
             options["drm"] = "disabled"  # not yet compilable in cairo 1.17.4
             options["openvg"] = "disabled"  # https://www.khronos.org/openvg/
             options["qt"] = "disabled"  # not yet compilable in cairo 1.17.4
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 options["xlib-xrender"] = is_enabled(self.options.with_xlib_xrender)
 
         options["gtk2-utils"] = "disabled"
@@ -243,7 +243,7 @@ class CairoConan(ConanFile):
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs.insert(0, os.path.join("include", "cairo"))
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cairo_"].system_libs.extend(["m", "dl", "pthread"])
             if self.options.get_safe("with_symbol_lookup"):
                 self.cpp_info.components["cairo_"].system_libs.append("bfd")
@@ -307,7 +307,7 @@ class CairoConan(ConanFile):
             if self.options.with_opengl == "desktop":
                 add_component_and_base_requirements("cairo-gl", ["opengl::opengl"])
 
-                if self.settings.os == "Linux":
+                if self.settings.os in ["Linux", "FreeBSD"]:
                     add_component_and_base_requirements("cairo-glx", ["opengl::opengl"])
 
                 if self.settings.os == "Windows":

@@ -59,7 +59,7 @@ class CairoConan(ConanFile):
         if is_msvc(self):
             del self.options.with_freetype
             del self.options.with_glib
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_xlib
             del self.options.with_xlib_xrender
             del self.options.with_xcb
@@ -78,7 +78,7 @@ class CairoConan(ConanFile):
             self.requires("freetype/2.13.0", transitive_headers=True)
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2", transitive_headers=True)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system", transitive_headers=True)
         if self.options.get_safe("with_glib", True):
@@ -291,7 +291,7 @@ class CairoConan(ConanFile):
             if self.options.with_fontconfig:
                 self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cairo_"].system_libs = ["pthread", "rt"]
             self.cpp_info.components["cairo_"].cflags = ["-pthread"]
             self.cpp_info.components["cairo_"].cxxflags = ["-pthread"]
@@ -324,7 +324,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-pdf"].set_property("pkg_config_name", "cairo-pdf")
             self.cpp_info.components["cairo-pdf"].requires = ["cairo_", "zlib::zlib"]
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_xlib:
                 self.cpp_info.components["cairo-xlib"].set_property("pkg_config_name", "cairo-xlib")
                 self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]
