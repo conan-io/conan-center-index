@@ -3,6 +3,7 @@ import shutil
 import textwrap
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.scm import Version
@@ -73,7 +74,7 @@ class CryptoPPPEMConan(ConanFile):
         tc.variables["DISABLE_ASM"] = True
         if self.settings.os == "Android":
             tc.variables["CRYPTOPP_NATIVE_ARCH"] = True
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) <= "8.4.0":
+        if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) <= "8.4.0":
             tc.variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         tc.generate()
         tc = CMakeDeps(self)
