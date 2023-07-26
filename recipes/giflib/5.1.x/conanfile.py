@@ -3,6 +3,7 @@ import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
@@ -131,7 +132,7 @@ class GiflibConan(ConanFile):
             ]:
                 if gnu_config:
                     copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
-            if self.settings.os == "Macos":
+            if is_apple_os(self):
                 # relocatable shared lib on macOS
                 replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                 "-install_name \\$rpath/\\$soname",
