@@ -48,7 +48,7 @@ class SqlcipherConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_largefile")
 
     def configure(self):
@@ -159,7 +159,7 @@ class SqlcipherConan(ConanFile):
                 "config_TARGET_EXEEXT='.exe'",
             ]
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             tc.extra_ldflags.append("-ldl")
             if not self.options.with_largefile:
                 tc.extra_defines.append("SQLITE_DISABLE_LFS=1")
