@@ -89,7 +89,7 @@ class QCoroConan(ConanFile):
         tc.variables["QCORO_BUILD_EXAMPLES"] = False
         tc.variables["QCORO_ENABLE_ASAN"] = self.options.asan
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["QCORO_WITH_QTDBUS"] = self.options["qt"].with_dbus
+        tc.variables["QCORO_WITH_QTDBUS"] = self.dependencies["qt"].options.with_dbus
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -137,7 +137,7 @@ class QCoroConan(ConanFile):
         self.cpp_info.components["qcoro-network"].libs = ["QCoro6Network"]
         self.cpp_info.components["qcoro-network"].requires = ["qt::qtNetwork"]
 
-        if self.options["qt"].with_dbus:
+        if self.dependencies["qt"].options.with_dbus:
             self.cpp_info.components["qcoro-dbus"].set_property("cmake_target_name", "QCoro::DBus")
             self.cpp_info.components["qcoro-dbus"].names["cmake_find_package"] = "DBus"
             self.cpp_info.components["qcoro-dbus"].names["cmake_find_package_multi"] = "DBus"
