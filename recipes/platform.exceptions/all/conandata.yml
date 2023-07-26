@@ -10,4 +10,4 @@ sources:
   "0.3.2":
     source:
       url: "https://github.com/linksplatform/Exceptions/releases/download/cpp_0.3.2/platform.exceptions_0.3.2.zip"
-      sha256: "62BE3FC1AAA735D8BB7D4BB31329A2703AFA5A337FF4CD2D3A33CA12F1B4FC65"
+      sha256: "62be3fc1aaa735d8bb7d4bb31329a2703afa5a337ff4cd2d3a33ca12f1b4fc65"
