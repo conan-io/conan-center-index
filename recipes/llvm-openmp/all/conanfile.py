@@ -3,6 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, save
 from conan.tools.scm import Version
@@ -64,7 +65,7 @@ class LLVMOpenMpConan(ConanFile):
     def validate(self):
         if (
             Version(self.version) <= "10.0.0"
-            and self.settings.os == "Macos"
+            and is_apple_os(self)
             and self.settings.arch == "armv8"
         ):
             raise ConanInvalidConfiguration("ARM v8 not supported")
