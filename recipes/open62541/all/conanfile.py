@@ -350,7 +350,7 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
         tc.variables["UA_ENABLE_HARDENING"] = self.options.hardening
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared == True:
+        if self.settings.compiler == "msvc" and self.options.shared == True:
             tc.variables["UA_MSVC_FORCE_STATIC_CRT"] = True
 
         tc.variables["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
