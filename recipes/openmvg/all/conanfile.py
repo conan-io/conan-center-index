@@ -67,8 +67,8 @@ class Openmvgconan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.39")
-        self.requires("libtiff/4.5.0")
+        self.requires("libpng/1.6.40")
+        self.requires("libtiff/4.5.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
