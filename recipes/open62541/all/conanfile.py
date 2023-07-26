@@ -417,10 +417,7 @@ class Open62541Conan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "open62541"
         self.cpp_info.names["pkg_config"] = "open62541"
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.includedirs = [
-            "include",
-            os.path.join("include", "open62541", "plugin")
-        ]
+        self.cpp_info.includedirs = ["include"]
 
         # required for creating custom servers from ua-nodeset
         self.conf_info.define("user.open62541:tools_dir", os.path.join(
@@ -433,14 +430,19 @@ class Open62541Conan(ConanFile):
 
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
-            self.cpp_info.includedirs.append(
-                os.path.join("include", "open62541", "win32"))
         else:
             self.cpp_info.includedirs.append(
-                os.path.join("include", "open62541", "posix"))
-        if self.settings.os in ("Linux", "FreeBSD"):
+                os.path.join("include", "open62541", "plugin"))
+            if self.settings.os == "Windows":
+                self.cpp_info.includedirs.append(
+                    os.path.join("include", "open62541", "win32"))
+            else:
+                self.cpp_info.includedirs.append(
+                    os.path.join("include", "open62541", "posix"))
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
+        elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
 
         self.cpp_info.builddirs.append(self._module_subfolder)
