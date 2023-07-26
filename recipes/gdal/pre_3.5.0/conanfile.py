@@ -1,4 +1,4 @@
-from conan import ConanFile
+﻿from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library, valid_min_cppstd
@@ -692,169 +692,172 @@ class GdalConan(ConanFile):
 
             tc = AutotoolsToolchain(self)
 
-            yes_no = lambda v: "yes" if v else "no"
-            internal_no = lambda v: "internal" if v else "no"
             rootpath = lambda req: unix_path(self, self.dependencies[req].package_folder)
-            rootpath_no = lambda v, req: rootpath(req) if v else "no"
 
-            tc.configure_args.extend([
-                "--includedir=${prefix}/include/gdal",
-                "--datarootdir=${prefix}/res",
-            ])
-
-            # Enable C++14 if requested in conan profile or if with_charls enabled
-            if (self.settings.compiler.get_safe("cppstd") and valid_min_cppstd(self, 14)) or self.options.with_charls:
-                tc.configure_args.append("--with-cpp14")
+            tc.configure_args.extend(["--includedir=${prefix}/include/gdal", "--datarootdir=${prefix}/res"])
             # Debug
             if self.settings.build_type == "Debug":
                 tc.configure_args.append("--enable-debug")
-            # SIMD Intrinsics
-            simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
-            if not simd_intrinsics:
-                tc.configure_args.extend(["--without-sse", "--without-ssse3", "--without-avx"])
-            elif simd_intrinsics == "sse":
-                tc.configure_args.extend(["--with-sse", "--without-ssse3", "--without-avx"])
-            elif simd_intrinsics == "ssse3":
-                tc.configure_args.extend(["--with-sse", "--with-ssse3", "--without-avx"])
-            elif simd_intrinsics == "avx":
-                tc.configure_args.extend(["--with-sse", "--with-ssse3", "--with-avx"])
             # LTO (disabled)
             tc.configure_args.append("--disable-lto")
+
+            # features maps key-value pairs to --with-<key>=<value> tc.configure_args entries
+            # boolean values are mapped to "yes"/"no"
+            features = {}
+
+            # Enable C++14 if requested in conan profile or if with_charls enabled
+            if (self.settings.compiler.get_safe("cppstd") and valid_min_cppstd(self, 14)) or self.options.with_charls:
+                features["cpp14"] = True
+            # SIMD Intrinsics
+            simd_intrinsics = self.options.get_safe("simd_intrinsics")
+            features["sse"] = simd_intrinsics in ["sse", "ssse3", "avx"]
+            features["ssse3"] = simd_intrinsics in ["ssse3", "avx"]
+            features["avx"] = simd_intrinsics == "avx"
             # Symbols
-            tc.configure_args.append("--with-hide_internal_symbols")
+            features["hide_internal_symbols"] = True
             # Do not add /usr/local/lib and /usr/local/include
-            tc.configure_args.append("--without-local")
+            features["local"] = False
             # Threadsafe
-            tc.configure_args.append("--with-threads={}".format(yes_no(self.options.threadsafe)))
+            features["threads"] = self.options.threadsafe
             # Depencencies:
-            tc.configure_args.append("--with-proj=yes") # always required !
-            tc.configure_args.append("--with-libz={}".format(yes_no(self.options.with_zlib)))
+            features["proj"] = True  # always required !
+            features["libz"] = self.options.with_zlib
             if self._has_with_libdeflate_option:
-                tc.configure_args.append("--with-libdeflate={}".format(yes_no(self.options.with_libdeflate)))
-            tc.configure_args.append("--with-libiconv-prefix={}".format(rootpath_no(self.options.with_libiconv, "libiconv")))
-            tc.configure_args.append("--with-liblzma=no") # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
-            tc.configure_args.append("--with-zstd={}".format(yes_no(self.options.get_safe("with_zstd")))) # Optional direct dependency of gdal only if lerc lib enabled
+                features["libdeflate"] = self.options.with_libdeflate
+            features["libiconv-prefix"] = rootpath("libiconv") if self.options.with_libiconv else False
+            features["liblzma"] = False  # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
+            features["zstd"] = self.options.get_safe("with_zstd")  # Optional direct dependency of gdal only if lerc lib enabled
             if self._has_with_blosc_option:
-                tc.configure_args.append("--with-blosc={}".format(yes_no(self.options.with_blosc)))
+                features["blosc"] = self.options.with_blosc
             if self._has_with_lz4_option:
-                tc.configure_args.append("--with-lz4={}".format(yes_no(self.options.with_lz4)))
+                features["lz4"] = self.options.with_lz4
             # Drivers:
             if not (self.options.with_zlib and self.options.with_png and bool(self.options.with_jpeg)):
                 # MRF raster driver always depends on zlib, libpng and libjpeg: https://github.com/OSGeo/gdal/issues/2581
                 if Version(self.version) < "3.0.0":
-                    tc.configure_args.append("--without-mrf")
+                    features["mrf"] = False
                 else:
                     tc.configure_args.append("--disable-driver-mrf")
-            tc.configure_args.append("--with-pg={}".format(yes_no(self.options.with_pg)))
-            tc.configure_args.extend(["--without-grass", "--without-libgrass"]) # TODO: to implement when libgrass lib available
-            tc.configure_args.append("--with-cfitsio={}".format(rootpath_no(self.options.with_cfitsio, "cfitsio")))
-            tc.configure_args.append("--with-pcraster={}".format(internal_no(self.options.with_pcraster))) # TODO: use conan recipe when available instead of internal one
-            tc.configure_args.append("--with-png={}".format(rootpath_no(self.options.with_png, "libpng")))
-            tc.configure_args.append("--with-dds={}".format(rootpath_no(self.options.with_dds, "crunch")))
-            tc.configure_args.append("--with-gta={}".format(rootpath_no(self.options.with_gta, "libgta")))
-            tc.configure_args.append("--with-pcidsk={}".format(internal_no(self.options.with_pcidsk))) # TODO: use conan recipe when available instead of internal one
-            tc.configure_args.append("--with-libtiff={}".format(rootpath("libtiff"))) # always required !
-            tc.configure_args.append("--with-geotiff={}".format(rootpath("libgeotiff"))) # always required !
+            features["pg"] = self.options.with_pg
+            features["grass"] = False  # TODO: to implement when libgrass lib available
+            features["libgrass"] = False  # TODO: to implement when libgrass lib available
+            features["cfitsio"] = rootpath("cfitsio") if self.options.with_cfitsio else False
+            features["pcraster"] = "internal" if self.options.with_pcraster else False  # TODO: use conan recipe when available instead of internal one
+            features["png"] = rootpath("libpng") if self.options.with_png else False
+            features["dds"] = rootpath("crunch") if self.options.with_dds else False
+            features["gta"] = rootpath("libgta") if self.options.with_gta else False
+            features["pcidsk"] = "internal" if self.options.with_pcidsk else False  # TODO: use conan recipe when available instead of internal one
+            features["libtiff"] = rootpath("libtiff")  # always required !
+            features["geotiff"] = rootpath("libgeotiff")  # always required !
             if self.options.with_jpeg == "libjpeg":
-                tc.configure_args.append("--with-jpeg={}".format(rootpath("libjpeg")))
+                features["jpeg"] = rootpath("libjpeg")
             elif self.options.with_jpeg == "libjpeg-turbo":
-                tc.configure_args.append("--with-jpeg={}".format(rootpath("libjpeg-turbo")))
+                features["jpeg"] = rootpath("libjpeg-turbo")
             elif self.options.with_jpeg == "mozjpeg":
-                tc.configure_args.append("--with-jpeg={}".format(rootpath("mozjpeg")))
+                features["jpeg"] = rootpath("mozjpeg")
             else:
-                tc.configure_args.append("--without-jpeg")
-            tc.configure_args.append("--without-jpeg12") # disabled: it requires internal libjpeg and libgeotiff
-            tc.configure_args.append("--with-charls={}".format(yes_no(self.options.with_charls)))
-            tc.configure_args.append("--with-gif={}".format(rootpath_no(self.options.with_gif, "giflib")))
-            tc.configure_args.append("--without-ogdi") # TODO: to implement when ogdi lib available (https://sourceforge.net/projects/ogdi/)
-            tc.configure_args.append("--without-fme") # commercial library
-            tc.configure_args.append("--without-sosi") # TODO: to implement when fyba lib available
-            tc.configure_args.append("--without-mongocxx") # TODO: handle mongo-cxx-driver v2
-            tc.configure_args.append("--with-mongocxxv3={}".format(yes_no(self.options.with_mongocxx)))
-            tc.configure_args.append("--with-hdf4={}".format(yes_no(self.options.with_hdf4)))
-            tc.configure_args.append("--with-hdf5={}".format(yes_no(self.options.with_hdf5)))
-            tc.configure_args.append("--with-kea={}".format(yes_no(self.options.with_kea)))
-            tc.configure_args.append("--with-netcdf={}".format(rootpath_no(self.options.with_netcdf, "netcdf")))
-            tc.configure_args.append("--with-jasper={}".format(rootpath_no(self.options.with_jasper, "jasper")))
-            tc.configure_args.append("--with-openjpeg={}".format(yes_no(self.options.with_openjpeg)))
-            tc.configure_args.append("--without-fgdb") # TODO: to implement when file-geodatabase-api lib available
-            tc.configure_args.append("--without-ecw") # commercial library
-            tc.configure_args.append("--without-kakadu") # commercial library
-            tc.configure_args.extend(["--without-mrsid", "--without-jp2mrsid", "--without-mrsid_lidar"]) # commercial library
-            tc.configure_args.append("--without-jp2lura") # commercial library
-            tc.configure_args.append("--without-msg") # commercial library
-            tc.configure_args.append("--without-oci") # TODO
-            tc.configure_args.append("--with-gnm={}".format(yes_no(self.options.with_gnm)))
-            tc.configure_args.append("--with-mysql={}".format(yes_no(self.options.with_mysql)))
-            tc.configure_args.append("--without-ingres") # commercial library
-            tc.configure_args.append("--with-xerces={}".format(rootpath_no(self.options.with_xerces, "xerces-c")))
-            tc.configure_args.append("--with-expat={}".format(yes_no(self.options.with_expat)))
-            tc.configure_args.append("--with-libkml={}".format(rootpath_no(self.options.with_libkml, "libkml")))
+                features["jpeg"] = False
+            features["jpeg12"] = False  # disabled: it requires internal libjpeg and libgeotiff
+            features["charls"] = self.options.with_charls
+            features["gif"] = rootpath("giflib") if self.options.with_gif else False
+            features["ogdi"] = False  # TODO: to implement when ogdi lib available (https://sourceforge.net/projects/ogdi/)
+            features["fme"] = False  # commercial library
+            features["sosi"] = False  # TODO: to implement when fyba lib available
+            features["mongocxx"] = False  # TODO: handle mongo-cxx-driver v2
+            features["mongocxxv3"] = self.options.with_mongocxx
+            features["hdf4"] = self.options.with_hdf4
+            features["hdf5"] = self.options.with_hdf5
+            features["kea"] = self.options.with_kea
+            features["netcdf"] = rootpath("netcdf") if self.options.with_netcdf else False
+            features["jasper"] = rootpath("jasper") if self.options.with_jasper else False
+            features["openjpeg"] = self.options.with_openjpeg
+            features["fgdb"] = False  # TODO: to implement when file-geodatabase-api lib available
+            features["ecw"] = False  # commercial library
+            features["kakadu"] = False  # commercial library
+            features["mrsid"] = False  # commercial library
+            features["jp2mrsid"] = False  # commercial library
+            features["mrsid_lidar"] = False  # commercial library
+            features["jp2lura"] = False  # commercial library
+            features["msg"] = False  # commercial library
+            features["oci"] = False  # TODO
+            features["gnm"] = self.options.with_gnm
+            features["mysql"] = self.options.with_mysql
+            features["ingres"] = False  # commercial library
+            features["xerces"] = rootpath("xerces-c") if self.options.with_xerces else False
+            features["expat"] = self.options.with_expat
+            features["libkml"] = rootpath("libkml") if self.options.with_libkml else False
             if self.options.with_odbc:
-                tc.configure_args.append("--with-odbc={}".format("yes" if self.settings.os == "Windows" else rootpath("odbc")))
+                features["odbc"] = True if self.settings.os == "Windows" else rootpath("odbc")
             else:
-                tc.configure_args.append("--without-odbc")
-            tc.configure_args.append("--without-dods-root") # TODO: to implement when libdap lib available
-            tc.configure_args.append("--with-curl={}".format(yes_no(self.options.with_curl)))
-            tc.configure_args.append("--with-xml2={}".format(yes_no(self.options.with_xml2)))
-            tc.configure_args.append("--without-spatialite") # TODO: to implement when libspatialite lib available
-            tc.configure_args.append("--with-sqlite3={}".format(yes_no(self.options.get_safe("with_sqlite3"))))
-            tc.configure_args.append("--without-rasterlite2") # TODO: to implement when rasterlite2 lib available
+                features["odbc"] = False
+            features["dods-root"] = False  # TODO: to implement when libdap lib available
+            features["curl"] = self.options.with_curl
+            features["xml2"] = self.options.with_xml2
+            features["spatialite"] = False  # TODO: to implement when libspatialite lib available
+            features["sqlite3"] = self.options.get_safe("with_sqlite3")
+            features["rasterlite2"] = False  # TODO: to implement when rasterlite2 lib available
             if self._has_with_pcre2_option:
-                tc.configure_args.append("--with-pcre2={}".format(yes_no(self.options.get_safe("with_pcre2"))))
-            tc.configure_args.append("--with-pcre={}".format(yes_no(self.options.get_safe("with_pcre"))))
-            tc.configure_args.append("--without-teigha") # commercial library
-            tc.configure_args.append("--without-idb") # commercial library
+                features["pcre2"] = self.options.get_safe("with_pcre2")
+            features["pcre"] = self.options.get_safe("with_pcre")
+            features["teigha"] = False  # commercial library
+            features["idb"] = False  # commercial library
             if Version(self.version) < "3.2.0":
-                tc.configure_args.append("--without-sde") # commercial library
+                features["sde"] = False  # commercial library
             if Version(self.version) < "3.3.0":
-                tc.configure_args.append("--without-epsilon")
-            tc.configure_args.append("--with-webp={}".format(rootpath_no(self.options.with_webp, "libwebp")))
-            tc.configure_args.append("--with-geos={}".format(yes_no(self.options.with_geos)))
-            tc.configure_args.append("--without-sfcgal") # TODO: to implement when sfcgal lib available
-            tc.configure_args.append("--with-qhull={}".format(yes_no(self.options.with_qhull)))
+                features["epsilon"] = False
+            features["webp"] = rootpath("libwebp") if self.options.with_webp else False
+            features["geos"] = self.options.with_geos
+            features["sfcgal"] = False  # TODO: to implement when sfcgal lib available
+            features["qhull"] = self.options.with_qhull
             if self.options.with_opencl:
-                tc.configure_args.extend([
-                    "--with-opencl",
-                    "--with-opencl-include={}".format(unix_path(self, self.dependencies["opencl-headers"].cpp_info.aggregated_components().includedirs[0])),
-                    "--with-opencl-lib=-L{}".format(unix_path(self, self.dependencies["opencl-icd-loader"].cpp_info.aggregated_components().libdirs[0]))
-                ])
+                features["opencl"] = True
+                features["opencl-include"] = unix_path(self, self.dependencies["opencl-headers"].cpp_info.aggregated_components().includedirs[0])
+                features["opencl-lib"] = "-L{}".format(unix_path(self, self.dependencies["opencl-icd-loader"].cpp_info.aggregated_components().libdirs[0]))
             else:
-                tc.configure_args.append("--without-opencl")
-            tc.configure_args.append("--with-freexl={}".format(yes_no(self.options.with_freexl)))
-            tc.configure_args.append("--with-libjson-c={}".format(rootpath("json-c"))) # always required !
+                features["opencl"] = False
+            features["freexl"] = self.options.with_freexl
+            features["libjson-c"] = rootpath("json-c")  # always required !
             if self.options.without_pam:
-                tc.configure_args.append("--without-pam")
-            tc.configure_args.append("--with-poppler={}".format(yes_no(self.options.with_poppler)))
-            tc.configure_args.append("--with-podofo={}".format(rootpath_no(self.options.with_podofo, "podofo")))
+                features["pam"] = False
+            features["poppler"] = self.options.with_poppler
+            features["podofo"] = rootpath("podofo") if self.options.with_podofo else False
             if self.options.with_podofo:
-                tc.configure_args.append("--with-podofo-lib=-l{}".format(" -l".join(self._gather_libs("podofo"))))
-            tc.configure_args.append("--without-pdfium") # TODO: to implement when pdfium lib available
-            tc.configure_args.append("--without-perl")
-            tc.configure_args.append("--without-python")
-            tc.configure_args.append("--without-java")
-            tc.configure_args.append("--without-hdfs")
+                features["podofo-lib"] = " ".join(f"-l{lib}" for lib in self._gather_libs("podofo"))
+            features["pdfium"] = False  # TODO: to implement when pdfium lib available
+            features["perl"] = False
+            features["python"] = False
+            features["java"] = False
+            features["hdfs"] = False
             if Version(self.version) >= "3.0.0":
-                tc.configure_args.append("--without-tiledb") # TODO: to implement when tiledb lib available
-            tc.configure_args.append("--without-mdb")
-            tc.configure_args.append("--without-rasdaman") # TODO: to implement when rasdaman lib available
+                features["tiledb"] = False  # TODO: to implement when tiledb lib available
+            features["mdb"] = False
+            features["rasdaman"] = False  # TODO: to implement when rasdaman lib available
             if self._has_with_brunsli_option:
-                tc.configure_args.append("--with-brunsli={}".format(yes_no(self.options.with_brunsli)))
+                features["brunsli"] = self.options.with_brunsli
             if Version(self.version) >= "3.1.0":
-                tc.configure_args.append("--without-rdb") # commercial library
-            tc.configure_args.append("--without-armadillo") # TODO: to implement when armadillo lib available
-            tc.configure_args.append("--with-cryptopp={}".format(rootpath_no(self.options.with_cryptopp, "cryptopp")))
-            tc.configure_args.append("--with-crypto={}".format(yes_no(self.options.with_crypto)))
+                features["rdb"] = False  # commercial library
+            features["armadillo"] = False  # TODO: to implement when armadillo lib available
+            features["cryptopp"] = rootpath("cryptopp") if self.options.with_cryptopp else False
+            features["crypto"] = self.options.with_crypto
             if Version(self.version) >= "3.3.0":
-                tc.configure_args.append("--with-lerc={}".format(internal_no(not self.options.without_lerc)))
+                features["lerc"] = "internal" if not self.options.without_lerc else False
             else:
-                tc.configure_args.append("--with-lerc={}".format(yes_no(not self.options.without_lerc)))
+                features["lerc"] = not self.options.without_lerc
             if self.options.with_null:
-                tc.configure_args.append("--with-null")
+                features["null"] = True
             if self._has_with_exr_option:
-                tc.configure_args.append("--with-exr={}".format(yes_no(self.options.with_exr)))
+                features["exr"] = self.options.with_exr
             if self._has_with_heif_option:
-                tc.configure_args.append("--with-heif={}".format(yes_no(self.options.with_heif)))
+                features["heif"] = self.options.with_heif
+
+            for k, v in features.items():
+                if v is True:
+                    tc.configure_args.append(f"--with-{k}=yes")
+                elif v is False:
+                    tc.configure_args.append(f"--with-{k}=no")
+                else:
+                    tc.configure_args.append(f"--with-{k}={v}")
+
             tc.generate()
 
             AutotoolsDeps(self).generate()
