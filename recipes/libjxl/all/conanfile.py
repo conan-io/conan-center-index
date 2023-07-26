@@ -116,7 +116,7 @@ class LibjxlConan(ConanFile):
         # jxl_threads
         self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
         self.cpp_info.components["jxl_threads"].libs = [self._lib_name("jxl_threads")]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
 
         if not self.options.shared and stdcpp_library(self):
