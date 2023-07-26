@@ -80,7 +80,7 @@ class LibdrmConan(ConanFile):
     def requirements(self):
         if self.options.intel:
             self.requires("libpciaccess/0.17")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("linux-headers-generic/5.14.9")
 
     def validate(self):
@@ -137,7 +137,7 @@ class LibdrmConan(ConanFile):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
         self.cpp_info.components["libdrm_libdrm"].includedirs.append(os.path.join("include", "libdrm"))
         self.cpp_info.components["libdrm_libdrm"].set_property("pkg_config_name", "libdrm")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libdrm_libdrm"].requires = ["linux-headers-generic::linux-headers-generic"]
 
         if Version(self.version) < "2.4.111":
