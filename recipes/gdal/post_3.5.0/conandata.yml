@@ -14,7 +14,5 @@ patches:
       base_path: "source_subfolder"
   "3.5.2":
     - patch_file: "patches/3.5.2/0-replace-find-package.patch"
-      base_path: "source_subfolder"
   "3.5.1":
     - patch_file: "patches/3.5.1/0-replace-find-package.patch"
-      base_path: "source_subfolder"
