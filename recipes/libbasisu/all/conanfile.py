@@ -126,7 +126,7 @@ class LibBasisUniversalConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs = ["include", os.path.join("include", self.name)]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         self.cpp_info.defines.append(
             "BASISU_NO_ITERATOR_DEBUG_LEVEL={}".format("1" if self._use_custom_iterator_debug_level() else "0")
