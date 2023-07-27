@@ -79,7 +79,7 @@ class CargsConan(ConanFile):
                  keep_path=False)
         copy(self, "*.dll",
              dst=os.path.join(self.package_folder, "bin"),
-             src=os.path.join(self.build_folder, "bin"),
+             src=self.build_folder,
              keep_path=False)
 
     def package_info(self):
