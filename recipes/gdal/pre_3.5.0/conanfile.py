@@ -241,6 +241,13 @@ class GdalConan(ConanFile):
         if self.options.with_qhull:
             self.options["qhull"].reentrant = self._has_reentrant_qhull_support
 
+        self.options["hdf4"].jpegturbo = self.options.with_jpeg == "libjpeg-turbo"
+        self.options["jasper"].with_libjpeg = self.options.with_jpeg
+        self.options["libtiff"].jpeg = self.options.with_jpeg
+        # TODO: add libjpeg options to poppler and podofo recipes
+        # self.options["poppler"].with_libjpeg = self.options.with_jpeg
+        # self.options["podofo"].with_libjpeg = self.options.with_jpeg
+
     def layout(self):
         basic_layout(self, src_folder="src")
         self.folders.build = self.folders.source
