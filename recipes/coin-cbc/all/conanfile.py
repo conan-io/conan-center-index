@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, mkdir, rename, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -53,8 +53,6 @@ class CoinCbcConan(ConanFile):
             self.requires("pthreads4w/3.0.0")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-cbc does not support shared builds on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
             raise ConanInvalidConfiguration("coin-cbc shared not supported yet when cross-building")
@@ -99,11 +97,8 @@ class CoinCbcConan(ConanFile):
                 )
         tc.generate()
 
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
@@ -116,6 +111,12 @@ class CoinCbcConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
+        if self._settings_build.os == "Windows":
+            env.define("PKG_CONFIG_PATH", self.generators_folder)
+        tc.generate(env)
+
+        tc = PkgConfigDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
