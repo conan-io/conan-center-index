@@ -1,4 +1,6 @@
-from conan import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.file import get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -38,12 +40,12 @@ class Crc_CppConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.build.check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
         if not self._supported_compiler:
             raise ConanInvalidConfiguration("crc_cpp: Unsupported compiler: {}-{} "
                                             "Minimum C++17 constexpr features required.".format(self.settings.compiler, self.settings.compiler.version))
     def source(self):
-        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
