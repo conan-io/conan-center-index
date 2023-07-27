@@ -2,6 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -21,6 +23,10 @@ class Asn1cConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -31,19 +37,34 @@ class Asn1cConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            if is_msvc(self):
+                self.tool_requires("automake/1.16.5")
+            self.tool_requires("winflexbison/2.5.24")
+        else:
+            self.tool_requires("bison/3.7.6")
+            self.tool_requires("flex/2.6.4")
+        self.tool_requires("libtool/2.4.7")
+
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration("Visual Studio is not supported")
-
-    def build_requirements(self):
-        self.tool_requires("bison/3.7.6")
-        self.tool_requires("flex/2.6.4")
-        self.tool_requires("libtool/2.4.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args += ["--datarootdir=${prefix}/res"]
         tc.generate()
