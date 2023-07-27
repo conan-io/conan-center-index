@@ -6,8 +6,6 @@ import os.path
 
 class DXCRecipe(ConanFile):
     name = "dxc"
-    version = "1.7.2212.1"
-
     license = "NCSA"
     author = "Copyright (c) Microsoft Corporation. Copyright (c) 2003-2015 University of Illinois at Urbana-Champaign."
     url = "https://github.com/microsoft/DirectXShaderCompiler"
@@ -19,7 +17,7 @@ class DXCRecipe(ConanFile):
     default_options = {}
 
     def validate(self):
-        if not str(self.settings.os) in ("Windows", "Linux"):
+        if str(self.settings.os) not in ("Windows", "Linux"):
             raise ConanInvalidConfiguration("DXC only works on Windows and Linux!")
 
     def build(self):
