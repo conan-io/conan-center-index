@@ -55,7 +55,8 @@ class OsmanipConan(ConanFile):
         self.requires("boost/1.82.0")
         if Version(self.version) < "4.2.0":
             self.requires("arsenalgear/1.2.2", transitive_headers=True)
-        else:
+        # osmanip doesn't require arsenalgear since 4.6.0
+        elif Version(self.version) < "4.6.0":
             self.requires("arsenalgear/2.1.0", transitive_headers=True)
 
     def validate(self):
