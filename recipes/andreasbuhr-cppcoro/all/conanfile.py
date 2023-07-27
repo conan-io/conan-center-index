@@ -112,7 +112,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         elif self.settings.compiler == "gcc":
             comp.cxxflags.append("-fcoroutines")
             comp.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
-        elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
+        elif self.settings.compiler in ["clang", "apple-clang"]:
             comp.cxxflags.append("-fcoroutines-ts")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
