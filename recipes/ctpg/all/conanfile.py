@@ -56,10 +56,6 @@ class CTPGConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        ## TODO: In ctpg<=1.3.5, Visual Studio C++ failed to compile ctpg with "error MSB6006: "CL.exe" exited with code -1073741571."
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.name} does not support Visual Studio currently.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
