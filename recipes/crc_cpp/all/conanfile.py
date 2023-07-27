@@ -43,7 +43,7 @@ class Crc_CppConan(ConanFile):
             raise ConanInvalidConfiguration("crc_cpp: Unsupported compiler: {}-{} "
                                             "Minimum C++17 constexpr features required.".format(self.settings.compiler, self.settings.compiler.version))
     def source(self):
-       tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
