@@ -9,6 +9,7 @@ from conan.tools.apple import XCRun, fix_apple_shared_install_name, is_apple_os,
 from conan.tools.build import build_jobs, can_run, check_min_cppstd, cross_building, default_cppstd, stdcpp_library, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import (
     apply_conandata_patches,
     chdir,
@@ -198,22 +199,22 @@ class GdalConan(ConanFile):
         self.requires("libgeotiff/1.7.1")
 
         if self.options.with_armadillo:
-            self.requires("armadillo/10.7.3")
+            self.requires("armadillo/12.2.0")
 
         if self.options.with_arrow:
-            self.requires("arrow/8.0.1")
+            self.requires("arrow/12.0.0")
 
         if self.options.with_blosc:
-            self.requires("c-blosc/1.21.1")
+            self.requires("c-blosc/1.21.4")
 
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.1.0")
+            self.requires("cfitsio/4.2.0")
 
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.7.0")
 
         if self.options.with_curl:
-            self.requires("libcurl/8.2.0")
+            self.requires("libcurl/8.2.1")
 
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
@@ -229,7 +230,7 @@ class GdalConan(ConanFile):
             self.requires("freexl/1.0.6")
 
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.11.2")
 
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
@@ -241,7 +242,7 @@ class GdalConan(ConanFile):
             self.requires("hdf4/4.2.15")
 
         if self.options.with_hdf5:
-            self.requires("hdf5/1.13.1")
+            self.requires("hdf5/1.14.1")
 
         if self.options.with_heif:
             self.requires("libheif/1.13.0")
@@ -249,7 +250,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
 
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
@@ -270,12 +271,12 @@ class GdalConan(ConanFile):
             self.requires("lz4/1.9.4")
 
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.6.7")
+            self.requires("mongo-cxx-driver/3.7.2")
 
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
-            self.requires("mariadb-connector-c/3.1.12")
+            self.requires("mariadb-connector-c/3.3.3")
 
         if self.options.with_netcdf:
             self.requires("netcdf/4.8.1")
@@ -296,7 +297,7 @@ class GdalConan(ConanFile):
             self.requires("pcre2/10.42")
 
         if self.options.with_pg:
-            self.requires("libpq/14.5")
+            self.requires("libpq/15.3")
 
         if self.options.with_png:
             self.requires("libpng/1.6.40")
@@ -308,7 +309,7 @@ class GdalConan(ConanFile):
             self.requires("poppler/21.07.0")
 
         if self.options.with_proj:
-            self.requires("proj/9.1.1")
+            self.requires("proj/9.2.1")
 
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
@@ -320,10 +321,10 @@ class GdalConan(ConanFile):
             self.requires("libwebp/1.3.1")
 
         if self.options.with_xerces:
-            self.requires("xerces-c/3.2.3")
+            self.requires("xerces-c/3.2.4")
 
         if self.options.with_xml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.11.4")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
@@ -728,7 +729,6 @@ class GdalConan(ConanFile):
         copy(self, "LICENSE.TXT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -888,9 +888,7 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(['zstd::zstdlib'])
 
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
-        self.output.info(
-            "Prepending to GDAL_DATA environment variable: {}".format(
-                gdal_data_path))
+        self.output.info(f"Prepending to GDAL_DATA environment variable: {gdal_data_path}")
         self.runenv_info.prepend_path("GDAL_DATA", gdal_data_path)
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.GDAL_DATA = gdal_data_path
@@ -898,6 +896,5 @@ class GdalConan(ConanFile):
         if self.options.tools:
             self.buildenv_info.prepend_path("GDAL_DATA", gdal_data_path)
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(
-                "Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
