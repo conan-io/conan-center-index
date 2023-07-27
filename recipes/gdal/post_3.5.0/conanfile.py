@@ -717,8 +717,8 @@ class GdalConan(ConanFile):
         else:
             tc.variables["ZSTD_FOUND"] = False
 
-        for k, v in tc.variables.items():
-            print(k, " = ", v)
+        # for k, v in tc.variables.items():
+        #     print(k, " = ", v)
 
         tc.generate()
 
@@ -728,7 +728,7 @@ class GdalConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
