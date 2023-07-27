@@ -1,4 +1,7 @@
 sources:
+  "0.19.2":
+    url: "https://github.com/actor-framework/actor-framework/archive/0.19.2.tar.gz"
+    sha256: "aa3fcc494424e0e20b177125458a6a6ed39c751a3d3d5193054e88bdf8a146d2"
   "0.18.6":
     url: "https://github.com/actor-framework/actor-framework/archive/0.18.6.tar.gz"
     sha256: "c2ead63a0322d992fea8813a7f7d15b4d16cbb8bbe026722f2616a79109b91cc"
