@@ -191,6 +191,12 @@ class GdalConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        self.options["hdf4"].jpegturbo = self.options.with_jpeg == "libjpeg-turbo"
+        self.options["libtiff"].jpeg = self.options.with_jpeg
+        # TODO: add libjpeg options to poppler and podofo recipes
+        # self.options["poppler"].with_libjpeg = self.options.with_jpeg
+        # self.options["podofo"].with_libjpeg = self.options.with_jpeg
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
