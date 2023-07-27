@@ -50,4 +50,4 @@ class Crc_CppConan(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
