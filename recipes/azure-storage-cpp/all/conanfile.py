@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -46,7 +46,7 @@ class AzureStorageCppConan(ConanFile):
         }
 
     def export_sources(self):
-        export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,9 +61,10 @@ class AzureStorageCppConan(ConanFile):
 
     def requirements(self):
         self.requires("cpprestsdk/2.10.18", transitive_headers=True, transitive_libs=True)
+        self.requires("libxml2/2.11.4", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]")
         if self.settings.os != "Windows":
             self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
-            self.requires("libxml2/2.11.4", transitive_headers=True, transitive_libs=True)
             self.requires("util-linux-libuuid/2.39", transitive_headers=True, transitive_libs=True)
         if is_apple_os(self):
             self.requires("libgettext/0.21")
@@ -103,14 +104,21 @@ class AzureStorageCppConan(ConanFile):
         if is_apple_os(self):
             tc.variables["GETTEXT_LIB_DIR"] = self.dependencies["libgettext"].cpp_info.libdirs[0]
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.set_property("libuuid", "cmake_file_name", "UUID")
+        deps.generate()
+
+    def _patch_sources(self):
+        cmakelists_path = os.path.join(self.source_folder, "Microsoft.WindowsAzure.Storage", "CMakeLists.txt")
+        replace_in_file(self, cmakelists_path, "-std=c++11", "")
+        replace_in_file(self, cmakelists_path, "-stdlib=libc++", "")
+        replace_in_file(self, cmakelists_path, "add_definitions(-DBOOST_LOG_DYN_LINK)", "")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(
-            self.source_folder, "Microsoft.WindowsAzure.Storage"))
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
@@ -121,7 +129,7 @@ class AzureStorageCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["wastorage"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "rpcrt4", "xmllite", "bcrypt"]
             if not self.options.shared:
