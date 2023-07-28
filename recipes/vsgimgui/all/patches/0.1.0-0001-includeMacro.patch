@@ -39,10 +39,14 @@ index eb0a39c..1ae1ff5 100644
      FILES
          include/vsgImGui/RenderImGui.h
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 2226b13..2598b4d 100644
+index 2226b13..85f3ed8 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -10,33 +10,18 @@ set(HEADERS
+@@ -6,37 +6,22 @@ set(EXTRA_INCLUDES)
+ SET(HEADER_PATH ${VSGIMGUI_SOURCE_DIR}/include/vsgImGui)
+ 
+ set(HEADERS
+-    ${HEADER_PATH}/imgui.h
      ${HEADER_PATH}/SendEventsToImGui.h
      ${HEADER_PATH}/RenderImGui.h
      ${HEADER_PATH}/Texture.h
@@ -66,12 +70,12 @@ index 2226b13..2598b4d 100644
 -    imgui/imgui_draw.cpp
 -    imgui/imgui_tables.cpp
 -    imgui/imgui_widgets.cpp
--    imgui/backends/imgui_impl_vulkan.cpp
+     imgui/backends/imgui_impl_vulkan.cpp
 -    imgui/misc/cpp/imgui_stdlib.cpp
 -    implot/implot.cpp
 -    implot/implot_demo.cpp
 -    implot/implot_items.cpp
-+    
++	
  )
  
 -
