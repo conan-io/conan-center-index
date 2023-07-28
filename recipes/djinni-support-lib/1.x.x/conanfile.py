@@ -101,15 +101,15 @@ class DjinniSuppotLib(ConanFile):
                 raise ConanInvalidConfiguration(
                     "C++/CLI has been enabled on a non-Windows operating system. This is not supported."
                 )
-            if self.options.shared:
-                raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
-            if is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
             if self._objc_support or self._jni_support or self._python_support:
                 raise ConanInvalidConfiguration(
                     "C++/CLI is not yet supported with other languages enabled as well. "
                     "Disable 'with_jni', 'with_objc' and 'with_python' options for a valid configuration."
                 )
+            if self.options.shared:
+                raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
+            if is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
         if self._python_support:
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration(
@@ -151,7 +151,7 @@ class DjinniSuppotLib(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)

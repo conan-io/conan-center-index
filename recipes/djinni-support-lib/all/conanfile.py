@@ -5,11 +5,12 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
+from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.53.0"
 
 
-class DjinniSuppotLib(ConanFile):
+class DjinniSupportLib(ConanFile):
     name = "djinni-support-lib"
     description = "Djinni is a tool for generating cross-language type declarations and interface bindings"
     license = "Apache-2.0"
@@ -76,12 +77,12 @@ class DjinniSuppotLib(ConanFile):
         tc.variables["DJINNI_WITH_JNI"] = self._jni_support
         if self._jni_support:
             tc.variables["JAVA_AWT_LIBRARY"] = "NotNeeded"
-            tc.variables["JAVA_AWT_INCLUDE_PATH"] = self.source_folder
+            tc.variables["JAVA_AWT_INCLUDE_PATH"] = unix_path(self, self.source_folder)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
