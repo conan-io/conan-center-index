@@ -30,6 +30,7 @@ class DirectShowBaseClassesConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    short_paths = True
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
