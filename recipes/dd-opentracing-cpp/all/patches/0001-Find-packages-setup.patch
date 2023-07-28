@@ -25,12 +25,13 @@
  # Code
  install(DIRECTORY include/datadog DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
  file(GLOB DD_OPENTRACING_SOURCES "src/*.cpp")
-@@ -58,29 +53,24 @@ else()
+@@ -58,29 +53,25 @@ else()
  endif()
  
  # Outputs
 -set(DATADOG_LINK_LIBRARIES ${OPENTRACING_LIB} ${CURL_LIBRARIES} ${ZLIB_LIBRARIES} Threads::Threads)
-+set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::libcurl msgpack-cxx ZLIB::ZLIB Threads::Threads)
++set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::libcurl ${msgpack_LIBRARIES} ZLIB::ZLIB Threads::Threads)
++include_directories(${msgpack_INCLUDE_DIRS})
  
  ## Shared lib
  if(BUILD_SHARED)
