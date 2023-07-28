@@ -1,73 +1,88 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.40.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import chdir, copy, get
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.53.0"
 
 
 class OfeliConan(ConanFile):
     name = "ofeli"
     description = "An Object Finite Element Library"
-    topics = ("finite-element", "finite-element-library",
-              "finite-element-analysis", "finite-element-solver")
     license = "LGPL-3.0-or-later"
-    homepage = "http://ofeli.org/index.html"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://ofeli.org/index.html"
+    topics = ("finite-element", "finite-element-library", "finite-element-analysis", "finite-element-solver")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    _autotools = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
-    @property
-    def _doc_folder(self):
-        return os.path.join(
-            self._source_subfolder,
-            "doc"
-        )
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "Ofeli is just supported for Linux")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Ofeli only supports Linux")
         if self.settings.compiler != "gcc":
-            raise ConanInvalidConfiguration(
-                "Ofeli is just supported for GCC")
+            raise ConanInvalidConfiguration("Ofeli only supports GCC")
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
         if self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration(
-                "Ofeli supports only libstdc++'s new ABI")
+            raise ConanInvalidConfiguration("Ofeli only supports libstdc++'s new ABI")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(args=["--enable-%s" % ("release"
-                                  if self.settings.build_type == "Release"
-                                  else "debug")])
-        return self._autotools
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        config = 'release' if self.settings.build_type == 'Release' else 'debug'
+        tc.configure_args.append(f"--enable-{config}")
+        tc.generate()
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("*.h", dst="include",
-                  src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*libofeli.a", dst="lib",
-                  src=os.path.join(self._source_subfolder, "src"))
-        self.copy("*.md", dst="res",
-                  src=os.path.join(self._source_subfolder, "material"))
-        self.copy("COPYING", dst="licenses", src=self._doc_folder)
+        copy(self, "*.h",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
+        copy(self, "*libofeli.a",
+             dst=os.path.join(self.package_folder, "lib"),
+             src=os.path.join(self.source_folder, "src"))
+        copy(self, "*.md",
+             dst=os.path.join(self.package_folder, "res"),
+             src=os.path.join(self.source_folder, "material"))
+        copy(self, "COPYING",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=os.path.join(self.source_folder, "doc"))
 
     def package_info(self):
         self.cpp_info.libs = ["ofeli"]
-        self.env_info.OFELI_PATH_MATERIAL.append(
-            os.path.join(self.package_folder, "res"))
+        res_path = os.path.join(self.package_folder, "res")
+        self.runenv_info.define("OFELI_PATH_MATERIAL", res_path)
+
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.env_info.OFELI_PATH_MATERIAL.append(res_path)
