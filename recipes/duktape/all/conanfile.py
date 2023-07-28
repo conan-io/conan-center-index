@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.files import copy, get
 
 required_conan_version = ">=1.53.0"
 
@@ -47,23 +47,17 @@ class DuktapeConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            # Duktape has a configure script with a number of options.
+            # However, it requires python 2 and PyYAML package
+            # which is quite an unusual combination to have.
+            # The most crucial option is --dll which enables
+            # DUK_F_DLL_BUILD and the following defines.
+            tc.preprocessor_definitions["DUK_EXTERNAL_DECL"] = "extern __declspec(dllexport)"
+            tc.preprocessor_definitions["DUK_EXTERNAL"] = "__declspec(dllexport)"
         tc.generate()
 
-    def _patch_sources(self):
-        # Duktape has configure script with a number of options.
-        # However it requires python 2 and PyYAML package
-        # which is quite an unusual combination to have.
-        # The most crucial option is --dll which just flips this define.
-        if self.settings.os == "Windows" and self.options.shared:
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "src", "duk_config.h"),
-                "#undef DUK_F_DLL_BUILD",
-                "#define DUK_F_DLL_BUILD",
-            )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
