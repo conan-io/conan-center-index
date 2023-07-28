@@ -1,0 +1,115 @@
+--- /dev/null	2023-07-28 07:48:39.050000000 +0200
++++ gio/qnx700.h	2023-07-28 09:06:15.733401700 +0200
+@@ -0,0 +1,112 @@
++#include <assert.h>
++
++#include <stdio.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <stdlib.h>
++#include <dirent.h>
++#include <unistd.h>
++#include <errno.h>
++#include <fcntl.h>
++
++#include <glib.h>
++
++#  define REPLACE_FCHDIR 0
++
++#define EXPECTED_ERRNO(Errno)                   \
++  ((Errno) == ENOTDIR || (Errno) == ENOENT      \
++   || (Errno) == EPERM || (Errno) == EACCES     \
++   || (Errno) == ENOSYS /* Solaris 8 */         \
++   || (Errno) == EOPNOTSUPP /* FreeBSD */)
++   
++#define SAFER_ALLOCA_MAX (4096 - 64)
++
++#define SAFER_ALLOCA(m) ((m) < SAFER_ALLOCA_MAX ? (m) : SAFER_ALLOCA_MAX)
++
++#if defined PATH_MAX
++# define OPENAT_BUFFER_SIZE SAFER_ALLOCA (PATH_MAX)
++#elif defined _XOPEN_PATH_MAX
++# define OPENAT_BUFFER_SIZE SAFER_ALLOCA (_XOPEN_PATH_MAX)
++#else
++# define OPENAT_BUFFER_SIZE SAFER_ALLOCA (1024)
++#endif
++
++#define INT_BITS_STRLEN_BOUND(b) (((b) * 146 + 484) / 485)
++
++#define INT_STRLEN_BOUND(t)                                     \
++  (INT_BITS_STRLEN_BOUND (TYPE_WIDTH (t) - _GL_SIGNED_TYPE_OR_EXPR (t)) \
++   + _GL_SIGNED_TYPE_OR_EXPR (t))
++
++#define TYPE_WIDTH(t) (sizeof (t) * CHAR_BIT)
++
++#if _GL_HAVE___TYPEOF__
++# define _GL_SIGNED_TYPE_OR_EXPR(t) TYPE_SIGNED (__typeof__ (t))
++#else
++# define _GL_SIGNED_TYPE_OR_EXPR(t) 1
++#endif
++
++#if GNULIB_FCNTL_SAFER
++# include "fcntl--.h"
++#else
++# define GNULIB_FCNTL_SAFER 0
++#endif
++
++# define assure(E) assert (E)
++
++#if (defined _WIN32 || defined __WIN32__ ||     \
++     defined __MSDOS__ || defined __CYGWIN__ || \
++     defined __EMX__ || defined __DJGPP__)
++   /* This internal macro assumes ASCII, but all hosts that support drive
++      letters use ASCII.  */
++# define _IS_DRIVE_LETTER(C) (((unsigned int) (C) | ('a' - 'A')) - 'a'  \
++                              <= 'z' - 'a')
++# define FILE_SYSTEM_PREFIX_LEN(Filename) \
++          (_IS_DRIVE_LETTER ((Filename)[0]) && (Filename)[1] == ':' ? 2 : 0)
++# ifndef __CYGWIN__
++#  define FILE_SYSTEM_DRIVE_PREFIX_CAN_BE_RELATIVE 1
++# endif
++# define ISSLASH(C) ((C) == '/' || (C) == '\\')
++#else
++# define FILE_SYSTEM_PREFIX_LEN(Filename) 0
++# define ISSLASH(C) ((C) == '/')
++#endif
++
++#if FILE_SYSTEM_DRIVE_PREFIX_CAN_BE_RELATIVE
++#  define IS_ABSOLUTE_FILE_NAME(F) ISSLASH ((F)[FILE_SYSTEM_PREFIX_LEN (F)])
++# else
++#  define IS_ABSOLUTE_FILE_NAME(F)                              \
++     (ISSLASH ((F)[0]) || FILE_SYSTEM_PREFIX_LEN (F) != 0)
++#endif
++
++struct saved_cwd
++{
++  int desc;
++  char *name;
++};
++
++struct cd_buf
++{
++  int fd;
++};
++
++
++DIR *fdopendir (int fd);
++DIR *fdopendir_with_dup (int fd, int older_dupfd, struct saved_cwd const *cwd);
++int save_cwd (struct saved_cwd *cwd);
++int restore_cwd (const struct saved_cwd *cwd);
++_Noreturn void openat_save_fail (int errnum);
++void free_cwd (struct saved_cwd *cwd);
++static DIR *fd_clone_opendir (int fd, struct saved_cwd const *cwd);
++char *openat_proc_name (char buf[OPENAT_BUFFER_SIZE], int fd, char const *file);
++_Noreturn void openat_restore_fail (int errnum);
++int fd_safer_flag (int fd, int flag);
++int dup_safer_flag (int fd, int flag);
++int chdir_long (char *dir);
++static void cdb_init (struct cd_buf *cdb);
++static int cdb_advance_fd (struct cd_buf *cdb, char const *dir);
++static void cdb_free (struct cd_buf const *cdb);
++static char *find_non_slash (char const *s);
++static int cdb_fchdir (struct cd_buf const *cdb);
++void *memrchr (void const *s, int c_in, size_t n);
++int openat (int fd, char const *file, int flags, ...);
++int openat_permissive (int fd, char const *file, int flags, mode_t mode, int *cwd_errno);

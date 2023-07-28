@@ -1,0 +1,14 @@
+--- gio/meson.build	2023-07-28 11:26:04.858363400 +0200
++++ gio/meson.build	2023-07-28 11:26:19.363678200 +0200
+@@ -619,6 +619,10 @@
+ gio_sources += portal_sources
+ gio_sources += local_sources
+ 
++if host_system == 'qnx'
++  gio_sources += 'qnx700.c'
++endif
++
+ MISSING_STUFF = '''
+ # This is read by gobject-introspection/misc/ and gtk-doc
+ gio-public-headers.txt: Makefile
+ 

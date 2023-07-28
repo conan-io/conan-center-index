@@ -1,0 +1,20 @@
+--- gio/glocalfile_org.c	2023-07-28 11:24:23.429163000 +0200
++++ gio/glocalfile.c	2023-07-28 11:24:52.849785800 +0200
+@@ -22,12 +22,16 @@
+ 
+ #include "config.h"
+ 
++#ifdef HAVE_QNX700
++#include "qnx700.h"
++#endif
++
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <string.h>
+ #include <errno.h>
+ #include <fcntl.h>
+-#if G_OS_UNIX
++#ifdef G_OS_UNIX
+ #include <dirent.h>
+ #include <unistd.h>
+ #endif
