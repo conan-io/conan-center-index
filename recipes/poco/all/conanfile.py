@@ -9,7 +9,6 @@ import os
 
 required_conan_version = ">=1.54.0"
 
-
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
@@ -29,12 +28,14 @@ class PocoConan(ConanFile):
         "fPIC": [True, False],
         "enable_fork": [True, False],
         "enable_active_record": [True, False, "deprecated"],
+        "foobar": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
         "enable_active_record": "deprecated",
+        "foobar": True,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
