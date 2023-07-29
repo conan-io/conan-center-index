@@ -27,11 +27,13 @@ class OnnxRuntimeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_xnnpack": [True, False],
+        "onnx_no_static_registration": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_xnnpack": False,
+        "onnx_no_static_registration": False
     }
     short_paths = True
 
@@ -61,7 +63,8 @@ class OnnxRuntimeConan(ConanFile):
             self.options.rm_safe("fPIC")
 
         # We need this to avoid double registration by both onnx and onnxruntime
-        self.options["onnx"].disable_static_registration = True
+        if self.options.onnx_no_static_registration:
+            self.options["onnx"].disable_static_registration = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -122,6 +125,7 @@ class OnnxRuntimeConan(ConanFile):
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
         if self.version >= Version("1.15.0") and self.options.shared:
+            # Need to replace windows path seperators with linux path seperators to keep CMake from crashing
             tc.variables["Python_EXECUTABLE"] = sys.executable.replace("\\", "/")
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
