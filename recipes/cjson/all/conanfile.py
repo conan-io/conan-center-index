@@ -13,7 +13,7 @@ class CjsonConan(ConanFile):
     name = "cjson"
     description = "Ultralightweight JSON parser in ANSI C."
     license = "MIT"
-    topics = ("json", "parser", "light")
+    topics = ("json", "parser", "light", "ansi")
     homepage = "https://github.com/DaveGamble/cJSON"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
