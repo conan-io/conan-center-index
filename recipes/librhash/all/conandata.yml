@@ -8,4 +8,3 @@ sources:
 patches:
   "1.4.2":
     - patch_file: "patches/0001-1.4.2-fix-compiler-detection.patch"
-      base_path: "source_subfolder"
