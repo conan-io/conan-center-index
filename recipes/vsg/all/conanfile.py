@@ -20,11 +20,13 @@ class VsgConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "shader_compiler": [True, False],
         "max_devices": [1,2,3,4],
         "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
+        "shader_compiler": True,
         "max_devices" : 1,
         "fPIC": True,
     }
@@ -43,6 +45,8 @@ class VsgConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version < "1.0.5":
+            self.options.shader_compiler = False
 
     def configure(self):
         if self.options.shared:
@@ -74,7 +78,7 @@ class VsgConan(ConanFile):
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 0
+        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 1 if self.options.shader_compiler else 0;
         tc.variables["VSG_MAX_DEVICES"] = self.options.max_devices
         tc.generate()
 
