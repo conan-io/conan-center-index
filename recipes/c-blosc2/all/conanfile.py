@@ -67,11 +67,11 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.0.6")
+            self.requires("zlib-ng/2.1.2")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.13")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
 
     def build_requirements(self):
         if Version(self.version) >= "2.4.1":
@@ -143,4 +143,4 @@ class CBlosc2Conan(ConanFile):
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}blosc2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["rt", "m", "pthread"]
+            self.cpp_info.system_libs = ["rt", "m", "pthread", "dl"]
