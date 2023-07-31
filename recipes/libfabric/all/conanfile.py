@@ -1,99 +1,106 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.35.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.53.0"
+
 
 class LibfabricConan(ConanFile):
     name = "libfabric"
-    description = "Open Fabric Interfaces"
-    topics = ("fabric", "communication", "framework", "service")
+    description = ("Libfabric, also known as Open Fabrics Interfaces (OFI), "
+                   "defines a communication API for high-performance parallel and distributed applications.")
+    license = ("BSD-2-Clause", "GPL-2.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://libfabric.org"
-    license = "BSD-2-Clause", "GPL-2.0-or-later"
+    topics = ("fabric", "communication", "framework", "service")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    _providers = ['gni', 'psm', 'psm2', 'psm3', 'rxm', 'sockets', 'tcp', 'udp', 'usnic', 'verbs', 'bgq']
+    _providers = ["gni", "psm", "psm2", "psm3", "rxm", "sockets", "tcp", "udp", "usnic", "verbs", "bgq"]
     options = {
-        **{ p: "ANY" for p in _providers },
-        **{
-            "shared": [True, False],
-            "fPIC": [True, False],
-            "with_libnl": "ANY",
-            "with_bgq_progress": [None, "auto", "manual"],
-            "with_bgq_mr": [None, "basic", "scalable"]
-        }
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_libnl": [None, "ANY"],
+        "with_bgq_progress": [None, "auto", "manual"],
+        "with_bgq_mr": [None, "basic", "scalable"],
+        **{ p: ["ANY"] for p in _providers },
     }
     default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_libnl": None,
+        "with_bgq_progress": None,
+        "with_bgq_mr": None,
         **{ p: "auto" for p in _providers },
-        **{
-            "shared": False,
-            "fPIC": True,
-            "with_libnl": None,
-            "with_bgq_progress": None,
-            "with_bgq_mr": None
-        }
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    _autotools = None
-
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def requirements(self):
+        self.requires("rdma-core/47.0")
+        self.requires("libnl/3.7.0")
+        self.requires("libnuma/2.0.14")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("libfabric only builds on Linux, Macos, and FreeBSD.")
         for p in self._providers:
             if self.options.get_safe(p) not in ["auto", "yes", "no", "dl"] and not os.path.isdir(str(self.options.get_safe(p))):
-                raise ConanInvalidConfiguration("Option {} can only be one of 'auto', 'yes', 'no', 'dl' or a directory path")
-        if self.options.get_safe('with_libnl') and not os.path.isdir(str(self.options.with_libnl)):
+                raise ConanInvalidConfiguration(f"Option {p} can only be one of 'auto', 'yes', 'no', 'dl' or a directory path")
+        if os.path.isdir(str(self.options.get_safe("with_libnl", ""))):
             raise ConanInvalidConfiguration("Value of with_libnl must be an existing directory")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
         args = []
         for p in self._providers:
-            args.append('--enable-{}={}'.format(p, self.options.get_safe(p)))
+            args.append(f"--enable-{p}={self.options.get_safe(p)}")
         if self.options.with_libnl:
-            args.append('--with-libnl={}'.format(self.options.with_libnl))
+            args.append(f"--with-libnl={self.options.with_libnl}")
         if self.options.with_bgq_progress:
-            args.append('--with-bgq-progress={}'.format(self.options.with_bgq_progress))
+            args.append(f"--with-bgq-progress={self.options.with_bgq_progress}")
         if self.options.with_bgq_mr:
-            args.append('--with-bgq-mr={}'.format(self.options.with_bgq_mr))
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+            args.append(f"--with-bgq-mr={self.options.with_bgq_mr}")
+        tc.configure_args += args
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        autotools = Autotools(self)
         autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libfabric"
-        self.cpp_info.libs = self.collect_libs()
+        self.cpp_info.set_property("pkg_config_name", "libfabric")
+        self.cpp_info.libs = ["fabric"]
+        self.cpp_info.requires = ["rdma-core::libefa", "rdma-core::librdmacm", "libnl::libnl", "libnuma::libnuma"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "m"]
+            self.cpp_info.system_libs = ["pthread", "m", "rt", "dl"]
