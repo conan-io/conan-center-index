@@ -1,0 +1,11 @@
+--- snmplib/snmp_debug.c	2021-05-26 00:19:35.000000000 +0200
++++ snmplib/snmp_debug.c	2022-09-05 13:51:14.733064200 +0200
+@@ -37,7 +37,7 @@
+ #endif
+ 
+ #ifdef HAVE_PRIORITYNAMES
+-#include <sys/syslog.h>
++#include <syslog.h>
+ #endif
+ 
+ #include <net-snmp/types.h>

@@ -1,14 +1,10 @@
 sources:
-  "5.9.1":
-    sha256: "75b59d67e871aaaa31c8cef89ba7d06972782b97736b7e8c3399f36b50a8816f"
-    url: https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.1/net-snmp-5.9.1.zip/download
+  "5.9.3":
+    sha256: 2097f29b7e1bf3f1300b4bae52fa2308d0bb8d5d3998dbe02f9462a413a2ef0a
+    url: https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.3/net-snmp-5.9.3.tar.gz/download
 patches:
-  "5.9.1":
+  "5.9.3":
     - patch_file: patches/0001-fix-openssl-linking-msvc.patch
-      base_path: ""
-    - patch_file: patches/0002-install-only-libnetsnmp.patch
-      base_path: ""
-    - patch_file: patches/0003-fix-perl-scripts-msvc.patch
-      base_path: ""
     - patch_file: patches/0004-fix-apple-arm64-build.patch
-      base_path: ""
+    - patch_file: patches/0005-exclude_syslog.patch
+    - patch_file: patches/0006-include_select.patch
