@@ -44,7 +44,7 @@ class NewmatConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        cmake_layout(self, src_folder="newmat")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

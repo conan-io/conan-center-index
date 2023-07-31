@@ -13,7 +13,7 @@ project(
 # -------------
 # target
 # -------------
-set(source_subfolder_ "newmat")
+set(source_subfolder_ "src")
 set(lib_name "Newmat")
 add_library(${lib_name})
 
