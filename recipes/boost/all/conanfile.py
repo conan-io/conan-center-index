@@ -21,7 +21,7 @@ import shutil
 import sys
 import yaml
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 # When adding (or removing) an option, also add this option to the list in
