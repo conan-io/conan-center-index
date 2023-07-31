@@ -3,17 +3,22 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
+from conan.tools.microsoft import unix_path
+
 required_conan_version = ">=1.52.0"
 
 
 class PopplerDataConan(ConanFile):
     name = "poppler-data"
     description = "encoding files for use with poppler, enable CJK and Cyrrilic"
-    homepage = "https://poppler.freedesktop.org/"
-    topics = "poppler", "pdf", "rendering"
-    license = "BSD-3-Clause", "GPL-2.0-or-later", "MIT"
+    license = ("BSD-3-Clause", "GPL-2.0-or-later", "MIT")
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://poppler.freedesktop.org/"
+    topics = ("poppler", "pdf", "rendering", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -25,8 +30,7 @@ class PopplerDataConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _datadir(self):
@@ -59,7 +63,7 @@ class PopplerDataConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.defines = ["POPPLER_DATADIR={}".format(self._poppler_datadir.replace("\\", "//"))]
+        self.cpp_info.defines = ["POPPLER_DATADIR={}".format(unix_path(self, self._poppler_datadir))]
         self.conf_info.define("user.poppler-data:datadir", self._poppler_datadir)
 
         # TODO: to remove in conan v2
