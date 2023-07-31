@@ -29,6 +29,6 @@ int main(int argc, char **argv)
   testCustomHexdumpBase<int8_t, 8, 16, true>();
   testCustomHexdumpBase<uint16_t, 16, 32, true>();
   testCustomHexdumpBase<int16_t, 16, 32, true>();
-  
+
   return 0;
 }

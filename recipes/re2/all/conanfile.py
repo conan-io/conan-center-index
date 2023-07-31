@@ -60,7 +60,7 @@ class Re2Conan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_icu"):
-            self.requires("icu/73.1")
+            self.requires("icu/73.2")
         if Version(self.version) >= "20230601":
             self.requires("abseil/20230125.3", transitive_headers=True)
 

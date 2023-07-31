@@ -25,6 +25,10 @@ class TurtleConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.bindirs = []
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
