@@ -1,25 +1,25 @@
-from conan import ConanFile
-from conan.tools.files import get, rmdir, rm, apply_conandata_patches
-from conan.tools.build import cross_building
-from conan.tools.scm import Version
-from conan.tools.apple import is_apple_os
-from conan.errors import ConanInvalidConfiguration
-from conans import CMake
 import os
-import functools
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenSceneGraphConanFile(ConanFile):
     name = "openscenegraph"
     description = "OpenSceneGraph is an open source high performance 3D graphics toolkit"
-    topics = ("openscenegraph", "graphics")
+    license = ("LGPL-2.1-only", "WxWindows-exception-3.1")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openscenegraph.org"
-    license = "LGPL-2.1-only", "WxWindows-exception-3.1"
+    topics = ("graphics",)
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -78,13 +78,9 @@ class OpenSceneGraphConanFile(ConanFile):
         "opengl_profile": "gl2",
     }
 
-    short_paths = True
-    exports_sources = "CMakeLists.txt", "patches/*.patch"
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -105,22 +101,19 @@ class OpenSceneGraphConanFile(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
         if not self.options.with_zlib:
             # These require zlib support
-            del self.options.with_openexr
-            del self.options.with_png
-            del self.options.with_dcmtk
+            self.options.rm_safe("with_openexr")
+            self.options.rm_safe("with_png")
+            self.options.rm_safe("with_dcmtk")
 
-    def validate(self):
-        if self.options.get_safe("with_asio", False):
-            raise ConanInvalidConfiguration("ASIO support in OSG is broken, see https://github.com/openscenegraph/OpenSceneGraph/issues/921")
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("openscenegraph recipe cannot be cross-built yet. Contributions are welcome.")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.enable_windowing_system and self.settings.os == "Linux":
+        if self.options.enable_windowing_system and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
         self.requires("opengl/system")
 
@@ -129,26 +122,26 @@ class OpenSceneGraphConanFile(ConanFile):
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
-            self.requires("asio/1.22.1")
-            self.requires("boost/1.81.0")
+            self.requires("asio/1.28.0")
+            self.requires("boost/1.82.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/8.2.0")
         if self.options.get_safe("with_dcmtk"):
-            self.requires("dcmtk/3.6.6")
+            self.requires("dcmtk/3.6.7")
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_gdal:
-            self.requires("gdal/3.4.3")
+            self.requires("gdal/3.5.2")
         if self.options.get_safe("with_gif"):
             self.requires("giflib/5.2.1")
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.33")
+            self.requires("jasper/4.0.0")
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/9e")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.7")
+            self.requires("openexr/3.1.9")
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.40")
         if self.options.with_tiff:
@@ -156,90 +149,107 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
 
+    def validate(self):
+        if self.options.get_safe("with_asio", False):
+            raise ConanInvalidConfiguration(
+                "ASIO support in OSG is broken, "
+                "see https://github.com/openscenegraph/OpenSceneGraph/issues/921"
+            )
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration(
+                "openscenegraph recipe cannot be cross-built yet. "
+                "Contributions are welcome."
+            )
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_3RDPARTY_BIN"] = False
+
+        tc.variables["DYNAMIC_OPENSCENEGRAPH"] = self.options.shared
+        tc.variables["DYNAMIC_OPENTHREADS"] = self.options.shared
+
+        tc.variables["BUILD_OSG_APPLICATIONS"] = self.options.build_applications
+        tc.variables["BUILD_OSG_EXAMPLES"] = False
+
+        tc.variables["OSG_NOTIFY_DISABLED"] = not self.options.enable_notify
+        tc.variables["OSG_USE_DEPRECATED_API"] = self.options.enable_deprecated_api
+        tc.variables["OSG_PROVIDE_READFILE"] = self.options.enable_readfile
+        tc.variables["OSG_USE_REF_PTR_IMPLICIT_OUTPUT_CONVERSION"] = self.options.enable_ref_ptr_implicit_output_conversion
+        tc.variables["OSG_USE_REF_PTR_SAFE_DEREFERENCE"] = self.options.enable_ref_ptr_safe_dereference
+        tc.variables["OSG_ENVVAR_SUPPORTED"] = self.options.enable_envvar_support
+
+        if not self.options.enable_windowing_system:
+            tc.variables["OSG_WINDOWING_SYSTEM"] = None
+
+        tc.variables["BUILD_OSG_DEPRECATED_SERIALIZERS"] = self.options.enable_deprecated_serializers
+
+        tc.variables["OSG_TEXT_USE_FONTCONFIG"] = self.options.use_fontconfig
+
+        tc.variables["OPENGL_PROFILE"] = str(self.options.opengl_profile).upper()
+
+        # Disable option dependencies unless we have a package for them
+        tc.variables["OSG_WITH_FREETYPE"] = self.options.with_freetype
+        tc.variables["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
+        tc.variables["OSG_WITH_INVENTOR"] = False
+        tc.variables["OSG_WITH_JASPER"] = self.options.with_jasper
+        tc.variables["OSG_WITH_OPENCASCADE"] = False
+        tc.variables["OSG_WITH_FBX"] = False
+        tc.variables["OSG_WITH_ZLIB"] = self.options.with_zlib
+        tc.variables["OSG_WITH_GDAL"] = self.options.with_gdal
+        tc.variables["OSG_WITH_GTA"] = self.options.with_gta
+        tc.variables["OSG_WITH_CURL"] = self.options.with_curl
+        tc.variables["OSG_WITH_LIBVNCSERVER"] = False
+        tc.variables["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False)
+        tc.variables["OSG_WITH_FFMPEG"] = False
+        tc.variables["OSG_WITH_DIRECTSHOW"] = False
+        tc.variables["OSG_WITH_SDL"] = False
+        tc.variables["OSG_WITH_POPPLER"] = False
+        tc.variables["OSG_WITH_RSVG"] = False
+        tc.variables["OSG_WITH_NVTT"] = False
+        tc.variables["OSG_WITH_ASIO"] = self.options.get_safe("with_asio", False)
+        tc.variables["OSG_WITH_ZEROCONF"] = False
+        tc.variables["OSG_WITH_LIBLAS"] = False
+        tc.variables["OSG_WITH_GIF"] = self.options.get_safe("with_gif", False)
+        tc.variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
+        tc.variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
+        tc.variables["OSG_WITH_TIFF"] = self.options.with_tiff
+
+        if self.settings.os == "Windows":
+            # osg has optional quicktime support on Windows
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
+
+        tc.variables["OSG_MSVC_VERSIONED_DLL"] = False
+
+        if is_apple_os(self):
+            tc.preprocessor_definitions["GL_SILENCE_DEPRECATION"] = "1"
+
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.set_property("freetype", "cmake_module_file_name", "FREETYPE")
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
         for package in ("Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"):
             # Prefer conan's find package scripts over osg's
-            os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
-
-    @functools.lru_cache(1)
-    def _configured_cmake(self):
-        cmake = CMake(self)
-
-        cmake.definitions["USE_3RDPARTY_BIN"] = False
-
-        cmake.definitions["DYNAMIC_OPENSCENEGRAPH"] = self.options.shared
-        cmake.definitions["DYNAMIC_OPENTHREADS"] = self.options.shared
-
-        cmake.definitions["BUILD_OSG_APPLICATIONS"] = self.options.build_applications
-        cmake.definitions["BUILD_OSG_EXAMPLES"] = False
-
-        cmake.definitions["OSG_NOTIFY_DISABLED"] = not self.options.enable_notify
-        cmake.definitions["OSG_USE_DEPRECATED_API"] = self.options.enable_deprecated_api
-        cmake.definitions["OSG_PROVIDE_READFILE"] = self.options.enable_readfile
-        cmake.definitions["OSG_USE_REF_PTR_IMPLICIT_OUTPUT_CONVERSION"] = self.options.enable_ref_ptr_implicit_output_conversion
-        cmake.definitions["OSG_USE_REF_PTR_SAFE_DEREFERENCE"] = self.options.enable_ref_ptr_safe_dereference
-        cmake.definitions["OSG_ENVVAR_SUPPORTED"] = self.options.enable_envvar_support
-
-        if not self.options.enable_windowing_system:
-            cmake.definitions["OSG_WINDOWING_SYSTEM"] = None
-
-        cmake.definitions["BUILD_OSG_DEPRECATED_SERIALIZERS"] = self.options.enable_deprecated_serializers
-
-        cmake.definitions["OSG_TEXT_USE_FONTCONFIG"] = self.options.use_fontconfig
-
-        cmake.definitions["OPENGL_PROFILE"] = str(self.options.opengl_profile).upper()
-
-        # Disable option dependencies unless we have a package for them
-        cmake.definitions["OSG_WITH_FREETYPE"] = self.options.with_freetype
-        cmake.definitions["OSG_WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
-        cmake.definitions["OSG_WITH_INVENTOR"] = False
-        cmake.definitions["OSG_WITH_JASPER"] = self.options.with_jasper
-        cmake.definitions["OSG_WITH_OPENCASCADE"] = False
-        cmake.definitions["OSG_WITH_FBX"] = False
-        cmake.definitions["OSG_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["OSG_WITH_GDAL"] = self.options.with_gdal
-        cmake.definitions["OSG_WITH_GTA"] = self.options.with_gta
-        cmake.definitions["OSG_WITH_CURL"] = self.options.with_curl
-        cmake.definitions["OSG_WITH_LIBVNCSERVER"] = False
-        cmake.definitions["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False)
-        cmake.definitions["OSG_WITH_FFMPEG"] = False
-        cmake.definitions["OSG_WITH_DIRECTSHOW"] = False
-        cmake.definitions["OSG_WITH_SDL"] = False
-        cmake.definitions["OSG_WITH_POPPLER"] = False
-        cmake.definitions["OSG_WITH_RSVG"] = False
-        cmake.definitions["OSG_WITH_NVTT"] = False
-        cmake.definitions["OSG_WITH_ASIO"] = self.options.get_safe("with_asio", False)
-        cmake.definitions["OSG_WITH_ZEROCONF"] = False
-        cmake.definitions["OSG_WITH_LIBLAS"] = False
-        cmake.definitions["OSG_WITH_GIF"] = self.options.get_safe("with_gif", False)
-        cmake.definitions["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
-        cmake.definitions["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
-        cmake.definitions["OSG_WITH_TIFF"] = self.options.with_tiff
-
-        if self.settings.os == "Windows":
-            # osg has optional quicktime support on Windows
-            cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
-
-        cmake.definitions["OSG_MSVC_VERSIONED_DLL"] = False
-
-        cmake.configure()
-
-        return cmake
+            os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
 
     def build(self):
         self._patch_sources()
-
-        self._configured_cmake().build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self._configured_cmake().install()
+        cmake = CMake(self)
+        cmake.install()
 
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, True)
@@ -255,6 +265,10 @@ class OpenSceneGraphConanFile(ConanFile):
         # but it will set the last three of these if the name of the package is OPENSCENEGRAPH (it uses
         # the filename for the first, so OpenSceneGraph_FOUND gets set, not OPENSCENEGRAPH_FOUND)
         # TODO: set OPENSCENEGRAPH_FOUND in cmake_find_package and cmake_find_package_multi
+        self.cpp_info.set_property("cmake_file_name", "OpenSceneGraph")
+        self.cpp_info.set_property("cmake_target_name", "OPENSCENEGRAPH::OPENSCENEGRAPH")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OpenSceneGraph"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenSceneGraph"
         self.cpp_info.names["cmake_find_package"] = "OPENSCENEGRAPH"
@@ -275,23 +289,23 @@ class OpenSceneGraphConanFile(ConanFile):
             plugin_library.libs = [] if self.options.shared else [lib + postfix]
             plugin_library.requires = ["OpenThreads", "osg", "osgDB", "osgUtil"]
             if not self.options.shared:
-                plugin_library.libdirs = [os.path.join("lib", "osgPlugins-{}".format(self.version))]
+                plugin_library.libdirs = [os.path.join("lib", f"osgPlugins-{self.version}")]
             return plugin_library
 
         def setup_serializers(lib):
             plugins = []
             if lib not in ("osgDB", "osgWidget", "osgPresentation"):
-                plugins.append("serializers_{}".format(lib.lower()))
+                plugins.append(f"serializers_{lib.lower()}")
             if self.options.enable_deprecated_serializers:
                 if lib not in ("osgUtil", "osgDB", "osgGA", "osgManipulator", "osgUI", "osgPresentation"):
-                    plugins.append("deprecated_{}".format(lib.lower()))
+                    plugins.append(f"deprecated_{lib.lower()}")
             for plugin in plugins:
                 setup_plugin(plugin).requires.append(lib)
 
         def setup_library(lib):
             library = self.cpp_info.components[lib]
             library.libs = [lib + postfix]
-            library.names["pkg_config"] = "openscenegraph-{}".format(lib)
+            library.set_property("pkg_config_name", f"openscenegraph-{lib}")
             setup_serializers(lib)
             return library
 
@@ -302,22 +316,22 @@ class OpenSceneGraphConanFile(ConanFile):
         # files for it with cmake_find_package and cmake_find_package_multi
         library = self.cpp_info.components["OpenThreads"]
         library.libs = ["OpenThreads" + postfix]
-        library.names["pkg_config"] = "openthreads"
-        if self.settings.os == "Linux":
+        library.set_property("pkg_config_name", "openthreads")
+        if self.settings.os in ["Linux", "FreeBSD"]:
             library.system_libs = ["pthread"]
 
         library = setup_library("osg")
         library.requires = ["OpenThreads", "opengl::opengl"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             library.system_libs = ["m", "rt", "dl"]
         if not self.options.shared:
             library.defines.append("OSG_LIBRARY_STATIC")
 
         library = setup_library("osgDB")
         library.requires = ["osg", "osgUtil", "OpenThreads"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             library.system_libs = ["dl"]
-        elif self.settings.os == "Macos":
+        elif is_apple_os(self):
             library.frameworks = ["Carbon", "Cocoa"]
         if self.options.with_zlib:
             library.requires.append("zlib::zlib")
@@ -333,7 +347,7 @@ class OpenSceneGraphConanFile(ConanFile):
         library = setup_library("osgViewer")
         library.requires = ["osgGA", "osgText", "osgDB", "osgUtil", "osg"]
         if self.options.enable_windowing_system:
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 library.requires.append("xorg::xorg")
             elif is_apple_os(self):
                 library.frameworks = ["Cocoa"]
@@ -350,7 +364,8 @@ class OpenSceneGraphConanFile(ConanFile):
         setup_library("osgSim").requires = ["osgText", "osgUtil", "osgDB", "osg", "OpenThreads"]
         setup_library("osgTerrain").requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
         setup_library("osgWidget").requires = ["osgText", "osgViewer", "osgDB", "osg", "OpenThreads"]
-        setup_library("osgPresentation").requires = ["osgViewer", "osgUI", "osgWidget", "osgManipulator", "osgVolume", "osgFX", "osgText", "osgGA", "osgUtil", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgPresentation").requires = ["osgViewer", "osgUI", "osgWidget", "osgManipulator", "osgVolume",
+                                                     "osgFX", "osgText", "osgGA", "osgUtil", "osgDB", "osg", "OpenThreads"]
 
         # Start of plugins
 
@@ -484,16 +499,24 @@ class OpenSceneGraphConanFile(ConanFile):
         if is_apple_os(self):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
-        if ((self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8")
-                or (self.settings.os == "iOS" and Version(self.settings.os.version) >= "6.0")):
+        if (
+            is_apple_os(self)
+            and self.settings.os.version
+            and Version(self.settings.os.version) >= "10.8"
+        ) or (self.settings.os == "iOS" and Version(self.settings.os.version) >= "6.0"):
             plugin = setup_plugin("avfoundation")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
-        if self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) <= "10.6" and self.settings.arch == "x86":
+        if (
+            is_apple_os(self)
+            and self.settings.os.version
+            and Version(self.settings.os.version) <= "10.6"
+            and self.settings.arch == "x86"
+        ):
             setup_plugin("qt").frameworks = ["QuickTime"]
 
-        if self.settings.os == "Macos" and self.settings.arch == "x86":
+        if is_apple_os(self) and self.settings.arch == "x86":
             plugin = setup_plugin("QTKit")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["QTKit", "Cocoa", "QuickTime", "CoreVideo"]
