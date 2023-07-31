@@ -13,10 +13,9 @@ class CjsonConan(ConanFile):
     name = "cjson"
     description = "Ultralightweight JSON parser in ANSI C."
     license = "MIT"
-    topics = ("json", "parser")
+    topics = ("json", "parser", "light")
     homepage = "https://github.com/DaveGamble/cJSON"
     url = "https://github.com/conan-io/conan-center-index"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
