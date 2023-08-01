@@ -12,6 +12,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
+    win_bash = True  # Needed in Conan v1 to avoid "Cannot wrap command with different envs."
 
     @property
     def _settings_build(self):
@@ -38,13 +39,11 @@ class TestPackageConan(ConanFile):
             env = Environment()
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
-            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            # FIXME: otherwise fails with 'configure: error: could not determine .../automake-1.16/ar-lib "lib -nologo" interface'.
+            # ar-lib wrapper is added automatically by ./configure
             # env.define("AR", f'{ar_wrapper} "lib -nologo"')
-            env.define("AR", unix_path(self, os.path.join(self.build_folder, "build-aux", "ar-lib")))
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -56,16 +55,18 @@ class TestPackageConan(ConanFile):
             copy(self, src, src=self.source_folder, dst=self.build_folder)
         for fn in ("COPYING", "NEWS", "INSTALL", "README", "AUTHORS", "ChangeLog"):
             save(self, os.path.join(self.build_folder, fn), "\n")
-        # self.run("gnulib-tool --list")
-        self.run("gnulib-tool --import getopt-posix")
-        autotools = Autotools(self)
-        # Can simply do autotools.autoreconf(self.build_folder) in Conan v2
+        self.run("gnulib-tool --list")
+        self.run("gnulib-tool --import getopt-posix", env="conanbuild")
         with chdir(self, self.build_folder):
+            autotools = Autotools(self)
+            # Disable m4 from Conan, which is not able to run shell commands with syscmd()
+            os.environ["M4"] = ""
+            # autotools.autoreconf() does not have build_script_folder param in Conan v1, so using .run()
             self.run("autoreconf -fiv")
-        autotools.configure(self.build_folder)
-        autotools.make()
+            autotools.configure(self.build_folder)
+            autotools.make()
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            bin_path = unix_path(self, os.path.join(self.build_folder, "test_package"))
             self.run(bin_path, env="conanrun")
