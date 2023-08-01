@@ -3,7 +3,6 @@ import sys
 import textwrap
 import time
 
-import conan.tools.scm as tools_scm
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -11,7 +10,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, load, save
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, VCVars
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.47.0"
 
@@ -37,6 +37,7 @@ class GnConan(ConanFile):
     def _minimum_compiler_version_supporting_cxx17(self):
         return {
             "Visual Studio": 15,
+            "msvc": 191,
             "gcc": 7,
             "clang": 4,
             "apple-clang": 10,
@@ -47,10 +48,7 @@ class GnConan(ConanFile):
             check_min_cppstd(self, 17)
         else:
             if self._minimum_compiler_version_supporting_cxx17:
-                if (
-                    tools_scm.Version(self.settings.compiler.version)
-                    < self._minimum_compiler_version_supporting_cxx17
-                ):
+                if Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
                     raise ConanInvalidConfiguration("gn requires a compiler supporting c++17")
             else:
                 self.output.warning(
@@ -60,25 +58,31 @@ class GnConan(ConanFile):
 
     def build_requirements(self):
         # FIXME: add cpython build requirements for `build/gen.py`.
-        self.build_requires("ninja/1.10.2")
+        self.build_requires("ninja/1.11.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
 
-    def _to_gn_platform(self, os_, compiler):
+    @property
+    def _gn_platform(self):
         if is_apple_os(self):
             return "darwin"
         if is_msvc(self):
             return "msvc"
         # Assume gn knows about the os
-        return str(os_).lower()
+        return str(self.settings.os).lower()
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        if is_msvc(self):
+            vcvars = VCVars(self)
+            vcvars.generate()
+
         configure_args = [
             "--no-last-commit-position",
-            "--host={}".format(self._to_gn_platform(self.settings.os, self.settings.compiler)),
+            f"--host={self._gn_platform}",
         ]
         if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
             configure_args.append("-d")
@@ -104,13 +108,15 @@ class GnConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "gn",
-            src=os.path.join(self.source_folder, "out"),
-            dst=os.path.join(self.package_folder, "bin"))
-        copy(self,
-            "gn.exe",
-            src=os.path.join(self.source_folder, "out"),
-            dst=os.path.join(self.package_folder, "bin"))
+        if self.settings.os == "Windows":
+            copy(self,
+                 "gn.exe",
+                 src=os.path.join(self.source_folder, "out"),
+                 dst=os.path.join(self.package_folder, "bin"))
+        else:
+            copy(self, "gn",
+                 src=os.path.join(self.source_folder, "out"),
+                 dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.includedirs = []

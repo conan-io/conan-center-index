@@ -9,7 +9,7 @@ from conan.tools.microsoft import unix_path
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
+    generators = "VirtualRunEnv", "VCVars"
     test_type = "explicit"
 
     def build_requirements(self):
