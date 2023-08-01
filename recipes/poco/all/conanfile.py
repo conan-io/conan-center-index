@@ -13,7 +13,7 @@ class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pocoproject.org"
-    topics = ("building", "networking", "server", "mobile", "embedded")
+    topics = ("building", "networking", "server", "mobile", "embedded, "foobar")
     license = "BSL-1.0"
     description = (
         "Modern, powerful open source C++ class libraries for building "
