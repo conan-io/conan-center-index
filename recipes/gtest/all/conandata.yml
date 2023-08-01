@@ -8,6 +8,9 @@ sources:
   "1.10.0":
     url: "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
     sha256: "9dc9157a9a1551ec7a7e43daea9a694a0bb5fb8bec81235d8a1e6ef64c716dcb"
+  "1.8.1":
+    url: "https://github.com/google/googletest/archive/release-1.8.1.tar.gz"
+    sha256: "9bf1fe5182a604b4135edc1a425ae356c9ad15e9b23f9f12a02e80184c3a249c"
 patches:
   "1.10.0":
     - patch_file: "patches/gtest-1.10.0.patch"
@@ -17,3 +20,7 @@ patches:
       patch_description: "prevent compiler from complaining while compiling"
       patch_type: "bugfix"
       patch_source: "https://github.com/google/googletest/pull/2507"
+  "1.8.1":
+    - patch_file: "patches/gtest-1.8.1.patch"
+      patch_description: "add CUSTOM_DEBUG_POSTFIX option"
+      patch_type: "conan"
