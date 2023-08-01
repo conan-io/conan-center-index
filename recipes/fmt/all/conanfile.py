@@ -9,6 +9,7 @@ from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
+# comment
 
 class FmtConan(ConanFile):
     name = "fmt"
