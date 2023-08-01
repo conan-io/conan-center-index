@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, collect_libs
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -121,6 +121,9 @@ class GfCompleteConan(ConanFile):
                 tc.configure_args.append("--enable-sse={}".format(yes_no(self.options.sse)))
             if self.options.avx != "auto":
                 tc.configure_args.append("--enable-avx={}".format(yes_no(self.options.avx)))
+        if is_msvc(self) and self.options.shared:
+            tc.extra_ldflags.append("-no-undefined")
+            tc.extra_ldflags.append("-Wl,--export-all-symbols")
         tc.generate()
 
         if is_msvc(self):
@@ -184,7 +187,7 @@ class GfCompleteConan(ConanFile):
         rm(self, "*.la", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["gf_complete"]
+        self.cpp_info.libs = collect_libs(self)
 
         if not is_msvc(self):
             bin_path = os.path.join(self.package_folder, "bin")
