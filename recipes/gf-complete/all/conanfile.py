@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import Environment
+from conan.tools.build import cross_building
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -67,8 +68,6 @@ class GfCompleteConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
-            if self.options.shared:
-                raise ConanInvalidConfiguration("gf-complete doesn't support shared with Visual Studio")
             if self.version == "1.03":
                 raise ConanInvalidConfiguration("gf-complete 1.03 doesn't support Visual Studio")
 
@@ -78,6 +77,8 @@ class GfCompleteConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -100,25 +101,26 @@ class GfCompleteConan(ConanFile):
                 replace_in_file(self, os.path.join(self.source_folder, subdir, "Makefile.am"), flag, "")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cxxflags.append("-FS")
         elif "x86" in self.settings.arch:
             tc.extra_cxxflags.append("-mstackrealign")
-
         yes_no = lambda v: "yes" if v else "no"
-
         if "arm" in self.settings.arch:
             if self.options.neon != "auto":
                 tc.configure_args.append("--enable-neon={}".format(yes_no(self.options.neon)))
-
         if self.settings.arch in ["x86", "x86_64"]:
             if self.options.sse != "auto":
                 tc.configure_args.append("--enable-sse={}".format(yes_no(self.options.sse)))
-
             if self.options.avx != "auto":
                 tc.configure_args.append("--enable-avx={}".format(yes_no(self.options.avx)))
-
         tc.generate()
 
         if is_msvc(self):
@@ -135,6 +137,36 @@ class GfCompleteConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
+
+        if is_msvc(self):
+            # Custom AutotoolsDeps for cl like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         self._patch_sources()
