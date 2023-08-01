@@ -2,7 +2,6 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -78,32 +77,18 @@ class GiflibConan(ConanFile):
             env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
-            if self.settings.arch == "x86":
-                host = "i686-w64-mingw32"
-            elif self.settings.arch == "x86_64":
-                host = "x86_64-w64-mingw32"
-            elif self.settings.arch == "armv8":
-                host = "aarch64-w64-mingw32"
-            elif self.settings.arch == "armv7":
-                host = "armv7-w64-mingw32"
-            else:
-                raise ConanInvalidConfiguration(f"Unsupported architecture {self.settings.arch}")
-            tc.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
-            tc.configure_args += [
-                f"--host={host}",
-                "--prefix=/"
-            ]
+            tc.extra_defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
         tc.generate()
 
         if is_msvc(self):
             env = Environment()
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
-            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            # ar-lib wrapper is added by ./configure automatically
+            # env.define("AR", f'{ar_wrapper} "lib -nologo"')
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -117,26 +102,27 @@ class GiflibConan(ConanFile):
                         "SUBDIRS = lib pic $(am__append_1)")
 
         if is_msvc(self):
+            # add unistd.h for VS
+            shutil.copy(os.path.join(self.export_sources_folder, "unistd.h"),
+                        os.path.join(self.source_folder, "lib"))
             # fully replace gif_lib.h for VS, with patched version
             ver_components = self.version.split(".")
-            replace_in_file(self, "gif_lib.h", "@GIFLIB_MAJOR@", ver_components[0])
-            replace_in_file(self, "gif_lib.h", "@GIFLIB_MINOR@", ver_components[1])
-            replace_in_file(self, "gif_lib.h", "@GIFLIB_RELEASE@", ver_components[2])
-            shutil.copy("gif_lib.h", os.path.join(self.source_folder, "lib"))
-            # add unistd.h for VS
-            shutil.copy("unistd.h", os.path.join(self.source_folder, "lib"))
-        else:
-            for gnu_config in [
-                self.conf.get("user.gnu-config:config_guess", check_type=str),
-                self.conf.get("user.gnu-config:config_sub", check_type=str)
-            ]:
-                if gnu_config:
-                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
-            if is_apple_os(self):
-                # relocatable shared lib on macOS
-                replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                                "-install_name \\$rpath/\\$soname",
-                                "-install_name \\@rpath/\\$soname")
+            header_path = os.path.join(self.source_folder, "lib", "gif_lib.h")
+            shutil.copy(os.path.join(self.export_sources_folder, "gif_lib.h"), header_path)
+            replace_in_file(self, header_path, "@GIFLIB_MAJOR@", ver_components[0])
+            replace_in_file(self, header_path, "@GIFLIB_MINOR@", ver_components[1])
+            replace_in_file(self, header_path, "@GIFLIB_RELEASE@", ver_components[2])
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str)
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        if is_apple_os(self):
+            # relocatable shared lib on macOS
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            "-install_name \\$rpath/\\$soname",
+                            "-install_name \\@rpath/\\$soname")
 
     def build(self):
         self._patch_sources()
