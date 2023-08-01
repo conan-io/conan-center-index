@@ -62,6 +62,8 @@ class Gm2calcConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "EIGEN3", "Eigen3")
+        for subdir in ["examples", "test", "doc"]:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), f"add_subdirectory({subdir})", "")
 
     def build(self):
         self._patch_sources()
