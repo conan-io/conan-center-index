@@ -134,6 +134,8 @@ class DbusConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
         fix_apple_shared_install_name(self)
+        if self.settings.os == "Windows" and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libdbus-1.a"), os.path.join(self.package_folder, "lib", "dbus-1.lib"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -172,6 +174,9 @@ class DbusConan(ConanFile):
             self.cpp_info.system_libs.extend(["iphlpapi", "ws2_32"])
         else:
             self.cpp_info.system_libs.append("pthread")
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("DBUS_STATIC_BUILD")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"
