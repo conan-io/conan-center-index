@@ -2,10 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, chdir, copy, get, export_conandata_patches
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.files import chdir, copy, get, replace_in_file
+from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, MSBuildDeps
 
 required_conan_version = ">=1.47.0"
 
@@ -20,9 +20,6 @@ class GoogleGuetzliConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -46,16 +43,39 @@ class GoogleGuetzliConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def generate(self):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
+            tc.configuration = "Debug" if self.settings.build_type == "Debug" else "Release"
             tc.generate()
+            deps = MSBuildDeps(self)
+            deps.generate()
         else:
             tc = AutotoolsToolchain(self)
             tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+    def _patch_sources(self):
+        if is_msvc(self):
+            # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
+            platform_toolset = MSBuildToolchain(self).toolset
+            import_conan_generators = ""
+            for props_file in ["conantoolchain.props", "conandeps.props"]:
+                props_path = os.path.join(self.generators_folder, props_file)
+                if os.path.exists(props_path):
+                    import_conan_generators += f"<Import Project=\"{props_path}\" />"
+            vcxproj_file = os.path.join(self.source_folder, "guetzli.vcxproj")
+            replace_in_file(self, vcxproj_file,
+                            "<PlatformToolset>v140</PlatformToolset>",
+                            f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
+            if props_path:
+                replace_in_file(self, vcxproj_file,
+                                '<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />',
+                                f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
+        else:
+            if self.settings.build_type not in ["Debug", "RelWithDebInfo"]:
+                replace_in_file(self, os.path.join(self.source_folder, "guetzli.make"), " -g ", " ")
 
     def build(self):
         self._patch_sources()
