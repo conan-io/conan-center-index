@@ -1,19 +1,10 @@
-from conan import ConanFile
-from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake
+from conans import ConanFile, CMake, tools
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
-    test_type = "explicit"
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-
-    def layout(self):
-        cmake_layout(self)
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -21,20 +12,21 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
+        if not tools.cross_building(self, skip_x64_x86=True):
             bin_ext = ".exe" if self.settings.os == "Windows" else ""
-            bin_path = os.path.join(self.cpp.build.bindir, f"test_package{bin_ext}")
+            bin_path = os.path.join("bin", f"test_package{bin_ext}")
 
-            self.run(f"upx --help")
+            upx_bin = self.deps_user_info["upx"].upx
+            self.run(f"{upx_bin} --help", run_environment=True)
 
             original_size = os.stat(bin_path).st_size
 
-            self.run(f"upx {bin_path}")
+            self.run(f"{upx_bin} {bin_path}", run_environment=True)
 
             packed_size = os.stat(bin_path).st_size
 
             # Run the packed executable to see whether it still works
-            self.run(bin_path, env="conanrun")
+            self.run(bin_path, run_environment=True)
 
             self.output.info(f"File: {bin_path}")
             self.output.info(f"Original size: {original_size:>9}")
