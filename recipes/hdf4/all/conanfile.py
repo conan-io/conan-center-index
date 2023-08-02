@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 
 required_conan_version = ">=1.53.0"
 
@@ -67,35 +67,49 @@ class Hdf4Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["HDF4_EXTERNALLY_CONFIGURED"] = True
-        tc.variables["HDF4_EXTERNAL_LIB_PREFIX"] = ""
-        tc.variables["HDF4_NO_PACKAGES"] = True
-        tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
-        tc.variables["HDF4_ENABLE_COVERAGE"] = False
-        tc.variables["HDF4_ENABLE_DEPRECATED_SYMBOLS"] = True
-        tc.variables["HDF4_ENABLE_JPEG_LIB_SUPPORT"] = True  # HDF can't compile without libjpeg or libjpeg-turbo
-        tc.variables["HDF4_ENABLE_Z_LIB_SUPPORT"] = True  # HDF can't compile without zlib
-        tc.variables["HDF4_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
-        tc.variables["HDF4_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding") or False
-        tc.variables["HDF4_PACKAGE_EXTLIBS"] = False
-        tc.variables["HDF4_BUILD_XDR_LIB"] = True
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["HDF4_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf4")
-        tc.variables["HDF4_BUILD_FORTRAN"] = False
-        tc.variables["HDF4_BUILD_UTILS"] = False
-        tc.variables["HDF4_BUILD_TOOLS"] = False
-        tc.variables["HDF4_BUILD_EXAMPLES"] = False
-        tc.variables["HDF4_BUILD_JAVA"] = False
+        tc.cache_variables["HDF4_EXTERNALLY_CONFIGURED"] = True
+        tc.cache_variables["HDF4_EXTERNAL_LIB_PREFIX"] = ""
+        tc.cache_variables["HDF4_NO_PACKAGES"] = True
+        tc.cache_variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["HDF4_ENABLE_COVERAGE"] = False
+        tc.cache_variables["HDF4_ENABLE_DEPRECATED_SYMBOLS"] = True
+        tc.cache_variables["HDF4_ENABLE_JPEG_LIB_SUPPORT"] = True  # HDF can't compile without libjpeg or libjpeg-turbo
+        tc.cache_variables["HDF4_ENABLE_Z_LIB_SUPPORT"] = True  # HDF can't compile without zlib
+        tc.cache_variables["HDF4_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
+        tc.cache_variables["HDF4_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding") or False
+        tc.cache_variables["HDF4_PACKAGE_EXTLIBS"] = False
+        tc.cache_variables["HDF4_BUILD_XDR_LIB"] = True
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["HDF4_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf4").replace("\\", "/")
+        tc.cache_variables["HDF4_BUILD_FORTRAN"] = False
+        tc.cache_variables["HDF4_BUILD_UTILS"] = False
+        tc.cache_variables["HDF4_BUILD_TOOLS"] = False
+        tc.cache_variables["HDF4_BUILD_EXAMPLES"] = False
+        tc.cache_variables["HDF4_BUILD_JAVA"] = False
         if cross_building(self):
-            tc.variables["H4_PRINTF_LL_TEST_RUN"] = "0"
-            tc.variables["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
+            tc.cache_variables["H4_PRINTF_LL_TEST_RUN"] = "0"
+            tc.cache_variables["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        if self.options.szip_support == "with_szip":
+            deps.set_property("szip", "cmake_file_name", "SZIP")
+            deps.set_property("szip", "cmake_target_name", "SZIP::SZIP")
+        elif self.options.szip_support == "with_libaec":
+            deps.set_property("libaec", "cmake_file_name", "SZIP")
+            deps.set_property("libaec", "cmake_target_name", "SZIP::SZIP")
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        libs = ["JPEG::JPEG", "ZLIB::ZLIB"]
+        if self.options.szip_support:
+            libs.append("SZIP::SZIP")
+        save(self, os.path.join(self.source_folder, "CMakeFilters.cmake"),
+             "\nlink_libraries({})".format(" ".join(libs)), append=True)
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
