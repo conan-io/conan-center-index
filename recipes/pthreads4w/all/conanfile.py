@@ -1,12 +1,16 @@
-from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import chdir, collect_libs, copy, get, mkdir, replace_in_file
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
-
+required_conan_version = ">=1.57.0"
 
 class Pthreads4WConan(ConanFile):
     name = "pthreads4w"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/pthreads4w/"
     description = "POSIX Threads for Windows"
@@ -22,54 +26,55 @@ class Pthreads4WConan(ConanFile):
         "exception_scheme": "default",
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not is_msvc(self):
             self.build_requires("autoconf/2.71")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("pthreads4w can only target os=Windows")
+        
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure()
-        return self._autotools
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.generate()
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            if self.settings.compiler == "Visual Studio":
-                tools.replace_in_file("Makefile",
+        with chdir(self, self.source_folder):
+            if is_msvc(self):
+                makefile = os.path.join(self.source_folder, "Makefile")
+                replace_in_file(self, makefile,
                     "	copy pthreadV*.lib $(LIBDEST)",
                     "	if exist pthreadV*.lib copy pthreadV*.lib $(LIBDEST)")
-                tools.replace_in_file("Makefile",
+                replace_in_file(self, makefile,
                     "	copy libpthreadV*.lib $(LIBDEST)",
                     "	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MD\"", "")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MDd\"", "")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
-                tools.replace_in_file("Makefile", "XCFLAGS=\"/MTd\"", "")
+                replace_in_file(self, makefile, "XCFLAGS=\"/MD\"", "")
+                replace_in_file(self, makefile, "XCFLAGS=\"/MDd\"", "")
+                replace_in_file(self, makefile, "XCFLAGS=\"/MT\"", "")
+                replace_in_file(self, makefile, "XCFLAGS=\"/MTd\"", "")
                 target = {
                     "CPP": "VCE",
                     "SEH": "SSE",
@@ -78,14 +83,13 @@ class Pthreads4WConan(ConanFile):
                     target += "-static"
                 if self.settings.build_type == "Debug":
                     target += "-debug"
-                with tools.vcvars(self):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake {}".format(target))
-            else:
-                self.run("{}".format(tools.get_env("AUTOHEADER")), win_bash=tools.os_info.is_windows)
-                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
-                autotools = self._configure_autotools()
+                self.run(f"nmake {target}")
+            else:
+                autotools = Autotools(self)
+                self.run("autoheader")
+                autotools.autoreconf()
+                autotools.configure()
 
                 make_target = "GCE" if self.options.exception_scheme == "CPP" else "GC"
                 if not self.options.shared:
@@ -95,26 +99,24 @@ class Pthreads4WConan(ConanFile):
                 autotools.make(target=make_target, args=["-j1"])
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
-            if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake install DESTROOT={}".format(self.package_folder))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            if is_msvc(self):
+                self.run("nmake install DESTROOT={}".format(self.package_folder), env="conanbuild")
             else:
-                autotools = self._configure_autotools()
-                tools.mkdir(os.path.join(self.package_folder, "include"))
-                tools.mkdir(os.path.join(self.package_folder, "lib"))
-                autotools.make(target="install-headers")
+                autotools = Autotools(self)
+                mkdir(self, os.path.join(self.package_folder, "include"))
+                mkdir(self, os.path.join(self.package_folder, "lib"))
+                autotools.install(target="install-headers")
                 if self.options.shared:
-                    tools.mkdir(os.path.join(self.package_folder, "bin"))
-                    autotools.make(target="install-dlls")
-                    autotools.make(target="install-implib-default")
+                    mkdir(self, os.path.join(self.package_folder, "bin"))
+                    autotools.install(target="install-dlls")
+                    autotools.install(target="install-implib-default")
                 else:
-                    autotools.make(target="install-lib-default")
+                    autotools.install(target="install-lib-default")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.defines.append(self._exception_scheme_definition)
         if not self.options.shared:
             self.cpp_info.defines.append("__PTW32_STATIC_LIB")

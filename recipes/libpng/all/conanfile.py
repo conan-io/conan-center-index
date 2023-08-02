@@ -38,6 +38,11 @@ class LibpngConan(ConanFile):
     }
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
     def _has_neon_support(self):
         return "arm" in self.settings.arch
 
@@ -53,8 +58,17 @@ class LibpngConan(ConanFile):
     def _has_vsx_support(self):
         return "ppc" in self.settings.arch
 
+    @property
+    def _neon_msa_sse_vsx_mapping(self):
+        return {
+            "True": "on",
+            "False": "off",
+            "check": "check",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -87,21 +101,15 @@ class LibpngConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _neon_msa_sse_vsx_mapping(self):
-        return {
-            "True": "on",
-            "False": "off",
-            "check": "check",
-        }
-
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["PNG_TESTS"] = False
-        tc.variables["PNG_SHARED"] = self.options.shared
-        tc.variables["PNG_STATIC"] = not self.options.shared
-        tc.variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
-        tc.variables["PNG_PREFIX"] = self.options.api_prefix
+        tc.cache_variables["PNG_TESTS"] = False
+        tc.cache_variables["PNG_SHARED"] = self.options.shared
+        tc.cache_variables["PNG_STATIC"] = not self.options.shared
+        tc.cache_variables["PNG_DEBUG"] = self.settings.build_type == "Debug"
+        tc.cache_variables["PNG_PREFIX"] = self.options.api_prefix
+        if Version(self.version) < "1.6.38":
+            tc.cache_variables["CMAKE_PROJECT_libpng_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         if self._has_neon_support:
             tc.variables["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
         if self._has_msa_support:
@@ -120,26 +128,6 @@ class LibpngConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self.settings.os == "Windows":
-            if Version(self.version) <= "1.5.2":
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)',
-                                      'set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})')
-            else:
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                    'OUTPUT_NAME "${PNG_LIB_NAME}_static',
-                                    'OUTPUT_NAME "${PNG_LIB_NAME}')
-            if not is_msvc(self):
-                if Version(self.version) < "1.6.38":
-                    src_text = 'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'
-                else:
-                    src_text = '''COMMAND "${CMAKE_COMMAND}"
-                                 -E copy_if_different
-                                 $<TARGET_LINKER_FILE_NAME:${S_TARGET}>
-                                 $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}'''
-                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                      src_text,
-                                      'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
     def build(self):
         self._patch_sources()
@@ -168,8 +156,10 @@ class LibpngConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libpng")
         self.cpp_info.set_property("pkg_config_aliases", [f"libpng{major_min_version}"])
 
-        prefix = "lib" if is_msvc(self) else ""
+        prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         suffix = major_min_version if self.settings.os == "Windows" else ""
+        if is_msvc(self) or self._is_clang_cl:
+            suffix += "_static" if not self.options.shared else ""
         suffix += "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{prefix}png{suffix}"]
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:

@@ -1,0 +1,208 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.11)
++cmake_minimum_required(VERSION 3.15)
+ 
+ include(CheckSymbolExists)
+ 
+@@ -46,6 +46,7 @@ if( BUILD_32 )
+ endif( BUILD_32 )
+ 
+ # Ensure proper build type
++if(0)
+ if (NOT CMAKE_BUILD_TYPE)
+   message("-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release.")
+   set(CMAKE_BUILD_TYPE Release CACHE STRING
+@@ -65,12 +66,14 @@ endif (NOT CMAKE_BUILD_TYPE)
+ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+   add_definitions(-O3)
+ endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
++endif()
+ 
+ # For Windows
+ if( MSVC )
+ 	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
+ 	add_definitions( /D _USE_MATH_DEFINES) # defines M_PI for Visual Studio
+ 	add_definitions( /D _ENABLE_EXTENDED_ALIGNED_STORAGE) # this variable must be defined with VS2017 to acknowledge alignment changes of aligned_storage
++    add_compile_options(/bigobj)
+ endif()
+ 
+ #======================= installation =====================================
+@@ -120,19 +123,16 @@ if (Boost_MINOR_VERSION GREATER 47)
+ 	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
+ endif (Boost_MINOR_VERSION GREATER 47)
+ include_directories(${Boost_INCLUDE_DIRS})
+-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${Boost_LIBRARIES})
++set(EXTERNAL_LIBS ${EXTERNAL_LIBS} Boost::headers Boost::thread Boost::filesystem Boost::system Boost::program_options Boost::date_time Boost::chrono)
+ 
+ 
+ #--------------------
+ # DEPENDENCY: eigen 3
+ #--------------------
+-find_path(EIGEN_INCLUDE_DIR Eigen/Core
+-	/usr/local/include/eigen3
+-	/usr/include/eigen3
+-)
++find_package(Eigen3 REQUIRED CONFIG)
++set(EXTERNAL_LIBS ${EXTERNAL_LIBS} Eigen3::Eigen )
+ 
+ # Suppress Eigen's warning by adding it to the system's library
+-include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
+ 
+ #TODO: this should be a more standard way
+ #find_package(Eigen3 REQUIRED)
+@@ -143,10 +143,9 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
+ #--------------------
+ # DEPENDENCY: nabo
+ #--------------------
+-find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
++find_package(libnabo REQUIRED CONFIG)
+ #include(libnaboConfig)
+-include_directories(${libnabo_INCLUDE_DIRS})
+-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
++set(EXTERNAL_LIBS ${EXTERNAL_LIBS} libnabo::nabo)
+ message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+ 
+ #--------------------
+@@ -215,8 +214,7 @@ else(USE_SYSTEM_YAML_CPP)
+         #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
+         #include_directories(${yaml-cpp-pm_INCLUDE})
+ 
+-        get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
+-        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
++        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} yaml-cpp-pm )
+         set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
+         set(yamlcpp_FOUND)
+ 
+@@ -241,6 +239,7 @@ endif (POSIX_TIMERS AND NOT APPLE)
+ #========================== libpointmatcher itself ==============================
+ 
+ # Check the compiler version as we need full C++11 support.
++if(0)
+ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+ 	# using Clang
+ 	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.3")
+@@ -276,6 +275,7 @@ if (CMAKE_VERSION VERSION_LESS "3.1")
+ else ()
+ 	set (CMAKE_CXX_STANDARD 11)
+ endif ()
++endif()
+ 
+ # SOURCE
+ 
+@@ -350,12 +350,12 @@ file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
+ 
+ # MacOS and Windows deal with shared/dynamic library differently. For
+ # simplicity, we only authorize static library in those cases.
+-if(APPLE OR WIN32)
++if(0)
+ 
+ 	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+ 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+ 
+-else(APPLE OR WIN32)
++else()
+ 	set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
+ 
+ 	if (SHARED_LIBS)
+@@ -369,14 +369,15 @@ else(APPLE OR WIN32)
+ 		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+ 		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+ 	endif(SHARED_LIBS)
+-endif(APPLE OR WIN32)
++    set_target_properties(pointmatcher PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++    target_compile_features(pointmatcher PUBLIC cxx_std_11)
++endif()
+ 
+ target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher)
+ target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
+ target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
+ 
+ # link all libraries to libpointmatcher
+-add_definitions(-Wall)
+ #target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
+ target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
+ 
+@@ -432,11 +433,8 @@ endif(GENERATE_API_DOC)
+ #=============== trigger other makefile ======================
+ 
+ # Example programs
+-add_subdirectory(examples)
+ # Evaluation programs
+-add_subdirectory(evaluations)
+ # Unit testing
+-add_subdirectory(utest)
+ 
+ 
+ #=================== allow find_package() =========================
+@@ -451,6 +449,7 @@ add_subdirectory(utest)
+ # 1- local build #
+ 
+ # Register the local build in case one doesn't use "make install"
++if(0)
+ export(PACKAGE libpointmatcher)
+ 
+ # Create variable for the local build tree
+@@ -537,3 +536,4 @@ configure_file(
+ 
+ add_custom_target(uninstall
+     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
++endif()
+--- a/contrib/CMakeLists.txt
++++ b/contrib/CMakeLists.txt
+@@ -1,8 +1,6 @@
+ # External libraries packed with libpointmatcher
+ 
+ # GTest
+-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+-add_library(gtest gtest/gtest-all.cc)
+ 
+ # Wrapped yaml-cpp
+ if(NOT USE_SYSTEM_YAML_CPP)
+--- a/contrib/yaml-cpp-pm/CMakeLists.txt
++++ b/contrib/yaml-cpp-pm/CMakeLists.txt
+@@ -19,7 +19,6 @@ set(YAML_CPP_BUILD_CONTRIB  OFF)
+ # --> General
+ # see http://www.cmake.org/cmake/help/cmake2.6docs.html#variable:BUILD_SHARED_LIBS
+ #     http://www.cmake.org/cmake/help/cmake2.6docs.html#command:add_library
+-set(BUILD_SHARED_LIBS OFF)
+ 
+ # --> Apple
+ option(APPLE_UNIVERSAL_BIN "Apple: Build universal binary" OFF)
+@@ -55,7 +54,6 @@ endif()
+ 
+ if(WIN32)
+ 	if(BUILD_SHARED_LIBS)
+-		add_definitions(-D${PROJECT_NAME}_DLL)	# use or build Windows DLL
+ 	endif()
+ 	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+ 		set(CMAKE_INSTALL_PREFIX "C:/")
+@@ -63,7 +61,7 @@ if(WIN32)
+ endif()
+ 
+ # GCC / Clang specialities
+-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
++if(0)
+ 	### General stuff
+ 	if(WIN32)
+ 		set(CMAKE_SHARED_LIBRARY_PREFIX "")	# DLLs do not have a "lib" prefix
+@@ -105,7 +103,7 @@ endif()
+ ###
+ ### Library
+ ###
+-add_library(yaml-cpp-pm
++add_library(yaml-cpp-pm OBJECT
+ 	${sources}
+ 	${public_headers}
+ 	${private_headers}
+@@ -113,6 +111,9 @@ add_library(yaml-cpp-pm
+ 	${contrib_public_headers}
+ 	${contrib_private_headers}
+ )
++if(BUILD_SHARED_LIBS)
++    set_target_properties(yaml-cpp-pm PROPERTIES POSITION_INDEPENDENT_CODE ON)
++endif()
+ 
+ set_target_properties(yaml-cpp-pm PROPERTIES
+ 	VERSION "${YAML_CPP_VERSION}"

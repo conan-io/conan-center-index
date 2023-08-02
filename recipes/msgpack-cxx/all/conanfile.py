@@ -14,6 +14,7 @@ class MsgpackCXXConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/msgpack/msgpack-c"
     topics = ("msgpack", "message-pack", "serialization", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "use_boost": [True, False],

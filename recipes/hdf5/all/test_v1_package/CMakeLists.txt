@@ -1,28 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package LANGUAGES C CXX)
+project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-set(HDF5_COMPONENTS C)
-if (HDF5_HL)
-    list(APPEND HDF5_COMPONENTS HL)
-endif()
-if (HDF5_CXX)
-    list(APPEND HDF5_COMPONENTS CXX)
-endif()
-find_package(HDF5 COMPONENTS ${HDF5_COMPONENTS})
-
-add_executable(${PROJECT_NAME} test_package.c)
-
-if (TARGET hdf5::hdf5_cpp)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE CONAN_HDF5_CXX)
-    target_sources(${PROJECT_NAME} PRIVATE test_package.cpp)
-    target_link_libraries(${PROJECT_NAME} PRIVATE hdf5::hdf5_cpp)
-elseif (HDF5_IS_PARALLEL)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE CONAN_HDF5_PARALLEL)
-    target_sources(${PROJECT_NAME} PRIVATE test_parallel.c)
-    target_link_libraries(${PROJECT_NAME} PRIVATE hdf5::hdf5)
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE hdf5::hdf5)
-endif()
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+    ${CMAKE_CURRENT_BINARY_DIR}/test_package)

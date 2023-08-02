@@ -9,6 +9,7 @@ special meaning:
 
   * [Bump dependencies](#bump-dependencies)
   * [Bump version](#bump-version)
+  * [C3I Conan2 Ready](#c3i-conan2-ready)
   * [Infrastructure](#infrastructure)
   * [Stale](#stale)
   * [Unexpected Error](#unexpected-error)
@@ -38,6 +39,16 @@ For now, only [SEMVER](https://semver.org/#semantic-versioning-200) and `<MAJOR.
 > These pull-requests will be merged right away without requiring any approval (CI and CLA checks must have passed).
 
 If the pull request modifies anything else, the label won't be assigned, we need to be very careful about false positives.
+
+## C3I Conan2 Ready
+
+Label [`c3i-conan2-ready`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22c3i-conan2-ready%22)
+is assigned by the bot to pull-requests that are just adding a new package references which passed by Conan v2 and are not listed in `.c3i/conan_v2_ready_references.yml`.
+This is a regression test, in case package is working with Conan v2, it can not be merged in a future pull request in case of failure.
+
+> These pull-requests will be merged right away without requiring any approval (CI and CLA checks must have passed).
+
+Only team members can open a pull request with these changes.
 
 ## Infrastructure
 

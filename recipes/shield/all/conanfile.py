@@ -1,32 +1,43 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class ShieldConan(ConanFile):
     name = "shield"
-    topics = ("utility", "warnings", "suppression")
     description = "C++ warning suppression headers."
-    settings = "os", "compiler", "build_type", "arch"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/holoplot/shield"
-    license = "MIT"
+    topics = ("utility", "warnings", "suppression", "header-only")
+    package_type = "header-library"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "shield"
         self.cpp_info.names["cmake_find_package_multi"] = "shield"

@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class VolkConan(ConanFile):
@@ -22,6 +22,7 @@ class VolkConan(ConanFile):
     )
     topics = ("vulkan", "loader", "extension", "entrypoint", "graphics")
 
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -35,24 +36,17 @@ class VolkConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"vulkan-headers/{self.version}")
+        self.requires(f"vulkan-headers/{self.version}", transitive_headers=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

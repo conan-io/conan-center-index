@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, save
+from conan.tools.layout import basic_layout
 import os
 import textwrap
 
@@ -14,15 +15,18 @@ class EmbeddedTemplateLibraryConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.etlcpp.com/"
     topics = ("cpp", "embedded", "template", "container", "utility", "framework", "messaging")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -59,9 +63,7 @@ class EmbeddedTemplateLibraryConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "etl")
 
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed

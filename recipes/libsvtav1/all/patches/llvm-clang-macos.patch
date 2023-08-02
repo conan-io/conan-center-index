@@ -1,15 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4d2dd735..7cabadd0 100644
+index 25a40f09..9c861554 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -205,8 +205,11 @@ if(UNIX)
+@@ -203,10 +203,12 @@ endif()
+ if(UNIX)
+     if(APPLE)
          set(CMAKE_MACOSX_RPATH 1)
-         set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-         set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+-        set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+-        set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 -        set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 -        set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-+        if(NOT CMAKE_RANLIB MATCHES "llvm-ranlib$")
-+            # we are using apple-clang
++        if(CMAKE_C_COMPILER_ID MATCHES "AppleClang")
++            set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
++            set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 +            set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 +            set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 +        endif()

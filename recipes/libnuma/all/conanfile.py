@@ -12,10 +12,11 @@ class LibnumaConan(ConanFile):
     name = "libnuma"
     description = "NUMA support for Linux."
     license = "LGPL-2.1-or-later"
-    topics = ("numa")
+    topics = ("numa",)
     homepage = "https://github.com/numactl/numactl"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,12 +40,11 @@ class LibnumaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libnuma is only supported on Linux")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)

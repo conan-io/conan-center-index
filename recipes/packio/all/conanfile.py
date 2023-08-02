@@ -1,7 +1,7 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+from conan import ConanFile
+from conan.tools import  files, scm, build
+from conan.errors import ConanInvalidConfiguration
 
 
 class PackioConan(ConanFile):
@@ -32,24 +32,31 @@ class PackioConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if scm.Version(self.version) < "2.4.0":
+            return {
+                "apple-clang": 10,
+                "clang": 6,
+                "gcc": 7,
+                "Visual Studio": 16,
+            }
         return {
-            "apple-clang": 10,
-            "clang": 6,
-            "gcc": 7,
+            "apple-clang": 13,
+            "clang": 11,
+            "gcc": 9,
             "Visual Studio": 16,
         }
 
     def config_options(self):
-        if tools.Version(self.version) < "1.2.0":
+        if scm.Version(self.version) < "1.2.0":
             del self.options.standalone_asio
-        if tools.Version(self.version) < "2.0.0":
+        if scm.Version(self.version) < "2.0.0":
             del self.options.msgpack
             del self.options.nlohmann_json
-        if tools.Version(self.version) < "2.1.0":
+        if scm.Version(self.version) < "2.1.0":
             del self.options.boost_json
 
     def requirements(self):
-        if self.options.get_safe("msgpack") or tools.Version(self.version) < "2.0.0":
+        if self.options.get_safe("msgpack") or scm.Version(self.version) < "2.0.0":
             self.requires("msgpack/3.2.1")
 
         if self.options.get_safe("nlohmann_json"):
@@ -66,17 +73,17 @@ class PackioConan(ConanFile):
             self.requires("asio/1.18.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        files.get(conanfile=self, **self.conan_data["sources"][self.version])
         extracted_dir = "packio-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+            build.check_min_cppstd(self, "17")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
+            if scm.Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("packio requires C++17, which your compiler does not support.")
         else:
             self.output.warn("packio requires C++17. Your compiler is unknown. Assuming it supports C++17.")
@@ -89,7 +96,7 @@ class PackioConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if tools.Version(self.version) < "2.1.0":
+        if scm.Version(self.version) < "2.1.0":
             if self.options.get_safe("standalone_asio"):
                 self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
         else:

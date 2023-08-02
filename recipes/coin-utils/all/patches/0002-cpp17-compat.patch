@@ -1,0 +1,75 @@
+--- a/CoinUtils/src/CoinOslC.h
++++ b/CoinUtils/src/CoinOslC.h
+@@ -34,30 +34,30 @@
+ extern "C" {
+ #endif
+ 
+-int c_ekkbtrn(register const EKKfactinfo *fact,
++int c_ekkbtrn(const EKKfactinfo *fact,
+   double *dwork1,
+   int *mpt, int first_nonzero);
+-int c_ekkbtrn_ipivrw(register const EKKfactinfo *fact,
++int c_ekkbtrn_ipivrw(const EKKfactinfo *fact,
+   double *dwork1,
+   int *mpt, int ipivrw, int *spare);
+ 
+-int c_ekketsj(register /*const*/ EKKfactinfo *fact,
++int c_ekketsj(/*const*/ EKKfactinfo *fact,
+   double *dwork1,
+   int *mpt2, double dalpha, int orig_nincol,
+   int npivot, int *nuspikp,
+   const int ipivrw, int *spare);
+-int c_ekkftrn(register const EKKfactinfo *fact,
++int c_ekkftrn(const EKKfactinfo *fact,
+   double *dwork1,
+   double *dpermu, int *mpt, int numberNonZero);
+ 
+-int c_ekkftrn_ft(register EKKfactinfo *fact,
++int c_ekkftrn_ft(EKKfactinfo *fact,
+   double *dwork1, int *mpt, int *nincolp);
+-void c_ekkftrn2(register EKKfactinfo *fact, double *dwork1,
++void c_ekkftrn2(EKKfactinfo *fact, double *dwork1,
+   double *dpermu1, int *mpt1, int *nincolp,
+   double *dwork1_ft, int *mpt_ft, int *nincolp_ft);
+ 
+-int c_ekklfct(register EKKfactinfo *fact);
+-int c_ekkslcf(register const EKKfactinfo *fact);
++int c_ekklfct(EKKfactinfo *fact);
++int c_ekkslcf(const EKKfactinfo *fact);
+ inline void c_ekkscpy(int n, const int *marr1, int *marr2)
+ {
+   CoinMemcpyN(marr1, n, marr2);
+--- a/CoinUtils/src/CoinOslFactorization2.cpp
++++ b/CoinUtils/src/CoinOslFactorization2.cpp
+@@ -21,9 +21,9 @@
+ extern int ets_count;
+ extern int ets_check;
+ #endif
+-#define COIN_REGISTER register
++#define COIN_REGISTER
+ #define COIN_REGISTER2
+-#define COIN_REGISTER3 register
++#define COIN_REGISTER3
+ #ifdef COIN_USE_RESTRICT
+ #define COIN_RESTRICT2 __restrict
+ #else
+--- a/CoinUtils/src/CoinOslFactorization3.cpp
++++ b/CoinUtils/src/CoinOslFactorization3.cpp
+@@ -1362,7 +1362,7 @@ static void c_ekkmltf(const EKKfactinfo *fact, double *dluval, int *hcoli,
+     }
+   }
+ } /* c_ekkmltf */
+-int c_ekklfct(register EKKfactinfo *fact)
++int c_ekklfct(EKKfactinfo *fact)
+ {
+   const int nrow = fact->nrow;
+   int ninbas = fact->xcsadr[nrow + 1] - 1;
+@@ -2591,7 +2591,7 @@ inline void c_ekkclcp2(const int *hcol, const double *dels, const int *mrstrt,
+     }
+   }
+ } /* c_ekkclcp */
+-int c_ekkslcf(register const EKKfactinfo *fact)
++int c_ekkslcf(const EKKfactinfo *fact)
+ {
+   int *hrow = fact->xeradr;
+   int *hcol = fact->xecadr;

@@ -1,0 +1,5 @@
+sources:
+  "1.0.0":
+    url:
+      - "https://github.com/alibaba/async_simple/archive/refs/tags/1.0.tar.gz"
+    sha256: "b243fb7af5d61b534fe18b662d16498392bbce1deffdc68e58829aa31db7badf"

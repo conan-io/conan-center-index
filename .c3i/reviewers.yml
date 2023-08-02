@@ -20,7 +20,7 @@ reviewers:
     request_reviews: false
   - user: "SSE4"
     type: "community"
-    request_reviews: true
+    request_reviews: false
   - user: "uilianries"
     type: "team"
     request_reviews: true
@@ -70,5 +70,17 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "RubenRBS"
+    type: "team"
+    request_reviews: true
+  - user: "System-Arch"
+    type: "community"
+    request_reviews: false
+  - user: "samuel-emrys"
+    type: "community"
+    request_reviews: false
+  - user: "StellaSmith"
+    type: "community"
+    request_reviews: false
+  - user: "davidsanfal"
     type: "team"
     request_reviews: false

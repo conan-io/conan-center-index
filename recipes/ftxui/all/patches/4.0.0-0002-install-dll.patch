@@ -1,0 +1,12 @@
+diff --git a/cmake/ftxui_install.cmake b/cmake/ftxui_install.cmake
+index 19e68d0..19d22c0 100644
+--- a/cmake/ftxui_install.cmake
++++ b/cmake/ftxui_install.cmake
+@@ -5,6 +5,7 @@ endif()
+ include(GNUInstallDirs)
+ install(TARGETS screen dom component
+     EXPORT ftxui-export
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+ )

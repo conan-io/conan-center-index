@@ -23,7 +23,7 @@ class XZUtilsConan(ConanFile):
     homepage = "https://tukaani.org/xz"
     topics = ("lzma", "xz", "compression")
     license = "Unlicense", "LGPL-2.1-or-later",  "GPL-2.0-or-later", "GPL-3.0-or-later"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -74,8 +74,7 @@ class XZUtilsConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if is_msvc(self):

@@ -20,11 +20,13 @@ class OpusConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "fixed_point": [True, False],
+        "stack_protector": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "fixed_point": False,
+        "stack_protector": True,
     }
 
     def export_sources(self):
@@ -53,6 +55,7 @@ class OpusConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["OPUS_FIXED_POINT"] = self.options.fixed_point
+        tc.variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
         tc.generate()
 
     def build(self):

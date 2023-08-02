@@ -5,13 +5,12 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc, unix_path, msvc_runtime_flag
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, msvc_runtime_flag
 
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -130,7 +129,7 @@ class OpenH264Conan(ConanFile):
                 libcxx = str(self.settings.compiler.libcxx)
                 stl_lib = f'$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib{"c++_static.a" if libcxx == "c++_static" else "c++_shared.so"}' \
                           + "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/libc++abi.a"
-                ndk_home = os.environ["ANDROID_NDK_HOME"]
+                ndk_home = self.conf.get("tools.android:ndk_path")
                 args.extend([
                     f"NDKLEVEL={self.settings.os.api_level}",
                     f"STL_LIB={stl_lib}",
@@ -150,7 +149,8 @@ class OpenH264Conan(ConanFile):
 
         if is_msvc(self):
             tc.extra_cxxflags.append("-nologo")
-            if not (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "12"):
+            if check_min_vs(self, "180", raise_invalid=False):
+                # https://github.com/conan-io/conan/issues/6514
                 tc.extra_cxxflags.append("-FS")
         # not needed during and after 2.3.1
         elif self.settings.compiler in ("apple-clang",):

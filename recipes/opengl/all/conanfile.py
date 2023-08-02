@@ -13,6 +13,7 @@ class SysConfigOpenGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengl.org/"
     license = "MIT"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -35,7 +36,7 @@ class SysConfigOpenGLConan(ConanFile):
         pacman.install(["libglvnd"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["Mesa-libGL-devel"], update=True, check=True)
+        zypper.install(["Mesa-libGL-devel", "glproto-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
         pkg.install(["libglvnd"], update=True, check=True)

@@ -1,4 +1,7 @@
 sources:
+  "2.13.10":
+    url: "https://github.com/catchorg/Catch2/archive/v2.13.10.tar.gz"
+    sha256: "d54a712b7b1d7708bc7a819a8e6e47b2fde9536f487b89ccbca295072a7d9943"
   "2.13.9":
     url: "https://github.com/catchorg/Catch2/archive/v2.13.9.tar.gz"
     sha256: "06dbc7620e3b96c2b69d57bf337028bf245a211b3cddb843835bfe258f427a52"

@@ -1,8 +1,14 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.53.0"
 
 class LibBsdConan(ConanFile):
     name = "libbsd"
@@ -12,6 +18,7 @@ class LibBsdConan(ConanFile):
     license = ("ISC", "MIT", "Beerware", "BSD-2-clause", "BSD-3-clause", "BSD-4-clause")
     homepage = "https://libbsd.freedesktop.org/wiki/"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,72 +28,66 @@ class LibBsdConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
-
-    _autotools = None
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        self.tool_requires("libtool/2.4.7")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
+    def export_sources(self):
+        export_conandata_patches(self)
+    
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+           self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+    
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        if is_apple_os(self):
+            tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
     
     def validate(self):
-        if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
+        if not is_apple_os(self) and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if tools.is_apple_os(self.settings.os):
-            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
-        conf_args = [
-        ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv")
-        autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
+        autotools = Autotools(self)
         autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["bsd"].libs = ["bsd"]
-        self.cpp_info.components["bsd"].names["pkg_config"] = "libbsd"
+        self.cpp_info.components["bsd"].set_property("pkg_config_name", "libbsd")
 
         self.cpp_info.components["libbsd-overlay"].libs = []
         self.cpp_info.components["libbsd-overlay"].requires = ["bsd"]
         self.cpp_info.components["libbsd-overlay"].includedirs.append(os.path.join("include", "bsd"))
         self.cpp_info.components["libbsd-overlay"].defines = ["LIBBSD_OVERLAY"]
-        self.cpp_info.components["libbsd-overlay"].names["pkg_config"] = "libbsd-overlay"
+        self.cpp_info.components["libbsd-overlay"].set_property("pkg_config_name", "libbsd-overlay")
 
         # on apple-clang, GNU .init_array section is not supported
         if self.settings.compiler != "apple-clang":
@@ -95,4 +96,5 @@ class LibBsdConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["libbsd-ctor"].exelinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
                 self.cpp_info.components["libbsd-ctor"].sharedlinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
-            self.cpp_info.components["libbsd-ctor"].names["pkg_config"] = "libbsd-ctor"
+            self.cpp_info.components["libbsd-ctor"].set_property("pkg_config_name", "libbsd-ctor")
+
