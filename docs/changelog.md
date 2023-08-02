@@ -1,5 +1,16 @@
 # Changelog
 
+### 19-Jul-2023 - 09:45 CEST
+
+- [fix] Fix message processing if no message is passed.
+- [fix] Fix automatic merge priority to follow the correct PR order.
+- [fix] Waiting for Conan 2.x result after building Conan 1.x.
+- [fix] Bump version should not be tagged when removing old versions.
+- [feature] Improve internal logs to get more information about epochs.
+- [feature] Add an option to disable some jobs.
+- [feature] Disable branch indexing job runs on cci multibranch job.
+- [feature] Enable Conan 2.0.8
+
 ### 04-May-2023 - 16:05 CEST
 
 - [bugfix] Fix cppstd issues when selecting the value to use in profiles.
