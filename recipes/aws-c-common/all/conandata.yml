@@ -56,4 +56,8 @@ sources:
 patches:
   "0.4.25":
     - patch_file: "patches/0001-disable-fPIC.patch"
+      patch_description: "Don't enable position independent code (will be handled by conan)"
+      patch_type: "conan"
     - patch_file: "patches/0002-no-warnings-as-errors.patch"
+      patch_description: "Don't make all warnings into errors"
+      patch_type: "portability"
