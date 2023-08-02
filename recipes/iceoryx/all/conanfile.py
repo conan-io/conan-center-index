@@ -5,17 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    mkdir,
-    rename,
-    replace_in_file,
-    rmdir,
-    save,
-)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
@@ -279,7 +269,7 @@ class IceoryxConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         # FIXME: We should provide 3 CMake config files:
@@ -298,9 +288,7 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[lib_name].requires = requires
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [
-                    self._module_file_rel_path
-                ]
+                self.cpp_info.components[lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
         if Version(self.version) >= "2.0.0":
             _register_components(self._iceoryx_components["2.0.0"])
