@@ -50,6 +50,7 @@ class IgnitionCmakeConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "bin"))
         version_major = Version(self.version).major
         cmake_config_files_dir = os.path.join(self.package_folder, "lib", "cmake", f"ignition-cmake{version_major}")
         files = os.listdir(cmake_config_files_dir)
@@ -70,12 +71,12 @@ class IgnitionCmakeConan(ConanFile):
 
     def _create_cmake_module_variables(self, module_file, version):
         # the version info is needed by downstream ignition-dependencies
-        content = textwrap.dedent("""\
-            set(ignition-cmake{major}_VERSION_MAJOR {major})
-            set(ignition-cmake{major}_VERSION_MINOR {minor})
-            set(ignition-cmake{major}_VERSION_PATCH {patch})
-            set(ignition-cmake{major}_VERSION_STRING "{major}.{minor}.{patch}")
-        """.format(major=version.major, minor=version.minor, patch=version.patch))
+        content = textwrap.dedent(f"""\
+            set(ignition-cmake{version.major}_VERSION_MAJOR {version.major})
+            set(ignition-cmake{version.major}_VERSION_MINOR {version.minor})
+            set(ignition-cmake{version.major}_VERSION_PATCH {version.patch})
+            set(ignition-cmake{version.major}_VERSION_STRING "{version.major}.{version.minor}.{version.patch}")
+        """)
         save(self, module_file, content)
 
 
