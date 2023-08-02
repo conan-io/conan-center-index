@@ -42,7 +42,7 @@ class UtfCppConan(ConanFile):
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
+        content = "add_library(utf8::cpp ALIAS utf8cpp)"
         for alias, aliased in targets.items():
             content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
@@ -59,12 +59,12 @@ class UtfCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "utf8cpp")
         self.cpp_info.set_property("cmake_target_name", "utf8cpp")
+        self.cpp_info.set_property("cmake_target_aliases", ["utf8::cpp"])
         self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "utf8cpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "utf8cpp"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+            self.cpp_info.names[generator] = "utf8cpp"
+            self.cpp_info.build_modules[generator] = [self._module_file_rel_path]
