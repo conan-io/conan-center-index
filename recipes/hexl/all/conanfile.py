@@ -85,9 +85,6 @@ class HexlConan(ConanFile):
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("Hexl only supports x86 architecture")
 
-        if self.options.shared and is_msvc(self):
-            raise ConanInvalidConfiguration("Hexl only supports static linking with msvc")
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24]")
 
@@ -112,6 +109,8 @@ class HexlConan(ConanFile):
 
         tc.variables["HEXL_SHARED_LIB"] = self.options.shared
         tc.variables["HEXL_CROSS_COMPILED"] = cross_building(self)
+
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
 
         tc.generate()
 
