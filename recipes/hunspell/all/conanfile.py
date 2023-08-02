@@ -48,7 +48,7 @@ class HunspellConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.name} requires at least {self.settings.compiler} {min_version}")
 
     def export_sources(self):
-        # FIXME: Remove once the pending upstream PR for CMake support is merged
+        # TODO: Remove once PR is merged: https://github.com/hunspell/hunspell/pull/704/
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
