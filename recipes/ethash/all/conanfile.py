@@ -34,8 +34,8 @@ class EthashConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "12",
-            "clang": "15",
+            "gcc": "11",
+            "clang": "13",
             "apple-clang": "14.1",
         }
 
