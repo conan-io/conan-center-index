@@ -46,7 +46,7 @@ class OpenSimulationInterfaceConan(ConanFile):
         self.requires("protobuf/3.21.9", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.options.shared and self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
