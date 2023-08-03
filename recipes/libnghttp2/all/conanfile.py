@@ -63,17 +63,17 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_app or self.options.get_safe("with_asio"):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_app:
-            self.requires("c-ares/1.19.0")
+            self.requires("c-ares/1.19.1")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.10.4")
+            self.requires("libxml2/2.11.4")
             self.requires("zlib/1.2.13")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.3.0")
         if self.options.with_hpack:
             self.requires("jansson/2.14")
         if self.options.get_safe("with_asio"):
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0")
 
     def validate(self):
         if self.options.get_safe("with_asio") and is_msvc(self):
