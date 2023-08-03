@@ -1,11 +1,12 @@
 import os
+import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -212,7 +213,7 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.variables["OSG_WITH_ASIO"] = self.options.get_safe("with_asio", False)
         tc.variables["OSG_WITH_ZEROCONF"] = False
         tc.variables["OSG_WITH_LIBLAS"] = False
-        tc.variables["OSG_WITH_GIF"] = self.options.get_safe("with_gif", False)
+        tc.variables["OSG_WITH_GIFLIB"] = self.options.get_safe("with_gif", False)
         tc.variables["OSG_WITH_JPEG"] = self.options.get_safe("with_jpeg", False)
         tc.variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
         tc.variables["OSG_WITH_TIFF"] = self.options.with_tiff
@@ -230,14 +231,29 @@ class OpenSceneGraphConanFile(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("freetype", "cmake_module_file_name", "FREETYPE")
+        deps.set_property("giflib", "cmake_file_name", "GIFLIB")
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         for package in ("Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"):
             # Prefer conan's find package scripts over osg's
             os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
+        for path in (self.source_path / "src" / "osgPlugins").rglob("CMakeLists.txt"):
+            content = path.read_text()
+            # Correct usage of *_LIBRARY variables to *_LIBRARIES
+            content = content.replace("_LIBRARY", "_LIBRARIES")
+            # Allow explicit control of plugins via OSG_WITH_* variables
+            # e.g. replace IF(FFMPEG_FOUND) with IF(OSG_WITH_FFMPEG)
+            content = re.sub(r"\b([A-Z]+)_FOUND\b", r"OSG_WITH_\1", content)
+            path.write_text(content)
+        # Fix file(to_cmake_path ...) usage
+        path = self.source_path / "CMakeModules" / "OsgMacroUtils.cmake"
+        content = path.read_text()
+        content = re.sub(r'FILE\(TO_CMAKE_PATH TMPVAR "CMAKE_(\w+)_OUTPUT_DIRECTORY/\$\{RELATIVE_OUTDIR}"\)',
+                         r'FILE(TO_CMAKE_PATH "\${CMAKE_\1_OUTPUT_DIRECTORY}/\${RELATIVE_OUTDIR}" TMPVAR)',
+                         content)
+        path.write_text(content)
+        apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
@@ -249,7 +265,7 @@ class OpenSceneGraphConanFile(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, True)
@@ -264,7 +280,6 @@ class OpenSceneGraphConanFile(ConanFile):
         # Unfortunately, the cmake_find_package generators don't currently allow directly setting variables,
         # but it will set the last three of these if the name of the package is OPENSCENEGRAPH (it uses
         # the filename for the first, so OpenSceneGraph_FOUND gets set, not OPENSCENEGRAPH_FOUND)
-        # TODO: set OPENSCENEGRAPH_FOUND in cmake_find_package and cmake_find_package_multi
         self.cpp_info.set_property("cmake_file_name", "OpenSceneGraph")
         self.cpp_info.set_property("cmake_target_name", "OPENSCENEGRAPH::OPENSCENEGRAPH")
 
