@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rm
+from conan.tools.files import copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -68,9 +68,6 @@ class Opene57Conan(ConanFile):
         self.requires("xerces-c/3.2.4")
 
     def validate(self):
-        if self.options.shared:
-            raise ConanInvalidConfiguration("OpenE57 cannot be built as shared library yet")
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
 
@@ -91,14 +88,17 @@ class Opene57Conan(ConanFile):
         tc.variables["BUILD_TESTS"] = False
         if is_msvc(self):
             tc.variables["BUILD_WITH_MT"] = is_msvc_static_runtime(self)
-        else:
-            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+    def _patch_sources(self):
+        # Do not raise an error for shared builds
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -109,7 +109,6 @@ class Opene57Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         os.remove(os.path.join(self.package_folder, "CHANGELOG.md"))
-        rm(self, "*.dll", os.path.join(self.package_folder, "bin"), recursive=True)
 
     def package_info(self):
         lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
