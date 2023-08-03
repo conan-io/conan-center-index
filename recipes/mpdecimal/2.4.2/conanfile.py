@@ -71,10 +71,6 @@ class MpdecimalConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _libmpdec_folder(self):
-        return os.path.join(self.source_folder, "libmpdec")
-
     def generate(self):
         if is_msvc(self):
             vcvars = VCVars(self)
@@ -173,42 +169,42 @@ class MpdecimalConan(ConanFile):
             else:
                 replace_in_file(self, mpdec_makefile_in, "libmpdec.so", f"libmpdec{shared_ext}")
 
-    def _build_msvc(self):
-        libmpdec_folder = self.source_path / "libmpdec"
-        libmpdecpp_folder = self.source_path / "libmpdec++"
-        vcbuild_folder = self.build_path / "vcbuild"
-        arch_ext = "{}".format(32 if self.settings.arch == "x86" else 64)
-        dist_folder = vcbuild_folder / f"dist{arch_ext}"
-        mkdir(self, dist_folder)
+    @property
+    def _libmpdec_folder(self):
+        return self.source_path / "libmpdec"
 
+    @property
+    def _dist_folder(self):
+        vcbuild_folder = self.build_path / "vcbuild"
+        arch_ext = "32" if self.settings.arch == "x86" else "64"
+        return vcbuild_folder / f"dist{arch_ext}"
+
+    def _build_msvc(self):
+        libmpdec_folder = self._libmpdec_folder
         copy(self, "Makefile.vc", libmpdec_folder, self.build_path)
         rename(self, self.build_path / "Makefile.vc", libmpdec_folder / "Makefile")
 
         ext = "dll" if self.options.shared else "lib"
         mpdec_target = f"libmpdec-{self.version}.{ext}"
 
-        builds = [[libmpdec_folder, mpdec_target]]
+        with chdir(self, libmpdec_folder):
+            self.run("nmake -f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}".format(
+                target=mpdec_target,
+                machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],
+                # FIXME: else, use ansi32 and ansi64
+                debug="1" if self.settings.build_type == "Debug" else "0",
+                dll="1" if self.options.shared else "0",
+            ))
 
-        for build_dir, target in builds:
-            with chdir(self, build_dir):
-                self.run("""nmake -f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
-                    target=target,
-                    machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],
-                    # FIXME: else, use ansi32 and ansi64
-                    debug="1" if self.settings.build_type == "Debug" else "0",
-                    dll="1" if self.options.shared else "0",
-                ))
-
+        dist_folder = self._dist_folder
+        mkdir(self, dist_folder)
         copy(self, "mpdecimal.h", libmpdec_folder, dist_folder)
         if self.options.shared:
-            copy(self, f"libmpdec-{self.version}.dll", libmpdec_folder, dist_folder)
-            copy(self, f"libmpdec-{self.version}.dll.exp", libmpdec_folder, dist_folder)
-            copy(self, f"libmpdec-{self.version}.dll.lib", libmpdec_folder, dist_folder)
+            copy(self, "*.dll", libmpdec_folder, dist_folder)
+            copy(self, "*.dll.exp", libmpdec_folder, dist_folder)
+            copy(self, "*.dll.lib", libmpdec_folder, dist_folder)
         else:
-            copy(self, f"libmpdec-{self.version}.lib", libmpdec_folder, dist_folder)
-        if self.options.cxx:
-            copy(self, "decimal.hh", libmpdecpp_folder, dist_folder)
-            copy(self, f"libmpdec++-{self.version}.lib", libmpdecpp_folder, dist_folder)
+            copy(self, "*.lib", libmpdec_folder, dist_folder)
 
     def build(self):
         self._patch_sources()
@@ -223,15 +219,11 @@ class MpdecimalConan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            distfolder = os.path.join(self.build_folder, self.source_folder, "vcbuild",
-                "dist{}".format(32 if self.settings.arch == "x86" else 64),
-            )
-            copy(self,"vc*.h",
-                 src=os.path.join(self.source_folder, "libmpdec"),
-                 dst=os.path.join(self.package_folder, "include"))
-            copy(self, "*.h", src=distfolder, dst=os.path.join(self.package_folder, "include"))
-            copy(self, "*.lib", src=distfolder, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", src=distfolder, dst=os.path.join(self.package_folder, "bin"))
+            dist_folder = self._dist_folder
+            copy(self, "vc*.h", src=self._libmpdec_folder, dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.h", src=dist_folder, dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.lib", src=dist_folder, dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", src=dist_folder, dst=os.path.join(self.package_folder, "bin"))
         else:
             with chdir(self, os.path.join(self.source_folder)):
                 autotools = Autotools(self)
@@ -240,7 +232,7 @@ class MpdecimalConan(ConanFile):
 
     def package_info(self):
         if is_msvc(self):
-            self.cpp_info.libs = ["libmpdec-{}".format(self.version)]
+            self.cpp_info.libs = [f"libmpdec-{self.version}.dll"]
         else:
             self.cpp_info.libs = ["mpdec"]
         if self.options.shared:
