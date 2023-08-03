@@ -125,8 +125,9 @@ class OpenFstConan(ConanFile):
             "--enable-ngram-fsts={}".format(yes_no(self.options.enable_ngram_fsts)),
             "--enable-pdt={}".format(yes_no(self.options.enable_pdt)),
             "--enable-special={}".format(yes_no(self.options.enable_special)),
-            "LIBS=-lpthread",
         ]
+        tc.extra_cflags.append("-pthread")
+        tc.extra_cxxflags.append("-pthread")
         tc.generate()
 
     def _patch_sources(self):
