@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -157,42 +158,44 @@ class MicroprofileConan(ConanFile):
         cmake.install()
 
     def _create_defines(self):
-        return [
-            "MICROPROFILE_EXPORT",
-            ("MICROPROFILE_ENABLED", ("1" if self.options.microprofile_enabled else "0")),
-            ("MICROPROFILE_DEBUG", ("1" if self.settings.build_type == "Debug" else "0")),
-            ("MICROPROFILE_MINIZ", ("1" if self.options.with_miniz else "0")),
-            ("MICROPROFILE_BIG_ENDIAN", ("1" if self.options.use_big_endian else "0")),
-            ("MICROPROFILE_GPU_TIMERS", ("1" if self.options.enable_timer else "0")),
-            ("MICROPROFILE_GPU_TIMER_CALLBACKS", ("1" if self.options.enable_gpu_timer_callbacks else "0")),
-            ("MICROPROFILE_GPU_TIMERS_GL", ("1" if self.options.enable_timer == "gl" else "0")),
-            ("MICROPROFILE_GPU_TIMERS_D3D11", ("1" if self.options.enable_timer == "d3d11" else "0")),
-            ("MICROPROFILE_GPU_TIMERS_D3D12", ("1" if self.options.enable_timer == "d3d12" else "0")),
-            ("MICROPROFILE_GPU_TIMERS_VULKAN", ("1" if self.options.enable_timer == "vulkan" else "0")),
-            ("MICROPROFILE_PER_THREAD_BUFFER_SIZE", str(self.options.thread_buffer_size)),
-            ("MICROPROFILE_PER_THREAD_GPU_BUFFER_SIZE", str(self.options.thread_gpu_buffer_size)),
-            ("MICROPROFILE_MAX_FRAME_HISTORY", str(self.options.max_frame_history)),
-            ("MICROPROFILE_WEBSERVER_PORT", str(self.options.webserver_port)),
-            ("MICROPROFILE_WEBSERVER_MAXFRAMES", str(self.options.webserver_maxframes)),
-            ("MICROPROFILE_WEBSERVER_SOCKET_BUFFER_SIZE", str(self.options.webserver_socket_buffer_size)),
-            ("MICROPROFILE_GPU_FRAME_DELAY", str(self.options.gpu_frame_delay)),
-            ("MICROPROFILE_NAME_MAX_LEN", str(self.options.name_max_length)),
-            ("MICROPROFILE_MAX_TIMERS", str(self.options.max_timers)),
-            ("MICROPROFILE_MAX_THREADS", str(self.options.max_threads)),
-            ("MICROPROFILE_MAX_STRING", str(self.options.max_string_length)),
-            ("MICROPROFILE_TIMELINE_MAX_TOKENS", str(self.options.timeline_max_tokens)),
-            ("MICROPROFILE_THREAD_LOG_FRAMES_REUSE", str(self.options.thread_log_frames_reuse)),
-            ("MICROPROFILE_MAX_GROUPS", str(self.options.max_groups)),
-        ]
+        defines = OrderedDict()
+        defines["MICROPROFILE_EXPORT"] = None
+        defines["MICROPROFILE_ENABLED"] = bool(self.options.microprofile_enabled)
+        defines["MICROPROFILE_DEBUG"] = bool(self.settings.build_type == "Debug")
+        defines["MICROPROFILE_MINIZ"] = bool(self.options.with_miniz)
+        defines["MICROPROFILE_BIG_ENDIAN"] = bool(self.options.use_big_endian)
+        defines["MICROPROFILE_GPU_TIMERS"] = bool(self.options.enable_timer)
+        defines["MICROPROFILE_GPU_TIMER_CALLBACKS"] = bool(self.options.enable_gpu_timer_callbacks)
+        defines["MICROPROFILE_GPU_TIMERS_GL"] = bool(self.options.enable_timer == "gl")
+        defines["MICROPROFILE_GPU_TIMERS_D3D11"] = bool(self.options.enable_timer == "d3d11")
+        defines["MICROPROFILE_GPU_TIMERS_D3D12"] = bool(self.options.enable_timer == "d3d12")
+        defines["MICROPROFILE_GPU_TIMERS_VULKAN"] = bool(self.options.enable_timer == "vulkan")
+        defines["MICROPROFILE_PER_THREAD_BUFFER_SIZE"] = self.options.thread_buffer_size
+        defines["MICROPROFILE_PER_THREAD_GPU_BUFFER_SIZE"] = self.options.thread_gpu_buffer_size
+        defines["MICROPROFILE_MAX_FRAME_HISTORY"] = self.options.max_frame_history
+        defines["MICROPROFILE_WEBSERVER_PORT"] = self.options.webserver_port
+        defines["MICROPROFILE_WEBSERVER_MAXFRAMES"] = self.options.webserver_maxframes
+        defines["MICROPROFILE_WEBSERVER_SOCKET_BUFFER_SIZE"] = self.options.webserver_socket_buffer_size
+        defines["MICROPROFILE_GPU_FRAME_DELAY"] = self.options.gpu_frame_delay
+        defines["MICROPROFILE_NAME_MAX_LEN"] = self.options.name_max_length
+        defines["MICROPROFILE_MAX_TIMERS"] = self.options.max_timers
+        defines["MICROPROFILE_MAX_THREADS"] = self.options.max_threads
+        defines["MICROPROFILE_MAX_STRING"] = self.options.max_string_length
+        defines["MICROPROFILE_TIMELINE_MAX_TOKENS"] = self.options.timeline_max_tokens
+        defines["MICROPROFILE_THREAD_LOG_FRAMES_REUSE"] = self.options.thread_log_frames_reuse
+        defines["MICROPROFILE_MAX_GROUPS"] = self.options.max_groups
+        return defines
 
     def _create_defines_file(self, filename):
         defines = self._create_defines()
         defines_list = ["#pragma once\n"]
-        for define in defines:
-            if isinstance(define, tuple) or isinstance(define, list):
-                defines_list.append(f"#define {define[0]} {define[1]}\n")
-            else:
+        for define, value in defines.items():
+            if value is None or value == "":
                 defines_list.append(f"#define {define}\n")
+            elif value in [True, False]:
+                defines_list.append(f"#define {define} {'1' if value else '0'}\n")
+            else:
+                defines_list.append(f"#define {define} {value}\n")
         save(self, filename, "".join(defines_list))
 
     def package_info(self):
