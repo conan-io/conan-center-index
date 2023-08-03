@@ -1,0 +1,23 @@
+--- serverloop.c	2022-10-03 16:51:42.000000000 +0200
++++ serverloop.c	2023-01-10 16:38:57.721400690 +0100
+@@ -229,13 +229,14 @@
+ 		if (max_time_ms == 0 || client_alive_scheduled)
+ 			max_time_ms = 100;
+ 
+-	if (max_time_ms == 0)
+-		tsp = NULL;
+-	else {
+-		ts.tv_sec = max_time_ms / 1000;
+-		ts.tv_nsec = 1000000 * (max_time_ms % 1000);
+-		tsp = &ts;
++
++	if (max_time_ms == 0) {
++		max_time_ms = 1000;
+ 	}
++	ts.tv_sec = max_time_ms / 1000;
++	ts.tv_nsec = 1000000 * (max_time_ms % 1000);
++	tsp = &ts;
++
+ 
+ 	/* Wait for something to happen, or the timeout to expire. */
+ 	ret = ppoll(*pfdp, *npfd_activep, tsp, sigsetp);
