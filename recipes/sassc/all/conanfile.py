@@ -53,10 +53,17 @@ class SasscConan(ConanFile):
     def _msbuild_configuration(self):
         return "Debug" if self.settings.build_type == "Debug" else "Release"
 
+    @property
+    def _msbuild_platform(self):
+        return "Win32" if self.settings.arch == "x86" else "Win64"
+
     def generate(self):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msbuild_configuration
+            tc.platform = self._msbuild_platform
+            # FIXME: setting this property does not work, applied as a patch instead
+            # tc.properties["LIBSASS_DIR"] = self.dependencies["libsass"].package_folder
             tc.generate()
             deps = MSBuildDeps(self)
             deps.configuration = self._msbuild_configuration
@@ -71,28 +78,40 @@ class SasscConan(ConanFile):
             deps.generate()
 
     def _patch_sources(self):
-        vcxproj_files = [os.path.join(self.build_folder, self.source_folder, "win", "sassc.vcxproj")]
         platform_toolset = MSBuildToolchain(self).toolset
         import_conan_generators = ""
         for props_file in ["conantoolchain.props", "conandeps.props"]:
             props_path = os.path.join(self.generators_folder, props_file)
             if os.path.exists(props_path):
                 import_conan_generators += f'<Import Project="{props_path}" />'
-        for vcxproj_file in vcxproj_files:
-            for exiting_toolset in ["v120", "v140", "v141", "v142", "v143"]:
-                replace_in_file(self, vcxproj_file,
-                    f"<PlatformToolset>{exiting_toolset}</PlatformToolset>",
-                    f"<PlatformToolset>{platform_toolset}</PlatformToolset>")
-            if props_path:
-                replace_in_file(self, vcxproj_file,
-                    '<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />',
-                    f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
+        vcxproj_file = os.path.join(self.source_folder, "win", "sassc.vcxproj")
+        for existing_toolset in ["v120", "v140", "v141", "v142", "v143"]:
+            replace_in_file(self, vcxproj_file,
+                            f"<PlatformToolset>{existing_toolset}</PlatformToolset>",
+                            f"<PlatformToolset>{platform_toolset}</PlatformToolset>", strict=False)
+        # Inject VS 2022 support
+        replace_in_file(self, vcxproj_file,
+                        '<PropertyGroup Label="VS2019',
+                        ('<PropertyGroup Label="VS2022 toolset selection" Condition="\'$(VisualStudioVersion)\' == \'17.0\'">\n'
+                         f'  <PlatformToolset>{platform_toolset}</PlatformToolset>\n'
+                         '</PropertyGroup>\n'
+                         '<PropertyGroup Label="VS2019'))
+        replace_in_file(self, vcxproj_file,
+                        '<LIBSASS_DIR Condition="\'$(LIBSASS_DIR)\' == \'\'">..\\..</LIBSASS_DIR>',
+                        f"<LIBSASS_DIR>{self.dependencies['libsass'].package_folder}</LIBSASS_DIR>")
+        replace_in_file(self, vcxproj_file, r'<Import Project="$(LIBSASS_DIR)\win\libsass.targets" />', "")
+        if props_path:
+            replace_in_file(self, vcxproj_file,
+                            r'<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />',
+                            rf'{import_conan_generators}<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />')
 
     def build(self):
         self._patch_sources()
         with chdir(self, self.source_folder):
             if is_msvc(self):
                 msbuild = MSBuild(self)
+                msbuild.build_type = self._msbuild_configuration
+                msbuild.platform = self._msbuild_platform
                 msbuild.build(sln=os.path.join("win", "sassc.sln"))
             else:
                 save(self, path="VERSION", content=f"{self.version}")
@@ -104,10 +123,10 @@ class SasscConan(ConanFile):
     def package(self):
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                copy(self,"*.exe",
-                    dst=os.path.join(self.package_folder, "bin"),
-                    src=os.path.join(self.source_folder, "bin"),
-                    keep_path=False)
+                copy(self, "*.exe",
+                     dst=os.path.join(self.package_folder, "bin"),
+                     src=os.path.join(self.source_folder, "bin"),
+                     keep_path=False)
             else:
                 autotools = Autotools(self)
                 autotools.install()
