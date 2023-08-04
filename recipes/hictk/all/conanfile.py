@@ -26,7 +26,7 @@ class HictkConan(ConanFile):
         return 17
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "apple-clang": "11",
             "clang": "7",
