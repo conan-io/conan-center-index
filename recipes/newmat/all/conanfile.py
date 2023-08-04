@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, collect_libs, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, collect_libs, rm, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -55,11 +55,8 @@ class NewmatConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
@@ -67,7 +64,7 @@ class NewmatConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        rm(self, "*.cmake", self.package_folder, recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
