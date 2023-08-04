@@ -5,6 +5,7 @@ from conan.tools.files import copy, get, rmdir, rename, chdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -107,6 +108,7 @@ class LibniceConan(ConanFile):
             if not self.options.shared:
                 with chdir(self, os.path.join(self.package_folder, "lib")):
                     rename(self, "libnice.a", "nice.lib")
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["nice"]
