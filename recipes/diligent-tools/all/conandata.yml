@@ -15,8 +15,8 @@ patches:
   "api.252009":
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
       base_path: "source_subfolder"
-    - patch_file: "patches/0013-libclang-15.diff"
-      patch_description: "Render state notation: use clang-15.0.6.1 for header parsing"
+    - patch_file: "patches/0013-libclang-14.diff"
+      patch_description: "Render state notation: use clang-14.0.6 for header parsing, modified upstream patch since clang-15.0.6.1 fails on macOS"
       patch_type: bugfix
       patch_source: "https://github.com/DiligentGraphics/DiligentTools/commit/b9f1d30d03237a3ff14c053aaf8bed0818d0e88c"
       base_path: "source_subfolder"
@@ -25,8 +25,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
       base_path: "source_subfolder"
-    - patch_file: "patches/0013-libclang-15.diff"
-      patch_description: "Render state notation: use clang-15.0.6.1 for header parsing"
+    - patch_file: "patches/0013-libclang-14.diff"
+      patch_description: "Render state notation: use clang-14.0.6 for header parsing, modified upstream patch since clang-15.0.6.1 fails on macOS"
       patch_type: bugfix
       patch_source: "https://github.com/DiligentGraphics/DiligentTools/commit/b9f1d30d03237a3ff14c053aaf8bed0818d0e88c"
       base_path: "source_subfolder"
@@ -45,8 +45,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0012-2.5.2-fix-imgui-include-path.diff"
       base_path: "source_subfolder"
-    - patch_file: "patches/0013-libclang-15.diff"
-      patch_description: "Render state notation: use clang-15.0.6.1 for header parsing"
+    - patch_file: "patches/0013-libclang-14.diff"
+      patch_description: "Render state notation: use clang-14.0.6 for header parsing, modified upstream patch since clang-15.0.6.1 fails on macOS"
       patch_type: bugfix
       patch_source: "https://github.com/DiligentGraphics/DiligentTools/commit/b9f1d30d03237a3ff14c053aaf8bed0818d0e88c"
       base_path: "source_subfolder"

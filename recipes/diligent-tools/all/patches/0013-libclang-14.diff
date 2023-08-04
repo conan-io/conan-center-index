@@ -7,7 +7,7 @@ index 29cd14db..3226d520 100644
  find_package(PythonInterp 3 REQUIRED)
  
 -execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install libclang
-+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install libclang==15.0.6.1 # Fails with 16.0.0
++execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install libclang==14.0.6 # Fails with 16.0.0 & 15.0.6.1
                  RESULT_VARIABLE PYTHON_PIP_LIBCLANG_RESULT)
  if(NOT PYTHON_PIP_LIBCLANG_RESULT EQUAL "0")
      message(FATAL_ERROR "python -m pip install libclang failed with ${PYTHON_PIP_LIBCLANG_RESULT}")
