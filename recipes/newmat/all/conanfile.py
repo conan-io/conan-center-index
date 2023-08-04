@@ -9,12 +9,13 @@ required_conan_version = ">=1.53.0"
 class NewmatConan(ConanFile):
     name = "newmat"
     package_type = "library"
-    url = "http://robertnz.net/nm11.htm"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://newmat.net"
     description = "Manipulate a variety of types of matrices using standard matrix operations."
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "newmat11.patch", "newmat6.cpp.patch"]
     topics = ("newmat", "matrix")
+    license = "GPLv3"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
