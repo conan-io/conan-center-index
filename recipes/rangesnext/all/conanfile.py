@@ -31,7 +31,7 @@ class RangesnextConan(ConanFile):
         return {
             "gcc": "10",
             "msvc": "193",
-            "Visual Studio": "19",
+            "Visual Studio": "17",
         }
 
     def layout(self):
