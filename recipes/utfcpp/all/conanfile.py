@@ -42,7 +42,7 @@ class UtfCppConan(ConanFile):
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = "add_library(utf8::cpp ALIAS utf8cpp)"
+        content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
@@ -50,6 +50,7 @@ class UtfCppConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
+        content += "add_library(utf8::cpp ALIAS utf8cpp)"
         save(self, module_file, content)
 
     @property
