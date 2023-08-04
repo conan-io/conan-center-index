@@ -38,7 +38,8 @@ class UtfCppConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"utf8cpp": "utf8cpp::utf8cpp"},
+            {"utf8cpp":   "utf8cpp::utf8cpp",
+             "utf8::cpp": "utf8cpp::utf8cpp"},
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -50,7 +51,6 @@ class UtfCppConan(ConanFile):
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
             """)
-        content += "add_library(utf8::cpp ALIAS utf8cpp)"
         save(self, module_file, content)
 
     @property
