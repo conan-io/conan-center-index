@@ -1,9 +1,11 @@
 import os.path
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
 
@@ -17,16 +19,22 @@ class HictkConan(ConanFile):
     topics = "hictk", "bioinformatics", "hic"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    options = {
-        "with_eigen": [True, False]
-    }
-    default_options = {
-        "with_eigen": True
-    }
+    options = {"with_eigen": [True, False]}
+    default_options = {"with_eigen": True}
 
     @property
     def _minimum_cpp_standard(self):
         return 17
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "apple-clang": "11",
+            "clang": "7",
+            "gcc": "8",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -45,9 +53,28 @@ class HictkConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
-    def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        compiler = str(self.settings.compiler)
+        version = str(self.settings.compiler.version)
+        try:
+            minimum_version = self._compilers_minimum_version[str(compiler)]
+            if minimum_version and loose_lt_semver(version, minimum_version):
+                msg = (
+                    f"{self.ref} requires C++{self._minimum_cpp_standard} features "
+                    f"which are not supported by compiler {compiler} {version}."
+                )
+                raise ConanInvalidConfiguration(msg)
+        except KeyError:
+            msg = (
+                f"{self.ref} recipe lacks information about the {compiler} compiler, "
+                f"support for the required C++{self._minimum_cpp_standard} features is assumed"
+            )
+            self.output.warn(msg)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -74,7 +101,12 @@ class HictkConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
         cmake = CMake(self)
         cmake.install()
 
