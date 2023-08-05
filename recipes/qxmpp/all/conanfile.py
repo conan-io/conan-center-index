@@ -50,7 +50,7 @@ class QxmppConan(ConanFile):
         self.requires("qt/6.5.1")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.22.3")
-            self.requires("glib/2.77.0")
+            self.requires("glib/2.77.1")
 
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
