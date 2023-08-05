@@ -201,6 +201,7 @@ class LibvipsConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.1.1")
+        self.tool_requires("gettext/0.21")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.introspection:
