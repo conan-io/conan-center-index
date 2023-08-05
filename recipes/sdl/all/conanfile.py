@@ -156,7 +156,7 @@ class SDLConan(ConanFile):
                 self.requires("xkbcommon/1.5.0")
                 self.requires("egl/system")
             if self.options.libunwind:
-                self.requires("libunwind/1.7.0")
+                self.requires("libunwind/1.7.2")
 
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
