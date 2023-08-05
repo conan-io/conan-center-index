@@ -1,0 +1,56 @@
+diff -ru a/gettext-runtime/gnulib-lib/memmove.c b/gettext-runtime/gnulib-lib/memmove.c
+--- a/gettext-runtime/gnulib-lib/memmove.c	2023-02-03 14:19:27
++++ b/gettext-runtime/gnulib-lib/memmove.c	2023-08-05 15:45:39
+@@ -7,8 +7,9 @@
+ 
+ #include <stddef.h>
+ 
+-/* Copy LENGTH bytes from SOURCE to DEST.  Does not null-terminate.  */
++#ifndef _MSC_VER
+ 
++/* Copy LENGTH bytes from SOURCE to DEST.  Does not null-terminate.  */
+ void *
+ memmove (void *dest0, void const *source0, size_t length)
+ {
+@@ -26,3 +27,5 @@
+     }
+   return dest0;
+ }
++
++#endif
+diff -ru a/gettext-tools/gnulib-lib/memmove.c b/gettext-tools/gnulib-lib/memmove.c
+--- a/gettext-tools/gnulib-lib/memmove.c	2023-02-03 14:20:17
++++ b/gettext-tools/gnulib-lib/memmove.c	2023-08-05 15:46:44
+@@ -7,6 +7,8 @@
+ 
+ #include <stddef.h>
+ 
++#ifndef _MSC_VER
++
+ /* Copy LENGTH bytes from SOURCE to DEST.  Does not null-terminate.  */
+ 
+ void *
+@@ -26,3 +28,5 @@
+     }
+   return dest0;
+ }
++
++#endif
+diff -ru a/gettext-tools/gnulib-lib/memset.c b/gettext-tools/gnulib-lib/memset.c
+--- a/gettext-tools/gnulib-lib/memset.c	2023-02-03 14:20:17
++++ b/gettext-tools/gnulib-lib/memset.c	2023-08-05 15:50:14
+@@ -18,6 +18,8 @@
+ 
+ #include <stddef.h>
+ 
++#ifndef _MSC_VER
++
+ void *
+ memset (void *str, int c, size_t len)
+ {
+@@ -27,3 +29,5 @@
+     *st++ = c;
+   return str;
+ }
++
++#endif
