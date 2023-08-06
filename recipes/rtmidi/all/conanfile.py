@@ -60,7 +60,8 @@ class RtMidiConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${ALSA_LIBRARY}", "ALSA::ALSA")
+        if Version(self.version) < "6.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${ALSA_LIBRARY}", "ALSA::ALSA")
 
     def build(self):
         self._patch_sources()
