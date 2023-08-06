@@ -11,8 +11,12 @@
 #endif
 
 int main() {
-  agrpc::GrpcContext grpc_context;
 
+#ifndef USE_NEW_INIT
+  agrpc::GrpcContext grpc_context{std::make_unique<grpc::CompletionQueue>()};  
+#else
+  agrpc::GrpcContext grpc_context;
+#endif
   boost::asio::post(grpc_context, [] {});
 
 #ifndef CROSSCOMPILING
