@@ -82,6 +82,11 @@ class IgnitionToolsConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @staticmethod
+    def _chmod_plus_x(filename):
+        if os.name == "posix":
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
+
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
@@ -93,7 +98,9 @@ class IgnitionToolsConan(ConanFile):
         ign_rb_content = ign_rb_content.replace("@CMAKE_INSTALL_PREFIX@", self.package_folder.replace("\\", "/"))
         ign_rb_content = ign_rb_content.replace("@ENV_PATH_DELIMITER@", os.pathsep)
         suffix = ".rb" if self.settings.os == "Windows" else ""
-        save(self, os.path.join(self.package_folder, "bin", f"ign{suffix}"), ign_rb_content)
+        ign_rb_path = os.path.join(self.package_folder, "bin", f"ign{suffix}")
+        save(self, ign_rb_path, ign_rb_content)
+        self._chmod_plus_x(ign_rb_path)
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
