@@ -39,15 +39,15 @@ class HictkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fast_float/5.2.0")
+        self.requires("fast_float/5.2.0", transitive_headers=True)
         if self.options.with_eigen:
-            self.requires("eigen/3.4.0")
-        self.requires("fmt/10.0.0")
-        self.requires("hdf5/1.14.0")
-        self.requires("highfive/2.7.1")
-        self.requires("libdeflate/1.18")
-        self.requires("parallel-hashmap/1.3.11")
-        self.requires("spdlog/1.12.0")
+            self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("fmt/10.0.0", transitive_headers=True)
+        self.requires("hdf5/1.14.0", transitive_headers=True)
+        self.requires("highfive/2.7.1", transitive_headers=True)
+        self.requires("libdeflate/1.18", transitive_headers=True)
+        self.requires("parallel-hashmap/1.3.11", transitive_headers=True)
+        self.requires("spdlog/1.12.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
