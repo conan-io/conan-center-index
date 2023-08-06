@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -12,22 +12,14 @@ required_conan_version = ">=1.53.0"
 
 class IgnitionToolsConan(ConanFile):
     name = "ignition-tools"
-    description = "Provides general purpose classes and functions designed for robotic applications."
+    description = "Ignition entry point for using all the suite of ignition tools."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ignitionrobotics.org/libs/tools"
     topics = ("ignition", "robotics", "tools")
 
-    package_type = "library"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     @property
     def _minimum_cpp_standard(self):
@@ -43,16 +35,11 @@ class IgnitionToolsConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("backward-cpp/1.6")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -60,16 +47,13 @@ class IgnitionToolsConan(ConanFile):
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warning(
-                "{} recipe lacks information about the {} compiler support.".format(
-                    self.name, self.settings.compiler
-                )
+                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
             )
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
-                    "{} requires c++17 support. The current compiler {} {} does not support it.".format(
-                        self.name, self.settings.compiler, self.settings.compiler.version
-                    )
+                    f"{self.name} requires c++17 support. "
+                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
                 )
 
     def source(self):
@@ -77,6 +61,7 @@ class IgnitionToolsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["USE_SYSTEM_BACKWARDCPP"] = True
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
@@ -84,10 +69,12 @@ class IgnitionToolsConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "${CMAKE_SOURCE_DIR}", "${PROJECT_SOURCE_DIR}")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "ADD_DEFINITIONS(-fPIC)", "")
+        for cmakelists in self.source_path.rglob("CMakeLists.txt"):
+            replace_in_file(self, cmakelists, "${CMAKE_SOURCE_DIR}", "${PROJECT_SOURCE_DIR}", strict=False)
+            replace_in_file(self, cmakelists, "${CMAKE_BINARY_DIR}", "${PROJECT_BINARY_DIR}", strict=False)
+        # Generating ign.rb fails on Windows, do it outside of CMake in package() instead
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                        "# Two steps to create `ign`", "return() #")
 
     def build(self):
         self._patch_sources()
@@ -97,8 +84,17 @@ class IgnitionToolsConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
         cmake = CMake(self)
         cmake.install()
+
+        # Generate ign.rb
+        ign_rb_content = load(self, os.path.join(self.source_folder, "src", "ign.in"))
+        ign_rb_content = ign_rb_content.replace("@CMAKE_INSTALL_PREFIX@", self.package_folder.replace("\\", "/"))
+        ign_rb_content = ign_rb_content.replace("@ENV_PATH_DELIMITER@", os.pathsep)
+        suffix = ".rb" if self.settings.os == "Windows" else ""
+        save(self, os.path.join(self.package_folder, "bin", f"ign{suffix}"), ign_rb_content)
+
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -109,9 +105,6 @@ class IgnitionToolsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = []
-        self.cpp_info.libdirs = []
-        self.cpp_info.frameworkdirs = []
-        self.cpp_info.bindirs = []
 
         version_major = Version(self.version).major
         pkg_name = f"ignition-tools{version_major}"
@@ -119,8 +112,9 @@ class IgnitionToolsConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"{pkg_name}::{pkg_name}")
 
         component = self.cpp_info.components["libignition-tools"]
+        component.includedirs = []
         component.libs = ["ignition-tools-backward"]
-        component.includedirs.append(f"include/ignition/tools{version_major}")
+        component.requires = ["backward-cpp::backward-cpp"]
         component.set_property("cmake_target_name", pkg_name)
         component.set_property("pkg_config_name", pkg_name)
 
