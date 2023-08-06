@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
+from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -14,7 +14,7 @@ required_conan_version = ">=1.53.0"
 
 class IgnitionUitlsConan(ConanFile):
     name = "ignition-utils"
-    description = "Provides general purpose classes and functions designed for robotic applications.."
+    description = "Provides general purpose classes and functions designed for robotic applications."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gazebosim.org/libs/utils"
@@ -46,9 +46,6 @@ class IgnitionUitlsConan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -87,7 +84,7 @@ class IgnitionUitlsConan(ConanFile):
             self.requires("cli11/2.1.2")
 
     def build_requirements(self):
-        self.build_requires("ignition-cmake/2.10.0")
+        self.tool_requires("ignition-cmake/2.10.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -101,8 +98,14 @@ class IgnitionUitlsConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "${CMAKE_SOURCE_DIR}", "${PROJECT_SOURCE_DIR}")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "${CMAKE_BINARY_DIR}", "${PROJECT_BINARY_DIR}")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
