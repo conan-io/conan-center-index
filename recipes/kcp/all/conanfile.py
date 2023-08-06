@@ -54,7 +54,12 @@ class KcpConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " STATIC", "")
+        # Fix shared builds on Windows
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        " STATIC", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "ARCHIVE DESTINATION",
+                        "RUNTIME DESTINATION bin\nARCHIVE DESTINATION")
 
     def build(self):
         self._patch_sources()
