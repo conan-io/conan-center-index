@@ -11,7 +11,7 @@ class DXCRecipe(ConanFile):
     homepage = "https://github.com/microsoft/DirectXShaderCompiler"
     description = "DirectX Shader Compiler which is based on LLVM/Clang."
     topics = ("dxc", "hlsl", "dxil", "shader-programs", "directx-shader-compiler")
-    
+
     settings = "os", "arch", "compiler", "build_type"
     options = {}
     default_options = {}
@@ -45,5 +45,7 @@ class DXCRecipe(ConanFile):
         self.cpp_info.includedirs = ["include"]
         self.cpp_info.bindirs = ["bin"]
 
-        if self.settings.os == "Window":
+        if self.settings.os == "Windows":
             self.cpp_info.defines = ["__DXC_TEST_WINDOWS"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
