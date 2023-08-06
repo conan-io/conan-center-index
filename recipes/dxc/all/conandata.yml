@@ -1,4 +1,4 @@
-source:
+sources:
   "1.7.2212.1":
     "Windows":
       - url: "https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2212.1/dxc_2023_03_01.zip"

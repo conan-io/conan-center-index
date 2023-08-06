@@ -7,12 +7,12 @@ import os.path
 class DXCRecipe(ConanFile):
     name = "dxc"
     license = "NCSA"
-    author = "Copyright (c) Microsoft Corporation. Copyright (c) 2003-2015 University of Illinois at Urbana-Champaign."
-    url = "https://github.com/microsoft/DirectXShaderCompiler"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/microsoft/DirectXShaderCompiler"
     description = "DirectX Shader Compiler which is based on LLVM/Clang."
     topics = ("dxc", "hlsl", "dxil", "shader-programs", "directx-shader-compiler")
-
-    settings = "os", "arch"
+    
+    settings = "os", "arch", "compiler", "build_type"
     options = {}
     default_options = {}
 
@@ -21,7 +21,7 @@ class DXCRecipe(ConanFile):
             raise ConanInvalidConfiguration("DXC only works on Windows and Linux!")
 
     def build(self):
-        get(self, **self.conan_data["source"][self.version][str(self.settings.os)][0])
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][0])
 
     def package(self):
         arch = str(self.settings.arch).lower()
