@@ -16,7 +16,7 @@ class IgnitionToolsConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ignitionrobotics.org/libs/tools"
-    topics = ("ignition", "robotics", "tools")
+    topics = ("ignition", "robotics", "tools", "gazebo")
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
