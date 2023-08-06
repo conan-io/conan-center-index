@@ -59,7 +59,6 @@ class IgnitionUitlsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("doxygen/1.9.4")
         if self.options.ign_utils_vendor_cli11:
             self.requires("cli11/2.3.2")
 
@@ -85,6 +84,7 @@ class IgnitionUitlsConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("ignition-cmake/2.10.0")
+        self.tool_requires("doxygen/1.9.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,8 +95,10 @@ class IgnitionUitlsConan(ConanFile):
         tc.variables["IGN_UTILS_VENDOR_CLI11"] = self.options.ign_utils_vendor_cli11
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.build_context_activated = ["ignition-cmake"]
+        deps.build_context_build_modules = ["ignition-cmake"]
+        deps.generate()
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -155,12 +157,11 @@ class IgnitionUitlsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", lib_name)
         self.cpp_info.set_property("cmake_target_name", f"{lib_name}::{lib_name}")
         build_dirs = os.path.join(self.package_folder, "lib", "cmake")
-        include_dir = os.path.join("include", "ignition", "utils" + version_major)
+        include_dir = os.path.join(self.package_folder, "include", "ignition", f"utils{version_major}")
 
         main_component = self.cpp_info.components[lib_name]
         main_component.libs = [lib_name]
         main_component.includedirs.append(include_dir)
-        main_component.requires = ["doxygen::doxygen"]
         if self.options.ign_utils_vendor_cli11:
             main_component.requires.append("cli11::cli11")
 
