@@ -17,5 +17,11 @@ sources:
 patches:
   "0.1.5":
     - patch_file: "patches/0001-use-PROJECT_SOURCE_DIR.patch"
+      patch_description: "use PROJECT_NAME instead of CMAKE_PROJECT_NAME"
+      patch_type: "conan"
     - patch_file: "patches/0002-disable-overriding-fPIC.patch"
+      patch_description: "disable overriding -fPIC"
+      patch_type: "conan"
     - patch_file: "patches/0003-disable-building-tests.patch"
+      patch_description: "build no tests"
+      patch_type: "conan"
