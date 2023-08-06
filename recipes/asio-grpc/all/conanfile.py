@@ -111,7 +111,7 @@ class AsioGrpcConan(ConanFile):
 
         build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
 
-        self.cpp_info.requires = ["grpc::grpc++_unsecure"]
+        self.cpp_info.requires = ["grpc::grpc++"]
         if self.options.backend == "boost":
             self.cpp_info.defines = ["AGRPC_BOOST_ASIO"]
             self.cpp_info.requires.append("boost::headers")
