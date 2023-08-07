@@ -69,6 +69,7 @@ class LibisalConan(ConanFile):
                 self.run("nmake /f Makefile.nmake")
             else:
                 autotools = Autotools(self)
+                autotools.autoreconf()
                 autotools.configure()
                 autotools.make()
 
