@@ -64,39 +64,38 @@ class SwigConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
+        build_env = VirtualBuildEnv(self)
+        build_env.generate()
 
         tc = AutotoolsToolchain(self)
-        if self.settings.os == "Windows" and not is_msvc(self):
-            tc.extra_ldflags.append("-static")
-
+        pcre = "pcre2" if self._use_pcre2 else "pcre"
         tc.configure_args += [
             f"--host={self.settings.arch}",
             "--with-swiglibdir=${prefix}/bin/swiglib",
+            f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}"
         ]
+        env = tc.environment()
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("LIBS=-ldl")
-        elif self.settings.os == "Windows" and not is_msvc(self):
-            tc.configure_args.append("LIBS=-lmingwex -lssp")
-
-        env = tc.environment()
-        if is_msvc(self):
-            env.define("CC", "cccl")
-            env.define("CXX", "cccl")
-            self.output.warning("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
-            tc.configure_args.append("--disable-ccache")
-            tc.extra_cxxflags.append("-FS")
-
-        if is_apple_os(self) and self.settings.arch == "armv8":
-            # FIXME: Apple ARM should be handled by build helpers
-            tc.extra_cxxflags.append("-arch arm64")
-            tc.extra_ldflags.append("-arch arm64")
-
+        elif self.settings.os == "Windows":
+            if is_msvc(self):
+                env.define("CC", "cccl")
+                env.define("CXX", "cccl")
+                self.output.warning("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
+                tc.configure_args.append("--disable-ccache")
+                tc.extra_cxxflags.append("-FS")
+            else:
+                tc.extra_ldflags.append("-static")
+                tc.configure_args.append("LIBS=-lmingwex -lssp")
+        elif is_apple_os(self):
+            if self.settings.arch == "armv8":
+                # FIXME: Apple ARM should be handled by build helpers
+                tc.extra_cxxflags.append("-arch arm64")
+                tc.extra_ldflags.append("-arch arm64")
         tc.generate(env)
 
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
