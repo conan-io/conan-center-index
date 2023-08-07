@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(hunspell VERSION "${CONAN_hunspell_VERSION}" LANGUAGES CXX)
 
-set(src "${HUNSPELL_SRC_DIR}/src/hunspell")
+set(src "${CMAKE_CURRENT_SOURCE_DIR}/src/src/hunspell")
 
 # ---- Configure hunvisapi.h ----
 

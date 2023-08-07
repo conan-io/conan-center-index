@@ -71,7 +71,6 @@ class HunspellConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["HUNSPELL_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["CONAN_hunspell_VERSION"] = self.version
         tc.generate()
 
