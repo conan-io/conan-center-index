@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 find_package(chaiscript REQUIRED CONFIG)
 
-# TEST_PACKAGE #################################################################
-
-add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} CONAN_PKG::chaiscript)
-set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} chaiscript::chaiscript)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  target_compile_options(${PROJECT_NAME} PRIVATE /bigobj)
+endif()
