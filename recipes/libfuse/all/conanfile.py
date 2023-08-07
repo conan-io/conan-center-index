@@ -45,7 +45,7 @@ class LibfuseConan(ConanFile):
             raise ConanInvalidConfiguration("libfuse supports only Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
