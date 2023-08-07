@@ -88,7 +88,7 @@ class LibdrmConan(ConanFile):
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.1")
+        self.tool_requires("meson/1.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
