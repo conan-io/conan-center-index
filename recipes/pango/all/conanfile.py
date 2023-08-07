@@ -78,10 +78,10 @@ class PangoConan(ConanFile):
         if self.options.with_xft and self.options.with_fontconfig and self.options.with_freetype:
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
-            self.requires("cairo/1.17.6", transitive_headers=True)
-        self.requires("harfbuzz/7.3.0", transitive_headers=True)
-        self.requires("glib/2.76.3", transitive_headers=True)
-        self.requires("fribidi/1.0.12")
+            self.requires("cairo/1.18.0", transitive_headers=True)
+        self.requires("harfbuzz/8.2.2", transitive_headers=True)
+        self.requires("glib/2.78.1", transitive_headers=True)
+        self.requires("fribidi/1.0.13")
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
@@ -104,8 +104,9 @@ class PangoConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("meson/1.1.1")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
+        self.tool_requires("meson/1.2.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
