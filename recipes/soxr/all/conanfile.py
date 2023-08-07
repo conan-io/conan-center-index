@@ -2,11 +2,11 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save, rmdir
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class SoxrConan(ConanFile):
@@ -16,18 +16,19 @@ class SoxrConan(ConanFile):
     topics = ("resampling", "audio", "sample-rate", "conversion")
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openmp": [True, False],
-        "with_lsr_bindings": [True, False]
+        "with_lsr_bindings": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openmp": False,
-        "with_lsr_bindings": True
+        "with_lsr_bindings": True,
     }
 
     def export_sources(self):
@@ -47,18 +48,15 @@ class SoxrConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840) 
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if Version(self.version) < "3.21":
             # silence warning
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
         if is_msvc(self):
-            tc.variables["BUILD_SHARED_RUNTIME"] = msvc_runtime_flag(self) == "MD"
+            tc.variables["BUILD_SHARED_RUNTIME"] = not is_msvc_static_runtime(self)
         # Disable SIMD based resample engines for Apple Silicon and iOS ARMv8 architecture
         if (self.settings.os == "Macos" or self.settings.os == "iOS") and self.settings.arch == "armv8":
             tc.variables["WITH_CR32S"] = False
@@ -76,12 +74,12 @@ class SoxrConan(ConanFile):
 
     def _extract_pffft_license(self):
         pffft_c = load(self, os.path.join(self.source_folder, "src", "pffft.c"))
-        license_contents = pffft_c[pffft_c.find("/* Copyright")+3:pffft_c.find("modern CPUs.")+13]
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        return pffft_c[pffft_c.find("/* Copyright")+3:pffft_c.find("modern CPUs.")+13]
 
     def package(self):
-        copy(self, "LICENCE", dst="licenses", src=self.source_folder)
-        self._extract_pffft_license()
+        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENCE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE_pffft"), self._extract_pffft_license())
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "doc"))
@@ -97,7 +95,7 @@ class SoxrConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.components["core"].defines.append("SOXR_DLL")
         if not self.options.shared and self.options.with_openmp:
-            if self.settings.compiler in ("Visual Studio", "msvc"):
+            if is_msvc(self):
                 openmp_flags = ["-openmp"]
             elif self.settings.compiler in ("gcc", "clang"):
                 openmp_flags = ["-fopenmp"]

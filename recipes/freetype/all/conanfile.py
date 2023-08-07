@@ -64,7 +64,7 @@ class FreetypeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_bzip2:
@@ -236,15 +236,15 @@ class FreetypeConan(ConanFile):
 
     @staticmethod
     def _chmod_plus_x(filename):
-        if os.name == "posix":
+        if os.name == "posix" and (os.stat(filename).st_mode & 0o111) != 0o111:
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "Freetype")
-        self.cpp_info.set_property("cmake_module_target_name", "Freetype::Freetype")
         self.cpp_info.set_property("cmake_file_name", "freetype")
-        self.cpp_info.set_property("cmake_target_name", "freetype")
+        self.cpp_info.set_property("cmake_target_name", "Freetype::Freetype")
+        self.cpp_info.set_property("cmake_target_aliases", ["freetype"]) # other possible target name in upstream config file
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "freetype2")
         self.cpp_info.libs = collect_libs(self)

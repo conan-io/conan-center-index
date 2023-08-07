@@ -211,7 +211,8 @@ class Mpg123Conan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["libmpg123"].system_libs = ["m"]
-            self.cpp_info.components["libsyn123"].system_libs = ["mvec"]
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.cpp_info.components["libsyn123"].system_libs = ["mvec"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libmpg123"].system_libs = ["shlwapi"]
 

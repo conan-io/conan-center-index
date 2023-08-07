@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53.0"
 
 
 class GemmlowpConan(ConanFile):
@@ -16,6 +16,7 @@ class GemmlowpConan(ConanFile):
     description = "Low-precision matrix multiplication"
     topics = ("gemm", "matrix")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -27,8 +28,7 @@ class GemmlowpConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,18 +36,17 @@ class GemmlowpConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

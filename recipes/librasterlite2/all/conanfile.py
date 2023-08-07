@@ -67,25 +67,25 @@ class Librasterlite2Conan(ConanFile):
         self.requires("cairo/1.17.6")
         self.requires("freetype/2.13.0")
         self.requires("giflib/5.2.1")
-        self.requires("libcurl/7.88.1")
+        self.requires("libcurl/8.1.2")
         self.requires("libgeotiff/1.7.1")
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.39")
+        self.requires("libpng/1.6.40")
         self.requires("libspatialite/5.0.1")
-        self.requires("libtiff/4.4.0")
-        self.requires("libxml2/2.10.3")
-        self.requires("sqlite3/3.41.1")
+        self.requires("libtiff/4.5.1")
+        self.requires("libxml2/2.11.4")
+        self.requires("sqlite3/3.42.0")
         self.requires("zlib/1.2.13")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
 
     def validate(self):
         if is_msvc(self):
@@ -94,7 +94,7 @@ class Librasterlite2Conan(ConanFile):
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

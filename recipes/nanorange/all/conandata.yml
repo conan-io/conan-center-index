@@ -1,7 +1,7 @@
 sources:
-  "20191001":
-    url: "https://github.com/tcbrindle/NanoRange/archive/abc34279d71369527e4da43cc4d02cf77446f79a.tar.gz"
-    sha256: "799431094ab784eb3cdbcd6de6681ff5d8b2b28e1a1e26e0a3a94fbfbfcd7e75"
-  "20200505":
+  "cci.20200706":
+    url: "https://github.com/tcbrindle/NanoRange/archive/bf32251d65673fe170d602777c087786c529ead8.tar.gz"
+    sha256: "28cf187174b3097c00aa12cc2a3b554f8f768a3b50a9703174af03ee99c3397c"
+  "cci.20200505":
     url: "https://github.com/tcbrindle/NanoRange/archive/a536e2747ba6124f1485dfa6acabca35326b1c5b.tar.gz"
     sha256: "9c4b71e6d26cbb85c9bf6751e6c0404922f75701984a85c312c4cf5838f89e2c"

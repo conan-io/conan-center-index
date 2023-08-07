@@ -1,0 +1,10 @@
+--- a/src/include/robin_hood.h
++++ b/src/include/robin_hood.h
+@@ -43,6 +43,7 @@
+ #include <cstdlib>
+ #include <cstring>
+ #include <functional>
++#include <limits>
+ #include <stdexcept>
+ #include <string>
+ #include <type_traits>

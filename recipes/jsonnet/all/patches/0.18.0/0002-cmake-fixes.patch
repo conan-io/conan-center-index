@@ -20,7 +20,7 @@ index 5df20ca..c14c93c 100644
  add_subdirectory(cpp)
  add_subdirectory(cmd)
 diff --git a/core/CMakeLists.txt b/core/CMakeLists.txt
-index e62a858..c0389f8 100644
+index e62a858..f0fb69f 100644
 --- a/core/CMakeLists.txt
 +++ b/core/CMakeLists.txt
 @@ -17,7 +17,8 @@ set(LIBJSONNET_HEADERS
@@ -33,15 +33,21 @@ index e62a858..c0389f8 100644
      desugarer.cpp
      formatter.cpp
      lexer.cpp
-@@ -28,6 +29,7 @@ set(LIBJSONNET_SOURCE
+@@ -28,9 +29,12 @@ set(LIBJSONNET_SOURCE
      string_utils.cpp
      vm.cpp)
  
++find_package(ryml REQUIRED CONFIG)
++
 +if (NOT BUILD_STATIC_LIBS)
  add_library(libjsonnet SHARED ${LIBJSONNET_HEADERS} ${LIBJSONNET_SOURCE})
  add_dependencies(libjsonnet md5 stdlib)
- target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json ryml)
-@@ -47,10 +49,10 @@ set_target_properties(libjsonnet PROPERTIES OUTPUT_NAME jsonnet
+-target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json ryml)
++target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json ryml::ryml)
+ 
+ file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/../include/libjsonnet.h JSONNET_VERSION_DEF
+      REGEX "[#]define[ \t]+LIB_JSONNET_VERSION[ \t]+")
+@@ -47,15 +51,15 @@ set_target_properties(libjsonnet PROPERTIES OUTPUT_NAME jsonnet
  install(TARGETS libjsonnet
  	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
  	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
@@ -54,6 +60,12 @@ index e62a858..c0389f8 100644
  if (BUILD_STATIC_LIBS)
      # Static library for jsonnet command-line tool.
      add_library(libjsonnet_static STATIC ${LIBJSONNET_SOURCE})
+     add_dependencies(libjsonnet_static md5 stdlib)
+-    target_link_libraries(libjsonnet_static md5 nlohmann_json::nlohmann_json ryml)
++    target_link_libraries(libjsonnet_static md5 nlohmann_json::nlohmann_json ryml::ryml)
+     set_target_properties(libjsonnet_static PROPERTIES OUTPUT_NAME jsonnet)
+     install(TARGETS libjsonnet_static DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+     target_include_directories(libjsonnet_static INTERFACE
 diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
 index eb7686c..cbf21bb 100644
 --- a/cpp/CMakeLists.txt

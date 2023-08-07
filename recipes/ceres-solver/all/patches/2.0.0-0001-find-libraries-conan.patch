@@ -1,49 +1,82 @@
---- cmake/FindGlog.cmake
-+++ cmake/FindGlog.cmake
-@@ -261,12 +261,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -239,14 +239,14 @@ message("-- Building with C++${CMAKE_CXX_STANDARD}")
+ # Eigen.
+ # Eigen delivers Eigen3Config.cmake since v3.3.3
+ find_package(Eigen3 3.3 REQUIRED)
+-if (EIGEN3_FOUND)
+-  message("-- Found Eigen version ${EIGEN3_VERSION_STRING}: ${EIGEN3_INCLUDE_DIRS}")
++if (1)
++  message("-- Found Eigen version ${Eigen3_VERSION}: ${Eigen3_INCLUDE_DIRS}")
+   if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*)" AND
+-      EIGEN3_VERSION_STRING VERSION_LESS 3.3.4)
++      Eigen3_VERSION VERSION_LESS 3.3.4)
+     # As per issue #289: https://github.com/ceres-solver/ceres-solver/issues/289
+     # the bundle_adjustment_test will fail for Eigen < 3.3.4 on aarch64.
+     message(FATAL_ERROR "-- Ceres requires Eigen version >= 3.3.4 on aarch64. "
+-      "Detected version of Eigen is: ${EIGEN3_VERSION_STRING}.")
++      "Detected version of Eigen is: ${Eigen3_VERSION}.")
+   endif()
  
-   # Search user-installed locations first, so that we prefer user installs
-   # to system installs where both exist.
--  list(APPEND GLOG_CHECK_INCLUDE_DIRS
--    /usr/local/include
--    /usr/local/homebrew/include # Mac OS X
--    /opt/local/var/macports/software # Mac OS X.
--    /opt/local/include
--    /usr/include)
-+  list(APPEND GLOG_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
-+    #/usr/local/include
-+    #/usr/local/homebrew/include # Mac OS X
-+    #/opt/local/var/macports/software # Mac OS X.
-+    #/opt/local/include
-+    #/usr/include)
-   # Windows (for C:/Program Files prefix).
-   list(APPEND GLOG_CHECK_PATH_SUFFIXES
-     glog/include
-@@ -276,11 +276,11 @@
-     google-glog/include # CMake installs with project name prefix.
-     google-glog/Include)
+   if (EIGENSPARSE)
+@@ -258,7 +258,7 @@ if (EIGEN3_FOUND)
+     message("   which can still use the EIGEN_SPARSE_QR algorithm.")
+     add_definitions(-DEIGEN_MPL2_ONLY)
+   endif (EIGENSPARSE)
+-endif (EIGEN3_FOUND)
++endif ()
  
--  list(APPEND GLOG_CHECK_LIBRARY_DIRS
--    /usr/local/lib
--    /usr/local/homebrew/lib # Mac OS X.
--    /opt/local/lib
--    /usr/lib)
-+  list(APPEND GLOG_CHECK_LIBRARY_DIRS ${CMAKE_LIB_PATH})
-+    #/usr/local/lib
-+    #/usr/local/homebrew/lib # Mac OS X.
-+    #/opt/local/lib
-+    #/usr/lib)
-   # Windows (for C:/Program Files prefix).
-   list(APPEND GLOG_CHECK_LIBRARY_SUFFIXES
-     glog/lib
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -389,7 +389,7 @@
- # GFlags.
- if (GFLAGS)
-   # Don't search with REQUIRED as we can continue without gflags.
--  find_package(gflags 2.2.0)
-+  find_package(gflags 2.2.0 REQUIRED)
-   if (gflags_FOUND)
-     if (TARGET gflags)
-       message("-- Found Google Flags (gflags) version ${gflags_VERSION}: ${gflags_DIR}")
+ if (LAPACK)
+   find_package(LAPACK QUIET)
+@@ -427,13 +427,14 @@ else (MINIGLOG)
+   unset(MINIGLOG_MAX_LOG_LEVEL CACHE)
+   # Don't search with REQUIRED so that configuration continues if not found and
+   # we can output an error messages explaining MINIGLOG option.
+-  find_package(Glog)
+-  if (NOT GLOG_FOUND)
++  find_package(glog REQUIRED CONFIG)
++  if (0)
+     message(FATAL_ERROR "Can't find Google Log (glog). Please set either: "
+       "glog_DIR (newer CMake built versions of glog) or GLOG_INCLUDE_DIR & "
+       "GLOG_LIBRARY or enable MINIGLOG option to use minimal glog "
+       "implementation.")
+-  endif(NOT GLOG_FOUND)
++  endif()
++  if(0)
+   # By default, assume gflags was found, updating the message if it was not.
+   set(GLOG_GFLAGS_DEPENDENCY_MESSAGE
+     " Assuming glog was built with gflags support as gflags was found. "
+@@ -446,7 +447,8 @@ else (MINIGLOG)
+       "Otherwise, Ceres may fail to link due to missing gflags symbols.")
+   endif(NOT gflags_FOUND)
+   message("-- Found Google Log (glog)." ${GLOG_GFLAGS_DEPENDENCY_MESSAGE})
+-endif (MINIGLOG)
++  endif()
++endif ()
+ 
+ if (NOT SCHUR_SPECIALIZATIONS)
+   list(APPEND CERES_COMPILE_OPTIONS CERES_RESTRICT_SCHUR_SPECIALIZATION)
+--- a/internal/ceres/CMakeLists.txt
++++ b/internal/ceres/CMakeLists.txt
+@@ -174,9 +174,9 @@ endif (SCHUR_SPECIALIZATIONS)
+ find_package(Threads QUIET)
+ list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES Threads::Threads)
+ 
+-if (NOT MINIGLOG AND GLOG_FOUND)
+-  list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES ${GLOG_LIBRARIES})
+-  if (gflags_FOUND)
++if (NOT MINIGLOG)
++  list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES glog::glog)
++  if (0)
+     # If glog & gflags are both found, we assume that glog was built with
+     # gflags, as it is awkward to perform a try_compile() to verify this
+     # when gflags is an imported target (as it is in newer versions).
+@@ -184,7 +184,7 @@ if (NOT MINIGLOG AND GLOG_FOUND)
+     # gflags, it is thus a public dependency for Ceres in this case.
+     list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES gflags)
+   endif()
+-endif (NOT MINIGLOG AND GLOG_FOUND)
++endif ()
+ 
+ if (SUITESPARSE AND SUITESPARSE_FOUND)
+   # Define version information for use in Solver::FullReport.
