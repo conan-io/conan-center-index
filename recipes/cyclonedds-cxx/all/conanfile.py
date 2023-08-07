@@ -8,7 +8,6 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-
 class CycloneDDSCXXConan(ConanFile):
     name = "cyclonedds-cxx"
     license = "EPL-2.0"
@@ -17,7 +16,6 @@ class CycloneDDSCXXConan(ConanFile):
     description = "Eclipse Cyclone DDS C++ Binding- An implementation"\
                   " of the OMG Data Distribution Service (DDS) specification"
     topics = ("dds", "ipc", "ros", "middleware")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,7 +26,6 @@ class CycloneDDSCXXConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
     short_paths = True
 
     @property
