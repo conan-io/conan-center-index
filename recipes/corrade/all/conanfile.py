@@ -128,11 +128,17 @@ class CorradeConan(ConanFile):
 
         suffix = "-d" if self.settings.build_type == "Debug" else ""
 
-        # The FindCorrade.cmake file provided by the library populates some extra stuff
-        cmake_mod = os.path.join("lib", "cmake", "conan-corrade-vars.cmake")
-        self.cpp_info.set_property("cmake_build_modules", [cmake_mod])
-        self.cpp_info.components["_corrade"].build_modules["cmake_find_package"].append(cmake_mod)
-        self.cpp_info.components["_corrade"].build_modules["cmake_find_package_multi"].append(cmake_mod)
+        cmake_modules = [
+            # Reproduces the variables and calls performed by the FindCorrade.cmake provided by the library
+            os.path.join("lib", "cmake", "conan-corrade-vars.cmake"),
+            # Autodetects LIB_SUFFIX (either "64" or "")
+            os.path.join("lib", "cmake", "CorradeLibSuffix.cmake"),
+            # Exports build flags and macros
+            os.path.join("lib", "cmake", "UseCorrade.cmake"),
+        ]
+        self.cpp_info.set_property("cmake_build_modules", cmake_modules)
+        self.cpp_info.components["_corrade"].build_modules["cmake_find_package"] = cmake_modules
+        self.cpp_info.components["_corrade"].build_modules["cmake_find_package_multi"] = cmake_modules
 
         if self.options.with_main:
             self.cpp_info.components["main"].set_property("cmake_target_name", "Corrade::Main")
