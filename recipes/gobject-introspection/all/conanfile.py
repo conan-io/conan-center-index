@@ -46,14 +46,14 @@ class GobjectIntrospectionConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.0")
+        self.requires("glib/2.77.1")
 
     def build_requirements(self):
         if Version(self.version) >= "1.71.0":
             self.tool_requires("meson/1.2.0")
         else:
             # https://gitlab.gnome.org/GNOME/gobject-introspection/-/issues/414
-            self.tool_requires("meson/0.59.3")
+            self.tool_requires("meson/1.2.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.5")
         if self.settings.os == "Windows":
