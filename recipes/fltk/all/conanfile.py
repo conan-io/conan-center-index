@@ -70,7 +70,7 @@ class FltkConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("opengl/system")
             self.requires("glu/system")
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
 
     def source(self):
