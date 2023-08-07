@@ -155,7 +155,7 @@ class PremakeConan(ConanFile):
              src=self.source_folder)
         copy(self, "*premake5*",
              dst=os.path.join(self.package_folder, "bin"),
-             src=os.path.join(self.source_folder, "bin", "release"),
+             src=os.path.join(self.source_folder, "bin", self._gmake_config),
              keep_path=False)
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
