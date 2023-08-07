@@ -40,7 +40,7 @@ class SplunkOpentelemetryConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opentelemetry-cpp/1.0.1", transitive_headers=True)
+        self.requires("opentelemetry-cpp/1.12.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
