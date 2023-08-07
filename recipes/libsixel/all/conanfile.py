@@ -57,7 +57,7 @@ class LibSixelConan(ConanFile):
 
     def requirements(self):
         if self.options.with_curl:
-            self.requires("libcurl/8.1.2")
+            self.requires("libcurl/8.2.0")
         if self.options.with_gd:
             self.requires("libgd/2.3.3")
         if self.options.with_gdk_pixbuf2:
@@ -75,7 +75,8 @@ class LibSixelConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.0")
-        self.tool_requires("pkgconf/1.9.5")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
