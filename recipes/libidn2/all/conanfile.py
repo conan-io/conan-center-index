@@ -56,7 +56,7 @@ class LibIdn(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
