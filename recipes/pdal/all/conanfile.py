@@ -64,35 +64,30 @@ class PdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0")
-        self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("gdal/3.4.3", transitive_headers=True)
-        self.requires("libcurl/8.1.2", force=True)  # mandatory dependency of arbiter (to remove if arbiter is unvendored)
+        self.requires("boost/1.83.0")
+        self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
+        self.requires("gdal/3.8.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libcurl/[>=7.78.0 <9]")  # mandatory dependency of arbiter (to remove if arbiter is unvendored)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("libgeotiff/1.7.1")
-        self.requires("nanoflann/1.4.3")
+        self.requires("nanoflann/1.5.0")
         if self.options.with_xml:
-            self.requires("libxml2/2.11.4", transitive_headers=True)
+            self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_laszip:
-            self.requires("laszip/3.4.3", transitive_headers=True)
+            self.requires("laszip/3.4.3", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13", transitive_headers=True)
+            self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/1.7.2")
         # TODO package improvements:
         # - switch from vendored arbiter (not in CCI)
         # - unvendor nlohmann_json
         # - add draco
         # - add openscenegraph
-
-        # Handle conflicts between gdal and other deps
-        self.requires("libtiff/4.5.0", override=True)
-        self.requires("libdeflate/1.18", override=True)
-        self.requires("sqlite3/3.42.0", override=True)
 
     @property
     def _required_boost_components(self):
