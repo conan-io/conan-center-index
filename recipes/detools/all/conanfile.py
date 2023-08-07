@@ -40,7 +40,7 @@ class DetoolsConan(ConanFile):
 
     def requirements(self):
         self.requires("heatshrink/0.4.1", transitive_headers=True)
-        self.requires("xz_utils/5.4.2", transitive_headers=True)
+        self.requires("xz_utils/5.4.4", transitive_headers=True)
         self.requires("lz4/1.9.4")
 
     def source(self):
