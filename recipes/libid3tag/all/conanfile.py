@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, replace_in_file, rm
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, MSBuildDeps
 
@@ -76,7 +76,7 @@ class LibId3TagConan(ConanFile):
         else:
             tc = AutotoolsToolchain(self)
             tc.generate()
-            deps = PkgConfigDeps(self)
+            deps = AutotoolsDeps(self)
             deps.generate()
 
     def build(self):
