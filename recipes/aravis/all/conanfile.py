@@ -65,13 +65,13 @@ class AravisConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
-        self.requires("libxml2/2.10.3")
+        self.requires("glib/2.77.1")
+        self.requires("libxml2/2.11.4")
         self.requires("zlib/1.2.13")
         if self.options.usb:
             self.requires("libusb/1.0.26")
         if self.options.gst_plugin:
-            self.requires("gstreamer/1.19.2")
+            self.requires("gstreamer/1.22.3")
             self.requires("gst-plugins-base/1.19.2")
 
     def validate(self):
@@ -86,11 +86,11 @@ class AravisConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.0")
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.75.2")
+            self.tool_requires("glib/2.77.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
