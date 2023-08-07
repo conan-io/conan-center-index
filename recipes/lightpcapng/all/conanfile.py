@@ -45,7 +45,7 @@ class LightPcapNgConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.5.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
