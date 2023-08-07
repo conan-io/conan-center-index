@@ -49,11 +49,11 @@ class SystemcComponentsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/8.1.1")
+        self.requires("fmt/10.1.1")
         self.requires("zlib/1.2.13")
-        self.requires("boost/1.82.0")
-        self.requires("gsl-lite/0.40.0")
-        self.requires("spdlog/1.10.0")
+        self.requires("boost/1.83.0")
+        self.requires("gsl-lite/0.41.0")
+        self.requires("spdlog/1.12.0")
         self.requires("systemc/2.3.4")
 
     def validate(self):
