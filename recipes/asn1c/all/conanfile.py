@@ -46,7 +46,7 @@ class Asn1cConan(ConanFile):
                 self.tool_requires("automake/1.16.5")
             self.tool_requires("winflexbison/2.5.24")
         else:
-            self.tool_requires("bison/3.7.6")
+            self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
         self.tool_requires("libtool/2.4.7")
 
