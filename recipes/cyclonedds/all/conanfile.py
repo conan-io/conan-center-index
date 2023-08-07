@@ -101,6 +101,8 @@ class CycloneDDSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # TODO : determine how to do in conan :
+        # - other tools like ddsperf is cross compiled for target
         tc.variables["BUILD_IDLC"] = self._has_idlc()
         tc.variables["BUILD_IDLC_TESTING"] = False
         tc.variables["BUILD_DDSPERF"] = False
@@ -158,7 +160,6 @@ class CycloneDDSConan(ConanFile):
                 "iphlpapi"
             ]
 
-        # Provide CycloneDDS::idlc target
         build_modules = [
             os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
             os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
