@@ -47,7 +47,7 @@ class Libnetfilter_queueConan(ConanFile):
 
     def requirements(self):
         self.requires("libmnl/1.0.4")
-        self.requires("libnfnetlink/1.0.1")
+        self.requires("libnfnetlink/1.0.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
