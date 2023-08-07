@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -66,6 +67,8 @@ class LibRawConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) <= "0.19.5":
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.variables["RAW_LIB_VERSION_STRING"] = self.version
         tc.variables["LIBRAW_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
