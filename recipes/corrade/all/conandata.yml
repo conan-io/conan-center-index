@@ -9,5 +9,5 @@ patches:
   "2020.06":
     - patch_file: "patches/2020.06/0001-emscripten-toolchain.patch"
       patch_type: "portability"
-      description: "Remove unnecessary dependency on UseEmscripten"
-      source: "https://github.com/mosra/corrade/issues/104"
+      patch_description: "Remove unnecessary dependency on UseEmscripten"
+      patch_source: "https://github.com/mosra/corrade/issues/104"
