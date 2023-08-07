@@ -36,7 +36,7 @@ index 35f9242..15abafe 100644
  # Uncomment the first for an optimized build, or the second for debug.
 -OPTFLAGS=	/nologo /Ox /fp:precise /W3 /MD /D_CRT_SECURE_NO_WARNINGS \
 -			/DDLL_EXPORT
-+OPTFLAGS=	/nologo /fp:precise /W3 /D_CRT_SECURE_NO_WARNINGS ＄｛FREEXL_EXPORT}
++OPTFLAGS=	/nologo /fp:precise /W3 /D_CRT_SECURE_NO_WARNINGS $(FREEXL_EXPORT)
  #OPTFLAGS=	/nologo /Zi /MD /Fdfreexl.pdb /DDLL_EXPORT
  
  # Set the version number for the DLL.  Normally we leave this blank since
