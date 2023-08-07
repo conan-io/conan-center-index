@@ -84,7 +84,7 @@ class GetDnsConan(ConanFile):
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libuv:
-            self.requires("libuv/1.45.0")
+            self.requires("libuv/1.47.0")
         if self.options.with_libidn2:
             self.requires("libidn2/2.3.0")
         if self.options.tls == "gnutls":
@@ -96,7 +96,8 @@ class GetDnsConan(ConanFile):
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/1.9.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
