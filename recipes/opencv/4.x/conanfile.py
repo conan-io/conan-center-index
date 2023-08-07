@@ -180,7 +180,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_jpeg2000") == "jasper":
@@ -188,28 +188,28 @@ class OpenCVConan(ConanFile):
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
             self.requires("openjpeg/2.5.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_openexr:
             if Version(self.version) < "4.5.3":
                 # opencv < 4.5.3 doesn't support openexr >= 3
                 self.requires("openexr/2.5.7")
             else:
-                self.requires("openexr/3.1.5")
+                self.requires("openexr/3.1.9")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.1")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/4.4.3")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.7.0")
+            self.requires("onetbb/2021.9.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
         if self.options.get_safe("contrib_freetype"):
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
             self.requires("harfbuzz/6.0.0")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
