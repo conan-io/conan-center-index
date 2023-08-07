@@ -1,7 +1,7 @@
 sources:
-  "0.588":
-    url: "https://github.com/Roblox/luau/archive/0.588.tar.gz"
-    sha256: "a65e2792e3cbc285ba85155167f63d7862fe7c3667fd75493c9ff25284d2d9e0"
+  "0.589":
+    url: "https://github.com/Roblox/luau/archive/0.589.tar.gz"
+    sha256: "dc4489de52dbf29cd3d04d78c1112f812e04a03b68d57585749260ba791e65ed"
   "0.582":
     url: "https://github.com/Roblox/luau/archive/0.582.tar.gz"
     sha256: "ee6da6329e58afc956bcca907ed9c6bc0455cd580990aa73f7cfb285aea22a6d"
@@ -30,7 +30,7 @@ sources:
     url: "https://github.com/Roblox/luau/archive/0.548.tar.gz"
     sha256: "1ec0aa919955aaa2d88dbef115801681d3b4dbfa7a276435a03d20230918659c"
 patches:
-  "0.588":
+  "0.589":
     - patch_file: "patches/0.572-0001-fix-cmake.patch"
       patch_description: "enable shared build"
       patch_type: "portability"
