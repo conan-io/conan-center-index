@@ -21,7 +21,7 @@ sources:
       "x86_64":
         "gcc":
           url: "https://github.com/wasmerio/wasmer/releases/download/v4.1.1/wasmer-darwin-amd64.tar.gz"
-          sha256: "74cc40fcfe4108c0240137a47704d4f6ade8895c70da25358b471fe32ce47a50"
+          sha256: "113f58b1560c21607f0011ec6a835bdf109efc2f3be6f200ff8bc8b9591d021e"
       "armv8":
         "gcc":
           url: "https://github.com/wasmerio/wasmer/releases/download/v4.1.1/wasmer-darwin-arm64.tar.gz"
