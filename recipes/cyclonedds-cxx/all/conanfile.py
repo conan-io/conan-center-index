@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 class CycloneDDSCXXConan(ConanFile):
     name = "cyclonedds-cxx"
@@ -141,24 +141,14 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS-CXX")
         self.cpp_info.set_property("cmake_target_name", "CycloneDDS-CXX::CycloneDDS-CXX")
         self.cpp_info.set_property("pkg_config_name", "CycloneDDS-CXX")
-
-        # Provide CycloneDDS-CXX::idlcxx target
         build_modules = [
             os.path.join(self._module_path, "CycloneDDS-CXX", "CycloneDDS-CXX_idlcxx.cmake"),
             os.path.join(self._module_path, "CycloneDDS-CXX", "idlcxx", "Generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "CycloneDDS-CXX"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "CycloneDDS-CXX"
-        self.cpp_info.names["cmake_find_package"] = "CycloneDDS-CXX"
-        self.cpp_info.names["cmake_find_package_multi"] = "CycloneDDS-CXX"
         self.cpp_info.includedirs = ["include/ddscxx"]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
         self.cpp_info.components["ddscxx"].includedirs = ["include/ddscxx"]
-        self.cpp_info.components["ddscxx"].names["cmake_find_package"] = "ddscxx"
-        self.cpp_info.components["ddscxx"].names["cmake_find_package_multi"] = "ddscxx"
         # self.cpp_info.components["ddscxx"].requires = ["CycloneDDS::ddsc"]
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
         self.cpp_info.components["ddscxx"].set_property("pkg_config_name", "CycloneDDS-CXX")
