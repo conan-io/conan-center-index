@@ -1,5 +1,33 @@
 # Changelog
 
+### 04-Aug-2023 - 10:26 CEST
+
+- [feature] Enable Conan 2.0.8
+- [feature] Enable Conan 1.60.2
+- [feature] Update Jenkins server version
+- [hotfix] Better error management when having CI build timeout
+
+### 19-Jul-2023 - 09:45 CEST
+
+- [fix] Fix message processing if no message is passed.
+- [fix] Fix automatic merge priority to follow the correct PR order.
+- [fix] Waiting for Conan 2.x result after building Conan 1.x.
+- [fix] Bump version should not be tagged when removing old versions.
+- [feature] Improve internal logs to get more information about epochs.
+- [feature] Add an option to disable some jobs.
+- [feature] Disable branch indexing job runs on cci multibranch job.
+- [feature] Enable Conan 2.0.8
+
+### 04-May-2023 - 16:05 CEST
+
+- [bugfix] Fix cppstd issues when selecting the value to use in profiles.
+- [feature] Add support for raising `InvalidConfiguration` in `validate_build()` method in recipes.
+- [feature] Update library requirements for Conan client 2.0.4
+- [feature] Inform users when Conan v2 CI build is mandatory for merging.
+- [feature] Implement different "under maintenance" levels: OFF, MINOR, MAJOR, CRITICAL.
+- [feature] ValidateInfrastrucure: Check Artifactory repos exist.
+- [feature] Move variables to new folder properties approach.
+
 ### 12-April-2023 - 16:18 CEST
 
 - [feature] Add ListPackages job the posibility to update a list via PR

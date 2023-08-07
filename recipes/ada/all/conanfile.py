@@ -15,13 +15,15 @@ class AdaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ada-url/ada"
     topics = ("url", "parser", "WHATWG")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "shared": False,
     }
 
     @property
@@ -42,6 +44,13 @@ class AdaConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if Version(self.version) <= "2.0.0":
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -59,20 +68,9 @@ class AdaConan(ConanFile):
                 f"{self.ref} requires <charconv>, please use libc++ or upgrade compiler."
             )
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "0.6.0" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.2")
+        if Version(self.version) >= "0.6.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
