@@ -48,6 +48,9 @@ class RtMidiConan(ConanFile):
         if self._with_alsa:
             self.requires("libalsa/1.2.7.2")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
