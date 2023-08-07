@@ -54,7 +54,7 @@ class Hdf4Conan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         else:
             self.requires("libjpeg/9e")
         if self.options.szip_support == "with_libaec":
