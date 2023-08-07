@@ -1,7 +1,9 @@
-#include <iostream>
-#include <sstream>
 #include <serdepp/serializer.hpp>
 #include <serdepp/adaptor/sstream.hpp>
+
+#include <iostream>
+#include <sstream>
+
 class test {
 public:
     template<class Context>
