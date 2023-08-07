@@ -50,7 +50,8 @@ class PDCursesConan(ConanFile):
 
     def build_requirements(self):
         if not is_msvc(self):
-            self.tool_requires("make/4.2.1")
+            if not self.conf.get("tools.gnu:make_program", check_type=str):
+                self.tool_requires("make/4.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
