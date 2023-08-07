@@ -67,14 +67,14 @@ class DaggyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.5.0")
+        self.requires("qt/6.6.0")
         self.requires("kainjow-mustache/4.1")
 
         if self.options.with_yaml:
-            self.requires("yaml-cpp/0.7.0")
+            self.requires("yaml-cpp/0.8.0")
 
         if self.options.with_ssh2:
-            self.requires("libssh2/1.10.0")
+            self.requires("libssh2/1.11.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -97,7 +97,7 @@ class DaggyConan(ConanFile):
             raise ConanInvalidConfiguration("Shared Qt lib is required.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21]")
+        self.tool_requires("cmake/[>=3.21 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
