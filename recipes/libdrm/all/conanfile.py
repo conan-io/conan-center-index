@@ -169,6 +169,8 @@ class LibdrmConan(ConanFile):
             self.cpp_info.components["libdrm_nouveau"].includedirs.append(os.path.join("include", "libdrm"))
             self.cpp_info.components["libdrm_nouveau"].requires = ["libdrm_libdrm"]
             self.cpp_info.components["libdrm_nouveau"].set_property("pkg_config_name", "libdrm_nouveau")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libdrm_nouveau"].system_libs = ["pthread"]
 
         if self.options.intel:
             self.cpp_info.components["libdrm_intel"].libs = ["drm_intel"]
