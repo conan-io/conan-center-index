@@ -1,5 +1,12 @@
 # Changelog
 
+### 04-Aug-2023 - 10:26 CEST
+
+- [feature] Enable Conan 2.0.8
+- [feature] Enable Conan 1.60.2
+- [feature] Update Jenkins server version
+- [hotfix] Better error management when having CI build timeout
+
 ### 19-Jul-2023 - 09:45 CEST
 
 - [fix] Fix message processing if no message is passed.

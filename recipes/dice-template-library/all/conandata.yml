@@ -1,7 +1,10 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "a00ee401379eaf6c8af013fb39d6732fa68c3852e14b50789edde6f054647ca2"
   "1.0.0":
     url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.0.0.tar.gz"
-    sha256: "485505ad3f9fb033083e2952bd8b4e68f6b4f123746b20f4ec3af46f4ce66cfe"
+    sha256: "d0c75ec4861e2480dc7d6533125f9c2dfb3574fc2cffd15c66665b1cdfa66561"
   "0.3.0":
     url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v0.3.0.tar.gz"
     sha256: "2c02278f86c7b5fe1c684f5126f30529952a03784fa7c883cc4fd44965b3c33e"
