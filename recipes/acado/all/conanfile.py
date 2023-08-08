@@ -33,9 +33,7 @@ class AcadoConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "cmake/qpoases.cmake",
-             src=self.recipe_folder,
-             dst=self.export_sources_folder)
+        copy(self, "cmake/qpoases.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,25 +71,21 @@ class AcadoConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        tc.variables["CMAKE_CXX_STANDARD"] = 11
-
-        tc.variables["ACADO_BUILD_SHARED"] = self.options.shared
-        tc.variables["ACADO_BUILD_STATIC"] = not self.options.shared
-
-        tc.variables["ACADO_WITH_EXAMPLES"] = False
-        tc.variables["ACADO_WITH_TESTING"] = False
-        tc.variables["ACADO_DEVELOPER"] = False
-        tc.variables["ACADO_INTERNAL"] = False
-        tc.variables["ACADO_BUILD_CGT_ONLY"] = self.options.codegen_only
-
+        tc.cache_variables["ACADO_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["ACADO_BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["ACADO_BUILD_CGT_ONLY"] = self.options.codegen_only
+        tc.cache_variables["ACADO_WITH_EXAMPLES"] = False
+        tc.cache_variables["ACADO_WITH_TESTING"] = False
+        tc.cache_variables["ACADO_DEVELOPER"] = False
+        tc.cache_variables["ACADO_INTERNAL"] = False
         # The build logs 170,000 lines of warnings otherwise
         tc.variables["CMAKE_C_FLAGS"] = "-w"
         tc.variables["CMAKE_CXX_FLAGS"] = "-w"
+        tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -118,10 +112,14 @@ class AcadoConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        if not self.options.shared:
+            # Copy internal static acado_casadi lib
+            copy(self, "*acado_casadi*",
+                 src=os.path.join(self.build_folder, "lib"),
+                 dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
+
         # Copy embedded qpOASES v1.3 sources for code generation
-        copy(self, "*",
-             src=os.path.join(self.build_folder, "lib"),
-             dst=os.path.join(self.package_folder, "lib"))
         copy(self, "qpoases.cmake",
              src=os.path.join(self.export_sources_folder, "cmake"),
              dst=os.path.join(self.package_folder, "lib", "cmake"))
@@ -131,13 +129,14 @@ class AcadoConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        rm(self, "*.exp", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ACADO")
         self.cpp_info.set_property("cmake_target_name", "ACADO::ACADO")
 
         if self.options.shared:
-            self.cpp_info.libs = ["acado_toolkit_s", "acado_casadi"]
+            self.cpp_info.libs = ["acado_toolkit_s"]
         else:
             self.cpp_info.libs = ["acado_toolkit", "acado_casadi"]
 
@@ -146,7 +145,6 @@ class AcadoConan(ConanFile):
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "qpoases.cmake")])
         self.cpp_info.includedirs += [
-            os.path.join("include", "acado"),
             self._qpoases_sources,
             os.path.join(self._qpoases_sources, "INCLUDE"),
             os.path.join(self._qpoases_sources, "SRC"),
@@ -154,7 +152,6 @@ class AcadoConan(ConanFile):
 
         acado_template_paths = os.path.join(self.package_folder, "include", "acado", "code_generation", "templates")
         self.conf_info.define("user.acado:template_paths", acado_template_paths)
-        self.runenv_info.define_path("ACADO_TEMPLATE_PATHS", acado_template_paths)
         self.buildenv_info.define_path("ACADO_TEMPLATE_PATHS", acado_template_paths)
 
         # TODO: to remove in conan v2
