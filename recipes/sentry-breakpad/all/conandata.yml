@@ -26,7 +26,6 @@ patches:
       patch_source: "https://github.com/getsentry/sentry-native/pull/872"
   "0.6.4":
     - patch_file: "patches/0001-remove-third-pary-lss.patch"
-      base_path: "external/breakpad"
       patch_description: "Remove third party lss from include"
       patch_type: "conan"
       patch_source: "https://github.com/getsentry/breakpad/pull/37"
@@ -36,7 +35,6 @@ patches:
       patch_source: "https://github.com/getsentry/sentry-native/pull/872"
   "0.6.3":
     - patch_file: "patches/0001-remove-third-pary-lss.patch"
-      base_path: "external/breakpad"
       patch_description: "Remove third party lss from include"
       patch_type: "conan"
       patch_source: "https://github.com/getsentry/breakpad/pull/37"
@@ -46,7 +44,6 @@ patches:
       patch_source: "https://github.com/getsentry/sentry-native/pull/872"
   "0.5.4":
     - patch_file: "patches/0001-remove-third-pary-lss.patch"
-      base_path: "external/breakpad"
       patch_description: "Remove third party lss from include"
       patch_type: "conan"
       patch_source: "https://github.com/getsentry/breakpad/pull/37"
@@ -56,7 +53,6 @@ patches:
       patch_source: "https://github.com/getsentry/sentry-native/pull/872"
   "0.4.18":
     - patch_file: "patches/0001-remove-third-pary-lss.patch"
-      base_path: "external/breakpad"
       patch_description: "Remove third party lss from include"
       patch_type: "conan"
       patch_source: "https://github.com/getsentry/breakpad/pull/37"
