@@ -15,12 +15,14 @@ class TreeSitterCConan(ConanFile):
     homepage = "https://github.com/tree-sitter/tree-sitter-c"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    package_type = "shared-library"
+    package_type = "library"
     generators = "CMakeToolchain", "CMakeDeps"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
 
