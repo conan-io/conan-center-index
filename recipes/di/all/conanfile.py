@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, save, load
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -28,7 +28,6 @@ class DiConan(ConanFile):
         "with_extensions": False,
         "diagnostics_level": 1
     }
-    exports = ["BSL-1.0.txt"]
     no_copy_source = True
 
     @property
@@ -71,10 +70,20 @@ class DiConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _extract_license(self):
+        file = os.path.join(self.source_folder, "CMakeLists.txt")
+        file_content = load(self, file)
+
+        license_start = file_content.find("# Copyright")
+        sub_end = "LICENSE_1_0.txt)"
+        license_end = file_content.find(sub_end)
+        license_contents = file_content[license_start:(license_end + len(sub_end))]
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+
+
     def package(self):
-        copy(self, "BSL-1.0.txt",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.recipe_folder)
+        self._extract_license()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.with_extensions:
             copy(self, "*.hpp",
                  dst=os.path.join(self.package_folder, "include", "boost", "di", "extension"),
