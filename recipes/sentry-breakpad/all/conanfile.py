@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
 import os
 
@@ -76,55 +76,8 @@ class SentryBreakpadConan(ConanFile):
             tc.variables["LINUX"] = True
         tc.generate()
 
-    def _patch_sources(self):
-        # FIXME: convert to patches
-        import textwrap
-
-        save(self, os.path.join(self.source_folder, "external", "CMakeLists.txt"),
-                   textwrap.dedent("""\
-                    target_compile_features(breakpad_client PUBLIC cxx_std_11)
-                    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-                        find_path(LINUX_SYSCALL_INCLUDE_DIR NAMES linux_syscall_support.h)
-                        target_include_directories(breakpad_client PRIVATE ${LINUX_SYSCALL_INCLUDE_DIR})
-                    endif()
-                    install(TARGETS breakpad_client
-                        ARCHIVE DESTINATION lib
-                        LIBRARY DESTINATION lib
-                        RUNTIME DESTINATION bin
-                    )
-                    file(GLOB COMMON_FILES breakpad/src/common/*.h)
-                    install(FILES ${COMMON_FILES}
-                        DESTINATION include/breakpad/common
-                    )
-                    set(PLATFORM_FOLDER)
-                    if(IOS)
-                        set(PLATFORM_FOLDER ios)
-                    elseif(APPLE)
-                        set(PLATFORM_FOLDER mac)
-                    elseif(UNIX)
-                        set(PLATFORM_FOLDER linux)
-                    endif()
-                    if(WIN32)
-                        set(PLATFORM_FOLDER windows)
-                    endif()
-                    if(NOT PLATFORM_FOLDER)
-                        message(FATAL_ERROR "Unknown os -> don't know how to install headers")
-                    endif()
-                    file(GLOB COMMON_PLATFORM_HEADERS breakpad/src/common/${PLATFORM_FOLDER}/*.h)
-                    install(FILES ${COMMON_PLATFORM_HEADERS}
-                        DESTINATION include/breakpad/common/${PLATFORM_FOLDER})
-                    install(DIRECTORY breakpad/src/client/${PLATFORM_FOLDER}
-                        DESTINATION include/breakpad/client
-                        FILES_MATCHING PATTERN *.h
-                    )
-                    install(DIRECTORY breakpad/src/google_breakpad/common
-                        DESTINATION include/breakpad/google_breakpad
-                        FILES_MATCHING PATTERN *.h
-                    )
-                   """), append=True)
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
