@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake
-from conan.tools.files import get, copy
+from conan.tools.files import get, replace_in_file, copy
 from conan.tools.layout import basic_layout
 import os
 
@@ -37,6 +37,8 @@ class TreeSitterCConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -46,7 +48,16 @@ class TreeSitterCConan(ConanFile):
     def requirements(self):
         self.requires("tree-sitter/0.20.8", transitive_headers=True, transitive_libs=True)
 
+    def _patch_sources(self):
+        if not self.options.shared:
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "src", "parser.c"),
+                "__declspec(dllexport)", ""
+            )
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()

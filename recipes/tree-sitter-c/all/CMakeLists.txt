@@ -21,7 +21,6 @@ const TSLanguage *tree_sitter_c(void);
 ]])
 
 add_library(${PROJECT_NAME}
-    SHARED
     src/src/parser.c
 )
 target_link_libraries(${PROJECT_NAME}
