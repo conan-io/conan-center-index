@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, collect_libs
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
@@ -61,14 +61,14 @@ class LibRawConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+            if Version(self.version) <= "0.19.5":
+                check_max_cppstd(self, 11)
 
     def source(self):
        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) <= "0.19.5":
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.variables["RAW_LIB_VERSION_STRING"] = self.version
         tc.variables["LIBRAW_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
