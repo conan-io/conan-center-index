@@ -77,6 +77,8 @@ class AdaConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        # Relocatable shared libs on macOS
+        tc.variables["CMAKE_MACOSX_RPATH"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -96,3 +98,5 @@ class AdaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ada"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
