@@ -117,6 +117,7 @@ class HictkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "hictk")
         self.cpp_info.set_property("cmake_target_name", "hictk::libhictk")
         self.cpp_info.set_property("pkg_config_name", "hictk")
