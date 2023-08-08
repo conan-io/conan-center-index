@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     def build_requirements(self):
-        self.build_requires("cmake/3.27.0")
+        self.build_requires("cmake/3.27.1")
 
     def build(self):
         cmake = CMake(self)
