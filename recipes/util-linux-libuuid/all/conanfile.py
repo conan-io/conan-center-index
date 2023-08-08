@@ -111,5 +111,8 @@ class UtilLinuxLibuuidConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "uuid")
         self.cpp_info.set_property("cmake_target_name", "libuuid::libuuid")
         self.cpp_info.set_property("cmake_file_name", "libuuid")
+        # Maintain alias to `LibUUID::LibUUID` for previous version of the recipe
+        self.cpp_info.set_property("cmake_target_aliases", ["LibUUID::LibUUID"])
+
         self.cpp_info.libs = ["uuid"]
         self.cpp_info.includedirs.append(os.path.join("include", "uuid"))
