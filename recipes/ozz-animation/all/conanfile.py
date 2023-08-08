@@ -87,6 +87,9 @@ class OzzAnimationConan(ConanFile):
             cmvars["ozz_build_tools"] = True
             cmvars["ozz_build_gltf"] = True
 
+        if self.options.ozz_animation_tools:
+            cmvars["ozz_build_tools"] = True
+
         cmake.configure(variables = cmvars)
         return cmake
 
