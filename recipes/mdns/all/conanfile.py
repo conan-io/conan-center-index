@@ -1,38 +1,45 @@
 import os
-from conans import CMake, ConanFile, tools
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.52.0"
+
 
 class MdnsConan(ConanFile):
     name = "mdns"
-    license = "Unlicense"
-    homepage = "https://github.com/mjansson/mdns"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Public domain mDNS/DNS-SD library in C"
-    topics = ("mdns", "dns", "dns-sd", "multicast discovery", "discovery")
-    settings = "os", "compiler", "build_type", "arch"
+    license = "Unlicense"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mjansson/mdns"
+    topics = ("dns", "dns-sd", "multicast discovery", "discovery", "header-only")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.h", dst="include", src=self._source_subfolder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
-        if str(self.settings.os) in ["Linux", "Android"]:
-            self.cpp_info.system_libs.append('pthread')
+        if str(self.settings.os) in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.system_libs.append("pthread")
 
         self.cpp_info.set_property("cmake_file_name", "mdns")
         self.cpp_info.set_property("cmake_target_name", "mdns::mdns")
