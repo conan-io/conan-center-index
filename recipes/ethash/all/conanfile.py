@@ -17,6 +17,7 @@ class EthashConan(ConanFile):
     homepage = "https://github.com/chfast/ethash"
     topics = ("ethereum", "mining", "proof-of-work")
     package_type = "library"
+    tool_requires = "cmake/3.16.2"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
