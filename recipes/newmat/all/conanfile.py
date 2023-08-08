@@ -68,5 +68,9 @@ class NewmatConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
+
         self.cpp_info.includedirs.append(os.path.join("include", "newmat"))
 
