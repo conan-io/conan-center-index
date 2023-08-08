@@ -421,12 +421,18 @@ required_for_references:
 - iso8601lib
 - itlib
 - ittapi
+- ixwebsocket
+- jansson
 - jasper
 - jbig
+- jeaiii-itoa
+- jfalcou-eve
 - jinja2cpp
 - joltphysics
 - jom
 - jpcre2
+- jpeg-compressor
+- jsmn
 - json-c
 - json-schema-validator
 - jsoncons
@@ -554,6 +560,7 @@ required_for_references:
 - libpqxx
 - libpsl
 - libqrencode
+- librasterlite
 - libraw
 - librdkafka
 - librealsense
@@ -602,6 +609,7 @@ required_for_references:
 - libwebsockets
 - libx264
 - libx265
+- libxcrypt
 - libxls
 - libxlsxwriter
 - libxml2
