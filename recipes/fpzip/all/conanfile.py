@@ -74,5 +74,7 @@ class FpzipConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["fpzip"]
         self.cpp_info.defines.append("FPZIP_FP={}".format(self._fp_name_table.get(str(self.options.with_fp), "FP_ZIP_FAST")))
+        if self.options.shared:
+            self.cpp_info.defines.append("FPZIP_SHARED_LIBS")
         if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             self.cpp_info.system_libs += ["stdc++"]
