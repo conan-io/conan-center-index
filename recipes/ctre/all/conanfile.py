@@ -39,8 +39,11 @@ class CtreConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC < 16")
         elif compiler == "gcc" and compiler_version < min_gcc:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < {min_gcc}")
-        elif compiler == "clang" and compiler_version < "6.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 6.0")
+        elif compiler == "clang":
+            if compiler_version < "6.0":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 6.0")
+            if ctre_version == "3.4.1" and compiler_version.major == 12 and not self.settings.compiler.get_safe("cppstd"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang 12.0 without cppstd. Please set cppstd.")
         elif compiler == "apple-clang":
             if compiler_version < "10.0":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support Apple clang < 10.0")
