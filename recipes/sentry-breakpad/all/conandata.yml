@@ -17,7 +17,6 @@ sources:
 patches:
   "0.6.5":
     - patch_file: "patches/0001-remove-third-pary-lss.patch"
-      base_path: "external/breakpad"
       patch_description: "Remove third party lss from include"
       patch_type: "conan"
       patch_source: "https://github.com/getsentry/breakpad/pull/37"

@@ -4,10 +4,10 @@ Date:   Tue Aug 8 11:59:04 2023 +0200
 
     Remove third_party/lss
 
-diff --git a/src/client/linux/crash_generation/crash_generation_client.cc b/src/client/linux/crash_generation/crash_generation_client.cc
+diff --git a/external/breakpad/src/client/linux/crash_generation/crash_generation_client.cc b/external/breakpad/src/client/linux/crash_generation/crash_generation_client.cc
 index f06273d5..45599971 100644
---- a/src/client/linux/crash_generation/crash_generation_client.cc
-+++ b/src/client/linux/crash_generation/crash_generation_client.cc
+--- a/external/breakpad/src/client/linux/crash_generation/crash_generation_client.cc
++++ b/external/breakpad/src/client/linux/crash_generation/crash_generation_client.cc
 @@ -40,7 +40,7 @@
  
  #include "common/linux/eintr_wrapper.h"
@@ -17,10 +17,10 @@ index f06273d5..45599971 100644
  
  namespace google_breakpad {
  
-diff --git a/src/client/linux/handler/exception_handler.cc b/src/client/linux/handler/exception_handler.cc
+diff --git a/external/breakpad/src/client/linux/handler/exception_handler.cc b/external/breakpad/src/client/linux/handler/exception_handler.cc
 index 9e23c119..4edd781c 100644
---- a/src/client/linux/handler/exception_handler.cc
-+++ b/src/client/linux/handler/exception_handler.cc
+--- a/external/breakpad/src/client/linux/handler/exception_handler.cc
++++ b/external/breakpad/src/client/linux/handler/exception_handler.cc
 @@ -98,7 +98,7 @@
  #include "client/linux/minidump_writer/linux_dumper.h"
  #include "client/linux/minidump_writer/minidump_writer.h"
@@ -30,10 +30,10 @@ index 9e23c119..4edd781c 100644
  
  #if defined(__ANDROID__)
  #include "linux/sched.h"
-diff --git a/src/client/linux/handler/exception_handler_unittest.cc b/src/client/linux/handler/exception_handler_unittest.cc
+diff --git a/external/breakpad/src/client/linux/handler/exception_handler_unittest.cc b/external/breakpad/src/client/linux/handler/exception_handler_unittest.cc
 index b2d8d468..a9199e2d 100644
---- a/src/client/linux/handler/exception_handler_unittest.cc
-+++ b/src/client/linux/handler/exception_handler_unittest.cc
+--- a/external/breakpad/src/client/linux/handler/exception_handler_unittest.cc
++++ b/external/breakpad/src/client/linux/handler/exception_handler_unittest.cc
 @@ -53,7 +53,7 @@
  #include "common/linux/linux_libc_support.h"
  #include "common/tests/auto_tempdir.h"
@@ -43,10 +43,10 @@ index b2d8d468..a9199e2d 100644
  #include "google_breakpad/processor/minidump.h"
  
  using namespace google_breakpad;
-diff --git a/src/client/linux/log/log.cc b/src/client/linux/log/log.cc
+diff --git a/external/breakpad/src/client/linux/log/log.cc b/external/breakpad/src/client/linux/log/log.cc
 index 2a48d7fe..0e3329a4 100644
---- a/src/client/linux/log/log.cc
-+++ b/src/client/linux/log/log.cc
+--- a/external/breakpad/src/client/linux/log/log.cc
++++ b/external/breakpad/src/client/linux/log/log.cc
 @@ -36,7 +36,7 @@
  #include <android/log.h>
  #include <dlfcn.h>
@@ -56,10 +56,10 @@ index 2a48d7fe..0e3329a4 100644
  #endif
  
  namespace logger {
-diff --git a/src/client/linux/minidump_writer/cpu_set.h b/src/client/linux/minidump_writer/cpu_set.h
+diff --git a/external/breakpad/src/client/linux/minidump_writer/cpu_set.h b/external/breakpad/src/client/linux/minidump_writer/cpu_set.h
 index 70c1c758..92f7cdec 100644
---- a/src/client/linux/minidump_writer/cpu_set.h
-+++ b/src/client/linux/minidump_writer/cpu_set.h
+--- a/external/breakpad/src/client/linux/minidump_writer/cpu_set.h
++++ b/external/breakpad/src/client/linux/minidump_writer/cpu_set.h
 @@ -34,7 +34,7 @@
  #include <string.h>
  
@@ -69,10 +69,10 @@ index 70c1c758..92f7cdec 100644
  
  namespace google_breakpad {
  
-diff --git a/src/client/linux/minidump_writer/directory_reader.h b/src/client/linux/minidump_writer/directory_reader.h
+diff --git a/external/breakpad/src/client/linux/minidump_writer/directory_reader.h b/external/breakpad/src/client/linux/minidump_writer/directory_reader.h
 index 62bba877..568278ff 100644
---- a/src/client/linux/minidump_writer/directory_reader.h
-+++ b/src/client/linux/minidump_writer/directory_reader.h
+--- a/external/breakpad/src/client/linux/minidump_writer/directory_reader.h
++++ b/external/breakpad/src/client/linux/minidump_writer/directory_reader.h
 @@ -37,7 +37,7 @@
  #include <string.h>
  
@@ -82,10 +82,10 @@ index 62bba877..568278ff 100644
  
  namespace google_breakpad {
  
-diff --git a/src/client/linux/minidump_writer/line_reader.h b/src/client/linux/minidump_writer/line_reader.h
+diff --git a/external/breakpad/src/client/linux/minidump_writer/line_reader.h b/external/breakpad/src/client/linux/minidump_writer/line_reader.h
 index d54a67d0..9ba8cd4c 100644
---- a/src/client/linux/minidump_writer/line_reader.h
-+++ b/src/client/linux/minidump_writer/line_reader.h
+--- a/external/breakpad/src/client/linux/minidump_writer/line_reader.h
++++ b/external/breakpad/src/client/linux/minidump_writer/line_reader.h
 @@ -34,7 +34,7 @@
  #include <string.h>
  
@@ -95,10 +95,10 @@ index d54a67d0..9ba8cd4c 100644
  
  namespace google_breakpad {
  
-diff --git a/src/client/linux/minidump_writer/linux_dumper.cc b/src/client/linux/minidump_writer/linux_dumper.cc
+diff --git a/external/breakpad/src/client/linux/minidump_writer/linux_dumper.cc b/external/breakpad/src/client/linux/minidump_writer/linux_dumper.cc
 index 85922a9c..3df94a6b 100644
---- a/src/client/linux/minidump_writer/linux_dumper.cc
-+++ b/src/client/linux/minidump_writer/linux_dumper.cc
+--- a/external/breakpad/src/client/linux/minidump_writer/linux_dumper.cc
++++ b/external/breakpad/src/client/linux/minidump_writer/linux_dumper.cc
 @@ -54,7 +54,7 @@
  #include "common/linux/memory_mapped_file.h"
  #include "common/linux/safe_readlink.h"
@@ -108,10 +108,10 @@ index 85922a9c..3df94a6b 100644
  
  using google_breakpad::elf::FileID;
  
-diff --git a/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc b/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
+diff --git a/external/breakpad/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc b/external/breakpad/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
 index 5a135fda..9f27f8d9 100644
---- a/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
-+++ b/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
+--- a/external/breakpad/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
++++ b/external/breakpad/src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc
 @@ -42,7 +42,7 @@
  #include <unistd.h>
  
@@ -121,10 +121,10 @@ index 5a135fda..9f27f8d9 100644
  
  #if defined(__ARM_EABI__)
  #define TID_PTR_REGISTER "r3"
-diff --git a/src/client/linux/minidump_writer/linux_ptrace_dumper.cc b/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
+diff --git a/external/breakpad/src/client/linux/minidump_writer/linux_ptrace_dumper.cc b/external/breakpad/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
 index 0e58236b..d8613cd3 100644
---- a/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
-+++ b/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
+--- a/external/breakpad/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
++++ b/external/breakpad/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
 @@ -60,7 +60,7 @@
  #include "client/linux/minidump_writer/directory_reader.h"
  #include "client/linux/minidump_writer/line_reader.h"
@@ -134,10 +134,10 @@ index 0e58236b..d8613cd3 100644
  
  // Suspends a thread by attaching to it.
  static bool SuspendThread(pid_t pid) {
-diff --git a/src/client/linux/minidump_writer/minidump_writer.cc b/src/client/linux/minidump_writer/minidump_writer.cc
+diff --git a/external/breakpad/src/client/linux/minidump_writer/minidump_writer.cc b/external/breakpad/src/client/linux/minidump_writer/minidump_writer.cc
 index a95dd254..a0ed1e1d 100644
---- a/src/client/linux/minidump_writer/minidump_writer.cc
-+++ b/src/client/linux/minidump_writer/minidump_writer.cc
+--- a/external/breakpad/src/client/linux/minidump_writer/minidump_writer.cc
++++ b/external/breakpad/src/client/linux/minidump_writer/minidump_writer.cc
 @@ -82,7 +82,7 @@
  #include "common/linux/linux_libc_support.h"
  #include "common/minidump_type_helper.h"
@@ -147,10 +147,10 @@ index a95dd254..a0ed1e1d 100644
  
  namespace {
  
-diff --git a/src/client/linux/minidump_writer/proc_cpuinfo_reader.h b/src/client/linux/minidump_writer/proc_cpuinfo_reader.h
+diff --git a/external/breakpad/src/client/linux/minidump_writer/proc_cpuinfo_reader.h b/external/breakpad/src/client/linux/minidump_writer/proc_cpuinfo_reader.h
 index 5ae16dfb..dcbb2e63 100644
---- a/src/client/linux/minidump_writer/proc_cpuinfo_reader.h
-+++ b/src/client/linux/minidump_writer/proc_cpuinfo_reader.h
+--- a/external/breakpad/src/client/linux/minidump_writer/proc_cpuinfo_reader.h
++++ b/external/breakpad/src/client/linux/minidump_writer/proc_cpuinfo_reader.h
 @@ -35,7 +35,7 @@
  
  #include "client/linux/minidump_writer/line_reader.h"
@@ -160,10 +160,10 @@ index 5ae16dfb..dcbb2e63 100644
  
  namespace google_breakpad {
  
-diff --git a/src/client/minidump_file_writer.cc b/src/client/minidump_file_writer.cc
+diff --git a/external/breakpad/src/client/minidump_file_writer.cc b/external/breakpad/src/client/minidump_file_writer.cc
 index c00af36c..acf5a520 100644
---- a/src/client/minidump_file_writer.cc
-+++ b/src/client/minidump_file_writer.cc
+--- a/external/breakpad/src/client/minidump_file_writer.cc
++++ b/external/breakpad/src/client/minidump_file_writer.cc
 @@ -44,7 +44,7 @@
  #include "common/linux/linux_libc_support.h"
  #include "common/string_conversion.h"
@@ -173,10 +173,10 @@ index c00af36c..acf5a520 100644
  #endif
  
  #if defined(__ANDROID__)
-diff --git a/src/common/linux/file_id.cc b/src/common/linux/file_id.cc
+diff --git a/external/breakpad/src/common/linux/file_id.cc b/external/breakpad/src/common/linux/file_id.cc
 index d8fcbd8d..c81e43bc 100644
---- a/src/common/linux/file_id.cc
-+++ b/src/common/linux/file_id.cc
+--- a/external/breakpad/src/common/linux/file_id.cc
++++ b/external/breakpad/src/common/linux/file_id.cc
 @@ -49,7 +49,7 @@
  #include "common/linux/linux_libc_support.h"
  #include "common/linux/memory_mapped_file.h"
@@ -186,10 +186,10 @@ index d8fcbd8d..c81e43bc 100644
  
  namespace google_breakpad {
  namespace elf {
-diff --git a/src/common/linux/memory_mapped_file.cc b/src/common/linux/memory_mapped_file.cc
+diff --git a/external/breakpad/src/common/linux/memory_mapped_file.cc b/external/breakpad/src/common/linux/memory_mapped_file.cc
 index a7b96eb5..b89a3c95 100644
---- a/src/common/linux/memory_mapped_file.cc
-+++ b/src/common/linux/memory_mapped_file.cc
+--- a/external/breakpad/src/common/linux/memory_mapped_file.cc
++++ b/external/breakpad/src/common/linux/memory_mapped_file.cc
 @@ -43,7 +43,7 @@
  #include <unistd.h>
  
@@ -199,10 +199,10 @@ index a7b96eb5..b89a3c95 100644
  
  namespace google_breakpad {
  
-diff --git a/src/common/linux/safe_readlink.cc b/src/common/linux/safe_readlink.cc
+diff --git a/external/breakpad/src/common/linux/safe_readlink.cc b/external/breakpad/src/common/linux/safe_readlink.cc
 index a42b01a5..939e5309 100644
---- a/src/common/linux/safe_readlink.cc
-+++ b/src/common/linux/safe_readlink.cc
+--- a/external/breakpad/src/common/linux/safe_readlink.cc
++++ b/external/breakpad/src/common/linux/safe_readlink.cc
 @@ -35,7 +35,7 @@
  
  #include <stddef.h>
@@ -212,10 +212,10 @@ index a42b01a5..939e5309 100644
  
  namespace google_breakpad {
  
-diff --git a/src/common/memory_allocator.h b/src/common/memory_allocator.h
+diff --git a/external/breakpad/src/common/memory_allocator.h b/external/breakpad/src/common/memory_allocator.h
 index 1c99913a..5fa3c337 100644
---- a/src/common/memory_allocator.h
-+++ b/src/common/memory_allocator.h
+--- a/external/breakpad/src/common/memory_allocator.h
++++ b/external/breakpad/src/common/memory_allocator.h
 @@ -46,7 +46,7 @@
  #define sys_munmap munmap
  #define MAP_ANONYMOUS MAP_ANON
@@ -225,29 +225,3 @@ index 1c99913a..5fa3c337 100644
  #endif
  
  namespace google_breakpad {
-diff --git a/src/processor/testdata/linux_test_app.cc b/src/processor/testdata/linux_test_app.cc
-index b0bbb669..0edbef42 100644
---- a/src/processor/testdata/linux_test_app.cc
-+++ b/src/processor/testdata/linux_test_app.cc
-@@ -49,7 +49,7 @@
- #include <string>
- 
- #include "client/linux/handler/exception_handler.h"
--#include "third_party/lss/linux_syscall_support.h"
-+#include "linux_syscall_support.h"
- 
- namespace {
- 
-diff --git a/src/tools/linux/md2core/minidump-2-core.cc b/src/tools/linux/md2core/minidump-2-core.cc
-index 9d5e5e3f..caa1f96c 100644
---- a/src/tools/linux/md2core/minidump-2-core.cc
-+++ b/src/tools/linux/md2core/minidump-2-core.cc
-@@ -55,7 +55,7 @@
- #include "common/using_std_string.h"
- #include "google_breakpad/common/breakpad_types.h"
- #include "google_breakpad/common/minidump_format.h"
--#include "third_party/lss/linux_syscall_support.h"
-+#include "linux_syscall_support.h"
- #include "tools/linux/md2core/minidump_memory_range.h"
- 
- #if ULONG_MAX == 0xffffffffffffffff
