@@ -52,7 +52,7 @@ class ImplotConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if Version(self.version) < "0.13" and is_msvc(self) and self.dependencies["imgui"].option.shared:
+        if Version(self.version) < "0.13" and is_msvc(self) and self.dependencies["imgui"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared imgui.")
 
     def source(self):
