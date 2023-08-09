@@ -106,6 +106,7 @@ class PclConan(ConanFile):
             self.requires("libpcap/1.10.4")
         if self.options.with_opengl:
             self.requires("opengl/system")
+            self.requires("freeglut/3.4.0")
             self.requires("glew/2.2.0")
 
     def validate(self):
@@ -137,6 +138,8 @@ class PclConan(ConanFile):
         tc.cache_variables["BUILD_apps"] = self.options.with_apps
         tc.cache_variables["BUILD_examples"] = False
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
+        # The default False setting breaks OpenGL detection in CMake
+        tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
