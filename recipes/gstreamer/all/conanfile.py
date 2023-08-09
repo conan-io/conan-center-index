@@ -55,7 +55,7 @@ class GStreamerConan(ConanFile):
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.0")
+        self.tool_requires("meson/1.2.1")
         # There used to be an issue with glib being shared by default but its dependencies being static
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
         self.tool_requires("glib/2.77.1")
