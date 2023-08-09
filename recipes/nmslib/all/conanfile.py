@@ -78,4 +78,6 @@ class Nmslib(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["NonMetricSpaceLib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "m", "mvec"]
+            self.cpp_info.system_libs = ["pthread", "m"]
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.cpp_info.system_libs.append("mvec")
