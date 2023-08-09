@@ -224,6 +224,7 @@ required_for_references:
 - dbus
 - debug_assert
 - decimal_for_cpp
+- di
 - dice-template-library
 - dirent
 - discount
@@ -421,12 +422,18 @@ required_for_references:
 - iso8601lib
 - itlib
 - ittapi
+- ixwebsocket
+- jansson
 - jasper
 - jbig
+- jeaiii-itoa
+- jfalcou-eve
 - jinja2cpp
 - joltphysics
 - jom
 - jpcre2
+- jpeg-compressor
+- jsmn
 - json-c
 - json-schema-validator
 - jsoncons
@@ -554,6 +561,7 @@ required_for_references:
 - libpqxx
 - libpsl
 - libqrencode
+- librasterlite
 - libraw
 - librdkafka
 - librealsense
@@ -602,6 +610,7 @@ required_for_references:
 - libwebsockets
 - libx264
 - libx265
+- libxcrypt
 - libxls
 - libxlsxwriter
 - libxml2
@@ -660,6 +669,7 @@ required_for_references:
 - mcap
 - md4c
 - md4qt
+- mdns
 - mdnsresponder
 - mdspan
 - meshoptimizer
@@ -757,6 +767,7 @@ required_for_references:
 - opencl-icd-loader
 - opencolorio
 - opencore-amr
+- opencv
 - openddl-parser
 - openexr
 - openfbx
@@ -925,6 +936,7 @@ required_for_references:
 - sfml
 - shapelib
 - shield
+- si
 - sigslot
 - simde
 - simdjson
