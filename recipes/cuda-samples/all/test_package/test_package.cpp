@@ -1,16 +1,16 @@
 #include <cstdlib>
 #include <iostream>
-#include <cmath>
 
-#include "nvVector.h"
-#include "nvMatrix.h"
-#include "nvQuaternion.h"
+// One of the few non-CUDA-specific headers in the CUDA Samples.
+#include "helper_string.h"
 
 
 int main() {
-    auto q = normalize(nv::quaternion<float>(0, 0, 0, 4));
+    char file[] = "hello_world.jpg";
+    char *ext = NULL;
+    getFileExtension(file, &ext);
 
-    std::cout << "Normalized nv::quaternion(): " << q[0] << ", " << q[1] << ", " << q[2] << ", " << q[3] << std::endl;
+    std::cout << "getFileExtension(\"" << file << "\") returned \"" << ext << "\"." << std::endl;
 
     return EXIT_SUCCESS;
 }
