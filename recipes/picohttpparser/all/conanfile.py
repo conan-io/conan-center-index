@@ -18,7 +18,7 @@ class PicohttpparserConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
