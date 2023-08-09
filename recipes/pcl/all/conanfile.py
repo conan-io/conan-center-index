@@ -13,7 +13,8 @@ required_conan_version = ">=1.53.0"
 
 class PclConan(ConanFile):
     name = "pcl"
-    description = "The Point Cloud Library (PCL) is a standalone, large-scale, open project for 2D/3D image and point cloud processing."
+    description = ("The Point Cloud Library (PCL) is a standalone, large-scale, "
+                   "open project for 2D/3D image and point cloud processing.")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/PointCloudLibrary/pcl"
