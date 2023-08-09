@@ -29,7 +29,7 @@ class EthashConan(ConanFile):
         return 20
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     @property
     def _compilers_minimum_version(self):
