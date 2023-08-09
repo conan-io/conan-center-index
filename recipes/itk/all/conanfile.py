@@ -266,9 +266,11 @@ class ITKConan(ConanFile):
     def _itk_components(self):
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+        def libdl():
+            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         return {
-            "itksys": {},
+            "itksys": {"system_libs": libdl()},
             "itkvcl": {"system_libs": libm()},
             "itkv3p_netlib": {"system_libs": libm()},
             "itkvnl": {"requires": ["itkvcl"]},
