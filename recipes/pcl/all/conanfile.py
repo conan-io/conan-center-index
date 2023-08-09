@@ -198,7 +198,7 @@ class PclConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "PCL")
         self.cpp_info.set_property("cmake_target_name", "PCL::PCL")
 
-        def _add_component(comp, requires, *, extra_libs=(), header_only=False):
+        def _add_component(comp, requires, *, extra_libs=None, header_only=False):
             self.cpp_info.components[comp].names["cmake_find_package"] = comp
             self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
             self.cpp_info.components[comp].set_property("cmake_file_name", comp)
@@ -207,11 +207,11 @@ class PclConan(ConanFile):
             self.cpp_info.components[comp].set_property("pkg_config_name", f"pcl_{comp}-{self._version_suffix}")
             self.cpp_info.components[comp].includedirs = [os.path.join("include", f"pcl-{self._version_suffix}")]
             if not header_only:
-                libs = [comp] + extra_libs
-                if comp != "common":
-                    libs.append("common")
+                libs = [comp]
+                if extra_libs:
+                    libs += extra_libs
                 self.cpp_info.components[comp].libs = [self._lib_name(lib) for lib in libs]
-            self.cpp_info.components[comp].requires = requires
+            self.cpp_info.components[comp].requires = ["common"] + requires
 
         def usb():
             return ["libusb::libusb"] if self.options.with_libusb else []
