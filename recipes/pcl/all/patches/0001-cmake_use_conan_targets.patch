@@ -1,0 +1,32 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -319,6 +319,6 @@ endif()
+ find_package(Threads REQUIRED)
+ 
+ # Eigen (required)
+-find_package(Eigen 3.3 REQUIRED)
++find_package(EIGEN REQUIRED)
+ include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})
+ 
+--- a/common/CMakeLists.txt
++++ b/common/CMakeLists.txt
+@@ -4,7 +4,7 @@ set(SUBSYS_DEPS)
+ 
+ set(build TRUE)
+ PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
+-PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} EXT_DEPS eigen boost)
++PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} EXT_DEPS EIGEN Boost)
+ 
+ PCL_ADD_DOC("${SUBSYS_NAME}")
+ 
+--- a/io/CMakeLists.txt
++++ b/io/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ set(SUBSYS_NAME io)
+ set(SUBSYS_DESC "Point cloud IO library")
+ set(SUBSYS_DEPS common octree)
+-set(SUBSYS_EXT_DEPS boost eigen)
++set(SUBSYS_EXT_DEPS Boost EIGEN)
+ 
+ set(build TRUE)
+ PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
