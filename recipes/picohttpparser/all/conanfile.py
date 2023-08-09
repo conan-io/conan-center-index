@@ -6,10 +6,12 @@ from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.51.1"
 
+
 class PicohttpparserConan(ConanFile):
     name = "picohttpparser"
     description = "tiny HTTP parser written in C (used in HTTP::Parser::XS et al.)"
     url = "https://github.com/conan-io/conan-center-index"
+    license = "MIT"
     homepage = "https://github.com/h2o/picohttpparser"
     topics = ("http", "parser")
     package_type = "library"
