@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -115,6 +115,7 @@ class LibSafeCConan(ConanFile):
             autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "libsafec"))
