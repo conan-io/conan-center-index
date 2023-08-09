@@ -1,11 +1,8 @@
 #include "QtAwesome.h"
-#include <QApplication>
 
-int main(int argc, char *argv[]) {
-	QApplication app(argc, argv);
-	fa::QtAwesome awesome(&app);
-
-	awesome.initFontAwesome();
+int main(void) {
+    fa::QtAwesome awesome(nullptr);
+    awesome.font(10, 12);
 
     return EXIT_SUCCESS;
 }
