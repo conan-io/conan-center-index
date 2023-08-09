@@ -108,6 +108,14 @@ class PclConan(ConanFile):
             self.requires("opengl/system")
             self.requires("freeglut/3.4.0")
             self.requires("glew/2.2.0")
+        # TODO:
+        # self.requires("vtk/9.x.x")
+        # self.requires("openni/x.x.x")
+        # self.requires("openni2/x.x.x")
+        # self.requires("ensenso/x.x.x")
+        # self.requires("davidsdk/x.x.x")
+        # self.requires("dssdk/x.x.x")
+        # self.requires("rssdk/x.x.x")
 
     def validate(self):
         if self.settings.compiler.cppstd:
