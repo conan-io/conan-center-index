@@ -77,7 +77,6 @@ class OzzAnimationConan(ConanFile):
             "ozz_build_cpp11": True,
             "ozz_build_tools": False,
             "ozz_build_gltf": False,
-            "ozz_build_fbx": False,
         }
         
         if self.options.tools:
