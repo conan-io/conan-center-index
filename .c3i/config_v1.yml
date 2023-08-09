@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.60.1
+  version: 1.60.2
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -61,6 +61,10 @@ tasks:
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
     report_issue_append: false
+  validate_infrastructure:
+    macos_executors: 2
+    windows_executors: 4
+    open_docs_pull-request: true
 
 # Profile configurations to build packages
 configurations:
@@ -192,9 +196,9 @@ pod_size:
   #   - name/version notation takes preference over the name only one
   #   - Both notations can be combined for the same reference name
   large:
-    - "pcl"
     - "duckdb"
     - "ceres-solver"
   xlarge:
     - "llvm"
     - "opengv"
+    - "pcl"
