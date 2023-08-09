@@ -224,6 +224,7 @@ required_for_references:
 - dbus
 - debug_assert
 - decimal_for_cpp
+- di
 - dice-template-library
 - dirent
 - discount
@@ -668,6 +669,7 @@ required_for_references:
 - mcap
 - md4c
 - md4qt
+- mdns
 - mdnsresponder
 - mdspan
 - meshoptimizer
@@ -765,6 +767,7 @@ required_for_references:
 - opencl-icd-loader
 - opencolorio
 - opencore-amr
+- opencv
 - openddl-parser
 - openexr
 - openfbx
@@ -933,6 +936,7 @@ required_for_references:
 - sfml
 - shapelib
 - shield
+- si
 - sigslot
 - simde
 - simdjson
