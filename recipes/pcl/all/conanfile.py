@@ -199,12 +199,9 @@ class PclConan(ConanFile):
         return f"pcl_{lib}"
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "PCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
-
         self.cpp_info.set_property("cmake_file_name", "PCL")
-        self.cpp_info.set_property("cmake_module_file_name", "PCL")
         self.cpp_info.set_property("cmake_target_name", "PCL::PCL")
+        self.cpp_info.set_property("cmake_find_mode", "both")
 
         def _add_component(comp, requires, *, extra_libs=None, header_only=False):
             self.cpp_info.components[comp].names["cmake_find_package"] = comp
@@ -266,3 +263,7 @@ class PclConan(ConanFile):
         if self.options.with_apps:
             self.cpp_info.components["apps"].libs = []
             self.cpp_info.components["apps"].requires = ["qt::qt"]
+
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "PCL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
