@@ -15,6 +15,7 @@ class ScipPlusPlus(ConanFile):
     description = "SCIP++ is a C++ wrapper for SCIP's C interface"
     package_type = "library"
     topics = ("mip", "solver", "linear", "programming")
+    license = "Apache-2.0"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
