@@ -73,7 +73,7 @@ class EthashConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure({"ETHASH_INSTALL_CMAKE_CONFIG": False})
         cmake.build()
 
     def package(self):
