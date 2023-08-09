@@ -1,4 +1,7 @@
 sources:
+  "1.0.0":
+    url: "https://github.com/capnproto/capnproto/archive/v1.0.0.tar.gz"
+    sha256: "bcd44dde78055313a7786cb6ab020cbef19b9045b53857f90cce101c9453f715"
   "0.10.4":
     url: "https://github.com/capnproto/capnproto/archive/v0.10.4.tar.gz"
     sha256: "c6f25940688c87ddb24e0c4e475c3213d9b044aad2ba305439cc8c224f559da6"
@@ -19,8 +22,10 @@ sources:
     sha256: "6d8b43a7ec2a764b4dfe4139a7cdd070ad9057f106898050d9f4db3754b98820"
   "0.7.0":
     url: "https://github.com/capnproto/capnproto/archive/v0.7.0.tar.gz"
-    sha256: 76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28
+    sha256: "76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28"
 patches:
+  "1.0.0":
+    - patch_file: patches/0015-disable-tests-for-1.0.0.patch
   "0.10.4":
     - patch_file: patches/0014-disable-tests-for-0.10.1.patch
   "0.10.3":
