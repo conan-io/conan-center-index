@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, unzip, download, replace_in_file
 
 class OzzAnimationConan(ConanFile):
@@ -15,35 +16,30 @@ class OzzAnimationConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
-        "gltf2ozz": [True, False],
         "ozz_geometry": [True, False],
         "ozz_animation": [True, False],
         "ozz_options": [True, False],
         "ozz_animation_offline": [True, False],
-        "ozz_animation_tools": [True, False],
-        #needs Autodesk FBX SDK
-        #"fbx2ozz": [True, False],
+        "tools": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
-        "gltf2ozz": False,
+        "tools": False,
         "ozz_geometry": True,
         "ozz_animation": True,
-        "ozz_options": False,
-        "ozz_animation_offline": False,
-        "ozz_animation_tools": False,
+        "ozz_options": True,
+        "ozz_animation_offline": True,
     }
-    short_paths = True
 
     def validate(self):
         def _ensure_enabled(opt, req):
             if getattr(self.options, opt):
                 missing = [r for r in req if not getattr(self.options, r, False)]
                 if missing:
-                    raise ConanInvalidConfiguration(f"Can't enable '{opt}' without also enabling {missing}")
-        _ensure_enabled('ozz_animation_tools', ['ozz_animation_offline', 'ozz_options'])
+                    raise ConanInvalidConfiguration(f"Option '{opt}' requires option(s) {missing} to be enabled too")
         _ensure_enabled('ozz_animation_offline', ['ozz_animation'])
+        _ensure_enabled('tools', ['ozz_animation_offline', 'ozz_options'])
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -54,14 +50,12 @@ class OzzAnimationConan(ConanFile):
         #conan center, so this will prevent ODR violations until either
         #upstream updates to a newer jsoncpp version, or someone adds a package
         #for that version of jsoncpp
-        if self.options.ozz_animation_tools:
+        if self.options.tools:
             self.provides = ['jsoncpp']
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-        dp = CMakeDeps(self)
-        dp.generate()
 
     def layout(self):
         cmake_layout(self)
@@ -80,15 +74,15 @@ class OzzAnimationConan(ConanFile):
             "ozz_build_samples": False,
             "ozz_build_howtos": False,
             "ozz_build_tests": False,
-            "ozz_build_cpp11": True
+            "ozz_build_cpp11": True,
+            "ozz_build_tools": False,
+            "ozz_build_gltf": False,
+            "ozz_build_fbx": False,
         }
         
-        if self.options.gltf2ozz:
+        if self.options.tools:
             cmvars["ozz_build_tools"] = True
             cmvars["ozz_build_gltf"] = True
-
-        if self.options.ozz_animation_tools:
-            cmvars["ozz_build_tools"] = True
 
         cmake.configure(variables = cmvars)
         return cmake
@@ -106,13 +100,12 @@ class OzzAnimationConan(ConanFile):
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
-
+        cmake = CMake(self)
         cmake.install()
 
         pkg = Path(self.package_folder)
 
-        if self.options.ozz_animation_tools:
+        if self.options.tools:
             json = Path(self.build_folder)/'src'/'animation'/'offline'/'tools'/'json'
             copy(self, pattern="libjson*", dst=pkg/"lib", src=str(json))
 
@@ -144,16 +137,15 @@ class OzzAnimationConan(ConanFile):
             self.cpp_info.components["animation_offline"].includedirs = ["include"]
             self.cpp_info.components["animation_offline"].requires = ["animation"]
 
-        if self.options.ozz_animation_tools:
-            self.cpp_info.components["jsoncpp"].libs = [f"json{postfix}"]
-            self.cpp_info.components["animation_offline_tools"].libs = [f"ozz_animation_tools{postfix}"]
-            self.cpp_info.components["animation_offline_tools"].includedirs = ["include"]
-            self.cpp_info.components["animation_offline_tools"].requires = ["animation_offline", "options", "jsoncpp"]
-
         if self.options.ozz_options:
             self.cpp_info.components["options"].libs = [f"ozz_options{postfix}"]
             self.cpp_info.components["options"].includedirs = ["include"]
             self.cpp_info.components["options"].requires = ["base"]
 
-        if self.options.gltf2ozz:
+        if self.options.tools:
+            self.cpp_info.components["jsoncpp"].libs = [f"json{postfix}"]
+            self.cpp_info.components["animation_offline_tools"].libs = [f"ozz_animation_tools{postfix}"]
+            self.cpp_info.components["animation_offline_tools"].includedirs = ["include"]
+            self.cpp_info.components["animation_offline_tools"].requires = ["animation_offline", "options", "jsoncpp"]
+
             self.buildenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin", "tools"))
