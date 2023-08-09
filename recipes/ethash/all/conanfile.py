@@ -9,6 +9,7 @@ import os
 
 required_conan_version = ">=1.51.1"
 
+
 class EthashConan(ConanFile):
     name = "ethash"
     description = "C/C++ implementation of Ethash and ProgPoW – the Ethereum Proof of Work algorithms"
@@ -17,7 +18,7 @@ class EthashConan(ConanFile):
     homepage = "https://github.com/chfast/ethash"
     topics = ("ethereum", "mining", "proof-of-work")
     package_type = "library"
-    tool_requires = "cmake/[>= 3.16.2 <4]"
+    tool_requires = "cmake/[>=3.16.2 <4]"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -56,8 +57,13 @@ class EthashConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False
+        )
+        if (
+            minimum_version
+            and Version(self.settings.compiler.version) < minimum_version
+        ):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
@@ -71,6 +77,11 @@ class EthashConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
         cmake = CMake(self)
         cmake.install()
