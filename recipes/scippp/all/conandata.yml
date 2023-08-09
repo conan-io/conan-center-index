@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/scipopt/SCIPpp/archive/refs/tags/1.0.0.tar.gz"
+    sha256: "01687e0f5a974898f50580f103237e3a507749388d559cf4ff4a62a0e405255d"
