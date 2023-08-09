@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -122,29 +123,33 @@ class PclConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["WITH_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["WITH_CUDA"] = self.options.with_cuda
         tc.cache_variables["WITH_LIBUSB"] = self.options.with_libusb
+        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl
+        tc.cache_variables["WITH_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["WITH_PCAP"] = self.options.with_pcap
         tc.cache_variables["WITH_PNG"] = self.options.with_png
         tc.cache_variables["WITH_QHULL"] = self.options.with_qhull
+        tc.cache_variables["WITH_QT"] = self.options.with_apps
         tc.cache_variables["WITH_VTK"] = self.options.with_vtk
-        tc.cache_variables["WITH_CUDA"] = self.options.with_cuda
-        tc.cache_variables["WITH_PCAP"] = self.options.with_pcap
-        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl
+        tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
         tc.cache_variables["BUILD_tools"] = self.options.with_tools
         tc.cache_variables["BUILD_apps"] = self.options.with_apps
         tc.cache_variables["BUILD_examples"] = False
-        tc.cache_variables["WITH_QT"] = self.options.with_apps
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.set_property("eigen", "cmake_file_name", "EIGEN")
-        tc.set_property("flann", "cmake_file_name", "FLANN")
-        tc.set_property("flann", "cmake_target_name", "FLANN::FLANN")
-        tc.set_property("glew", "cmake_file_name", "GLEW")
-        if self.options.with_qhull:
-            tc.set_property("qhull", "cmake_file_name", "QHULL")
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        deps.set_property("flann", "cmake_file_name", "FLANN")
+        deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
+        deps.set_property("pcap", "cmake_file_name", "PCAP")
+        deps.set_property("qhull", "cmake_file_name", "QHULL")
+        deps.set_property("qhull", "cmake_target_name", "QHULL::QHULL")
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
