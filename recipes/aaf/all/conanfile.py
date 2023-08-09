@@ -38,7 +38,7 @@ class AafConan(ConanFile):
         self.requires("expat/2.5.0")
         self.requires("libjpeg/9e")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
