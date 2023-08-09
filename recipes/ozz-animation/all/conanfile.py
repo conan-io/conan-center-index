@@ -5,6 +5,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, unzip, download, replace_in_file
 
+required_conan_version = ">=1.53.0"
+
 class OzzAnimationConan(ConanFile):
     name = "ozz-animation"
     description = "Open source c++ skeletal animation library and toolset."
@@ -46,6 +48,8 @@ class OzzAnimationConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         #this component ships an old version of jsoncpp (0.10.6) which isn't on
         #conan center, so this will prevent ODR violations until either
         #upstream updates to a newer jsoncpp version, or someone adds a package
@@ -55,10 +59,11 @@ class OzzAnimationConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         src = self.conan_data["sources"][self.version]
@@ -78,7 +83,6 @@ class OzzAnimationConan(ConanFile):
             "ozz_build_tools": False,
             "ozz_build_gltf": False,
         }
-        
         if self.options.tools:
             cmvars["ozz_build_tools"] = True
             cmvars["ozz_build_gltf"] = True
@@ -91,7 +95,7 @@ class OzzAnimationConan(ConanFile):
         for before, after in [('string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")', ""), ('string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")', "")]:
             replace_in_file(self, subfolder/"build-utils"/"cmake"/"compiler_settings.cmake", before, after)
 
-        replace_in_file(self, subfolder/"src"/"animation"/"offline"/"tools"/"CMakeLists.txt", 
+        replace_in_file(self, subfolder/"src"/"animation"/"offline"/"tools"/"CMakeLists.txt",
                               "if(NOT EMSCRIPTEN)",
                               "if(NOT CMAKE_CROSSCOMPILING)")
 
@@ -108,6 +112,9 @@ class OzzAnimationConan(ConanFile):
             json = Path(self.build_folder)/'src'/'animation'/'offline'/'tools'/'json'
             copy(self, pattern="libjson*", dst=pkg/"lib", src=str(json))
 
+        os.remove(pkg/"CHANGES.md")
+        os.remove(pkg/"LICENSE.md")
+        os.remove(pkg/"README.md")
         copy(self, pattern="LICENSE.md", dst=pkg/"licenses", src=self.source_folder)
 
     def package_info(self):
@@ -147,4 +154,4 @@ class OzzAnimationConan(ConanFile):
             self.cpp_info.components["animation_offline_tools"].includedirs = ["include"]
             self.cpp_info.components["animation_offline_tools"].requires = ["animation_offline", "options", "jsoncpp"]
 
-            self.buildenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin", "tools"))
+            self.buildenv_info.prepend_path("PATH", Path(self.package_folder)/"bin"/"tools")
