@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, unzip, download, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -11,7 +12,7 @@ class OzzAnimationConan(ConanFile):
     name = "ozz-animation"
     description = "Open source c++ skeletal animation library and toolset."
     license = "MIT"
-    topics = ("conan", "ozz", "animation", "skeletal")
+    topics = ("ozz", "animation", "skeletal")
     homepage = "https://github.com/guillaumeblanc/ozz-animation"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
@@ -42,6 +43,13 @@ class OzzAnimationConan(ConanFile):
                     raise ConanInvalidConfiguration(f"Option '{opt}' requires option(s) {missing} to be enabled too")
         _ensure_enabled('ozz_animation_offline', ['ozz_animation'])
         _ensure_enabled('tools', ['ozz_animation_offline', 'ozz_options'])
+
+        if self.settings.compiler == 'gcc':
+            # GCC 11.2 bug breaks build
+            # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578
+            # https://github.com/guillaumeblanc/ozz-animation/issues/147
+            if Version(self.settings.compiler.version) < "11.3":
+                raise ConanInvalidConfiguration(f"GCC 11.3 or newer required")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -154,4 +162,4 @@ class OzzAnimationConan(ConanFile):
             self.cpp_info.components["animation_offline_tools"].includedirs = ["include"]
             self.cpp_info.components["animation_offline_tools"].requires = ["animation_offline", "options", "jsoncpp"]
 
-            self.buildenv_info.prepend_path("PATH", Path(self.package_folder)/"bin"/"tools")
+            self.buildenv_info.prepend_path("PATH", str(Path(self.package_folder)/"bin"/"tools"))
