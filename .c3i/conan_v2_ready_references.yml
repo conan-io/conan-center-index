@@ -765,6 +765,7 @@ required_for_references:
 - opencl-icd-loader
 - opencolorio
 - opencore-amr
+- opencv
 - openddl-parser
 - openexr
 - openfbx
