@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -12,7 +13,8 @@ required_conan_version = ">=1.53.0"
 
 class PclConan(ConanFile):
     name = "pcl"
-    description = "The Point Cloud Library (PCL) is a standalone, large-scale, open project for 2D/3D image and point cloud processing."
+    description = ("The Point Cloud Library (PCL) is a standalone, large-scale, "
+                   "open project for 2D/3D image and point cloud processing.")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/PointCloudLibrary/pcl"
@@ -103,9 +105,24 @@ class PclConan(ConanFile):
             self.requires("libusb/1.0.26")
         if self.options.with_pcap:
             self.requires("libpcap/1.10.4")
-        if self.options.with_opengl:
+        if self.options.with_opengl and self.options.with_vtk:
+            # OpenGL is only used if VTK is available
             self.requires("opengl/system")
+            self.requires("freeglut/3.4.0")
             self.requires("glew/2.2.0")
+        # TODO:
+        # self.requires("vtk/9.x.x")
+        # self.requires("openni/x.x.x")
+        # self.requires("openni2/x.x.x")
+        # self.requires("ensenso/x.x.x")
+        # self.requires("davidsdk/x.x.x")
+        # self.requires("dssdk/x.x.x")
+        # self.requires("rssdk/x.x.x")
+
+    def package_id(self):
+        if self.info.options.with_vtk:
+            # with_opengl has no effect if VTK is not available
+            self.info.options.with_opengl = False
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -122,29 +139,35 @@ class PclConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["WITH_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["WITH_CUDA"] = self.options.with_cuda
         tc.cache_variables["WITH_LIBUSB"] = self.options.with_libusb
+        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl
+        tc.cache_variables["WITH_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["WITH_PCAP"] = self.options.with_pcap
         tc.cache_variables["WITH_PNG"] = self.options.with_png
         tc.cache_variables["WITH_QHULL"] = self.options.with_qhull
+        tc.cache_variables["WITH_QT"] = self.options.with_apps
         tc.cache_variables["WITH_VTK"] = self.options.with_vtk
-        tc.cache_variables["WITH_CUDA"] = self.options.with_cuda
-        tc.cache_variables["WITH_PCAP"] = self.options.with_pcap
-        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl
+        tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
         tc.cache_variables["BUILD_tools"] = self.options.with_tools
         tc.cache_variables["BUILD_apps"] = self.options.with_apps
         tc.cache_variables["BUILD_examples"] = False
-        tc.cache_variables["WITH_QT"] = self.options.with_apps
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
+        # The default False setting breaks OpenGL detection in CMake
+        tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.set_property("eigen", "cmake_file_name", "EIGEN")
-        tc.set_property("flann", "cmake_file_name", "FLANN")
-        tc.set_property("flann", "cmake_target_name", "FLANN::FLANN")
-        tc.set_property("glew", "cmake_file_name", "GLEW")
-        if self.options.with_qhull:
-            tc.set_property("qhull", "cmake_file_name", "QHULL")
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        deps.set_property("flann", "cmake_file_name", "FLANN")
+        deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
+        deps.set_property("pcap", "cmake_file_name", "PCAP")
+        deps.set_property("qhull", "cmake_file_name", "QHULL")
+        deps.set_property("qhull", "cmake_target_name", "QHULL::QHULL")
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -183,27 +206,27 @@ class PclConan(ConanFile):
         return f"pcl_{lib}"
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "PCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
-
         self.cpp_info.set_property("cmake_file_name", "PCL")
-        self.cpp_info.set_property("cmake_module_file_name", "PCL")
         self.cpp_info.set_property("cmake_target_name", "PCL::PCL")
+        self.cpp_info.set_property("cmake_find_mode", "both")
 
-        def _add_component(comp, requires, *, extra_libs=(), header_only=False):
-            self.cpp_info.components[comp].names["cmake_find_package"] = comp
-            self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
-            self.cpp_info.components[comp].set_property("cmake_file_name", comp)
-            self.cpp_info.components[comp].set_property("cmake_module_file_name", comp)
-            self.cpp_info.components[comp].set_property("cmake_target_name", f"PCL::{comp}")
-            self.cpp_info.components[comp].set_property("pkg_config_name", f"pcl_{comp}-{self._version_suffix}")
-            self.cpp_info.components[comp].includedirs = [os.path.join("include", f"pcl-{self._version_suffix}")]
+        def _add_component(name, requires, *, extra_libs=None, header_only=False):
+            component = self.cpp_info.components[name]
+            component.names["cmake_find_package"] = name
+            component.names["cmake_find_package_multi"] = name
+            component.set_property("cmake_file_name", name)
+            component.set_property("cmake_module_file_name", name)
+            component.set_property("cmake_target_name", f"PCL::{name}")
+            component.set_property("pkg_config_name", f"pcl_{name}-{self._version_suffix}")
+            component.includedirs = [os.path.join("include", f"pcl-{self._version_suffix}")]
             if not header_only:
-                libs = [comp] + extra_libs
-                if comp != "common":
-                    libs.append("common")
-                self.cpp_info.components[comp].libs = [self._lib_name(lib) for lib in libs]
-            self.cpp_info.components[comp].requires = requires
+                libs = [name]
+                if extra_libs:
+                    libs += extra_libs
+                component.libs = [self._lib_name(lib) for lib in libs]
+            if name != "common":
+                component.requires = ["common"]
+            component.requires += requires
 
         def usb():
             return ["libusb::libusb"] if self.options.with_libusb else []
@@ -211,26 +234,62 @@ class PclConan(ConanFile):
             return ["libpng::libpng"] if self.options.with_png else []
         def qhull():
             return ["qhull::qhull"] if self.options.with_qhull else []
+        def vtk():
+            # TODO: add vtk package to CCI
+            return []
+        def opengl():
+            if self.options.with_opengl:
+                return ["opengl::opengl", "freeglut::freeglut", "glew::glew"]
+            return []
 
+        # FIXME: grep for PCL_MAKE_PKGCONFIG and add any missing sub-components
+        # TODO: make the set of enabled components configurable via options
+        # TODO: maybe extract the component configuration automatically from each CMakelists.txt
         _add_component("common", ["eigen::eigen3", "boost::boost"])
-        _add_component("kdtree", ["flann::flann"])
-        _add_component("octree", [])
-        _add_component("search", ["kdtree", "octree", "flann::flann"])
-        _add_component("sample_consensus", ["search"])
-        _add_component("filters", ["sample_consensus", "search", "kdtree", "octree"])
-        _add_component("2d", ["filters"], header_only=True)
-        _add_component("geometry", [], header_only=True)
-        _add_component("io", ["octree", "zlib::zlib"] + png() + usb(), extra_libs=["io_ply"])
+        _add_component("2d", ["filters"] + vtk(), header_only=True)
+        if self.options.with_cuda:
+            # FIXME: add individual sub-components
+            _add_component("cuda", [])
         _add_component("features", ["search", "kdtree", "octree", "filters", "2d"])
-        _add_component("ml", [])
-        _add_component("segmentation", ["geometry", "search", "sample_consensus", "kdtree", "octree", "features", "filters", "ml"])
-        _add_component("surface", ["search", "kdtree", "octree"] + qhull())
-        _add_component("registration", ["octree", "kdtree", "search", "sample_consensus", "features", "filters"])
+        _add_component("filters", ["sample_consensus", "search", "kdtree", "octree"])
+        _add_component("geometry", [], header_only=True)
+        if self.options.with_cuda:
+            # FIXME: add individual sub-components
+            _add_component("gpu", [])
+        _add_component("io", ["octree", "zlib::zlib"] + png() + usb() + vtk(), extra_libs=["io_ply"])
+        _add_component("kdtree", ["flann::flann"])
         _add_component("keypoints", ["search", "kdtree", "octree", "features", "filters"])
-        _add_component("tracking", ["search", "kdtree", "filters", "octree"])
+        _add_component("ml", [])
+        _add_component("octree", [])
+        if self.options.with_vtk:
+            # FIXME: add individual sub-components
+            _add_component("outofcore", ["io", "filters", "octree", "visualization"] + vtk())
+        if self.options.with_vtk:
+            _add_component("people", ["kdtree", "search", "sample_consensus", "filters", "io", "visualization", "geometry", "segmentation", "octree"] + vtk())
         _add_component("recognition", ["io", "search", "kdtree", "octree", "features", "filters", "registration", "sample_consensus", "ml"])
+        _add_component("registration", ["octree", "kdtree", "search", "sample_consensus", "features", "filters"])
+        _add_component("sample_consensus", ["search"])
+        _add_component("search", ["kdtree", "octree", "flann::flann"])
+        _add_component("segmentation", ["geometry", "search", "sample_consensus", "kdtree", "octree", "features", "filters", "ml"])
+        # simulation is disabled by default
+        # _add_component("simulation", ["io", "surface", "kdtree", "features", "search", "octree", "visualization", "filters", "geometry"] + opengl() + vtk())
         _add_component("stereo", ["io"])
+        _add_component("surface", ["search", "kdtree", "octree"] + qhull() + vtk())
+        _add_component("tracking", ["search", "kdtree", "filters", "octree"])
+        if self.options.with_vtk:
+            _add_component("visualization", ["io", "kdtree", "geometry", "search", "octree"] + opengl() + vtk())
 
+        if self.options.with_tools:
+            self.cpp_info.components["tools"].libs = []
+            self.cpp_info.components["apps"].requires = [
+                "filters", "sample_consensus", "segmentation", "search", "kdtree", "features", "surface",
+                "octree", "registration", "recognition", "geometry", "keypoints", "ml", "visualization"
+            ] + vtk() + qhull()
+
+        if self.options.with_apps:
+            # FIXME: add each app as individual sub-component
+            self.cpp_info.components["apps"].libs = []
+            self.cpp_info.components["apps"].requires = ["qt::qt"] + opengl() + vtk()
 
         if not self.options.shared:
             common = self.cpp_info.components["common"]
@@ -247,6 +306,6 @@ class PclConan(ConanFile):
                     elif self.settings.compiler == "gcc":
                         common.system_libs.append("gomp")
 
-        if self.options.with_apps:
-            self.cpp_info.components["apps"].libs = []
-            self.cpp_info.components["apps"].requires = ["qt::qt"]
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.cpp_info.names["cmake_find_package"] = "PCL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
