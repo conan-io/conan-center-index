@@ -16,6 +16,8 @@ class ScipPlusPlus(ConanFile):
     package_type = "library"
     topics = ("mip", "solver", "linear", "programming")
     license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/scipopt/SCIPpp"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
