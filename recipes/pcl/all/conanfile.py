@@ -351,38 +351,40 @@ class PclConan(ConanFile):
         return self.options.get_safe(f"with_{dep}") and dep in self._all_ext_deps(self.options)
 
     def requirements(self):
-        # Boost is used in public PCL headers here:
-        # https://github.com/PointCloudLibrary/pcl/blob/pcl-1.13.1/common/include/pcl/point_struct_traits.h#L40-L46
         self.requires("boost/1.82.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self._is_enabled("flann"):
-            self.requires("flann/1.9.2")
+            self.requires("flann/1.9.2", transitive_headers=True)
         if self._is_enabled("png"):
             self.requires("libpng/1.6.40")
         if self._is_enabled("qhull"):
-            self.requires("qhull/8.0.1")
+            self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
             self.requires("qt/6.5.1")
         if self._is_enabled("libusb"):
-            self.requires("libusb/1.0.26")
+            self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
             self.requires("libpcap/1.10.4")
         if self._is_enabled("opengl"):
             # OpenGL is only used if VTK is available
-            self.requires("opengl/system")
-            self.requires("freeglut/3.4.0")
-            self.requires("glew/2.2.0")
-            self.requires("glu/system")
+            self.requires("opengl/system", transitive_headers=True)
+            self.requires("freeglut/3.4.0", transitive_headers=True)
+            self.requires("glew/2.2.0", transitive_headers=True)
+            self.requires("glu/system", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.5.5")
+            self.requires("opencv/4.5.5", transitive_headers=True)
         # TODO:
-        # self.requires("vtk/9.x.x")
-        # self.requires("openni/x.x.x")
-        # self.requires("openni2/x.x.x")
-        # self.requires("ensenso/x.x.x")
-        # self.requires("davidsdk/x.x.x")
-        # self.requires("dssdk/x.x.x")
-        # self.requires("rssdk/x.x.x")
+        # self.requires("vtk/9.x.x", transitive_headers=True)
+        # self.requires("openni/x.x.x", transitive_headers=True)
+        # self.requires("openni2/x.x.x", transitive_headers=True)
+        # self.requires("ensenso/x.x.x", transitive_headers=True)
+        # self.requires("davidsdk/x.x.x", transitive_headers=True)
+        # self.requires("dssdk/x.x.x", transitive_headers=True)
+        # self.requires("rssdk/x.x.x", transitive_headers=True)
+        # self.requires("metslib/x.x.x", transitive_headers=True)
+        # self.requires("openmp/system", transitive_headers=True)
+        # self.requires("opennurbs/x.x.x", transitive_headers=True)
+        # self.requires("poisson4/x.x.x", transitive_headers=True)
 
     def package_id(self):
         used_deps = self._all_ext_deps(self.info.options)
