@@ -541,8 +541,8 @@ class PclConan(ConanFile):
             for dep in self._external_optional_deps["tools"]:
                 component.requires += self._ext_dep_to_conan_target(dep)
 
+        common = self.cpp_info.components["common"]
         if not self.options.shared:
-            common = self.cpp_info.components["common"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 common.system_libs.append("pthread")
             if self.options.with_openmp:
@@ -555,6 +555,8 @@ class PclConan(ConanFile):
                         common.system_libs.append("delayimp")
                     elif self.settings.compiler == "gcc":
                         common.system_libs.append("gomp")
+        if self.settings.os == "Windows":
+            common.system_libs.append("ws2_32")
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
