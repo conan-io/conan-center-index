@@ -257,7 +257,7 @@ class OpenCVConan(ConanFile):
 
     @property
     def _protobuf_version(self):
-        return "3.21.9"
+        return "3.21.12"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -1028,12 +1028,12 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.9")
+            self.requires("qt/5.15.10")
         # imgcodecs module dependencies
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_jpeg2000") == "jasper":
@@ -1062,7 +1062,7 @@ class OpenCVConan(ConanFile):
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/7.3.0")
+            self.requires("harfbuzz/8.1.1")
         # hdf module dependencies
         if self.options.hdf:
             self.requires("hdf5/1.14.1")
