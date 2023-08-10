@@ -8,15 +8,9 @@ sources:
 patches:
   "2.3.3":
     - patch_file: "patches/0001-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-sc_string_view.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-mingw.patch"
-      base_path: "source_subfolder"
   "2.3.4":
     - patch_file: "patches/0002-sc_string_view.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-mingw.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-cmake.patch"
-      base_path: "source_subfolder"
