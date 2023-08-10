@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get
+from conan.tools.files import copy, get
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
+from os.path import join
 
 
 class ScipPlusPlus(ConanFile):
@@ -81,6 +82,7 @@ class ScipPlusPlus(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, pattern="LICENSE", dst=join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
