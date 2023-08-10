@@ -286,7 +286,7 @@ class PclConan(ConanFile):
 
     @property
     def _extra_libs(self):
-        return {"io": ["pcl_io_ply"]}
+        return {"io": ["io_ply"]}
 
     def _enabled_components(self, opts=None):
         opts = opts or self.options
@@ -488,6 +488,7 @@ class PclConan(ConanFile):
         if is_msvc(self) and self.settings.build_type == "Debug":
             return f"pcl_{lib}d"
         return f"pcl_{lib}"
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PCL")
         self.cpp_info.set_property("cmake_target_name", "PCL::PCL")
