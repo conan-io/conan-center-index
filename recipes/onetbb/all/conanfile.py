@@ -135,6 +135,11 @@ class OneTBBConan(ConanFile):
             toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = os.path.join(hwloc_package_folder, "include")
             if self.settings.os == "Windows":
                 toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = os.path.join(hwloc_package_folder, "bin", "hwloc.dll")
+
+        # To be able to build statically, see https://github.com/oneapi-src/oneTBB/issues/802#issuecomment-1062799037
+        if not self.options.shared:
+            toolchain.preprocessor_definitions["__TBB_DYNAMIC_LOAD_ENABLED"] = "0"
+
         toolchain.generate()
 
     def build(self):
@@ -206,7 +211,3 @@ class OneTBBConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "tbb"
         tbb.names["cmake_find_package"] = "tbb"
         tbb.names["cmake_find_package_multi"] = "tbb"
-
-        # To be able to build statically, see https://github.com/oneapi-src/oneTBB/issues/802#issuecomment-1062799037
-        if not self.options.shared:
-            self.cpp_info.defines = ["__TBB_DYNAMIC_LOAD_ENABLED=0"]
