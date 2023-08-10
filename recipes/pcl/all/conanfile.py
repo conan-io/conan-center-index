@@ -177,7 +177,6 @@ class PclConan(ConanFile):
     def _external_optional_deps(self):
         return {
             "2d": ["vtk"],
-            "common": ["boost", "eigen"],
             "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
             "kdtree": ["flann"],
             "people": ["openni"],
@@ -190,11 +189,40 @@ class PclConan(ConanFile):
             "tools": ["cuda", "davidsdk", "dssdk", "ensenso", "opencv", "opengl", "openni", "openni2", "qhull", "rssdk", "vtk"],
         }
 
+    def _ext_dep_to_conan_target(self, dep):
+        if not self._is_enabled(dep):
+            return []
+        return {
+            "boost": ["boost::boost"],
+            "cuda": [],
+            "davidsdk": [],
+            "dssdk": [],
+            "eigen": ["eigen::eigen"],
+            "ensenso": [],
+            "flann": ["flann::flann"],
+            "fzapi": [],
+            "libusb": ["libusb::libusb"],
+            "metslib": [],
+            "opencv": ["opencv::opencv"],
+            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu"],
+            "openni": [],
+            "openni2": [],
+            "pcap": ["libpcap::libpcap"],
+            "png": ["libpng::libpng"],
+            "qhull": ["qhull::qhull"],
+            "qt": ["qt::qt"],
+            "qvtk": [],
+            "rssdk": [],
+            "rssdk2": [],
+            "vtk": [],
+        }[dep]
+
     @property
     def _internal_deps(self):
         return {
             "2d": ["common", "filters"],
             "common": [],
+            "cuda_common": [],
             "cuda_features": ["common", "cuda_common", "io"],
             "cuda_io": ["common", "cuda_common", "io"],
             "cuda_sample_consensus": ["common", "cuda_common", "io"],
@@ -260,13 +288,20 @@ class PclConan(ConanFile):
     def _extra_libs(self):
         return {"io": ["pcl_io_ply"]}
 
-    @property
-    def _enabled_components(self):
-        return {c for c in self._internal_deps if self.options.get_safe(c) or c == "common"}
+    def _enabled_components(self, opts=None):
+        opts = opts or self.options
+        return {c for c in self._internal_deps if opts.get_safe(c)} | {"common"}
 
-    @property
-    def _disabled_components(self):
-        return {c for c in self._internal_deps if not self.options.get_safe(c)}
+    def _disabled_components(self, opts=None):
+        opts = opts or self.options
+        return {c for c in self._internal_deps if not opts.get_safe(c)} - {"common"}
+
+    def _all_ext_deps(self, opts):
+        all_deps = set()
+        for component in self._enabled_components(opts):
+            all_deps.update(self._external_deps.get(component, []))
+            all_deps.update(self._external_optional_deps.get(component, []))
+        return all_deps
 
     @property
     def _min_cppstd(self):
@@ -296,56 +331,43 @@ class PclConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def _all_required_deps(self, opts):
-        all_deps = set()
-        for component, deps in self._external_deps.items():
-            if opts.get_safe(component):
-                all_deps.update(deps)
-        return all_deps
-
-    def _all_optional_deps(self, opts):
-        all_deps = set()
-        for component, deps in self._external_optional_deps.items():
-            if opts.get_safe(component):
-                all_deps.update(deps)
-        return all_deps
-
-    def _all_deps(self, opts):
-        return self._all_required_deps(opts) | self._all_optional_deps(opts)
-
     def system_requirements(self):
-        if self.options.with_vtk and "vtk" in self._all_deps(self.options):
+        if self._is_enabled("vtk"):
             # TODO: add vtk/system package?
             package_manager.Apt(self).install(["libvtk-dev"])
             package_manager.Dnf(self).install(["vtk-devel"])
             if self.settings.os == "Windows":
                 self.output.warn("VTK must be installed manually on Windows.")
 
+    def _is_enabled(self, dep):
+        if dep in ["boost", "eigen"]:
+            return True
+        return self.options.get_safe(f"with_{dep}") and dep in self._all_ext_deps(self.options)
+
     def requirements(self):
         # Boost is used in public PCL headers here:
         # https://github.com/PointCloudLibrary/pcl/blob/pcl-1.13.1/common/include/pcl/point_struct_traits.h#L40-L46
         self.requires("boost/1.82.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
-        used_deps = self._all_deps(self.options)
-        if self.options.with_flann and "flann" in used_deps:
+        if self._is_enabled("flann"):
             self.requires("flann/1.9.2")
-        if self.options.with_png and "png" in used_deps:
+        if self._is_enabled("png"):
             self.requires("libpng/1.6.40")
-        if self.options.with_qhull and "qhull" in used_deps:
+        if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1")
-        if self.options.with_qt and "qt" in used_deps:
+        if self._is_enabled("qt"):
             self.requires("qt/6.5.1")
-        if self.options.with_libusb and "libusb" in used_deps:
+        if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26")
-        if self.options.with_pcap and "pcap" in used_deps:
+        if self._is_enabled("pcap"):
             self.requires("libpcap/1.10.4")
-        if self.options.with_opengl and "opengl" in used_deps:
+        if self._is_enabled("opengl"):
             # OpenGL is only used if VTK is available
             self.requires("opengl/system")
             self.requires("freeglut/3.4.0")
             self.requires("glew/2.2.0")
             self.requires("glu/system")
-        if self.options.with_opencv and "opencv" in used_deps:
+        if self._is_enabled("opencv"):
             self.requires("opencv/4.5.5")
         # TODO:
         # self.requires("vtk/9.x.x")
@@ -357,7 +379,7 @@ class PclConan(ConanFile):
         # self.requires("rssdk/x.x.x")
 
     def package_id(self):
-        used_deps = self._all_deps(self.info.options)
+        used_deps = self._all_ext_deps(self.info.options)
         # Disable options that have no effect
         all_opts = list(self.info.options.possible_values)
         for opt in all_opts:
@@ -365,20 +387,18 @@ class PclConan(ConanFile):
                 setattr(self.info.options, opt, False)
 
     def validate(self):
-        for component, deps in self._external_deps.items():
-            if self.options.get_safe(component):
-                for dep in deps:
-                    if not self.options.get_safe(f"with_{dep}"):
-                        raise ConanInvalidConfiguration(
-                            f"'with_{dep}=True' is required when '{component}' is enabled."
-                        )
-        for component, deps in self._internal_deps.items():
-            if self.options.get_safe(component):
-                for dep in deps:
-                    if not self.options.get_safe(dep) and dep != "common":
-                        raise ConanInvalidConfiguration(
-                            f"'{dep}=True' is required when '{component}' is enabled."
-                        )
+        enabled_components = self._enabled_components()
+        for component in sorted(enabled_components):
+            for dep in self._external_deps.get(component, []):
+                if not self._is_enabled(dep):
+                    raise ConanInvalidConfiguration(
+                        f"'with_{dep}=True' is required when '{component}' is enabled."
+                    )
+            for dep in self._internal_deps[component]:
+                if dep not in enabled_components:
+                    raise ConanInvalidConfiguration(
+                        f"'{dep}=True' is required when '{component}' is enabled."
+                    )
 
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -394,15 +414,15 @@ class PclConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["WITH_CUDA"] = self.options.with_cuda
-        tc.cache_variables["WITH_LIBUSB"] = self.options.with_libusb
-        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl
-        tc.cache_variables["WITH_OPENMP"] = self.options.with_openmp
-        tc.cache_variables["WITH_PCAP"] = self.options.with_pcap
-        tc.cache_variables["WITH_PNG"] = self.options.with_png
-        tc.cache_variables["WITH_QHULL"] = self.options.with_qhull
-        tc.cache_variables["WITH_QT"] = self.options.with_qt
-        tc.cache_variables["WITH_VTK"] = self.options.with_vtk
+        tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
+        tc.cache_variables["WITH_LIBUSB"] = self._is_enabled("libusb")
+        tc.cache_variables["WITH_OPENGL"] = self._is_enabled("opengl")
+        tc.cache_variables["WITH_OPENMP"] = self._is_enabled("openmp")
+        tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
+        tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
+        tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
+        tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
+        tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
         tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
         # The default False setting breaks OpenGL detection in CMake
@@ -410,9 +430,13 @@ class PclConan(ConanFile):
         tc.cache_variables["BUILD_tools"] = self.options.tools
         tc.cache_variables["BUILD_apps"] = self.options.apps
         tc.cache_variables["BUILD_examples"] = False
-        for comp in sorted(self._enabled_components):
+        enabled = sorted(self._enabled_components())
+        disabled = sorted(self._disabled_components())
+        self.output.info("Enabled components: " + ", ".join(enabled))
+        self.output.info("Disabled components: " + ", ".join(disabled))
+        for comp in enabled:
             tc.cache_variables[f"BUILD_{comp}"] = True
-        for comp in sorted(self._disabled_components):
+        for comp in disabled:
             tc.cache_variables[f"BUILD_{comp}"] = False
         tc.generate()
 
@@ -420,7 +444,7 @@ class PclConan(ConanFile):
         deps.set_property("eigen", "cmake_file_name", "EIGEN")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
-        deps.set_property("pcap", "cmake_file_name", "PCAP")
+        deps.set_property("libpcap", "cmake_file_name", "PCAP")
         deps.set_property("qhull", "cmake_file_name", "QHULL")
         deps.set_property("qhull", "cmake_target_name", "QHULL::QHULL")
         deps.generate()
@@ -463,41 +487,12 @@ class PclConan(ConanFile):
         if is_msvc(self) and self.settings.build_type == "Debug":
             return f"pcl_{lib}d"
         return f"pcl_{lib}"
-
-    def _ext_dep_to_conan_target(self, dep):
-        if not self.options.get_safe(f"with_{dep}"):
-            return []
-        return {
-            "boost": ["boost::boost"],
-            "cuda": [],
-            "davidsdk": [],
-            "dssdk": [],
-            "eigen": ["eigen::eigen"],
-            "ensenso": [],
-            "flann": ["flann::flann"],
-            "fzapi": [],
-            "libusb": ["libusb::libusb"],
-            "metslib": [],
-            "opencv": ["opencv::opencv"],
-            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu"],
-            "openni": [],
-            "openni2": [],
-            "pcap": ["libpcap::libpcap"],
-            "png": ["libpng::libpng"],
-            "qhull": ["qhull::qhull"],
-            "qt": ["qt::qt"],
-            "qvtk": [],
-            "rssdk": [],
-            "rssdk2": [],
-            "vtk": [],
-        }[dep]
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PCL")
         self.cpp_info.set_property("cmake_target_name", "PCL::PCL")
         self.cpp_info.set_property("cmake_find_mode", "both")
 
-        for name in self._enabled_components:
+        for name in sorted(self._enabled_components()):
             component = self.cpp_info.components[name]
             component.names["cmake_find_package"] = name
             component.names["cmake_find_package_multi"] = name
@@ -516,8 +511,9 @@ class PclConan(ConanFile):
                     component.requires.append(opt_dep)
             for dep in self._external_deps.get(name, []) + self._external_optional_deps.get(name, []):
                 component.requires += self._ext_dep_to_conan_target(dep)
+            self.output.info(f"Component {name} requires: {component.requires}")
 
-        if self.options.with_apps:
+        if self.options.apps:
             component = self.cpp_info.components["apps"]
             component.libs = []
             component.includedirs = []
@@ -525,7 +521,7 @@ class PclConan(ConanFile):
             for dep in self._external_optional_deps["apps"]:
                 component.requires += self._ext_dep_to_conan_target(dep)
 
-        if self.options.with_tools:
+        if self.options.tools:
             component = self.cpp_info.components["tools"]
             component.libs = []
             component.includedirs = []
