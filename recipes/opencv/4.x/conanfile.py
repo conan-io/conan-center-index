@@ -569,7 +569,7 @@ class OpenCVConan(ConanFile):
             "cudacodec": {
                 "is_built": self.options.cudacodec,
                 "mandatory_options": ["with_cuda", "videoio"],
-                "requires": ["opencv_core", "opencv_videio", "opencv_cudev"] + ipp(),
+                "requires": ["opencv_core", "opencv_videoio", "opencv_cudev"] + ipp(),
             },
             "cudafeatures2d": {
                 "is_built": self.options.cudafeatures2d,
