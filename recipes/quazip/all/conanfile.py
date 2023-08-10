@@ -49,7 +49,7 @@ class QuaZIPConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/5.15.9")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/1.2.13", transitive_headers=True)
         if Version(self.version) >= "1.4":
             self.requires("bzip2/1.0.8")
 
