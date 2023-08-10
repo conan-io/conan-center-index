@@ -13,7 +13,6 @@ class NewmatConan(ConanFile):
     homepage = "https://newmat.net"
     description = "Manipulate a variety of types of matrices using standard matrix operations."
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["CMakeLists.txt", "newmat11.patch", "newmat6.cpp.patch"]
     topics = ("newmat", "matrix")
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
