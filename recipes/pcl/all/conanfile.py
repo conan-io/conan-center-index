@@ -334,10 +334,16 @@ class PclConan(ConanFile):
     def system_requirements(self):
         if self._is_enabled("vtk"):
             # TODO: add vtk/system package?
-            package_manager.Apt(self).install(["libvtk-dev"])
-            package_manager.Dnf(self).install(["vtk-devel"])
+            # https://repology.org/project/vtk/versions
+            package_manager.Apt(self).install(["libvtk9-dev"], update=True, check=True)
+            package_manager.Dnf(self).install(["vtk-devel"], update=True, check=True)
+            package_manager.Yum(self).install(["vtk-devel"], update=True, check=True)
+            package_manager.PacMan(self).install(["vtk"], update=True, check=True)
+            package_manager.Zypper(self).install(["vtk"], update=True, check=True)
+            package_manager.Pkg(self).install(["vtk9"], update=True, check=True)
+            package_manager.Brew(self).install(["vtk"], update=True, check=True)
             if self.settings.os == "Windows":
-                self.output.warn("VTK must be installed manually on Windows.")
+                self.output.warning("VTK must be installed manually on Windows.")
 
     def _is_enabled(self, dep):
         if dep in ["boost", "eigen"]:
