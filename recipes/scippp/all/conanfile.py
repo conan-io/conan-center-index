@@ -71,6 +71,7 @@ class ScipPlusPlus(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["scippp_version"] = self.version
         tc.generate()
 
     def build(self):
