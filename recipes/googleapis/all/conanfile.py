@@ -153,6 +153,14 @@ class GoogleAPIS(ConanFile):
             deactivate_library("//google/cloud/talent/v4:talent_cc_proto")
             deactivate_library("//google/cloud/asset/v1:asset_proto")
             deactivate_library("//google/cloud/asset/v1:asset_cc_proto")
+        # This fails to build on Windows. It is arguably a missing feature of
+        # Protobuf.
+        #     https://github.com/protocolbuffers/protobuf/issues/12774
+        # Fortunately this library is not used by any downstream packages
+        # (grpc-protos, or google-cloud-cpp), and it is only "beta" at the
+        # moment. Simply disable it for now.
+        deactivate_library("//google/cloud/lifesciences/v2beta:lifesciences_proto")
+        deactivate_library("//google/cloud/lifesciences/v2beta:lifesciences_cc_proto")
 
         return proto_libraries
 

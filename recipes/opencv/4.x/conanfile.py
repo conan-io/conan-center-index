@@ -1041,13 +1041,13 @@ class OpenCVConan(ConanFile):
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
             self.requires("openjpeg/2.5.0")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.7")
+            self.requires("openexr/3.1.9")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.5.0")
+            self.requires("libtiff/4.5.1")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
         if self.options.get_safe("with_gdal"):
             self.requires("gdal/3.5.2")
         if self.options.get_safe("with_gdcm"):

@@ -50,7 +50,7 @@ class _ProtoLibrary:
         if short_name.endswith(suffix):
             short_name = short_name[:-len(suffix)]
         return short_name
-        
+
     @property
     def cmake_deps(self):
         def to_cmake_target(item):
@@ -58,7 +58,7 @@ class _ProtoLibrary:
                 return item[2:].replace("/", "_").replace(":", "_")
             return item
         return [to_cmake_target(it) for it in self.deps]
-    
+
     @property
     def cmake_deps_short(self):
         return [self.shorten_cmake_target(dep) for dep in self.cmake_deps]
@@ -68,7 +68,7 @@ class _ProtoLibrary:
         cmake_target_short = self.shorten_cmake_target(self.cmake_target)
         content = f"\n\n# {self.cmake_target} ({cmake_target_short})\n"
         content += "\n".join([f"#{it}" for it in self.dumps().split('\n')])
-        content += "\n"        
+        content += "\n"
         if not self.srcs:
             content += textwrap.dedent(f"""\
                 add_library({cmake_target_short} INTERFACE)
@@ -81,8 +81,8 @@ class _ProtoLibrary:
                 target_compile_features({cmake_target_short} PUBLIC cxx_std_11)
                 # set project_label to shorten the name of the vcxproj file and cause shorter paths
                 set_property(TARGET {cmake_target_short} PROPERTY OUTPUT_NAME "{self.cmake_target}")
-                protobuf_generate(LANGUAGE cpp 
-                                TARGET {cmake_target_short} 
+                protobuf_generate(LANGUAGE cpp
+                                TARGET {cmake_target_short}
                                 PROTOS ${{{cmake_target_short}_PROTOS}}
                                 IMPORT_DIRS ${{CMAKE_SOURCE_DIR}}
                                 )
@@ -107,14 +107,18 @@ def parse_proto_libraries(filename, source_folder, error):
     basedir = os.path.dirname(filename)
     current_folder_str = os.path.relpath(basedir, source_folder).replace('\\', '/')  # We need forward slashes because of Windows
     proto_library = None
-    
+
     def parsing_sources(line):
         proto_path = os.path.relpath(os.path.join(basedir, line.strip(",").strip("\"")), source_folder).replace('\\', '/')
         proto_library.srcs.append(proto_path)
 
     def parsing_deps(line):
+        # Remove any comments
+        line = line.split('#', 1)[0].strip()
         line = line.strip(",").strip("\"")
-        if line.startswith("@com_google_protobuf//:"):
+        if line == '':
+            pass
+        elif line.startswith("@com_google_protobuf//:"):
             proto_library.deps.add("protobuf::libprotobuf")
         elif line.startswith("@com_google_googleapis//"):
             proto_library.deps.add(line[len("@com_google_googleapis"):])
@@ -137,7 +141,7 @@ def parse_proto_libraries(filename, source_folder, error):
         variables = {}
         for line in f.readlines():
             line = line.strip()
-            
+
             if line == "proto_library(":
                 assert proto_library == None
                 proto_library = _ProtoLibrary(is_cc=False)
@@ -175,11 +179,11 @@ def parse_proto_libraries(filename, source_folder, error):
                     proto_library = None
                     action = None
                 elif line == "],":
-                    action = None 
+                    action = None
                 elif line.startswith("] + "):
                     varname = re_add_varname.search(line).group(1)
                     for it in variables[varname]:
-                        action(it) 
+                        action(it)
                 elif action:
                     action(line)
 

@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.4
+  version: 2.0.9
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -11,15 +11,10 @@ artifactory:
   pull-request_repo_prefix: "c3i_PR-v2"
   pull-request_permission: "c3i-pr"
   logs_repo: "misc-v2"
-  # cache_repo: "cache"
 
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
-
-#slack:
-#  credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
-#  ceredential_errors_url: SLACK_FAILURE_WEBHOOK_URL
 
 # Things related to Jenkins jobs:
 tasks:
@@ -29,6 +24,13 @@ tasks:
   access_request:
       request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
       max_inactivity_days: 0
+  build_single_reference:
+    package_id_cache_type: "none"
+    timeout_minutes: 600
+    large_timeout_minutes: 800
+    large_timeout_references:
+      - boost
+      - qt
   cci:
     conan_v2_run_export: false
     detailed_status_checks: false
@@ -47,10 +49,14 @@ tasks:
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
     report_issue_append: false
+  validate_infrastructure:
+    macos_executors: 2
+    windows_executors: 4
+    open_docs_pull-request: false
 
 configurations:
   - id: linux-gcc
-    epochs: [0, 20211221, 20220120, 20220628]
+    epochs: [0, 20211221, 20220120, 20220628, 20230606]
     hrname: "Linux, GCC"
     build_profile:
       os: "Linux"
@@ -63,7 +69,7 @@ configurations:
               compiler.version: ["11"]
               build_type: ["Release"]
   - id: macos-clang
-    epochs: [0, 20211221, 20220120, 20220628]
+    epochs: [0, 20211221, 20220120, 20220628, 20230606]
     hrname: "macOS, Clang"
     build_profile:
       os: "Macos"
@@ -76,7 +82,7 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: macos-m1-clang
-    epochs: [0, 20211221, 20220120, 20220628]
+    epochs: [0, 20211221, 20220120, 20220628, 20230606]
     hrname: "macOS M1, Clang"
     build_profile:
       os: "Macos"
@@ -104,6 +110,21 @@ configurations:
                 - "Release":
                     compiler.runtime: ["dynamic"]
                     compiler.runtime_type: [ "Release" ]
+  - id: windows-msvc
+    epochs: [20230606]
+    hrname: "Windows, MSVC"
+    build_profile:
+      os: "Windows"
+    content:
+      - os: [ "Windows" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "msvc":
+              compiler.version: [ "192", "193" ]
+              build_type:
+                - "Release":
+                    compiler.runtime: ["dynamic"]
+                    compiler.runtime_type: [ "Release" ]
 
 cppstd:
   apple-clang:
@@ -112,6 +133,7 @@ cppstd:
     "11": ["17", "gnu17", "20", "gnu20"]
   msvc:
     "192": ["14", "17", "20"]
+    "193": ["14", "17", "20"]
 
 jenkins:
   url: "http://mb-jenkins-my-bloody-jenkins:8080"
@@ -120,7 +142,7 @@ node_labels:
   Windows:
     x86_64:
       "msvc":
-        default: "windows20221212"
+        default: "windows20230531"
   Macos:
     x86_64:
       "apple-clang":
@@ -134,3 +156,12 @@ node_labels:
         default: "linux_gcc_${compiler.version}_ubuntu16.04"
       "clang":
         default: "linux_clang_${compiler.version}_ubuntu16.04"
+
+
+pod_size:
+  # Map with references that need special memory resources to compile.
+  #   - Can be only by name or by name/version.
+  #   - name/version notation takes preference over the name only one
+  #   - Both notations can be combined for the same reference name
+  xlarge:
+    - "pcl"

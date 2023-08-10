@@ -1,3 +1,4 @@
+import glob
 import os
 
 from conan import ConanFile
@@ -182,7 +183,7 @@ class GetTextConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.configure("gettext-tools")
+        autotools.configure("gettext-runtime")
         autotools.make()
 
     def package(self):
@@ -214,8 +215,6 @@ def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
     if not conanfile.settings.get_safe("compiler.runtime"):
         return
-    from conan.tools.files import rename
-    import glob
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:
         for ext in [".dll.a", ".dll.lib", ".a"]:
