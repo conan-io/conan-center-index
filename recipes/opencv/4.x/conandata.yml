@@ -116,3 +116,4 @@ patches:
     - patch_file: "patches/4.1.2-0011-compat-openexr3.patch"
       patch_description: "Compatibility with OpenEXR 3.x"
       patch_type: "portability"
+      patch_source: "https://github.com/opencv/opencv/pull/19970"
