@@ -52,13 +52,13 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
-        self.requires("eigen/3.4.0")
+        self.requires("boost/1.82.0")
+        self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.0.3":
             self.requires("onetbb/2020.3")
         else:
-            self.requires("onetbb/2021.5.0")
-        self.requires("opencv/4.5.5")
+            self.requires("onetbb/2021.6.0")
+        self.requires("opencv/4.5.5", transitive_headers=True)
 
     @property
     def _required_boost_components(self):
