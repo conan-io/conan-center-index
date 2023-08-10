@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, collect_libs, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, collect_libs, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -24,10 +24,6 @@ class NewmatConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-#    @property
-#    def _is_mingw(self):
-#        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
