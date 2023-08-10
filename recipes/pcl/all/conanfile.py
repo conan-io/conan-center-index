@@ -105,7 +105,8 @@ class PclConan(ConanFile):
             self.requires("libusb/1.0.26")
         if self.options.with_pcap:
             self.requires("libpcap/1.10.4")
-        if self.options.with_opengl:
+        if self.options.with_opengl and self.options.with_vtk:
+            # OpenGL is only used if VTK is available
             self.requires("opengl/system")
             self.requires("freeglut/3.4.0")
             self.requires("glew/2.2.0")
@@ -117,6 +118,11 @@ class PclConan(ConanFile):
         # self.requires("davidsdk/x.x.x")
         # self.requires("dssdk/x.x.x")
         # self.requires("rssdk/x.x.x")
+
+    def package_id(self):
+        if self.info.options.with_vtk:
+            # with_opengl has no effect if VTK is not available
+            self.info.options.with_opengl = False
 
     def validate(self):
         if self.settings.compiler.cppstd:
