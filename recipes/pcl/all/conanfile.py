@@ -427,6 +427,7 @@ class PclConan(ConanFile):
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
+        tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
         tc.cache_variables["BUILD_tools"] = self.options.tools
         tc.cache_variables["BUILD_apps"] = self.options.apps
         tc.cache_variables["BUILD_examples"] = False
