@@ -22,6 +22,8 @@ class Log4cxxConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "char_type": ["utf-8", "wchar_t", "unichar"],
+        "char_encoding": ["locale", "utf-8", "ISO-8859-1", "US-ASCII", "EBCDIC"],
         "with_networking": [True, False],
         "with_wchar_t": [True, False],
         "with_fmt_layout": [True, False],
@@ -33,6 +35,8 @@ class Log4cxxConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "char_type": "utf-8",
+        "char_encoding": "locale",
         "with_networking": True,
         "with_wchar_t": False,
         "with_fmt_layout": False,
@@ -119,6 +123,8 @@ class Log4cxxConan(ConanFile):
         if Version(self.version) > "1.0.0" and self.settings.os != "Windows":
             tc.variables["LOG4CXX_ENABLE_ESMTP"] = self.options.with_smtp_appender
         tc.variables["LOG4CXX_ENABLE_ODBC"] = self.options.with_odbc_appender
+        tc.variables["LOG4CXX_CHAR"] = self.options.char_type
+        tc.variables["LOG4CXX_CHARSET"] = self.options.char_encoding
         tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
         tc.variables["LOG4CXX_QT_SUPPORT"] = self.options.with_qt
         if self.settings.os == "Windows":
