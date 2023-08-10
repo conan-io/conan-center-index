@@ -202,7 +202,7 @@ class PclConan(ConanFile):
         return f"{semver.major}.{semver.minor}"
 
     def _lib_name(self, lib):
-        if is_msvc(self) and self.settings.build_type == "Debug":
+        if (is_msvc(self) or is_msvc_static_runtime(self)) and self.settings.build_type == "Debug":
             return f"pcl_{lib}d"
         return f"pcl_{lib}"
 
