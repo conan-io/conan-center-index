@@ -52,7 +52,11 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0")
+        # self.requires("boost/1.82.0")
+        self.requires("boost/1.69.0")
+        # self.requires("boost/1.80.0")
+        # With boost 1.80.0 build failed with error like:
+        # CMakeFiles/CCTag.dir/cctag/Multiresolution.cpp.o:(.bss+0x4): multiple definition of `boost::phoenix::placeholders::uarg8'; CMakeFiles/CCTag.dir/cctag/Bresenham.cpp.o:(.bss+0x4): first defined here
         self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.0.3":
             self.requires("onetbb/2020.3")
