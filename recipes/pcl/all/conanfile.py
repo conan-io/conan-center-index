@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -201,7 +202,7 @@ class PclConan(ConanFile):
         return f"{semver.major}.{semver.minor}"
 
     def _lib_name(self, lib):
-        if self.settings.compiler == "msvc" and self.settings.build_type == "Debug":
+        if is_msvc(self) and self.settings.build_type == "Debug":
             return f"pcl_{lib}d"
         return f"pcl_{lib}"
 
