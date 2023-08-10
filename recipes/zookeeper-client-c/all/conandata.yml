@@ -1,6 +1,6 @@
 sources:
   "3.8.1":
-    url: "https://dlcdn.apache.org/zookeeper/zookeeper-3.8.1/apache-zookeeper-3.8.1.tar.gz"
+    url: "https://archive.apache.org/dist/zookeeper/zookeeper-3.8.1/apache-zookeeper-3.8.1.tar.gz"
     sha256: "ccc16850c8ab2553583583234d11c813061b5ea5f3b8ff1d740cde6c1fd1e219"
 patches:
   "3.8.1":
