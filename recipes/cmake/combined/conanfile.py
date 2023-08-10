@@ -30,10 +30,6 @@ class CMakeConan(ConanFile):
         "from_sources": False,
     }
 
-    def set_name(self):
-        self.name = os.environ.get('CMAKE_RECIPE_NAME', 'cmake')
-        print(self.name)
-
     def config_options(self):
         if self.settings.os not in ["Macos", "Windows", "Linux"]:
             self.options.from_sources = True
