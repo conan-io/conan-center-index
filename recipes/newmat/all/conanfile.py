@@ -15,7 +15,7 @@ class NewmatConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "newmat11.patch", "newmat6.cpp.patch"]
     topics = ("newmat", "matrix")
-    license = "GPLv3"
+    license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -64,6 +64,8 @@ class NewmatConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "nm11.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "nm10.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
