@@ -53,17 +53,17 @@ class CCTagConan(ConanFile):
 
     def requirements(self):
         # self.requires("boost/1.82.0")
-        self.requires("boost/1.69.0")
-        # self.requires("boost/1.80.0")
+        # 
         # With boost 1.80.0 build failed with error like:
         # CMakeFiles/CCTag.dir/cctag/Multiresolution.cpp.o:(.bss+0x4): multiple definition of `boost::phoenix::placeholders::uarg8'; CMakeFiles/CCTag.dir/cctag/Bresenham.cpp.o:(.bss+0x4): first defined here
         self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("opencv/4.5.5", transitive_headers=True)
         if Version(self.version) < "1.0.3":
+            self.requires("boost/1.80.0")
             self.requires("onetbb/2020.3")
         else:
+            self.requires("boost/1.71.0")
             self.requires("onetbb/2021.6.0")
-        self.requires("opencv/4.5.5", transitive_headers=True)
-        self.requires("zlib/1.2.13", override=True)
 
     @property
     def _required_boost_components(self):
