@@ -141,7 +141,7 @@ class PclConan(ConanFile):
         tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["WITH_CUDA"] = self.options.with_cuda
         tc.cache_variables["WITH_LIBUSB"] = self.options.with_libusb
-        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl
+        tc.cache_variables["WITH_OPENGL"] = self.options.with_opengl and self.options.with_vtk
         tc.cache_variables["WITH_OPENMP"] = self.options.with_openmp
         tc.cache_variables["WITH_PCAP"] = self.options.with_pcap
         tc.cache_variables["WITH_PNG"] = self.options.with_png
