@@ -326,7 +326,7 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.34")
+            self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
             self.requires("libpq/15.3")
         if self.options.with_odbc:
