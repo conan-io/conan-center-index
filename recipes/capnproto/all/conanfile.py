@@ -218,9 +218,9 @@ class CapnprotoConan(ConanFile):
             self._register_component(component)
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["capnpc"].system_libs = ["pthread"]
-            self.cpp_info.components["kj"].system_libs = ["pthread"]
-            self.cpp_info.components["kj-async"].system_libs = ["pthread"]
+            self.cpp_info.components["capnpc"].system_libs = ["pthread", "m"]
+            self.cpp_info.components["kj"].system_libs = ["pthread", "m"]
+            self.cpp_info.components["kj-async"].system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
 
