@@ -47,7 +47,7 @@ class CapnprotoConan(ConanFile):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
+            "gcc": "5" if Version(self.version) < "1.0.0" else "7",
             "clang": "5",
             "apple-clang": "5.1",
         }
