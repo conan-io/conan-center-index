@@ -125,6 +125,10 @@ class QtConan(ConanFile):
     short_paths = True
 
     @property
+    def _is_clang(self):
+        return str(self.settings.compiler) in ["clang", "apple-clang"]
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -737,7 +741,7 @@ class QtConan(ConanFile):
 
         libdirs = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
         args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(libdirs))
-        if not is_msvc(self):
+        if not is_msvc(self) and not self._is_clang():
             args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(libdirs))
 
         if "libmysqlclient" in [d.ref.name for d in self.dependencies.direct_host.values()]:
