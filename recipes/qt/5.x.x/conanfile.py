@@ -124,7 +124,6 @@ class QtConan(ConanFile):
     no_copy_source = True
     short_paths = True
 
-    @property
     def _is_clang(self):
         return str(self.settings.compiler) in ["clang", "apple-clang"]
 
