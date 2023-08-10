@@ -4,6 +4,14 @@ id: 'conan-io/conan-center-index'
 
 conan:
   version: 2.0.9
+  backup_sources:
+    upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
+    download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
+
+  globalconf:
+    - 'core.sources:download_cache={{ CONFIG_HOME }}/backup_sources_cache'
+    - 'core.sources:download_urls=["{{ ARTI_DOWNLOAD_URL }}", "origin"]'
+    - 'core.sources:upload_url={{ ARTI_UPLOAD_URL }}'
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
