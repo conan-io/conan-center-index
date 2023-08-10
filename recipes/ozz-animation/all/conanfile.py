@@ -51,6 +51,10 @@ class OzzAnimationConan(ConanFile):
             if Version(self.settings.compiler.version) < "11.3":
                 raise ConanInvalidConfiguration(f"GCC 11.3 or newer required")
 
+        if Version(self.version) < "0.14.0" and self.options.shared:
+            # these versions hard-code STATIC in CMakeLists.txt for libraries
+            raise ConanInvalidConfiguration(f"version '{self.version}' doesn't support shared linking")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
