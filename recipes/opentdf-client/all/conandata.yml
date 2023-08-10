@@ -1,7 +1,7 @@
 sources:
   "1.5.0":
     url: "https://github.com/opentdf/client-cpp/archive/1.5.0.tar.gz"
-    sha256: "c0b5f0732742a539c6a4bf5e720da4cf5c318bb069cef69789dce91c9261e8a2"
+    sha256: "ab2945bd729810f1c9b2da934e726cad5733e3044b77d7808b2702410879528f"
   "1.4.0":
     url: "https://github.com/opentdf/client-cpp/archive/1.4.0.tar.gz"
     sha256: "0ef9cdf5e49f83a8ddcde10d64cdf9108652e781396cfab000f50cc067e6f795"
