@@ -19,7 +19,7 @@ class BanditConan(ConanFile):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def requirements(self):
-        self.requires("snowhouse/5.0.0")
+        self.requires("snowhouse/5.0.0", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
