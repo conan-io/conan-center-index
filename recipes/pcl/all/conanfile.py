@@ -414,7 +414,6 @@ class PclConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
         tc.cache_variables["WITH_LIBUSB"] = self._is_enabled("libusb")
         tc.cache_variables["WITH_OPENGL"] = self._is_enabled("opengl")
         tc.cache_variables["WITH_OPENMP"] = self._is_enabled("openmp")
@@ -423,6 +422,9 @@ class PclConan(ConanFile):
         tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
         tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
         tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
+        tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
+        tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
+        tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
         tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
         # The default False setting breaks OpenGL detection in CMake
