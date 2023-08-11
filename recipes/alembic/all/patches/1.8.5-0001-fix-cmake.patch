@@ -1,0 +1,26 @@
+--- a/lib/Alembic/CMakeLists.txt
++++ b/lib/Alembic/CMakeLists.txt
+@@ -68,7 +68,6 @@ IF (ALEMBIC_SHARED_LIBS)
+ 
+   if (ALEMBIC_USING_IMATH_3)
+     if (APPLE OR UNIX)
+-      set_target_properties(Alembic PROPERTIES INSTALL_RPATH "$<TARGET_FILE_DIR:${ALEMBIC_ILMBASE_LIBS}>")
+     endif ()
+   endif ()
+ ENDIF()
+@@ -87,9 +87,9 @@ TARGET_LINK_LIBRARIES(Alembic
+ SET( ALEMBIC_LIB_INSTALL_DIR lib CACHE STRING "Where to install the Alembic libs")
+ INSTALL(TARGETS Alembic
+         EXPORT AlembicTargets
+-        LIBRARY DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        ARCHIVE DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        RUNTIME DESTINATION ${ALEMBIC_LIB_INSTALL_DIR})
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ #-******************************************************************************
+ # PACKAGE EXPORTS
+-- 
+2.41.0
+
