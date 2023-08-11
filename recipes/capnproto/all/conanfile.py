@@ -93,6 +93,10 @@ class CapnprotoConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared libraries for Visual Studio")
         if self.settings.os == "Windows" and Version(self.version) < "0.8.0" and self.options.with_openssl:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support OpenSSL on Windows pre 0.8.0")
+        # MSVC Release build is not supported in 1.0.0
+        # https://github.com/capnproto/capnproto/issues/1740
+        if Version(self.version) == "1.0.0" and is_msvc(self) and self.settings.build_type == "Release":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC Release build")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
