@@ -5,7 +5,6 @@
    if (ALEMBIC_USING_IMATH_3)
      if (APPLE OR UNIX)
 -      set_target_properties(Alembic PROPERTIES INSTALL_RPATH "$<TARGET_FILE_DIR:${ALEMBIC_ILMBASE_LIBS}>")
-+      # set_target_properties(Alembic PROPERTIES INSTALL_RPATH "$<TARGET_FILE_DIR:${ALEMBIC_ILMBASE_LIBS}>")
      endif ()
    endif ()
  ENDIF()
