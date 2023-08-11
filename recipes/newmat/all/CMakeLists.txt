@@ -10,6 +10,11 @@ project(
   HOMEPAGE_URL "http://www.robertnz.net/nm11.htm"
   LANGUAGES CXX)
 
+option(SETUP_C_SUBSCRIPTS "Activate SETUP_C_SUBSCRIPTS if you want to use traditional C style element access" OFF)
+if (SETUP_C_SUBSCRIPTS)
+   add_compile_definitions(SETUP_C_SUBSCRIPTS)
+endif()
+ 
 # -------------
 # target
 # -------------
