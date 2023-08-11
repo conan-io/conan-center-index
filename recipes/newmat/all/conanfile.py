@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, collect_libs, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, collect_libs, rmdir, save, load
 import os
 
 required_conan_version = ">=1.53.0"
@@ -64,11 +64,14 @@ class NewmatConan(ConanFile):
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
+    def _extract_license(self):
+        header = load(self, os.path.join(self.source_folder, "nm11.htm"))
+        return header[header.find("I place no restrictions", 1) : header.find("report bugs to me.", 1) + 18]
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "nm11.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "nm10.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         if self.settings.os == "Windows":
             rmdir(self, os.path.join(self.package_folder, "bin"))
