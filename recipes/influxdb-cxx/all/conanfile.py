@@ -76,6 +76,8 @@ class InfluxdbCxxConan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["INFLUXCXX_TESTING"] = False
         tc.cache_variables["INFLUXCXX_WITH_BOOST"] = self.options.boost
+        if self.options.shared:
+            tc.preprocessor_definitions["InfluxDB_EXPORTS"] = 1
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
