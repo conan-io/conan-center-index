@@ -86,6 +86,8 @@ class PclConan(ConanFile):
         # "with_rssdk": [True, False],
         # "with_rssdk2": [True, False],
         # "with_qvtk": [True, False],
+        # If to enable https://github.com/PointCloudLibrary/pcl/pull/5764 
+        "with_compilation_optimisation": [True, False],
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
     }
@@ -145,6 +147,7 @@ class PclConan(ConanFile):
         "with_qhull": True,
         "with_qt": True,
         "with_vtk": False,
+        "with_compilation_optimisation": True,
         "add_build_type_postfix": False,
     }
 
@@ -436,7 +439,7 @@ class PclConan(ConanFile):
         tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
         tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
         tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
-        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = True
+        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.with_compilation_optimisation
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
