@@ -86,7 +86,8 @@ class PclConan(ConanFile):
         # "with_rssdk": [True, False],
         # "with_rssdk2": [True, False],
         # "with_qvtk": [True, False],
-        "instantiate_only_core_point_types": [True, False],
+        # Precompile for a minimal set of point types only instead of all (e.g., pcl::PointXYZ instead of PCL_XYZ_POINT_TYPES)
+        "precompile_only_core_point_types": [True, False],
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
     }
@@ -146,7 +147,8 @@ class PclConan(ConanFile):
         "with_qhull": True,
         "with_qt": True,
         "with_vtk": False,
-        "instantiate_only_core_point_types": True,
+        # Enabled to avoid excessive memory usage during compilation in CCI
+        "precompile_only_core_point_types": True,
         "add_build_type_postfix": False,
     }
 
@@ -444,7 +446,7 @@ class PclConan(ConanFile):
         tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
         tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
         tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
-        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.instantiate_only_core_point_types
+        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
