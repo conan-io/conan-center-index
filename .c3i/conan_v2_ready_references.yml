@@ -119,6 +119,7 @@ required_for_references:
 - canvas_ity
 - capnproto
 - capstone
+- cargs
 - catch2
 - ccache
 - cccl
@@ -229,6 +230,7 @@ required_for_references:
 - dice-template-library
 - dirent
 - discount
+- djinni-generator
 - dlpack
 - docopt.cpp
 - doctest
@@ -306,6 +308,7 @@ required_for_references:
 - foxglove-schemas-protobuf
 - foxi
 - fp16
+- fpzip
 - freeglut
 - freeimage
 - freetype
@@ -773,6 +776,7 @@ required_for_references:
 - openddl-parser
 - openexr
 - openfbx
+- openfst
 - openfx
 - opengl
 - opengl-registry
@@ -858,6 +862,7 @@ required_for_references:
 - pthreads4w
 - pugixml
 - pulseaudio
+- pupnp
 - pybind11
 - pybind11_json
 - pystring
