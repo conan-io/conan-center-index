@@ -389,7 +389,7 @@ class PclConan(ConanFile):
     def package_id(self):
         used_deps = self._all_ext_deps(self.info.options)
         # Disable options that have no effect
-        all_opts = list(self.info.options.possible_values)
+        all_opts = [opt for opt, value in self.info.options.items()]
         for opt in all_opts:
             if opt.startswith("with_") and opt.split("_", 1)[1] not in used_deps:
                 setattr(self.info.options, opt, False)
