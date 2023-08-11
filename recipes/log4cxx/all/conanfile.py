@@ -23,7 +23,7 @@ class Log4cxxConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "char_type": ["utf-8", "wchar_t", "unichar"],
-        "char_encoding": ["locale", "utf-8", "ISO-8859-1", "US-ASCII", "EBCDIC"],
+        "char_encoding": ["locale", "utf-8"],
         "with_networking": [True, False],
         "with_wchar_t": [True, False],
         "with_fmt_layout": [True, False],
