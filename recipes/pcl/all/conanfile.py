@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -87,6 +86,8 @@ class PclConan(ConanFile):
         # "with_rssdk": [True, False],
         # "with_rssdk2": [True, False],
         # "with_qvtk": [True, False],
+        # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
+        "add_build_type_postfix": [True, False],
     }
     default_options = {
         "shared": False,
@@ -144,6 +145,7 @@ class PclConan(ConanFile):
         "with_qhull": True,
         "with_qt": True,
         "with_vtk": False,
+        "add_build_type_postfix": False,
     }
 
     short_paths = True
@@ -286,7 +288,7 @@ class PclConan(ConanFile):
 
     @property
     def _extra_libs(self):
-        return {"io": ["io_ply"]}
+        return {"io": ["pcl_io_ply"]}
 
     def _enabled_components(self, opts=None):
         opts = opts or self.options
@@ -438,6 +440,13 @@ class PclConan(ConanFile):
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
+
+        if not self.options.add_build_type_postfix:
+            tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_RELEASE_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
+
         tc.cache_variables["BUILD_tools"] = self.options.tools
         tc.cache_variables["BUILD_apps"] = self.options.apps
         tc.cache_variables["BUILD_examples"] = False
@@ -449,6 +458,7 @@ class PclConan(ConanFile):
             tc.cache_variables[f"BUILD_{comp}"] = True
         for comp in disabled:
             tc.cache_variables[f"BUILD_{comp}"] = False
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -494,11 +504,6 @@ class PclConan(ConanFile):
         semver = Version(self.version)
         return f"{semver.major}.{semver.minor}"
 
-    def _lib_name(self, lib):
-        if (is_msvc(self) or is_msvc_static_runtime(self)) and self.settings.build_type == "Debug":
-            return f"pcl_{lib}d"
-        return f"pcl_{lib}"
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PCL")
         self.cpp_info.set_property("cmake_target_name", "PCL::PCL")
@@ -514,9 +519,8 @@ class PclConan(ConanFile):
             component.set_property("pkg_config_name", f"pcl_{name}-{self._version_suffix}")
             component.includedirs = [os.path.join("include", f"pcl-{self._version_suffix}")]
             if not self._is_header_only(name):
-                libs = [name]
-                libs += self._extra_libs.get(name, [])
-                component.libs = [self._lib_name(lib) for lib in libs]
+                component.libs = [f"pcl_{name}"]
+                component.libs += self._extra_libs.get(name, [])
             component.requires += self._internal_deps[name]
             for opt_dep in self._internal_optional_deps.get(name, []):
                 if self.options.get_safe(opt_dep):
