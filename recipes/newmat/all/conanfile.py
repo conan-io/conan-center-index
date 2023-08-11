@@ -15,7 +15,7 @@ class NewmatConan(ConanFile):
     description = "Manipulate a variety of types of matrices using standard matrix operations."
     settings = "os", "compiler", "build_type", "arch"
     topics = ("newmat", "matrix")
-    license = "MIT"
+    license = "LicenseRef-newmat"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,7 +53,6 @@ class NewmatConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
@@ -69,10 +68,7 @@ class NewmatConan(ConanFile):
         copy(self, "nm10.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         if self.settings.os == "Windows":
-            if self.options.shared == True:
-                rmdir(self, os.path.join(self.package_folder, "lib"))
-            else:
-                rmdir(self, os.path.join(self.package_folder, "bin"))
+            rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
