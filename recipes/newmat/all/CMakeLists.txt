@@ -14,6 +14,7 @@ option(SETUP_C_SUBSCRIPTS "Activate SETUP_C_SUBSCRIPTS if you want to use tradit
 if (SETUP_C_SUBSCRIPTS)
    add_compile_definitions(SETUP_C_SUBSCRIPTS)
 endif()
+message("Build with C style element access ${SETUP_C_SUBSCRIPTS}")
  
 # -------------
 # target
