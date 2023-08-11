@@ -5,7 +5,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir, patch, apply_co
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.60.0"
+required_conan_version = ">=1.53.0"
 
 
 class LzipConan(ConanFile):
@@ -14,7 +14,7 @@ class LzipConan(ConanFile):
     license = "GPL-v2-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nongnu.org/lzip/"
-    topics = ("lzip", "compressor", "lzma")
+    topics = ("compressor", "lzma")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -41,10 +41,6 @@ class LzipConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-
-        if self.settings.os == "Windows":
-            #Change program extension to .exe when compiling for windows
-            replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), '$(INSTALL_PROGRAM) ./$(progname) \"$(DESTDIR)$(bindir)/$(progname)\"', '$(INSTALL_PROGRAM) ./$(progname).exe \"$(DESTDIR)$(bindir)/$(progname).exe\"')
 
         autotools = Autotools(self)
         autotools.configure()
