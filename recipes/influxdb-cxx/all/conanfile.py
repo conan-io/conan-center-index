@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -44,9 +42,6 @@ class InfluxdbCxxConan(ConanFile):
             "msvc": "192",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -77,6 +72,7 @@ class InfluxdbCxxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # BUILD_SHARED_LIBS is defined explicitly in CMakeLists.txt
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["INFLUXCXX_TESTING"] = False
         tc.cache_variables["INFLUXCXX_WITH_BOOST"] = self.options.boost
@@ -85,7 +81,6 @@ class InfluxdbCxxConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
