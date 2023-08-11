@@ -1,6 +1,6 @@
 --- a/lib/Alembic/CMakeLists.txt
 +++ b/lib/Alembic/CMakeLists.txt
-@@ -68,7 +68,7 @@ IF (ALEMBIC_SHARED_LIBS)
+@@ -68,7 +68,6 @@ IF (ALEMBIC_SHARED_LIBS)
  
    if (ALEMBIC_USING_IMATH_3)
      if (APPLE OR UNIX)
