@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, collect_libs, rmdir, save, load
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, save, load
 import os
 
 required_conan_version = ">=1.53.0"
@@ -77,7 +77,13 @@ class NewmatConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["Newmat"]
+        else:
+            if self.options.shared:
+                self.cpp_info.libs = ["libNewmat.so"]
+            else:
+                self.cpp_info.libs = ["libNewmat.a"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
