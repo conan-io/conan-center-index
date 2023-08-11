@@ -119,6 +119,7 @@ required_for_references:
 - canvas_ity
 - capnproto
 - capstone
+- cargs
 - catch2
 - ccache
 - cccl
