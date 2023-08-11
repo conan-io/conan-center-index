@@ -30,6 +30,7 @@ class LibwebsocketsConan(ConanFile):
         "with_sqlite3": [True, False],
         "with_libmount": [True, False],
         "with_hubbub": [True, False],
+        "with_netlink": [True, False],
         "ssl_client_use_os_ca_certs": [True, False],                            # SSL support should make use of the OS-installed CA root certs
         "ssl_server_with_ecdh_cert": [True, False],                             # Include SSL server use ECDH certificate
 
@@ -114,6 +115,7 @@ class LibwebsocketsConan(ConanFile):
         "with_sqlite3": False,
         "with_libmount": False,
         "with_hubbub": False,
+        "with_netlink": False,
 
         "ssl_client_use_os_ca_certs": True,
         "ssl_server_with_ecdh_cert": False,
@@ -294,6 +296,7 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_SHARED"] = self.options.shared
         tc.variables["LWS_WITH_STATIC"] = not self.options.shared
         tc.variables["LWS_WITH_SSL"] = bool(self.options.with_ssl)
+        tc.variables["LWS_WITH_NETLINK"] = self.options.with_netlink
 
         # Allow forwarding project targets to try_compile and derivatives
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
