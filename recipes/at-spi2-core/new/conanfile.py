@@ -21,17 +21,18 @@ class AtSpi2CoreConan(ConanFile):
 
     provides = "at-spi2-atk", "atk"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_x11": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_x11": False,
-        }
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
