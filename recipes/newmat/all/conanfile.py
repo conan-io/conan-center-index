@@ -42,12 +42,17 @@ class NewmatConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate_build(self):
+        if self.settings.os == "Windows" and self.options.shared == True:
+            raise ConanInvalidConfiguration("Not working yet. Feel free to submit a fix in conan-center")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
@@ -62,6 +67,11 @@ class NewmatConan(ConanFile):
         copy(self, "nm11.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "nm10.htm", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
+        if self.settings.os == "Windows":
+            if self.options.shared == True:
+                rmdir(self, os.path.join(self.package_folder, "lib"))
+            else:
+                rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
