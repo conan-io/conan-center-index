@@ -146,7 +146,7 @@ class PclConan(ConanFile):
         "with_qhull": True,
         "with_qt": True,
         "with_vtk": False,
-        "instantiate_only_core_point_types": False,
+        "instantiate_only_core_point_types": True,
         "add_build_type_postfix": False,
     }
 
