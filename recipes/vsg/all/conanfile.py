@@ -11,7 +11,11 @@ required_conan_version = ">=1.53.0"
 
 class VsgConan(ConanFile):
     name = "vsg"
-    description = "VulkanSceneGraph"
+    description = "VulkanSceneGraph (VSG), is a modern, cross platform, \
+                   high performance scene graph library \ 
+                   built upon Vulkan graphics/compute API.\
+                   The software is written in C++17,\
+                   and follows the CppCoreGuidelines and FOSS Best Practices."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vulkanscenegraph.org"
@@ -100,7 +104,6 @@ class VsgConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rm(self, "Find*.cmake", os.path.join(self.package_folder, "lib/cmake/vsg"))
