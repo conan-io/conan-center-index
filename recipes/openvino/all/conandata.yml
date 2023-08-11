@@ -1,23 +1,17 @@
 sources:
-  "2022.3.0":
+  "2023.1.0":
     "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2022.3.0.tar.gz"
-      sha256: "b8dc1880d9ab71bd24aa5b2565724c12fb78172613e23ce312e0b98a6d8a0dd7"
-    "openvino_contrib":
-      url: "https://github.com/openvinotoolkit/openvino_contrib/archive/refs/tags/2022.3.0.tar.gz"
-      sha256: "245e19b4a2c926aedb764fecbd02c5023deab56eba497e4a3c8194e760e26413"
+      url: "https://github.com/openvinotoolkit/openvino/archive/2bdb7bd23e5c2ebf6fdf8c2941928820a34ffff2.tar.gz"
+      sha256: "fadc9cf49d3bd7f03160887eb5c264aa063c8d91a27b944e71ccc63d387f1754"
     "arm_compute":
-      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v22.11.tar.gz"
-      sha256: "e20a060d3c4f803889d96c2f0b865004ba3ef4e228299a44339ea1c1ba827c85"
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v23.02.1.tar.gz"
+      sha256: "c3a443e26539f866969242e690cf0651ef629149741ee18732f954c734da6763"
     "onednn_cpu":
-      url: "https://github.com/openvinotoolkit/oneDNN/archive/44de3c3698b687c26e487fc8f0213fa487e8fe2c.tar.gz"
-      sha256: "2c6aa7d787a947aa032224683f216ab38c168de4aed61d0554671774060a3615"
-    "ittapi":
-      url: "https://github.com/intel/ittapi/archive/refs/tags/v3.23.0.tar.gz"
-      sha256: "9af1231808c602c2f7a66924c8798b1741d3aa4b15f3874d82ca7a89b5dbb1b1"
-    "xbyak":
-      url: "https://github.com/herumi/xbyak/archive/refs/tags/v6.63.tar.gz"
-      sha256: "16c60f0682502624115c4dc9fec66782ae68ef32e469946f50cd169179ea92bb"
-    "onnx":
-      url: "https://github.com/onnx/onnx/archive/refs/tags/v1.12.0.tar.gz"
-      sha256: "052ad3d5dad358a33606e0fc89483f8150bb0655c99b12a43aa58b5b7f0cc507"
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/6b6f9fcebf840c665e1db4361f75c42ac77e5e72.tar.gz"
+      sha256: "adc981b4dbd8f9d02b29e2035a9a2431fc63d93aa2e7ddd944a8f96f3664bc4a"
+    "mlas":
+      url: "https://github.com/openvinotoolkit/mlas/archive/219f114e988527bb0ecaf2636622562859afa6e1.tar.gz"
+      sha256: "c97dcca992a4bb24f2936558304bd8ac0ce10d2cb9b8f2f3eadf4d0b14995e93"
+    "onednn_gpu":
+      url: "https://github.com/oneapi-src/oneDNN/archive/4b82a66ed38ecaa993352e5cc6ed7753656b8a26.tar.gz"
+      sha256: "cb17c003fe51bc9b4e20189573956b4446468162adf0fc4cea2ee0820cff0cd0"

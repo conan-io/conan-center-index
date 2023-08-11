@@ -10,7 +10,7 @@ int main() {
     OV_CALL(ov_core_create(&core));
     OV_CALL(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
 #ifndef __APPLE__
-    // OV_CALL(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
+    OV_CALL(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
 #endif
     OV_CALL(ov_core_get_property(core, "AUTO", "SUPPORTED_METRICS", &ret));
     OV_CALL(ov_core_get_property(core, "MULTI", "SUPPORTED_METRICS", &ret));

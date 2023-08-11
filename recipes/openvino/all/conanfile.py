@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import rmdir
+from conan.tools.files import get, export_conandata_patches, rmdir
 import os
 
 required_conan_version = ">=1.60.0"
@@ -58,10 +58,6 @@ class OpenvinoConan(ConanFile):
         "enable_pytorch_frontend": True
     }
 
-    # TODO: understand what to export
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = ("*")
-
     @property
     def _protobuf_required(self):
         return self.options.enable_tf_frontend or self.options.enable_onnx_frontend or self.options.enable_pdpd_frontend
@@ -84,16 +80,19 @@ class OpenvinoConan(ConanFile):
         return self.settings.os != "Macos" and self._target_x86_64
 
     def source(self):
-        # get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
-        # get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
-        # get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
-        # get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
-        # get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
-        pass
+        print(self.conan_data["sources"][self.version]["openvino"])
+        get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
+        get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
+        get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
+        get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -146,12 +145,7 @@ class OpenvinoConan(ConanFile):
             self.requires("flatbuffers/[>=22.9.24]")
 
     def layout(self):
-        if self.settings.os == "Macos":
-            cmake_layout(self, src_folder="/Users/sandye51/Documents/Programming/git_repo/openvino",
-                               build_folder="/Users/sandye51/Documents/Programming/builds/openvino-release-conan")
-        else:
-            cmake_layout(self, src_folder="/openvino",
-                               build_folder="/build-conan-x86-64")
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
