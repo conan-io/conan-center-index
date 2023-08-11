@@ -1,0 +1,4 @@
+sources:
+  "0.7.1":
+    url: "https://github.com/offa/influxdb-cxx/archive/refs/tags/v0.7.1.tar.gz"
+    sha256: "6b111fc9484dd0a716aa0ef954f117babb781903149ecff409b0da794da50993"
