@@ -86,7 +86,6 @@ class PclConan(ConanFile):
         # "with_rssdk": [True, False],
         # "with_rssdk2": [True, False],
         # "with_qvtk": [True, False],
-        # If to enable https://github.com/PointCloudLibrary/pcl/pull/5764 
         "instantiate_only_core_point_types": [True, False],
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
@@ -147,7 +146,7 @@ class PclConan(ConanFile):
         "with_qhull": True,
         "with_qt": True,
         "with_vtk": False,
-        "instantiate_only_core_point_types": True,
+        "instantiate_only_core_point_types": False,
         "add_build_type_postfix": False,
     }
 
