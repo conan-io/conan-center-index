@@ -10,6 +10,7 @@ import os
 
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+
 class AtSpi2CoreConan(ConanFile):
     name = "at-spi2-core"
     description = "It provides a Service Provider Interface for the Assistive Technologies available on the GNOME platform and a library against which applications can be linked"
