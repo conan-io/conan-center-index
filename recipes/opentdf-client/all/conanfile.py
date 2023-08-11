@@ -70,7 +70,7 @@ class OpenTDFConan(ConanFile):
         if Version(self.version) >= "1.5.0":
             self.requires("openssl/[>=3.1 <3.2]")
         else:
-            self.requires("openssl//[>=1.1.1q <=1.1.1u]")
+            self.requires("openssl/[>=1.1.1q <=1.2]")
         # Uses magic_enum for 1.4.0 and newer
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.8.2")
