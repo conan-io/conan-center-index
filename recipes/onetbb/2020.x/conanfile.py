@@ -190,6 +190,9 @@ class OneTBBConan(ConanFile):
             tc.extra_cflags.append("-mrtm")
             tc.extra_cxxflags.append("-mrtm")
 
+        # Fixes 'ar: two different operation options specified' due to duplicate -m64 flags
+        tc.arch_flag = ""
+
         tc.generate()
 
         if self.settings.compiler == "intel-cc":
@@ -207,9 +210,6 @@ class OneTBBConan(ConanFile):
         replace_in_file(self, linux_include, "= gcc", "= $(CC)")
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
             replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "release", "debug")
-        for inc_file in glob.glob(os.path.join(self.source_folder, "build", "*.inc")):
-            # Fix 'ar: two different operation options specified' due to unrecognized -m64 flag in 2020.04
-            replace_in_file(self, inc_file, "LIB_LINK_FLAGS += -m64", "LIB_LINK_FLAGS += ", strict=False)
 
     def build(self):
         self._patch_sources()
