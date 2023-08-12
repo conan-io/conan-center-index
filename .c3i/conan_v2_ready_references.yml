@@ -119,6 +119,7 @@ required_for_references:
 - canvas_ity
 - capnproto
 - capstone
+- cargs
 - catch2
 - ccache
 - cccl
@@ -211,6 +212,7 @@ required_for_references:
 - cxxopts
 - cyclonedds
 - cyrus-sasl
+- czmq
 - dacap-clip
 - darknet
 - dataframe
@@ -703,6 +705,7 @@ required_for_references:
 - mp-units
 - mpark-variant
 - mpc
+- mpfr
 - mpg123
 - mpmcqueue
 - mppp
@@ -989,6 +992,7 @@ required_for_references:
 - svgpp
 - svgwrite
 - symengine
+- systemc
 - szip
 - tabulate
 - taglib
@@ -1048,6 +1052,7 @@ required_for_references:
 - utfcpp
 - util-linux-libuuid
 - uvw
+- uwebsockets
 - vaapi
 - variant-lite
 - vdpau
