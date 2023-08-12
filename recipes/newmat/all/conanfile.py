@@ -90,8 +90,8 @@ class NewmatConan(ConanFile):
 
         self.cpp_info.includedirs.append(os.path.join("include", "newmat"))
 
-        self.cpp_info.set_property("cmake_file_name", "Newmat")
-        self.cpp_info.set_property("cmake_target_name", "Newmat::Newmat")
-        self.cpp_info.names["cmake_find_package"] = "Newmat"
-        self.cpp_info.names["cmake_find_package_multi"] = "Newmat"
+        self.cpp_info.set_property("cmake_file_name", "newmat")
+        self.cpp_info.set_property("cmake_target_name", "newmat::newmat")
+        self.cpp_info.names["cmake_find_package"] = "newmat"
+        self.cpp_info.names["cmake_find_package_multi"] = "newmat"
 
