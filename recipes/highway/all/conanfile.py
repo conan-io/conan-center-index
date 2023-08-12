@@ -113,7 +113,7 @@ class HighwayConan(ConanFile):
             self.cpp_info.components["hwy_contrib"].set_property("pkg_config_name", "libhwy-contrib")
             self.cpp_info.components["hwy_contrib"].libs = ["hwy_contrib"]
             self.cpp_info.components["hwy_contrib"].requires = ["hwy"]
-        if Version(self.version) == "0.15.0" or (Version(self.version) >= "0.16.0" and self.options.with_test):
+        if "0.15.0" <= Version(self.version) < "1.0.6" or (Version(self.version) >= "1.0.6" and self.options.with_test):
             self.cpp_info.components["hwy_test"].set_property("pkg_config_name", "libhwy-test")
             self.cpp_info.components["hwy_test"].libs = ["hwy_test"]
             self.cpp_info.components["hwy_test"].requires = ["hwy"]
