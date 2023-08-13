@@ -48,6 +48,8 @@ class NewmatConan(ConanFile):
     def validate_build(self):
         if self.settings.os == "Windows" and self.options.shared == True:
             raise ConanInvalidConfiguration("Not working yet. Feel free to submit a fix in conan-center")
+        elif self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Not working yet. Feel free to submit a fix in conan-center")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
