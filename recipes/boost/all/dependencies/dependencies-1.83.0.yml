@@ -12,10 +12,12 @@ configure_options:
 - graph
 - graph_parallel
 - iostreams
+- json
 - locale
 - log
 - math
 - mpi
+- nowide
 - program_options
 - python
 - random
@@ -27,14 +29,14 @@ configure_options:
 - thread
 - timer
 - type_erasure
+- url
 - wave
 dependencies:
   atomic: []
   chrono:
   - system
   container: []
-  context:
-  - thread
+  context: []
   contract:
   - exception
   - thread
@@ -42,9 +44,7 @@ dependencies:
   - context
   - exception
   - system
-  - thread
-  date_time:
-  - serialization
+  date_time: []
   exception: []
   fiber:
   - context
@@ -52,6 +52,7 @@ dependencies:
   fiber_numa:
   - fiber
   filesystem:
+  - atomic
   - system
   graph:
   - math
@@ -67,6 +68,9 @@ dependencies:
   iostreams:
   - random
   - regex
+  json:
+  - container
+  - system
   locale:
   - thread
   log:
@@ -75,15 +79,13 @@ dependencies:
   - date_time
   - exception
   - filesystem
-  - locale
   - random
   - regex
   - system
   - thread
   log_setup:
   - log
-  math:
-  - atomic
+  math: []
   math_c99:
   - math
   math_c99f:
@@ -102,6 +104,8 @@ dependencies:
   mpi_python:
   - mpi
   - python
+  nowide:
+  - filesystem
   numpy:
   - python
   prg_exec_monitor:
@@ -109,7 +113,6 @@ dependencies:
   program_options: []
   python: []
   random:
-  - math
   - system
   regex: []
   serialization: []
@@ -147,6 +150,8 @@ dependencies:
   - prg_exec_monitor
   - test
   - test_exec_monitor
+  url:
+  - system
   wave:
   - filesystem
   - serialization
@@ -181,6 +186,8 @@ libs:
   - boost_graph_parallel
   iostreams:
   - boost_iostreams
+  json:
+  - boost_json
   locale:
   - boost_locale
   log:
@@ -204,6 +211,8 @@ libs:
   - boost_mpi
   mpi_python:
   - boost_mpi_python
+  nowide:
+  - boost_nowide
   numpy:
   - boost_numpy{py_major}{py_minor}
   prg_exec_monitor:
@@ -244,6 +253,8 @@ libs:
   - boost_type_erasure
   unit_test_framework:
   - boost_unit_test_framework
+  url:
+  - boost_url
   wave:
   - boost_wave
   wserialization:
@@ -266,4 +277,4 @@ requirements:
 static_only:
 - boost_exception
 - boost_test_exec_monitor
-version: 1.71.0
+version: 1.83.0
