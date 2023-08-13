@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, get, files, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, get, files, export_conandata_patches, copy
 from conan.errors import ConanInvalidConfiguration
 import functools
 import os
@@ -125,7 +125,7 @@ class GdalConan(ConanFile):
     }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -260,7 +260,7 @@ class GdalConan(ConanFile):
             self.requires("poppler/21.07.0")
 
         if self.options.with_proj:
-            self.requires("proj/9.1.1")
+            self.requires("proj/9.2.1")
 
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
