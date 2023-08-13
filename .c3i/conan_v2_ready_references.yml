@@ -41,6 +41,7 @@ required_for_references:
 - asio
 - asio-grpc
 - asmjit
+- assimp
 - astc-codec
 - astro-informatics-so3
 - async_simple
@@ -230,6 +231,7 @@ required_for_references:
 - dice-template-library
 - dirent
 - discount
+- djinni-generator
 - dlpack
 - docopt.cpp
 - doctest
@@ -242,6 +244,7 @@ required_for_references:
 - drmp3
 - drogon
 - drwav
+- dtl
 - duckdb
 - eabase
 - earcut
@@ -307,6 +310,7 @@ required_for_references:
 - foxglove-schemas-protobuf
 - foxi
 - fp16
+- fpzip
 - freeglut
 - freeimage
 - freetype
@@ -410,6 +414,7 @@ required_for_references:
 - imgui
 - imguizmo
 - implot
+- imutils-cpp
 - incbin
 - indicators
 - indirect_value
@@ -711,6 +716,7 @@ required_for_references:
 - mppp
 - ms-gsl
 - msdf-atlas-gen
+- msdfgen
 - msgpack-c
 - msgpack-cxx
 - msys2
@@ -774,6 +780,7 @@ required_for_references:
 - openddl-parser
 - openexr
 - openfbx
+- openfst
 - openfx
 - opengl
 - opengl-registry
@@ -859,6 +866,7 @@ required_for_references:
 - pthreads4w
 - pugixml
 - pulseaudio
+- pupnp
 - pybind11
 - pybind11_json
 - pystring
@@ -909,6 +917,7 @@ required_for_references:
 - rtmidi
 - rttr
 - ruy
+- rvo2
 - rxcpp
 - s2n
 - safeint
@@ -1048,6 +1057,7 @@ required_for_references:
 - upx
 - uriparser
 - usockets
+- usrsctp
 - utf8proc
 - utfcpp
 - util-linux-libuuid
