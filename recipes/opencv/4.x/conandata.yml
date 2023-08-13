@@ -1,4 +1,9 @@
 sources:
+  "4.8.0":
+    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.8.0.tar.gz"
+      sha256: "cbf47ecc336d2bff36b0dcd7d6c179a9bb59e805136af6b9670ca944aef889bd"
+    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.8.0.tar.gz"
+      sha256: "b4aef0f25a22edcd7305df830fa926ca304ea9db65de6ccd02f6cfa5f3357dbb"
   "4.5.5":
     - url: "https://github.com/opencv/opencv/archive/refs/tags/4.5.5.tar.gz"
       sha256: "a1cfdcf6619387ca9e232687504da996aaa9f7b5689986b8331ec02cb61d28ad"
