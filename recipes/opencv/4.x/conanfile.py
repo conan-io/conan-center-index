@@ -224,6 +224,10 @@ class OpenCVConan(ConanFile):
         return os.path.join(self.source_folder, "contrib")
 
     @property
+    def _extra_modules_folder(self):
+        return os.path.join(self._contrib_folder, "modules")
+
+    @property
     def _has_with_jpeg2000_option(self):
         return self.settings.os != "iOS"
 
@@ -368,9 +372,6 @@ class OpenCVConan(ConanFile):
                 ]
             return []
 
-        def freetype():
-            return ["freetype::freetype"] if self.options.freetype else []
-
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
@@ -499,7 +500,7 @@ class OpenCVConan(ConanFile):
                 "is_built": self.options.highgui,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_core", "opencv_imgproc"] + opencv_imgcodecs() +
-                            opencv_videoio() + freetype() + gtk() + qt() + wayland() + ipp(),
+                            opencv_videoio() + gtk() + qt() + wayland() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]),
                 ],
@@ -1192,21 +1193,31 @@ class OpenCVConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        for directory in ["libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff", "libwebp", "openexr", "protobuf", "zlib", "quirc"]:
+
+        # Patches in opencv
+        # -----------------
+
+        ## Remove 3rd party libs
+        for directory in [
+            "libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff",
+            "libwebp", "openexr", "protobuf", "zlib", "quirc",
+        ]:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", directory))
 
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
+
+        ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
         if Version(self.version) >= "4.8.0":
             replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${AVIF_LIBRARY}", "avif")
 
-        # Fix detection of ffmpeg
+        ## Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
                         "FFMPEG_FOUND", "ffmpeg_FOUND")
 
-        # Cleanup RPATH
+        ## Cleanup RPATH
         if Version(self.version) < "4.1.2":
             install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
         else:
@@ -1216,6 +1227,7 @@ class OpenCVConan(ConanFile):
                               "")
         replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
+        ## Fix discovery & link of protobuf
         if self.options.get_safe("with_protobuf"):
             find_protobuf = os.path.join(self.source_folder, "cmake", "OpenCVFindProtobuf.cmake")
             # OpenCV expects to find FindProtobuf.cmake, not the config file
@@ -1228,8 +1240,21 @@ class OpenCVConan(ConanFile):
                                       'if(TARGET "${Protobuf_LIBRARIES}")',
                                       'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
 
+        # Patches in opencv_contrib
+        # -------------------------
+
+        ## Remove unused extra modules to avoid side effects
+        if not self.options.with_cuda:
+            rmdir(self, os.path.join(self._extra_modules_folder, "cudev"))
+        for module in OPENCV_EXTRA_MODULES_OPTIONS:
+            if not self.options.get_safe(module):
+                rmdir(self, os.path.join(self._extra_modules_folder, module))
+        for module in ["cnn_3dobj", "julia", "matlab"]:
+            rmdir(self, os.path.join(self._extra_modules_folder, module))
+
+        ## Fix Freetype discovery logic in freetype extra module
         if self.options.freetype:
-            freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
+            freetype_cmake = os.path.join(self._extra_modules_folder, "freetype", "CMakeLists.txt")
             replace_in_file(self, freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED MODULE)")
             replace_in_file(self, freetype_cmake, "FREETYPE_", "Freetype_")
 
@@ -1411,7 +1436,8 @@ class OpenCVConan(ConanFile):
             tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
 
         # Extra modules
-        tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
+        if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]):
+            tc.variables["OPENCV_EXTRA_MODULES_PATH"] = self._extra_modules_folder.replace("\\", "/")
         tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
         for module in OPENCV_EXTRA_MODULES_OPTIONS:
             tc.variables[f"BUILD_opencv_{module}"] = self.options.get_safe(module, False)
