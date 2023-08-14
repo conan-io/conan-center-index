@@ -1,0 +1,4 @@
+sources:
+  "v2-alpha3":
+    url: "https://github.com/Siviuze/KickCAT/archive/refs/tags/v2-alpha3.zip"
+    sha256: "dadd8518c3232162b7455fdcd837578120ece5a42c3bc2701147a68cbee60da4"
