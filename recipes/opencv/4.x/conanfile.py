@@ -365,12 +365,12 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def ffmpeg():
+            components = []
             if self.options.get_safe("with_ffmpeg"):
-                return [
-                    "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat",
-                    "ffmpeg::avutil", "ffmpeg::swscale",
-                ]
-            return []
+                components = ["ffmpeg::avcodec", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
+                if Version(self.version) >= "4.7.0":
+                    components.append("ffmpeg::avdevice")
+            return components
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
@@ -1329,9 +1329,12 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
             if Version(self.version) >= "4.7.0":
-                tc.variables["OPENCV_FFMPEG_ENABLE_LIBAVDEVICE"] = True
+                tc.variables["OPENCV_FFMPEG_ENABLE_LIBAVDEVICE"] = self.dependencies["ffmpeg"].options.get_safe("avdevice", False)
             ffmpeg_libraries = []
-            for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale", "avresample"]:
+            ffmpeg_components = ["avcodec",  "avformat", "avutil", "swscale", "avresample"]
+            if Version(self.version) >= "4.7.0":
+                ffmpeg_components.append("avdevice")
+            for component in ffmpeg_components:
                 if component == "avutil" or self.dependencies["ffmpeg"].options.get_safe(component):
                     ffmpeg_libraries.append(f"ffmpeg::{component}")
                     ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
