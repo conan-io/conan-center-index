@@ -115,6 +115,12 @@ class Openmvgconan(ConanFile):
         # see https://github.com/conan-io/conan/issues/10281
         if Version(self.dependencies["ceres-solver"].ref.version) >= "2.0.0" and not valid_min_cppstd(self, "14"):
             tc.variables["CMAKE_CXX_STANDARD"] = "14"
+
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+        
         tc.generate()
 
         deps = CMakeDeps(self)
