@@ -41,6 +41,7 @@ required_for_references:
 - asio
 - asio-grpc
 - asmjit
+- assimp
 - astc-codec
 - astro-informatics-so3
 - async_simple
@@ -70,6 +71,7 @@ required_for_references:
 - backward-cpp
 - bacnet-stack
 - baical-p7
+- bandit
 - base64
 - bazel
 - bdwgc
@@ -205,6 +207,7 @@ required_for_references:
 - cubicinterpolation
 - cuda-api-wrappers
 - cuda-kat
+- cuda-samples
 - cunit
 - cute_headers
 - cvplot
@@ -230,6 +233,7 @@ required_for_references:
 - dice-template-library
 - dirent
 - discount
+- djinni-generator
 - dlpack
 - docopt.cpp
 - doctest
@@ -242,6 +246,7 @@ required_for_references:
 - drmp3
 - drogon
 - drwav
+- dtl
 - duckdb
 - eabase
 - earcut
@@ -267,6 +272,7 @@ required_for_references:
 - enum-flags
 - erikzenker-hsm
 - erkir
+- etc2comp
 - eternal
 - etl
 - exiv2
@@ -307,6 +313,7 @@ required_for_references:
 - foxglove-schemas-protobuf
 - foxi
 - fp16
+- fpzip
 - freeglut
 - freeimage
 - freetype
@@ -317,6 +324,7 @@ required_for_references:
 - ftxui
 - function2
 - functionalplus
+- fusepp
 - fxdiv
 - g3log
 - gainput
@@ -389,6 +397,7 @@ required_for_references:
 - heatshrink
 - hedley
 - hffix
+- hictk
 - hidapi
 - highfive
 - highs
@@ -399,6 +408,7 @@ required_for_references:
 - hlslpp
 - homog2d
 - http_parser
+- hunspell
 - hwloc
 - icecream-cpp
 - icu
@@ -410,6 +420,7 @@ required_for_references:
 - imgui
 - imguizmo
 - implot
+- imutils-cpp
 - incbin
 - indicators
 - indirect_value
@@ -544,6 +555,7 @@ required_for_references:
 - libmorton
 - libmount
 - libmp3lame
+- libmpdclient
 - libmysqlclient
 - libnabo
 - libnet
@@ -569,6 +581,7 @@ required_for_references:
 - librealsense
 - libressl
 - librttopo
+- libsafec
 - libsamplerate
 - libschrift
 - libsecret
@@ -711,6 +724,7 @@ required_for_references:
 - mppp
 - ms-gsl
 - msdf-atlas-gen
+- msdfgen
 - msgpack-c
 - msgpack-cxx
 - msys2
@@ -736,6 +750,7 @@ required_for_references:
 - nlohmann_json
 - nlopt
 - nmea
+- nmslib
 - nng
 - nodejs
 - norm
@@ -774,6 +789,7 @@ required_for_references:
 - openddl-parser
 - openexr
 - openfbx
+- openfst
 - openfx
 - opengl
 - opengl-registry
@@ -859,6 +875,7 @@ required_for_references:
 - pthreads4w
 - pugixml
 - pulseaudio
+- pupnp
 - pybind11
 - pybind11_json
 - pystring
@@ -909,6 +926,7 @@ required_for_references:
 - rtmidi
 - rttr
 - ruy
+- rvo2
 - rxcpp
 - s2n
 - safeint
@@ -1048,6 +1066,7 @@ required_for_references:
 - upx
 - uriparser
 - usockets
+- usrsctp
 - utf8proc
 - utfcpp
 - util-linux-libuuid
