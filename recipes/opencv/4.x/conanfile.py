@@ -946,7 +946,11 @@ class OpenCVConan(ConanFile):
                        "they are required by modules you have explicitly requested:\n")
 
             for option_to_enable in all_options_to_enable:
-                setattr(self.options, option_to_enable, True)
+                try:
+                    setattr(self.options, option_to_enable, True)
+                except ConanException:
+                    # It may not work in conan v2 and raise ConanException "Incorrect attempt to modify option"
+                    continue
 
                 direct_and_transitive = []
                 direct = ", ".join(direct_options_to_enable.get(option_to_enable, []))
