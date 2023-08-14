@@ -162,28 +162,37 @@ class OzzAnimationConan(ConanFile):
             "RelWithDebInfo": "_rd",
         }[str(self.settings.build_type)]
 
+        def _add_libm(c):
+            if self.settings.os in ("Linux", "Android", "FreeBSD"):
+                self.cpp_info.components[c].system_libs = ["m"]
+
         self.cpp_info.components["base"].libs = [f"ozz_base{postfix}"]
         self.cpp_info.components["base"].includedirs = ["include"]
+        _add_libm("base")
 
         if self.options.ozz_geometry:
             self.cpp_info.components["geometry"].libs = [f"ozz_geometry{postfix}"]
             self.cpp_info.components["geometry"].includedirs = ["include"]
             self.cpp_info.components["geometry"].requires = ["base"]
+            _add_libm("geometry")
 
         if self.options.ozz_animation:
             self.cpp_info.components["animation"].libs = [f"ozz_animation{postfix}"]
             self.cpp_info.components["animation"].includedirs = ["include"]
             self.cpp_info.components["animation"].requires = ["base"]
+            _add_libm("animation")
 
         if self.options.ozz_animation_offline:
             self.cpp_info.components["animation_offline"].libs = [f"ozz_animation_offline{postfix}"]
             self.cpp_info.components["animation_offline"].includedirs = ["include"]
             self.cpp_info.components["animation_offline"].requires = ["animation"]
+            _add_libm("animation_offline")
 
         if self.options.ozz_options:
             self.cpp_info.components["options"].libs = [f"ozz_options{postfix}"]
             self.cpp_info.components["options"].includedirs = ["include"]
             self.cpp_info.components["options"].requires = ["base"]
+            _add_libm("options")
 
         if self.options.ozz_animation_tools:
             self.cpp_info.components["animation_tools"].libs = [f"ozz_animation_tools{postfix}"]
