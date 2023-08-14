@@ -148,7 +148,3 @@ Pull Requests that introduce patches will be carefully reviewed by the Conan Tea
 Patches that affect C and C++ code are strongly discouraged and will only be accepted at the discretion of the Conan Team, after a strict validation process. Patches are more likely to be accepted if they are first reported and acknowledged by the library authors.
 
 For scenarios that require patching source code, we greatly encourage raising a new issue explaining the need and motivation, reproducible steps and complete logs, behind the patch. Please note that for issues that strictly affect C and C++ source code, it is very unlikely that a patch will be accepted if an issue is not first raised with the original library authors, or if the patches are not addressing a known security advisory.
-
-considerations. It means that these releases will modify their behavior without previous
-notice, the documentation or changelog for these specific releases won't exist. Use
-them carefully in your projects.
