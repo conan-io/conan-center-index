@@ -68,7 +68,8 @@ class OpenTDFConan(ConanFile):
     def requirements(self):
         # Uses openssl 3.x for 1.5.0 and newer
         if Version(self.version) >= "1.5.0":
-            self.requires("openssl/[>=3.1.1 <3.2]")
+            # NOTE: jwt-cpp complains about using 3.1 range, so use override
+            self.requires("openssl/3.1.1")
         else:
             # NOTE: jwt-cpp complains about using >=1.1.1u, so limit range
             self.requires("openssl/[>=1.1.1q <1.1.1u]")
