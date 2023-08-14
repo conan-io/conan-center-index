@@ -68,15 +68,15 @@ class OpenTDFConan(ConanFile):
     def requirements(self):
         # Uses openssl 3.x for 1.5.0 and newer
         if Version(self.version) >= "1.5.0":
-            self.requires("openssl/3.1.1")
+            self.requires("openssl/[>=3.1.1 <3.2]")
         else:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1.1q <=1.2]")
         # Uses magic_enum for 1.4.0 and newer
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.8.2")
         self.requires("ms-gsl/2.1.0")
         self.requires("nlohmann_json/3.11.1")
-        self.requires("jwt-cpp/0.4.0")
+        self.requires("jwt-cpp/0.6.0")
         # Use newer boost+libxml2 after 1.3.6
         if Version(self.version) <= "1.3.6":
             self.requires("boost/1.79.0")
