@@ -322,7 +322,7 @@ class FFMpegConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
-            self.tool_requires("yasm/1.3.0")
+            self.tool_requires("nasm/2.15.05")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self._settings_build.os == "Windows":
