@@ -133,7 +133,6 @@ class LibMysqlClientCConan(ConanFile):
                                 f"# SET({lib.upper()}_WARN_GIVEN)",
                                 strict=False)
 
-        rmdir(self, os.path.join(self.source_folder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"ADD_SUBDIRECTORY({folder})\n",
