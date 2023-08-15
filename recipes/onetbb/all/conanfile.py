@@ -109,6 +109,7 @@ class OneTBBConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TBB")
         self.cpp_info.set_property("pkg_config_name", "tbb")
+        self.cpp_info.set_property("cmake_config_version_compat", "AnyNewerVersion")
 
         def lib_name(name):
             if self.settings.build_type == "Debug":
