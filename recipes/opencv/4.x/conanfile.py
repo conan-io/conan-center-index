@@ -11,7 +11,7 @@ import os
 import re
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 OPENCV_MAIN_MODULES_OPTIONS = (
@@ -278,10 +278,6 @@ class OpenCVConan(ConanFile):
     @property
     def _has_with_flatbuffers_option(self):
         return Version(self.version) >= "4.8.0"
-
-    @property
-    def _protobuf_version(self):
-        return "3.21.12"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -1070,7 +1066,7 @@ class OpenCVConan(ConanFile):
         # dnn module dependencies
         if self.options.get_safe("with_protobuf"):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
-            self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True, run=can_run(self))
+            self.requires("protobuf/3.21.12", transitive_libs=True, run=can_run(self))
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.250.0")
         # gapi module dependencies
@@ -1185,7 +1181,7 @@ class OpenCVConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf") and not can_run(self):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
