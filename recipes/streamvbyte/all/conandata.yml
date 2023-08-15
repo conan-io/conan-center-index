@@ -7,4 +7,3 @@ patches:
     - patch_file: "patches/1.0.0-0001-fix-cmake.patch"
       patch_description: "fix install destination"
       patch_type: "conan"
-
