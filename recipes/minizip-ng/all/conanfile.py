@@ -140,7 +140,7 @@ class MinizipNgConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
                                   "")
-        else:
+        elif Version(self.version) == "4.0.0":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties(${MINIZIP_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
                                   "")
