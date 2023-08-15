@@ -100,7 +100,7 @@ class OpenTelemetryCppConan(ConanFile):
             if Version(self.version) <= "1.4.1":
                 self.requires("opentelemetry-proto/0.11.0")
             else:
-                self.requires("opentelemetry-proto/0.20.0")
+                self.requires("opentelemetry-proto/1.0.0")
 
             if self.options.get_safe("with_otlp_grpc"):
                 self.requires("grpc/1.50.1")
@@ -117,7 +117,7 @@ class OpenTelemetryCppConan(ConanFile):
            self.options.with_elasticsearch or
            self.options.get_safe("with_otlp_http")
         ):
-            self.requires("libcurl/8.1.1")
+            self.requires("libcurl/8.2.1")
 
         if self.options.with_prometheus:
             self.requires("prometheus-cpp/1.1.0")
