@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -34,6 +36,13 @@ class LibE57FormatConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        compiler = str(self.settings.compiler)
+        compiler_version = Version(self.settings.compiler.version)
+        minimal_gcc_version = "11.0.0"
+
+        if compiler == "gcc" and compiler_version < Version(minimal_gcc_version):
+            raise ConanInvalidConfiguration(f"gcc {compiler_version} is not supported (use >= {minimal_gcc_version})")
+
         if self.options.shared:
             try:
                 del self.options.fPIC
