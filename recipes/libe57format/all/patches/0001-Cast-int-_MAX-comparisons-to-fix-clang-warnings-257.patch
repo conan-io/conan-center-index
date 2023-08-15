@@ -1,0 +1,59 @@
+From 507c98a229333995fd92b37e890c1c50f97fa91d Mon Sep 17 00:00:00 2001
+From: Andy Maloney <asmaloney@gmail.com>
+Date: Tue, 15 Aug 2023 11:02:53 -0400
+Subject: [PATCH] Cast <int>_MAX comparisons to fix clang warnings (#257)
+
+These should be safe because we aren't checking equality.
+
+Note that Apple's clang doesn't warn about these, but it looks like the official clang releases do.
+
+Fixes #256
+---
+ src/SourceDestBufferImpl.cpp | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/src/SourceDestBufferImpl.cpp b/src/SourceDestBufferImpl.cpp
+index b103414..c534e30 100644
+--- a/src/SourceDestBufferImpl.cpp
++++ b/src/SourceDestBufferImpl.cpp
+@@ -203,7 +203,7 @@ template <typename T> void SourceDestBufferImpl::_setNextReal( T inValue )
+          {
+             throw E57_EXCEPTION2( ErrorConversionRequired, "pathName=" + pathName_ );
+          }
+-         if ( inValue < INT32_MIN || INT32_MAX < inValue )
++         if ( inValue < INT32_MIN || ( inValue > static_cast<T>( INT32_MAX ) ) )
+          {
+             throw E57_EXCEPTION2( ErrorValueNotRepresentable,
+                                   "pathName=" + pathName_ + " value=" + toString( inValue ) );
+@@ -215,7 +215,7 @@ template <typename T> void SourceDestBufferImpl::_setNextReal( T inValue )
+          {
+             throw E57_EXCEPTION2( ErrorConversionRequired, "pathName=" + pathName_ );
+          }
+-         if ( inValue < UINT32_MIN || UINT32_MAX < inValue )
++         if ( inValue < UINT32_MIN || ( inValue > ( static_cast<T>( UINT32_MAX ) ) ) )
+          {
+             throw E57_EXCEPTION2( ErrorValueNotRepresentable,
+                                   "pathName=" + pathName_ + " value=" + toString( inValue ) );
+@@ -227,7 +227,7 @@ template <typename T> void SourceDestBufferImpl::_setNextReal( T inValue )
+          {
+             throw E57_EXCEPTION2( ErrorConversionRequired, "pathName=" + pathName_ );
+          }
+-         if ( inValue < INT64_MIN || INT64_MAX < inValue )
++         if ( inValue < INT64_MIN || ( inValue > ( static_cast<T>( INT64_MAX ) ) ) )
+          {
+             throw E57_EXCEPTION2( ErrorValueNotRepresentable,
+                                   "pathName=" + pathName_ + " value=" + toString( inValue ) );
+@@ -491,8 +491,9 @@ int64_t SourceDestBufferImpl::getNextInt64( double scale, double offset )
+       default:
+          throw E57_EXCEPTION2( ErrorInternal, "pathName=" + pathName_ );
+    }
++
+    /// Make sure that value is representable in an int64_t
+-   if ( doubleRawValue < INT64_MIN || INT64_MAX < doubleRawValue )
++   if ( doubleRawValue < INT64_MIN || ( doubleRawValue > ( static_cast<double>( INT64_MAX ) ) ) )
+    {
+       throw E57_EXCEPTION2( ErrorScaledValueNotRepresentable,
+                             "pathName=" + pathName_ + " value=" + toString( doubleRawValue ) );
+-- 
+2.41.0
+

@@ -16,3 +16,4 @@ patches:
     - patch_file: "patches/2.3.0-0001-fix-pic.patch"
   "3.0.2":
     - patch_file: "patches/3.0.1-0001-fix-pic-lto.patch"
+    - patch_file: "patches/0001-Cast-int-_MAX-comparisons-to-fix-clang-warnings-257.patch"
