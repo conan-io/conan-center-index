@@ -3,14 +3,13 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 
 required_conan_version = ">=1.53.0"
-
 
 class GperftoolsConan(ConanFile):
     name = "gperftools"
@@ -58,6 +57,10 @@ class GperftoolsConan(ConanFile):
         "tcmalloc_pagesize": None,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -96,6 +99,10 @@ class GperftoolsConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("enable_libunwind", False):
             self.requires("libunwind/1.6.2")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
