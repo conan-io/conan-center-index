@@ -58,12 +58,12 @@ class Exiv2Conan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
             self.requires("zlib/1.2.13")
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.5.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/8.2.1")
 
     def validate(self):
         if self.options.with_xmp == "external":
