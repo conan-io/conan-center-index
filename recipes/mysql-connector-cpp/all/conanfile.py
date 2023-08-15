@@ -83,7 +83,6 @@ class MysqlConnectorCPPRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_BUILD_TYPE"] = "Release"
         tc.cache_variables["WITH_JDBC"] = "ON"
         tc.cache_variables["WITHOUT_SERVER"] = "ON"
         if not self.options.shared:
