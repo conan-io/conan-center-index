@@ -137,7 +137,6 @@ class PremakeConan(ConanFile):
             for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
                 replace_in_file(self, vcxproj, "v142", "v143")
 
-
     def build(self):
         self._patch_sources()
         if is_msvc(self):
@@ -153,11 +152,11 @@ class PremakeConan(ConanFile):
         copy(self, "LICENSE.txt",
              dst=os.path.join(self.package_folder, "licenses"),
              src=self.source_folder)
-        copy(self, "*premake5*",
+        suffix = ".exe" if self.settings.os == "Windows" else ""
+        copy(self, f"*/premake5{suffix}",
              dst=os.path.join(self.package_folder, "bin"),
-             src=os.path.join(self.source_folder, "bin", self._gmake_config),
+             src=os.path.join(self.source_folder, "bin"),
              keep_path=False)
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
