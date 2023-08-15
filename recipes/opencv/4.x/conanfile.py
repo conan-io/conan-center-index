@@ -1438,7 +1438,7 @@ class OpenCVConan(ConanFile):
             tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
 
         # Extra modules
-        if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]):
+        if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]) or self.options.with_cuda:
             tc.variables["OPENCV_EXTRA_MODULES_PATH"] = self._extra_modules_folder.replace("\\", "/")
         tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
         for module in OPENCV_EXTRA_MODULES_OPTIONS:
