@@ -19,7 +19,7 @@ class VsgConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vulkanscenegraph.org"
-    topics = ("vulkan", "scenegraph", "graphics", "3d")
+    topics = ("vulkan", "scenegraph", "graphics", "3d", "VulkanSceneGraph")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
