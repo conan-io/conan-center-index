@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class VsgConan(ConanFile):
     name = "vsg"
     description = "VulkanSceneGraph (VSG), is a modern, cross platform, \
-                   high performance scene graph library \ 
+                   high performance scene graph library \
                    built upon Vulkan graphics/compute API. \
                    The software is written in C++17, \
                    and follows the CppCoreGuidelines and FOSS Best Practices."
