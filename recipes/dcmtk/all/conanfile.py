@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import can_run, cross_building, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy, rm
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
@@ -94,7 +94,7 @@ class DCMTKConan(ConanFile):
         return 11
 
     def validate(self):
-        if not cross_building(self) and self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if not (can_run(self) or cross_building(self)) and self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
 
