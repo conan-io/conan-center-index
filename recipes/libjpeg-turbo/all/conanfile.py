@@ -49,6 +49,9 @@ class LibjpegTurboConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "3.0.0":
+            del self.options.enable12bit
+            del self.options.mem_src_dst
 
     def configure(self):
         if self.options.shared:
@@ -56,22 +59,22 @@ class LibjpegTurboConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
-        if self.options.enable12bit:
+        if self.options.get_safe("enable12bit"):
             del self.options.java
             del self.options.turbojpeg
-        if self.options.enable12bit or self.settings.os == "Emscripten":
+        if self.options.get_safe("enable12bit") or self.settings.os == "Emscripten":
             del self.options.SIMD
-        if self.options.enable12bit or self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility:
+        if self.options.get_safe("enable12bit") or self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility:
             del self.options.arithmetic_encoder
             del self.options.arithmetic_decoder
         if self.options.libjpeg8_compatibility:
-            del self.options.mem_src_dst
+            self.options.rm_safe("mem_src_dst")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.options.enable12bit and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
+        if self.options.get_safe("enable12bit") and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
         if self.options.get_safe("java") and not self.options.shared:
             raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
@@ -107,10 +110,11 @@ class LibjpegTurboConan(ConanFile):
         tc.variables["WITH_ARITH_DEC"] = self._is_arithmetic_decoding_enabled
         tc.variables["WITH_JPEG7"] = self.options.libjpeg7_compatibility
         tc.variables["WITH_JPEG8"] = self.options.libjpeg8_compatibility
-        tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
         tc.variables["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
         tc.variables["WITH_JAVA"] = self.options.get_safe("java", False)
-        tc.variables["WITH_12BIT"] = self.options.enable12bit
+        if Version(self.version) < "3.0.0":
+            tc.variables["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
+            tc.variables["WITH_12BIT"] = self.options.enable12bit
         if is_msvc(self):
             tc.variables["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
         if Version(self.version) <= "2.1.0":
