@@ -1,4 +1,7 @@
 sources:
+  "0.1.17":
+    url: "https://github.com/awslabs/aws-checksums/archive/v0.1.17.tar.gz"
+    sha256: "83c1fbae826631361a529e9565e64a942c412baaec6b705ae5da3f056b97b958"
   "0.1.13":
     url: "https://github.com/awslabs/aws-checksums/archive/v0.1.13.tar.gz"
     sha256: "0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d"
@@ -14,5 +17,11 @@ sources:
 patches:
   "0.1.5":
     - patch_file: "patches/0001-use-PROJECT_SOURCE_DIR.patch"
+      patch_description: "use PROJECT_NAME instead of CMAKE_PROJECT_NAME"
+      patch_type: "conan"
     - patch_file: "patches/0002-disable-overriding-fPIC.patch"
+      patch_description: "disable overriding -fPIC"
+      patch_type: "conan"
     - patch_file: "patches/0003-disable-building-tests.patch"
+      patch_description: "build no tests"
+      patch_type: "conan"
