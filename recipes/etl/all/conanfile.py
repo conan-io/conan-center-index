@@ -60,7 +60,6 @@ class EmbeddedTemplateLibraryConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "etl")
-        self.cpp_info.set_property("cmake_target_name", "etl")
         self.cpp_info.set_property("cmake_target_name", "etl::etl")
 
         self.cpp_info.bindirs = []
