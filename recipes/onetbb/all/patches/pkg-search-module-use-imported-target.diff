@@ -1,0 +1,97 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 34a23d40..d569d57e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -100,6 +100,8 @@ option(TBB_NO_APPCONTAINER "Apply /APPCONTAINER:NO (for testing binaries for Win
+ option(TBB4PY_BUILD "Enable tbb4py build" OFF)
+ option(TBB_CPF "Enable preview features of the library" OFF)
+ option(TBB_FIND_PACKAGE "Enable search for external oneTBB using find_package instead of build from sources" OFF)
++option(TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH "Disable HWLOC automatic search by pkg-config tool" OFF)
++
+ 
+ if (NOT DEFINED BUILD_SHARED_LIBS)
+     set(BUILD_SHARED_LIBS ON)
+@@ -194,7 +196,7 @@ else()
+     if (NOT "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "mips")
+         add_subdirectory(src/tbbmalloc)
+         add_subdirectory(src/tbbmalloc_proxy)
+-        if (APPLE)
++        if (APPLE OR NOT BUILD_SHARED_LIBS)
+             message(STATUS "TBBBind build target is disabled due to unsupported environment")
+         else()
+             add_subdirectory(src/tbbbind)
+diff --git a/cmake/hwloc_detection.cmake b/cmake/hwloc_detection.cmake
+index f1740662..e1806a0f 100644
+--- a/cmake/hwloc_detection.cmake
++++ b/cmake/hwloc_detection.cmake
+@@ -45,11 +45,15 @@ endforeach()
+ 
+ unset(HWLOC_TARGET_NAME)
+ 
+-if (NOT HWLOC_TARGET_EXPLICITLY_DEFINED)
++if (NOT HWLOC_TARGET_EXPLICITLY_DEFINED AND
++    # No hwloc auto detection for cross compilation
++    NOT CMAKE_CROSSCOMPILING AND
++    NOT TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH
++)
+     find_package(PkgConfig QUIET)
+-    if (PKG_CONFIG_FOUND)
+-        pkg_search_module(HWLOC hwloc)
+-        if (HWLOC_FOUND)
++    if (PKG_CONFIG_FOUND AND NOT CMAKE_VERSION VERSION_LESS 3.6)
++        pkg_search_module(HWLOC hwloc IMPORTED_TARGET)
++        if (TARGET PkgConfig::HWLOC)
+             if (HWLOC_VERSION VERSION_LESS 2)
+                 set(TBBBIND_LIBRARY_NAME tbbbind)
+             elseif(HWLOC_VERSION VERSION_LESS 2.4)
+@@ -60,4 +64,3 @@ if (NOT HWLOC_TARGET_EXPLICITLY_DEFINED)
+         endif()
+     endif()
+ endif()
+-
+diff --git a/src/tbbbind/CMakeLists.txt b/src/tbbbind/CMakeLists.txt
+index da9dabfe..1a4c6ca0 100644
+--- a/src/tbbbind/CMakeLists.txt
++++ b/src/tbbbind/CMakeLists.txt
+@@ -18,12 +18,13 @@ endif()
+ set(CMAKE_SKIP_BUILD_RPATH TRUE)
+ 
+ function(tbbbind_build TBBBIND_NAME REQUIRED_HWLOC_TARGET)
+-    if (NOT TARGET ${REQUIRED_HWLOC_TARGET} AND NOT DEFINED HWLOC_LIBRARIES)
++    if (NOT TARGET ${REQUIRED_HWLOC_TARGET})
+         message(STATUS "HWLOC target ${REQUIRED_HWLOC_TARGET} doesn't exist."
+                        " The ${TBBBIND_NAME} target cannot be created")
+         return()
+     endif()
+     add_library(${TBBBIND_NAME} tbb_bind.cpp)
++
+     add_library(TBB::${TBBBIND_NAME} ALIAS ${TBBBIND_NAME})
+ 
+     target_compile_definitions(${TBBBIND_NAME}
+@@ -64,14 +65,12 @@ function(tbbbind_build TBBBIND_NAME REQUIRED_HWLOC_TARGET)
+             PRIVATE
+             ${TBB_LIB_LINK_FLAGS}
+             ${TBB_COMMON_LINK_FLAGS}
+-            ${HWLOC_LIBRARY_DIRS} # pkg-config defined
+         )
+     else()
+         target_link_libraries(${TBBBIND_NAME}
+             PRIVATE
+             ${TBB_LIB_LINK_FLAGS}
+             ${TBB_COMMON_LINK_FLAGS}
+-            ${HWLOC_LIBRARY_DIRS} # pkg-config defined
+         )
+     endif()
+ 
+@@ -90,9 +89,9 @@ function(tbbbind_build TBBBIND_NAME REQUIRED_HWLOC_TARGET)
+     endif()
+ endfunction()
+ 
+-if (NOT DEFINED HWLOC_TARGET_EXPLICITLY_DEFINED AND DEFINED HWLOC_LIBRARIES)
++if (NOT DEFINED HWLOC_TARGET_EXPLICITLY_DEFINED AND TARGET PkgConfig::HWLOC)
+     message(STATUS "The ${TBBBIND_LIBRARY_NAME} target will be configured using the HWLOC ${HWLOC_VERSION}")
+-    tbbbind_build(${TBBBIND_LIBRARY_NAME} ${HWLOC_LIBRARIES})
++    tbbbind_build(${TBBBIND_LIBRARY_NAME} PkgConfig::HWLOC)
+ else()
+     tbbbind_build(tbbbind     HWLOC::hwloc_1_11)
+     tbbbind_build(tbbbind_2_0 HWLOC::hwloc_2   )

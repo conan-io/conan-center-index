@@ -245,6 +245,9 @@ class QtConan(ConanFile):
         if self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, or to libc++")
 
+        if self.settings.os == "Macos" and self.dependencies["double-conversion"].options.shared:
+            raise ConanInvalidConfiguration("Test recipe fails because of Macos' SIP. Contributions are welcome.")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
@@ -291,6 +294,9 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
+        if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
+            raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -305,7 +311,7 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.3")
+            self.requires("glib/2.77.0")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -315,7 +321,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/73.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/7.3.0")
+            self.requires("harfbuzz/8.0.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.5")
@@ -370,7 +376,7 @@ class QtConan(ConanFile):
         self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
@@ -1269,6 +1275,19 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
+
+        if self.options.get_safe("qtspeech"):
+            _create_module("TextToSpeech", [])
+
+        if self.options.get_safe("qthttpserver"):
+            http_server_deps = ["Core", "Network"]
+            if self.options.get_safe("qtwebsockets"):
+                http_server_deps.append("WebSockets")
+            _create_module("HttpServer", http_server_deps)
+
+        if self.options.get_safe("qtgrpc"):
+            _create_module("Protobuf", [])
+            _create_module("Grpc", ["Core", "Protobuf", "Network"])
 
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
