@@ -208,6 +208,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
         tc.variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
+        tc.variables["OTELCPP_PROTO_PATH"] = self._proto_root
 
         if Version(self.version) < "1.10":
             tc.variables["WITH_OTLP"] = self.options.with_otlp
@@ -226,8 +227,12 @@ class OpenTelemetryCppConan(ConanFile):
                 env.append_path("LD_LIBRARY_PATH", os.path.join(self.dependencies["protobuf"].package_folder, "lib"))
             env.vars(self).save_script("conanbuild_loadpath")
 
+    @property
+    def _proto_root(self):
+        return self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
+
     def _patch_sources(self):
-        protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
+        protos_path = self._proto_root
         protos_cmake_path = os.path.join(
             self.source_folder,
             "cmake",
