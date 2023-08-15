@@ -92,7 +92,7 @@ class GrpcConan(ConanFile):
             self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.0")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("re2/20230301")
+        self.requires("re2/20230701")
         self.requires("zlib/1.2.13")
         self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
