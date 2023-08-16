@@ -20,6 +20,7 @@ class OpenvinoConan(ConanFile):
               "speech-recognition", "yolo", "performance-boost", "diffusion-models", "recomendation-system", "stable-diffusion",
               "generative-ai", "llm-inference", "optimize-ai", "deploy-ai")
     package_id_non_embed_mode = "patch_mode"
+    short_paths = True
 
     # Binary configuration
     settings = "os", "arch", "compiler", "build_type"
@@ -126,14 +127,16 @@ class OpenvinoConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self._protobuf_required:
             # static build + TF FE requires full protobuf, otherwise we can use lite version
-            self.options['protobuf'].lite = True # self.options.shared or not self.options.enable_tf_frontend
+            # self.options['protobuf'].lite = True # self.options.shared or not self.options.enable_tf_frontend
             if self.options.shared:
                 # we need to use static protobuf to overcome potential issues with multiple registrations inside
                 # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
-                self.options['protobuf'].shared = False
+                # self.options['protobuf'].shared = False
+                pass
         if self.options.enable_tf_lite_frontend:
             # only flatc is required for TF Lite FE plus headers
-            self.options['flatbuffers'].header_only = True
+            # self.options['flatbuffers'].header_only = True
+            pass
 
     def build_requirements(self):
         if self._target_arm:
