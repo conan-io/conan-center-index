@@ -1,0 +1,9 @@
+sources:
+  3.1.2:
+    url:
+      - "https://github.com/quictls/openssl/archive/refs/tags/openssl-3.1.2-quic1.tar.gz"
+    sha256: 1651412ec136a693fcc84c77df664ca0dc0495eab2785afa2c7ba064a00fb1b6
+  3.0.10:
+    url:
+      - "https://github.com/quictls/openssl/archive/refs/tags/openssl-3.0.10-quic1.tar.gz"
+    sha256: 75a3cbfe414fe7a0d4cfe9919e2a82191e4bc4c4c41b6f0bb18c02a77637d336

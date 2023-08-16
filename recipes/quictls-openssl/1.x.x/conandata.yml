@@ -1,0 +1,10 @@
+sources:
+  1.1.1v:
+    sha256: 6f93347cbbd599cc9b5cf1d170ceee68c4ed1a4ac366e946364f722742f73070
+    url:
+      - " https://github.com/quictls/openssl/archive/refs/tags/OpenSSL_1_1_1v-quic1.tar.gz"
+patches:
+  1.1.1v:
+    - patch_file: patches/1.1.1-tvos-watchos.patch
+      patch_description: "TVOS and WatchOS don't like fork()"
+      patch_type: "portability"
