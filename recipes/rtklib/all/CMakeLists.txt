@@ -11,6 +11,11 @@ else()
     add_compile_options(/W4 /O2 /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+if (APPLE)
+    # Allow extern functions (showmsg(), settspan() and settime()) to be found at runtime
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
+endif()
+
 file(GLOB_RECURSE RTKLIB_SOURCES "src/*.c")
 
 add_library(rtklib ${RTKLIB_SOURCES})
