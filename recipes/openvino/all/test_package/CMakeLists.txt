@@ -1,8 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-# TODO
-find_package(OpenVINO REQUIRED COMPONENTS Runtime ONNX TensorFlow TensorFlowLite Paddle PyTroch)
+macro(add_component def comp)
+    if(${def})
+        list(APPEND OpenVINO_COMPONENTS ${comp})
+    endif()
+endmacro()
+
+add_component(ENABLE_ONNX_FRONTEND ONNX)
+add_component(ENABLE_PADDLE_FRONTEND Paddle)
+add_component(ENABLE_TF_FRONTEND TensorFlow)
+add_component(ENABLE_TF_LITE_FRONTEND TensorFlowLite)
+add_component(ENABLE_PYTORCH_FRONTEND PyTroch)
+
+find_package(OpenVINO REQUIRED COMPONENTS Runtime ${OpenVINO_COMPONENTS})
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE openvino::runtime)

@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir
 import os
 
-required_conan_version = ">=1.60"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 class OpenvinoConan(ConanFile):
     name = "openvino"
@@ -147,11 +147,10 @@ class OpenvinoConan(ConanFile):
             if self.options.enable_tf_lite_frontend:
                 self.tool_requires("flatbuffers/<host_version>")
         if not self.options.shared:
-            # static libraries build requires higher cmake version because of ALIASes on imported targets
             self.tool_requires("cmake/[>=3.18]")
 
     def requirements(self):
-        self.requires("onetbb/[>=2021.2.1,<2022]")
+        self.requires("onetbb/2021.3.0")
         self.requires("pugixml/[>=1.10]")
         if self._target_x86_64:
             self.requires("xbyak/6.62")
@@ -209,7 +208,7 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_SYSTEM_FLATBUFFERS"] = True
         # misc
         if self._preprocessing_available:
-            toolchain.cache_variables["ENABLE_GAPI_REPROCESSING"] = True
+            toolchain.cache_variables["ENABLE_GAPI_PREPROCESSING"] = True
         toolchain.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         toolchain.cache_variables["CPACK_GENERATOR"] = "CONAN"
         toolchain.cache_variables["ENABLE_PROFILING_ITT"] = False

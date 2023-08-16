@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -16,6 +16,10 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
+        deps = CMakeDeps(self)
+        # deps.check_components_exist = True
+        deps.generate()
+
         tc = CMakeToolchain(self)
         # HW plugins
         tc.variables["ENABLE_INTEL_CPU"] = self.dependencies[self.tested_reference_str].options.enable_cpu
