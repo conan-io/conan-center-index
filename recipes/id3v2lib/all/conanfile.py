@@ -8,7 +8,7 @@ import os
 required_conan_version = ">=1.53.0"
 
 
-class LibwebmConan(ConanFile):
+class Id3v2libConan(ConanFile):
     name = "id3v2lib"
     description = "id3v2lib is a library written in C to read and edit id3 tags from mp3 files."
     topics = ("conan", "id3", "tags", "mp3", "container", "media", "audio")

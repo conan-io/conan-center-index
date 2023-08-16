@@ -25,8 +25,8 @@ class GlazeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16",
-            "msvc": "192",
+            "Visual Studio": "17" if Version(self.version) >= "1.3.3" else "16",
+            "msvc": "193" if Version(self.version) >= "1.3.3" else "192",
             "gcc": "12",
             "clang": "12" if Version(self.version) > "1.0.0" else "13",
             "apple-clang": "13.1",
@@ -44,7 +44,7 @@ class GlazeConan(ConanFile):
             self.requires("frozen/1.1.1")
             self.requires("nanorange/cci.20200706")
         if Version(self.version) < "0.2.3":
-            self.requires("fast_float/5.0.0")
+            self.requires("fast_float/5.2.0")
         if "0.1.5" <= Version(self.version) < "0.2.3":
             self.requires("dragonbox/1.1.3")
 
