@@ -1,5 +1,6 @@
-#include <iostream>
 #include <cor3ntin/rangesnext/enumerate.hpp>
+
+#include <iostream>
 
 namespace rangesnext = cor3ntin::rangesnext;
 
@@ -12,11 +13,11 @@ bool test_enumerate_with(RangeT &&range) {
 
     bool success = true;
     for (auto &&[i, v] : enumerated_range) {
-    	std::cout << i << " - " << v << "\n";
+        std::cout << i << " - " << v << "\n";
 
         success = (i == idx_ref++) && (v == *it_ref++);
         if (success == false) {
-        	return false;
+            return false;
         }
     }
 
