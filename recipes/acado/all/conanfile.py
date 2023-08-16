@@ -30,6 +30,7 @@ class AcadoConan(ConanFile):
         "fPIC": True,
         "codegen_only": True,
     }
+    short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -142,6 +143,9 @@ class AcadoConan(ConanFile):
 
         self.cpp_info.includedirs.append(os.path.join("include", "acado"))
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "qpoases.cmake")])
         self.cpp_info.includedirs += [
@@ -159,3 +163,5 @@ class AcadoConan(ConanFile):
         self.env_info.ACADO_TEMPLATE_PATHS = acado_template_paths
         self.cpp_info.names["cmake_find_package"] = "ACADO"
         self.cpp_info.names["cmake_find_package_multi"] = "ACADO"
+        self.cpp_info.build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "qpoases.cmake"))
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(os.path.join("lib", "cmake", "qpoases.cmake"))
