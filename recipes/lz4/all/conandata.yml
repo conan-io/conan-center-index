@@ -12,7 +12,7 @@ patches:
   "1.9.4":
     - patch_file: "patches/0004-Added-namespace-declaration-for-xxhash-in-CMake.patch"
       patch_description: "Added namespace/prefix for xxHash functions by altering CMakeLists.txt"
-      patch_type: official 
+      patch_type: official
       patch_source: "https://github.com/lz4/lz4/pull/1258"
   "1.9.3":
     - patch_file: "patches/0003-cmake-minimum-required-first-1.9.3.patch"
