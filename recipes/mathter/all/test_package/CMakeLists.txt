@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(TestPackage CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(mathter REQUIRED CONFIG)
 
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
-target_compile_features(test_package PUBLIC cxx_std_17)
+target_link_libraries(test_package PRIVATE mathter::mathter)
+target_compile_features(test_package PRIVATE cxx_std_17)
