@@ -62,7 +62,7 @@ class CzmqConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zeromq/4.3.4")
+        self.requires("zeromq/4.3.4", transitive_headers=True)
         if self.options.get_safe("with_libmicrohttpd"):
             self.requires("libmicrohttpd/0.9.75")
         if self.options.get_safe("with_libcurl"):
@@ -70,7 +70,7 @@ class CzmqConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.get_safe("with_libuuid"):
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/252.4")
 
