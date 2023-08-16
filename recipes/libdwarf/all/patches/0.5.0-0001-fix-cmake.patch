@@ -6,7 +6,7 @@ index 4f58f43..69e0238 100644
  
  ### cmake provides no way to guarantee uint32_t present.
  ### configure does guarantee that.
-+find_package(libelf REQUIRED)
++find_package(libelf)
  if(HAVE_STDINT_H)
    check_c_source_compiles("
    #include <stdint.h>
