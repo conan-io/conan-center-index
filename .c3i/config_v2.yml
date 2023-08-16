@@ -3,7 +3,15 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.6
+  version: 2.0.9
+  backup_sources:
+    upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
+    download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
+
+  globalconf:
+    - 'core.sources:download_cache={{ CONFIG_HOME }}/backup_sources_cache'
+    - 'core.sources:download_urls=["{{ ARTI_DOWNLOAD_URL }}", "origin"]'
+    - 'core.sources:upload_url={{ ARTI_UPLOAD_URL }}'
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -49,6 +57,10 @@ tasks:
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
     report_issue_append: false
+  validate_infrastructure:
+    macos_executors: 2
+    windows_executors: 4
+    open_docs_pull-request: false
 
 configurations:
   - id: linux-gcc
@@ -152,3 +164,12 @@ node_labels:
         default: "linux_gcc_${compiler.version}_ubuntu16.04"
       "clang":
         default: "linux_clang_${compiler.version}_ubuntu16.04"
+
+
+pod_size:
+  # Map with references that need special memory resources to compile.
+  #   - Can be only by name or by name/version.
+  #   - name/version notation takes preference over the name only one
+  #   - Both notations can be combined for the same reference name
+  xlarge:
+    - "pcl"
