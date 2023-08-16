@@ -3,13 +3,13 @@ import shutil
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.files import copy, mkdir, rm
+from conan.tools.files import mkdir, rm
 from conan.tools.layout import basic_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
+    generators = "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
 
     _targets = ("c64", "apple2")
