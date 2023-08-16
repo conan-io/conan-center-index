@@ -190,9 +190,6 @@ class OneTBBConan(ConanFile):
             tc.extra_cflags.append("-mrtm")
             tc.extra_cxxflags.append("-mrtm")
 
-        # Fixes 'ar: two different operation options specified' due to duplicate -m64 flags
-        tc.arch_flag = ""
-
         tc.generate()
 
         if self.settings.compiler == "intel-cc":
@@ -204,6 +201,9 @@ class OneTBBConan(ConanFile):
             vcvars.generate()
 
     def _patch_sources(self):
+        # Fix LDFLAGS getting incorrectly applied to ar command
+        linux_include = os.path.join(self.source_folder, "build", "common_rules.inc")
+        replace_in_file(self, linux_include, "LIB_LINK_FLAGS += $(LDFLAGS)", "")
         # Get the version of the current compiler instead of gcc
         linux_include = os.path.join(self.source_folder, "build", "linux.inc")
         replace_in_file(self, linux_include, "shell gcc", "shell $(CC)")
