@@ -51,17 +51,28 @@ class DataFrameConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "20" if Version(self.version) >= "2.1.0" else "17"
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10.0",
-        }
+            "17": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "6",
+                "apple-clang": "10.0",
+            },
+            "20": {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "13",
+            },
+        }.get(self._min_cppstd, {})
+
+        return {}
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -152,7 +163,7 @@ class DataFrameConan(ConanFile):
             if Version(self.version) < "1.20.0" and not self.options.shared:
                 # weird but required in those versions of dataframe
                 self.cpp_info.defines.append("LIBRARY_EXPORTS")
-        if "1.20.0" <= Version(self.version) < "2.0.0" and self.options.shared:
+        if Version(self.version) >= "1.20.0" and self.options.shared:
             self.cpp_info.defines.append("HMDF_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed

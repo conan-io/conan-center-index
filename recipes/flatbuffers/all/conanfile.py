@@ -60,7 +60,9 @@ class FlatbuffersConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        if Version(self.version) >= "2.0.7":
+        # since 23.3.3 version, flatbuffers cmake scripts were refactored to use cmake 3.8 version
+        # see https://github.com/google/flatbuffers/pull/7801
+        if Version(self.version) >= "2.0.7" and Version(self.version) < "23.3.3":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
@@ -116,7 +118,7 @@ class FlatbuffersConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))

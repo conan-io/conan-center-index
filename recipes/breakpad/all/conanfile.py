@@ -31,7 +31,7 @@ class BreakpadConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("linux-syscall-support/cci.20200813")
+        self.requires("linux-syscall-support/cci.20200813", transitive_headers=True)
 
     def validate(self):
         if self.settings.os != "Linux":

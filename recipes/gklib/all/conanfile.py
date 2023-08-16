@@ -1,8 +1,11 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches
+from os import path
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class GKlibConan(ConanFile):
@@ -13,6 +16,7 @@ class GKlibConan(ConanFile):
     description = "A library of various helper routines and frameworks" \
                   " used by many of the lab's software"
     topics = ("karypislab")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,29 +26,13 @@ class GKlibConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,45 +40,47 @@ class GKlibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.options.shared and self._is_msvc:
+        if self.options.shared and is_msvc(self):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} shared not supported with Visual Studio")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["ASSERT"] = self.settings.build_type == "Debug"
-            self._cmake.definitions["ASSERT2"] = self.settings.build_type == "Debug"
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        tc.variables["ASSERT"] = self.settings.build_type == "Debug"
+        tc.variables["ASSERT2"] = self.settings.build_type == "Debug"
+
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE.txt", src=self.source_folder,
+             dst=path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.libs = ["GKlib"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-        if self._is_msvc or self._is_mingw:
+        if is_msvc(self) or self._is_mingw:
             self.cpp_info.defines.append("USE_GKREGEX")
-        if self._is_msvc:
+        if is_msvc(self):
             self.cpp_info.defines.append("__thread=__declspec(thread)")
