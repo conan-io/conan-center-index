@@ -146,6 +146,9 @@ class OpenvinoConan(ConanFile):
                 self.tool_requires("protobuf/<host_version>")
             if self.options.enable_tf_lite_frontend:
                 self.tool_requires("flatbuffers/<host_version>")
+        if not self.options.shared:
+            # static libraries build requires higher cmake version because of ALIASes on imported targets
+            self.tool_requires("cmake/[>=3.18]")
 
     def requirements(self):
         self.requires("onetbb/[>=2021.2.1,<2022]")
