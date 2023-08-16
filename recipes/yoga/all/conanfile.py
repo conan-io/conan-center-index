@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 import os
 
 
@@ -31,7 +30,6 @@ class YogaConan(ConanFile):
     def _min_cppstd(self):
         return 14
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -54,12 +52,7 @@ class YogaConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    # def requirements(self):
-    #     # prefer self.requires method instead of requires attribute
-    #     self.requires("dependency/0.8.1")
-
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
@@ -89,14 +82,7 @@ class YogaConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        # rmdir(self, os.path.join(self.package_folder, "share"))
-        # rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        # rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        # rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["yogacore"]
