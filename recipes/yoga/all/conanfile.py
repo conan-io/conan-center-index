@@ -18,9 +18,11 @@ class YogaConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
 
@@ -51,6 +53,8 @@ class YogaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration("Building in shared mode is not supported!")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 191)
