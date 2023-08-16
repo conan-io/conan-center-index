@@ -88,6 +88,8 @@ class vvencRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.variables["VVENC_ENABLE_LINK_TIME_OPT"] = False
+        tc.cache_variables["VVENC_ENABLE_LINK_TIME_OPT"] = False
         tc.generate()
 
     def build(self):
