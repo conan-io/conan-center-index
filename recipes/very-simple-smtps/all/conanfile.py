@@ -54,7 +54,7 @@ class VerySimpleSmtpsConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "9",
+            "gcc": "10",
             "clang": "9",
             "apple-clang": "10",
         }
@@ -101,7 +101,7 @@ class VerySimpleSmtpsConan(ConanFile):
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/1.2.0")
         # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
@@ -128,8 +128,8 @@ class VerySimpleSmtpsConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
+        # rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
+        # replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
 
     def build(self):
         self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
