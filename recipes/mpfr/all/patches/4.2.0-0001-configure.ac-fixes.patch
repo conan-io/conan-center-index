@@ -1,0 +1,10 @@
+--- configure.ac
++++ configure.ac
+@@ -44,6 +44,7 @@
+ dnl as it could cause confusion. But let's keep AC_CANONICAL_HOST here,
+ dnl since this may be a better place than later.
+ AC_CANONICAL_HOST
++AC_CANONICAL_TARGET
+
+ dnl Older Automake versions than 1.13 may still be supported, but no longer
+ dnl tested, and many things have changed in 1.13. Moreover the INSTALL file
