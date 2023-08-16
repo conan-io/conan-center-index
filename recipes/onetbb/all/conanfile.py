@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.53.0 <2.0 || >=2.0.8"
 
 
 class OneTBBConan(ConanFile):
