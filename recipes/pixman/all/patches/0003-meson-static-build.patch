@@ -1,0 +1,28 @@
+From 48d5df1f3772a08a929dcb3b2fe4d7b1853223c9 Mon Sep 17 00:00:00 2001
+From: Benjamin Gilbert <bgilbert@backtick.net>
+Date: Thu, 5 Jan 2023 20:29:00 -0500
+Subject: [PATCH] meson: don't dllexport when built as static library
+
+If a static Pixman is linked with a dynamic library, Pixman shouldn't
+export its own symbols into the latter's ABI.
+---
+ pixman/meson.build | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/pixman/meson.build b/pixman/meson.build
+index 5dce870..62ec66b 100644
+--- a/pixman/meson.build
++++ b/pixman/meson.build
+@@ -31,7 +31,8 @@ version_h = configure_file(
+ )
+ 
+ libpixman_extra_cargs = []
+-if cc.has_function_attribute('dllexport')
++default_library = get_option('default_library')
++if default_library != 'static' and cc.has_function_attribute('dllexport')
+   libpixman_extra_cargs = ['-DPIXMAN_API=__declspec(dllexport)']
+ endif
+ 
+-- 
+GitLab
+
