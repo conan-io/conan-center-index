@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
 from conan.tools.files import mkdir
+from conan.tools.scm import Version
 import os
 
 
@@ -10,6 +11,7 @@ class TestPackageV1Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["HAS_PROXY"] = Version(self.deps_cpp_info["sentry-crashpad"].version) > "0.6.2"
         cmake.configure()
         cmake.build()
 
