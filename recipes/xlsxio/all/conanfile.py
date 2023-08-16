@@ -113,7 +113,11 @@ class XlsxioConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "xlsxio")
         self.cpp_info.set_property("pkg_config_name", "xlsxio")
 
-        ziplib = "libzip::libzip" if self.options.with_libzip else "minizip-ng::minizip-ng"
+        ziplib = "minizip::minizip"
+        if self.options.with_libzip:
+            ziplib = "libzip::libzip"
+        elif self.options.get_safe("with_minizip_ng"):
+            ziplib = "minizip-ng::minizip-ng"
 
         xlsxio_macro = "BUILD_XLSXIO_SHARED" if self.options.shared else "BUILD_XLSXIO_STATIC"
 
