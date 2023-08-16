@@ -1,4 +1,7 @@
 sources:
+  "23.08.00":
+    url: "https://github.com/rapidsai/rmm/archive/refs/tags/v23.08.00.tar.gz"
+    sha256: "5bcea99a99539b9b4af0aeec7eb9f05b56ed81d439fea721f107616cc37ff640"
   "23.06.00":
     url: "https://github.com/rapidsai/rmm/archive/refs/tags/v23.06.00.tar.gz"
     sha256: "3dade75a6ba21041e47493a6514513aa01d40e19bba500f5e648e399744e1a24"
