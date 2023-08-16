@@ -91,7 +91,7 @@ class GrpcConan(ConanFile):
             else:
                 self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/20230125.2", transitive_headers=True, transitive_libs=True)
+            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("re2/20230301")
