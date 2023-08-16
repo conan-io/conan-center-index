@@ -15,14 +15,12 @@ class YogaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://yogalayout.com/"
     topics = ("layout engine", "flexbox")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
