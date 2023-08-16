@@ -127,7 +127,7 @@ class OpenCVConan(ConanFile):
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
-        "with_jpeg2000": [False, "jasper", "openjpeg"],
+        "with_jpeg2000": [False, "jasper", "openjpeg", "openjpeg_embedded"],
         "with_openexr": [True, False],
         "with_webp": [True, False],
         "with_gdal": [True, False],
@@ -182,7 +182,7 @@ class OpenCVConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
-        "with_jpeg2000": "jasper",
+        "with_jpeg2000": "openjpeg_embedded",
         "with_openexr": True,
         "with_webp": True,
         "with_gdal": False,
@@ -307,7 +307,7 @@ class OpenCVConan(ConanFile):
     def _opencv_modules(self):
         def imageformats_deps():
             components = []
-            if self.options.get_safe("with_jpeg2000"):
+            if self.options.get_safe("with_jpeg2000") in ("jasper", "openjpeg"):
                 components.append("{0}::{0}".format(self.options.with_jpeg2000))
             if self.options.get_safe("with_png"):
                 components.append("libpng::libpng")
@@ -1303,7 +1303,7 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_TIFF"] = self.options.get_safe("with_tiff", False)
         if self._has_with_jpeg2000_option:
             tc.variables["WITH_JASPER"] = self.options.get_safe("with_jpeg2000") == "jasper"
-            tc.variables["WITH_OPENJPEG"] = self.options.get_safe("with_jpeg2000") == "openjpeg"
+            tc.variables["WITH_OPENJPEG"] = self.options.get_safe("with_jpeg2000") in ("openjpeg", "openjpeg_embedded")
         tc.variables["WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
         tc.variables["WITH_GDAL"] = self.options.get_safe("with_gdal", False)
         tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
@@ -1355,6 +1355,8 @@ class OpenCVConan(ConanFile):
             tc.variables["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
             tc.variables["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
             tc.variables["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
+        elif self.options.get_safe("with_jpeg2000") == "openjpeg_embedded":
+            tc.variables["BUILD_OPENJPEG"] = True
 
         tc.variables["WITH_CUDA"] = self.options.with_cuda
         if self.options.with_cuda:
