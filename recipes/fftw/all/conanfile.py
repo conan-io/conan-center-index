@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.54.0"
 
 
 class FFTWConan(ConanFile):
@@ -15,6 +15,7 @@ class FFTWConan(ConanFile):
     license = "GPL-2.0"
     topics = ("fftw", "dft", "dct", "dst")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,8 +37,7 @@ class FFTWConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,17 +45,14 @@ class FFTWConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if not self.options.threads:
             del self.options.combinedthreads
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -64,12 +61,8 @@ class FFTWConan(ConanFile):
             if self.options.threads and not self.options.combinedthreads:
                 raise ConanInvalidConfiguration("Shared fftw with threads and not combinedthreads can't be built on Windows")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -83,8 +76,6 @@ class FFTWConan(ConanFile):
         tc.variables["ENABLE_SSE2"] = self.options.simd == "sse2"
         tc.variables["ENABLE_AVX"] = self.options.simd == "avx"
         tc.variables["ENABLE_AVX2"] = self.options.simd == "avx2"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -109,7 +100,7 @@ class FFTWConan(ConanFile):
         lib_name = "fftw3" + prec_suffix
 
         self.cpp_info.set_property("cmake_file_name", cmake_config_name)
-        self.cpp_info.set_property("cmake_target_name", "{}::{}".format(cmake_namespace, cmake_target_name))
+        self.cpp_info.set_property("cmake_target_name", f"{cmake_namespace}::{cmake_target_name}")
         self.cpp_info.set_property("pkg_config_name", pkgconfig_name)
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* & pkg_config generators removed
@@ -130,7 +121,7 @@ class FFTWConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
         self.cpp_info.components["fftwlib"].names["cmake_find_package"] = cmake_target_name
         self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = cmake_target_name
-        self.cpp_info.components["fftwlib"].set_property("cmake_target_name", "{}::{}".format(cmake_namespace, cmake_target_name))
+        self.cpp_info.components["fftwlib"].set_property("cmake_target_name", f"{cmake_namespace}::{cmake_target_name}")
         self.cpp_info.components["fftwlib"].set_property("pkg_config_name", pkgconfig_name)
 
     @property

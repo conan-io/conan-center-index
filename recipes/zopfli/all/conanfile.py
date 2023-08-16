@@ -1,9 +1,10 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class ZopfliConan(ConanFile):
@@ -33,7 +34,10 @@ class ZopfliConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -82,14 +86,7 @@ class ZopfliConan(ConanFile):
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
         self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Zopfli"
-        self.cpp_info.names["cmake_find_package_multi"] = "Zopfli"
-        self.cpp_info.components["libzopfli"].names["cmake_find_package"] = "libzopfli"
-        self.cpp_info.components["libzopfli"].names["cmake_find_package_multi"] = "libzopfli"
-        self.cpp_info.components["libzopflipng"].names["cmake_find_package"] = "libzopflipng"
-        self.cpp_info.components["libzopflipng"].names["cmake_find_package_multi"] = "libzopflipng"
+        if Version(conan_version).major < 2:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.cpp_info.names["cmake_find_package"] = "Zopfli"
+            self.cpp_info.names["cmake_find_package_multi"] = "Zopfli"

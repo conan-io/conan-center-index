@@ -36,7 +36,7 @@ class NSSConan(ConanFile):
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
         if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/3.39.3")
+            self.build_requires("sqlite3/3.41.2")
 
     def configure(self):
         self.options["nspr"].shared = True
@@ -49,8 +49,8 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.35")
-        self.requires("sqlite3/3.39.3")
-        self.requires("zlib/1.2.12")
+        self.requires("sqlite3/3.41.2")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if not self.options.shared:
@@ -63,9 +63,6 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
-        if Version(self.version) >= "3.83":
-            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 11:
-                raise ConanInvalidConfiguration("nss requires at least gcc 11.")
         if Version(self.version) < "3.74":
             if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
                 raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")

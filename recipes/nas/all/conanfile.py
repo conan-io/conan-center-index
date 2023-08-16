@@ -1,8 +1,14 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.layout import basic_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy
+from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 import os
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.54.0"
 
 
 class NasRecipe(ConanFile):
@@ -22,51 +28,59 @@ class NasRecipe(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("Recipe supports Linux only")
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def requirements(self):
         self.requires("xorg/system")
 
     def build_requirements(self):
-        self.build_requires("bison/3.7.1")
-        self.build_requires("flex/2.6.4")
-        self.build_requires("imake/1.0.8")
-        self.build_requires("xorg-cf-files/1.0.7")
-        self.build_requires("xorg-makedepend/1.0.6")
-        self.build_requires("xorg-gccmakedep/1.0.3")
+        self.tool_requires("bison/3.7.1")
+        self.tool_requires("flex/2.6.4")
+        self.tool_requires("imake/1.0.8")
+        self.tool_requires("xorg-cf-files/1.0.7")
+        self.tool_requires("xorg-makedepend/1.0.6")
+        self.tool_requires("xorg-gccmakedep/1.0.3")
+        self.tool_requires("gnu-config/cci.20210814")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0], destination=self._source_subfolder, strip_root=True)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        get(self, **self.conan_data["sources"][self.version][0],  strip_root=True)
+        # This library does not come with a License file by itself, package it from an external source
+        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.libs = []
-        return autotools
+    def generate(self):
+        autotools = AutotoolsToolchain(self)
+        autotools.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
+
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
     @property
     def _imake_irulesrc(self):
-        return self._user_info_build["xorg-cf-files"].CONFIG_PATH
+        return self.conf.get("user.xorg-cf-files:config-path")
 
     @property
     def _imake_defines(self):
@@ -77,36 +91,49 @@ class NasRecipe(ConanFile):
         return ["IRULESRC={}".format(self._imake_irulesrc), "IMAKE_DEFINES={}".format(self._imake_defines)]
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "server", "dia", "main.c"),
-                              "\nFILE *yyin", "\nextern FILE *yyin")
-        with tools.chdir(self._source_subfolder):
-            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
-            autotools = self._configure_autotools()
-            autotools.make(target="World",args=["-j1"] + self._imake_make_args)
+        apply_conandata_patches(self)
+
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                config_folder = os.path.join(self.source_folder, "config")
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=config_folder)
+
+        with chdir(self, self.source_folder):
+            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), env="conanbuild")
+            autotools = Autotools(self)
+            # j1 avoids some errors while trying to run this target
+            autotools.make(target="World", args=["-j1"] + self._imake_make_args)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses")
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            tmp_install = os.path.join(self.build_folder, "prefix")
-            install_args = [
-                "DESTDIR={}".format(tmp_install),
-                "INCDIR=/include",
-                "ETCDIR=/etc",
-                "USRLIBDIR=/lib",
-                "BINDIR=/bin",
-            ] + self._imake_make_args
+        tmp_install = os.path.join(self.build_folder, "prefix")
+        self.output.warning(tmp_install)
+        install_args = [
+                        "DESTDIR={}".format(tmp_install),
+                        "INCDIR=/include",
+                        "ETCDIR=/etc",
+                        "USRLIBDIR=/lib",
+                        "BINDIR=/bin",
+                    ] + self._imake_make_args
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            # j1 avoids some errors while trying to install
             autotools.install(args=["-j1"] + install_args)
 
-        self.copy("*", src=os.path.join(tmp_install, "bin"), dst="bin")
-        self.copy("*", src=os.path.join(tmp_install, "include"), dst=os.path.join("include", "audio"))
-        self.copy("*", src=os.path.join(tmp_install, "lib"), dst="lib")
+        copy(self, "*", src=os.path.join(tmp_install, "bin"), dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "*.h", src=os.path.join(tmp_install, "include"), dst=os.path.join(self.package_folder, "include", "audio"))
+        copy(self, "*", src=os.path.join(tmp_install, "lib"), dst=os.path.join(self.package_folder, "lib"))
 
+        # Both are present in the final build and there does not seem to be an obvious way to tell the build system
+        # to only generate one of them, so remove the unwanted one
         if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["audio"]

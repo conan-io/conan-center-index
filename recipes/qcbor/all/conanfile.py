@@ -1,10 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, load, save
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
+
 import os
-import functools
 import re
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 class QCBORConan(ConanFile):
     name = "qcbor"
@@ -17,59 +19,64 @@ class QCBORConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "disable_float": [False, "HW_USE", "PREFERRED", "ALL"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "disable_float": False,
     }
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if Version(self.version) < "1.2":
+            del self.options.disable_float
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if Version(self.version) >= "1.2":
+            tc.variables["QCBOR_OPT_DISABLE_FLOAT_HW_USE"] = self.options.disable_float in ["HW_USE", "PREFERRED", "ALL"]
+            tc.variables["QCBOR_OPT_DISABLE_FLOAT_PREFERRED"] = self.options.disable_float in ["PREFERRED", "ALL"]
+            tc.variables["QCBOR_OPT_DISABLE_FLOAT_ALL"] = self.options.disable_float == "ALL"
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
         # Extract the License/s from README.md to a file
-        tmp = tools.load(os.path.join(self._source_subfolder, "inc", "qcbor", "qcbor.h"))
+        tmp = load(self, os.path.join(self.source_folder, "inc", "qcbor", "qcbor.h"))
         license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
         self.cpp_info.libs = ["qcbor"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"] and \
+            (Version(self.version) < "1.2" or self.options.disable_float == False):
             self.cpp_info.system_libs.append("m")

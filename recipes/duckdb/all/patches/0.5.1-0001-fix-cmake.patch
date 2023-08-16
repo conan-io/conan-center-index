@@ -1,0 +1,82 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cc43104..5b034d2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -196,6 +196,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
+   set(SUN TRUE)
+ endif()
+ 
++if(0) # conan patch
++
+ execute_process(
+         COMMAND git log -1 --format=%h
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+@@ -236,6 +238,10 @@ else()
+   set(DUCKDB_VERSION "v${DUCKDB_MAJOR_VERSION}.${DUCKDB_MINOR_VERSION}.${DUCKDB_PATCH_VERSION}-dev${DUCKDB_DEV_ITERATION}")
+ endif()
+ 
++else()  # conan patch
++set(DUCKDB_VERSION "v${DUCKDB_MAJOR_VERSION}.${DUCKDB_MINOR_VERSION}.${DUCKDB_PATCH_VERSION}-dev${DUCKDB_DEV_ITERATION}")
++endif()  # conan patch
++
+ option(AMALGAMATION_BUILD
+        "Build from the amalgamation files, rather than from the normal sources."
+        FALSE)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7e07a47..8027d90 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -166,9 +166,18 @@ if(BUILD_PYTHON
+   endif()
+ endif()
+ 
+-install(
+-  TARGETS duckdb duckdb_static
+-  EXPORT "${DUCKDB_EXPORT_SET}"
+-  LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
+-  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+-  RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++if(BUILD_SHARED_LIBS)
++  install(
++    TARGETS duckdb
++    EXPORT "${DUCKDB_EXPORT_SET}"
++    LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++    RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++else()
++  install(
++    TARGETS duckdb_static
++    EXPORT "${DUCKDB_EXPORT_SET}"
++    LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++    ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++    RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++endif()
+diff --git a/tools/odbc/CMakeLists.txt b/tools/odbc/CMakeLists.txt
+index 9d116b9..b46e5bd 100644
+--- a/tools/odbc/CMakeLists.txt
++++ b/tools/odbc/CMakeLists.txt
+@@ -53,3 +53,11 @@ add_library(
+ set_target_properties(duckdb_odbc PROPERTIES DEFINE_SYMBOL "DUCKDB_ODBC_API")
+ 
+ target_link_libraries(duckdb_odbc ${LINK_LIB_LIST} duckdb_static)
++
++install(
++    TARGETS duckdb_odbc
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
+diff --git a/tools/sqlite3_api_wrapper/CMakeLists.txt b/tools/sqlite3_api_wrapper/CMakeLists.txt
+index cef9622..ca7e1f1 100644
+--- a/tools/sqlite3_api_wrapper/CMakeLists.txt
++++ b/tools/sqlite3_api_wrapper/CMakeLists.txt
+@@ -14,7 +14,7 @@ add_library(sqlite3_api_wrapper_static STATIC sqlite3_api_wrapper.cpp
+ target_link_libraries(sqlite3_api_wrapper_static duckdb_static duckdb_utf8proc)
+ link_threads(sqlite3_api_wrapper_static)
+ 
+-if(NOT WIN32)
++if(BUILD_SHARED_LIBS AND NOT WIN32)
+   add_library(sqlite3_api_wrapper SHARED sqlite3_api_wrapper.cpp
+                                          ${ALL_OBJECT_FILES})
+   target_link_libraries(sqlite3_api_wrapper duckdb ${DUCKDB_EXTRA_LINK_FLAGS})

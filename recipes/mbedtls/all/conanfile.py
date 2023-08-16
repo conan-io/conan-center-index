@@ -1,19 +1,25 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class MBedTLSConan(ConanFile):
     name = "mbedtls"
-    description = "mbed TLS makes it trivially easy for developers to include cryptographic and SSL/TLS capabilities in their (embedded) products"
-    topics = ("mbedtls", "polarssl", "tls", "security")
+    description = (
+        "mbed TLS makes it trivially easy for developers to include "
+        "cryptographic and SSL/TLS capabilities in their (embedded) products"
+    )
+    topics = ("polarssl", "tls", "security")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = ("GPL-2.0", "Apache-2.0",)
+    license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,99 +32,65 @@ class MBedTLSConan(ConanFile):
         "with_zlib": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _license(self):
-        return self.version.rsplit("-", 1)[1]
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "3.0.0":
+        if Version(self.version) >= "3.0.0":
             # ZLIB support has been ditched on version 3.0.0
             del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
-        if tools.Version(self.version) >= "2.23.0":
-            self.license = "Apache-2.0"
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
 
     def validate(self):
-        if tools.Version(self.version) >= "2.23.0" \
-            and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.name}/{self.version} does not support shared build on Windows"
-                )
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
 
-        if tools.Version(self.version) >= "2.23.0" \
-            and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # The command line flags set are not supported on older versions of gcc
             raise ConanInvalidConfiguration(
-                f"{self.settings.compiler}-{self.settings.compiler.version} is not supported by this recipe"
-                )
+                f"{self.ref} does not support {self.settings.compiler}-{self.settings.compiler.version}"
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                    strip_root = True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root = True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if tools.Version(self.version) < "2.23.0":
-            # No warnings as errors
-            cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-            tools.replace_in_file(cmakelists, "-Werror", "")
-            tools.replace_in_file(cmakelists, "/WX", "")
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
-        cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
-        if tools.Version(self.version) < "3.0.0":
-            cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
-        cmake.definitions["ENABLE_PROGRAMS"] = False
-        if tools.Version(self.version) >= "2.23.0":
-            cmake.definitions["MBEDTLS_FATAL_WARNINGS"] = False
-        cmake.definitions["ENABLE_TESTING"] = False
-        if tools.Version(self.version) < "3.0.0":
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
+        tc.variables["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
+        if Version(self.version) < "3.0.0":
+            tc.variables["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+        tc.variables["ENABLE_PROGRAMS"] = False
+        tc.variables["MBEDTLS_FATAL_WARNINGS"] = False
+        tc.variables["ENABLE_TESTING"] = False
+        if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
-            cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        cmake.configure()
-        return cmake
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        if tools.Version(self.version) < "2.23.0": # less then 2.23 is multi-licensed
-            if self._license == "gpl":
-                self.copy("gpl-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-            else:
-                self.copy("apache-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "MbedTLS")

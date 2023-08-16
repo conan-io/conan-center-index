@@ -1,0 +1,12 @@
+sources:
+  "4.8":
+    url: "https://github.com/Corvusoft/restbed/archive/refs/tags/4.8.tar.gz"
+    sha256: "4801833f86a67b8a123c2c01203e259eb81157e1e9ef144a3b6395cb2d838a42"
+patches:
+  "4.8":
+    - patch_file: "patches/4.8-0001-cmake-conan.patch"
+      patch_description: "Use CMake targets + separate static/shared"
+      patch_type: "conan"
+    - patch_file: "patches/4.8-0002-mingw-deprecated-fix.patch"
+      patch_description: "MinGW apparently does not support deprecated and __declspec in the same line"
+      patch_type: "portability"

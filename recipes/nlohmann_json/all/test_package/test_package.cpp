@@ -25,6 +25,6 @@ int main() {
 #else
     auto f = data["pi"].get<float>();
 #endif
-    std::cout << data.dump(4) << std::endl;
+    std::cout << data.dump(4) << "\n";
     return 0;
 }

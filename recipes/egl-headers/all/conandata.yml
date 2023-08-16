@@ -1,0 +1,4 @@
+sources:
+  "cci.20220525":
+    url: "https://github.com/KhronosGroup/EGL-Registry/archive/84f25dd4c04a01ea48480f7296ba9d64d435fa87.tar.gz"
+    sha256: "6a4cbc7cf8b9057250c5c3982939b2bf46b1c2bfe0795e1445b8f7f39bd33988"

@@ -1,4 +1,13 @@
 sources:
+  "1.5.6":
+    url: "https://github.com/google/draco/archive/refs/tags/1.5.6.tar.gz"
+    sha256: "0280888e5b8e4c4fb93bf40e65e4e8a1ba316a0456f308164fb5c2b2b0c282d6"
+  "1.5.5":
+    url: "https://github.com/google/draco/archive/refs/tags/1.5.5.tar.gz"
+    sha256: "6b7994150bbc513abcdbe22ad778d6b2df10fc8cdc7035e916985b2a209ab826"
+  "1.5.4":
+    url: "https://github.com/google/draco/archive/refs/tags/1.5.4.tar.gz"
+    sha256: "7698cce91c24725562fb73811d24823f0f0a25e3ac0941e792993c5191d3baee"
   "1.5.3":
     url: "https://github.com/google/draco/archive/refs/tags/1.5.3.tar.gz"
     sha256: "7882a942a1da14a9ae9d557b1a3af7f44bdee7f5d42b745c4e474fb8b28d4e5e"

@@ -1,6 +1,8 @@
 sources:
   "6.2.1":
-    url: "https://gmplib.org/download/gmp/gmp-6.2.1.tar.bz2"
+    url:
+      - "https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
+      - "https://gmplib.org/download/gmp/gmp-6.2.1.tar.bz2"
     sha256: "eae9326beb4158c386e39a356818031bd28f3124cf915f8c5b1dc4c7a36b4d7c"
   "6.2.0":
     url: "https://gmplib.org/download/gmp/gmp-6.2.0.tar.bz2"
@@ -11,18 +13,11 @@ sources:
 patches:
   "6.2.1":
     - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
-      base_path: ""
     - patch_file: "patches/6.2.x-0001-fix-MSVC-next-prime-error.patch"
-      base_path: "source_subfolder"
   "6.2.0":
     - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
-      base_path: ""
     - patch_file: "patches/6.2.x-0001-fix-MSVC-next-prime-error.patch"
-      base_path: "source_subfolder"
   "6.1.2":
     - patch_file: "patches/0001-msvc-dumpbin-yasm-wrapper.patch"
-      base_path: ""
     - patch_file: "patches/6.1.x-0001-fix-MSVC-next-prime-error.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/6.1.x-0002-fix-MSVC-debug.patch"
-      base_path: "source_subfolder"

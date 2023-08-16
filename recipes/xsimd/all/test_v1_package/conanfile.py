@@ -1,4 +1,3 @@
-# pylint: skip-file
 from conans import ConanFile, CMake, tools
 import os
 
@@ -9,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["XSIMD_WITH_XTL"] = self.options["xsimd"].xtl_complex
         cmake.configure()
         cmake.build()
 

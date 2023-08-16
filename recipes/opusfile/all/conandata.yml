@@ -8,7 +8,11 @@ sources:
 patches:
   "0.12":
     - patch_file: "patches/001-disable-cert-store-integration.patch"
-      base_path: "source_subfolder"
+      patch_description: "Allow to build with OpenSSL 1.1"
+      patch_type: "portability"
+      patch_source: "https://github.com/xiph/opusfile/issues/13#issuecomment-425349836"
   "0.11":
     - patch_file: "patches/001-disable-cert-store-integration.patch"
-      base_path: "source_subfolder"
+      patch_description: "Allow to build with OpenSSL 1.1"
+      patch_type: "portability"
+      patch_source: "https://github.com/xiph/opusfile/issues/13#issuecomment-425349836"

@@ -5,6 +5,5 @@ sources:
 patches:
   "cci.20210521":
     - patch_file: "patches/0001-Use_conans_lss.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-Remove-hardcoded-fpic.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0003-Fix-gcc11-compilation.patch"

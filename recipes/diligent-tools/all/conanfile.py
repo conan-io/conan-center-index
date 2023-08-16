@@ -1,8 +1,12 @@
 import os
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, rmdir, rm, collect_libs, patches, export_conandata_patches
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class DiligentToolsConan(ConanFile):
     name = "diligent-tools"
@@ -13,12 +17,20 @@ class DiligentToolsConan(ConanFile):
     topics = ("graphics", "texture", "gltf", "draco", "imgui")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], 
-               "fPIC": [True, False]}
+               "fPIC": [True, False],
+               "jpeg": [False, "libjpeg-turbo", "libjpeg"],
+               "with_render_state_packager": [True, False],
+               "with_archiver": [True, False],
+              }
     default_options = {"shared": False, 
-                       "fPIC": True}
-    generators = "cmake_find_package", "cmake"
+                       "fPIC": True,
+                       "jpeg": "libjpeg",
+                       "with_render_state_packager": False,
+                       "with_archiver": True,
+                      }
+
+    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
     _cmake = None
-    exports_sources = ["CMakeLists.txt", "patches/**", "BuildUtils.cmake"]
     short_paths = True
 
     @property
@@ -29,8 +41,13 @@ class DiligentToolsConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+        self.copy("CMakeLists.txt")
+        self.copy("BuildUtils.cmake")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package_id(self):
         if self.settings.compiler == "Visual Studio":
@@ -48,14 +65,16 @@ class DiligentToolsConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        patches.apply_conandata_patches(self)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
         if self.options.shared:
             raise ConanInvalidConfiguration("Can't build diligent tools as shared lib")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.24.2")
 
     def requirements(self):
         if self.version == "cci.20211009":
@@ -66,7 +85,10 @@ class DiligentToolsConan(ConanFile):
             self.requires('taywee-args/6.3.0')
             self.requires("imgui/1.85")
 
-        self.requires("libjpeg/9d")
+        if self.options.jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        if self.options.jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.4")
         self.requires("libpng/1.6.37")
         self.requires("libtiff/4.3.0")
         self.requires("zlib/1.2.12")
@@ -99,6 +121,16 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_TESTS"] = False
         self._cmake.definitions["DILIGENT_BUILD_TOOLS_INCLUDE_TEST"] = False
+        self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
+        self._cmake.definitions["ARCHIVER_SUPPORTED"] = not self.options.with_archiver
+
+        if self.version != "cci.20211009" and \
+        (self.version.startswith("api") and self.version >= "api.252005") or \
+        (self.version > "2.5.2"):
+            self._cmake.definitions["GL_SUPPORTED"] = True
+            self._cmake.definitions["GLES_SUPPORTED"] = True
+            self._cmake.definitions["VULKAN_SUPPORTED"] = True
+            self._cmake.definitions["METAL_SUPPORTED"] = True
 
         self._cmake.definitions[self._diligent_platform] = True
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -115,11 +147,13 @@ class DiligentToolsConan(ConanFile):
         self.copy(pattern="*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "Licenses"))
+        self.copy("*", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
+        rmdir(self, os.path.join(self.package_folder, "Licenses"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentTools", "AssetLoader", "interface"))
 

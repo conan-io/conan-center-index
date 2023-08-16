@@ -5,8 +5,5 @@ sources:
 patches:
   "2.13":
     - patch_file: "patches/2.13-0001-enable-mingw-dll.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/2.13-0002-msvc-nmake-accept-conan-flags.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2.13-0002-msvc-nmake-honor-profile.patch"
     - patch_file: "patches/2.13-0003-armv8-build.patch"
-      base_path: "source_subfolder"

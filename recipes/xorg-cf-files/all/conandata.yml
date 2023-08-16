@@ -5,4 +5,3 @@ sources:
 patches:
   "1.0.7":
     - patch_file: "patches/1.0.7-0001-win-fixes.patch"
-      base_path: "source_subfolder"

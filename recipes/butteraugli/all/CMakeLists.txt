@@ -1,31 +1,31 @@
-cmake_minimum_required(VERSION 3.4)
-project(cmake_wrapper)
+cmake_minimum_required(VERSION 3.8)
+project(butteraugli LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+option(BUTTERAUGLI_TOOL "Build comparison tool" ON)
 
-if(WIN32 AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif(WIN32 AND BUILD_SHARED_LIBS)
+add_library(butteraugli_lib ${BUTTERAUGLI_SRC_DIR}/butteraugli/butteraugli.cc)
+target_include_directories(butteraugli_lib PUBLIC ${BUTTERAUGLI_SRC_DIR})
+set_target_properties(butteraugli_lib PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_compile_features(butteraugli_lib PUBLIC cxx_std_11)
 
-set(butteraugli_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
-
-set(SRCS_FILES ${butteraugli_DIR}/butteraugli/butteraugli.cc)
-set(HDRS_FILES ${butteraugli_DIR}/butteraugli/butteraugli.h)
-add_library(butteraugli_lib ${SRCS_FILES} ${HDRS_FILES})
-target_include_directories(butteraugli_lib PUBLIC ${butteraugli_DIR})
-set_property(TARGET butteraugli_lib PROPERTY CXX_STANDARD 11)
-
-find_package(JPEG REQUIRED)
-find_package(PNG REQUIRED)
-
-add_library(butteraugli ${butteraugli_DIR}/butteraugli/butteraugli_main.cc)
-target_link_libraries(butteraugli butteraugli_lib ${JPEG_LIBRARIES} ${PNG_LIBRARIES})
-set_property(TARGET butteraugli PROPERTY CXX_STANDARD 11)
-
-install(TARGETS butteraugli butteraugli_lib
+install(
+    TARGETS butteraugli_lib
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-install(FILES ${HDRS_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/butteraugli)
+install(
+    FILES ${BUTTERAUGLI_SRC_DIR}/butteraugli/butteraugli.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/butteraugli
+)
+
+if(BUTTERAUGLI_TOOL)
+    find_package(JPEG REQUIRED)
+    find_package(PNG REQUIRED)
+
+    add_executable(butteraugli ${BUTTERAUGLI_SRC_DIR}/butteraugli/butteraugli_main.cc)
+    target_link_libraries(butteraugli PRIVATE butteraugli_lib JPEG::JPEG PNG::PNG)
+    target_compile_features(butteraugli PRIVATE cxx_std_11)
+
+    install(TARGETS butteraugli DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()

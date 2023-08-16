@@ -1,4 +1,10 @@
 sources:
+  "api.252009":
+    url: "https://github.com/DiligentGraphics/DiligentFX/archive/refs/tags/API252009.tar.gz"
+    sha256: "4a7822e21d07d018fb5436fb286c552e160847ba5104561c17af6e86fa837c7d"
+  "api.252005":
+    url: "https://github.com/DiligentGraphics/DiligentFX/archive/refs/tags/API252005.tar.gz"
+    sha256: "1f6b4e0e81a8300ebd89bbf1a94d73b508e7c0b2e1170c3f9faa9d22645d19dd"
   "2.5.2":
     url: "https://github.com/DiligentGraphics/DiligentFX/archive/refs/tags/v2.5.2.tar.gz"
     sha256: "2875e7d1e449c32c3c10a7f563cc5b3ad56b3465374dec2a9ed598411ab3b65f"
@@ -9,6 +15,12 @@ sources:
     url: "https://github.com/DiligentGraphics/DiligentFX/archive/3757c8c99141400e0d215e0bb8865eef404a5488.tar.gz"
     sha256: "09f347dc00b968f3ccc383bb3e9af0e9197641f1ba7a5d22652a1cee5552786a"
 patches:
+  "api.252009":
+    - patch_file: "patches/0001-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
+  "api.252005":
+    - patch_file: "patches/0001-use-conan-dependencies.diff"
+      base_path: "source_subfolder"
   "2.5.2":
     - patch_file: "patches/0001-use-conan-dependencies.diff"
       base_path: "source_subfolder"
@@ -18,4 +30,3 @@ patches:
   "cci.20220219":
     - patch_file: "patches/0001-use-conan-dependencies.diff"
       base_path: "source_subfolder"
-

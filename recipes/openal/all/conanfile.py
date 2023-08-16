@@ -1,18 +1,19 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, copy, get, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.54.0"
 
 
 class OpenALConan(ConanFile):
+    deprecated = "openal-soft"
+
     name = "openal"
     description = "OpenAL Soft is a software implementation of the OpenAL 3D audio API."
     topics = ("openal", "audio", "api")
@@ -48,8 +49,7 @@ class OpenALConan(ConanFile):
         }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,12 +57,12 @@ class OpenALConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         # OpenAL's API is pure C, thus the c++ standard does not matter
         # Because the backend is C++, the C++ STL matters
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
         if not self._openal_cxx_backend:
-            del self.settings.compiler.libcxx
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -73,10 +73,10 @@ class OpenALConan(ConanFile):
 
     def validate(self):
         if self._openal_cxx_backend:
-            if self.info.settings.compiler.get_safe("cppstd"):
+            if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, self._min_cppstd)
 
-            compiler = self.info.settings.compiler
+            compiler = self.settings.compiler
 
             minimum_version = self._minimum_compilers_version.get(str(compiler), False)
             if minimum_version and Version(compiler.version) < minimum_version:
@@ -91,8 +91,7 @@ class OpenALConan(ConanFile):
                 )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -155,11 +154,13 @@ class OpenALConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
         elif is_apple_os(self):
-            self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])
+            self.cpp_info.frameworks.extend(["AudioToolbox", "AudioUnit", "CoreAudio", "CoreFoundation"])
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.append("ApplicationServices")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "User32"])
+            self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "user32"])
         if self._openal_cxx_backend and not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
         if not self.options.shared:

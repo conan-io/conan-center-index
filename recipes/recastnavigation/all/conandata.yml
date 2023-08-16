@@ -5,4 +5,3 @@ sources:
 patches:
   "cci.20200511":
     - patch_file: "patches/001_fix_shared_option.patch"
-      base_path: "source_subfolder"

@@ -1,0 +1,15 @@
+--- a/Alc/bformatdec.h	2018-10-11 18:05:31.000000000 -0400
++++ b/Alc/bformatdec.h	2020-10-10 21:01:08.842986977 -0400
+@@ -24,9 +24,9 @@
+ /* NOTE: These are scale factors as applied to Ambisonics content. Decoder
+  * coefficients should be divided by these values to get proper N3D scalings.
+  */
+-const ALfloat N3D2N3DScale[MAX_AMBI_COEFFS];
+-const ALfloat SN3D2N3DScale[MAX_AMBI_COEFFS];
+-const ALfloat FuMa2N3DScale[MAX_AMBI_COEFFS];
++extern const ALfloat N3D2N3DScale[MAX_AMBI_COEFFS];
++extern const ALfloat SN3D2N3DScale[MAX_AMBI_COEFFS];
++extern const ALfloat FuMa2N3DScale[MAX_AMBI_COEFFS];
+ 
+ 
+ struct AmbDecConf;

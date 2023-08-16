@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class CAresConan(ConanFile):
@@ -13,9 +13,10 @@ class CAresConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A C library for asynchronous DNS requests"
-    topics = ("c-ares", "dns")
+    topics = ("dns", "resolver", "async")
     homepage = "https://c-ares.haxx.se/"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,8 +30,7 @@ class CAresConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,22 +38,15 @@ class CAresConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -97,11 +90,6 @@ class CAresConan(ConanFile):
         elif is_apple_os(self):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
-        if self.options.tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
-
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
@@ -109,3 +97,5 @@ class CAresConan(ConanFile):
         self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].set_property("cmake_target_name", "c-ares::cares")
         self.cpp_info.components["cares"].set_property("pkg_config_name", "libcares")
+        if self.options.tools:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

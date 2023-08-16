@@ -1,7 +1,12 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    replace_in_file, rmdir
+)
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class CppRestSDKConan(ConanFile):
@@ -10,9 +15,9 @@ class CppRestSDKConan(ConanFile):
                   "C++ API design"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Microsoft/cpprestsdk"
-    topics = ("cpprestsdk", "rest", "client", "http", "https")
+    topics = ("rest", "client", "http", "https")
     license = "MIT"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,21 +38,8 @@ class CppRestSDKConan(ConanFile):
         "http_listener_impl": "httpsys",
     }
 
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,60 +51,60 @@ class CppRestSDKConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0")
-        self.requires("openssl/1.1.1o")
+        self.requires("boost/1.81.0")
+        self.requires("openssl/[>=1.1 <4]")
         if self.options.with_compression:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/1.2.13")
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
 
-    def package_id(self):
-        self.info.requires["boost"].minor_mode()
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self, set_cmake_flags=True)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_SAMPLES"] = False
-        self._cmake.definitions["WERROR"] = False
-        self._cmake.definitions["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
-        self._cmake.definitions["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # upstream CMakeLists.txt sets BUILD_SHARED_LIBS as a CACHE variable
+        # TODO: remove if required_conan_version = ">=1.54.0"
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_SAMPLES"] = False
+        tc.variables["WERROR"] = False
+        tc.variables["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
+        tc.variables["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
         if self.options.get_safe("pplx_impl"):
-            self._cmake.definitions["CPPREST_PPLX_IMPL"] = self.options.pplx_impl
+            tc.variables["CPPREST_PPLX_IMPL"] = self.options.pplx_impl
         if self.options.get_safe("http_client_impl"):
-            self._cmake.definitions["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
+            tc.variables["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
         if self.options.get_safe("http_listener_impl"):
-            self._cmake.definitions["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_clang_libcxx(self):
         if self.settings.compiler == 'clang' and str(self.settings.compiler.libcxx) in ['libstdc++', 'libstdc++11']:
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'Release', 'CMakeLists.txt'),
+            replace_in_file(self, os.path.join(self.source_folder, 'Release', 'CMakeLists.txt'),
                                   'libc++', 'libstdc++')
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         self._patch_clang_libcxx()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("license.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "license.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cpprestsdk"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cpprestsdk"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cpprestsdk")
@@ -127,7 +119,7 @@ class CppRestSDKConan(ConanFile):
         self.cpp_info.components["cpprestsdk_openssl_internal"].requires = ["openssl::openssl"]
         # cpprest
         self.cpp_info.components["cpprest"].set_property("cmake_target_name", "cpprestsdk::cpprest")
-        self.cpp_info.components["cpprest"].libs = tools.collect_libs(self)
+        self.cpp_info.components["cpprest"].libs = collect_libs(self)
         self.cpp_info.components["cpprest"].requires = ["cpprestsdk_boost_internal", "cpprestsdk_openssl_internal"]
         if self.settings.os == "Linux":
             self.cpp_info.components["cpprest"].system_libs.append("pthread")

@@ -10,6 +10,6 @@ patches:
     - patch_file: "patches/0002-use-conans-eigen.patch"
       patch_description: "fix call to find_package to use conan provided file"
       patch_type: "conan"
-    - patch_file: "patches/0003-let-conan-handle-shared-and-fpic.patch"
+    - patch_file: "patches/0003-let-conan-handle-shared-fpic-and-marchs.patch"
       patch_description: "disable some options such that conan manages values"
       patch_type: "conan"

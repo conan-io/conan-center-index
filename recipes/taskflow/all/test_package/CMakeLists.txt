@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES CXX)
 
 find_package(Taskflow REQUIRED CONFIG)
 
@@ -13,4 +10,4 @@ endif()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE ${_CXX_STANDARD})
-target_link_libraries(${PROJECT_NAME} Taskflow::Taskflow)
+target_link_libraries(${PROJECT_NAME} PRIVATE Taskflow::Taskflow)

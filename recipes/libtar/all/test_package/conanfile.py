@@ -1,12 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import load
 import os
 import tarfile
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str, run=True)
 
     def build(self):
         cmake = CMake(self)
@@ -25,15 +35,15 @@ class TestPackageConan(ConanFile):
             bio.seek(0)
             f.addfile(tarinfo, bio)
 
-        if not tools.cross_building(self):
+        if can_run(self):
             if os.path.exists("hello_world"):
                 raise ConanException("file extracted by tar archive should not exist yet")
-            bin_path = os.path.join("bin", "test_package")
-            self.run("{} {}".format(bin_path, "test.tar"), run_environment=True)
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(f"{bin_path} test.tar", env="conanrun")
             if not os.path.exists("hello_world"):
                 raise ConanException("file not extracted")
-            extracted_text = tools.load("hello_world")
+            extracted_text = load(self, "hello_world")
             if extracted_text != "secret text\n":
-                raise ConanException("File not loaded correctly. Got \"{}\"".format(repr(extracted_text)))
+                raise ConanException(f"File not loaded correctly. Got \"{repr(extracted_text)}\"")
 
-            self.run("libtar -t test.tar", run_environment=True)
+            self.run("libtar -t test.tar", env="conanrun")

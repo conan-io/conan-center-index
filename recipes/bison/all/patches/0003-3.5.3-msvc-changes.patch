@@ -7,11 +7,11 @@ but aren't to avoid a dependency on a already-built flex and bison.
  #include <mbswidth.h>
  #include <quotearg.h>
  #include <stdio.h>    /* fileno */
-+#if !defined(_WINDOWS)
++#ifndef _WIN32
  #include <sys/ioctl.h>
 +#endif
  #include <sys/stat.h> /* fstat */
-+#if !defined(_WINDOWS)
++#ifndef _WIN32
  #include <termios.h>
 +#endif
  

@@ -1,10 +1,16 @@
 sources:
+  "3.11.2":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.2/geos-3.11.2.tar.bz2"
+    sha256: "b1f077669481c5a3e62affc49e96eb06f281987a5d36fdab225217e5b825e4cc"
+  "3.11.1":
+    url: "https://github.com/libgeos/geos/releases/download/3.11.1/geos-3.11.1.tar.bz2"
+    sha256: "be83ed195ffb82373710c90befc580911ea0eb57003a2d703e30101c5b262f62"
   "3.11.0":
     url: "https://github.com/libgeos/geos/releases/download/3.11.0/geos-3.11.0.tar.bz2"
     sha256: "79ab8cabf4aa8604d161557b52e3e4d84575acdc0d08cb09ab3f7aaefa4d858a"
   "3.10.3":
-    url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.3.tar.gz"
-    sha256: "5af5a7ba0cc1225e7301fdcd7818521d65eb77e2f06647168e1969276d800cc1"
+    url: "https://download.osgeo.org/geos/geos-3.10.3.tar.bz2"
+    sha256: "3c141b07d61958a758345d5f54e3c735834b2f4303edb9f67fb26914f0d44770"
   "3.10.2":
-    url: "https://github.com/libgeos/geos/archive/refs/tags/3.10.2.tar.gz"
-    sha256: "d71932b444c9bd5d0bdf9eab4d22f25d9c31c122a73d619e2ec15294fb32147d"
+    url: "https://download.osgeo.org/geos/geos-3.10.2.tar.bz2"
+    sha256: "50bbc599ac386b4c2b3962dcc411f0040a61f204aaef4eba7225ecdd0cf45715"

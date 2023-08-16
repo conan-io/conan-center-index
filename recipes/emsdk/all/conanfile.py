@@ -1,12 +1,13 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import cross_building
 from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import json
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class EmSDKConan(ConanFile):
@@ -24,6 +25,9 @@ class EmSDKConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("nodejs/16.3.0")
         # self.requires("python")  # FIXME: Not available as Conan package
@@ -32,9 +36,6 @@ class EmSDKConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -71,8 +72,7 @@ class EmSDKConan(ConanFile):
         env.define_path("EMSCRIPTEN", self._emscripten)
         env.define_path("EM_CONFIG", self._em_config)
         env.define_path("EM_CACHE", self._em_cache)
-        envvars = env.vars(self, scope="emsdk")
-        envvars.save_script("emsdk_env_file")
+        env.vars(self, scope="emsdk").save_script("emsdk_env_file")
 
     @staticmethod
     def _chmod_plus_x(filename):
@@ -125,7 +125,7 @@ class EmSDKConan(ConanFile):
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
         if not cross_building(self):
-            self.run("embuilder build MINIMAL", env="conanemsdk") # force cache population
+            self.run("embuilder build MINIMAL", env=["conanemsdk", "conanrun"]) # force cache population
             # the line below forces emscripten to accept the cache as-is, even after re-location
             # https://github.com/emscripten-core/emscripten/issues/15053#issuecomment-920950710
             os.remove(os.path.join(self._em_cache, "sanity.txt"))
@@ -148,7 +148,7 @@ class EmSDKConan(ConanFile):
             return
 
         if self.settings_target.os != "Emscripten":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Emscripten")
+            self.output.warning(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Emscripten")
             return
 
         toolchain = os.path.join(self.package_folder, "bin", "upstream", "emscripten", "cmake", "Modules", "Platform", "Emscripten.cmake")
@@ -159,8 +159,13 @@ class EmSDKConan(ConanFile):
         self.buildenv_info.define_path("EM_CONFIG", self._em_config)
         self.buildenv_info.define_path("EM_CACHE",  self._em_cache)
 
-        self.buildenv_info.define_path("CC", self._define_tool_var("emcc"))
-        self.buildenv_info.define_path("CXX", self._define_tool_var("em++"))
+        compiler_executables = {
+            "c": self._define_tool_var("emcc"),
+            "cpp": self._define_tool_var("em++"),
+        }
+        self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.buildenv_info.define_path("CC", compiler_executables["c"])
+        self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
         self.buildenv_info.define_path("AR", self._define_tool_var("emar"))
         self.buildenv_info.define_path("NM", self._define_tool_var("emnm"))
         self.buildenv_info.define_path("RANLIB", self._define_tool_var("emranlib"))
@@ -176,16 +181,16 @@ class EmSDKConan(ConanFile):
             os.path.join("bin", "upstream", "lib", "cmake", "llvm"),
         ]
 
-        # TODO: conan v1 stuff, to remove in conan v2?
-        self.env_info.PATH.extend(self._paths)
-        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
-        self.env_info.EMSDK = self._emsdk
-        self.env_info.EMSCRIPTEN = self._emscripten
-        self.env_info.EM_CONFIG = self._em_config
-        self.env_info.EM_CACHE = self._em_cache
-        self.env_info.CC = self._define_tool_var("emcc")
-        self.env_info.CXX = self._define_tool_var("em++")
-        self.env_info.AR = self._define_tool_var("emar")
-        self.env_info.NM = self._define_tool_var("emnm")
-        self.env_info.RANLIB = self._define_tool_var("emranlib")
-        self.env_info.STRIP = self._define_tool_var("emstrip")
+        if Version(conan_version).major < 2:
+            self.env_info.PATH.extend(self._paths)
+            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
+            self.env_info.EMSDK = self._emsdk
+            self.env_info.EMSCRIPTEN = self._emscripten
+            self.env_info.EM_CONFIG = self._em_config
+            self.env_info.EM_CACHE = self._em_cache
+            self.env_info.CC = compiler_executables["c"]
+            self.env_info.CXX = compiler_executables["cpp"]
+            self.env_info.AR = self._define_tool_var("emar")
+            self.env_info.NM = self._define_tool_var("emnm")
+            self.env_info.RANLIB = self._define_tool_var("emranlib")
+            self.env_info.STRIP = self._define_tool_var("emstrip")

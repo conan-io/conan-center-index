@@ -1,9 +1,11 @@
 versions:
+  "8.1.0":
+    folder: all
+  "8.0.34":
+    folder: all
+  "8.0.31":
+    folder: all
   "8.0.30":
     folder: all
-  "8.0.29":
-    folder: all
   "8.0.25":
-    folder: all
-  "8.0.17":
     folder: all

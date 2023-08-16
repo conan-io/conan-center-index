@@ -1,25 +1,24 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 import textwrap
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.54.0"
 
 
 class OpenEXRConan(ConanFile):
     name = "openexr"
     description = "OpenEXR is a high dynamic-range (HDR) image file format developed by Industrial Light & " \
                   "Magic for use in computer imaging applications."
-    topics = ("openexr", "hdr", "image", "picture")
+    topics = ("hdr", "image", "picture", "file format", "computer vision")
     license = "BSD-3-Clause"
     homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,10 +35,10 @@ class OpenEXRConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and cross_building(self):
@@ -50,8 +49,7 @@ class OpenEXRConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -66,8 +64,6 @@ class OpenEXRConan(ConanFile):
         tc.variables["OPENEXR_BUILD_UTILS"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.variables["CMAKE_SKIP_INSTALL_RPATH"] = True
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -217,7 +213,7 @@ class OpenEXRConan(ConanFile):
             self.cpp_info.components["ilmbase_ilmbaseconfig"].defines.append("OPENEXR_DLL")
 
         if not self.options.shared:
-            libcxx = tools_legacy.stdcpp_library(self)
+            libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.components["openexr_ilmimfconfig"].system_libs.append(libcxx)
                 self.cpp_info.components["ilmbase_ilmbaseconfig"].system_libs.append(libcxx)

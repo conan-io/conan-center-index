@@ -1,43 +1,61 @@
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 import os
-import glob
 
+required_conan_version = ">=1.52.0"
 
 class ValijsonConan(ConanFile):
     name = "valijson"
     description = "Valijson is a header-only JSON Schema Validation library for C++11."
-    topics = ("conan", "valijson", "json", "validator")
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tristanpenman/valijson"
-    license = "BSD-2-Clause"
-    exports_sources = ["patches/**"]
+    topics = ("json", "validator", "header-only")
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def package(self):
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=include_folder)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.hpp",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        self.cpp_info.set_property("cmake_target_name", "ValiJSON::valijson")
+        self.cpp_info.components["libvalijson"].set_property("cmake_target_name", "ValiJSON::valijson")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         # self.cpp_info.filenames["cmake_find_package"] = "valijson" # TBA: There's no installed config file
         # self.cpp_info.filenames["cmake_find_package_multi"] = "valijson" # TBA: There's no installed config file
         self.cpp_info.names["cmake_find_package"] = "ValiJSON"
         self.cpp_info.names["cmake_find_package_multi"] = "ValiJSON"
-
         self.cpp_info.components["libvalijson"].names["cmake_find_package"] = "valijson"
         self.cpp_info.components["libvalijson"].names["cmake_find_package_multi"] = "valijson"

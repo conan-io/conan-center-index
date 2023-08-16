@@ -1,0 +1,25 @@
+Fixes:
+In function 'o_strncpy',
+    inlined from 'mstrcatf' at /home/maarten/programming/orcania/src/orcania.c:131:11:
+/home/maarten/programming/orcania/src/orcania.c:208:12: error: 'strncpy' output truncated before terminating nul copying as many bytes from a string as its length [-Werror=stringop-truncation]
+  208 |     return strncpy(p1, p2, n);
+      |            ^~~~~~~~~~~~~~~~~~
+/home/maarten/programming/orcania/src/orcania.c: In function 'mstrcatf':
+/home/maarten/programming/orcania/src/orcania.c:343:12: note: length computed here
+  343 |     return strlen(s);
+      |            ^~~~~~~~~
+
+
+--- src/orcania.c
++++ src/src/orcania.c
+@@ -148,8 +148,8 @@ char * mstrcatf(char * source, const char * message, ...) {
+         out = o_malloc(source_len+message_formatted_len+sizeof(char));
+         vsnprintf(message_formatted, (message_formatted_len+sizeof(char)), message, argp_cpy);
+         if (out != NULL) {
+-          o_strncpy(out, source, source_len);
+-          o_strncpy(out+source_len, message_formatted, message_formatted_len);
++          memcpy(out, source, source_len);
++          memcpy(out+source_len, message_formatted, message_formatted_len);
+           out[source_len+message_formatted_len] = '\0';
+         }
+         o_free(message_formatted);

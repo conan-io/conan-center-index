@@ -1,0 +1,21 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 0a5af42..781f4c7 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -58,7 +58,6 @@ if(WEBP_LINK_STATIC)
+   else()
+     set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+   endif()
+-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+   # vwebp does not compile on Ubuntu with static libraries so disabling it for
+   # now.
+   set(WEBP_BUILD_VWEBP OFF)
+@@ -142,7 +141,7 @@ endif()
+ set(PTHREAD_LIBS ${CMAKE_THREAD_LIBS_INIT})
+ set(INSTALLED_LIBRARIES)
+ 
+-if(MSVC)
++if(0)
+   # match the naming convention used by nmake
+   set(webp_libname_prefix "lib")
+   set(CMAKE_SHARED_LIBRARY_PREFIX "${webp_libname_prefix}")

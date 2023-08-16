@@ -1,0 +1,4 @@
+sources:
+  "1.0.210629.2":
+    url: "https://github.com/microsoft/winmd/archive/refs/tags/1.0.210629.2.tar.gz"
+    sha256: "93ef28b801abc390a2a09a69d56e1200533a5c8d9fc1743cb23afaaa890ac5a8"

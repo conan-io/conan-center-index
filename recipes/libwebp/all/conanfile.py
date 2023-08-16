@@ -1,18 +1,18 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibwebpConan(ConanFile):
     name = "libwebp"
     description = "Library to encode and decode images in WebP format"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/webmproject/libwebp"
+    homepage = "https://chromium.googlesource.com/webm/libwebp"
     topics = ("image", "libwebp", "webp", "decoding", "encoding")
     license = "BSD-3-Clause"
 
@@ -33,8 +33,7 @@ class LibwebpConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,22 +41,15 @@ class LibwebpConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-           del self.settings.compiler.libcxx
-        except Exception:
-           pass
-        try:
-           del self.settings.compiler.cppstd
-        except Exception:
-           pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,8 +77,8 @@ class LibwebpConan(ConanFile):
             tc.variables["WEBP_BUILD_LIBWEBPMUX"] = True
         tc.variables["WEBP_BUILD_WEBPMUX"] = False
         if self.options.shared and is_msvc(self):
-          # Building a dll (see fix-dll-export patch)
-          tc.preprocessor_definitions["WEBP_DLL"] = 1
+            # Building a dll (see fix-dll-export patch)
+            tc.preprocessor_definitions["WEBP_DLL"] = 1
         tc.generate()
 
     def build(self):
@@ -111,7 +103,7 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webpdecoder"].set_property("pkg_config_name", "libwebpdecoder")
         self.cpp_info.components["webpdecoder"].libs = ["webpdecoder"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["webpdecoder"].system_libs = ["pthread"]
+            self.cpp_info.components["webpdecoder"].system_libs = ["m", "pthread"]
 
         # webp
         self.cpp_info.components["webp"].set_property("cmake_target_name", "WebP::webp")
@@ -119,6 +111,16 @@ class LibwebpConan(ConanFile):
         self.cpp_info.components["webp"].libs = ["webp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["webp"].system_libs = ["m", "pthread"]
+
+        if Version(self.version) >= "1.3.0":
+            # sharpyuv
+            self.cpp_info.components["sharpyuv"].set_property("cmake_target_name", "WebP::sharpyuv")
+            self.cpp_info.components["sharpyuv"].set_property("pkg_config_name", "libsharpyuv")
+            self.cpp_info.components["sharpyuv"].libs = ["sharpyuv"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["sharpyuv"].system_libs = ["m", "pthread"]
+            # note: webp now depends on sharpyuv
+            self.cpp_info.components["webp"].requires = ["sharpyuv"]
 
         # webpdemux
         self.cpp_info.components["webpdemux"].set_property("cmake_target_name", "WebP::webpdemux")

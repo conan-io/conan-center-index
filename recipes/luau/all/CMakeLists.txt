@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
-project(conan_wrapper CXX)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS KEEP_RPATHS)
+project(conan_wrapper LANGUAGES CXX)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-add_subdirectory(source_subfolder)
+add_subdirectory(${LUAU_SRC_DIR})
 
 ## installer
 include(GNUInstallDirs)
@@ -17,7 +14,7 @@ install(
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-install(DIRECTORY "source_subfolder/Ast/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(DIRECTORY "${LUAU_SRC_DIR}/Ast/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 install(
     TARGETS Luau.Compiler
@@ -26,9 +23,9 @@ install(
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(DIRECTORY "source_subfolder/Compiler/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(DIRECTORY "${LUAU_SRC_DIR}/Compiler/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES
-    "source_subfolder/Compiler/include/luacode.h"
+    "${LUAU_SRC_DIR}/Compiler/include/luacode.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 install(
@@ -37,7 +34,7 @@ install(
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-install(DIRECTORY "source_subfolder/CodeGen/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(DIRECTORY "${LUAU_SRC_DIR}/CodeGen/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 
 install(
@@ -47,7 +44,7 @@ install(
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(DIRECTORY "source_subfolder/Analysis/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(DIRECTORY "${LUAU_SRC_DIR}/Analysis/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 install(
     TARGETS Luau.VM
@@ -57,9 +54,9 @@ install(
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 install(FILES
-    "source_subfolder/VM/include/lua.h"
-    "source_subfolder/VM/include/luaconf.h"
-    "source_subfolder/VM/include/lualib.h"
+    "${LUAU_SRC_DIR}/VM/include/lua.h"
+    "${LUAU_SRC_DIR}/VM/include/luaconf.h"
+    "${LUAU_SRC_DIR}/VM/include/lualib.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 if(LUAU_BUILD_CLI)

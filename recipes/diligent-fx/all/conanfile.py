@@ -1,7 +1,11 @@
 import os
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import CMake
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, collect_libs, export_conandata_patches, apply_conandata_patches, rename
 import shutil
+
+required_conan_version = ">=1.52.0"
 
 class DiligentFxConan(ConanFile):
     name = "diligent-fx"
@@ -19,7 +23,6 @@ class DiligentFxConan(ConanFile):
     }
     generators = "cmake_find_package", "cmake"
     _cmake = None
-    exports_sources = ["CMakeLists.txt", "BuildUtils.cmake", "script.py", "patches/**"]
     short_paths = True
 
     @property
@@ -30,8 +33,14 @@ class DiligentFxConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+        self.copy("CMakeLists.txt")
+        self.copy("BuildUtils.cmake")
+        self.copy("script.py")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def validate(self):
         if self.options.shared:
@@ -46,11 +55,13 @@ class DiligentFxConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     def requirements(self):
-        self.requires("diligent-tools/2.5.2")
+        if self.version == "cci.20220219" or self.version == "cci.20211112":
+            self.requires("diligent-tools/2.5.2")
+        else:
+            self.requires("diligent-tools/{}".format(self.version))
 
     @property
     def _diligent_platform(self):
@@ -89,7 +100,7 @@ class DiligentFxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
-        tools.rename(src=os.path.join(self.package_folder, "include", "source_subfolder"),
+        rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
                      dst=os.path.join(self.package_folder, "include", "DiligentFx"))
         shutil.move(os.path.join(self.package_folder, "Shaders"), 
                     os.path.join(self.package_folder, "res", "Shaders"))
@@ -100,7 +111,7 @@ class DiligentFxConan(ConanFile):
         self.copy(pattern="*.a", src=self._build_subfolder, dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "Components", "interface"))
         self.cpp_info.includedirs.append(os.path.join("include", "DiligentFx", "GLTF_PBR_Renderer", "interface"))

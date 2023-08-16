@@ -2,7 +2,7 @@
 
 int main()
 {
-    std::cout << "Bincrafters\n";
+    std::cout << " g++: Hello, World!\n";
     return 0;
 }
 

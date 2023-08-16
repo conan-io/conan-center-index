@@ -1,0 +1,15 @@
+Ensure to use FindEXPAT.cmake instead of expat-config.cmake
+(side effect of CMAKE_FIND_PACKAGE_PREFER_CONFIG ON, see https://github.com/conan-io/conan/issues/10387)
+diff --git a/cmake/findDependencies.cmake b/cmake/findDependencies.cmake
+index ec3a43f5..27bf42d3 100644
+--- a/cmake/findDependencies.cmake
++++ b/cmake/findDependencies.cmake
+@@ -42,7 +42,7 @@ if (EXIV2_ENABLE_XMP AND EXIV2_ENABLE_EXTERNAL_XMP)
+     message(FATAL_ERROR "EXIV2_ENABLE_XMP AND EXIV2_ENABLE_EXTERNAL_XMP are mutually exclusive.  You can only choose one of them")
+ else()
+     if (EXIV2_ENABLE_XMP)
+-        find_package(EXPAT REQUIRED)
++        find_package(EXPAT REQUIRED MODULE)
+     elseif (EXIV2_ENABLE_EXTERNAL_XMP)
+         find_package(XmpSdk REQUIRED)
+     endif ()

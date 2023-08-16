@@ -1,13 +1,15 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.52.0"
 
 
 class NinjaConan(ConanFile):
     name = "ninja"
+    package_type = "application"
     description = "Ninja is a small build system with a focus on speed"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -22,12 +24,15 @@ class NinjaConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
+            # Link C++ library statically on Linux so that it can run on systems
+            # with an older C++ runtime
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static-libstdc++ -static-libgcc"
         tc.generate()
 
     def build(self):
@@ -43,9 +48,8 @@ class NinjaConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
-        self.conf_info.define("tools.cmake.cmaketoolchain:generator", "Ninja")
 
         # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.CONAN_CMAKE_GENERATOR = "Ninja"
+        if Version(conan_version).major < 2:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.env_info.CONAN_CMAKE_GENERATOR = "Ninja"

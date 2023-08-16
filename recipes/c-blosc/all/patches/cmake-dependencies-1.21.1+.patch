@@ -1,5 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f5eff9e..92b35f2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -121,12 +121,12 @@ option(PREFER_EXTERNAL_ZLIB
@@ -12,7 +10,7 @@ index f5eff9e..92b35f2 100644
  if(NOT DEACTIVATE_LZ4)
      if(PREFER_EXTERNAL_LZ4)
 -        find_package(LZ4)
-+        ### find_package(LZ4)
++        find_package(lz4 REQUIRED CONFIG)
 +        set(LZ4_FOUND TRUE)
      else()
          message(STATUS "Using LZ4 internal sources.")
@@ -30,12 +28,10 @@ index f5eff9e..92b35f2 100644
  if (NOT DEACTIVATE_ZSTD)
      if (PREFER_EXTERNAL_ZSTD)
 -        find_package(Zstd)
-+        find_package(zstd)
++        find_package(zstd REQUIRED CONFIG)
      else ()
          message(STATUS "Using ZSTD internal sources.")
      endif (PREFER_EXTERNAL_ZSTD)
-diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
-index 84b72e5..20b94e0 100644
 --- a/blosc/CMakeLists.txt
 +++ b/blosc/CMakeLists.txt
 @@ -91,7 +91,7 @@ endif(WIN32)
@@ -43,7 +39,7 @@ index 84b72e5..20b94e0 100644
  if(NOT DEACTIVATE_LZ4)
      if(LZ4_FOUND)
 -        set(LIBS ${LIBS} ${LZ4_LIBRARY})
-+        set(LIBS ${LIBS} "CONAN_PKG::lz4")
++        set(LIBS ${LIBS} $<IF:$<TARGET_EXISTS:LZ4::lz4_shared>,LZ4::lz4_shared,LZ4::lz4_static>)
      else(LZ4_FOUND)
          file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
          set(SOURCES ${SOURCES} ${LZ4_FILES})
@@ -70,7 +66,7 @@ index 84b72e5..20b94e0 100644
  if (NOT DEACTIVATE_ZSTD)
      if (ZSTD_FOUND)
 -        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
-+        set(LIBS ${LIBS} "zstd::zstd")
++        set(LIBS ${LIBS} $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
      else (ZSTD_FOUND)
        file(GLOB ZSTD_FILES
          ${ZSTD_LOCAL_DIR}/common/*.c

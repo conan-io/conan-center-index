@@ -4,7 +4,9 @@ index 5aecafc..abb133f 100644
 +++ b/CMakeLists.txt
 @@ -1,36 +1,54 @@
 -# Project
- project(libftdi1 C)
+-project(libftdi1 C)
++cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
++project(libftdi1)
 +
  set(MAJOR_VERSION 1)
  set(MINOR_VERSION 5)
@@ -21,7 +23,6 @@ index 5aecafc..abb133f 100644
  set(CMAKE_COLOR_MAKEFILE ON)
 -cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 +
-+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 +if(POLICY CMP0057)
 +    cmake_policy(SET CMP0057 NEW)
 +endif()

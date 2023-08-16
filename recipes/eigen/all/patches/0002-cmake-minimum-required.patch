@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,6 @@
++cmake_minimum_required(VERSION 2.8.5)
+ project(Eigen3)
+ 
+-cmake_minimum_required(VERSION 2.8.5)
+ 
+ # guard against in-source builds
+ 

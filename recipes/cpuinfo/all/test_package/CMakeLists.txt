@@ -1,11 +1,14 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package C)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES C)
 
 find_package(cpuinfo REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} cpuinfo::cpuinfo)
-set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
+if ((${CPUINFO_VERSION} GREATER_EQUAL "20220618") AND (${CPUINFO_VERSION} LESS "20230118"))
+    # in that version range cpuinfo exposed cpuinfo::clog. Check that is available through conan recipe
+    target_link_libraries(${PROJECT_NAME} PRIVATE cpuinfo::cpuinfo cpuinfo::clog)
+else ()
+    target_link_libraries(${PROJECT_NAME} PRIVATE cpuinfo::cpuinfo)
+endif()
+
+target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)

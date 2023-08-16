@@ -1,8 +1,16 @@
 sources:
+  "3.2":
+    url: "https://github.com/albertodemichelis/squirrel/archive/v3.2.tar.gz"
+    sha256: "02805414cfadd5bbb921891d3599b83375a40650abd6404a8ab407dc5e86a996"
   "3.1":
     url: "https://github.com/albertodemichelis/squirrel/archive/v3.1.tar.gz"
     sha256: "51942b8638a97b673e34ecf3ca50304996fa99bbdbfa7fe93d9744e6769b2f95"
 patches:
+  "3.2":
+    - patch_file: "patches/3.2-fix-cmake-static-build.patch"
+      patch_description: "fix static build issue"
+      patch_type: "portability"
   "3.1":
-    - patch_file: "patches/fix-cmake-static-shared.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/3.1-fix-cmake-static-shared.patch"
+      patch_description: "add flag to switch static/shared builds"
+      patch_type: "conan"

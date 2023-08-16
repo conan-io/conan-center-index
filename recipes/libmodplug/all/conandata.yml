@@ -5,4 +5,6 @@ sources:
 patches:
   "0.8.9.0":
     - patch_file: "patches/0001-cmake-install-dll.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cpp17-compat.patch"
+      patch_description: "C++17 support"
+      patch_type: portability

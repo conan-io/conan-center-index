@@ -1,6 +1,9 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir
+from conans import CMake
 import os
 
+required_conan_version = ">=1.52.0"
 
 class QtADS(ConanFile):
     name = "qt-advanced-docking-system"
@@ -23,15 +26,18 @@ class QtADS(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
-    _qt_version = "5.15.2"
+    _qt_version = "5.15.6"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,7 +51,7 @@ class QtADS(ConanFile):
         self.requires(f"qt/{self._qt_version}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+        get(self, **self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
 
     def _configure_cmake(self):
@@ -61,10 +67,9 @@ class QtADS(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        tools.replace_in_file(
+        replace_in_file(self,
             f"{self.source_folder}/{self._source_subfolder}/src/ads_globals.cpp",
             "#include <qpa/qplatformnativeinterface.h>",
             f"#include <{self._qt_version}/QtGui/qpa/qplatformnativeinterface.h>"
@@ -79,8 +84,8 @@ class QtADS(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "license"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "license"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if self.options.shared:

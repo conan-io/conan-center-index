@@ -1,13 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class DbusConan(ConanFile):
@@ -16,22 +19,29 @@ class DbusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/dbus"
     description = "D-Bus is a simple system for interprocess communication and coordination."
-    topics = ("dbus")
-
+    topics = "bus", "interprocess", "message"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    short_paths = True
     options = {
-        "system_socket": ["ANY"],
-        "system_pid_file": ["ANY"],
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "system_socket": [None, "ANY"],
+        "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
         "with_glib": [True, False],
+        "with_systemd": [True, False],
         "with_selinux": [True, False],
         "session_socket_dir": ["ANY"],
     }
     default_options = {
-        "system_socket": "",
-        "system_pid_file": "",
+        "shared": False,
+        "fPIC": True,
+        "system_socket": None,
+        "system_pid_file": None,
         "with_x11": False,
         "with_glib": False,
+        "with_systemd": False,
         "with_selinux": False,
         "session_socket_dir": "/tmp",
     }
@@ -41,82 +51,81 @@ class DbusConan(ConanFile):
 
     def config_options(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
+            del self.options.with_systemd
+        if self.settings.os not in ("Linux", "FreeBSD"):
             del self.options.with_x11
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.4.9")
+        self.requires("expat/2.5.0")
         if self.options.with_glib:
-            self.requires("glib/2.74.0")
+            self.requires("glib/2.77.0")
+        if self.options.get_safe("with_systemd"):
+            self.requires("libsystemd/253.6")
         if self.options.with_selinux:
-            self.requires("selinux/3.3")
+            self.requires("libselinux/3.3")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
     def validate(self):
-        if Version(self.version) >= "1.14.0":
-            if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < 7:
-                raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
-            if self.info.settings.os == "Windows":
-                raise ConanInvalidConfiguration(f"{self.ref} does not support windows. contributions are welcome")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
+            raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
+
+    def build_requirements(self):
+        self.tool_requires("meson/1.2.0")
+        if not self.conf.get("tools.gnu:pkg_config",check_type=str):
+            self.tool_requires("pkgconf/1.9.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["DBUS_BUILD_TESTS"] = False
-        tc.variables["DBUS_ENABLE_DOXYGEN_DOCS"] = False
-        tc.variables["DBUS_ENABLE_XML_DOCS"] = False
-        tc.variables["DBUS_BUILD_X11"] = self.options.get_safe("with_x11", False)
-        tc.variables["DBUS_WITH_GLIB"] = self.options.with_glib
-        tc.variables["DBUS_DISABLE_ASSERT"] = is_apple_os(self)
-        tc.variables["DBUS_DISABLE_CHECKS"] = False
-        # https://github.com/freedesktop/dbus/commit/e827309976cab94c806fda20013915f1db2d4f5a
-        tc.variables["DBUS_SESSION_SOCKET_DIR"] = self.options.session_socket_dir
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = MesonToolchain(self)
+        tc.project_options["asserts"] = not is_apple_os(self)
+        tc.project_options["checks"] = False
+        tc.project_options["doxygen_docs"] = "disabled"
+        tc.project_options["modular_tests"] = "disabled"
+        tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+        tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+        tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
+        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
+        tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
+        if self.options.get_safe("with_systemd", False):
+            tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
+            tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
+        if is_apple_os(self):
+            tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
+        tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
+        tc.project_options["xml_docs"] = "disabled"
         tc.generate()
-
-        deps = CMakeDeps(self)
+        deps = PkgConfigDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Unfortunately, there is currently no other way to force disable
-        # CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMake conan_toolchain.
-        replace_in_file(
-            self,
-            os.path.join(self.generators_folder, "conan_toolchain.cmake"),
-            "set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)",
-            "",
-            strict=False,
-        )
-
     def build(self):
-        self._patch_sources()
-        cmake = CMake(self)
-        if Version(self.version) < "1.14.0":
-            cmake.configure(build_script_folder=os.path.join(self.source_folder, "cmake"))
-        else:
-            cmake.configure()
-        cmake.build()
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "# subdir('test')")
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
+        meson = Meson(self)
+        meson.install()
 
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         mkdir(self, os.path.join(self.package_folder, "res"))
         for i in ["var", "share", "etc"]:
@@ -125,6 +134,9 @@ class DbusConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
+        fix_apple_shared_install_name(self)
+        if self.settings.os == "Windows" and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libdbus-1.a"), os.path.join(self.package_folder, "lib", "dbus-1.lib"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -163,6 +175,9 @@ class DbusConan(ConanFile):
             self.cpp_info.system_libs.extend(["iphlpapi", "ws2_32"])
         else:
             self.cpp_info.system_libs.append("pthread")
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("DBUS_STATIC_BUILD")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"

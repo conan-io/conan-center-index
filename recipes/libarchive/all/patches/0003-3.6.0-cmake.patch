@@ -1,0 +1,112 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 646e5ce7..9bca273f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,7 +9,7 @@ endif()
+ #
+ PROJECT(libarchive C)
+ #
+-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
+ if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${libarchive_BINARY_DIR}/bin)
+ endif()
+@@ -424,7 +424,7 @@ IF(ZLIB_FOUND)
+   SET(HAVE_LIBZ 1)
+   SET(HAVE_ZLIB_H 1)
+   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+-  LIST(APPEND ADDITIONAL_LIBS ${ZLIB_LIBRARIES})
++  LIST(APPEND ADDITIONAL_LIBS ZLIB::ZLIB)
+   IF(WIN32 AND NOT CYGWIN)
+     set(ZLIB_WINAPI yes)
+     IF(ZLIB_WINAPI)
+@@ -486,7 +486,7 @@ IF(LIBLZMA_FOUND)
+   SET(HAVE_LIBLZMA 1)
+   SET(HAVE_LZMA_H 1)
+   CMAKE_PUSH_CHECK_STATE()
+-  SET(CMAKE_REQUIRED_INCLUDES ${LIBLZMA_INCLUDE_DIR})
++  SET(CMAKE_REQUIRED_INCLUDES ${LIBLZMA_INCLUDE_DIRS})
+   SET(CMAKE_REQUIRED_LIBRARIES ${LIBLZMA_LIBRARIES})
+   INCLUDE_DIRECTORIES(${LIBLZMA_INCLUDE_DIRS})
+   LIST(APPEND ADDITIONAL_LIBS ${LIBLZMA_LIBRARIES})
+@@ -503,7 +503,7 @@ IF(LIBLZMA_FOUND)
+ ELSE(LIBLZMA_FOUND)
+ # LZMA not found and will not be used.
+ ENDIF(LIBLZMA_FOUND)
+-MARK_AS_ADVANCED(CLEAR LIBLZMA_INCLUDE_DIR)
++MARK_AS_ADVANCED(CLEAR LIBLZMA_INCLUDE_DIRS)
+ MARK_AS_ADVANCED(CLEAR LIBLZMA_LIBRARY)
+ 
+ #
+@@ -573,7 +573,7 @@ IF(ENABLE_LZ4)
+   ENDIF (LZ4_INCLUDE_DIR)
+ 
+   FIND_PATH(LZ4_INCLUDE_DIR lz4.h)
+-  FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4)
++  FIND_LIBRARY(LZ4_LIBRARY NAMES lz4 liblz4 lz4_static liblz4_static)
+   INCLUDE(FindPackageHandleStandardArgs)
+   FIND_PACKAGE_HANDLE_STANDARD_ARGS(LZ4 DEFAULT_MSG LZ4_LIBRARY LZ4_INCLUDE_DIR)
+ ELSE(ENABLE_LZ4)
+@@ -790,7 +790,7 @@ ENDIF(ENABLE_NETTLE)
+ # Find OpenSSL
+ # (Except on Mac, where OpenSSL is deprecated.)
+ #
+-IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
++IF(ENABLE_OPENSSL)
+   FIND_PACKAGE(OpenSSL)
+   IF(OPENSSL_FOUND)
+     SET(HAVE_LIBCRYPTO 1)
+diff --git a/libarchive/CMakeLists.txt b/libarchive/CMakeLists.txt
+index e1d76a51..713c6496 100644
+--- a/libarchive/CMakeLists.txt
++++ b/libarchive/CMakeLists.txt
+@@ -5,6 +5,10 @@
+ #
+ ############################################
+ 
++if (ANDROID)
++    include_directories(${PROJECT_SOURCE_DIR}/contrib/android/include)
++endif()
++
+ # Public headers
+ SET(include_HEADERS
+   archive.h
+@@ -238,11 +242,15 @@ ELSEIF(ARCHIVE_ACL_SUNOS)
+ ENDIF()
+ 
+ # Libarchive is a shared library
++if (BUILD_SHARED_LIBS)
++
+ ADD_LIBRARY(archive SHARED ${libarchive_SOURCES} ${include_HEADERS})
+ TARGET_INCLUDE_DIRECTORIES(archive PUBLIC .)
+ TARGET_LINK_LIBRARIES(archive ${ADDITIONAL_LIBS})
+ SET_TARGET_PROPERTIES(archive PROPERTIES SOVERSION ${SOVERSION})
+ 
++else()
++
+ # archive_static is a static library
+ ADD_LIBRARY(archive_static STATIC ${libarchive_SOURCES} ${include_HEADERS})
+ TARGET_LINK_LIBRARIES(archive_static ${ADDITIONAL_LIBS})
+@@ -252,13 +260,21 @@ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
+ IF(NOT WIN32 OR CYGWIN)
+   SET_TARGET_PROPERTIES(archive_static PROPERTIES OUTPUT_NAME archive)
+ ENDIF(NOT WIN32 OR CYGWIN)
++endif()
+ 
+ IF(ENABLE_INSTALL)
+   # How to install the libraries
+-  INSTALL(TARGETS archive archive_static
++  if (BUILD_SHARED_LIBS)
++  INSTALL(TARGETS archive
++          RUNTIME DESTINATION bin
++          LIBRARY DESTINATION lib
++          ARCHIVE DESTINATION lib)
++  else()
++  INSTALL(TARGETS archive_static
+           RUNTIME DESTINATION bin
+           LIBRARY DESTINATION lib
+           ARCHIVE DESTINATION lib)
++  endif()
+   INSTALL_MAN(${libarchive_MANS})
+   INSTALL(FILES ${include_HEADERS} DESTINATION include)
+ ENDIF()

@@ -7,14 +7,11 @@ macro(add_image_option type)
     option(${type} "${type} images support" ON)
     if(${type})
         add_definitions("-DLOAD_${type}")
-        if(${type}_DYNAMIC)
-            add_definitions("-DLOAD_${type}_DYNAMIC")
-        endif()
     endif()
 endmacro()
 
 if(APPLE)
-    option(IMAGEIO "use native Mac OS X frameworks for loading images" ON)
+    option(IMAGEIO "use native Apple frameworks for loading images" ON)
     if(IMAGEIO)
         set(IMAGEIO_SOURCE "${SDL_IMAGE_SRC_DIR}/IMG_ImageIO.m")
     else()
@@ -91,6 +88,26 @@ endif()
 if(WEBP)
     find_package(WebP REQUIRED CONFIG)
     target_link_libraries(${PROJECT_NAME} PRIVATE WebP::webp)
+endif()
+
+if(APPLE AND IMAGEIO AND BUILD_SHARED_LIBS)
+    if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+        set(extraFrameworks
+            "-framework ApplicationServices"
+        )
+    else()
+        set(extraFrameworks
+            "-framework MobileCoreServices"
+            "-framework UIKit"
+        )
+    endif()
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        "-framework CoreFoundation"
+        "-framework CoreGraphics"
+        "-framework Foundation"
+        "-framework ImageIO"
+        ${extraFrameworks}
+    )
 endif()
 
 install(TARGETS ${PROJECT_NAME}

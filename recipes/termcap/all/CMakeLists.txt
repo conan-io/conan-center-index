@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(conan_termcap C)
-
-include("conanbuildinfo.cmake")
-conan_basic_setup(KEEP_RPATHS)
+project(conan_termcap LANGUAGES C)
 
 include(CheckIncludeFile)
 include(GNUInstallDirs)

@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f0b67b9..4b00b8b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,3 +17,19 @@ set(SOURCE
+ add_library(qcbor ${SOURCE})
+ 
+ target_include_directories(qcbor PUBLIC inc)
++
++set_target_properties(qcbor PROPERTIES
++    WINDOWS_EXPORT_ALL_SYMBOLS ON
++)
++
++find_library(LIBM m)
++target_link_libraries(qcbor PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
++
++include(GNUInstallDirs)
++install(TARGETS qcbor
++    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++
++install(DIRECTORY "inc/qcbor" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

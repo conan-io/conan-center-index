@@ -1,4 +1,7 @@
 sources:
+  "2.5.0":
+    url: "https://github.com/libexpat/libexpat/releases/download/R_2_5_0/expat-2.5.0.tar.xz"
+    sha256: "ef2420f0232c087801abf705e89ae65f6257df6b7931d37846a193ef2e8cdcbe"
   "2.4.9":
     sha256: "6e8c0728fe5c7cd3f93a6acce43046c5e4736c7b4b68e032e9350daa0efc0354"
     url: "https://github.com/libexpat/libexpat/releases/download/R_2_4_9/expat-2.4.9.tar.xz"
@@ -32,19 +35,6 @@ sources:
   "2.2.10":
     sha256: "bf42d1f52371d23684de36cc6d2f0f1acd02de264d1105bdc17792bbeb7e7ceb"
     url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_10/expat-2.2.10.tar.gz"
-  "2.2.9":
-    sha256: "4456e0aa72ecc7e1d4b3368cd545a5eec7f9de5133a8dc37fdb1efa6174c4947"
-    url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_9/expat-2.2.9.tar.gz"
-  "2.2.8":
-    sha256: "bd507cba42716ca9afe46dd3687fb0d46c09347517beb9770f53a435d2c67ea0"
-    url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_8/expat-2.2.8.tar.gz"
-  "2.2.7":
-    sha256: "42241742da97d40557857726cc4f02008cd14f2b44134c6e33af043967cd9d15"
-    url: "https://github.com/libexpat/libexpat/releases/download/R_2_2_7/expat-2.2.7.tar.gz"
 patches:
   "2.3.0":
     - patch_file: "patches/0001-2.3.0-relax-vs-restriction.patch"
-  "2.2.7":
-    - patch_file: "patches/0002-2.2.7-fix-set-cmake-policies.patch"
-      patch_description: "cmake_minimum_required(VERSION) should be called before project() for cmake policies to work"
-      patch_type: "conan"

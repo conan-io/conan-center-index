@@ -1,17 +1,24 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.55.0"
 
 
 class Argtable2Conan(ConanFile):
     name = "argtable2"
     description = "Argtable is an ANSI C library for parsing GNU style command line options with a minimum of fuss."
-    topics = ("conan", "argtable2", "argument", "parsing", "getopt")
     license = "LGPL-2.0+"
-    homepage = "http://argtable.sourceforge.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://argtable.sourceforge.net/"
+    topics = ("argument", "parsing", "getopt")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,22 +29,12 @@ class Argtable2Conan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "pkg_config", "cmake_find_package"
-    exports_sources = "patches/**"
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,82 +42,69 @@ class Argtable2Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("gnu-config/cci.20201022")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+        if not is_msvc(self):
+            self.tool_requires("gnu-config/cci.20210814")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        # If using the experimental feature with different context for host and
-        # build, the 'user_info' attributes of the 'build_requires' packages
-        # will be located into the 'user_info_build' object. In other cases they
-        # will be located into the 'deps_user_info' object.
-        return getattr(self, "user_info_build", None) or self.deps_user_info
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-
-        # it contains outdated 'config.sub' and
-        # 'config.guess' files. It not allows to build libelf for armv8 arch.
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    def _run_nmake(self, target):
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.libs = []
-        vars = " ".join("CONAN_{}=\"{}\"".format(k, v) for k, v in autotools.vars.items())
-        with tools.vcvars(self.settings):
-            with tools.chdir(os.path.join(self._source_subfolder, "src")):
-                self.run("nmake -f Makefile.nmake {} {}".format(target, vars), run_environment=True)
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
-            self._run_nmake("argtable2.dll" if self.options.shared else "argtable2.lib")
+        apply_conandata_patches(self)
+        if is_msvc(self):
+            with chdir(self, os.path.join(self.source_folder, "src")):
+                target = "argtable2.dll" if self.options.shared else "argtable2.lib"
+                self.run(f"nmake -f Makefile.nmake {target}")
         else:
-            autotools = self._configure_autotools()
+            for gnu_config in [
+                self.conf.get("user.gnu-config:config_guess", check_type=str),
+                self.conf.get("user.gnu-config:config_sub", check_type=str),
+            ]:
+                if gnu_config:
+                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
-            self.copy("*.lib", src=os.path.join(self._source_subfolder, "src"), dst="lib")
-            self.copy("*.dll", src=os.path.join(self._source_subfolder, "src"), dst="bin")
-            self.copy("argtable2.h", src=os.path.join(self._source_subfolder, "src"), dst="include")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if is_msvc(self):
+            output_folder = os.path.join(self.source_folder, "src")
+            copy(self, "*.lib", src=output_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dll", src=output_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+            copy(self, "argtable2.h", src=output_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
             if self.options.shared:
-                os.rename(os.path.join(self.package_folder, "lib", "impargtable2.lib"),
-                          os.path.join(self.package_folder, "lib", "argtable2.lib"))
+                rename(self, os.path.join(self.package_folder, "lib", "impargtable2.lib"),
+                             os.path.join(self.package_folder, "lib", "argtable2.lib"))
         else:
-            autotools = self._configure_autotools()
+            autotools = Autotools(self)
             autotools.install()
-
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "argtable2")
         self.cpp_info.libs = ["argtable2"]
-        self.cpp_info.names["pkg_config"] = "argtable2"

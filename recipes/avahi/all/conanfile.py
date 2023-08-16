@@ -1,12 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.53.0"
 
 
 class AvahiConan(ConanFile):
@@ -14,7 +15,7 @@ class AvahiConan(ConanFile):
     # --enable-compat-libdns_sd means that this recipe provides the mdnsresponder compile interface
     provides = "mdnsresponder"
     description = "Avahi - Service Discovery for Linux using mDNS/DNS-SD -- compatible with Bonjour"
-    topics = ("avahi", "Bonjour", "DNS-SD", "mDNS")
+    topics = ("bonjour", "dns", "dns-sd", "mdns")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lathiat/avahi"
     license = "LGPL-2.1-only"
@@ -33,33 +34,34 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.74.0")
-        self.requires("expat/2.4.9")
+        self.requires("glib/2.75.2")
+        self.requires("expat/2.5.0")
         self.requires("libdaemon/0.14")
-        self.requires("dbus/1.15.0")
+        self.requires("dbus/1.15.2")
         self.requires("gdbm/1.19")
         self.requires("libevent/2.1.12")
 
+    def build_requirements(self):
+        self.tool_requires("glib/2.75.2")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+
     def validate(self):
-        if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux is supported for this package.")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def configure(self):
-        try:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-compat-libdns_sd")
         tc.configure_args.append("--disable-gtk3")
@@ -68,9 +70,15 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
+        if self.settings.os == "Linux":
+            tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
         AutotoolsDeps(self).generate()
         PkgConfigDeps(self).generate()
+        # Override Avahi's problematic check for the pkg-config executable.
+        env = Environment()
+        env.define("have_pkg_config", "yes")
+        env.vars(self).save_script("conanbuild_pkg_config")
 
     def build(self):
         autotools = Autotools(self)

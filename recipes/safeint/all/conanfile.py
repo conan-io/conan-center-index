@@ -11,11 +11,15 @@ class SafeintConan(ConanFile):
     name = "safeint"
     description = "SafeInt is a class library for C++ that manages integer overflows."
     license = "MIT"
-    topics = ("safeint", "integer", "overflow")
+    topics = ("integer", "overflow", "header-only")
+    package_type = "header-library"
     homepage = "https://github.com/dcleblanc/SafeInt"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -23,9 +27,6 @@ class SafeintConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -40,6 +41,4 @@ class SafeintConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+option(built_contrib "Enabled if opencv is built contrib sfm" OFF)
 
 find_package(OpenCV REQUIRED core imgproc CONFIG)
 
-option(built_contrib "Enabled if opencv is built contrib sfm" OFF)
-if(built_contrib)
-    add_definitions(-DBUILT_CONTRIB)
-endif()
-
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} opencv_core opencv_imgproc $<TARGET_NAME_IF_EXISTS:opencv_sfm>)
+target_link_libraries(${PROJECT_NAME} PRIVATE opencv_core opencv_imgproc $<TARGET_NAME_IF_EXISTS:opencv_sfm>)
+if(built_contrib)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_CONTRIB)
+endif()

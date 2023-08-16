@@ -8,6 +8,5 @@ sources:
 patches:
   "1.1.0":
     - patch_file: "patches/0001-change-share-to-res.patch"
-      base_path: "source_subfolder"
       patch_type: "conan"
       patch_description: "Change share folder to res"

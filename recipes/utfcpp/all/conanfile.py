@@ -14,6 +14,7 @@ class UtfCppConan(ConanFile):
     description = "UTF-8 with C++ in a Portable Way"
     topics = ("utf", "utf8", "unicode", "text")
     license = "BSL-1.0"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -24,8 +25,7 @@ class UtfCppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -61,9 +61,7 @@ class UtfCppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "utf8cpp")
         self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "utf8cpp"

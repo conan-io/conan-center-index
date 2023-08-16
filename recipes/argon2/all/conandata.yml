@@ -4,5 +4,4 @@ sources:
     sha256: "daf972a89577f8772602bf2eb38b6a3dd3d922bf5724d45e7f9589b5e830442c"
 patches:
   "20190702":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-makefile-no-march.patch"
+    - patch_file: "patches/0001-makefile-no-march.patch"

@@ -7,8 +7,11 @@ from conan.tools.cmake import cmake_layout
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -17,9 +20,6 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["SPDLOG_HEADER_ONLY"] = self.dependencies["spdlog"].options.header_only
         tc.generate()
-
-    def layout(self):
-        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)

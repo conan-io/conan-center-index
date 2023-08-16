@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -10,11 +10,13 @@ class PlflistConan(ConanFile):
     name = "plf_list"
     description = "plf::list is a drop-in higher-performance replacement for std::list"
     license = "Zlib"
-    topics = ("plf_list", "container", "linked-list", "list")
-    homepage = "https://github.com/mattreecebentley/plf_list"
+    topics = ("container", "linked-list", "list", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mattreecebentley/plf_list"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
@@ -27,7 +29,7 @@ class PlflistConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

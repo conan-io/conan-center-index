@@ -1,19 +1,17 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
-
+required_conan_version = ">=1.52.0"
 
 class LibmaxminddbConan(ConanFile):
     name = "libmaxminddb"
+    description = "C library for the MaxMind DB file format"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://maxmind.github.io/libmaxminddb/"
-    description = "C library for the MaxMind DB file format"
     topics = ("maxmind", "geoip")
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,8 +23,7 @@ class LibmaxminddbConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,7 +31,10 @@ class LibmaxminddbConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            try:
+                del self.options.fPIC
+            except Exception:
+                pass
         try:
             del self.settings.compiler.libcxx
         except Exception:
@@ -69,6 +69,7 @@ class LibmaxminddbConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "maxminddb")

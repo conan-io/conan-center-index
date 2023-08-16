@@ -1,5 +1,21 @@
---- a/libgeotiff/CMakeLists.txt
-+++ b/libgeotiff/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,6 +5,7 @@
+ # Author: Mateusz Loskot <mateusz@loskot.net>
+ #
+ ###############################################################################
++CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+ PROJECT(GeoTIFF)
+ 
+ SET(GEOTIFF_LIB_NAME geotiff)
+@@ -12,7 +13,6 @@ SET(GEOTIFF_LIBRARY_TARGET geotiff_library)
+ 
+ ##############################################################################
+ # CMake settings
+-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+ 
+ SET(CMAKE_COLOR_MAKEFILE ON)
+ 
 @@ -88,7 +88,7 @@ IF(WIN32)
  ENDIF()
  

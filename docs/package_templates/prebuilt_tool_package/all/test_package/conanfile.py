@@ -9,10 +9,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def build_requirements(self):
-        self.tools_requires(self.tested_reference_str)
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if can_run(self):
-            # self.run checks the command exit code
-            # the tool must be available on PATH
-            self.run("tool --version")
+        self.run("tool --version")

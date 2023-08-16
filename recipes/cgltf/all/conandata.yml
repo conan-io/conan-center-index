@@ -1,4 +1,7 @@
 sources:
+  "1.13":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.13.tar.gz"
+    sha256: "053d5320097334767486c6e33d01dd1b1c6224eac82aac2d720f4ec456d8c50b"
   "1.12":
     url: "https://github.com/jkuhlmann/cgltf/archive/v1.12.tar.gz"
     sha256: "2c429bb26256b49bfed2510aef1e5fa9321b27fe4cf226c9ece9a5867150974f"

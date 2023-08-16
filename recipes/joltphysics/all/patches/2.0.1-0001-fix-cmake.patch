@@ -1,0 +1,90 @@
+--- a/Build/CMakeLists.txt
++++ b/Build/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.15)
+ 
+ project(JoltPhysics CXX)
+ 
+@@ -32,11 +32,6 @@ include(CMakeDependentOption)
+ # Windows Store only supports the DLL version
+ cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runtime library" ON "MSVC;NOT WINDOWS_STORE" OFF)
+ 
+-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
+-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseASAN;ReleaseUBSAN;ReleaseCoverage;Distribution")
+-endif()
+ 
+ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore") AND NOT MINGW)
+ 	# Fill in the path to the asan libraries
+@@ -53,7 +48,7 @@ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUA
+ 	endif()
+ 
+ 	# Set general compiler flags
+-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /Gm- /Wall /WX /MP /nologo /diagnostics:classic /FC /fp:except- /Zc:inline /Zi")
++	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Gm- /Wall /MP /nologo /diagnostics:classic /FC /fp:except- /Zc:inline /Zi")
+ 
+ 	# Remove any existing compiler flag that enables RTTI
+ 	string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+@@ -76,8 +71,6 @@ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUA
+ 
+ 	if (NOT ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM64") AND NOT ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM"))
+ 		# On ARM, whole program optimization triggers an internal compiler error during code gen, so we don't turn it on
+-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
+-		set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_DISTRIBUTION} /GL")
+ 	endif()
+ 
+ 	# Set linker flags
+@@ -118,7 +111,6 @@ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUA
+ 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DJPH_FLOATING_POINT_EXCEPTIONS_ENABLED") # Clang turns Float2 into a vector sometimes causing floating point exceptions
+ 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DJPH_FLOATING_POINT_EXCEPTIONS_ENABLED")
+ 		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /LTCG:incremental /OPT:ICF /OPT:REF")
+-		set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "/LTCG")
+ 	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+ 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showFilenames")
+ 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments") # Clang emits warnings about unused arguments such as /MP and /GL
+@@ -153,7 +145,7 @@ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUA
+ 	endif()
+ elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "iOS" OR MINGW OR EMSCRIPTEN)
+ 	# Set general compiler flags
+-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++17 -I. -Wall -Werror")
++	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -I. -Wall")
+ 
+ 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+ 		# Somehow -Wcomment doesn't want to be turned off from code and we need this because Doxygen MathJax uses it
+--- a/Jolt/Jolt.cmake
++++ b/Jolt/Jolt.cmake
+@@ -410,12 +410,26 @@ endif()
+ source_group(TREE ${JOLT_PHYSICS_ROOT} FILES ${JOLT_PHYSICS_SRC_FILES})
+ 
+ # Create Jolt lib
+-add_library(Jolt STATIC ${JOLT_PHYSICS_SRC_FILES})
++add_library(Jolt ${JOLT_PHYSICS_SRC_FILES})
++target_compile_features(Jolt PUBLIC cxx_std_17)
++include(GNUInstallDirs)
++install(
++	TARGETS Jolt
++	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++install(DIRECTORY ${JOLT_PHYSICS_ROOT} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING REGEX "(.*).(h|inl)$")
++if(JPH_DEBUG_RENDERER)
++    target_compile_definitions(Jolt PUBLIC JPH_DEBUG_RENDERER)
++endif()
++if(JPH_PROFILE_ENABLED)
++    target_compile_definitions(Jolt PUBLIC JPH_PROFILE_ENABLED)
++endif()
+ target_include_directories(Jolt PUBLIC ${PHYSICS_REPO_ROOT})
+-target_precompile_headers(Jolt PRIVATE ${JOLT_PHYSICS_ROOT}/Jolt.h)
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:_DEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Release>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:_DEBUG>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Release>:NDEBUG>")
+ target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Distribution>:NDEBUG>")
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseASAN>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DISABLE_TEMP_ALLOCATOR;JPH_DISABLE_CUSTOM_ALLOCATOR;JPH_DEBUG_RENDERER>")
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseUBSAN>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseASAN>:NDEBUG;JPH_DISABLE_TEMP_ALLOCATOR;JPH_DISABLE_CUSTOM_ALLOCATOR>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseUBSAN>:NDEBUG>")
+ target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseCoverage>:NDEBUG>")

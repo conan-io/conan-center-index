@@ -1,4 +1,19 @@
 sources:
+  "3.5.0":
+    url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/v3_5_0.zip"
+    sha256: "1b2916d57173ac523acd334fb6e25623ddfed3c342f3c2aadfe4d1d0be6e7657"
   "3.4.4":
     url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/v3_4_4.zip"
     sha256: "04b52a67e90a56b18d9ddd0384630f43b5263a8fdee1afae081e32d7b23cd5ec"
+patches:
+  "3.5.0":
+    - patch_file: "patches/3.4.4-0002-cmake-no-rpath.patch"
+      patch_description: "CMake: do not populate rpath with absolute paths"
+      patch_type: "conan"
+  "3.4.4":
+    - patch_file: "patches/3.4.4-0001-cmake-minimum-required.patch"
+      patch_description: "CMake: Fix position of cmake_minimum_required()"
+      patch_type: "conan"
+    - patch_file: "patches/3.4.4-0002-cmake-no-rpath.patch"
+      patch_description: "CMake: do not populate rpath with absolute paths"
+      patch_type: "conan"

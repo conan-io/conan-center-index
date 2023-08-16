@@ -1,0 +1,13 @@
+diff --git a/Makefile.in b/Makefile.in
+index 18850e7..ae75282 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -703,7 +703,7 @@ man1_MANS = \
+ update_mans = \
+   $(AM_V_GEN): \
+     && $(MKDIR_P) doc \
+-    && ./pre-inst-env $(PERL) $(srcdir)/doc/help2man --output=$@
++    && ./pre-inst-env $(PERL) $(srcdir)/doc/help2man --no-discard-stderr --output=$@
+ 
+ checklinkx = $(top_srcdir)/contrib/checklinkx
+ # that 4-second sleep seems to be what gnu.org likes.
