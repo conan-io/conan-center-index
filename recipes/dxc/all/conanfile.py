@@ -45,7 +45,5 @@ class DXCRecipe(ConanFile):
         self.cpp_info.includedirs = ["include"]
         self.cpp_info.bindirs = ["bin"]
 
-        if self.settings.os == "Windows":
-            self.cpp_info.defines = ["__DXC_TEST_WINDOWS"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]

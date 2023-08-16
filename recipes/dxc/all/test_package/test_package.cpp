@@ -1,4 +1,4 @@
-#ifdef __DXC_TEST_WINDOWS
+#ifdef _MSC_VER
 #include <Windows.h>
 #else
 #include <WinAdapter.h>
