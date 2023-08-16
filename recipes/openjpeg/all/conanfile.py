@@ -148,7 +148,6 @@ class OpenjpegConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenJPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenJPEG"
-        legacy_build_modules = [self._module_vars_rel_path, self._module_target_rel_path]
-        self.cpp_info.build_modules["cmake_find_package"] = legacy_build_modules
-        self.cpp_info.build_modules["cmake_find_package_multi"] = legacy_build_modules
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_target_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
         self.cpp_info.names["pkg_config"] = "libopenjp2"
