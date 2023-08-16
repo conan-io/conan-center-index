@@ -21,6 +21,11 @@ class AudiofileConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        # v1.1.1 uses is_signed_v
+        return 11 if Version(self.version) < "1.1.1" else 17
+
     def configure(self):
         if Version(self.version) < "1.1.0":
             self.license = "GPL-3.0-or-later"
@@ -33,13 +38,13 @@ class AudiofileConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if (
             Version(self.version) >= "1.1.1"
             and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) < "8"
+            and Version(self.settings.compiler.version) < "7"
         ):
-            raise ConanInvalidConfiguration("AudioFile >= 1.1.1 requires GCC >= 8")
+            raise ConanInvalidConfiguration("AudioFile >= 1.1.1 requires GCC >= 7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
