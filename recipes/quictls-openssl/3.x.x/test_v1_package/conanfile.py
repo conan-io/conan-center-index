@@ -28,13 +28,13 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
 
-            if not self.options["openssl"].no_legacy:
+            if not self.options["quictls-openssl"].no_legacy:
                 bin_legacy_path = os.path.join("bin", "digest_legacy")
                 self.run(bin_legacy_path, run_environment=True)
 
-            if not self.options["openssl"].no_stdio:
+            if not self.options["quictls-openssl"].no_stdio:
                 self.run("openssl version", run_environment=True)
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
+        assert os.path.exists(os.path.join(self.deps_cpp_info["quictls-openssl"].rootpath, "licenses", "LICENSE.txt"))
 
         for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
             assert os.path.isfile(os.path.join(self.build_folder, fn))
