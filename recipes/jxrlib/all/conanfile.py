@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class JxrlibConan(ConanFile):
@@ -15,6 +15,7 @@ class JxrlibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
     topics = ("jxr", "jpeg", "xr")
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -36,18 +37,9 @@ class JxrlibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

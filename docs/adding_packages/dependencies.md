@@ -168,20 +168,26 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 
 > **Note**: These are very specific to the ConanCenter being the default remote and may not be relevant to your specifc use case.
 
-* [Version ranges](https://docs.conan.io/1/versioning/version_ranges.html) are not allowed.
+* [Version ranges](https://docs.conan.io/1/versioning/version_ranges.html) are generally not allowed (see below for exemption).
 * Specify explicit [RREV](https://docs.conan.io/1/versioning/revisions.html) (recipe revision) of dependencies is not allowed.
 * Only ConanCenter recipes are allowed in `requires`/`requirements()` and `build_requires`/`build_requirements()`.
 * [`python_requires`](https://docs.conan.io/1/reference/conanfile/other.html#python-requires) are not allowed.
 
 ### Version Ranges
  
-Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/1/versioning/version_ranges.html). With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies. Currently, these are:
+Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/2/tutorial/versioning/version_ranges.html).
+With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies.
+Currently, these are:
+
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts.
 
-Conan maintainers may introduce this for other dependencies over time.
+> **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec, 
+> OpenSSL 1.1.x does not follow this so the client will not resolve to that range and will pick a 3.x version. In order to select a lower version you
+> can user the defunct `--require-override openssl/1.1.1t@` from the command line, or override from the recipe with `self.requires(openssl/1.1.1t, override=True)`
+> to ensure a lower version is picked.
 
-Outside of the cases outlined above, version ranges are not allowed in ConanCenter recipes.
+Conan maintainers may introduce this for other dependencies over time. Outside of the cases outlined above, version ranges are not allowed in ConanCenter recipes.
 
 ## Handling "internal" dependencies
 
