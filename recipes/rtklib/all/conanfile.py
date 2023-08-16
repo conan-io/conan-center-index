@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=1.53.0"
 
@@ -44,8 +44,9 @@ class RtklibConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt",
-            src=self.recipe_folder,
-            dst=os.path.join(self.export_sources_folder, "src"))
+             src=self.recipe_folder,
+             dst=os.path.join(self.export_sources_folder, "src"))
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -110,14 +111,15 @@ class RtklibConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE.txt",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder)
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
@@ -131,6 +133,6 @@ class RtklibConan(ConanFile):
                 self.cpp_info.defines.append(k)
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("rt")
+            self.cpp_info.system_libs = ["m", "pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32", "winmm"]

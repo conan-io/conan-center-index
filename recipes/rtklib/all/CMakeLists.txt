@@ -18,8 +18,18 @@ endif()
 
 file(GLOB_RECURSE RTKLIB_SOURCES "src/*.c")
 
+find_package(Threads REQUIRED)
+
 add_library(rtklib ${RTKLIB_SOURCES})
 target_include_directories(rtklib PUBLIC src)
+target_link_libraries(rtklib PUBLIC Threads::Threads)
+
+if (WIN32)
+    target_link_libraries(rtklib PRIVATE
+        ws2_32 # sockets
+        winmm # timeGetTime()
+    )
+endif()
 
 include(GNUInstallDirs)
 install(TARGETS rtklib)
