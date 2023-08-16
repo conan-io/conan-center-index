@@ -30,7 +30,7 @@ generally approved on a weekly basis. Feel free to continue to step :two: while 
 > All interactions are subject to the expectations of the [code of conduct](../code_of_conduct.md). Any misuse or inappropriate behavior
 > are subject to the same principals.
 
-When submitting a pull request for the first time, you will be prompted to sign the [CLA](../CONTRIBUTOR_LICENSE_AGREEMENT.md) for your
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](https://cla-assistant.io/conan-io/conan-center-index) for your
 code contributions. You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
 
 ## Inactivity and user removal
@@ -68,7 +68,7 @@ In ConanCenter, our belief is recipes should always match upstream, in other wor
 
 Where dependencies are involved, there's no shortcuts, inspect the upstream's build scripts for how they are usually consumed. Pick the Conan
 generator that matches. The most common example is CMake's `find_package` that can be satisfied by Conan's
-[`CMakeDeps`](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html) generator. There are a few
+[`CMakeDeps`](https://docs.conan.io/1/reference/conanfile/tools/cmake/cmakedeps.html) generator. There are a few
 things to be cautious about, many projects like to "vendor" other projects within them. This can be files checked into the repository or
 downloaded during the build process. These should be removed, see the [Dependencies section](dependencies.md#handling-internal-dependencies)
 for more information.

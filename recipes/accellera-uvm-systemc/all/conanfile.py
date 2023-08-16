@@ -29,9 +29,11 @@ class UvmSystemC(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def requirements(self):
+        self.requires("systemc/2.3.3")
+
     def build_requirements(self):
         self.tool_requires("cmake/3.24.0")
-        self.tool_requires("systemc/2.3.3")
 
     def configure(self):
         if self.options.shared:

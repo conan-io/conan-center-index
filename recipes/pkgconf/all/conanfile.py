@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
@@ -49,13 +48,9 @@ class PkgConfConan(ConanFile):
             self.options.rm_safe("shared")
         elif self.options.shared:
             self.options.rm_safe("fPIC")
-       
+
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
-    def validate(self):
-        if cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building is not implemented in the recipe, contributions welcome.")
 
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
@@ -79,7 +74,11 @@ class PkgConfConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
-        tc.project_options["tests"] = False
+        if Version(self.version) >= "1.9.4":
+            tc.project_options["tests"] = "disabled"
+        else:
+            tc.project_options["tests"] = False
+
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
         tc.generate()
@@ -101,12 +100,12 @@ class PkgConfConan(ConanFile):
             if self.options.enable_lib and not self.options.shared:
                 rename(self, os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
-        
+
         if not self.options.enable_lib:
             rmdir(self, os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "include"))
 
-        
+
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
         rename(self, os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))

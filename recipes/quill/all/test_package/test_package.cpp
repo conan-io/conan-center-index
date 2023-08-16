@@ -3,8 +3,16 @@
 int main()
 {
     quill::start();
-    quill::Handler *file_handler = quill::file_handler("logfile.log", "w");
-    quill::Logger *my_logger = quill::create_logger("my_logger", file_handler);
+#ifdef QUILL_FILE_HANDLERS_API_V3_3
+    auto file_handler = quill::file_handler("logfile.log", []() {
+        quill::FileHandlerConfig cfg;
+        cfg.set_open_mode('w');
+        return cfg;
+    }());
+#else
+    auto file_handler = quill::file_handler("logfile.log", "w");
+#endif
+    auto my_logger = quill::create_logger("my_logger", std::move(file_handler));
 
     LOG_INFO(my_logger, "Hello from {}", "Quill");
     LOG_CRITICAL(my_logger, "This is a conan example {}", 1234);

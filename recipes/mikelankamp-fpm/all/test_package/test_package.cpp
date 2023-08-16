@@ -5,9 +5,7 @@
 #include <iostream>
 
 int main() {
-    std::cout << "Please input a number: ";
-    fpm::fixed_16_16 x;
-    std::cin >> x;
+    fpm::fixed_16_16 x {0.0};
     std::cout << "The cosine of " << x << " radians is: " << cos(x) << std::endl;
 
     return 0;

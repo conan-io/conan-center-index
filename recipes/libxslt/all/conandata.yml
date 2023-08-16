@@ -5,6 +5,4 @@ sources:
 patches:
   "1.1.34":
     - patch_file: "patches/0001-allow-xsltproc-link-shared-mt.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-Add-configuration-for-profiler.patch"
-      base_path: "source_subfolder"

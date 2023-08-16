@@ -1,18 +1,24 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-import contextlib
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibltcConan(ConanFile):
     name = "libltc"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://x42.github.io/libltc/"
-    description = "Linear/Logitudinal Time Code (LTC) Library"
+    description = "Linear/Longitudinal Time Code (LTC) Library"
     topics = ("timecode", "smpte", "ltc")
     license = "LGPL-3.0"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,12 +27,6 @@ class LibltcConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _settings_build(self):
@@ -37,75 +37,61 @@ class LibltcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.cxx_flags.append("-EHsc")
-            if tools.Version(self.settings.compiler.version) >= "12":
-                self._autotools.flags.append("-FS")
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        tc = AutotoolsToolchain(self)
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
+            tc.extra_cflags.append("-FS")
+        env = tc.environment()
+        if is_msvc(self):
+            compile_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper"))
+            lib_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("AR", f"{lib_wrapper} lib")
+            env.define("LD", f"{compile_wrapper} link -nologo")
+        tc.generate(env)
 
     def build(self):
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libltc.la"))
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "ltc.dll.lib"),
-                    os.path.join(self.package_folder, "lib", "ltc.lib"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "ltc.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "ltc.lib"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "ltc"
+        self.cpp_info.set_property("pkg_config_name", "ltc")
         self.cpp_info.libs = ["ltc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

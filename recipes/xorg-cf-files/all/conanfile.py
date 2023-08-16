@@ -13,7 +13,7 @@ required_conan_version = ">=1.57.0"
 
 class XorgCfFilesConan(ConanFile):
     name = "xorg-cf-files"
-    package_type = "build-scripts"
+    # package_type = "build-scripts" # see https://github.com/conan-io/conan/issues/13431
     description = "Imake configuration files & templates"
     topics = ("imake", "xorg", "template", "configuration", "obsolete")
     license = "MIT"

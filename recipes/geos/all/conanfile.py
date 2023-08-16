@@ -12,10 +12,10 @@ class GeosConan(ConanFile):
     name = "geos"
     description = "C++11 library for performing operations on two-dimensional vector geometries"
     license = "LGPL-2.1"
-    topics = ("geos", "osgeo", "geometry", "topology", "geospatial")
+    topics = ("osgeo", "geometry", "topology", "geospatial")
     homepage = "https://trac.osgeo.org/geos"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -122,6 +122,4 @@ class GeosConan(ConanFile):
         self.cpp_info.components["geos_c"].requires = ["geos_cpp"]
 
         if self.options.utils:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
