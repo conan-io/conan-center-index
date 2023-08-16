@@ -11,10 +11,10 @@ class BrynetConan(ConanFile):
     name = "brynet"
     description = "Header Only Cross platform high performance TCP network library using C++ 11."
     license = "MIT"
-    topics = ("networking", "tcp", "websocket")
-    homepage = "https://github.com/IronsDu/brynet"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/IronsDu/brynet"
+    topics = ("networking", "tcp", "websocket")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
@@ -30,7 +30,7 @@ class BrynetConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()
@@ -40,8 +40,7 @@ class BrynetConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

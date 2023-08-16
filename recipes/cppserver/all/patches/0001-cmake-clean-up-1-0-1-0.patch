@@ -1,17 +1,8 @@
-From 3fa937989fcb8c96a1a73eb016706e5cfb18a799 Mon Sep 17 00:00:00 2001
-From: Alejandro Colomar <alx.manpages@gmail.com>
-Date: Mon, 7 Jun 2021 11:42:21 +0200
-Subject: [PATCH] cmake clean up
-
----
- CMakeLists.txt | 59 +++++++++++++++-----------------------------------
- 1 file changed, 18 insertions(+), 41 deletions(-)
-
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 95e9c9e1..2183c531 100644
+index 95e9c9e..8616cb6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -17,52 +17,20 @@ if(DOXYGEN_FOUND)
+@@ -17,52 +17,21 @@ if(DOXYGEN_FOUND)
    endif()
  endif()
  
@@ -49,7 +40,7 @@ index 95e9c9e1..2183c531 100644
  
  # Link libraries
 -list(APPEND LINKLIBS ${OPENSSL_LIBRARIES})
-+list(APPEND LINKLIBS CONAN_PKG::openssl)
++list(APPEND LINKLIBS OpenSSL::SSL)
  if(WIN32)
 -  list(APPEND LINKLIBS ${CRYPT_LIBRARIES})
 -  list(APPEND LINKLIBS ${WINSOCK_LIBRARIES})
@@ -57,7 +48,8 @@ index 95e9c9e1..2183c531 100644
 +  list(APPEND LINKLIBS mswsock ws2_32)
  endif()
 -list(APPEND LINKLIBS cppcommon)
-+list(APPEND LINKLIBS CONAN_PKG::cppcommon)
++find_package(cppcommon REQUIRED)
++list(APPEND LINKLIBS cppcommon::cppcommon)
  
  # OpenSSL libraries
  message(STATUS "OpenSSL version: ${OPENSSL_VERSION} ${OPENSSL_INCLUDE_DIR} ${OPENSSL_LIBRARIES}")
@@ -68,17 +60,18 @@ index 95e9c9e1..2183c531 100644
  # Library
  file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
  file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
-@@ -70,7 +38,8 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
+@@ -70,7 +39,9 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
  add_library(cppserver ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
  set_target_properties(cppserver PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
  target_include_directories(cppserver PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 -target_link_libraries(cppserver ${LINKLIBS} asio)
-+target_link_libraries(cppserver ${LINKLIBS} CONAN_PKG::asio)
++find_package(asio REQUIRED)
++target_link_libraries(cppserver ${LINKLIBS} asio::asio)
 +target_compile_features(cppserver PUBLIC cxx_std_17)
  list(APPEND INSTALL_TARGETS cppserver)
  list(APPEND LINKLIBS cppserver)
  
-@@ -78,6 +47,7 @@ list(APPEND LINKLIBS cppserver)
+@@ -78,6 +49,7 @@ list(APPEND LINKLIBS cppserver)
  if(NOT CPPSERVER_MODULE)
  
    # Examples
@@ -86,7 +79,7 @@ index 95e9c9e1..2183c531 100644
    file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
    file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
    file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
-@@ -90,8 +60,10 @@ if(NOT CPPSERVER_MODULE)
+@@ -90,8 +62,10 @@ if(NOT CPPSERVER_MODULE)
      list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
    endforeach()
@@ -97,7 +90,7 @@ index 95e9c9e1..2183c531 100644
    file(GLOB BENCHMARK_HEADER_FILES "performance/*.h")
    file(GLOB BENCHMARK_INLINE_FILES "performance/*.inl")
    file(GLOB BENCHMARK_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/performance" "performance/*.cpp")
-@@ -104,8 +76,10 @@ if(NOT CPPSERVER_MODULE)
+@@ -104,8 +78,10 @@ if(NOT CPPSERVER_MODULE)
      list(APPEND INSTALL_TARGETS ${BENCHMARK_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${BENCHMARK_TARGET})
    endforeach()
@@ -108,7 +101,7 @@ index 95e9c9e1..2183c531 100644
    file(GLOB TESTS_HEADER_FILES "tests/*.h")
    file(GLOB TESTS_INLINE_FILES "tests/*.inl")
    file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
-@@ -115,19 +89,22 @@ if(NOT CPPSERVER_MODULE)
+@@ -115,19 +91,22 @@ if(NOT CPPSERVER_MODULE)
    target_link_libraries(cppserver-tests ${LINKLIBS})
    list(APPEND INSTALL_TARGETS cppserver-tests)
    list(APPEND INSTALL_TARGETS_PDB cppserver-tests)
@@ -135,6 +128,3 @@ index 95e9c9e1..2183c531 100644
      foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
        install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
      endforeach()
--- 
-2.31.1.498.g6c1eba8ee3d
-

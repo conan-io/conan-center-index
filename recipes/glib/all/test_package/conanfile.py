@@ -25,15 +25,19 @@ class TestPackageConan(ConanFile):
         tc.generate()
         virtual_run_env = VirtualRunEnv(self)
         virtual_run_env.generate()
+
+        if self.settings.os == "Macos":
+            env = Environment()
+            # Avoid conflicts with system libiconv
+            # see: https://github.com/conan-io/conan-center-index/pull/17610#issuecomment-1552921286
+            env.define_path("DYLD_FALLBACK_LIBRARY_PATH", "$DYLD_LIBRARY_PATH")
+            env.define_path("DYLD_LIBRARY_PATH", "")
+            env.vars(self, scope="run").save_script("conanrun_macos_runtimepath")
+
         if self.settings.os == "Windows":
             deps = CMakeDeps(self)
             deps.generate()
         else:
-            # todo Remove the following workaround after https://github.com/conan-io/conan/issues/11962 is fixed.
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            envvars = env.vars(self)
-            envvars.save_script("pkg_config")
             virtual_build_env = VirtualBuildEnv(self)
             virtual_build_env.generate()
             pkg_config_deps = PkgConfigDeps(self)

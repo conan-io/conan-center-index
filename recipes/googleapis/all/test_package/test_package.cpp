@@ -1,14 +1,13 @@
 #include <iostream>
-#include "google/type/color.pb.h"
+#include <google/bigtable/v2/bigtable.pb.h>
 
 int main() {
     std::cout << "Conan - test package for googleapis\n";
 
-    google::type::Color c;
-    c.set_red(255);
-    c.set_blue(255);
+    google::bigtable::v2::CheckAndMutateRowRequest request;
+    request.set_table_name("projects/my-project/instances/my-instance/tables/my-table");
 
-    std::cout << c.DebugString();
+    std::cout << request.DebugString();
 
     return 0;
 }

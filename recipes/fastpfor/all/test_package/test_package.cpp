@@ -3,8 +3,9 @@
 
 int main() {
   using namespace FastPForLib;
+  CODECFactory factory;
 
-  IntegerCODEC &codec = *CODECFactory::getFromName("simdfastpfor256");
+  IntegerCODEC &codec = *factory.getFromName("simdfastpfor256");
 
   size_t N = 10 * 1000;
   std::vector<uint32_t> mydata(N);

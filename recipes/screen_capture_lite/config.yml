@@ -1,4 +1,12 @@
 versions:
+  "17.1.1369":
+    folder: "all"
+  "17.1.1327":
+    folder: "all"
+  "17.1.1173":
+    folder: "all"
+  "17.1.613":
+    folder: "all"
   "17.1.462":
     folder: "all"
   "17.1.439":

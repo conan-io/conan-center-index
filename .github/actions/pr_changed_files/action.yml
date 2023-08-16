@@ -37,6 +37,8 @@ runs:
         res = subprocess.run(["gh", "api", "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files", "--paginate"], capture_output=True, check=True)
         files = []
         for f in json.loads(res.stdout):
+          if f["status"] == "removed":
+            continue
           filename = Path(f["filename"]).parts
           for pattern in patterns:
             if len(pattern) != len(filename):

@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 class SimdutfConan(ConanFile):
     name = "simdutf"
@@ -15,6 +15,7 @@ class SimdutfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/simdutf/simdutf"
     topics = ("unicode", "transcoding", "neon", "simd", "avx2", "sse2", "utf8", "utf16", )
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,10 +39,7 @@ class SimdutfConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,7 +49,7 @@ class SimdutfConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -62,7 +60,6 @@ class SimdutfConan(ConanFile):
         if Version(self.version) >= "2.0.3":
             tc.variables["SIMDUTF_TOOLS"] = False
         tc.generate()
-
         deps = CMakeDeps(self)
         deps.generate()
 

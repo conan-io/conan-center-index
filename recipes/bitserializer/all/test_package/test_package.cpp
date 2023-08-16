@@ -12,6 +12,12 @@
 #ifdef WITH_PUGIXML
 #include <bitserializer/pugixml_archive.h>
 #endif
+#ifdef WITH_RAPIDYAML
+#include <bitserializer/rapidyaml_archive.h>
+#endif
+#ifdef WITH_CSV
+#include <bitserializer/csv_archive.h>
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -41,7 +47,7 @@ void TestArchive(const std::string& message)
 	BitSerializer::SerializationOptions serializationOptions;
 	serializationOptions.streamOptions.writeBom = false;
 
-	CTest testObj(message);
+    CTest testObj[1] = { message };
 	std::stringstream outputStream;
 	BitSerializer::SaveObject<TArchive>(testObj, outputStream, serializationOptions);
 	std::cout << outputStream.str() << std::endl;
@@ -65,5 +71,11 @@ int main() {
 #endif
 #ifdef WITH_PUGIXML
 	TestArchive<BitSerializer::Xml::PugiXml::XmlArchive>("Implementation based on pugixml");
+#endif
+#ifdef WITH_RAPIDYAML
+    TestArchive<BitSerializer::Yaml::RapidYaml::YamlArchive>("Implementation based on RapidYaml");
+#endif
+#ifdef WITH_CSV
+	TestArchive<BitSerializer::Csv::CsvArchive>("CSV archive (built-in implementation)");
 #endif
 }

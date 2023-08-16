@@ -1,10 +1,19 @@
 sources:
+  "2.1.3":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.1.3.tar.gz"
+    sha256: "d20e55f89d71991c59f1c5ad1ef944815e5850526c0d9cd8e504eaed5b24491a"
+  "2.1.2":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.1.2.tar.gz"
+    sha256: "383560d6b00697c04e8878e26c0187b480971a8bce90ffd26a5a7b0f7ecf1a33"
+  "2.0.7":
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.7.tar.gz"
+    sha256: "6c0853bb27738b811f2b4d4af095323c3d5ce36ceed6b50e5f773204fb8f7200"
   "2.0.6":
-    url: "https://github.com/zlib-ng/zlib-ng/archive/2.0.6.tar.gz"
+    url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.6.tar.gz"
     sha256: "8258b75a72303b661a238047cb348203d88d9dddf85d480ed885f375916fcab6"
   "2.0.5":
-    sha256: "eca3fe72aea7036c31d00ca120493923c4d5b99fe02e6d3322f7c88dbdcd0085"
     url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.5.tar.gz"
+    sha256: "eca3fe72aea7036c31d00ca120493923c4d5b99fe02e6d3322f7c88dbdcd0085"
   "2.0.2":
-    sha256: "dd37886f22ca6890e403ea6c1d60f36eab1d08d2f232a35f5b02126621149d28"
     url: "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.2.tar.gz"
+    sha256: "dd37886f22ca6890e403ea6c1d60f36eab1d08d2f232a35f5b02126621149d28"

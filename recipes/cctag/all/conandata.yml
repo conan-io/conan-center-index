@@ -5,4 +5,5 @@ sources:
 patches:
   "1.0.1":
     - patch_file: "patches/0001-honor-vc-runtime.patch"
-      base_path: "source_subfolder"
+      patch_description: "Honor vc runtime"
+      patch_type: "conan"

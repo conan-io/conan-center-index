@@ -6,17 +6,17 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class HighwayConan(ConanFile):
     name = "highway"
-    description = "Performance-portable, length-agnostic SIMD with runtime " \
-                  "dispatch"
-    topics = ("highway", "simd")
+    description = "Performance-portable, length-agnostic SIMD with runtime dispatch"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/highway"
+    topics = ("simd", "neon", "avx", "sse",)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,8 +28,8 @@ class HighwayConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
+    def _min_cppstd(self):
+        return "11"
 
     @property
     def _minimum_compilers_version(self):
@@ -50,34 +50,30 @@ class HighwayConan(ConanFile):
     def configure(self):
         if Version(self.version) < "0.16.0":
             del self.options.shared
+            self.package_type = "static-library"
         elif self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._minimum_compilers_version.get(str(self.info.settings.compiler))
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["HWY_ENABLE_EXAMPLES"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.variables["HWY_ENABLE_TESTS"] = False
         tc.generate()
 
     def _patch_sources(self):
@@ -100,6 +96,7 @@ class HighwayConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["hwy"].set_property("pkg_config_name", "libhwy")
@@ -116,3 +113,6 @@ class HighwayConan(ConanFile):
             self.cpp_info.components["hwy_test"].set_property("pkg_config_name", "libhwy-test")
             self.cpp_info.components["hwy_test"].libs = ["hwy_test"]
             self.cpp_info.components["hwy_test"].requires = ["hwy"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

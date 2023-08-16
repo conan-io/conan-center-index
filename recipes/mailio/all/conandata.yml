@@ -1,4 +1,10 @@
 sources:
+  "0.23.0":
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.23.0.tar.gz"
+    sha256: "9fc3f1f803a85170c2081cbbef2e301473a400683fc1dffefa2d6707598206a5"
+  "0.22.0":
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.22.0.tar.gz"
+    sha256: "e177522f0479f33b6cbc7085268ca385140457eb752b45f07e5d6b41e314ece9"
   "0.21.0":
     url: "https://github.com/karastojko/mailio/archive/refs/tags/0.21.0.tar.gz"
     sha256: "8f58dfc8bcbe01224c788f22c544c27611e3c411ed5a2097488fbb32a3c0fb3d"
@@ -6,9 +12,19 @@ sources:
     url: "https://github.com/karastojko/mailio/archive/refs/tags/0.20.0.tar.gz"
     sha256: "073d6b1ff891444b54a01c2a3f17074fd612f9e2e14d9ebd61863c70737b1882"
 patches:
+  "0.23.0":
+    - patch_file: "patches/0.23.0-adapt-cmakelists.patch"
+      patch_description: "fix install path"
+      patch_type: "conan"
+  "0.22.0":
+    - patch_file: "patches/0.22.0-adapt-cmakelists.patch"
+      patch_description: "fix install path"
+      patch_type: "conan"
   "0.21.0":
     - patch_file: "patches/0.21.0-adapt-cmakelists.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install path"
+      patch_type: "conan"
   "0.20.0":
     - patch_file: "patches/0.20.0-adapt-cmakelists.patch"
-      base_path: "source_subfolder"
+      patch_description: "fix install path"
+      patch_type: "conan"

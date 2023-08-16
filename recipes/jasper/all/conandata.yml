@@ -1,47 +1,41 @@
 sources:
+  "4.0.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
+    sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
+  "3.0.6":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-3.0.6/jasper-3.0.6.tar.gz"
+    sha256: "169be004d91f6940c649a4f854ada2755d4f35f62b0555ce9e1219c778cffc09"
   "2.0.33":
-    url: "https://github.com/jasper-software/jasper/archive/refs/tags/version-2.0.33.tar.gz"
-    sha256: "38b8f74565ee9e7fec44657e69adb5c9b2a966ca5947ced5717cde18a7d2eca6"
-  "2.0.32":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.32.tar.gz"
-    sha256: "a3583a06698a6d6106f2fc413aa42d65d86bedf9a988d60e5cfa38bf72bc64b9"
-  "2.0.28":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.28.tar.gz"
-    sha256: "6b4e5f682be0ab1a5acb0eeb6bf41d6ce17a658bb8e2dbda95de40100939cc88"
-  "2.0.27":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.27.tar.gz"
-    sha256: "df41bd015a9dd0cc2a2e696f8ca5cbfb633323ca9429621f7fa801778681f2dd"
-  "2.0.26":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.26.tar.gz"
-    sha256: "a82a119e85b7d1f448e61309777fa5f79053a9adca4a2b5bfe44be5439fb8fea"
-  "2.0.25":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.25.tar.gz"
-    sha256: "f5bc48e2884bcabd2aca1737baff4ca962ec665b6eb673966ced1f7adea07edb"
-  "2.0.24":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.24.tar.gz"
-    sha256: "d2d28e115968d38499163cf8086179503668ce0d71b90dd33855b3de96a1ca1d"
-  "2.0.23":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.23.tar.gz"
-    sha256: "20facc904bd9d38c20e0c090b1be3ae02ae5b2703b803013be2ecad586a18927"
-  "2.0.22":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.22.tar.gz"
-    sha256: "afc4166bff29b8a0dc46ed5e8d6a208d7976fccfd0b1146e3400c8b2948794a2"
-  "2.0.21":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.21.tar.gz"
-    sha256: "2482def06dfaa33b8d93cbe992a29723309f3c2b6e75674423a52fc82be10418"
-  "2.0.19":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.19.tar.gz"
-    sha256: "b9d16162a088617ada36450f2374d72165377cb64b33ed197c200bcfb73ec76c"
-  "2.0.16":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.16.tar.gz"
-    sha256: "f1d8b90f231184d99968f361884e2054a1714fdbbd9944ba1ae4ebdcc9bbfdb1"
-  "2.0.14":
-    url: "https://github.com/jasper-software/jasper/archive/version-2.0.14.tar.gz"
-    sha256: "85266eea728f8b14365db9eaf1edc7be4c348704e562bb05095b9a077cf1a97b"
+    url: "https://github.com/jasper-software/jasper/releases/download/version-2.0.33/jasper-2.0.33.tar.gz"
+    sha256: "28d28290cc2eaf70c8756d391ed8bcc8ab809a895b9a67ea6e89da23a611801a"
 patches:
-  "2.0.16":
-    - patch_file: "patches/fix-exported-symbols.patch"
-      base_path: "source_subfolder"
-  "2.0.14":
-    - patch_file: "patches/fix-exported-symbols.patch"
-      base_path: "source_subfolder"
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"
+    - patch_file: "patches/4.0.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "3.0.6":
+    - patch_file: "patches/3.0.6-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.6-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.6-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "2.0.33":
+    - patch_file: "patches/2.0.33-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/2.0.33-0002-find-libjpeg.patch"
+      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
+      patch_type: "conan"

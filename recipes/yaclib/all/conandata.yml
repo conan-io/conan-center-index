@@ -1,0 +1,15 @@
+sources:
+  '2022.12.20':
+    url: 'https://github.com/YACLib/YACLib/archive/refs/tags/v2022.12.10.tar.gz'
+    sha256: '30b3e3743daa3ea36244fa9c7e619fdbfed2975e4f8e017a4d973f25fe78bde3'
+  '2022.10.31':
+    url: 'https://github.com/YACLib/YACLib/archive/refs/tags/v2022.10.31.tar.gz'
+    sha256: '81761b1c8e53e6eaeb36fa00183cae66068b85d24c910c0584d0b29b371e143c'
+patches:
+  '2022.10.31':
+    - patch_file: 'patches/0001-Set-17-as-default-or-20-if-CORO-specified.patch'
+      patch_description: 'Set 17 standard if not stated otherwise'
+      patch_type: 'conan'
+    - patch_file: 'patches/0002-Add-install-commands.patch'
+      patch_description: 'Add install commands'
+      patch_type: 'conan'

@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class GlslangConan(ConanFile):
@@ -19,6 +19,7 @@ class GlslangConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/glslang"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,10 +50,7 @@ class GlslangConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -71,26 +69,25 @@ class GlslangConan(ConanFile):
             self.requires(f"spirv-tools/{self._get_compatible_spirv_tools_version}")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
         # see https://github.com/KhronosGroup/glslang/issues/2283
         glslang_version = Version(self.version)
-        if (self.info.options.shared and
-            (self.info.settings.os == "Windows" or \
+        if (self.options.shared and
+            (self.settings.os == "Windows" or \
              (glslang_version >= "7.0.0" and glslang_version < "11.0.0" and is_apple_os(self)))
            ):
-            raise ConanInvalidConfiguration(f"{self.ref} shared library build is broken on {self.info.settings.os}")
+            raise ConanInvalidConfiguration(f"{self.ref} shared library build is broken on {self.settings.os}")
 
-        if self.info.options.enable_optimizer and self.dependencies["spirv-tools"].options.shared:
+        if self.options.enable_optimizer and self.dependencies["spirv-tools"].options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} with enable_optimizer requires static spirv-tools, "
                 "because SPIRV-Tools-opt is not built if shared"
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -124,8 +121,6 @@ class GlslangConan(ConanFile):
         if glslang_version < "1.3.231" or glslang_version >= "7.0.0":
             # Generate a relocatable shared lib on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-            # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)

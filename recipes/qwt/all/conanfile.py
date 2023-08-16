@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
@@ -57,7 +58,7 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.7")
+        self.requires("qt/5.15.9")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
@@ -73,12 +74,20 @@ class QwtConan(ConanFile):
             raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
 
     def build_requirements(self):
-        self.tool_requires("qt/5.15.7")
+        if hasattr(self, "settings_build") and cross_building(self):
+            self.tool_requires("qt/5.15.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            env = VirtualBuildEnv(self)
+            env.generate()
+        else:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.variables["QWT_DLL"] = self.options.shared
         tc.variables["QWT_STATIC "] = not self.options.shared

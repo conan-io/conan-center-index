@@ -13,7 +13,7 @@ class PlfstackConan(ConanFile):
         "better performance than standard library containers in a stack context."
     )
     license = "Zlib"
-    topics = ("plf_stack", "container", "stack")
+    topics = ("container", "stack", "header-only")
     homepage = "https://plflib.org/stack.htm"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"

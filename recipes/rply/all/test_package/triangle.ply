@@ -1,0 +1,15 @@
+ply
+format ascii 1.0
+comment this is a simple file
+obj_info any data, in one line of free form text
+element vertex 3
+property float x
+property float y
+property float z
+element face 1
+property list uchar int vertex_indices
+end_header
+-1 0 0
+ 0 1 0
+ 1 0 0
+3 0 1 2

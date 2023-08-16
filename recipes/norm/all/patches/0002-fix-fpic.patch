@@ -1,7 +1,5 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 15735c6ab31e92f781decc72d71dde0b0ec3c81f..1f3e55c640d09088dae9acc2aea09b152bab540a 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+--- a/protolib/CMakeLists.txt
++++ b/protolib/CMakeLists.txt
 @@ -4,6 +4,7 @@ cmake_policy(SET CMP0077 NEW)
  # set the project name
  project(protokit)

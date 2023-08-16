@@ -1,0 +1,13 @@
+diff --git a/tinyexr.h b/tinyexr.h
+index 2580ae0..4b44d82 100644
+--- a/tinyexr.h
++++ b/tinyexr.h
+@@ -6947,7 +6947,7 @@ static size_t SaveEXRNPartImageToMemory(const EXRImage* exr_images,
+         return 0;
+       }
+ #else
+-      for (int c = 0; c < exr_header->num_channels; ++c) {
++      for (int c = 0; c < exr_headers[i]->num_channels; ++c) {
+         if (exr_headers[i]->requested_pixel_types[c] != TINYEXR_PIXELTYPE_FLOAT) {
+           SetErrorMessage("Pixel type must be FLOAT for ZFP compression",
+                           err);

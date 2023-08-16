@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -12,10 +13,10 @@ class CpphttplibConan(ConanFile):
     name = "cpp-httplib"
     description = "A C++11 single-file header-only cross platform HTTP/HTTPS library."
     license = "MIT"
-    topics = ("cpp-httplib", "http", "https", "header-only")
     homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
-
+    topics = ("http", "https", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
@@ -27,7 +28,6 @@ class CpphttplibConan(ConanFile):
         "with_zlib": False,
         "with_brotli": False,
     }
-
     no_copy_source = True
 
     def config_options(self):
@@ -36,7 +36,7 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.get_safe("with_brotli"):
@@ -53,8 +53,7 @@ class CpphttplibConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -68,9 +67,7 @@ class CpphttplibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "httplib::httplib")
         self.cpp_info.includedirs.append(os.path.join("include", "httplib"))
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         if self.options.with_openssl:
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:

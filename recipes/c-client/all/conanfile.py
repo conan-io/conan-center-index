@@ -1,10 +1,15 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, mkdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
+import glob
 import os
+import shutil
 import stat
 
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.55.0"
 
 
 class CclientConan(ConanFile):
@@ -21,20 +26,29 @@ class CclientConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-    exports_sources = "patches/*"
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    @property
-    def _is_msvc(self):
-        return self._settings_build.compiler in ("Visual Studio", "msvc")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if not is_msvc(self):
+            self.requires("openssl/1.1.1s")
 
     def validate(self):
-        if self._settings_build.os == "Windows" and not self._is_msvc:
+        if self.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration(
-                "c-client is setup to build only with MSVC on Windows"
+                "c-client is setup to build only with MSVC for Windows"
             )
         # FIXME: need krb5 recipe
         if self.settings.os == "Macos":
@@ -43,40 +57,28 @@ class CclientConan(ConanFile):
                 "Conan yet"
             )
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def requirements(self):
-        if not self._is_msvc:
-            self.requires("openssl/1.1.1q")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_msvc(self):
-        opt_flags = "/O2 /Ob2 /DNDEBUG"
-        if self.settings.build_type == "Debug":
-            opt_flags = "/Zi /Ob0 /Od /RTC1"
-        runtime = f"/{self.settings.compiler.runtime}"
-        # NOTE: boatloads of warnings for truncation, sign mismatch,
-        #       implicit conversions, just the usual C things
-        warnings = \
-            "/W3 /wd4267 /wd4244 /wd4273 /wd4311 /wd4312 /wd4133 /wd4028"
-        cflags = f"{runtime} {warnings} /GS {opt_flags}"
-        search = "EXTRACFLAGS ="
-        replace = f"EXTRACFLAGS = {cflags}"
-        tools.replace_in_file(r"src\osdep\nt\makefile.w2k", search, replace)
+    def generate(self):
+        if is_msvc(self):
+            tc = NMakeToolchain(self)
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _build_msvc(self):
-        make = "nmake /nologo /f makefile.w2k"
-        with tools.vcvars(self):
-            self.run(f"{make} c-client", run_environment=True)
-            self.run(make, cwd="c-client", run_environment=True)
+        # Avoid many warnings
+        makefile_w2k = os.path.join(self.source_folder, "src", "osdep", "nt", "makefile.w2k")
+        warnings = "/W3 /wd4267 /wd4244 /wd4273 /wd4311 /wd4312 /wd4133 /wd4028"
+        replace_in_file(self, makefile_w2k, "EXTRACFLAGS =", f"EXTRACFLAGS = {warnings}")
+
+        nmake = "nmake /f makefile.w2k"
+        self.run(f"{nmake} c-client", cwd=self.source_folder)
+        self.run(nmake, cwd=os.path.join(self.source_folder, "c-client"))
 
     def _chmod_x(self, path):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
@@ -85,18 +87,17 @@ class CclientConan(ConanFile):
         with open(path, "a", encoding=None): pass
 
     def _build_unix(self):
-        self._touch("ip6")
-        self._chmod_x("tools/an")
-        self._chmod_x("tools/ua")
-        unix = "src/osdep/unix"
-        self._chmod_x(f"{unix}/drivers")
-        self._chmod_x(f"{unix}/mkauths")
-        search = "SSLDIR=/usr/local/ssl"
-        ssldir = self.deps_cpp_info["openssl"].rootpath
-        tools.replace_in_file(f"{unix}/Makefile", search, f"SSLDIR={ssldir}")
+        self._touch(os.path.join(self.source_folder, "ip6"))
+        self._chmod_x(os.path.join(self.source_folder, "tools", "an"))
+        self._chmod_x(os.path.join(self.source_folder, "tools", "ua"))
+        unix = os.path.join(self.source_folder, "src", "osdep", "unix")
+        self._chmod_x(os.path.join(unix, "drivers"))
+        self._chmod_x(os.path.join(unix, "mkauths"))
+        ssldir = self.dependencies["openssl"].package_folder
+        replace_in_file(self, os.path.join(unix, "Makefile"), "SSLDIR=/usr/local/ssl", f"SSLDIR={ssldir}")
         # This is from the Homebrew Formula
-        tools.replace_in_file(
-            "src/osdep/unix/ssl_unix.c",
+        replace_in_file(
+            self, os.path.join(unix, "ssl_unix.c"),
             "#include <x509v3.h>\n#include <ssl.h>",
             "#include <ssl.h>\n#include <x509v3.h>"
         )
@@ -104,31 +105,34 @@ class CclientConan(ConanFile):
         # NOTE: only one job is used, because there are issues with dependency
         #       tracking in parallel builds
         args = ["IP=6", "-j1"]
-        AutoToolsBuildEnvironment(self).make(target=target, args=args)
+        autotools = Autotools(self)
+        with chdir(self, self.source_folder):
+            autotools.make(target=target, args=args)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        if self._is_msvc:
-            self._patch_msvc()
+        apply_conandata_patches(self)
+        if is_msvc(self):
             self._build_msvc()
         else:
             self._build_unix()
 
     def package(self):
-        self.copy("LICENSE.txt", "licenses")
-        self.copy("c-client/*.h", "include")
-        if self._is_msvc:
-            self.copy("*.lib", "lib", "c-client")
-        else:
-            self.copy("*.a", "lib", "c-client")
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # Install headers (headers in build tree are symlinks)
+        include_folder = os.path.join(self.package_folder, "include", "c-client")
+        mkdir(self, include_folder)
+        for header_path in glob.glob(os.path.join(self.source_folder, "c-client", "*.h")):
+            # conan.tools.files.copy can't be used because it copies symlinks instead of real files
+            shutil.copy(src=header_path, dst=os.path.join(include_folder, os.path.basename(header_path)))
+        # Install libs
+        for lib in ("*.a", "*.lib"):
+            copy(self, lib, src=os.path.join(self.source_folder, "c-client"), dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        if self._is_msvc:
-            self.cpp_info.system_libs = \
-                ["Winmm", "Ws2_32", "Secur32", "Crypt32"]
-        else:
+        self.cpp_info.libs = ["cclient" if is_msvc(self) else "c-client"]
+        if self.settings.os != "Windows":
             self.cpp_info.defines = ["_DEFAULT_SOURCE"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["winmm", "ws2_32", "secur32", "crypt32"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["crypt"]
-            self.cpp_info.requires = ["openssl::crypto", "openssl::ssl"]
-        self.cpp_info.libs = ["cclient" if self._is_msvc else "c-client"]

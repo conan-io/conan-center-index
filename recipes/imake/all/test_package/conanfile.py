@@ -1,44 +1,45 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import contextlib
-import os
-import shutil
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.files import copy
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, VCVars
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 
-required_conan_version = ">=1.36.0"
+
+required_conan_version = ">=1.54.0"
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
 
-    exports_sources = "Imakefile", "Imake.tmpl"
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if not tools.get_env("CONAN_MAKE_PROGRAM"):
-            self.build_requires("make/4.2.1")
+        if not self.conf.get("tools.gnu:make_program", check_type=str):
+            self.tool_requires("make/4.3")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def layout(self):
+        basic_layout(self)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "cl -nologo",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+
+        env = tc.environment()
+        if is_msvc(self):
+            env.define("CC", "cl -nologo")
+            ms = VCVars(self)
+            ms.generate(scope="run")
+        tc.generate(env)
 
     def build(self):
-        for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
-        if not tools.cross_building(self):
-            with self._build_context():
-                self.run("imake", run_environment=True)
+        if can_run(self):
+            copy(self, "Imake*", self.source_folder, self.build_folder)
+            self.run("imake", env="conanrun")
+            autotools = Autotools(self)
+            autotools.make()
 
     def test(self):
-        if not tools.cross_building(self):
-            autotools = AutoToolsBuildEnvironment(self)
-            autotools.make()
+        # test is successful if we can invoke make in the build step
+        pass

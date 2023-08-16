@@ -1,25 +1,27 @@
 from conan import ConanFile
-from conan.tools.build import can_run, cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualRunEnv
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeDeps"
     test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        if not (hasattr(self, "settings_build") and cross_building(self) and self.options["flatbuffers"].header_only):
-            self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
 
+    def requirements(self):
+        self.requires(self.tested_reference_str, run=can_run(self))
+
     def generate(self):
+        env = VirtualRunEnv(self)
+        env.generate()
+        if can_run(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = CMakeToolchain(self)
         tc.variables["FLATBUFFERS_HEADER_ONLY"] = self.dependencies["flatbuffers"].options.header_only
         tc.generate()

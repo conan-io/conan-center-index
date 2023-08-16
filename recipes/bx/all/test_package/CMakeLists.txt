@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.8)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+project(test_package LANGUAGES CXX)
 
-add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
-set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+find_package(bx REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+target_link_libraries(${PROJECT_NAME} bx::bx)

@@ -1,18 +1,21 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class LibpqxxConan(ConanFile):
     name = "libpqxx"
     description = "The official C++ client API for PostgreSQL"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jtv/libpqxx"
-    license = "BSD-3-Clause"
     topics = ("libpqxx", "postgres", "postgresql", "database", "db")
 
     settings = "os", "arch", "compiler", "build_type"
@@ -25,24 +28,31 @@ class LibpqxxConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
+    @property
+    def _min_cppstd(self):
+        return 14 if Version(self.version) < "7.0" else "17"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compilers_minimum_version(self):
+        if Version(self.version) < "7.0":
+            return {
+                "gcc": "7",
+                "clang": "6",
+                "apple-clang": "10"
+            }
+        else:
+            return {
+                "gcc": "7" if Version(self.version) < "7.5.0" else "8",
+                "clang": "6",
+                "apple-clang": "10"
+            }
 
     @property
     def _mac_os_minimum_required_version(self):
         return "10.15"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,77 +60,70 @@ class LibpqxxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libpq/14.2")
+        self.requires("libpq/14.5")
 
     def validate(self):
-        if self.options.shared and msvc_runtime_flag(self) == "MTd":
-            raise ConanInvalidConfiguration(
-                "{} recipes does not support build shared library with MTd runtime."
-                .format(self.name,))
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
+        if Version(self.version) < "7.0":
+            check_min_vs(self, 190)
+        elif Version(self.version) < "7.6":
+            check_min_vs(self, 191)
+        else:
+            check_min_vs(self, 192)
 
-        lib_version = tools.Version(self.version)
-        lib_version_7_6_0_or_later = lib_version >= "7.6.0"
-        minimum_compiler_version = {
-            "Visual Studio": "16" if lib_version_7_6_0_or_later else "15",
-            "msvc": "192" if lib_version_7_6_0_or_later else "191",
-            "gcc": "8" if lib_version >= "7.5.0" else "7",
-            "clang": "6",
-            "apple-clang": "10"
-        }
+        if is_msvc(self) and self.options.shared and msvc_runtime_flag(self) == "MTd":
+            raise ConanInvalidConfiguration(f"{self.ref} recipes does not support build shared library with MTd runtime.")
 
-        minimum_cpp_standard = 17
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
-        if compiler in minimum_compiler_version and \
-           compiler_version < minimum_compiler_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a compiler that supports"
-                                            " at least C++{}. {} {} is not"
-                                            " supported."
-                                            .format(self.name, minimum_cpp_standard, compiler, compiler_version))
-
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             os_version = self.settings.get_safe("os.version")
-            if os_version and tools.Version(os_version) < self._mac_os_minimum_required_version:
+            if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimum_cpp_standard)
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_DOC"] = False
-        cmake.definitions["BUILD_TEST"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_DOC"] = False
+        tc.variables["BUILD_TEST"] = False
         # Set `-mmacosx-version-min` to enable C++17 standard library support.
-        cmake.definitions["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        tc.variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libpqxx")
@@ -131,6 +134,8 @@ class LibpqxxConan(ConanFile):
         self.cpp_info.components["pqxx"].libs = ["pqxx"]
         if self.settings.os == "Windows":
             self.cpp_info.components["pqxx"].system_libs = ["wsock32", "ws2_32"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["pqxx"].set_property("cmake_target_name", "libpqxx::pqxx")

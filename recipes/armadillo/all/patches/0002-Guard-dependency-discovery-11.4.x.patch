@@ -1,0 +1,143 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index da1ff3a..7bdd808 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -275,7 +275,11 @@ if(APPLE)
+   set(ARMA_USE_ACCELERATE true)
+   
+   if(ALLOW_OPENBLAS_MACOS)
+-    include(ARMA_FindOpenBLAS)
++    if(USE_OPENBLAS)
++        find_package(OpenBLAS)
++    else()
++        set(OpenBLAS_FOUND NO)
++    endif()
+     message(STATUS "OpenBLAS_FOUND = ${OpenBLAS_FOUND}")
+     message(STATUS "")
+     message(STATUS "*** If use of OpenBLAS is causing problems,")
+@@ -290,8 +294,16 @@ if(APPLE)
+   endif()
+   
+   if(ALLOW_BLAS_LAPACK_MACOS)
+-    include(ARMA_FindBLAS)
+-    include(ARMA_FindLAPACK)
++    if(USE_SYSTEM_BLAS)
++        include(ARMA_FindBLAS)
++    else()
++        set(BLAS_FOUND NO)
++    endif()
++    if(USE_SYSTEM_LAPACK)
++        include(ARMA_FindLAPACK)
++    else()
++        set(LAPACK_FOUND NO)
++    endif()
+     message(STATUS "  BLAS_FOUND = ${BLAS_FOUND}"  )
+     message(STATUS "LAPACK_FOUND = ${LAPACK_FOUND}")
+     message(STATUS "")
+@@ -331,17 +343,45 @@ if(APPLE)
+ else()
+   
+   if(ALLOW_FLEXIBLAS_LINUX AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
+-    include(ARMA_FindFlexiBLAS)
++    if(USE_SYSTEM_FLEXIBLAS)
++        include(ARMA_FindFlexiBLAS)
++    else()
++        set(FlexiBLAS_FOUND NO)
++    endif()
+   else()
+     set(FlexiBLAS_FOUND false)
+   endif()
+-  
+-  include(ARMA_FindMKL)
+-  include(ARMA_FindOpenBLAS)
+-  include(ARMA_FindATLAS)     # TODO: remove support for ATLAS in next major version
+-  include(ARMA_FindBLAS)
+-  include(ARMA_FindLAPACK)
+-  
++
++  if(USE_MKL)
++      find_package(MKL)
++  else()
++      set(MKL_FOUND NO)
++  endif()
++
++  if(USE_OPENBLAS)
++      find_package(OpenBLAS)
++  else()
++      set(OpenBLAS_FOUND NO)
++  endif()
++
++  if(USE_SYSTEM_ATLAS)
++    include(ARMA_FindATLAS)
++  else()
++    set(ATLAS_FOUND NO)
++  endif()
++
++  if(USE_SYSTEM_BLAS)
++    include(ARMA_FindBLAS)
++  else()
++    set(BLAS_FOUND NO)
++  endif()
++
++  if(USE_SYSTEM_LAPACK)
++    include(ARMA_FindLAPACK)
++  else()
++    set(LAPACK_FOUND NO)
++  endif()
++
+   message(STATUS "FlexiBLAS_FOUND = ${FlexiBLAS_FOUND}" )
+   message(STATUS "      MKL_FOUND = ${MKL_FOUND}"       )
+   message(STATUS " OpenBLAS_FOUND = ${OpenBLAS_FOUND}"  )
+@@ -493,8 +533,6 @@ if(DETECT_HDF5)
+     # HDF5_INCLUDE_DIRS is the correct include directory.  So, in either case we
+     # can use the first element in the list.  Issue a status message, too, just
+     # for good measure.
+-    list(GET HDF5_INCLUDE_DIRS 0 ARMA_HDF5_INCLUDE_DIR)
+-    message(STATUS "ARMA_HDF5_INCLUDE_DIR = ${ARMA_HDF5_INCLUDE_DIR}")
+     message(STATUS "")
+     message(STATUS "*** If use of HDF5 is causing problems,")
+     message(STATUS "*** rerun cmake with HDF5 detection disabled:")
+@@ -503,7 +541,12 @@ if(DETECT_HDF5)
+   endif()
+ endif()
+ 
+-include(ARMA_FindARPACK)
++if(USE_SYSTEM_ARPACK)
++  include(ARMA_FindARPACK)
++else()
++  set(ARPACK_FOUND NO)
++endif()
++
+ message(STATUS "ARPACK_FOUND = ${ARPACK_FOUND}")
+ 
+ if(ARPACK_FOUND)
+@@ -511,7 +554,12 @@ if(ARPACK_FOUND)
+   set(ARMA_LIBS ${ARMA_LIBS} ${ARPACK_LIBRARY})
+ endif()
+ 
+-include(ARMA_FindSuperLU5)
++if(USE_SYSTEM_SUPERLU)
++  include(ARMA_FindSuperLU5)
++else()
++  set(SuperLU_FOUND NO)
++endif()
++
+ message(STATUS "SuperLU_FOUND = ${SuperLU_FOUND}")
+ 
+ if(SuperLU_FOUND)
+diff --git a/include/armadillo_bits/config.hpp.cmake b/include/armadillo_bits/config.hpp.cmake
+index 07c85b8..584e01e 100644
+--- a/include/armadillo_bits/config.hpp.cmake
++++ b/include/armadillo_bits/config.hpp.cmake
+@@ -164,7 +164,7 @@
+   #undef  ARMA_USE_HDF5
+   #define ARMA_USE_HDF5
+   
+-  #define ARMA_HDF5_INCLUDE_DIR ${ARMA_HDF5_INCLUDE_DIR}/
++  // #define ARMA_HDF5_INCLUDE_DIR ${ARMA_HDF5_INCLUDE_DIR}/
+ #endif
+ 
+ #if !defined(ARMA_MAT_PREALLOC)
+-- 
+2.39.0
+

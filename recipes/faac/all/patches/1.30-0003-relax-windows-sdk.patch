@@ -1,0 +1,40 @@
+--- a/project/msvc/faac.vcxproj
++++ b/project/msvc/faac.vcxproj
+@@ -12,7 +12,6 @@
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{92992E74-AEDE-46DC-AD8C-ADEA876F1A4C}</ProjectGuid>
+-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+--- a/project/msvc/libfaac.vcxproj
++++ b/project/msvc/libfaac.vcxproj
+@@ -13,7 +13,6 @@
+   <PropertyGroup Label="Globals">
+     <ProjectName>libfaac</ProjectName>
+     <ProjectGuid>{9CC48C6E-92EB-4814-AD37-97AB3622AB65}</ProjectGuid>
+-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+--- a/project/msvc/libfaac_dll.vcxproj
++++ b/project/msvc/libfaac_dll.vcxproj
+@@ -13,7 +13,6 @@
+   <PropertyGroup Label="Globals">
+     <ProjectName>libfaac_dll</ProjectName>
+     <ProjectGuid>{856BB8CF-B944-4D7A-9D59-4945316229AA}</ProjectGuid>
+-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+--- a/project/msvc/libfaac_dll_drm.vcxproj
++++ b/project/msvc/libfaac_dll_drm.vcxproj
+@@ -13,7 +13,6 @@
+   <PropertyGroup Label="Globals">
+     <ProjectName>libfaac_dll_drm</ProjectName>
+     <ProjectGuid>{AA2D0EFE-E73D-40AD-ADCE-8A2B54F34C6F}</ProjectGuid>
+-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

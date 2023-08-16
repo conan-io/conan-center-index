@@ -1,27 +1,20 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.53.0"
+
 
 class GeotransConan(ConanFile):
     name = "geotrans"
-    license = (
-        "NGA GEOTRANS ToS (https://earth-info.nga.mil/php/download.php?file=wgs-terms)"
-    )
+    license = "NGA GEOTRANS ToS (https://earth-info.nga.mil/php/download.php?file=wgs-terms)"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://earth-info.nga.mil/"
     description = "MSP GEOTRANS is the NGA and DOD approved coordinate converter and datum translator."
-    topics = (
-        "geotrans",
-        "geodesic",
-        "geographic",
-        "coordinate",
-        "datum",
-        "geodetic",
-        "conversion",
-        "transformation",
-    )
-
+    topics = ("geotrans", "geodesic", "geographic", "coordinate", "datum", "geodetic", "conversion", "transformation")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,21 +25,9 @@ class GeotransConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,36 +35,34 @@ class GeotransConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self._source_subfolder,
-            filename="master.tgz"
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, filename=f"geotrans-{self.version}.tgz")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["GEOTRANS_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(
-            "*.txt",
-            dst="licenses",
-            src=os.path.join(self._source_subfolder, "GEOTRANS3", "docs"),
-        )
-        cmake = self._configure_cmake()
+        copy(self, "*.txt",
+                   src=os.path.join(self.source_folder, "GEOTRANS3", "docs"),
+                   dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -91,6 +70,7 @@ class GeotransConan(ConanFile):
         self.cpp_info.components["dtcc"].includedirs = [
             path[0] for path in os.walk("include")
         ]
+        self.cpp_info.components["dtcc"].res = ["res"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["dtcc"].system_libs.append("pthread")
             self.cpp_info.components["dtcc"].system_libs.append("m")
@@ -100,9 +80,9 @@ class GeotransConan(ConanFile):
         self.cpp_info.components["ccs"].includedirs = [
             path[0] for path in os.walk("include")
         ]
+        self.cpp_info.components["ccs"].res = ["res"]
 
-        mpccs_data_path = os.path.join(self.package_folder, "res")
-        self.output.info("Prepending to MPCCS_DATA runtime environment variable: {}".format(mpccs_data_path))
-        self.runenv_info.prepend_path("MPCCS_DATA", mpccs_data_path)
+        mspccs_data_path = os.path.join(self.package_folder, "res")
+        self.runenv_info.define_path("MSPCCS_DATA", mspccs_data_path)
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
-        self.env_info.MPCCS_DATA.append(mpccs_data_path)
+        self.env_info.MSPCCS_DATA = mspccs_data_path

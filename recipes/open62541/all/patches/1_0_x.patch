@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94ceb127..00b7ca1d 100644
+index 94ceb127..3aa9ec26 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -7,9 +7,8 @@ endif()
@@ -31,6 +31,15 @@ index 94ceb127..00b7ca1d 100644
  
  #################
  # Build Options #
+@@ -378,7 +376,7 @@ if(UA_ENABLE_ENCRYPTION)
+     # that is not possible, manually compile mbedTLS and set the cmake variables
+     # defined in /tools/cmake/FindMbedTLS.cmake.
+     find_package(MbedTLS REQUIRED)
+-    list(APPEND open62541_LIBRARIES ${MBEDTLS_LIBRARIES})
++    list(APPEND open62541_LIBRARIES ${MbedTLS_LIBRARIES})
+ endif()
+ 
+ #####################
 @@ -405,7 +403,6 @@ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID
                      -fno-strict-aliasing # fewer compiler assumptions about pointer types
                      -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
@@ -96,6 +105,15 @@ index 94ceb127..00b7ca1d 100644
          ${lib_sources})
  endif()
  
+@@ -939,7 +911,7 @@ if(UA_ENABLE_AMALGAMATION)
+     target_include_directories(open62541-object PRIVATE ${PROJECT_BINARY_DIR})
+     target_include_directories(open62541-object PRIVATE "${ua_architecture_directories_to_include}")
+     if(UA_ENABLE_ENCRYPTION)
+-        target_include_directories(open62541-object PRIVATE ${MBEDTLS_INCLUDE_DIRS})
++        target_include_directories(open62541-object PRIVATE ${MbedTLS_INCLUDE_DIRS})
+     endif()
+ 
+     # make sure the open62541_amalgamation target builds before so that amalgamation is finished and it is not executed again for open62541-object
 @@ -972,6 +944,10 @@ else()
                       open62541-generator-namespace
                       )
@@ -107,6 +125,15 @@ index 94ceb127..00b7ca1d 100644
  
      add_library(open62541-plugins OBJECT ${default_plugin_sources} ${ua_architecture_sources} ${exported_headers})
      add_dependencies(open62541-plugins open62541-generator-types open62541-generator-transport open62541-generator-namespace)
+@@ -1018,7 +994,7 @@ else()
+     include_directories_private("${PROJECT_BINARY_DIR}")
+ 
+     if(UA_ENABLE_ENCRYPTION)
+-        include_directories_private(${MBEDTLS_INCLUDE_DIRS})
++        include_directories_private(${MbedTLS_INCLUDE_DIRS})
+     endif()
+ 
+     # Option-specific includes
 @@ -1163,7 +1139,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
          EXPORT open62541Targets
          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -116,6 +143,11 @@ index 94ceb127..00b7ca1d 100644
          INCLUDES DESTINATION include)
  
  if(UA_ENABLE_AMALGAMATION)
+@@ -1296,4 +1272,3 @@ set_target_properties(open62541-generator-namespace PROPERTIES FOLDER "open62541
+ set_target_properties(open62541-generator-statuscode PROPERTIES FOLDER "open62541/generators")
+ set_target_properties(open62541-generator-transport PROPERTIES FOLDER "open62541/generators")
+ set_target_properties(open62541-generator-types PROPERTIES FOLDER "open62541/generators")
+-
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
 index 3d1ae299..7d5f1051 100644
 --- a/src/server/ua_discovery_manager.h

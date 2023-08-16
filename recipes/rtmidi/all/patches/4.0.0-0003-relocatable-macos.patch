@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -151,7 +151,6 @@ if (NEED_PTHREAD)
+ endif()
+ 
+ # Create library targets.
+-cmake_policy(SET CMP0042 OLD)
+ set(LIB_TARGETS)
+ 
+ # Use RTMIDI_BUILD_SHARED_LIBS / RTMIDI_BUILD_STATIC_LIBS if they

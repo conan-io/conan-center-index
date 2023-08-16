@@ -1,20 +1,22 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.43.0"
-
+required_conan_version = ">=1.53.0"
 
 class ZXingCppConan(ConanFile):
     name = "zxing-cpp"
     description = "C++ port of ZXing, a barcode scanning library"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/nu-book/zxing-cpp"
+    homepage = "https://github.com/zxing-cpp/zxing-cpp"
     topics = ("zxing", "barcode", "scanner", "generator")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,37 +31,27 @@ class ZXingCppConan(ConanFile):
         "enable_decoders": True,
     }
 
-    generators = "cmake"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _compiler_cpp_support(self):
         return {
             "14" : {
                 "gcc": "5",
                 "Visual Studio": "14",
+                "msvc": "190",
                 "clang": "3.4",
                 "apple-clang": "3.4",
             },
             "17" : {
-                "gcc": "7",
+                "gcc": "7" if Version(self.version) < "2.0.0" else "8",
                 "Visual Studio": "16",
-                "clang": "5",
-                "apple-clang": "5",
+                "msvc": "192",
+                "clang": "5" if Version(self.version) < "2.0.0" else "7",
+                "apple-clang": "5" if Version(self.version) < "2.0.0" else "12",
             }
         }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,62 +59,61 @@ class ZXingCppConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        cpp_version = 17 if tools.Version(self.version) >= "1.2.0" else 14
+        cpp_version = 17 if Version(self.version) >= "1.2.0" else 14
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, cpp_version)
+            check_min_cppstd(self, cpp_version)
         min_version = self._compiler_cpp_support.get(str(cpp_version)).get(str(self.settings.compiler))
-
-        if min_version and tools.Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration(
-                "This compiler is too old. {} needs a compiler with c++{} support".format(self.name, cpp_version)
-            )
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(f"This compiler is too old. {self.ref} needs a compiler with c++{cpp_version} support")
 
         # FIXME: This is a workaround for "The system cannot execute the specified program."
-        if tools.Version(self.version) >= "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration("{}/{} doesn't support MT + Debug.".format(self.name, self.version))
+        if Version(self.version) >= "1.3.0" and is_msvc_static_runtime(self) and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MT + Debug.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        if tools.Version(self.version) < "1.1":
-            cmake.definitions["ENABLE_ENCODERS"] = self.options.enable_encoders
-            cmake.definitions["ENABLE_DECODERS"] = self.options.enable_decoders
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) < "1.1":
+            tc.variables["ENABLE_ENCODERS"] = self.options.enable_encoders
+            tc.variables["ENABLE_DECODERS"] = self.options.enable_decoders
+            tc.variables["BUILD_SHARED_LIBRARY"] = self.options.shared
         else:
-            cmake.definitions["BUILD_WRITERS"] = self.options.enable_encoders
-            cmake.definitions["BUILD_READERS"] = self.options.enable_decoders
-            cmake.definitions["BUILD_EXAMPLES"] = False
-            cmake.definitions["BUILD_BLACKBOX_TESTS"] = False
+            tc.variables["BUILD_WRITERS"] = self.options.enable_encoders
+            tc.variables["BUILD_READERS"] = self.options.enable_decoders
+            tc.variables["BUILD_EXAMPLES"] = False
+            tc.variables["BUILD_BLACKBOX_TESTS"] = False
         if is_msvc(self):
-            cmake.definitions["LINK_CPP_STATICALLY"] = "MT" in str(self.settings.compiler.runtime)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            tc.variables["LINK_CPP_STATICALLY"] = is_msvc_static_runtime(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ZXing")
         self.cpp_info.set_property("cmake_target_name", "ZXing::ZXing")
         self.cpp_info.set_property("pkg_config_name", "zxing")
-        self.cpp_info.libs = ["ZXingCore" if tools.Version(self.version) < "1.1" else "ZXing"]
+        self.cpp_info.libs = ["ZXingCore" if Version(self.version) < "1.1" else "ZXing"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
 

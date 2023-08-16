@@ -1,10 +1,10 @@
 sources:
   "2.0.2":
-    url: "https://github.com/mstorsjo/fdk-aac/archive/refs/tags/v2.0.2.tar.gz"
-    sha256: "7812b4f0cf66acda0d0fe4302545339517e702af7674dd04e5fe22a5ade16a90"
+    url: "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.2.tar.gz"
+    sha256: "c9e8630cf9d433f3cead74906a1520d2223f89bcd3fa9254861017440b8eb22f"
   "2.0.1":
-    url: "https://github.com/mstorsjo/fdk-aac/archive/v2.0.1.tar.gz"
-    sha256: "a4142815d8d52d0e798212a5adea54ecf42bcd4eec8092b37a8cb615ace91dc6"
+    url: "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.1.tar.gz"
+    sha256: "840133aa9412153894af03b27b03dde1188772442c316a4ce2a24ed70093f271"
   "2.0.0":
-    url: "https://github.com/mstorsjo/fdk-aac/archive/v2.0.0.tar.gz"
-    sha256: "6e6c7921713788e31df655911e1d42620b057180b00bf16874f5d630e1d5b9a2"
+    url: "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.0.tar.gz"
+    sha256: "f7d6e60f978ff1db952f7d5c3e96751816f5aef238ecf1d876972697b85fd96c"

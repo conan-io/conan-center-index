@@ -1,9 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class CCTagConan(ConanFile):
@@ -33,16 +36,8 @@ class CCTagConan(ConanFile):
         "with_cuda": False,
     }
 
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,10 +45,13 @@ class CCTagConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.78.0")
+        self.requires("boost/1.80.0")
         self.requires("eigen/3.4.0")
         self.requires("onetbb/2020.3")
         self.requires("opencv/4.5.5")
@@ -67,74 +65,77 @@ class CCTagConan(ConanFile):
 
     def validate(self):
         miss_boost_required_comp = \
-            any(getattr(self.options["boost"],
-                        "without_{}".format(boost_comp),
+            any(getattr(self.dependencies["boost"].options,
+                        f"without_{boost_comp}",
                         True) for boost_comp in self._required_boost_components)
-        if self.options["boost"].header_only or miss_boost_required_comp:
+        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration(
-                "{0} requires non header-only boost with these components: {1}".format(
-                    self.name, ", ".join(self._required_boost_components),
-                )
+                f"{self.ref} requires non header-only boost with these components: "
+                f"{', '.join(self._required_boost_components)}",
             )
 
+        if self.settings.compiler == "Visual Studio" and not self.options.shared and \
+           is_msvc_static_runtime(self) and self.dependencies["onetbb"].options.shared:
+            raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
+
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            check_min_cppstd(self, 14)
 
         # FIXME: add cuda support
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CUDA not supported yet")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CCTAG_SERIALIZE"] = self.options.serialize
+        tc.variables["CCTAG_VISUAL_DEBUG"] = self.options.visual_debug
+        tc.variables["CCTAG_NO_COUT"] = self.options.no_cout
+        tc.variables["CCTAG_WITH_CUDA"] = self.options.with_cuda
+        tc.variables["CCTAG_BUILD_APPS"] = False
+        tc.variables["CCTAG_CUDA_CC_CURRENT_ONLY"] = False
+        tc.variables["CCTAG_NVCC_WARNINGS"] = False
+        tc.variables["CCTAG_EIGEN_NO_ALIGN"] = True
+        tc.variables["CCTAG_USE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.variables["CCTAG_ENABLE_SIMD_AVX2"] = False
+        tc.variables["CCTAG_BUILD_TESTS"] = False
+        tc.variables["CCTAG_BUILD_DOC"] = False
+        tc.variables["CCTAG_NO_THRUST_COPY_IF"] = False
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
         # Cleanup RPATH if Apple in shared lib of install tree
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
                               "")
         # Link to OpenCV targets
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "${OpenCV_LIBS}",
                               "opencv_core opencv_videoio opencv_imgproc opencv_imgcodecs")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CCTAG_SERIALIZE"] = self.options.serialize
-        cmake.definitions["CCTAG_VISUAL_DEBUG"] = self.options.visual_debug
-        cmake.definitions["CCTAG_NO_COUT"] = self.options.no_cout
-        cmake.definitions["CCTAG_WITH_CUDA"] = self.options.with_cuda
-        cmake.definitions["CCTAG_BUILD_APPS"] = False
-        cmake.definitions["CCTAG_CUDA_CC_CURRENT_ONLY"] = False
-        cmake.definitions["CCTAG_NVCC_WARNINGS"] = False
-        cmake.definitions["CCTAG_EIGEN_NO_ALIGN"] = True
-        cmake.definitions["CCTAG_USE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        cmake.definitions["CCTAG_ENABLE_SIMD_AVX2"] = False
-        cmake.definitions["CCTAG_BUILD_TESTS"] = False
-        cmake.definitions["CCTAG_BUILD_DOC"] = False
-        cmake.definitions["CCTAG_NO_THRUST_COPY_IF"] = False
-        cmake.configure()
-        return cmake
-
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING.md", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CCTag")
         self.cpp_info.set_property("cmake_target_name", "CCTag::CCTag")
         suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["CCTag{}".format(suffix)]
+        self.cpp_info.libs = [f"CCTag{suffix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         self.cpp_info.requires = [

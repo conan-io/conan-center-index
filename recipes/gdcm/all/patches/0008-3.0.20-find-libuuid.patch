@@ -1,0 +1,40 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -411,7 +411,7 @@ endif()
+ 
+ if(GDCM_USE_SYSTEM_UUID)
+   # If user say so, then this is a requirement !
+-  find_package(UUID REQUIRED)
++  find_package(libuuid REQUIRED)
+   set(GDCM_UUID_LIBRARIES ${UUID_LIBRARIES})
+ else()
+   set(GDCM_UUID_LIBRARIES "gdcmuuid")
+--- a/Source/MediaStorageAndFileFormat/CMakeLists.txt
++++ b/Source/MediaStorageAndFileFormat/CMakeLists.txt
+@@ -176,17 +176,6 @@ if(NOT GDCM_USE_SYSTEM_ZLIB)
+     "${GDCM_BINARY_DIR}/Utilities/gdcmzlib"
+   )
+ endif()
+-if(GDCM_USE_SYSTEM_UUID)
+-  include_directories(
+-    ${UUID_INCLUDE_DIR}
+-  )
+-  set(GDCMUUID ${UUID_LIBRARIES})
+-else()
+-  include_directories(
+-    "${GDCM_BINARY_DIR}/Utilities/gdcmuuid" # uuid_mangle.h
+-  )
+-  set(GDCMUUID gdcmuuid)
+-endif()
+ 
+ add_library(gdcmMSFF ${MSFF_SRCS})
+ # gdcmPVRGCodec calls gdcmjpeg
+@@ -218,7 +207,7 @@ if(WIN32)
+   target_link_libraries(gdcmMSFF LINK_PRIVATE rpcrt4)
+ #endif()
+ else()
+-  target_link_libraries(gdcmMSFF LINK_PRIVATE ${GDCMUUID})
++  target_link_libraries(gdcmMSFF LINK_PRIVATE libuuid::libuuid)
+ endif()
+ if(GDCM_USE_SYSTEM_JSON)
+   target_link_libraries(gdcmMSFF PRIVATE json-c::json-c)

@@ -1,4 +1,7 @@
 sources:
+  "2.0.8":
+    url: "https://github.com/arvidn/libtorrent/releases/download/v2.0.8/libtorrent-rasterbar-2.0.8.tar.gz"
+    sha256: "09dd399b4477638cf140183f5f85d376abffb9c192bc2910002988e27d69e13e"
   "2.0.1":
     url: "https://github.com/arvidn/libtorrent/releases/download/v2.0.1/libtorrent-rasterbar-2.0.1.tar.gz"
     sha256: "7b39599bf602bf2f208f8f05bf2327576356a3c192175b3a4603262ede42ffd7"
@@ -6,15 +9,13 @@ sources:
     url: "https://github.com/arvidn/libtorrent/releases/download/libtorrent-1_2_3/libtorrent-rasterbar-1.2.3.tar.gz"
     sha256: "1582fdbbd0449bcfe4ffae2ccb9e5bf0577459a32bb25604e01accb847da1a2d"
 patches:
-  "2.0.1":
-    - patch_file: "patches/2.0.1-0001-cmake-fix-conan-boost-openssl.patch"
-      base_path: "source_subfolder"
   "1.2.3":
-    - patch_file: "patches/1.2.3-0001-cmake-fix-conan-boost-openssl.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/1.2.3-0002-boost-system-header-only-1.69+.patch"
-      base_path: "source_subfolder"
+      patch_description: "use find_package with component only boost >= 1.69"
+      patch_type: "portability"
     - patch_file: "patches/1.2.3-0003-include-cstddef.patch"
-      base_path: "source_subfolder"
+      patch_description: "include cstddef instead stddef.h"
+      patch_type: "portability"
     - patch_file: "patches/1.2.3-0004-increase-handle-storage-sizes.patch"
-      base_path: "source_subfolder"
+      patch_description: "increase handle storage size"
+      patch_type: "portability"

@@ -17,7 +17,7 @@ class GlfwConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/glfw/glfw"
     topics = ("graphics", "opengl", "vulkan", "opengl-es")
-
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
@@ -49,13 +49,12 @@ class GlfwConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.3.231.1")
+            self.requires("vulkan-loader/1.3.239.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -73,6 +72,10 @@ class GlfwConan(ConanFile):
         # don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # don't force static link to libgcc if MinGW
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
             cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
@@ -129,15 +132,19 @@ class GlfwConan(ConanFile):
         libname = "glfw"
         if self.settings.os == "Windows" or not self.options.shared:
             libname += "3"
-        if is_msvc(self) and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             libname += "dll"
+            self.cpp_info.defines.append("GLFW_DLL")
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("gdi32")
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+            self.cpp_info.frameworks.extend([
+                "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
+                "CoreServices", "Foundation", "IOKit",
+            ])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"

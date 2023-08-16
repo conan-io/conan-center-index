@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class FarmhashConan(ConanFile):
@@ -14,6 +14,7 @@ class FarmhashConan(ConanFile):
     homepage = "https://github.com/google/farmhash"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,14 +35,13 @@ class FarmhashConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

@@ -1,8 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, download, unzip, load, copy
+from conan.tools.files import get, download, unzip, load, copy, rm
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 import re
 import shutil
@@ -12,24 +11,28 @@ required_conan_version = ">=1.52.0"
 
 class AndroidNDKConan(ConanFile):
     name = "android-ndk"
-    description = "The Android NDK is a toolset that lets you implement parts of your app in native code, using languages such as C and C++"
+    description = (
+        "The Android NDK is a toolset that lets you implement parts of your app "
+        "in native code, using languages such as C and C++"
+    )
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
     topics = ("android", "ndk", "toolchain", "compiler")
-    license = "Apache-2.0"
 
-    settings = "os", "arch", "build_type", "compiler"
-
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"
     short_paths = True
-    exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
 
-    @property
-    def _is_universal2(self):
-        return self.version in ["r23b", "r23c", "r24", "r25"] and self.settings.os == "Macos" and self.settings.arch in ["x86_64", "armv8"]
+    def _is_universal2(self, info=False):
+        settings = self.info.settings if info else self.settings
+        major, minor = self._ndk_major_minor
+        return ((major == 23 and minor >= "b") or major >= 24) and \
+               settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
 
     @property
     def _arch(self):
-        return "x86_64" if self._is_universal2 else self.settings.arch
+        return "x86_64" if self._is_universal2() else self.settings.arch
 
     @property
     def _settings_os_supported(self):
@@ -39,11 +42,15 @@ class AndroidNDKConan(ConanFile):
     def _settings_arch_supported(self):
         return self.conan_data["sources"][self.version].get(str(self.settings.os), {}).get(str(self._arch)) is not None
 
+    def export_sources(self):
+        copy(self, "cmake-wrapper.cmd", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "cmake-wrapper", src=self.recipe_folder, dst=self.export_sources_folder)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        if self._is_universal2:
+        if self._is_universal2(info=True):
             self.info.settings.arch = "universal:armv8/x86_64"
         del self.info.settings.compiler
         del self.info.settings.build_type
@@ -58,7 +65,8 @@ class AndroidNDKConan(ConanFile):
         pass
 
     def build(self):
-        if self.version in ['r23', 'r23b', 'r23c', 'r24', 'r25']:
+        major, _ = self._ndk_major_minor
+        if major >= 23:
             data = self.conan_data["sources"][self.version][str(self.settings.os)][str(self._arch)]
             self._unzip_fix_symlinks(url=data["url"], target_folder=self.source_folder, sha256=data["sha256"])
         else:
@@ -73,6 +81,10 @@ class AndroidNDKConan(ConanFile):
         copy(self, "cmake-wrapper", src=os.path.join(self.source_folder, os.pardir), dst=os.path.join(self.package_folder, "bin"))
         self._fix_broken_links()
         self._fix_permissions()
+        # Remove module and config CMake files, see https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#kb-h016-cmake-modules-config-files
+        rm(self, "*Config.cmake", os.path.join(self.package_folder, "bin"), recursive=True)
+        rm(self, "*-config.cmake", os.path.join(self.package_folder, "bin"), recursive=True)
+        rm(self, "Find*.cmake", os.path.join(self.package_folder, "bin"), recursive=True)
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
 
@@ -219,7 +231,7 @@ class AndroidNDKConan(ConanFile):
             cmake_system_processor = "armv5te"
         return cmake_system_processor
 
-    def _define_tool_var(self, name, value, bare = False):
+    def _define_tool_var(self, name, value, bare=False):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, self._tool_name(value, bare))
         if not os.path.isfile(path):
@@ -262,7 +274,7 @@ class AndroidNDKConan(ConanFile):
 
         # And if we are not building for Android, why bother at all
         if not self.settings_target.os == "Android":
-            self.output.warn(f"You've added {self.name}/{self.version} as a build requirement, while os={self.settings_target.os} != Android")
+            self.output.warning(f"You've added {self.ref} as a build requirement, while os={self.settings_target.os} != Android")
             return
 
         self.cpp_info.bindirs.append(os.path.join(self._ndk_root_rel_path, "bin"))
@@ -281,8 +293,13 @@ class AndroidNDKConan(ConanFile):
         # when `tools.android:ndk_path` is provided, so it MUST NOT be manually injected here to `tools.cmake.cmaketoolchain:user_toolchain` conf_info
         self.conf_info.define("tools.android:ndk_path", os.path.join(self.package_folder, "bin"))
 
-        self.buildenv_info.define_path("CC", self._define_tool_var("CC", "clang"))
-        self.buildenv_info.define_path("CXX", self._define_tool_var("CXX", "clang++"))
+        compiler_executables = {
+            "c": self._define_tool_var("CC", "clang"),
+            "cpp": self._define_tool_var("CXX", "clang++"),
+        }
+        self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.buildenv_info.define_path("CC", compiler_executables["c"])
+        self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.
@@ -313,7 +330,7 @@ class AndroidNDKConan(ConanFile):
         self.buildenv_info.define("ANDROID_STL", libcxx_str if libcxx_str.startswith("c++_") else "c++_shared")
 
         # TODO: conan v1 stuff to remove later
-        if Version(conan_version).major < 2:
+        if conan_version.major < 2:
             self.env_info.PATH.extend([os.path.join(self.package_folder, "bin"), os.path.join(self._ndk_root, "bin")])
             self.env_info.ANDROID_NDK_ROOT = os.path.join(self.package_folder, "bin")
             self.env_info.ANDROID_NDK_HOME = os.path.join(self.package_folder, "bin")
@@ -321,7 +338,7 @@ class AndroidNDKConan(ConanFile):
             if cmake_system_processor:
                 self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
             else:
-                self.output.warn("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
+                self.output.warning("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
             self.env_info.NDK_ROOT = self._ndk_root
             self.env_info.CHOST = self._llvm_triplet
             self.env_info.CONAN_CMAKE_FIND_ROOT_PATH = ndk_sysroot
@@ -332,8 +349,8 @@ class AndroidNDKConan(ConanFile):
             cmake_wrapper = os.path.join(self.package_folder, "bin", cmake_wrapper)
             self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
             self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.package_folder, "bin", "build", "cmake", "android.toolchain.cmake")
-            self.env_info.CC = self._define_tool_var("CC", "clang")
-            self.env_info.CXX = self._define_tool_var("CXX", "clang++")
+            self.env_info.CC = compiler_executables["c"]
+            self.env_info.CXX = compiler_executables["cpp"]
             self.env_info.AR = self._define_tool_var("AR", "ar", bare)
             self.env_info.AS = self._define_tool_var("AS", "as", bare)
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", bare)

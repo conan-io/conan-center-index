@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4467941..0212c5a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,13 +6,6 @@ option(SVGWRITE_BUILD_DOC "Build svgwrite documentation")
+ option(SVGWRITE_BUILD_EXAMPLES "Build svgwrite examples")
+ 
+ if(SVGWRITE_BUILD_LIB)
+-    if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+-        include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+-
+-        include(CTest)
+-        enable_testing()
+-    endif()
+-
+     add_subdirectory(src)
+ 
+     if(SVGWRITE_BUILD_EXAMPLES)

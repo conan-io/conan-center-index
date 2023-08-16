@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
@@ -15,7 +16,8 @@ class Rangev3Conan(ConanFile):
     license = "BSL-1.0"
     homepage = "https://github.com/ericniebler/range-v3"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Experimental range library for C++11/14/17"
+    package_type = "header-library"
+    description = "Range library for C++14/17/20, basis for C++20's std::ranges"
     topics = ("range", "range-library", "proposal", "iterator", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -24,19 +26,20 @@ class Rangev3Conan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5" if Version(self.version) < "0.10.0" else "6.5",
-            "Visual Studio": "16",
+            "msvc": "192",
+            "Visual Studio": "16", # TODO: remove when only Conan2 is supported
             "clang": "3.6" if Version(self.version) < "0.10.0" else "3.9"
         }
 
     @property
     def _min_cppstd(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             return "17"
         else:
             return "14"
-    
+
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -47,7 +50,7 @@ class Rangev3Conan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn(
+            self.output.warning(
                 f"{self.settings.compiler} {self.settings.compiler.version} support for range-v3 is unknown, assuming it is supported.")
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -65,9 +68,11 @@ class Rangev3Conan(ConanFile):
             self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.bindirs = []
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package"] = "meta"
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package_multi"] = "meta"
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.cpp_info.components["range-v3-meta"].cxxflags = ["/permissive-"]
 
             if "0.9.0" <= Version(self.version) < "0.11.0":

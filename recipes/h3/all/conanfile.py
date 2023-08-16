@@ -1,19 +1,21 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class H3Conan(ConanFile):
     name = "h3"
     description = "Hexagonal hierarchical geospatial indexing system."
     license = "Apache-2.0"
-    topics = ("h3", "hierarchical", "geospatial", "indexing")
+    topics = ("hierarchical", "geospatial", "indexing")
     homepage = "https://github.com/uber/h3"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,8 +31,7 @@ class H3Conan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,22 +39,19 @@ class H3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.0":
+            self.tool_requires("cmake/[>=3.20 <4]")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,11 +83,9 @@ class H3Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "h3")
         self.cpp_info.set_property("cmake_target_name", "h3::h3")
         self.cpp_info.libs = ["h3"]
-        self.cpp_info.defines.append("H3_PREFIX={}".format(self.options.h3_prefix))
+        self.cpp_info.defines.append(f"H3_PREFIX={self.options.h3_prefix}")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
         if self.options.build_filters:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

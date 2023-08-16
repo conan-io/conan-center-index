@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.53.0"
 
 
 class SimdjsonConan(ConanFile):
@@ -18,6 +18,7 @@ class SimdjsonConan(ConanFile):
     homepage = "https://github.com/lemire/simdjson"
     topics = ("json", "parser", "simd", "format")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,11 +32,15 @@ class SimdjsonConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return "17"
+
+    @property
     def _compilers_minimum_version(self):
         return {
-            # In simdjson/2.0.1, several AVX-512 instructions are not support by GCC < 9.0
-            "gcc": "8" if Version(self.version) != "2.0.1" else "9",
+            "gcc": "8",
             "Visual Studio": "16",
+            "msvc": "192",
             "clang": "6",
             "apple-clang": "9.4",
         }
@@ -46,11 +51,14 @@ class SimdjsonConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, "17")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -58,26 +66,22 @@ class SimdjsonConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
-        elif loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not fully support.".format(self.name))
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not fully support."
+            )
 
         if Version(self.version) >= "2.0.0" and \
-            self.info.settings.compiler == "gcc" and \
-            Version(self.info.settings.compiler.version).major == "9":
+            self.settings.compiler == "gcc" and \
+            Version(self.settings.compiler.version).major == "9":
             if self.settings.compiler.get_safe("libcxx") == "libstdc++11":
-                raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with libstdc++11.".format(self.name, self.version))
-            if self.info.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration("{}/{} doesn't support GCC 9 with Debug build type.".format(self.name, self.version))
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC 9 with libstdc++11.")
+            if self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC 9 with Debug build type.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -120,8 +124,7 @@ class SimdjsonConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "simdjson")
         self.cpp_info.set_property("cmake_target_name", "simdjson::simdjson")
-        if Version(self.version) >= "2.2.3":
-            self.cpp_info.set_property("pkg_config_name", "simdjson")
+        self.cpp_info.set_property("pkg_config_name", "simdjson")
 
         self.cpp_info.libs = ["simdjson"]
         if self.settings.os in ["Linux", "FreeBSD"]:

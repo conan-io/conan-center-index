@@ -1,10 +1,10 @@
 sources:
   "2.14":
-    url: "https://github.com/akheron/jansson/archive/v2.14.tar.gz"
-    sha256: "c739578bf6b764aa0752db9a2fdadcfe921c78f1228c7ec0bb47fa804c55d17b"
+    url: "https://github.com/akheron/jansson/releases/download/v2.14/jansson-2.14.tar.bz2"
+    sha256: "fba956f27c6ae56ce6dfd52fbf9d20254aad42821f74fa52f83957625294afb9"
   "2.13.1":
-    url: "https://github.com/akheron/jansson/archive/v2.13.1.tar.gz"
-    sha256: "f22901582138e3203959c9257cf83eba9929ac41d7be4a42557213a22ebcc7a0"
+    url: "https://github.com/akheron/jansson/releases/download/v2.13.1/jansson-2.13.1.tar.bz2"
+    sha256: "ee90a0f879d2b7b7159124ff22b937a2a9a8c36d3bb65d1da7dd3f04370a10bd"
   "2.12":
-    url: "https://github.com/akheron/jansson/archive/v2.12.tar.gz"
-    sha256: "76260d30e9bbd0ef392798525e8cd7fe59a6450c54ca6135672e3cd6a1642941"
+    url: "https://github.com/akheron/jansson/releases/download/v2.12/jansson-2.12.tar.bz2"
+    sha256: "645d72cc5dbebd4df608d33988e55aa42a7661039e19a379fcbe5c79d1aee1d2"

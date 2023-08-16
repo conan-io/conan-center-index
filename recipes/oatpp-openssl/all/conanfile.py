@@ -44,7 +44,7 @@ class OatppOpenSSLConan(ConanFile):
 
     def requirements(self):
         self.requires(f"oatpp/{self.version}")
-        self.requires("openssl/3.0.5")
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):

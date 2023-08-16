@@ -15,11 +15,12 @@ class LibnopConan(ConanFile):
                   "deserializing C++ data types without external code " \
                   "generators or runtime support libraries."
     license = "Apache-2.0"
-    topics = ("libnop", "header-only", "serializer")
+    topics = ("header-only", "serializer")
     homepage = "https://github.com/google/libnop"
     url = "https://github.com/conan-io/conan-center-index"
-    no_copy_source = True
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -29,8 +30,12 @@ class LibnopConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "5",
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -44,12 +49,8 @@ class LibnopConan(ConanFile):
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -59,7 +60,5 @@ class LibnopConan(ConanFile):
         copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []

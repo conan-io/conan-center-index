@@ -1,11 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(elfio REQUIRED CONFIG)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-set_target_properties(example PROPERTIES
-    CXX_STANDARD 11 # Elfio requires at least c++11
-    CXX_STANDARD_REQUIRED ON)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE elfio::elfio)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)

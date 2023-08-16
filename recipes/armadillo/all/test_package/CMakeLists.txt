@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
 project(PackageTest CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(armadillo CONFIG REQUIRED)
+if (LINK_HDF5)
+    find_package(HDF5)
+    set(HDF5_TARGETS HDF5::HDF5)
+endif()
 
-find_package(armadillo REQUIRED)
-
-add_executable(example example.cpp)
-target_link_libraries(example armadillo::armadillo)
+add_executable(example src/example.cpp)
+target_link_libraries(example armadillo::armadillo ${HDF5_TARGETS})
 set_property(TARGET example PROPERTY CXX_STANDARD 11)

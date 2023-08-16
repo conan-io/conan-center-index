@@ -1,7 +1,10 @@
 sources:
-  "10.2.0":
-    sha256: 27e879dccc639cd7b0cc08ed575c1669492579529b53c9ff27b0b96265fa867d
-    url: https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz
   "12.2.0":
     sha256: ac6b317eb4d25444d87cf29c0d141dedc1323a1833ec9995211b13e1a851261c
     url: https://ftp.gnu.org/gnu/gcc/gcc-12.2.0/gcc-12.2.0.tar.gz
+  "11.3.0":
+    sha256: 98438e6cc7294298b474cf0da7655d9a8c8b796421bb0210531c294a950374ed
+    url: https://ftp.gnu.org/gnu/gcc/gcc-11.3.0/gcc-11.3.0.tar.gz
+  "10.2.0":
+    sha256: 27e879dccc639cd7b0cc08ed575c1669492579529b53c9ff27b0b96265fa867d
+    url: https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz

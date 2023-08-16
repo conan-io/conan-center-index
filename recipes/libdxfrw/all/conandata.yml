@@ -1,4 +1,7 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/LibreCAD/libdxfrw/archive/refs/tags/LC2.2.0.tar.gz"
+    sha256: "b56535f8c234bb119b94e11b2436651531869ba0171bb10166b007588e97d69f"
   "1.0.1":
     url: "https://github.com/LibreCAD/libdxfrw/archive/1.0.1.tar.gz"
     sha256: "eea1021b296cb9ba4cab4417106e41d53a8fadfffe2cd108efe46afb04e2ec34"

@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES C CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 set(HDF5_COMPONENTS C)
 if (HDF5_HL)
@@ -14,6 +11,9 @@ endif()
 find_package(HDF5 COMPONENTS ${HDF5_COMPONENTS})
 
 add_executable(${PROJECT_NAME} test_package.c)
+if(HDF5_CXX)
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+endif()
 
 if (TARGET hdf5::hdf5_cpp)
     target_compile_definitions(${PROJECT_NAME} PRIVATE CONAN_HDF5_CXX)

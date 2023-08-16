@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
 
-
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class AnyRPCConan(ConanFile):
@@ -15,7 +14,9 @@ class AnyRPCConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sgieseking/anyrpc"
-    topics = ("rpc")
+    topics = ("rpc",)
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -41,7 +42,7 @@ class AnyRPCConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -53,10 +54,7 @@ class AnyRPCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,14 +64,17 @@ class AnyRPCConan(ConanFile):
             self.requires("log4cplus/2.0.7")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-        if self.info.options.with_log4cplus and self.info.options.with_wchar:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built with both log4cplus and wchar, see https://github.com/sgieseking/anyrpc/issues/25")
+        if self.options.with_log4cplus and self.options.with_wchar:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can not be built with both log4cplus and wchar, see"
+                " https://github.com/sgieseking/anyrpc/issues/25"
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,25 +82,22 @@ class AnyRPCConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TEST"] = False
         tc.variables["BUILD_WITH_ADDRESS_SANITIZE"] = False
-
         tc.variables["BUILD_WITH_LOG4CPLUS"] = self.options.with_log4cplus
         tc.variables["BUILD_WITH_THREADING"] = self.options.with_threading
         tc.variables["BUILD_WITH_REGEX"] = self.options.with_regex
         tc.variables["BUILD_WITH_WCHAR"] = self.options.with_wchar
-
         tc.variables["BUILD_PROTOCOL_JSON"] = self.options.with_protocol_json
         tc.variables["BUILD_PROTOCOL_XML"] = self.options.with_protocol_xml
         tc.variables["BUILD_PROTOCOL_MESSAGEPACK"] = self.options.with_protocol_messagepack
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -109,19 +107,9 @@ class AnyRPCConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-
     def package_info(self):
         self.cpp_info.libs = ["anyrpc"]
-        
         if not self.options.shared and self.settings.os == "Windows":
-                self.cpp_info.system_libs.append("ws2_32")
-                
+            self.cpp_info.system_libs.append("ws2_32")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])

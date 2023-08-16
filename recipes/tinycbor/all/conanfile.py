@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, VCVars
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class TinycborConan(ConanFile):
@@ -53,8 +53,8 @@ class TinycborConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.options.shared and (self.info.settings.os == "Windows" or is_apple_os(self)):
-            raise ConanInvalidConfiguration(f"{self.ref} shared not supported on {self.info.settings.os}")
+        if self.options.shared and (self.settings.os == "Windows" or is_apple_os(self)):
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported on {self.settings.os}")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
@@ -63,29 +63,20 @@ class TinycborConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
         if is_msvc(self):
-            vc = VCVars(self)
-            vc.generate()
-            # FIXME: no conan v2 build helper for NMake yet (see https://github.com/conan-io/conan/issues/12188)
-            #        So populate CL with AutotoolsToolchain cflags
-            env = Environment()
-            c_flags = AutotoolsToolchain(self).cflags
-            if c_flags:
-                env.define("CL", c_flags)
-            env.vars(self).save_script("conanbuildenv_nmake")
+            tc = NMakeToolchain(self)
+            tc.generate()
         else:
             tc = AutotoolsToolchain(self)
             env = tc.environment()
             env.define("BUILD_SHARED", "1" if self.options.shared else "0")
             env.define("BUILD_STATIC", "0" if self.options.shared else "1")
-            env.define_path("DESTDIR", unix_path(self, self.package_folder))
-            tc.generate()
+            tc.generate(env)
 
     def build(self):
         apply_conandata_patches(self)
@@ -110,8 +101,7 @@ class TinycborConan(ConanFile):
         else:
             autotools = Autotools(self)
             with chdir(self, self.source_folder):
-                # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-                autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+                autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "bin"))
 

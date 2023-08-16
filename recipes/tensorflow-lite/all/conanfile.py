@@ -1,13 +1,14 @@
 from conan import ConanFile
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
 from os.path import join
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class TensorflowLiteConan(ConanFile):
@@ -18,7 +19,7 @@ class TensorflowLiteConan(ConanFile):
     description = ("TensorFlow Lite is a set of tools that enables on-device machine learning "
                    "by helping developers run their models on mobile, embedded, and IoT devices.")
     topics = ("machine-learning", "neural-networks", "deep-learning")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,10 +41,15 @@ class TensorflowLiteConan(ConanFile):
     short_paths = True
 
     @property
+    def _min_cppstd(self):
+        return "17"
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
             "Visual Studio": "15.8",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "5.1",
         }
@@ -61,30 +67,47 @@ class TensorflowLiteConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20220623.0")
+        self.requires("abseil/20230125.1")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/2.0.6")
+        self.requires("flatbuffers/23.3.3", transitive_headers=True)
         self.requires("gemmlowp/cci.20210928")
+        self.requires("ruy/cci.20220628")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
-        self.requires("ruy/cci.20220628")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
+            # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
+            self.requires("pthreadpool/cci.20210218")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/3.24.0")
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-    def layout(self):
-        cmake_layout(self, build_folder=f"build_folder/{self.settings.build_type}")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = CMakeToolchain(self)
         tc.variables.update({
             "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS": True,
@@ -102,19 +125,6 @@ class TensorflowLiteConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-
-    def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 17)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++17, which your compiler does not support.")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
     def build(self):
         apply_conandata_patches(self)

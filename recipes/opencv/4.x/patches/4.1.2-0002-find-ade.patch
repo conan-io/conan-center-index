@@ -1,0 +1,11 @@
+--- a/modules/gapi/cmake/init.cmake
++++ b/modules/gapi/cmake/init.cmake
+@@ -4,7 +4,7 @@ if(NOT WITH_ADE)
+   return()
+ endif()
+ 
+-if (ade_DIR)
++if (1)
+   # if ade_DIR is set, use ADE-supplied CMake script
+   # to set up variables to the prebuilt ADE
+   find_package(ade 0.1.0)

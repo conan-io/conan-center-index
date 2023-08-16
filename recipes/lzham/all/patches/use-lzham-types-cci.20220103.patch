@@ -1,0 +1,142 @@
+diff --git a/lzhamcomp/lzham_win32_threading.h b/lzhamcomp/lzham_win32_threading.h
+index 0e1d16b..4aaff8c 100644
+--- a/lzhamcomp/lzham_win32_threading.h
++++ b/lzhamcomp/lzham_win32_threading.h
+@@ -43,9 +43,9 @@ namespace lzham
+          }
+       }
+ 
+-      bool wait(uint32 milliseconds = UINT32_MAX)
++      bool wait(uint32 milliseconds = LZHAM_UINT32_MAX)
+       {
+-         LZHAM_ASSUME(INFINITE == UINT32_MAX);
++         LZHAM_ASSUME(INFINITE == LZHAM_UINT32_MAX);
+ 
+          DWORD result = WaitForSingleObject(m_handle, milliseconds);
+ 
+diff --git a/lzhamdecomp/lzham_huffman_codes.cpp b/lzhamdecomp/lzham_huffman_codes.cpp
+index 11bdbd4..788414a 100644
+--- a/lzhamdecomp/lzham_huffman_codes.cpp
++++ b/lzhamdecomp/lzham_huffman_codes.cpp
+@@ -224,7 +224,7 @@ namespace lzham
+             
+             sym_freq& sf = state.syms0[num_used_syms];
+             sf.m_left = (uint16)i;
+-            sf.m_right = UINT16_MAX;
++            sf.m_right = LZHAM_UINT16_MAX;
+             sf.m_freq = freq;
+             num_used_syms++;
+          }            
+diff --git a/lzhamdecomp/lzham_prefix_coding.cpp b/lzhamdecomp/lzham_prefix_coding.cpp
+index e9ada15..52377c9 100644
+--- a/lzhamdecomp/lzham_prefix_coding.cpp
++++ b/lzhamdecomp/lzham_prefix_coding.cpp
+@@ -149,7 +149,7 @@ namespace lzham
+          {
+             uint c = pCodesizes[i];
+             
+-            LZHAM_ASSERT(!c || (next_code[c] <= UINT16_MAX));
++            LZHAM_ASSERT(!c || (next_code[c] <= LZHAM_UINT16_MAX));
+             
+             pCodes[i] = static_cast<uint16>(next_code[c]++);
+             
+@@ -296,7 +296,7 @@ namespace lzham
+                      
+                      LZHAM_ASSERT(t < (1U << table_bits));
+                      
+-                     LZHAM_ASSERT(pTables->m_lookup[t] == UINT32_MAX);
++                     LZHAM_ASSERT(pTables->m_lookup[t] == LZHAM_UINT32_MAX);
+                      
+                      pTables->m_lookup[t] = sym_index | (codesize << 16U);
+                   }
+diff --git a/lzhamdecomp/lzham_symbol_codec.cpp b/lzhamdecomp/lzham_symbol_codec.cpp
+index 5623584..b2ea7ee 100644
+--- a/lzhamdecomp/lzham_symbol_codec.cpp
++++ b/lzhamdecomp/lzham_symbol_codec.cpp
+@@ -581,7 +581,7 @@ namespace lzham
+       freq++;
+       m_sym_freq[sym] = static_cast<uint16>(freq);
+ 
+-      LZHAM_ASSERT(freq <= UINT16_MAX);
++      LZHAM_ASSERT(freq <= LZHAM_UINT16_MAX);
+ 
+       if (--m_symbols_until_update == 0)
+       {
+@@ -828,7 +828,7 @@ namespace lzham
+       freq++;
+       model.m_sym_freq[sym] = static_cast<uint16>(freq);
+       
+-      LZHAM_ASSERT(freq <= UINT16_MAX);
++      LZHAM_ASSERT(freq <= LZHAM_UINT16_MAX);
+ 
+       if (--model.m_symbols_until_update == 0)
+       {
+@@ -1265,8 +1265,8 @@ namespace lzham
+       {
+          uint32 t = pTables->m_lookup[m_bit_buf >> (cBitBufSize - pTables->m_table_bits)];
+ 
+-         LZHAM_ASSERT(t != UINT32_MAX);
+-         sym = t & UINT16_MAX;
++         LZHAM_ASSERT(t != LZHAM_UINT32_MAX);
++         sym = t & LZHAM_UINT16_MAX;
+          len = t >> 16;
+ 
+          LZHAM_ASSERT(model.m_code_sizes[sym] == len);
+@@ -1301,7 +1301,7 @@ namespace lzham
+       freq++;
+       model.m_sym_freq[sym] = static_cast<uint16>(freq);
+       
+-      LZHAM_ASSERT(freq <= UINT16_MAX);
++      LZHAM_ASSERT(freq <= LZHAM_UINT16_MAX);
+       
+       if (--model.m_symbols_until_update == 0)
+       {
+diff --git a/lzhamdecomp/lzham_symbol_codec.h b/lzhamdecomp/lzham_symbol_codec.h
+index 306d59b..b231530 100644
+--- a/lzhamdecomp/lzham_symbol_codec.h
++++ b/lzhamdecomp/lzham_symbol_codec.h
+@@ -19,7 +19,7 @@ namespace lzham
+    typedef uint64 bit_cost_t;
+    const uint32 cBitCostScaleShift = 24;
+    const uint32 cBitCostScale = (1U << cBitCostScaleShift);
+-   const bit_cost_t cBitCostMax = UINT64_MAX;
++   const bit_cost_t cBitCostMax = LZHAM_UINT64_MAX;
+ 
+    inline bit_cost_t convert_to_scaled_bitcost(uint bits) { LZHAM_ASSERT(bits <= 255); uint32 scaled_bits = bits << cBitCostScaleShift; return static_cast<bit_cost_t>(scaled_bits); }
+ 
+@@ -444,7 +444,7 @@ namespace lzham
+    if (LZHAM_BUILTIN_EXPECT(k <= pTables->m_table_max_code, 1)) \
+    { \
+       uint32 t = pTables->m_lookup[bit_buf >> (symbol_codec::cBitBufSize - pTables->m_table_bits)]; \
+-      result = t & UINT16_MAX; \
++      result = t & LZHAM_UINT16_MAX; \
+       len = t >> 16; \
+    } \
+    else \
+@@ -465,7 +465,7 @@ namespace lzham
+    uint freq = pModel->m_sym_freq[result]; \
+    freq++; \
+    pModel->m_sym_freq[result] = static_cast<uint16>(freq); \
+-   LZHAM_ASSERT(freq <= UINT16_MAX); \
++   LZHAM_ASSERT(freq <= LZHAM_UINT16_MAX); \
+    if (LZHAM_BUILTIN_EXPECT(--pModel->m_symbols_until_update == 0, 0)) \
+    { \
+       pModel->update_tables(); \
+@@ -501,7 +501,7 @@ namespace lzham
+    if (LZHAM_BUILTIN_EXPECT(k <= pTables->m_table_max_code, 1)) \
+    { \
+       uint32 t = pTables->m_lookup[bit_buf >> (symbol_codec::cBitBufSize - pTables->m_table_bits)]; \
+-      result = t & UINT16_MAX; \
++      result = t & LZHAM_UINT16_MAX; \
+       len = t >> 16; \
+    } \
+    else \
+@@ -522,7 +522,7 @@ namespace lzham
+    uint freq = pModel->m_sym_freq[result]; \
+    freq++; \
+    pModel->m_sym_freq[result] = static_cast<uint16>(freq); \
+-   LZHAM_ASSERT(freq <= UINT16_MAX); \
++   LZHAM_ASSERT(freq <= LZHAM_UINT16_MAX); \
+    if (LZHAM_BUILTIN_EXPECT(--pModel->m_symbols_until_update == 0, 0)) \
+    { \
+       pModel->update_tables(); \

@@ -5,17 +5,17 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class CbloscConan(ConanFile):
     name = "c-blosc"
     description = "An extremely fast, multi-threaded, meta-compressor library."
     license = "BSD-3-Clause"
-    topics = ("c-blosc", "blosc", "compression")
-    homepage = "https://github.com/Blosc/c-blosc"
+    topics = ("blosc", "compression")
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/Blosc/c-blosc"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -47,18 +47,9 @@ class CbloscConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -67,15 +58,14 @@ class CbloscConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.9")
+            self.requires("snappy/1.1.10")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -130,4 +120,4 @@ class CbloscConan(ConanFile):
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}blosc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])

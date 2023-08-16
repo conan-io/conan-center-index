@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(PackageTest CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(icecream-cpp REQUIRED CONFIG)
 
 add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
+target_link_libraries(example PRIVATE icecream-cpp::icecream-cpp)
 set_property(TARGET example PROPERTY CXX_STANDARD 11)

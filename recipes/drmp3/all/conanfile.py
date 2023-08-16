@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class Drmp3Conan(ConanFile):
@@ -13,22 +13,21 @@ class Drmp3Conan(ConanFile):
     topics = ("audio", "mp3", "sound")
     license = ("Unlicense", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
         "no_simd": [True, False],
-        "no_stdio": [True, False]
+        "no_stdio": [True, False],
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True,
         "no_simd": False,
-        "no_stdio": False
+        "no_stdio": False,
     }
     exports_sources = ["CMakeLists.txt", "dr_mp3.c"]
-
-    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,15 +35,15 @@ class Drmp3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -55,7 +54,7 @@ class Drmp3Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):

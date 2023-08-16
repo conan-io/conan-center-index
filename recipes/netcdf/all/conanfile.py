@@ -1,7 +1,9 @@
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class NetcdfConan(ConanFile):
@@ -11,7 +13,7 @@ class NetcdfConan(ConanFile):
         "scientific data access and a freely-distributed software library "
         "that provides an implementation of the interface."
     )
-    topics = ("unidata", "unidata-netcdf", "networking")
+    topics = "unidata", "unidata-netcdf", "networking"
     license = "BSD-3-Clause"
     homepage = "https://github.com/Unidata/netcdf-c"
     url = "https://github.com/conan-io/conan-center-index"
@@ -36,25 +38,12 @@ class NetcdfConan(ConanFile):
         "byterange": False,
     }
 
-    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
-    _cmake = None
-
     @property
     def _with_hdf5(self):
         return self.options.with_hdf5 or self.options.netcdf4
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,13 +51,16 @@ class NetcdfConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self._with_hdf5:
-            if self.version == "4.7.4":
+            if self.version == "4.7.4" and self.options.byterange:
                 # 4.7.4 was built and tested with hdf5/1.12.0
                 # It would be nice to upgrade to 1.12.1,
                 # but when the byterange feature is enabled,
@@ -76,56 +68,58 @@ class NetcdfConan(ConanFile):
                 # So we will require the older hdf5 to keep the older behaviour.
                 self.requires("hdf5/1.12.0")
             else:
-                self.requires("hdf5/1.12.1")
+                self.requires("hdf5/1.14.0")
 
         if self.options.dap or self.options.byterange:
-            self.requires("libcurl/7.83.1")
+            self.requires("libcurl/7.88.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_UTILITIES"] = False
-        self._cmake.definitions["ENABLE_TESTS"] = False
-        self._cmake.definitions["ENABLE_FILTER_TESTING"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_UTILITIES"] = False
+        tc.variables["ENABLE_TESTS"] = False
+        tc.variables["ENABLE_FILTER_TESTING"] = False
 
-        self._cmake.definitions["ENABLE_NETCDF_4"] = self.options.netcdf4
-        self._cmake.definitions["ENABLE_CDF5"] = self.options.cdf5
-        self._cmake.definitions["ENABLE_DAP"] = self.options.dap
-        self._cmake.definitions["ENABLE_BYTERANGE"] = self.options.byterange
-        self._cmake.definitions["USE_HDF5"] = self.options.with_hdf5
-        self._cmake.definitions["NC_FIND_SHARED_LIBS"] = self.options.with_hdf5 and self.options["hdf5"].shared
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        tc.variables["ENABLE_NETCDF_4"] = self.options.netcdf4
+        tc.variables["ENABLE_CDF5"] = self.options.cdf5
+        tc.variables["ENABLE_DAP"] = self.options.dap
+        tc.variables["ENABLE_BYTERANGE"] = self.options.byterange
+        tc.variables["USE_HDF5"] = self.options.with_hdf5
+        tc.variables["NC_FIND_SHARED_LIBS"] = self.options.with_hdf5 and self.dependencies["hdf5"].options.shared
+
+        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYRIGHT", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
-        os.unlink(os.path.join(self.package_folder, "bin", "nc-config"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.settings")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rm(self, "nc-config", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.settings", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             for vc_file in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), vc_file)
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
+                rm(self, vc_file, os.path.join(self.package_folder, "bin"))
+            rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
         else:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "netCDF")

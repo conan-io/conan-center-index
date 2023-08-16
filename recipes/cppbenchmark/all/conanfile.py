@@ -1,33 +1,34 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
-import glob
 
+required_conan_version = ">=1.53.0"
 
 class CppBenchmark(ConanFile):
     name = "cppbenchmark"
+    description = "Performance benchmark framework for C++ with nanoseconds measure precision."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/chronoxor/CppBenchmark"
-    description = "Performance benchmark framework for C++ with nanoseconds measure precision."
-    topics = ("conan", "utils", "library", "benchmark")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True,
-                       "shared": False}
-    requires = ["hdrhistogram-c/0.11.1", "cpp-optparse/cci.20171104"]
-    generators = "cmake"
-    exports_sources = ["patches/**", "CMakeLists.txt"]
-    _cmake = None
+    topics = ("utils", "library", "benchmark")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
     def _compilers_minimum_version(self):
@@ -36,23 +37,11 @@ class CppBenchmark(ConanFile):
             "clang": 6,
             "gcc": 7,
             "Visual Studio": 16,
+            "msvc": 192,
         }
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["CPPBENCHMARK_MODULE"] = "OFF"
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("CppBenchmark-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,30 +49,50 @@ class CppBenchmark(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("hdrhistogram-c/0.11.6")
+        self.requires("cpp-optparse/cci.20171104")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("cppbenchmark requires C++17, which your compiler does not support.")
-        else:
-            self.output.warn("cppbenchmark requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CPPBENCHMARK_MODULE"] = "OFF"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch()
-
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cppbenchmark"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]

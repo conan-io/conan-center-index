@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.tools.apple import is_apple_os
+from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
-from conans import tools
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.51.3"
 
 
 class SysConfigGLUConan(ConanFile):
@@ -14,8 +14,19 @@ class SysConfigGLUConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    requires = "opengl/system"
+
+    def layout(self):
+        pass
+
+    def requirements(self):
+        # - glu headers include opengl headers
+        # - on Apple OS, glu is part of OpenGL framework, already managed by opengl recipe
+        self.requires("opengl/system", transitive_headers=True, transitive_libs=is_apple_os(self))
+
+    def package_id(self):
+        self.info.clear()
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
@@ -36,34 +47,13 @@ class SysConfigGLUConan(ConanFile):
         pkg = package_manager.Pkg(self)
         pkg.install(["libGLU"], update=True, check=True)
 
-    def _fill_cppinfo_from_pkgconfig(self, name):
-        pkg_config = tools.PkgConfig(name)
-        if not pkg_config.provides:
-            raise ConanException("GLU development files aren't available, giving up")
-        libs = [lib[2:] for lib in pkg_config.libs_only_l]
-        lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
-        ldflags = [flag for flag in pkg_config.libs_only_other]
-        include_dirs = [include[2:] for include in pkg_config.cflags_only_I]
-        cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
-        defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
-
-        self.cpp_info.system_libs.extend(libs)
-        self.cpp_info.libdirs.extend(lib_dirs)
-        self.cpp_info.sharedlinkflags.extend(ldflags)
-        self.cpp_info.exelinkflags.extend(ldflags)
-        self.cpp_info.defines.extend(defines)
-        self.cpp_info.includedirs.extend(include_dirs)
-        self.cpp_info.cflags.extend(cflags)
-        self.cpp_info.cxxflags.extend(cflags)
-
     def package_info(self):
+        self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Glu32"]
+            self.cpp_info.system_libs = ["glu32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self._fill_cppinfo_from_pkgconfig("glu")
-
-    def package_id(self):
-        self.info.header_only()
+            pkg_config = PkgConfig(self, 'glu')
+            pkg_config.fill_cpp_info(self.cpp_info, is_system=self.settings.os != "FreeBSD")

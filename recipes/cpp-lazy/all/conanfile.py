@@ -40,7 +40,7 @@ class CpplazyConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang < 14.0.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version])
 
     def build(self):
         apply_conandata_patches(self)
