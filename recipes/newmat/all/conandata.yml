@@ -6,3 +6,4 @@ patches:
   "11.0.1":
     - patch_file: "patches/11.0.1/newmat6.cpp.patch"
       patch_type: portability
+      patch_description: "Fix comparison of pointer and int for new compilers"
