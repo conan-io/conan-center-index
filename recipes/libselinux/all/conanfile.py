@@ -48,13 +48,13 @@ class LibSELinuxConan(ConanFile):
         self.requires("pcre2/10.42")
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
         self.tool_requires("flex/2.6.4")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
 
     def source(self):
         for download in self.conan_data["sources"][self.version]:
