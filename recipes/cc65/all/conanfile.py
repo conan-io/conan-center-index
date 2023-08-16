@@ -38,7 +38,7 @@ class Cc65Conan(ConanFile):
 
     def package_id(self):
         if str(self.info.settings.compiler) in ["msvc", "Visual Studio"]:
-            if self.settings.arch == "x86_64":
+            if self.info.settings.arch == "x86_64":
                 self.info.settings.arch = "x86"
         del self.info.settings.compiler
 
