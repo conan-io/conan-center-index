@@ -89,7 +89,7 @@ class GrpcConan(ConanFile):
             if is_msvc(self):
                 self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
             else:
-                self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
+                self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
