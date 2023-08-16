@@ -9,6 +9,11 @@ sources:
     sha256: 658ba6191fa44c92280d4aa2c271b0f4fbc0e34d249578dd05e50e76d0e5efcc
     url: https://github.com/lz4/lz4/archive/v1.9.2.tar.gz
 patches:
+  "1.9.4":
+    - patch_file: "patches/0004-Added-namespace-declaration-for-xxhash-in-CMake.patch"
+      patch_description: "Added namespace/prefix for xxHash functions by altering CMakeLists.txt"
+      patch_type: official
+      patch_source: "https://github.com/lz4/lz4/pull/1258"
   "1.9.3":
     - patch_file: "patches/0003-cmake-minimum-required-first-1.9.3.patch"
       patch_description: "Move cmake_minimum_required to the top of CMakeFile.txt"
