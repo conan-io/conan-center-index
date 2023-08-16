@@ -9,8 +9,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE openjp2)
 # Test whether variables from https://github.com/uclouvain/openjpeg/blob/master/cmake/OpenJPEGConfig.cmake.in are properly defined
 set(_custom_vars
     OPENJPEG_FOUND
-    OpenJPEG_INCLUDE_DIRS
-    OpenJPEG_LIBRARIES
+    OPENJPEG_INCLUDE_DIRS
+    OPENJPEG_LIBRARIES
     OPENJPEG_MAJOR_VERSION
     OPENJPEG_MINOR_VERSION
     OPENJPEG_BUILD_VERSION
