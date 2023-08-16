@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 22e275f..1a97423 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -414,9 +414,8 @@ endif()
+ 
+ # NOTE: need at least version 6.2
+ # to print 128-bit integers.
+-set(_MPPP_MIN_FMT_VERSION "6.2")
+ if(MPPP_WITH_FMT)
+-    find_package(fmt ${_MPPP_MIN_FMT_VERSION} REQUIRED CONFIG)
++    find_package(fmt REQUIRED CONFIG)
+     message(STATUS "fmt version: ${fmt_VERSION}")
+     target_link_libraries(mp++ PUBLIC fmt::fmt)
+ endif()

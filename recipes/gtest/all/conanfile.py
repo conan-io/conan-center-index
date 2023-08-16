@@ -26,6 +26,7 @@ class GTestConan(ConanFile):
         "no_main": [True, False],
         "hide_symbols": [True, False],
         "debug_postfix": ["ANY"],
+        "disable_pthreads": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,6 +35,7 @@ class GTestConan(ConanFile):
         "no_main": False,
         "hide_symbols": False,
         "debug_postfix": "d",
+        "disable_pthreads": False,
     }
 
     @property
@@ -113,8 +115,7 @@ class GTestConan(ConanFile):
 
         if self.settings.compiler.get_safe("runtime"):
             tc.variables["gtest_force_shared_crt"] = "MD" in msvc_runtime_flag(self)
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            tc.variables["gtest_disable_pthreads"] = True
+        tc.variables["gtest_disable_pthreads"] = self.options.disable_pthreads
         if Version(self.version) < "1.12.0":
             # Relocatable shared lib on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"

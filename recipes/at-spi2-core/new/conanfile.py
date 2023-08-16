@@ -9,7 +9,8 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+
 class AtSpi2CoreConan(ConanFile):
     name = "at-spi2-core"
     description = "It provides a Service Provider Interface for the Assistive Technologies available on the GNOME platform and a library against which applications can be linked"
@@ -20,17 +21,18 @@ class AtSpi2CoreConan(ConanFile):
 
     provides = "at-spi2-atk", "atk"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_x11": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_x11": False,
-        }
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -40,22 +42,21 @@ class AtSpi2CoreConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.2.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
+        self.tool_requires("glib/<host_version>")
 
     def requirements(self):
-        self.requires("glib/2.76.2")
+        self.requires("glib/2.77.0")
         if self.options.with_x11:
             self.requires("xorg/system")
-        self.requires("dbus/1.15.2")
+        self.requires("dbus/1.15.6")
 
     def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
+        if self.options.shared and not  self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
@@ -123,6 +124,3 @@ class AtSpi2CoreConan(ConanFile):
         self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
         self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
         self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
-
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
