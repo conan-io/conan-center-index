@@ -16,8 +16,7 @@ These are a very important aspects and it helps us to establish the quality of t
     * [Format and Conventions](#format-and-conventions)
     * [Exporting Patches](#exporting-patches)
     * [Applying Patches](#applying-patches)
-    * [Rules](#rules)
-    * [Exceptions](#exceptions)<!-- endToc -->
+    * [Policy on patches](#policy-on-patches)<!-- endToc -->
 
 ## Picking the Sources
 
