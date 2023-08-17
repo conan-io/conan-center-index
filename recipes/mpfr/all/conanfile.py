@@ -5,6 +5,8 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualRunEnv
+from conan.tools.build import cross_building
 from conan.errors import ConanException
 import os
 import re
@@ -73,6 +75,9 @@ class MpfrConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         if self.settings.os == "Windows":
             if is_msvc(self) and not check_min_vs(self, 193, raise_invalid=False) and \
                 not self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str):
@@ -126,9 +131,8 @@ class MpfrConan(ConanFile):
         defs = self._extract_makefile_variable(makefile, "DEFS")
         return sources, headers, defs
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
-
         if self.settings.os == "Windows": # Allow mixed shared and static libs
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                 'as_fn_error $? "libgmp isn\'t provided as a DLL: use --enable-static --disable-shared" "$LINENO" 5',
@@ -144,6 +148,8 @@ class MpfrConan(ConanFile):
                                        "<gmp.h>", "<mpir.h>")
             save(self, "gmp.h", "#pragma once\n#include <mpir.h>\n")
 
+    def build(self):
+        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure() # Need to generate Makefile to extract variables for CMake below
 
