@@ -31,7 +31,14 @@ class ArmGnuToolchain(ConanFile):
 
     @property
     def license_url(self):
-        return "https://gist.githubusercontent.com/kammce/dc566a05f6ab2787ceef5b706012e7a2/raw/4cb8ab752d7c0f87cc074afa4e548a2be8766210/EULA.html"
+        # All versions of arm-gnu-toolchain (previously called gnu-arm-embedded)
+        # before 12.3.0 did NOT include their licenses in their package
+        # releases. Instead they are a glob of multiple HTML licenses fused
+        # together into a EULA.html file. This is a work around for those
+        # versions.
+        if self.version == "11.3.0" or self.version == "12.2.1":
+            return "https://gist.githubusercontent.com/kammce/dc566a05f6ab2787ceef5b706012e7a2/raw/4cb8ab752d7c0f87cc074afa4e548a2be8766210/EULA.html"
+        return None
 
     @property
     def _settings_build(self):
@@ -67,7 +74,8 @@ class ArmGnuToolchain(ConanFile):
         pass
 
     def build(self):
-        download(self, self.license_url, "LICENSE", verify=False)
+        if self.license_url:
+            download(self, self.license_url, "LICENSE", verify=False)
 
         get(self,
             **self.conan_data["sources"][self.version][str(self._settings_build.os)][str(self._settings_build.arch)],
