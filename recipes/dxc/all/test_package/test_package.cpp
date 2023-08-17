@@ -8,7 +8,6 @@
 
 int main() 
 {
-    // It is sufficient to check if the dxcapi.h compiled without issues on all targeted platforms
-    // We will still check integrity by running dcx
+    // TODO: Implement a basic example
     return 0;
 }
