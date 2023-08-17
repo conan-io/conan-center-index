@@ -22,23 +22,23 @@ class ArgRouterConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "20" if str(self.settings.compiler) == "msvc" else "17"
 
     @property
     def _min_compilers_version(self):
         return {
             "apple-clang": "10",
-            "clang": "5",
-            "gcc": "10",
+            "clang": "10",
+            "gcc": "9",
             "msvc": "191",
-            "Visual Studio": "15",
+            "Visual Studio": "17",
         }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.74.0")
         self.requires("span-lite/0.10.3")
 
     def package_id(self):
@@ -84,5 +84,3 @@ class ArgRouterConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["boost::headers", "span-lite::span-lite"]
-        if self.settings.os == "Windows":
-            self.cpp_info.defines.append("NOMINMAX")
