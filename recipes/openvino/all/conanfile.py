@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 
 class OpenvinoConan(ConanFile):
     name = "openvino"
