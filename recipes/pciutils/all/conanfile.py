@@ -62,14 +62,19 @@ class PciUtilsConan(ConanFile):
     def generate(self):
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
+        env_vars = tc.environment().vars(self)
+        cc = env_vars.get("CC", self.settings.compiler)
         tc.make_args = [
-            "SHARED={}".format(yes_no(self.options.shared)),
-            "ZLIB={}".format(yes_no(self.options.with_zlib)),
-            "HWDB={}".format(yes_no(self.options.with_udev)),
-            "DESTDIR={}".format(self.package_folder),
+            f"SHARED={yes_no(self.options.shared)}",
+            f"ZLIB={yes_no(self.options.with_zlib)}",
+            f"HWDB={yes_no(self.options.with_udev)}",
+            f"DESTDIR={self.package_folder}",
             "PREFIX=/",
             "DNS=no",
+            f"CC={cc}",
         ]
+        for var, value in env_vars.items():
+            tc.make_args.append(f"{var}={value}")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
