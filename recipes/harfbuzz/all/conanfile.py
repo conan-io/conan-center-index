@@ -78,9 +78,9 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_icu:
-            self.requires("icu/73.1")
+            self.requires("icu/73.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.3", run=can_run(self))
+            self.requires("glib/2.77.0")
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -100,8 +100,8 @@ class HarfbuzzConan(ConanFile):
         self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if self.options.with_glib and not can_run(self):
-            self.tool_requires("glib/2.76.3")
+        if self.options.with_glib:
+            self.tool_requires("glib/<host_version>")
         if self.settings.os == "Macos":
             # Ensure that the gettext we use at build time is compatible
             # with the libiconv that is transitively exposed by glib
@@ -125,8 +125,6 @@ class HarfbuzzConan(ConanFile):
             return "ninja", []
 
         VirtualBuildEnv(self).generate()
-        if self.options.with_glib and can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
 
         # Avoid conflicts with libiconv
         # see: https://github.com/conan-io/conan-center-index/pull/17046#issuecomment-1554629094
