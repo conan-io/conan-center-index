@@ -199,6 +199,7 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_OV_PYTORCH_FRONTEND"] = self.options.enable_pytorch_frontend
         # Dependencies
         toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
+        toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = self.options['onetbb'].shared
         toolchain.cache_variables["ENABLE_SYSTEM_PUGIXML"] = True
         if self._protobuf_required:
             toolchain.cache_variables["ENABLE_SYSTEM_PROTOBUF"] = True
