@@ -26,7 +26,7 @@ class GetTextConan(ConanFile):
     topics = ("gettext", "intl", "libintl", "i18n")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
-    license = "GPL-3.0-or-later"
+    license = "LGPL-2.1-or-later"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
