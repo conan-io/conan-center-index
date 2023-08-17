@@ -1,0 +1,13 @@
+--- a/contrib/modules/tracking/CMakeLists.txt
++++ b/contrib/modules/tracking/CMakeLists.txt
+@@ -9,9 +9,9 @@ ocv_define_module(tracking
+     opencv_imgproc
+     opencv_core
+     opencv_video
+-    opencv_plot  # samples only
+     ${debug_modules}
+     OPTIONAL
++      opencv_plot
+       opencv_dnn
+       opencv_datasets
+       opencv_highgui
