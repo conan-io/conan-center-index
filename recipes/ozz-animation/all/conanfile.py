@@ -52,7 +52,7 @@ class OzzAnimationConan(ConanFile):
 
     def validate(self):
         def _ensure_enabled(opt, req):
-            if getattr(self.options, opt):
+            if self.options.get_safe(opt):
                 missing = [r for r in req if not getattr(self.options, r, False)]
                 if missing:
                     raise ConanInvalidConfiguration(f"Option '{opt}' requires option(s) {missing} to be enabled too")
@@ -134,7 +134,7 @@ class OzzAnimationConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        pkg = Path(self.package_folder)
+        pkg = self.package_path
 
         if self.options.ozz_animation_tools:
             json = Path(self.build_folder)/'src'/'animation'/'offline'/'tools'/'json'
@@ -167,36 +167,30 @@ class OzzAnimationConan(ConanFile):
                 self.cpp_info.components[c].system_libs = ["m"]
 
         self.cpp_info.components["base"].libs = [f"ozz_base{postfix}"]
-        self.cpp_info.components["base"].includedirs = ["include"]
         _add_libm("base")
 
         if self.options.ozz_geometry:
             self.cpp_info.components["geometry"].libs = [f"ozz_geometry{postfix}"]
-            self.cpp_info.components["geometry"].includedirs = ["include"]
             self.cpp_info.components["geometry"].requires = ["base"]
             _add_libm("geometry")
 
         if self.options.ozz_animation:
             self.cpp_info.components["animation"].libs = [f"ozz_animation{postfix}"]
-            self.cpp_info.components["animation"].includedirs = ["include"]
             self.cpp_info.components["animation"].requires = ["base"]
             _add_libm("animation")
 
         if self.options.ozz_animation_offline:
             self.cpp_info.components["animation_offline"].libs = [f"ozz_animation_offline{postfix}"]
-            self.cpp_info.components["animation_offline"].includedirs = ["include"]
             self.cpp_info.components["animation_offline"].requires = ["animation"]
             _add_libm("animation_offline")
 
         if self.options.ozz_options:
             self.cpp_info.components["options"].libs = [f"ozz_options{postfix}"]
-            self.cpp_info.components["options"].includedirs = ["include"]
             self.cpp_info.components["options"].requires = ["base"]
             _add_libm("options")
 
         if self.options.ozz_animation_tools:
             self.cpp_info.components["animation_tools"].libs = [f"ozz_animation_tools{postfix}"]
-            self.cpp_info.components["animation_tools"].includedirs = ["include"]
             self.cpp_info.components["animation_tools"].requires = ["animation_offline", "options", "jsoncpp"]
             self.cpp_info.components["jsoncpp"].libs = [f"json{postfix}"]
 
