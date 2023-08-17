@@ -75,4 +75,4 @@ class EnkiTSConan(ConanFile):
         if self.options.shared:
             self.cpp_info.defines.append("ENKITS_DLL=1")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["m", "pthread"]
