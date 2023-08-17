@@ -753,6 +753,7 @@ required_for_references:
 - nmslib
 - nng
 - nodejs
+- nodesoup
 - norm
 - nsync
 - ntv2
@@ -839,6 +840,7 @@ required_for_references:
 - pixman
 - pkgconf
 - platform.delegates
+- platform.exceptions
 - platform.hashing
 - platform.interfaces
 - plf_colony
@@ -895,6 +897,7 @@ required_for_references:
 - ragel
 - rang
 - range-v3
+- rangesnext
 - rapidcheck
 - rapidcsv
 - rapidfuzz
@@ -917,6 +920,7 @@ required_for_references:
 - restbed
 - restinio
 - rg-etc1
+- rgbcx
 - ring-span-lite
 - rmm
 - roaring
@@ -1109,6 +1113,7 @@ required_for_references:
 - wt
 - wtl
 - xapian-core
+- xbyak
 - xerces-c
 - xkbcommon
 - xkeyboard-config
