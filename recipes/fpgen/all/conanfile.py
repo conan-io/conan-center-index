@@ -49,8 +49,12 @@ class FpgenConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
+        def lazy_lt_semver(v1, v2):
+            # Needed to allow version "13" >= "13.1" for apple-clang
+            return all(int(p1) < int(p2) for p1, p2 in zip(v1.split("."), v2.split(".")))
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
