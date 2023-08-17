@@ -30,7 +30,7 @@ generally approved on a weekly basis. Feel free to continue to step :two: while 
 > All interactions are subject to the expectations of the [code of conduct](../code_of_conduct.md). Any misuse or inappropriate behavior
 > are subject to the same principals.
 
-When submitting a pull request for the first time, you will be prompted to sign the [CLA](../CONTRIBUTOR_LICENSE_AGREEMENT.md) for your
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](https://cla-assistant.io/conan-io/conan-center-index) for your
 code contributions. You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
 
 ## Inactivity and user removal
