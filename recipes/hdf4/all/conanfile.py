@@ -159,6 +159,8 @@ class Hdf4Conan(ConanFile):
             self.cpp_info.components["hdf"].requires.append("libaec::libaec")
         elif self.options.szip_support == "with_szip":
             self.cpp_info.components["hdf"].requires.append("szip::szip")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["hdf"].system_libs = ["m", "dl"]
 
         # mfhdf
         mfhdf_cmake = f"mfhdf-{target_suffix}"
