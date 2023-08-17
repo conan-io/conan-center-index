@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -88,10 +88,10 @@ class LibopingConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
-
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", self.package_folder, recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["oping"]
