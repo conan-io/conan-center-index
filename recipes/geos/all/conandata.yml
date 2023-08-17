@@ -21,5 +21,5 @@ patches:
   "3.12.0":
     - patch_file: "patches/3.12.0-0001-fix-cmake.patch"
       patch_description: "Fix CMake on Windows with Visual Studio"
-      patch_type: "backport"
+      patch_type: "official"
       patch_source: "https://github.com/libgeos/geos/pull/945"
