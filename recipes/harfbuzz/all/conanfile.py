@@ -2,7 +2,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import can_run, stdcpp_library
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -12,7 +12,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class HarfbuzzConan(ConanFile):
@@ -20,7 +20,7 @@ class HarfbuzzConan(ConanFile):
     description = "HarfBuzz is an OpenType text shaping engine."
     topics = ("opentype", "text", "engine")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://harfbuzz.org"
+    homepage = "https://harfbuzz.github.io/"
     license = "MIT"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
