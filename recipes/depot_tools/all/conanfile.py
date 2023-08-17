@@ -19,6 +19,7 @@ class DepotToolsConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
