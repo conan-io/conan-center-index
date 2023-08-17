@@ -63,7 +63,7 @@ class GDCMConan(ConanFile):
         else:
             self.requires("zlib/1.2.13")
         if self.settings.os != "Windows":
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
             if Version(self.version) >= Version("3.0.20"):
                 self.requires("libiconv/1.17")
         if self.options.with_json:
@@ -241,7 +241,7 @@ class GDCMConan(ConanFile):
         if self.options.with_json:
             self.cpp_info.components["gdcmMSFF"].requires.append("json-c::json-c")
         if self.settings.os != "Windows":
-            self.cpp_info.components["gdcmMSFF"].requires.append("libuuid::libuuid")
+            self.cpp_info.components["gdcmMSFF"].requires.append("util-linux-libuuid::util-linux-libuuid")
             if Version(self.version) >= Version("3.0.20"):
                 self.cpp_info.components["gdcmMSFF"].requires.append("libiconv::libiconv")
         if not self.options.shared:
