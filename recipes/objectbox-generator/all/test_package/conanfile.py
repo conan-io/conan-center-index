@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -10,4 +11,5 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        self.run("objectbox-generator -help")
+        if can_run(self):
+            self.run("objectbox-generator -help")

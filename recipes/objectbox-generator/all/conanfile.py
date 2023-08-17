@@ -18,7 +18,6 @@ class PackageConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -31,22 +30,21 @@ class PackageConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD", "Windows", "Macos"] or self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(f"{self.name} doesn't support current environment")
 
-    def source(self):
+    def build(self):
         get(self, **self.conan_data["sources"][self.version][str(self.info.settings.os)])
         download(self, **self.conan_data["sources"][self.version]["License"], filename="LICENSE.txt")
 
-    def build(self):
-        pass
-
     def package(self):
         if self.settings.os != "Windows":
-            bin_path = os.path.join(self.source_folder, "objectbox-generator")
+            bin_path = os.path.join(self.build_folder, "objectbox-generator")
             os.chmod(bin_path, os.stat(bin_path).st_mode | 0o111)
         copy(self, "objectbox-generator*",
-             src=self.source_folder,
+             src=self.build_folder,
              dst=os.path.join(self.package_folder, "bin"),
              keep_path=False)
-        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE.txt",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.build_folder)
 
     def package_info(self):
         self.cpp_info.includedirs = []
