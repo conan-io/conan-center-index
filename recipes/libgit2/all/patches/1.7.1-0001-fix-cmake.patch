@@ -34,13 +34,13 @@ index d149416..33473ee 100644
  	sanitizebool(USE_HTTPS)
  	if(USE_HTTPS STREQUAL ON)
 diff --git a/cmake/SelectSSH.cmake b/cmake/SelectSSH.cmake
-index 968a631..386f184 100644
+index 23dfc97..386f184 100644
 --- a/cmake/SelectSSH.cmake
 +++ b/cmake/SelectSSH.cmake
 @@ -1,13 +1,10 @@
  # Optional external dependency: libssh2
  if(USE_SSH)
--	find_pkglibraries(LIBSSH2 ssh2)
+-	find_pkglibraries(LIBSSH2 libssh2)
 -	if(NOT LIBSSH2_FOUND)
 -		find_package(LibSSH2)
 -		set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
