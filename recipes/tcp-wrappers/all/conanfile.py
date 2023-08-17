@@ -59,13 +59,12 @@ class TcpWrappersConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        tc.make_args += [
-            "REAL_DAEMON_DIR=/bin",
-            f"SHEXT={self._shext}",
-            "-j1",
-        ]
+        tc.make_args.append("REAL_DAEMON_DIR=/bin")
+        tc.make_args.append(f"SHEXT={self._shext}")
         if self.options.shared:
             tc.make_args.append("shared=1")
+        if self.options.get_safe("fPIC") or self.options.shared:
+            tc.make_args.append("ENV_CFLAGS=-fPIC")
         tc.generate()
 
     def build(self):
