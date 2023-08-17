@@ -47,7 +47,7 @@ class OpenvinoConan(ConanFile):
         "fPIC": True,
         # HW plugins
         "enable_cpu": True,
-        "enable_gpu": False,
+        "enable_gpu": True,
         # SW plugins
         "enable_auto": True,
         "enable_hetero": True,
@@ -183,6 +183,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
+            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False
+            # toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
         # SW plugins
@@ -199,7 +201,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_OV_PYTORCH_FRONTEND"] = self.options.enable_pytorch_frontend
         # Dependencies
         toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
-        toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = self.options['onetbb'].shared
+        # toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = self.options["onetbb"].shared
+        toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = self.options.shared
         toolchain.cache_variables["ENABLE_SYSTEM_PUGIXML"] = True
         if self._protobuf_required:
             toolchain.cache_variables["ENABLE_SYSTEM_PROTOBUF"] = True
