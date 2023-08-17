@@ -37,11 +37,11 @@ sources:
       "x86_64":
         url: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-mingw-w64-i686-arm-none-eabi.zip"
         sha256: "ad1427496cde9bbe7604bc448ec6e115c6538e04af1c8275795ebb1c2b7b2830"
-  "12.3.0":
+  "12.3.1":
     "Linux":
       "x86_64":
         url: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz"
-        sha256: "d50516efae1dbada6bece103da49fb6af1893c274e1c27234086d256bdce80c0"
+        sha256: "12a2815644318ebcceaf84beabb665d0924b6e79e21048452c5331a56332b309"
       "armv8":
         url: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-aarch64-arm-none-eabi.tar.xz"
         sha256: "14c0487d5753f6071d24e568881f7c7e67f80dd83165dec5164b3731394af431"

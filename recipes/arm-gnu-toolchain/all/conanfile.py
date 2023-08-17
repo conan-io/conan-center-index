@@ -4,7 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0.6"
 
 
 class ArmGnuToolchain(ConanFile):
@@ -21,6 +21,7 @@ class ArmGnuToolchain(ConanFile):
     exports_sources = "toolchain.cmake"
     package_type = "application"
     short_paths = True
+    build_policy = "missing"
 
     @property
     def download_info(self):
@@ -77,24 +78,56 @@ class ArmGnuToolchain(ConanFile):
         if self.license_url:
             download(self, self.license_url, "LICENSE", verify=False)
 
+        destination_pico = os.path.join(self.build_folder, "picolibc/")
+        destination_toolchain = os.path.join(self.build_folder, "toolchain/")
+
+        if str(self.version) == "11.3.0":
+            get(self,
+                "https://github.com/picolibc/picolibc/releases/download/1.7.9/picolibc-1.7.9-11.3.rel1.zip", destination=destination_pico)
+        elif str(self.version) == "12.2.1":
+            get(self,
+                "https://github.com/picolibc/picolibc/releases/download/1.8/picolibc-1.8-12.2.rel1.zip", destination=destination_pico)
+        elif str(self.version) == "12.3.1":
+            get(self,
+                "https://github.com/picolibc/picolibc/releases/download/1.8.3/picolibc-1.8.3-12.3-rel1.zip",
+                destination=destination_pico)
+
         get(self,
-            **self.conan_data["sources"][self.version][str(self._settings_build.os)][str(self._settings_build.arch)],
-            strip_root=True)
+            **self.conan_data["sources"][self.version][str(self._settings_build.os)][str(self._settings_build.arch)], destination=destination_toolchain, strip_root=True)
 
     def package(self):
+        picolibc_source = os.path.join(self.build_folder, "picolibc/")
+        toolchain_source = os.path.join(self.build_folder, "toolchain/")
         destination = os.path.join(self.package_folder, "bin/")
 
-        copy(self, pattern="arm-none-eabi/*", src=self.build_folder,
+        # Copy Picolibc files
+
+        copy(self, pattern="arm-none-eabi/*", src=picolibc_source,
              dst=destination, keep_path=True)
-        copy(self, pattern="bin/*", src=self.build_folder,
+        copy(self, pattern="bin/*", src=picolibc_source,
              dst=destination, keep_path=True)
-        copy(self, pattern="include/*", src=self.build_folder,
+        copy(self, pattern="include/*", src=picolibc_source,
              dst=destination, keep_path=True)
-        copy(self, pattern="lib/*", src=self.build_folder,
+        copy(self, pattern="lib/*", src=picolibc_source,
              dst=destination, keep_path=True)
-        copy(self, pattern="libexec/*", src=self.build_folder,
+        copy(self, pattern="libexec/*", src=picolibc_source,
              dst=destination, keep_path=True)
-        copy(self, pattern="share/*", src=self.build_folder,
+        copy(self, pattern="share/*", src=picolibc_source,
+             dst=destination, keep_path=True)
+
+        # Copy Toolchain Files
+
+        copy(self, pattern="arm-none-eabi/*", src=toolchain_source,
+             dst=destination, keep_path=True)
+        copy(self, pattern="bin/*", src=toolchain_source,
+             dst=destination, keep_path=True)
+        copy(self, pattern="include/*", src=toolchain_source,
+             dst=destination, keep_path=True)
+        copy(self, pattern="lib/*", src=toolchain_source,
+             dst=destination, keep_path=True)
+        copy(self, pattern="libexec/*", src=toolchain_source,
+             dst=destination, keep_path=True)
+        copy(self, pattern="share/*", src=toolchain_source,
              dst=destination, keep_path=True)
 
         license_dir = os.path.join(self.package_folder, "licenses/")
