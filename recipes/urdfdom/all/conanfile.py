@@ -3,14 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    replace_in_file,
-    rm,
-)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -65,12 +58,8 @@ class PackageConan(ConanFile):
         # There is no obvious benefit of doing the same for the Conan package,
         # so we simply merge the headers into the main source tree.
         sources = self.conan_data["sources"][self.version]
-        get(
-            self,
-            **sources["urdfdom_headers"],
-            strip_root=True,
-            destination=os.path.join(self.source_folder, "urdf_parser"),
-        )
+        get(self, **sources["urdfdom_headers"], strip_root=True,
+            destination=os.path.join(self.source_folder, "urdf_parser"))
         get(self, **sources["urdfdom"], strip_root=True, destination=self.source_folder)
 
     def generate(self):
@@ -86,12 +75,8 @@ class PackageConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # Do not hard-code libraries to SHARED
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "urdf_parser", "CMakeLists.txt"),
-            " SHARED",
-            "",
-        )
+        parser_cmakelists = os.path.join(self.source_folder, "urdf_parser", "CMakeLists.txt")
+        replace_in_file(self, parser_cmakelists, " SHARED", "")
 
     def build(self):
         self._patch_sources()
@@ -100,16 +85,16 @@ class PackageConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
+        copy(self, "LICENSE",
             dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+            src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-
-        rm(self, "*.pdb", self.package_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "urdfdom"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = [
