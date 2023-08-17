@@ -115,6 +115,7 @@ class HexlConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        tc.set_property("easyloggingpp", "cmake_file_name", "EASYLOGGINGPP")
         tc.generate()
 
     def build(self):

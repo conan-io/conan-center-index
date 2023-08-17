@@ -54,7 +54,7 @@ index 1cee76b..0db1f9c 100644
 -    message(STATUS "easyloggingpp: pre-installed easyloggingpp NOT found, building from source")
 -    add_subdirectory(cmake/third-party/easylogging)
 -  endif()
-+  find_package(easyloggingpp REQUIRED)
++  find_package(EASYLOGGINGPP REQUIRED)
 +  get_target_property(
 +    EASYLOGGINGPP_INCLUDE_DIR
 +    easyloggingpp::easyloggingpp
