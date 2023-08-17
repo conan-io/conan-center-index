@@ -53,7 +53,10 @@ class XnnpackConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpuinfo/cci.20230118")
+        if self.version in ["cci.20220801", "cci.20220621", "cci.20211210"]:
+            self.requires("cpuinfo/cci.20220228")
+        else:
+            self.requires("cpuinfo/cci.20230118")
         self.requires("fp16/cci.20210320")
         #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
         self.requires("pthreadpool/cci.20210218", transitive_headers=True)
