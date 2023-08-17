@@ -103,3 +103,5 @@ class CoConan(ConanFile):
         self.cpp_info.libs = ["co"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m", "pthread", "dl"]
