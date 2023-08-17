@@ -57,7 +57,7 @@ class MailioConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.82.0", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
@@ -102,10 +102,20 @@ class MailioConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["mailio"]
-        self.cpp_info.requires = ["boost::system", "boost::date_time", "boost::regex", "openssl::openssl"]
+        self.cpp_info.requires = [
+            "boost::system",
+            "boost::date_time",
+            "boost::regex",
+            "openssl::openssl",
+        ]
+        if self.dependencies["boost"].options.get_safe("with_stacktrace_backtrace"):
+            self.cpp_info.requires.append("boost::stacktrace_backtrace")
+
+        self.cpp_info.set_property("pkg_config_name", "mailio")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

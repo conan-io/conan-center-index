@@ -1,9 +1,22 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.build import can_run
 import os
 
 class ExtraCMakeModulesTestConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+
+    def build_requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -11,7 +24,6 @@ class ExtraCMakeModulesTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "example")
-            self.run(bin_path, run_environment=True)
-
+        if can_run(self):
+            runpath = os.path.join(self.cpp.build.bindir, "example")
+            self.run(runpath, env="conanrun")
