@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -77,14 +77,19 @@ class AdaConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        # Relocatable shared libs on macOS
-        tc.variables["CMAKE_MACOSX_RPATH"] = True
+        if Version(self.version) >= "2.4.2":
+            tc.variables["ADA_TOOLS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        # solve APPLE RELOCATABLE SHARED LIBS (KB-H077)
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
