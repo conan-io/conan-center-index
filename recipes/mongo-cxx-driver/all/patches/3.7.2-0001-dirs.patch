@@ -1,0 +1,80 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 20254fa..d7dc7c4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -206,6 +206,7 @@ set (BUILD_SOURCE_DIR ${CMAKE_BINARY_DIR})
+ 
+ include (MakeDistFiles)
+ 
++if(FALSE)
+ add_custom_target(hugo_dir
+     COMMAND ${CMAKE_COMMAND} -E make_directory hugo
+ )
+@@ -261,6 +262,7 @@ add_custom_target(format-lint
+ add_custom_target(docs
+     DEPENDS hugo doxygen-current
+ )
++endif()
+ 
+ set(THIRD_PARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party)
+ 
+@@ -270,6 +272,9 @@ if (ENABLE_TESTS)
+     enable_testing()
+ endif ()
+ 
++set(MONGO_CXX_PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
++set(MONGO_CXX_PROJECT_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
++
+ add_subdirectory(src)
+ 
+ add_subdirectory(examples EXCLUDE_FROM_ALL)
+@@ -281,6 +286,7 @@ add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+ # CMake does not implement anything like 'dist' from autotools.
+ # This implementation is based on the one in GnuCash.
+ 
++if(FALSE)
+ add_subdirectory (cmake)
+ add_subdirectory (data)
+ add_subdirectory (docs)
+@@ -381,4 +387,4 @@ endif ()
+ if (CMAKE_GENERATOR_TOOLSET)
+    message (STATUS "\tinstance: ${CMAKE_GENERATOR_TOOLSET}")
+ endif ()
+-
++endif()
+diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
+index d87d588..1aefd91 100644
+--- a/src/bsoncxx/CMakeLists.txt
++++ b/src/bsoncxx/CMakeLists.txt
+@@ -71,7 +71,7 @@ set(BSONCXX_VERSION_NO_EXTRA ${BSONCXX_VERSION_MAJOR}.${BSONCXX_VERSION_MINOR}.$
+ set(BSONCXX_VERSION ${BSONCXX_VERSION_NO_EXTRA}${BSONCXX_VERSION_EXTRA})
+ message ("bsoncxx version: ${BSONCXX_VERSION}")
+ set(BSONCXX_INLINE_NAMESPACE "v${BSONCXX_ABI_VERSION}")
+-set(BSONCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/bsoncxx/${BSONCXX_INLINE_NAMESPACE}" CACHE INTERNAL "")
++set(BSONCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE INTERNAL "")
+ 
+ set(LIBBSON_REQUIRED_VERSION 1.13.0)
+ set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
+@@ -94,7 +94,8 @@ if(TARGET bson_shared OR TARGET bson_static)
+   endif()
+ else()
+   # Attempt to find libbson by new package name (without lib).
+-  find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} QUIET)
++  find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} REQUIRED)
++  set(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND TRUE)
+ 
+   if(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND)
+     message ("found libbson version ${bson-${LIBBSON_REQUIRED_ABI_VERSION}_VERSION}")
+diff --git a/src/mongocxx/CMakeLists.txt b/src/mongocxx/CMakeLists.txt
+index a7e6ded..4fb9027 100644
+--- a/src/mongocxx/CMakeLists.txt
++++ b/src/mongocxx/CMakeLists.txt
+@@ -27,7 +27,7 @@ set(MONGOCXX_VERSION_NO_EXTRA ${MONGOCXX_VERSION_MAJOR}.${MONGOCXX_VERSION_MINOR
+ set(MONGOCXX_VERSION ${MONGOCXX_VERSION_NO_EXTRA}${MONGOCXX_VERSION_EXTRA})
+ message ("mongocxx version: ${MONGOCXX_VERSION}")
+ set(MONGOCXX_INLINE_NAMESPACE "v${MONGOCXX_ABI_VERSION}")
+-set(MONGOCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/mongocxx/${MONGOCXX_INLINE_NAMESPACE}" CACHE INTERNAL "")
++set(MONGOCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/" CACHE INTERNAL "")
+ 
+ set(LIBMONGOC_REQUIRED_VERSION 1.22.1)
+ set(LIBMONGOC_REQUIRED_ABI_VERSION 1.0)

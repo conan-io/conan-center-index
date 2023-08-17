@@ -1,36 +1,49 @@
 import os
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=1.50.0"
+
 
 class TermcolorConan(ConanFile):
     name = "termcolor"
     description = "Termcolor is a header-only C++ library for printing colored messages to the terminal."
-    topics = ("termcolor", "terminal", "color")
+    topics = ("terminal", "color")
     license = "BSD-3-Clause"
     homepage = "https://github.com/ikalnytskyi/termcolor"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    generators = "cmake"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
-    def _configure_cmake(self):
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "termcolor")
+        self.cpp_info.set_property("cmake_target_name", "termcolor::termcolor")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

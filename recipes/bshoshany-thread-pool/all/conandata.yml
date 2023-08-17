@@ -1,4 +1,7 @@
 sources:
+  "3.5.0":
+    sha256: "d3efd5c434f6e99f4cff7b8219cbb586dc06bc0aeaf17cd174813a2333961306"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.5.0.tar.gz"
   "3.4.0":
     sha256: "b282149693534934d29c3e6eb563a668b04d6abc53ff013bbe608d96741eddb2"
     url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v3.4.0.tar.gz"

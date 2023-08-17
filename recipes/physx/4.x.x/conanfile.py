@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rm, rmdir, copy, replace_in_file, save
+from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy, replace_in_file, save
 from conan.tools.build import valid_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 import os
 
@@ -35,7 +34,6 @@ class PhysXConan(ConanFile):
         "enable_float_point_precise_math": False,
     }
 
-    no_copy_source = True
     short_paths = True
 
     generators = "CMakeDeps"
