@@ -267,20 +267,22 @@ class OneTBBConan(ConanFile):
         self.cpp_info.components["libtbb"].set_property("cmake_target_name", "TBB::tbb")
         self.cpp_info.components["libtbb"].libs = [f"tbb{suffix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libtbb"].system_libs = ["dl", "rt", "pthread"]
+            self.cpp_info.components["libtbb"].system_libs = ["m", "dl", "rt", "pthread"]
 
         # tbbmalloc
         if self.options.tbbmalloc:
             self.cpp_info.components["tbbmalloc"].set_property("cmake_target_name", "TBB::tbbmalloc")
             self.cpp_info.components["tbbmalloc"].libs = [f"tbbmalloc{suffix}"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["tbbmalloc"].system_libs = ["dl", "pthread"]
+                self.cpp_info.components["tbbmalloc"].system_libs = ["m", "dl", "pthread"]
 
             # tbbmalloc_proxy
             if self.options.tbbproxy:
                 self.cpp_info.components["tbbmalloc_proxy"].set_property("cmake_target_name", "TBB::tbbmalloc_proxy")
                 self.cpp_info.components["tbbmalloc_proxy"].libs = [f"tbbmalloc_proxy{suffix}"]
                 self.cpp_info.components["tbbmalloc_proxy"].requires = ["tbbmalloc"]
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    self.cpp_info.components["tbbmalloc_proxy"].system_libs = ["m"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "TBB"
