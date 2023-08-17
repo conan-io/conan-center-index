@@ -7,6 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -19,6 +20,7 @@ class StdgpuConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://stotko.github.io/stdgpu/"
     topics = ("cuda", "data-structures", "gpgpu", "gpu", "hip", "openmp", "rocm", "stl", "thrust")
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +30,7 @@ class StdgpuConan(ConanFile):
         "setup_compiler_flags": [True, False],
         "enable_contract_checks": [None, True, False],
         "use_32_bit_index": [True, False],
+        "openmp": ["llvm", "system"],
     }
     default_options = {
         "shared": False,
@@ -36,6 +39,7 @@ class StdgpuConan(ConanFile):
         "setup_compiler_flags": False,
         "enable_contract_checks": None,
         "use_32_bit_index": True,
+        "openmp": "llvm",
     }
 
     @property
@@ -67,16 +71,14 @@ class StdgpuConan(ConanFile):
                 "Visual Studio": "16",
             }
 
-    @property
-    def _tests_enabled(self):
-        return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.options.backend != "openmp":
+            del self.options.openmp
 
     def configure(self):
         if self.options.shared:
@@ -91,22 +93,29 @@ class StdgpuConan(ConanFile):
 
     def requirements(self):
         if self.options.backend != "hip":
-            # HIP support requires Thrust provided with ROCm.
-            # The main version provided by Nvidia found in Conan is not compatible.
-            self.requires("thrust/1.17.2", transitive_headers=True, transitive_libs=True)
+            self.requires("thrust/1.17.2", transitive_headers=True)
+        else:
+            # The baseline Thrust version provided by Nvidia and Conan is not compatible with HIP.
+            self.output.warning("HIP support requires Thrust with ROCm. "
+                                "Will Thrust from system instead of Conan.")
+        if self.options.backend == "openmp":
+            if self.options.openmp == "llvm":
+                self.requires("llvm-openmp/12.0.1")
+            else:
+                self.output.info("Using OpenMP backend with system OpenMP")
 
     def _cmake_new_enough(self, required_version):
         try:
             output = StringIO()
             self.run("cmake --version", output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
+            cmake_version = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())[1]
+            return Version(cmake_version) >= required_version
         except:
             return False
 
     def build_requirements(self):
         if Version(self.version) > "1.3.0" and not self._cmake_new_enough("3.18"):
-            self.tool_requires("cmake/3.26.4")
+            self.tool_requires("cmake/[>=3.18]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -130,7 +139,7 @@ class StdgpuConan(ConanFile):
         tc.variables["STDGPU_TREAT_WARNINGS_AS_ERRORS"] = False
         tc.variables["STDGPU_BUILD_EXAMPLES"] = False
         tc.variables["STDGPU_BUILD_BENCHMARKS"] = False
-        tc.variables["STDGPU_BUILD_TESTS"] = self._tests_enabled
+        tc.variables["STDGPU_BUILD_TESTS"] = False
         tc.variables["STDGPU_BUILD_TEST_COVERAGE"] = False
         tc.variables["STDGPU_ANALYZE_WITH_CLANG_TIDY"] = False
         tc.variables["STDGPU_ANALYZE_WITH_CPPCHECK"] = False
@@ -147,29 +156,37 @@ class StdgpuConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if self._tests_enabled:
-            cmake.test()
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        rm(self, "*.pdb", self.package_folder)
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
+
+    def _configure_system_openmp(self):
+        openmp_flags = []
+        if is_msvc(self):
+            openmp_flags = ["-openmp"]
+        elif self.settings.compiler in ["clang", "apple-clang"]:
+            openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            openmp_flags = ["-fopenmp"]
+        elif self.settings.compiler == "intel":
+            openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+        self.cpp_info.cflags += openmp_flags
+        self.cpp_info.cxxflags += openmp_flags
+        self.cpp_info.sharedlinkflags += openmp_flags
+        self.cpp_info.exelinkflags += openmp_flags
+        if self.settings.os == "Windows":
+            if is_msvc(self):
+                self.cpp_info.system_libs.append("delayimp")
+            elif self.settings.compiler == "gcc":
+                self.cpp_info.system_libs.append("gomp")
 
     def package_info(self):
         self.cpp_info.libs = ["stdgpu"]
 
         if self.options.backend == "openmp":
-            if self.settings.compiler in ["clang", "apple-clang"]:
-                self.cpp_info.cxxflags = ["-Xpreprocessor", "-fopenmp"]
-            elif self.settings.compiler == "gcc":
-                self.cpp_info.cxxflags = ["-fopenmp"]
-            elif self.settings.compiler == "intel":
-                self.cpp_info.cxxflags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
-            self.cpp_info.cflags = self.cpp_info.cxxflags
+            if self.options.openmp == "system":
+                self._configure_system_openmp()

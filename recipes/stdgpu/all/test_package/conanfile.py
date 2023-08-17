@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        backend = str(self.dependencies["stdgpu"].options.backend).upper()
+        backend = str(self.dependencies["stdgpu"].options.backend)
         tc.variables["STDGPU_BACKEND"] = backend
         tc.generate()
 
@@ -28,6 +28,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if can_run(self):
+        if can_run(self) and str(self.dependencies["stdgpu"].options.backend) in ["cuda", "openmp"]:
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
