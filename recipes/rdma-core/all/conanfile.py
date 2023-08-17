@@ -5,6 +5,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, load, save
+from conan.tools.gnu import PkgConfigDeps
 
 required_conan_version = ">=1.53.0"
 
@@ -30,6 +31,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("libnl/3.7.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libudev/system")
 
@@ -47,6 +49,8 @@ class PackageConan(ConanFile):
         tc.variables["NO_MAN_PAGES"] = True
         tc.generate()
         deps = CMakeDeps(self)
+        deps.generate()
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     def _patch_sources(self):
@@ -79,7 +83,7 @@ class PackageConan(ConanFile):
                     "libibverbs", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
             component = self.cpp_info.components[lib]
             component.libs = [lib.replace("lib", "")]
-            component.requires = ["libudev::libudev"]
+            component.requires = ["libudev::libudev", "libnl::libnl"]
             component.set_property("pkg_config_name", lib)
 
         for lib in ["libefa", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
