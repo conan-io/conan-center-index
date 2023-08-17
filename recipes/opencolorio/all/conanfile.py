@@ -36,11 +36,13 @@ class OpenColorIOConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.use_sse
+            del self.options.use_sse      
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "2.2.0":
+            self.options["tinyxml"].with_stl = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
