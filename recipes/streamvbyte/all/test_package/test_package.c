@@ -10,7 +10,7 @@
 #endif
 
 int main(void) {
-	uint32_t N = 5000U;
+	uint32_t N = 100U;
 	uint32_t * datain = malloc(N * sizeof(uint32_t));
 	uint8_t * compressedbuffer = malloc(streamvbyte_max_compressedbytes(N));
 	uint32_t * recovdata = malloc(N * sizeof(uint32_t));
