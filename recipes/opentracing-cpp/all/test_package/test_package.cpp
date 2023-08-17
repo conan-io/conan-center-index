@@ -7,6 +7,6 @@ int main() {
   auto tracer = MakeNoopTracer();
 
   auto span1 = tracer->StartSpan("a");
-  
+
   return 0;
 }
