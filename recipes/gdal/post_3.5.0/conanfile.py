@@ -294,10 +294,10 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
-        if self.options.get_safe("with_sqlite3") and not self.options["sqlite3"].enable_column_metadata:
+        if  self.options.get_safe("with_sqlite3") and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("gdql requires sqlite3:enable_column_metadata=True")
 
-        if self.options.get_safe("with_libtiff") and self.options["libtiff"].jpeg != self.options.get_safe("with_jpeg"):
+        if self.options.get_safe("with_libtiff") and self.dependencies["libtiff"].options.jpeg != self.options.get_safe("with_jpeg"):
             msg = "libtiff:jpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             # For some reason, the ConanInvalidConfiguration message is not shown, only
             #     ERROR: At least two recipes provides the same functionality:
@@ -306,7 +306,7 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
-        if self.options.get_safe("with_poppler") and self.options["poppler"].with_libjpeg != self.options.get_safe("with_jpeg"):
+        if self.options.get_safe("with_poppler") and self.dependencies["poppler"].options.with_libjpeg != self.options.get_safe("with_jpeg"):
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
@@ -341,10 +341,9 @@ class GdalConan(ConanFile):
         tc.variables["BUILD_APPS"] = self.options.tools
 
         tc.variables["SQLite3_HAS_COLUMN_METADATA"] = \
-            self.options["sqlite3"].enable_column_metadata
+            self.dependencies["sqlite3"].options.enable_column_metadata
 
-        tc.variables["SQLite3_HAS_RTREE"] = self.options[
-            "sqlite3"].enable_rtree
+        tc.variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
 
         tc.variables["GDAL_USE_JSONC"] = True
         tc.variables["GDAL_CONAN_PACKAGE_FOR_JSONC"] = "json-c"
