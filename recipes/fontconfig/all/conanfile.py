@@ -47,10 +47,10 @@ class FontconfigConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.12.1")
+        self.requires("freetype/2.13.0")
         self.requires("expat/2.5.0")
         if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
 
     def validate(self):
         if is_msvc(self):

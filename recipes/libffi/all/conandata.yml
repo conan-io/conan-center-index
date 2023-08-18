@@ -17,6 +17,10 @@ patches:
     - patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"
     - patch_file: "patches/0005-3.4.4-do-not-install-libraries-to-arch-dependent-directories.patch"
     - patch_file: "patches/0006-3.4.4-library-no-version-suffix.patch"
+    - patch_file: "patches/0007-3.4.3-forward-declare-open_temp_exec_file.patch"
+      patch_type: "portability"
+      patch_source: "https://github.com/libffi/libffi/pull/764"
+      patch_description: "Forward declare the open_temp_exec_file function which is required by the C99 standard"
   "3.4.3":
     - patch_file: "patches/0002-3.4.3-fix-libtool-path.patch"
     - patch_file: "patches/0004-3.3-fix-complex-type-msvc.patch"

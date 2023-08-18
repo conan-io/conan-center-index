@@ -1,0 +1,13 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -74,9 +74,9 @@ target_include_directories(paho-cpp-objs
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:include>
+     PRIVATE 
+-        ${PAHO_MQTT_C_INCLUDE_DIRS}
+         src
+ )
++target_link_libraries(paho-cpp-objs PUBLIC PahoMqttC::PahoMqttC)
+ 
+ 
+ ## --- Build the shared library, if requested ---

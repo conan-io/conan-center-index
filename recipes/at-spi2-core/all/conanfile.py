@@ -1,5 +1,9 @@
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file,rmdir
+from conan.tools.scm import Version
+
+from conans import Meson
 import os
 
 
@@ -11,6 +15,7 @@ class AtSpi2CoreConan(ConanFile):
     homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core/"
     license = "LGPL-2.1-or-later"
     generators = "pkg_config"
+    deprecated = "Consumers should migrate to at-spi2-core/[>=2.45.1], which includes atk and at-spi2-atk"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -35,26 +40,23 @@ class AtSpi2CoreConan(ConanFile):
     _meson = None
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def build_requirements(self):
-        self.build_requires("meson/0.62.2")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/1.1.1")
+        self.build_requires("pkgconf/1.9.3")
 
     def requirements(self):
-        self.requires("glib/2.73.0")
+        self.requires("glib/2.76.3")
         if self.options.with_x11:
             self.requires("xorg/system")
-        self.requires("dbus/1.12.20")
+        self.requires("dbus/1.15.2")
 
     def validate(self):
         if self.options.shared and not self.options["glib"].shared:
@@ -65,7 +67,7 @@ class AtSpi2CoreConan(ConanFile):
             raise ConanInvalidConfiguration("only linux is supported by this recipe")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                     strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
@@ -84,10 +86,9 @@ class AtSpi2CoreConan(ConanFile):
         return self._meson
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if tools.Version(self.version) >= "2.42.0":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "bus", "meson.build"),
+        apply_conandata_patches(self)
+        if Version(self.version) >= "2.42.0":
+            replace_in_file(self, os.path.join(self._source_subfolder, "bus", "meson.build"),
                                   "if x11_dep.found()",
                                   "if x11_option == 'yes'")
         meson = self._configure_meson()
@@ -97,14 +98,11 @@ class AtSpi2CoreConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
 
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ['atspi']
         self.cpp_info.includedirs = ["include/at-spi-2.0"]
         self.cpp_info.names["pkg_config"] = "atspi-2"
-
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()

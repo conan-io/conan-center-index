@@ -17,7 +17,7 @@ class MongoCxxConan(ConanFile):
     homepage = "http://mongocxx.org"
     description = "C++ Driver for MongoDB"
     topics = ("libbsoncxx", "libmongocxx", "mongo", "mongodb", "database", "db")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -47,9 +47,9 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.23.2")
+        self.requires("mongo-c-driver/1.24.3")
         if self.options.polyfill == "boost":
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0", transitive_headers=True)
 
     @property
     def _minimal_std_version(self):

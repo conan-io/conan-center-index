@@ -1,7 +1,12 @@
+from conan import ConanFile
+from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
-from conans import CMake, ConanFile, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 class ReplxxConan(ConanFile):
     name = "replxx"
@@ -9,12 +14,11 @@ class ReplxxConan(ConanFile):
     A readline and libedit replacement that supports UTF-8,
     syntax highlighting, hints and Windows and is BSD licensed.
     """
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AmokHuginnsson/replxx"
     topics = ("readline", "libedit", "UTF-8")
-    license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,15 +29,9 @@ class ReplxxConan(ConanFile):
         "fPIC": True,
     }
 
-    _cmake = None
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,37 +39,54 @@ class ReplxxConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["REPLXX_BuildExamples"] = False
-            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-            self._cmake.configure()
-        return self._cmake
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["REPLXX_BuildExamples"] = False
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.generate()
 
     def build(self):
-        if tools.Version(self.version) < "0.0.3":
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "src", "io.cxx"),
+        if Version(self.version) < "0.0.3":
+            replace_in_file(self,
+                os.path.join(self.source_folder, "src", "io.cxx"),
                 "#include <array>\n",
                 "#include <array>\n#include <stdexcept>\n"
             )
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", dst='licenses', src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        libname = "replxx"
+        if is_msvc(self) and not self.options.shared:
+            libname += "-static"
+        if self.settings.build_type == "Debug":
+            libname += "-d"
+        self.cpp_info.libs = [libname]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
         if not self.options.shared:
             self.cpp_info.defines.append("REPLXX_STATIC")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "replxx"
         self.cpp_info.filenames["cmake_find_package_multi"] = "replxx"
