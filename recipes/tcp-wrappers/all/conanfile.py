@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -47,6 +48,10 @@ class TcpWrappersConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def validate(self):
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not current supported.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
