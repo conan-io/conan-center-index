@@ -13,6 +13,9 @@ patches:
     - patch_file: "patches/0.7.1-0001-fix-packages.patch"
       patch_description: "don't find catch2, use jpeg instead of libjpeg-turbo"
       patch_type: "conan"
+    - patch_file: "patches/0.7.1-0002-use-cci-packages.patch"
+      patch_description: "use cci's packages"
+      patch_type: "conan"
   "0.5.0":
     - patch_file: "patches/0.4.0-0001-cmake-no-openblas.patch"
       patch_description: "Fix CMakeLists: OpenBLAS is not a dependency"
