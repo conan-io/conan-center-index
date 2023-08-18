@@ -18,7 +18,7 @@ class ScdocInstallerConan(ConanFile):
     homepage = "https://git.sr.ht/~sircmpwn/scdoc"
     topics = ("manpage", "documentation", "posix")
 
-    package_type = "library"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
