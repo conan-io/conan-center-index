@@ -1,0 +1,4 @@
+sources:
+  "2023c":
+    url: "https://github.com/eggert/tz/archive/refs/tags/2023c.tar.gz"
+    sha256: "9aa20ef838183e58f09acca92098cf6aa6d8e229aecf24e098c3af2a38e596f8"

@@ -1,4 +1,7 @@
 sources:
+  "2.1.0":
+    url: "https://github.com/boostorg/pfr/archive/refs/tags/2.1.0.tar.gz"
+    sha256: "7c18a4ab73b70f8b3513fa3a836c6f4310f627bbf55f62b89bdd7aa787c7da31"
   "2.0.3":
     url: "https://github.com/boostorg/pfr/archive/refs/tags/2.0.3.tar.gz"
     sha256: "c7d1950b56a07678423759f0bcdf37312f9861e3e9e59c45331903891213e2f2"

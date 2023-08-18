@@ -72,22 +72,22 @@ class LeptonicaConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_tiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.1")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
 
     def build_requirements(self):
         if self.options.with_webp or self.options.with_openjpeg:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/1.9.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

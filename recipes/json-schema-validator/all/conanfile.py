@@ -23,10 +23,19 @@ class JsonSchemaValidatorConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "json_diagnostics": [True, False],
+    }
+    options_description = {
+        "json_diagnostics": (
+            "Defines JSON_DIAGNOSTICS=1 for the nlohmann_json library. "
+            "Refer https://json.nlohmann.me/api/macros/json_diagnostics/ "
+            "This macro enables extended diagnostics for exception messages."
+        )
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "json_diagnostics": False,
     }
 
     short_paths = True
@@ -83,6 +92,8 @@ class JsonSchemaValidatorConan(ConanFile):
         else:
             tc.variables["JSON_VALIDATOR_BUILD_TESTS"] = False
             tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
+        if self.options.json_diagnostics:
+            tc.preprocessor_definitions["JSON_DIAGNOSTICS"] = '1'
         if Version(self.version) < "2.1.0":
             nlohmann_json_includedirs = self.dependencies["nlohmann_json"].cpp_info.aggregated_components().includedirs
             tc.variables["NLOHMANN_JSON_DIR"] = ";".join([p.replace("\\", "/") for p in nlohmann_json_includedirs])
@@ -131,6 +142,8 @@ class JsonSchemaValidatorConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "nlohmann_json_schema_validator")
         self.cpp_info.set_property("cmake_target_name", "nlohmann_json_schema_validator")
         self.cpp_info.libs = ["json-schema-validator" if Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
+        if self.options.json_diagnostics:
+            self.cpp_info.defines = ["JSON_DIAGNOSTICS=1"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

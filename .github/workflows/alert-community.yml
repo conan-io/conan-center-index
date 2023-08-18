@@ -383,6 +383,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/snowhouse/*/*"
+          reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/uncrustify/*/*"
           reviewers: "@MartinDelille"
 

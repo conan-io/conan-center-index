@@ -1,4 +1,10 @@
 sources:
+  "8.1.0":
+    url: "https://dev.mysql.com/get/Downloads/MySQL-8.1/mysql-8.1.0.tar.gz"
+    sha256: "3dd017a940734aa90796a4c65e125e6712f64bbbbe3388d36469deaa87b599eb"
+  "8.0.34":
+    url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.34.tar.gz"
+    sha256: "e65d03a3c42618b5fbf99042aed33209402e9b27aa62c7c8743ffd4788d8db1d"
   "8.0.31":
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.31.tar.gz"
     sha256: "67bb8cba75b28e95c7f7948563f01fb84528fcbb1a35dba839d4ce44fe019baa"
@@ -9,6 +15,14 @@ sources:
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.25.tar.gz"
     sha256: "c16aa9cf621bc028efba2bb11f3c36a323b125fa0d108ff92fab60e46309206e"
 patches:
+  "8.1.0":
+    - patch_file: "patches/0006-fix-cpp20-build-8.1.0.patch"
+      patch_description: "Fix C++20 compilation"
+      patch_type: "portability"
+  "8.0.34":
+    - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
+      patch_description: "Fix C++20 compilation"
+      patch_type: "portability"
   "8.0.31":
     - patch_file: "patches/0006-fix-cpp20-build-8.0.29.patch"
       patch_description: "Fix C++20 compilation"

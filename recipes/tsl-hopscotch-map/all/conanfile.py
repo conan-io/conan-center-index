@@ -11,9 +11,10 @@ class TslHopscotchMapConan(ConanFile):
     name = "tsl-hopscotch-map"
     license = "MIT"
     description = "C++ implementation of a fast hash map and hash set using hopscotch hashing"
-    topics = ("structure", "hash map", "hash set")
-    homepage = "https://github.com/Tessil/hopscotch-map"
+    topics = ("structure", "hash map", "hash set", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Tessil/hopscotch-map"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,8 +29,7 @@ class TslHopscotchMapConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -43,7 +43,6 @@ class TslHopscotchMapConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tsl::hopscotch_map")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tsl-hopscotch-map"
@@ -55,4 +54,3 @@ class TslHopscotchMapConan(ConanFile):
         self.cpp_info.components["hopscotch_map"].set_property("cmake_target_name", "tsl::hopscotch_map")
         self.cpp_info.components["hopscotch_map"].bindirs = []
         self.cpp_info.components["hopscotch_map"].libdirs = []
-        self.cpp_info.components["hopscotch_map"].resdirs = []
