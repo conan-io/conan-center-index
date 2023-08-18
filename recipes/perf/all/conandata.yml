@@ -5,4 +5,3 @@ sources:
 patches:
   "5.13":
     - patch_file: patches/0001-Wno-strict-prototypes.patch
-      base_path: source_subfolder

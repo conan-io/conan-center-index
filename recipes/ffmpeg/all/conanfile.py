@@ -289,7 +289,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
