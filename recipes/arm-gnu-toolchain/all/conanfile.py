@@ -9,7 +9,8 @@ required_conan_version = ">=2.0.6"
 
 class ArmGnuToolchain(ConanFile):
     name = "arm-gnu-toolchain"
-    license = "GPL-3.0-only"
+    license = ("GPL-3.0-only", "GPL-2.0-only", "BSD-3-Clause",
+               "BSD-2-Clause-FreeBSD", "AGPL-3.0-only", "BSD-2-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
     description = ("Conan installer for the GNU Arm Embedded Toolchain")
