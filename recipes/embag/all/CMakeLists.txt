@@ -19,11 +19,6 @@ target_link_libraries(embag PUBLIC
     BZip2::BZip2
 )
 
-if (MSVC)
-    # For a #if __cplusplus < 201402L check in lib/util.h
-    target_compile_options(embag PRIVATE /Zc:__cplusplus)
-endif()
-
 install(TARGETS embag)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/embag
