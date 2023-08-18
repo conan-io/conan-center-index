@@ -21,6 +21,7 @@ class OneTBBConan(ConanFile):
         " programs that take full advantage of multicore performance, that are portable, composable"
         " and have future-proof scalability.")
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
