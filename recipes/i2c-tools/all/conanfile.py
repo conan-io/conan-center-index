@@ -50,11 +50,12 @@ class I2cConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         shared = "1" if self.options.shared else "0"
+        not_shared = "1" if not self.options.shared else "0"
         tc.make_args = [
             "PREFIX=/",
             f"BUILD_DYNAMIC_LIB={shared}",
-            f"BUILD_STATIC_LIB={shared}",
-            f"USE_STATIC_LIB={shared}",
+            f"BUILD_STATIC_LIB={not_shared}",
+            f"USE_STATIC_LIB={not_shared}",
         ]
         tc.generate()
 
