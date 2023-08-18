@@ -67,7 +67,10 @@ class ScdocInstallerConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
 
         scdoc_root = os.path.join(self.package_folder, "bin")
         self._chmod_plus_x(os.path.join(scdoc_root, "scdoc"))
