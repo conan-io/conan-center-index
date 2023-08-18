@@ -34,9 +34,8 @@ class ArmGnuToolchain(ConanFile):
     def license_url(self):
         # All versions of arm-gnu-toolchain (previously called gnu-arm-embedded)
         # after 12.3.1 will include their licenses in their package
-        # releases. Instead they are a glob of multiple HTML licenses fused
-        # together into a EULA.html file. This is a work around for versions
-        # before.
+        # releases. This is a work around for versions of the compiler without
+        # licenses.
         if (self.version == "11.3.0" or
             self.version == "12.2.1" or
             self.version == "12.3.1"):
