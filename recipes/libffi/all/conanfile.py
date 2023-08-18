@@ -21,6 +21,7 @@ class LibffiConan(ConanFile):
     homepage = "https://sourceware.org/libffi/"
     topics = ("runtime", "foreign-function-interface", "runtime-library")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -60,8 +61,7 @@ class LibffiConan(ConanFile):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)

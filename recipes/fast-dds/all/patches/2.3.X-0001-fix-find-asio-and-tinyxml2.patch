@@ -14,9 +14,18 @@ index 8a9cb0209..400c681e7 100644
  find_package(foonathan_memory REQUIRED)
  message(STATUS "Found foonathan_memory: ${foonathan_memory_DIR}")
 diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
-index d26915242..f00e36ea6 100644
+index d26915242..5cc41ba84 100644
 --- a/src/cpp/CMakeLists.txt
 +++ b/src/cpp/CMakeLists.txt
+@@ -435,7 +435,7 @@ elseif(NOT EPROSIMA_INSTALLER)
+         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/cpp>
+         $<INSTALL_INTERFACE:include>
+         PRIVATE
+-        ${Asio_INCLUDE_DIR}
++        ${asio_INCLUDE_DIR}
+         ${TINYXML2_INCLUDE_DIR}
+         $<$<BOOL:${ANDROID}>:${ANDROID_IFADDRS_INCLUDE_DIR}>
+         ${THIRDPARTY_BOOST_INCLUDE_DIR}
 @@ -456,7 +456,7 @@ elseif(NOT EPROSIMA_INSTALLER)
      # Link library to external libraries.
      target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr foonathan_memory
@@ -26,3 +35,12 @@ index d26915242..f00e36ea6 100644
          $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto$<$<BOOL:${WIN32}>:$<SEMICOLON>crypt32.lib>>
          $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>
          ${THIRDPARTY_BOOST_LINK_LIBS}
+@@ -579,7 +579,7 @@ if(UNIX AND EPROSIMA_INSTALLER)
+         COMPONENT headers
+         )
+ 
+-    set_public_headers_directory(${Asio_INCLUDE_DIR} ""
++    set_public_headers_directory(${asio_INCLUDE_DIR} ""
+         DESTINATION thirdparty/asio
+         COMPONENT headers
+         )

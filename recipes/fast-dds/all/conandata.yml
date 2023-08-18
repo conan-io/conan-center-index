@@ -11,10 +11,13 @@ sources:
 patches:
   "2.3.4":
     - patch_file: "patches/2.3.X-0001-fix-find-asio-and-tinyxml2.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
   "2.3.3":
     - patch_file: "patches/2.3.X-0001-fix-find-asio-and-tinyxml2.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
   "2.3.2":
     - patch_file: "patches/2.3.2-0001-fix-find-asio-and-tinyxml2.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"

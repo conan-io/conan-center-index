@@ -106,7 +106,6 @@ class LdnsConan(ConanFile):
         autotools.make()
 
     def package(self):
-        print(self.package_folder)
         autotools = Autotools(self)
         for target in ["install-h", "install-lib"]:
             autotools.install(target=target)

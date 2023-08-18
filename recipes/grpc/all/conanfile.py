@@ -4,9 +4,9 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
+from conan.tools.build import can_run, cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -14,7 +14,7 @@ from conan.tools.scm import Version
 required_conan_version = ">=1.53.0"
 
 
-class grpcConan(ConanFile):
+class GrpcConan(ConanFile):
     name = "grpc"
     package_type = "library"
     description = "Google's RPC (remote procedure call) library and framework."
@@ -56,9 +56,6 @@ class grpcConan(ConanFile):
 
     short_paths = True
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     @property
     def _grpc_plugin_template(self):
         return "grpc_plugin_template.cmake.in"
@@ -86,35 +83,38 @@ class grpcConan(ConanFile):
             if cross_building(self):
                 self.options["grpc"].shared = True
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
+        # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
         if is_msvc(self) and Version(self.version) < "1.47":
-            self.requires("abseil/20211102.0", transitive_headers=True)
+            self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/20220623.0", transitive_headers=True)
-        self.requires("c-ares/1.18.1")
-        self.requires("openssl/1.1.1t")
-        self.requires("re2/20220601")
+            self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
+        self.requires("c-ares/1.19.0")
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("re2/20230301")
         self.requires("zlib/1.2.13")
-        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True, run=can_run(self))
         self.requires("googleapis/cci.20221108")
         self.requires("grpc-proto/cci.20220627")
 
     def package_id(self):
         del self.info.options.secure
-        self.info.requires["protobuf"].full_package_mode()
 
     def validate(self):
         check_min_vs(self, "190")
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
-        if Version(self.version) >= "1.47" and self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "6":
+        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("GCC older than 6 is not supported")
 
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._cxxstd_required)
 
-        if self.info.options.shared and \
+        if self.options.shared and \
            (not self.dependencies["protobuf"].options.shared or not self.dependencies["googleapis"].options.shared or not self.dependencies["grpc-proto"].options.shared):
             raise ConanInvalidConfiguration(
                 "If built as shared, protobuf, googleapis and grpc-proto must be shared as well. "
@@ -122,18 +122,20 @@ class grpcConan(ConanFile):
             )
 
     def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.21.9')
+        if not can_run(self):
+            self.tool_requires("protobuf/3.21.9")
+        if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
-            if cross_building(self):
-                self.build_requires('grpc/{}'.format(self.version))
+            self.tool_requires(f"grpc/{self.version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-
+        # Set up environment so that we can run grpc-cpp-plugin at build time
+        VirtualBuildEnv(self).generate()
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
 
         # This doesn't work yet as one would expect, because the install target builds everything
         # and we need the install target because of the generated CMake files
@@ -185,10 +187,6 @@ class grpcConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
-        # Set up environment so that we can run grpc-cpp-plugin at build time
-        if hasattr(self, "settings_build"):
-            VirtualBuildEnv(self).generate()
-
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -210,7 +208,7 @@ class grpcConan(ConanFile):
         # This workaround wraps the protoc command to be invoked by CMake with a modified environment
         settings_build = getattr(self, "settings_build", self.settings)
         if settings_build.os == "Macos":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
     def build(self):

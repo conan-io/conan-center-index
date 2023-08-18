@@ -1,7 +1,10 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy
+from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54"
 
 class ImplotConan(ConanFile):
     name = "implot"
@@ -11,9 +14,7 @@ class ImplotConan(ConanFile):
     topics = ("imgui", "plot", "graphics", )
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    package_type = "library"
 
     options = {
         "shared": [True, False],
@@ -24,41 +25,47 @@ class ImplotConan(ConanFile):
         "fPIC": True
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            del self.options.fPIC # rm_safe not needed
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if tools.Version(self.version) >= "0.13":
-            self.requires("imgui/1.87")
+        if Version(self.version) >= "0.14":
+            self.requires("imgui/1.89.4", transitive_headers=True)
+        elif Version(self.version) >= "0.13":
+            # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
+            self.requires("imgui/1.88", transitive_headers=True)
         else:
-            self.requires("imgui/1.86")
+            self.requires("imgui/1.86", transitive_headers=True)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["IMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

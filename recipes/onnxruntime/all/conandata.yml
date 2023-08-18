@@ -1,0 +1,20 @@
+sources:
+  "1.14.1":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
+    sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
+patches:
+  "1.14.1":
+    - patch_file: "patches/1.14.1-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used (upstreamed future versions)"
+      patch_type: "conan"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/15323"
+    - patch_file: "patches/1.14.1-0002-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0003-amx-gas-version.patch"
+      patch_description: "Check GNU AS supports AMX before enabling it"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/commit/126e7bf15fa4af8621814b82a3f7bd0d786f0239.patch"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"

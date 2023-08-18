@@ -67,6 +67,7 @@ class BackwardCppConan(ConanFile):
         if self.settings.os in ["Linux", "Android"]:
             if self._has_stack_details("dwarf"):
                 self.requires("libdwarf/20191104", transitive_headers=True, transitive_libs=True)
+                self.requires("libelf/0.8.13")
             if self._has_stack_details("dw"):
                 self.requires("elfutils/0.186", transitive_headers=True, transitive_libs=True)
             if self._has_stack_details("bfd"):

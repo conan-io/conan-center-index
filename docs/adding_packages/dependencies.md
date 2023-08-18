@@ -174,18 +174,14 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 * [`python_requires`](https://docs.conan.io/1/reference/conanfile/other.html#python-requires) are not allowed.
 
 ### Version Ranges
+ 
+Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/1/versioning/version_ranges.html). With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies. Currently, these are:
+* OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
+* CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts.
 
-Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/1/versioning/version_ranges.html). However,
-in the context of ConanCenter they pose a few key challenges when being used generally to consume packages, most notably:
+Conan maintainers may introduce this for other dependencies over time.
 
-* Non-Deterministic `package-id`: With version ranges the newest compatible package may yield a different `package_id` than the one built
-  and published by ConanCenter resulting in frustrating error "no binaries found". For more context
-  see [this excellent explanation](https://github.com/conan-io/conan-center-index/pull/8831#issuecomment-1024526780).
-
-* Build Reproducibility: If consumers try to download and build the recipe at a later time, it may resolve to a different package version
-  that may generate a different binary (that may or may not be compatible). In order to prevent these types of issues, we have decided to
-  only allow exact requirements versions. This is a complicated issue,
-  [check this thread](https://github.com/conan-io/conan-center-index/pull/9140#discussion_r795461547) for more information.
+Outside of the cases outlined above, version ranges are not allowed in ConanCenter recipes.
 
 ## Handling "internal" dependencies
 
