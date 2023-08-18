@@ -59,7 +59,7 @@ class OneTBBConan(ConanFile):
         return str(self._base_compiler) in ["Visual Studio", "msvc"]
 
     @property
-    def _is_clanglc(self):
+    def _is_clang_cl(self):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def config_options(self):
@@ -186,7 +186,7 @@ class OneTBBConan(ConanFile):
                 tc.make_args.append("compiler=icl")
             else:
                 tc.make_args.append("compiler=cl")
-        elif self._is_clanglc:
+        elif self._is_clang_cl:
             tc.extra_cflags.append("-mrtm")
             tc.extra_cxxflags.append("-mrtm")
 
