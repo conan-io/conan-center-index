@@ -20,14 +20,6 @@ class ScdocInstallerConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -89,5 +81,5 @@ class ScdocInstallerConan(ConanFile):
         )
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.output.info("Appending PATH environment variable: {}".format(scdoc_root))
+        self.output.info(f"Appending PATH environment variable: {scdoc_root}")
         self.env_info.PATH.append(scdoc_root)
