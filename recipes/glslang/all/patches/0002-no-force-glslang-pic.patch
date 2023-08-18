@@ -1,0 +1,24 @@
+diff --git a/SPIRV/CMakeLists.txt b/SPIRV/CMakeLists.txt
+index a80e74ed..264261f1 100644
+--- a/SPIRV/CMakeLists.txt
++++ b/SPIRV/CMakeLists.txt
+@@ -73,7 +73,6 @@ set(SPVREMAP_HEADERS
+ add_library(SPIRV ${LIB_TYPE} ${SOURCES} ${HEADERS})
+ set_target_properties(SPIRV PROPERTIES
+     FOLDER glslang
+-    POSITION_INDEPENDENT_CODE ON
+     VERSION   "${GLSLANG_VERSION}"
+     SOVERSION "${GLSLANG_VERSION_MAJOR}")
+ target_include_directories(SPIRV PUBLIC
+diff --git a/hlsl/CMakeLists.txt b/hlsl/CMakeLists.txt
+index 058a67b0..89687025 100644
+--- a/hlsl/CMakeLists.txt
++++ b/hlsl/CMakeLists.txt
+@@ -40,7 +40,6 @@
+ add_library(HLSL ${LIB_TYPE} "stub.cpp")
+ set_target_properties(HLSL PROPERTIES
+     FOLDER hlsl
+-    POSITION_INDEPENDENT_CODE ON
+     VERSION   "${GLSLANG_VERSION}"
+     SOVERSION "${GLSLANG_VERSION_MAJOR}")
+ 

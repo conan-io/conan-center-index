@@ -58,6 +58,7 @@ class GlslangConan(ConanFile):
     @property
     def _get_compatible_spirv_tools_version(self):
         return {
+            "12.3.1": "1.3.243.0",
             "11.7.0": "2021.4",
             "11.6.0": "2021.3",
             "11.5.0": "2021.2",
@@ -133,17 +134,19 @@ class GlslangConan(ConanFile):
         if not self.options.shared:
             cmake_files_to_fix = [
                 {"target": "OGLCompiler", "relpath": os.path.join("OGLCompilersDLL", "CMakeLists.txt")},
-                {"target": "SPIRV"      , "relpath": os.path.join("SPIRV", "CMakeLists.txt")},
-                {"target": "SPVRemapper", "relpath": os.path.join("SPIRV", "CMakeLists.txt")},
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Unix","CMakeLists.txt")},
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
-                {"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")},
             ]
             glslang_version = Version(self.version)
+            if glslang_version < "12.3.1":
+                cmake_files_to_fix.append({"target": "SPIRV"      , "relpath": os.path.join("SPIRV", "CMakeLists.txt")})
+                cmake_files_to_fix.append({"target": "SPVRemapper", "relpath": os.path.join("SPIRV", "CMakeLists.txt")})
+                cmake_files_to_fix.append({"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")})
             if glslang_version >= "7.0.0" and glslang_version < "11.0.0":
                 cmake_files_to_fix.append({"target": "glslang", "relpath": os.path.join("glslang", "CMakeLists.txt")})
             else:
-                cmake_files_to_fix.append({"target": "glslang-default-resource-limits", "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
+                if glslang_version < "12.3.1":
+                    cmake_files_to_fix.append({"target": "glslang-default-resource-limits", "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
                 cmake_files_to_fix.append({"target": "MachineIndependent", "relpath": os.path.join("glslang", "CMakeLists.txt")})
                 cmake_files_to_fix.append({"target": "GenericCodeGen", "relpath": os.path.join("glslang", "CMakeLists.txt")})
             for cmake_file in cmake_files_to_fix:
