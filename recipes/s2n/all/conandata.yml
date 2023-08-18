@@ -1,4 +1,7 @@
 sources:
+  "1.3.49":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.3.49.tar.gz"
+    sha256: "2bc7b170a750a435ad02ab8e696c3ad6e9bb7a585c02899472793f87670184dd"
   "1.3.31":
     url: "https://github.com/aws/s2n-tls/archive/v1.3.31.tar.gz"
     sha256: "23cfb42f82cbe1ce94b59f3b1c1c8eb9d24af2a1ae4c8f854209ff88fddd3900"
