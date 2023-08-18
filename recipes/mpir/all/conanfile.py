@@ -98,10 +98,10 @@ class MpirConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             if hasattr(self, "settings_build"):
                 # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
-                xcrun = XCRun(self.settings_build)
+                sdk_path = XCRun(self).sdk_path
                 tc.extra_cxxflags += [
                     "-Wno-implicit-function-declaration"
-                    f"-isysroot {xcrun.sdk_path}"
+                    f"-isysroot {sdk_path}"
                     "-arch", f"{to_apple_arch(self.settings_build.arch)}"
                 ]
         # Disable docs
