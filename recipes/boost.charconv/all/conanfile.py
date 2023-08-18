@@ -6,7 +6,7 @@ import os
 
 required_conan_version = ">=1.50.0"
 
-class FastFloatConan(ConanFile):
+class BoostCharConvConan(ConanFile):
     name = "charconv"
     description = "C++11 compatible implementation of <charconv>."
     license = "BSL-1.0"
@@ -19,7 +19,6 @@ class FastFloatConan(ConanFile):
 
     # def package_id(self):
     #     self.info.clear()
-
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
