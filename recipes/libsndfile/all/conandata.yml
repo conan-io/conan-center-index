@@ -15,6 +15,10 @@ sources:
     url: "https://github.com/libsndfile/libsndfile/releases/download/v1.0.29/libsndfile-1.0.29.tar.bz2"
     sha256: "2ba20d44817c8176f097ab25eff44ef0aeec9e00973def5a7174c5ae0764b22f"
 patches:
+  "1.2.2":
+    - patch_file: "patches/1.0.31-0001-fix-msvc-runtime-logic.patch"
+      patch_description: "always set CMP0091"
+      patch_type: "portability"
   "1.2.0":
     - patch_file: "patches/1.0.31-0001-fix-msvc-runtime-logic.patch"
       patch_description: "always set CMP0091"
