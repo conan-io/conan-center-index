@@ -3,6 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import os
 import textwrap
 
@@ -26,6 +28,8 @@ class Exiv2Conan(ConanFile):
         "with_png": [True, False],
         "with_xmp": [False, "bundled", "external"],
         "with_curl": [True, False],
+        "with_brotli": [True, False],
+        "with_inih": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,9 +37,27 @@ class Exiv2Conan(ConanFile):
         "with_png": True,
         "with_xmp": "bundled",
         "with_curl": False,
+        "with_brotli": True,
+        "with_inih": True,
     }
 
     provides = []
+
+    @property
+    def _min_cppstd(self):
+        return "17" if Version(self.version) >= "0.28.0" else False
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -47,6 +69,9 @@ class Exiv2Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.28.0":
+            del self.options.with_brotli
+            del self.options.with_inih
         if self.options.with_xmp == "bundled":
             # recipe has bundled xmp-toolkit-sdk of old version
             # avoid conflict with a future xmp recipe
@@ -64,8 +89,21 @@ class Exiv2Conan(ConanFile):
             self.requires("expat/2.5.0")
         if self.options.with_curl:
             self.requires("libcurl/7.87.0")
+        if self.options.get_safe("with_brotli"):
+            self.requires("brotli/1.0.9")
+        if self.options.get_safe("with_inih"):
+            self.requires("inih/57")
 
     def validate(self):
+        if self._min_cppstd:
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, self._min_cppstd)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+
         if self.options.with_xmp == "external":
             raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
 
@@ -84,6 +122,8 @@ class Exiv2Conan(ConanFile):
         tc.variables["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_CURL"] = self.options.with_curl
         tc.variables["EXIV2_ENABLE_SSH"] = False
+        tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.get_safe("with_brotli", False)
+        tc.variables["EXIV2_ENABLE_INIH"] = self.options.get_safe("with_inih", False)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if is_msvc(self):
@@ -111,7 +151,7 @@ class Exiv2Conan(ConanFile):
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         targets = {"exiv2lib": "exiv2::exiv2lib"}
-        if self.options.with_xmp == "bundled":
+        if self.options.with_xmp == "bundled" and Version(self.version) < "0.28.0":
             targets.update({"exiv2-xmp": "exiv2::exiv2-xmp"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -145,6 +185,12 @@ class Exiv2Conan(ConanFile):
             self.cpp_info.components["exiv2lib"].requires.extend(["libpng::libpng", "zlib::zlib"])
         if self.options.with_curl:
             self.cpp_info.components["exiv2lib"].requires.append("libcurl::libcurl")
+        if self.options.get_safe("with_brotli"):
+            self.cpp_info.components["exiv2lib"].requires.append("brotli::brotli")
+        if self.options.get_safe("with_inih"):
+            self.cpp_info.components["exiv2lib"].requires.append("inih::inih")
+        if self.options.with_xmp == "bundled" and Version(self.version) >= "0.28.0":
+            self.cpp_info.components["exiv2lib"].requires.append("expat::expat")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["exiv2lib"].system_libs.extend(["pthread"])
@@ -153,7 +199,8 @@ class Exiv2Conan(ConanFile):
             self.cpp_info.components["exiv2lib"].defines.append("WIN32_LEAN_AND_MEAN")
 
         # component exiv2-xmp
-        if self.options.with_xmp == "bundled":
+        # exiv2-xmp has been object library since 0.28.0
+        if self.options.with_xmp == "bundled" and Version(self.version) < "0.28.0":
             self.cpp_info.components["exiv2-xmp"].set_property("cmake_target_name", "exiv2-xmp")
             self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
             self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
@@ -162,6 +209,6 @@ class Exiv2Conan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.with_xmp == "bundled":
+        if self.options.with_xmp == "bundled" and Version(self.version) < "0.28.0":
             self.cpp_info.components["exiv2-xmp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["exiv2-xmp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
