@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rm, rmdir, collect_libs
+from conan.tools.files import apply_conandata_patches, get, copy, export_conandata_patches, rm, rmdir, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
@@ -19,7 +19,7 @@ class VsgConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vulkanscenegraph.org"
-    topics = ("vulkan", "scenegraph", "graphics", "3d", "VulkanSceneGraph")
+    topics = ("vulkan", "scenegraph", "graphics", "3d")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -46,6 +46,11 @@ class VsgConan(ConanFile):
             "clang": "7",
             "apple-clang": "10",
         }
+        
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -58,6 +63,8 @@ class VsgConan(ConanFile):
 
     def requirements(self):
         self.requires("vulkan-loader/1.3.239.0", transitive_headers=True)
+        if self.options.shader_compiler and self.version >= "1.0.5":
+            self.requires("glslang/12.3.1", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -91,6 +98,7 @@ class VsgConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
