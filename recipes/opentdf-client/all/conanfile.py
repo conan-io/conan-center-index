@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import replace_in_file, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, replace_in_file, get, copy
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -29,6 +29,10 @@ class OpenTDFConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def export_sources(self):
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        export_conandata_patches(self)
 
     @property
     def _minimum_cpp_standard(self):
@@ -94,6 +98,9 @@ class OpenTDFConan(ConanFile):
         # Disallow MT and MTd
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.name} can not be built with MT or MTd at this time")
+        
+        if self.options.shared and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.name} does not currently support shared library on Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -102,22 +109,13 @@ class OpenTDFConan(ConanFile):
         tc = CMakeToolchain(self)
         if not self.settings.get_safe("compiler.cppstd"):
             tc.variables["CMAKE_CXX_STANDARD"] = 17
+        tc.cache_variables["CMAKE_PROJECT_opentdf_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "src", "lib", "CMakeLists.txt"),
-            "set(CMAKE_CXX_STANDARD 17)",
-            (
-                "find_package(Boost REQUIRED)\n"
-                "find_package(OpenSSL REQUIRED)\n"
-                "find_package(Microsoft.GSL REQUIRED)\n"
-                "find_package(nlohmann_json REQUIRED)\n"
-                "find_package(libxml2 REQUIRED)\n"
-                "find_package(jwt-cpp REQUIRED)\n"
-                "link_libraries(Boost::boost OpenSSL::SSL Microsoft.GSL::GSL nlohmann_json::nlohmann_json LibXml2::LibXml2 jwt-cpp::jwt-cpp)\n"
-            ))
+        apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
@@ -142,13 +140,12 @@ class OpenTDFConan(ConanFile):
             ignore_case=True,
             keep_path=False)
 
-    # TODO - this only advertises the static lib, add dynamic lib also
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "opentdf-client")
         self.cpp_info.set_property("cmake_target_name", "opentdf-client::opentdf-client")
         self.cpp_info.set_property("pkg_config_name", "opentdf-client")
 
-        self.cpp_info.components["libopentdf"].libs = ["opentdf_static"]
+        self.cpp_info.components["libopentdf"].libs = ["opentdf_static"] if not self.options.shared else ["opentdf"]
         self.cpp_info.components["libopentdf"].set_property("cmake_target_name", "copentdf-client::opentdf-client")
         self.cpp_info.components["libopentdf"].names["cmake_find_package"] = "opentdf-client"
         self.cpp_info.components["libopentdf"].names["cmake_find_package_multi"] = "opentdf-client"
@@ -159,7 +156,10 @@ class OpenTDFConan(ConanFile):
             "libxml2::libxml2",
             "jwt-cpp::jwt-cpp",
             "nlohmann_json::nlohmann_json",
+            "zlib::zlib"
         ]
+        if Version(self.version) >= "1.4.0":
+            self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
         if Version(self.version) < "1.1.0":
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
         if Version(self.version) >= "1.4.0":
