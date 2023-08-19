@@ -1,0 +1,4 @@
+sources:
+  "0.9.0":
+    url: "https://github.com/ouster-lidar/ouster_example/archive/refs/tags/20230710.tar.gz"
+    sha256: "07e64ad3dc831924a3c57aae6a36e3297937a1231689dc4344a841b7a24052bb"
