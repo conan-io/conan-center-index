@@ -10,7 +10,8 @@ project(test_package LANGUAGES CXX)
 set(test_package_compiler_flags -mcpu=cortex-m0plus
   -mfloat-abi=soft
   --specs=nosys.specs
-  --specs=nano.specs)
+  --specs=nano.specs
+  --specs=picolibc.specs)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
