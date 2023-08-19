@@ -37,7 +37,7 @@ class LibHALConan(ConanFile):
         }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) >= "2.0.0":
