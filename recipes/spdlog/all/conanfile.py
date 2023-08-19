@@ -142,7 +142,9 @@ class SpdlogConan(ConanFile):
         self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
         self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
 
-        if not self.options.header_only:
+        if self.options.header_only:
+            self.cpp_info.components["libspdlog"].libdirs = []
+        else:
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
