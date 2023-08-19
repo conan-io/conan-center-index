@@ -117,7 +117,7 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.77.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.77.1", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.1.0")
         if self.options.with_cgif:
@@ -133,7 +133,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.with_jpeg_xl:
@@ -207,7 +207,7 @@ class LibvipsConan(ConanFile):
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if not can_run(self):
-            self.tool_requires("glib/2.77.0")
+            self.tool_requires("glib/2.77.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
