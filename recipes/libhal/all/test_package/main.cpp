@@ -33,7 +33,6 @@ int main()
 
 #else
 
-#include <cstdio>
 #include <libhal/pwm.hpp>
 
 class test_pwm : public hal::pwm {
