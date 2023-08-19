@@ -40,10 +40,11 @@ class GdalConan(ConanFile):
         "with_hdf4": [True, False],
         "with_hdf5": [True, False],
         "with_heif": [True, False],
+        "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
         "with_kea": [True, False],
+        "with_libarchive": [True, False],
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
-        "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
         "with_libkml": [True, False],
         "with_libtiff": [True, False],
         "with_lz4": [True, False],
@@ -88,10 +89,11 @@ class GdalConan(ConanFile):
         "with_hdf4": False,
         "with_hdf5": False,
         "with_heif": False,
+        "with_jpeg": "libjpeg",
         "with_kea": False,
+        "with_libarchive": False,
         "with_libdeflate": True,
         "with_libiconv": True,
-        "with_jpeg": "libjpeg",
         "with_libkml": False,
         "with_libtiff": True,
         "with_lz4": False,
@@ -183,6 +185,8 @@ class GdalConan(ConanFile):
             self.requires("libjpeg-turbo/3.0.0")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
+        if self.options.with_libarchive:
+            self.requires("libarchive/3.6.2")
         if self.options.with_libdeflate:
             self.requires("libdeflate/1.18")
         if self.options.with_libiconv:
@@ -286,6 +290,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
         tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
 
+        tc.cache_variables["GDAL_USE_ARCHIVE"] = self.options.with_libarchive
         tc.cache_variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
         tc.cache_variables["GDAL_USE_ARROW"] = self.options.with_arrow
         tc.cache_variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow
@@ -340,7 +345,6 @@ class GdalConan(ConanFile):
         deps = CMakeDeps(self)
         # Based on `grep -h 'grep -hPIR '(gdal_check_package|find_package2)\(' ~/.conan2/p/b/gdal*/b/src/cmake | sort -u`
         conan_to_cmake_pkg_name = {
-            # "archive": "ARCHIVE",
             "armadillo": "Armadillo",
             "arrow": "Arrow",
             # "brunsli": "BRUNSLI",
@@ -364,6 +368,7 @@ class GdalConan(ConanFile):
             # "kdu": "KDU",
             "kealib": "KEA",
             # "lerc": "LERC",
+            "libarchive": "ARCHIVE",
             # "libbasisu": "basisu",
             # "libcsf": "LIBCSF",
             "libcurl": "CURL",
@@ -435,6 +440,7 @@ class GdalConan(ConanFile):
             "hdf4":                       "HDF4::HDF4",
             "hdfs":                       "HDFS::HDFS",
             "kealib":                     "KEA::KEA",
+            "libarchive":                 "ARCHIVE::ARCHIVE",
             "libdeflate":                 "Deflate::Deflate",
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
@@ -500,6 +506,8 @@ class GdalConan(ConanFile):
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
         self.cpp_info.requires.extend(["zlib::zlib"])
+        if self.options.with_libarchive:
+            self.cpp_info.requires.extend(["libarchive::libarchive"])
         if self.options.with_armadillo:
             self.cpp_info.requires.extend(["armadillo::armadillo"])
         if self.options.with_arrow:
