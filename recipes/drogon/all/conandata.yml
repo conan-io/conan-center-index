@@ -28,6 +28,10 @@ patches:
     - patch_file: "patches/1.8.4-0004-find-package-yaml-cpp.patch"
       patch_description: "Fix yaml-cpp cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.2-0004-support-gcc13.patch"
+      patch_description: "Fix compilation error on gcc13 with C++17"
+      patch_type: "portability"
+      patch_source: "https://github.com/drogonframework/drogon/pull/1563/"
   "1.8.3":
     - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
       patch_description: "Consume Trantor package from Conan instead of using the\
@@ -39,6 +43,10 @@ patches:
     - patch_file: "patches/1.8.3-0003-find-package-sqlite.patch"
       patch_description: "Fix sqlite cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.2-0004-support-gcc13.patch"
+      patch_description: "Fix compilation error on gcc13 with C++17"
+      patch_type: "portability"
+      patch_source: "https://github.com/drogonframework/drogon/pull/1563/"
   "1.8.2":
     - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
       patch_description: "Consume Trantor package from Conan instead of using the\
@@ -50,6 +58,10 @@ patches:
     - patch_file: "patches/1.8.2-0003-find-package-sqlite.patch"
       patch_description: "Fix sqlite cmake target name"
       patch_type: "conan"
+    - patch_file: "patches/1.8.2-0004-support-gcc13.patch"
+      patch_description: "Fix compilation error on gcc13 with C++17"
+      patch_type: "portability"
+      patch_source: "https://github.com/drogonframework/drogon/pull/1563/"
   "1.8.0":
     - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
       patch_description: "Consume Trantor package from Conan instead of using the subproject"

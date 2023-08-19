@@ -113,7 +113,7 @@ class DrogonConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
         if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
         if self.options.with_boost:
