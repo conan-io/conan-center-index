@@ -26,6 +26,7 @@ class GdalConan(ConanFile):
         "tools": [True, False],
         "with_armadillo": [True, False],
         "with_arrow": [True, False],
+        "with_basisu": [True, False],
         "with_blosc": [True, False],
         "with_cfitsio": [True, False],
         "with_cryptopp": [True, False],
@@ -77,6 +78,7 @@ class GdalConan(ConanFile):
         "tools": False,
         "with_armadillo": False,
         "with_arrow": False,
+        "with_basisu": False,
         "with_blosc": False,
         "with_cfitsio": False,
         "with_cryptopp": False,
@@ -154,6 +156,8 @@ class GdalConan(ConanFile):
             self.requires("armadillo/12.2.0")
         if self.options.with_arrow:
             self.requires("arrow/12.0.0")
+        if self.options.with_basisu:
+            self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.4")
         if self.options.with_cfitsio:
@@ -302,6 +306,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
         tc.cache_variables["GDAL_USE_ARROW"] = self.options.with_arrow
         tc.cache_variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow
+        tc.cache_variables["GDAL_USE_BASISU"] = self.options.with_basisu
         tc.cache_variables["GDAL_USE_BLOSC"] = self.options.with_blosc
         tc.cache_variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
         tc.cache_variables["GDAL_USE_CRNLIB"] = self.options.with_dds
@@ -378,7 +383,7 @@ class GdalConan(ConanFile):
             "kealib": "KEA",
             "lerc": "LERC",
             "libarchive": "ARCHIVE",
-            # "libbasisu": "basisu",
+            "libbasisu": "basisu",
             # "libcsf": "LIBCSF",
             "libcurl": "CURL",
             "libdeflate": "Deflate",
@@ -452,6 +457,7 @@ class GdalConan(ConanFile):
             "kealib":                     "KEA::KEA",
             "lerc":                       "LERC::LERC",
             "libarchive":                 "ARCHIVE::ARCHIVE",
+            "libbasisu":                  "basisu::basisu_lib",
             "libdeflate":                 "Deflate::Deflate",
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
@@ -518,12 +524,12 @@ class GdalConan(ConanFile):
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
         self.cpp_info.requires.extend(["zlib::zlib"])
-        if self.options.with_libarchive:
-            self.cpp_info.requires.extend(["libarchive::libarchive"])
         if self.options.with_armadillo:
             self.cpp_info.requires.extend(["armadillo::armadillo"])
         if self.options.with_arrow:
             self.cpp_info.requires.extend(["arrow::libarrow"])
+        if self.options.with_basisu:
+            self.cpp_info.requires.extend(["libbasisu::libbasisu"])
         if self.options.with_blosc:
             self.cpp_info.requires.extend(["c-blosc::c-blosc"])
         if self.options.with_cfitsio:
@@ -558,6 +564,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["kealib::kealib"])
         if self.options.with_lerc:
             self.cpp_info.requires.extend(["lerc::lerc"])
+        if self.options.with_libarchive:
+            self.cpp_info.requires.extend(["libarchive::libarchive"])
         if self.options.with_libdeflate:
             self.cpp_info.requires.extend(["libdeflate::libdeflate"])
         if self.options.with_libiconv:
