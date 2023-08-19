@@ -460,11 +460,15 @@ class GdalConan(ConanFile):
         copy(self, "ConanFindPackage.cmake",
              src=self.export_sources_folder,
              dst=os.path.join(self.source_folder, "cmake", "helpers"))
-        # Fix Deflate::Deflate and possibly other linked libs not being propagated internally
+        # Use standard target_link_libraries instead of gdal_target_link_libraries.
+        # GDAL version does not allow PUBLIC and got stuck in an infinite recursion for some Conan deps.
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "GdalDriverHelper.cmake"),
+                        "function(gdal_target_link_libraries target)",
+                        "function(gdal_target_link_libraries target)\ntarget_link_libraries(${target} ${ARGN})\nreturn()\n")
+        # Fix Deflate::Deflate not being correctly propagated internally.
         replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
-                        "gdal_target_link_libraries", "target_link_libraries")
-        replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
-                        "PRIVATE", "PUBLIC")
+                        "PRIVATE Deflate::Deflate",
+                        "PUBLIC Deflate::Deflate")
 
     def build(self):
         self._patch_sources()

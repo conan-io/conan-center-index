@@ -1,41 +1,16 @@
-diff -urN ./a/alg/CMakeLists.txt ./b/alg/CMakeLists.txt
---- ./a/alg/CMakeLists.txt	2023-05-02 08:47:11.000000000 -0500
-+++ ./b/alg/CMakeLists.txt	2023-06-06 16:47:02.784509800 -0500
-@@ -73,7 +73,7 @@
-   target_sources(alg PRIVATE gdalwarpkernel_opencl.h gdalwarpkernel_opencl.cpp)
- endif ()
- 
--gdal_target_link_libraries(alg PRIVATE PROJ::proj)
-+target_link_libraries(alg PUBLIC PROJ::proj)
- 
- if (GDAL_USE_QHULL_INTERNAL)
-   target_compile_definitions(alg PRIVATE -DINTERNAL_QHULL)
-diff -urN ./a/apps/CMakeLists.txt ./b/apps/CMakeLists.txt
---- ./a/apps/CMakeLists.txt	2023-05-02 08:47:11.000000000 -0500
-+++ ./b/apps/CMakeLists.txt	2023-06-06 16:46:55.380690700 -0500
-@@ -26,7 +26,7 @@
-   appslib PRIVATE $<TARGET_PROPERTY:gdal_vrt,SOURCE_DIR> $<TARGET_PROPERTY:ogrsf_generic,SOURCE_DIR>
-                   $<TARGET_PROPERTY:ogr_geojson,SOURCE_DIR> $<TARGET_PROPERTY:ogr_MEM,SOURCE_DIR>)
- 
--gdal_target_link_libraries(appslib PRIVATE PROJ::proj)
-+target_link_libraries(appslib PUBLIC PROJ::proj)
- 
- set_property(TARGET appslib PROPERTY POSITION_INDEPENDENT_CODE ${GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE})
- if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
 diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/CheckDependentLibraries.cmake
 --- ./a/cmake/helpers/CheckDependentLibraries.cmake	2023-06-07 09:33:06.599777700 -0500
 +++ ./b/cmake/helpers/CheckDependentLibraries.cmake	2023-06-07 13:38:51.722872200 -0500
-@@ -11,7 +11,8 @@
+@@ -11,7 +11,7 @@
  include(CheckFunctionExists)
  include(CMakeDependentOption)
  include(FeatureSummary)
 -include(DefineFindPackage2)
-+#include(DefineFindPackage2)
 +include(ConanFindPackage)
  include(CheckSymbolExists)
  
  option(
-@@ -109,51 +110,8 @@
+@@ -109,51 +109,8 @@
    string(TOUPPER ${name} key)
    set(_find_dependency "")
    set(_find_dependency_args "")
@@ -85,11 +60,11 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
 -    endif ()
 -  endif ()
 +
-+  find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
++  find_package2(${name} QUIET)
    if (${key}_FOUND OR ${name}_FOUND)
      if(_GCP_MINIMUM_VERSION)
  
-@@ -368,14 +326,12 @@
+@@ -368,10 +325,7 @@
  endif ()
  
  # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
@@ -97,20 +72,15 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
 -if (NOT PROJ_FOUND)
 -  find_package(PROJ 8 CONFIG QUIET)
 -endif()
-+find_package2(PROJ)
-+target_include_directories(PROJ::proj INTERFACE ${PROJ_INCLUDE_DIRS})
++find_package2(PROJ CONFIG QUIET)
  if (PROJ_FOUND)
    string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ ${PROJ_VERSION_MAJOR} CONFIG)\n")
  else()
--  find_package(PROJ 6.0 REQUIRED)
-+  find_package(proj 6.0 REQUIRED)
-   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ 6.0)\n")
- endif ()
- 
-@@ -458,15 +414,10 @@
+@@ -457,16 +411,7 @@
+   NAMES json-c
    TARGETS json-c::json-c JSONC::JSONC
  )
- gdal_internal_library(JSONC REQUIRED)
+-gdal_internal_library(JSONC REQUIRED)
 -if(TARGET json-c::json-c)
 -  get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
 -  find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
@@ -120,14 +90,11 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
 -    INTERFACE_INCLUDE_DIRECTORIES "${GDAL_JSON_INCLUDE_DIR}"
 -  )
 -endif()
-+get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
-+list(APPEND include_dirs "${JSONC_INCLUDE_DIRS}/json-c")
-+set_target_properties(json-c::json-c PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}")
-+message("Setting include for json-c: ${include_dirs}")
++find_package2(JSONC REQUIRED)
  
  gdal_check_package(OpenCAD "libopencad (external, used by OpenCAD driver)" CAN_DISABLE)
  gdal_internal_library(OPENCAD)
-@@ -527,6 +478,24 @@
+@@ -527,6 +472,24 @@
  gdal_check_package(SQLite3 "Enable SQLite3 support (used by SQLite/Spatialite, GPKG, Rasterlite, MBTiles, etc.)"
                     CAN_DISABLE RECOMMENDED)
  if (SQLite3_FOUND)
@@ -152,15 +119,24 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
    if (NOT DEFINED SQLite3_HAS_COLUMN_METADATA)
      message(FATAL_ERROR "missing SQLite3_HAS_COLUMN_METADATA")
    endif ()
-@@ -566,7 +535,7 @@
+@@ -566,7 +529,7 @@
  gdal_check_package(SPATIALITE "Enable spatialite support for sqlite3" VERSION 4.1.2 CAN_DISABLE)
  gdal_check_package(RASTERLITE2 "Enable RasterLite2 support for sqlite3" VERSION 1.1.0 CAN_DISABLE)
  
 -find_package(LibKML COMPONENTS DOM ENGINE)
-+find_package(LibKML COMPONENTS kmlengine kmldom kmlbase)
++find_package2(LibKML COMPONENTS kmlengine kmldom kmlbase)
  if (GDAL_USE_LIBKML)
    if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
+@@ -729,7 +692,7 @@
+ gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
+ 
+ # OpenJPEG's cmake-CONFIG is broken, so call module explicitly
+-find_package(OpenJPEG MODULE)
++find_package2(OpenJPEG MODULE)
+ if (GDAL_USE_OPENJPEG)
+   if (NOT OPENJPEG_FOUND)
+     message(FATAL_ERROR "Configured to use GDAL_USE_OPENJPEG, but not found")
 diff -urN ./a/frmts/hfa/CMakeLists.txt ./b/frmts/hfa/CMakeLists.txt
 --- ./a/frmts/hfa/CMakeLists.txt	2023-05-02 08:47:11.000000000 -0500
 +++ ./b/frmts/hfa/CMakeLists.txt	2023-06-06 16:54:31.162043900 -0500
@@ -203,24 +179,6 @@ diff -urN ./a/gdal.cmake ./b/gdal.cmake
  endif ()
  
  configure_file(${GDAL_CMAKE_TEMPLATE_PATH}/uninstall.cmake.in ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake @ONLY)
-diff -urN ./a/ogr/CMakeLists.txt ./b/ogr/CMakeLists.txt
---- ./a/ogr/CMakeLists.txt	2023-05-02 08:47:12.000000000 -0500
-+++ ./b/ogr/CMakeLists.txt	2023-06-06 16:56:18.682151700 -0500
-@@ -89,12 +89,12 @@
- 
- target_compile_definitions(ogr PRIVATE HAVE_MITAB)
- 
--gdal_target_link_libraries(ogr PRIVATE PROJ::proj)
-+target_link_libraries(ogr PUBLIC PROJ::proj)
- 
- # External libs then
- if (GDAL_USE_GEOS)
-   target_compile_definitions(ogr PRIVATE -DHAVE_GEOS=1)
--  gdal_target_link_libraries(ogr PRIVATE ${GEOS_TARGET})
-+  target_link_libraries(ogr PUBLIC ${GEOS_TARGET})
- endif ()
- 
- if (GDAL_USE_SFCGAL)
 diff -urN ./a/ogr/ogr_proj_p.h ./b/ogr/ogr_proj_p.h
 --- ./a/ogr/ogr_proj_p.h	2023-05-02 08:47:12.000000000 -0500
 +++ ./b/ogr/ogr_proj_p.h	2023-06-06 16:56:30.772908800 -0500

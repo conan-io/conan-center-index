@@ -1,7 +1,10 @@
 function(define_find_package2 pkgname include_file library_name)
 endfunction()
 function(find_package2 pkgname)
-    list(REMOVE_ITEM ARGN MODULE NO_CONFIG NO_MOULE)
+    # Remove args unsupported by find_package()
+    list(REMOVE_ITEM ARGN OUT_DEPENDENCY _find_dependency)
+    # Force CONFIG mode
+    list(REMOVE_ITEM ARGN MODULE NO_CONFIG NO_MODULE)
     find_package(${pkgname} ${ARGN} CONFIG)
     # Add variables with upper-case package name in addition to the default ones
     string(TOUPPER ${pkgname} key)

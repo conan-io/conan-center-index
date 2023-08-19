@@ -1,29 +1,3 @@
-diff --git a/alg/CMakeLists.txt b/alg/CMakeLists.txt
-index edf75158c7..4200309ca8 100644
---- a/alg/CMakeLists.txt
-+++ b/alg/CMakeLists.txt
-@@ -72,7 +72,7 @@ if (GDAL_USE_OPENCL)
-   target_sources(alg PRIVATE gdalwarpkernel_opencl.h gdalwarpkernel_opencl.cpp)
- endif ()
- 
--gdal_target_link_libraries(alg PRIVATE PROJ::proj)
-+target_link_libraries(alg PUBLIC PROJ::proj)
- 
- if (GDAL_USE_QHULL_INTERNAL)
-   target_compile_definitions(alg PRIVATE -DINTERNAL_QHULL)
-diff --git a/apps/CMakeLists.txt b/apps/CMakeLists.txt
-index 8b02cea456..ad4adbfc9e 100644
---- a/apps/CMakeLists.txt
-+++ b/apps/CMakeLists.txt
-@@ -25,7 +25,7 @@ target_include_directories(
-   appslib PRIVATE $<TARGET_PROPERTY:gdal_vrt,SOURCE_DIR> $<TARGET_PROPERTY:ogrsf_generic,SOURCE_DIR>
-                   $<TARGET_PROPERTY:ogr_geojson,SOURCE_DIR> $<TARGET_PROPERTY:ogr_MEM,SOURCE_DIR>)
- 
--gdal_target_link_libraries(appslib PRIVATE PROJ::proj)
-+target_link_libraries(appslib PUBLIC PROJ::proj)
- 
- set_property(TARGET appslib PROPERTY POSITION_INDEPENDENT_CODE ${GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE})
- if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
 diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDependentLibraries.cmake
 index 0a66b44fec..152ff42ff7 100644
 --- a/cmake/helpers/CheckDependentLibraries.cmake
@@ -131,15 +105,6 @@ index 0a66b44fec..152ff42ff7 100644
  if (GDAL_USE_LIBKML)
    if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
-@@ -561,7 +512,7 @@
-   unset(CMAKE_TRY_COMPILE_CONFIGURATION)
-   cmake_pop_check_state()
-   if (NOT ARMADILLO_TEST_PROGRAM_WITHOUT_LAPACK_COMPILES)
--    find_package(LAPACK)
-+    find_package2(LAPACK)
-     if (LAPACK_FOUND)
-       list(APPEND ARMADILLO_LIBRARIES ${LAPACK_LIBRARIES})
-       cmake_push_check_state(RESET)
 @@ -646,7 +597,7 @@
  gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
  
@@ -193,25 +158,6 @@ index 4bae2e2760..7695df40c8 100644
  endif ()
  
  configure_file(${GDAL_CMAKE_TEMPLATE_PATH}/uninstall.cmake.in ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake @ONLY)
-diff --git a/ogr/CMakeLists.txt b/ogr/CMakeLists.txt
-index 19ba4e12fe..87cd123c54 100644
---- a/ogr/CMakeLists.txt
-+++ b/ogr/CMakeLists.txt
-@@ -88,12 +88,12 @@ endif ()
- 
- target_compile_definitions(ogr PRIVATE HAVE_MITAB)
- 
--gdal_target_link_libraries(ogr PRIVATE PROJ::proj)
-+target_link_libraries(ogr PUBLIC PROJ::proj)
- 
- # External libs then
- if (GDAL_USE_GEOS)
-   target_compile_definitions(ogr PRIVATE -DHAVE_GEOS=1)
--  gdal_target_link_libraries(ogr PRIVATE ${GEOS_TARGET})
-+  target_link_libraries(ogr PUBLIC ${GEOS_TARGET})
- endif ()
- 
- if (GDAL_USE_SFCGAL)
 diff --git a/ogr/ogr_proj_p.h b/ogr/ogr_proj_p.h
 index 88928ad1ad..7cdd587db7 100644
 --- a/ogr/ogr_proj_p.h
