@@ -51,7 +51,7 @@ class LibjxlConan(ConanFile):
         if Version(self.version) < "0.7.0":
             self.requires("highway/0.12.2")
         else:
-            self.requires("highway/1.0.3")
+            self.requires("highway/1.0.6")
         self.requires("lcms/2.14")
 
     def validate(self):
@@ -82,7 +82,6 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
         tc.variables["JPEGXL_ENABLE_TOOLS"] = False
         tc.generate()
-
         deps = CMakeDeps(self)
         deps.generate()
 
