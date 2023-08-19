@@ -32,7 +32,6 @@ class OnnxRuntimeConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_xnnpack": False,
-        "onnx_no_static_registration": False
     }
     short_paths = True
 
