@@ -340,6 +340,9 @@ class GdalConan(ConanFile):
         # target_include_directories(OpenEXR::OpenEXR INTERFACE ${OpenEXR_INCLUDE_DIR})
         # set(HDF5_C_LIBRARIES HDF5::C)
 
+        jsonc = self.dependencies["json-c"]
+        jsonc.cpp_info.includedirs.append(os.path.join(jsonc.package_folder, "include", "json-c"))
+
         deps = CMakeDeps(self)
         # Based on `grep -h 'grep -hPIR '(gdal_check_package|find_package2)\(' ~/.conan2/p/b/gdal*/b/src/cmake | sort -u`
         conan_to_cmake_pkg_name = {
