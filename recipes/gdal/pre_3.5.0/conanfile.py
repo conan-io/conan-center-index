@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library, valid_min_cppstd
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeDeps, NMakeToolchain, unix_path
@@ -464,8 +464,7 @@ class GdalConan(ConanFile):
                 replace_in_file(self, configure_ac, "AC_CHECK_LIB(z,", f"AC_CHECK_LIB({zlib_name},")
                 replace_in_file(self, configure_ac, "-lz ", f"-l{zlib_name} ")
             # Workaround for autoconf 2.71
-            with open(os.path.join(self.source_folder, "config.rpath"), "w"):
-                pass
+            save(self, os.path.join(self.source_folder, "config.rpath"), "")
 
         # Disable tools
         if not self.options.tools:
@@ -512,11 +511,11 @@ class GdalConan(ConanFile):
         if not self.options.with_pcidsk:
             replace_in_nmake_opt("PCIDSK_SETTING=INTERNAL", "")
         if self.options.with_pg:
-            replace_in_nmake_opt("#PG_LIB = n:\\pkg\\libpq_win32\\lib\\libpqdll.lib wsock32.lib", "PG_LIB=")
+            replace_in_nmake_opt(r"#PG_LIB = n:\pkg\libpq_win32\lib\libpqdll.lib wsock32.lib", "PG_LIB=")
         if bool(self.options.with_mysql):
-            replace_in_nmake_opt("#MYSQL_LIB = D:\\Software\\MySQLServer4.1\\lib\\opt\\libmysql.lib advapi32.lib", "MYSQL_LIB=")
+            replace_in_nmake_opt(r"#MYSQL_LIB = D:\Software\MySQLServer4.1\lib\opt\libmysql.lib advapi32.lib", "MYSQL_LIB=")
         if self.options.get_safe("with_sqlite3"):
-            replace_in_nmake_opt("#SQLITE_LIB=N:\\pkg\\sqlite-win32\\sqlite3_i.lib", "SQLITE_LIB=")
+            replace_in_nmake_opt(r"#SQLITE_LIB=N:\pkg\sqlite-win32\sqlite3_i.lib", "SQLITE_LIB=")
         if self.options.with_curl:
             replace_in_nmake_opt("#CURL_LIB = $(CURL_DIR)/libcurl.lib wsock32.lib wldap32.lib winmm.lib", "CURL_LIB=")
         if self.options.with_freexl:
@@ -524,7 +523,7 @@ class GdalConan(ConanFile):
         if not (self.options.get_safe("with_zlib", True) and self.options.get_safe("with_png", True) and bool(self.options.with_jpeg)):
             replace_in_nmake_opt("MRF_SETTING=yes", "")
         if self.options.with_charls:
-            replace_in_nmake_opt("#CHARLS_LIB=e:\\work\\GIS\\gdal\\supportlibs\\charls\\bin\\Release\\x86\\CharLS.lib", "CHARLS_LIB=")
+            replace_in_nmake_opt(r"#CHARLS_LIB=e:\work\GIS\gdal\supportlibs\charls\bin\Release\x86\CharLS.lib", "CHARLS_LIB=")
         # Trick to enable OpenCL (option missing in upstream nmake files)
         if self.options.with_opencl:
             replace_in_file(self, os.path.join(self.source_folder, "alg", "makefile.vc"),
