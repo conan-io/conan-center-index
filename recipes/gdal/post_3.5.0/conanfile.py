@@ -60,6 +60,7 @@ class GdalConan(ConanFile):
         "with_openssl": [True, False],
         "with_pcre": [True, False],
         "with_pcre2": [True, False],
+        "with_pdfium": [True, False],
         "with_pg": [True, False],
         "with_png": [True, False],
         "with_podofo": [True, False],
@@ -113,6 +114,7 @@ class GdalConan(ConanFile):
         "with_openssl": False,
         "with_pcre": False,
         "with_pcre2": False,
+        "with_pdfium": False,
         "with_pg": False,
         "with_png": True,
         "with_podofo": False,
@@ -231,6 +233,8 @@ class GdalConan(ConanFile):
             self.requires("pcre/8.45")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
+        if self.options.with_pdfium:
+            self.requires("pdfium/cci.20210730")
         if self.options.with_pg:
             self.requires("libpq/15.3")
         if self.options.with_png:
@@ -344,7 +348,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
         tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
-        tc.cache_variables["GDAL_USE_PDFIUM"] = False
+        tc.cache_variables["GDAL_USE_PDFIUM"] = self.options.with_pdfium
         tc.cache_variables["GDAL_USE_PNG"] = self.options.with_png
         tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
         tc.cache_variables["GDAL_USE_POPPLER"] = self.options.with_poppler
@@ -427,7 +431,7 @@ class GdalConan(ConanFile):
             # "parquet": "Parquet",
             "pcre": "PCRE",
             "pcre2": "PCRE2",
-            # "pdfium": "PDFIUM",
+            "pdfium": "PDFIUM",
             "podofo": "Podofo",
             "poppler": "Poppler",
             "proj": "PROJ",
@@ -475,6 +479,7 @@ class GdalConan(ConanFile):
             "openjpeg":                   "OPENJPEG::OpenJPEG",
             "pcre":                       "PCRE::PCRE",
             "pcre2::pcre2-8":             "PCRE2::PCRE2-8",
+            "pdfium":                     "PDFIUM::PDFIUM",
             "podofo":                     "PODOFO::Podofo",
             "poppler":                    "Poppler::Poppler",
             "xz_utils":                   "LibLZMA::LibLZMA",
@@ -606,6 +611,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["pcre::pcre"])
         if self.options.with_pcre2:
             self.cpp_info.requires.extend(["pcre2::pcre2-8"])
+        if self.options.with_pdfium:
+            self.cpp_info.requires.extend(["pdfium::pdfium"])
         if self.options.with_pg:
             self.cpp_info.requires.extend(["libpq::pq"])
         if self.options.with_png:
