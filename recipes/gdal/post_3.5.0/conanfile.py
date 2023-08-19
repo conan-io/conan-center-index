@@ -50,6 +50,7 @@ class GdalConan(ConanFile):
         "with_libiconv": [True, False],
         "with_libkml": [True, False],
         "with_libtiff": [True, False],
+        "with_lzma": [True, False],
         "with_lz4": [True, False],
         "with_mongocxx": [True, False],
         "with_mysql": [None, "libmysqlclient", "mariadb-connector-c"],
@@ -102,6 +103,7 @@ class GdalConan(ConanFile):
         "with_libiconv": True,
         "with_libkml": False,
         "with_libtiff": True,
+        "with_lzma": False,
         "with_lz4": False,
         "with_mongocxx": False,
         "with_mysql": None,
@@ -207,6 +209,8 @@ class GdalConan(ConanFile):
             self.requires("libkml/1.3.0")
         if self.options.with_libtiff:
             self.requires("libtiff/4.5.1")
+        if self.options.with_lzma:
+            self.requires("xz_utils/5.4.2")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
@@ -330,6 +334,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_LERC"] = self.options.with_lerc
         tc.cache_variables["GDAL_USE_LIBKML"] = self.options.with_libkml
         tc.cache_variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
+        tc.cache_variables["GDAL_USE_LZMA"] = self.options.with_lzma
         tc.cache_variables["GDAL_USE_LZ4"] = self.options.with_lz4
         tc.cache_variables["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
         tc.cache_variables["GDAL_USE_NETCDF"] = self.options.with_netcdf
@@ -395,7 +400,6 @@ class GdalConan(ConanFile):
             "libjpeg-turbo": "JPEG",
             "libjxl": "JXL",
             "libkml": "LibKML",
-            # "xz_utils": "LibLZMA",
             "libmysqlclient": "MySQL",
             "libpng": "PNG",
             "libpq": "PostgreSQL",
@@ -437,6 +441,7 @@ class GdalConan(ConanFile):
             # "teigha": "TEIGHA",
             # "tiledb": "TileDB",
             "xerces-c": "XercesC",
+            "xz_utils": "LibLZMA",
             "zlib": "ZLIB",
             "zstd": "ZSTD",
         }
@@ -472,6 +477,7 @@ class GdalConan(ConanFile):
             "pcre2::pcre2-8":             "PCRE2::PCRE2-8",
             "podofo":                     "PODOFO::Podofo",
             "poppler":                    "Poppler::Poppler",
+            "xz_utils":                   "LibLZMA::LibLZMA",
             "zstd":                       "ZSTD::zstd",
         }
         for component, new_target_name in renamed_targets.items():
@@ -578,6 +584,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["libkml::kmldom", "libkml::kmlengine"])
         if self.options.with_libtiff:
             self.cpp_info.requires.extend(["libtiff::libtiff"])
+        if self.options.with_lzma:
+            self.cpp_info.requires.extend(["xz_utils::xz_utils"])
         if self.options.with_lz4:
             self.cpp_info.requires.extend(["lz4::lz4"])
         if self.options.with_mongocxx:
