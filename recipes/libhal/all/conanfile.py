@@ -33,7 +33,7 @@ class LibHALConan(ConanFile):
             "Visual Studio": "17",
             "msvc": "193",
             "clang": "13",
-            "apple-clang": "13.1.6"
+            "apple-clang": "14.0.0"
         }
 
     def layout(self):
@@ -41,7 +41,7 @@ class LibHALConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "2.0.0":
-            self.requires("boost/1.83.0", transitive_headers=True)
+            self.requires("boost-leaf/1.82.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
@@ -77,5 +77,3 @@ class LibHALConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        if Version(self.version) >= "2.0.0":
-            self.cpp_info.requires = ["boost::headers"]
