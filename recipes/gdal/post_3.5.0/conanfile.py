@@ -43,6 +43,7 @@ class GdalConan(ConanFile):
         "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
         "with_jxl": [True, False],
         "with_kea": [True, False],
+        "with_lerc": [True, False],
         "with_libarchive": [True, False],
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
@@ -93,6 +94,7 @@ class GdalConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_jxl": False,
         "with_kea": False,
+        "with_lerc": False,
         "with_libarchive": False,
         "with_libdeflate": True,
         "with_libiconv": True,
@@ -189,6 +191,8 @@ class GdalConan(ConanFile):
             self.requires("libjxl/0.6.1")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
+        if self.options.with_lerc:
+            self.requires("lerc/4.0.0")
         if self.options.with_libarchive:
             self.requires("libarchive/3.6.2")
         if self.options.with_libdeflate:
@@ -288,7 +292,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_GEOTIFF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_GIF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_LERC_INTERNAL"] = True
+        tc.cache_variables["GDAL_USE_LERC_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = True
 
         tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
@@ -318,6 +322,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_JPEG"] = self.options.with_jpeg is not None
         tc.cache_variables["GDAL_USE_JXL"] = self.options.with_jxl
         tc.cache_variables["GDAL_USE_KEA"] = self.options.with_kea
+        tc.cache_variables["GDAL_USE_LERC"] = self.options.with_lerc
         tc.cache_variables["GDAL_USE_LIBKML"] = self.options.with_libkml
         tc.cache_variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
         tc.cache_variables["GDAL_USE_LZ4"] = self.options.with_lz4
@@ -371,7 +376,7 @@ class GdalConan(ConanFile):
             "json-c": "JSONC",
             # "kdu": "KDU",
             "kealib": "KEA",
-            # "lerc": "LERC",
+            "lerc": "LERC",
             "libarchive": "ARCHIVE",
             # "libbasisu": "basisu",
             # "libcsf": "LIBCSF",
@@ -445,6 +450,7 @@ class GdalConan(ConanFile):
             "hdf4":                       "HDF4::HDF4",
             "hdfs":                       "HDFS::HDFS",
             "kealib":                     "KEA::KEA",
+            "lerc":                       "LERC::LERC",
             "libarchive":                 "ARCHIVE::ARCHIVE",
             "libdeflate":                 "Deflate::Deflate",
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
@@ -550,6 +556,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["libjxl::libjxl"])
         if self.options.with_kea:
             self.cpp_info.requires.extend(["kealib::kealib"])
+        if self.options.with_lerc:
+            self.cpp_info.requires.extend(["lerc::lerc"])
         if self.options.with_libdeflate:
             self.cpp_info.requires.extend(["libdeflate::libdeflate"])
         if self.options.with_libiconv:
