@@ -26,10 +26,6 @@ class OGDFConan(ConanFile):
         "fPIC": True,
     }
 
-    def validate(self):
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -85,12 +81,13 @@ class OGDFConan(ConanFile):
         copy(self, pattern="LICENSE*.txt", src=self.source_folder, dst=join(self.package_folder, "licenses"))
         copy(self, pattern="*.h", src=join(self.source_folder, "include"), dst=join(self.package_folder, "include"))
         copy(self, pattern="*.h", src=join(self.build_folder, "include"), dst=join(self.package_folder, "include"))
+        copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
         if self.options.shared:
             copy(self, pattern="*.so*", src=self.build_folder, dst=join(self.package_folder, "lib"))
             copy(self, pattern="*.dylib*", src=self.build_folder, dst=join(self.package_folder, "lib"))
+            copy(self, pattern="*.dll", src=self.build_folder, dst=join(self.package_folder, "bin"), keep_path=False)
         else:
             copy(self, pattern="*.a", src=self.build_folder, dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.lib", src=self.build_folder, dst=join(self.package_folder, "lib"), keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
