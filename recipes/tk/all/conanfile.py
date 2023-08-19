@@ -163,7 +163,7 @@ class TkConan(ConanFile):
             opts.append("static")
         if self.settings.build_type == "Debug":
             opts.append("symbols")
-        if "MD" in str(self.settings.compiler.runtime):
+        if "dynamic" in str(self.settings.compiler.runtime) or "MD" in str(self.settings.compiler.runtime):
             opts.append("msvcrt")
         else:
             opts.append("nomsvcrt")
@@ -246,7 +246,7 @@ class TkConan(ConanFile):
             tk_suffix = "t{}{}{}".format(
                 "" if self.options.shared else "s",
                 "g" if self.settings.build_type == "Debug" else "",
-                "x" if "MD" in str(self.settings.compiler.runtime) and not self.options.shared else "",
+                "x" if ("dynamic" in str(self.settings.compiler.runtime) or "MD" in str(self.settings.compiler.runtime)) and not self.options.shared else "",
             )
         else:
             tk_suffix = ""
