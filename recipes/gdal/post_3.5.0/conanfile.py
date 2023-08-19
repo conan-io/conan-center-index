@@ -117,6 +117,7 @@ class GdalConan(ConanFile):
     }
 
     def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
         copy(self, "ConanFindPackage.cmake", src=os.path.join(self.recipe_folder, "cmake"), dst=self.export_sources_folder)
 
@@ -154,7 +155,7 @@ class GdalConan(ConanFile):
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.7.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/8.2.0")
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
         if self.options.with_expat:
@@ -287,6 +288,7 @@ class GdalConan(ConanFile):
 
         tc.cache_variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
         tc.cache_variables["GDAL_USE_ARROW"] = self.options.with_arrow
+        tc.cache_variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow
         tc.cache_variables["GDAL_USE_BLOSC"] = self.options.with_blosc
         tc.cache_variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
         tc.cache_variables["GDAL_USE_CRNLIB"] = self.options.with_dds
@@ -331,13 +333,6 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ZLIB"] = True
         tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
         tc.generate()
-
-        # TODO?
-        # # gdal includes without "Imath/" folder prefix
-        # target_include_directories(Imath::Imath INTERFACE ${Imath_INCLUDE_DIR})
-        # # and also without "OpenEXR/" prefix
-        # target_include_directories(OpenEXR::OpenEXR INTERFACE ${OpenEXR_INCLUDE_DIR})
-        # set(HDF5_C_LIBRARIES HDF5::C)
 
         jsonc = self.dependencies["json-c"]
         jsonc.cpp_info.includedirs.append(os.path.join(jsonc.package_folder, "include", "json-c"))
@@ -430,20 +425,19 @@ class GdalConan(ConanFile):
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
-            "arrow":              "arrow_shared",
+            "arrow":              "Arrow::arrow_shared",
             "c-blosc":            "Blosc::Blosc",
             "cfitsio":            "CFITSIO::CFITSIO",
+            "crunch":             "CRNLIB::Crnlib",
             "cryptopp":           "CRYPTOPP::CRYPTOPP",
             "freexl":             "FREEXL::freexl",
             "geos":               "GEOS::GEOS",
             "hdfs":               "HDFS::HDFS",
-            "imath":              "OpenEXR::Half",
+            "hdf4":               "HDF4::HDF4",
             "libdeflate":         "Deflate::Deflate",
             "libgeotiff":         "GEOTIFF::GEOTIFF",
             "lz4":                "LZ4::LZ4",
             "netcds":             "netCDF::netcdf",
-            "openexr::IlmThread": "OpenEXR::IlmImf",
-            "openexr::OpenEXR":   "OpenEXR::IlmImfUtil",
             "openjpeg":           "OPENJPEG::OpenJPEG",
             "pcre2::pcre2-8":     "PCRE2::PCRE2-8",
             "poppler":            "Poppler::Poppler",
@@ -472,7 +466,7 @@ class GdalConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):

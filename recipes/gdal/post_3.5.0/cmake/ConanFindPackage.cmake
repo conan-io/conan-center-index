@@ -22,6 +22,8 @@ function(find_package2 pkgname)
     set(${key}_INCLUDE_DIRS "${${pkgname}_INCLUDE_DIRS}" CACHE STRING "")
     set(${key}_DEFINITIONS "${${pkgname}_DEFINITIONS}" CACHE STRING "")
     set(${key}_FOUND ${${pkgname}_FOUND} CACHE BOOL "")
+    set(${pkgname}_VERSION ${${pkgname}_VERSION_STRING} CACHE BOOL "")
+    set(${key}_VERSION ${${pkgname}_VERSION} CACHE BOOL "")
 
     message(STATUS "Found ${pkgname}: ${${pkgname}_FOUND}")
     message(STATUS "  ${key}_TARGET: ${${key}_TARGET}")
