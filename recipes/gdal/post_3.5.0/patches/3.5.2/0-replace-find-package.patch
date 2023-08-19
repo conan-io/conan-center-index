@@ -28,7 +28,7 @@ diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDe
 index 0a66b44fec..152ff42ff7 100644
 --- a/cmake/helpers/CheckDependentLibraries.cmake
 +++ b/cmake/helpers/CheckDependentLibraries.cmake
-@@ -11,7 +11,10 @@ Detect GDAL dependencies and set variable HAVE_*
+@@ -11,7 +11,10 @@
  include(CheckFunctionExists)
  include(CMakeDependentOption)
  include(FeatureSummary)
@@ -40,9 +40,12 @@ index 0a66b44fec..152ff42ff7 100644
  include(CheckSymbolExists)
  
  option(
-@@ -111,47 +114,7 @@ macro (gdal_check_package name purpose)
+@@ -109,49 +112,9 @@
+   string(TOUPPER ${name} key)
+   set(_find_dependency "")
    set(_find_dependency_args "")
-   find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
+-  find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
++  find_package2(${name} QUIET)
    if (NOT DEFINED ${key}_FOUND)
 -    set(_find_package_args)
 -    if (_GCP_VERSION)
@@ -89,7 +92,7 @@ index 0a66b44fec..152ff42ff7 100644
    endif ()
    if (${key}_FOUND OR ${name}_FOUND)
      set(HAVE_${key} ON)
-@@ -345,14 +308,15 @@ if (GDAL_USE_CRYPTOPP)
+@@ -345,10 +308,7 @@
  endif ()
  
  # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
@@ -97,23 +100,15 @@ index 0a66b44fec..152ff42ff7 100644
 -if (NOT PROJ_FOUND)
 -  find_package(PROJ 8 CONFIG QUIET)
 -endif()
-+find_package2(PROJ)
-+target_include_directories(PROJ::proj INTERFACE ${PROJ_INCLUDE_DIRS})
-+#if (NOT PROJ_FOUND)
-+#  find_package(proj 8 CONFIG QUIET)
-+#endif()
++find_package2(PROJ CONFIG QUIET)
  if (PROJ_FOUND)
    string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ ${PROJ_VERSION_MAJOR} CONFIG)\n")
  else()
--  find_package(PROJ 6.0 REQUIRED)
-+  find_package(proj 6.0 REQUIRED)
-   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ 6.0)\n")
- endif ()
- 
-@@ -412,15 +376,10 @@ gdal_check_package(JSONC "json-c library (external)" CAN_DISABLE
+@@ -411,16 +371,7 @@
+   NAMES json-c
    TARGETS json-c::json-c JSONC::JSONC
  )
- gdal_internal_library(JSONC REQUIRED)
+-gdal_internal_library(JSONC REQUIRED)
 -if(TARGET json-c::json-c)
 -  get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
 -  find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
@@ -123,22 +118,37 @@ index 0a66b44fec..152ff42ff7 100644
 -    INTERFACE_INCLUDE_DIRECTORIES "${GDAL_JSON_INCLUDE_DIR}"
 -  )
 -endif()
-+get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
-+list(APPEND include_dirs "${JSONC_INCLUDE_DIRS}/json-c")
-+set_target_properties(json-c::json-c PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}")
-+message("Setting include for json-c: ${include_dirs}")
++find_package2(JSONC REQUIRED)
  
  gdal_check_package(OpenCAD "libopencad (external, used by OpenCAD driver)" CAN_DISABLE)
  gdal_internal_library(OPENCAD)
-@@ -517,7 +476,7 @@ if (GDAL_USE_RASTERLITE2)
+@@ -517,7 +468,7 @@
  endif ()
  cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
  
 -find_package(LibKML COMPONENTS DOM ENGINE)
-+find_package(LibKML COMPONENTS kmlengine kmldom kmlbase)
++find_package2(LibKML COMPONENTS kmlengine kmldom kmlbase)
  if (GDAL_USE_LIBKML)
    if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
+@@ -561,7 +512,7 @@
+   unset(CMAKE_TRY_COMPILE_CONFIGURATION)
+   cmake_pop_check_state()
+   if (NOT ARMADILLO_TEST_PROGRAM_WITHOUT_LAPACK_COMPILES)
+-    find_package(LAPACK)
++    find_package2(LAPACK)
+     if (LAPACK_FOUND)
+       list(APPEND ARMADILLO_LIBRARIES ${LAPACK_LIBRARIES})
+       cmake_push_check_state(RESET)
+@@ -646,7 +597,7 @@
+ gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
+ 
+ # OpenJPEG's cmake-CONFIG is broken, so call module explicitly
+-find_package(OpenJPEG MODULE)
++find_package2(OpenJPEG MODULE)
+ if (GDAL_USE_OPENJPEG)
+   if (NOT OPENJPEG_FOUND)
+     message(FATAL_ERROR "Configured to use GDAL_USE_OPENJPEG, but not found")
 diff --git a/frmts/hfa/CMakeLists.txt b/frmts/hfa/CMakeLists.txt
 index e5b7138e91..039cac7361 100644
 --- a/frmts/hfa/CMakeLists.txt
