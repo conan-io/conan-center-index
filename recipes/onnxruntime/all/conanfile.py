@@ -27,7 +27,6 @@ class OnnxRuntimeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_xnnpack": [True, False],
-        "onnx_no_static_registration": [True, False],
     }
     default_options = {
         "shared": False,
