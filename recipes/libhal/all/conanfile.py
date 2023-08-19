@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -20,7 +20,6 @@ class LibHALConan(ConanFile):
     topics = ("peripherals", "hardware", "abstraction", "devices", "hal", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -66,13 +65,29 @@ class LibHALConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build(self):
+        if Version(self.version) == "0.0.0":
+            replace_in_file(
+                self, 
+                os.path.join(self.source_folder, "include", "libhal", "percentage.hpp"), 
+                "constexpr bool operator<=>(const percentage_t& p_percent) const = default;", 
+                "constexpr auto operator<=>(const percentage_t& p_percent) const = default;"
+            )
+
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(
-            self.package_folder, "licenses"),  src=self.source_folder)
-        copy(self, "*.h", dst=os.path.join(self.package_folder, "include"),
-             src=os.path.join(self.source_folder, "include"))
-        copy(self, "*.hpp", dst=os.path.join(self.package_folder,
-             "include"), src=os.path.join(self.source_folder, "include"))
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self, 
+            "*.h", 
+            dst=os.path.join(self.package_folder, "include"), 
+            src=os.path.join(self.source_folder, "include")
+        )
+        copy(
+            self, 
+            "*.hpp", 
+            dst=os.path.join(self.package_folder, "include"), 
+            src=os.path.join(self.source_folder, "include")
+        )
 
     def package_info(self):
         self.cpp_info.bindirs = []
