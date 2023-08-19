@@ -103,7 +103,8 @@ index 0a66b44fec..152ff42ff7 100644
 -find_package(LibKML COMPONENTS DOM ENGINE)
 +find_package2(LibKML COMPONENTS kmlengine kmldom kmlbase)
  if (GDAL_USE_LIBKML)
-   if (NOT LibKML_FOUND)
+-  if (NOT LibKML_FOUND)
++  if (FALSE)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
 @@ -646,7 +597,7 @@
  gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)

@@ -126,7 +126,8 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
 -find_package(LibKML COMPONENTS DOM ENGINE)
 +find_package2(LibKML COMPONENTS kmlengine kmldom kmlbase)
  if (GDAL_USE_LIBKML)
-   if (NOT LibKML_FOUND)
+-  if (NOT LibKML_FOUND)
++  if (FALSE)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
 @@ -729,7 +692,7 @@
  gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
