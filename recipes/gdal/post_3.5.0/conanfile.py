@@ -41,6 +41,7 @@ class GdalConan(ConanFile):
         "with_hdf5": [True, False],
         "with_heif": [True, False],
         "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
+        "with_jxl": [True, False],
         "with_kea": [True, False],
         "with_libarchive": [True, False],
         "with_libdeflate": [True, False],
@@ -90,6 +91,7 @@ class GdalConan(ConanFile):
         "with_hdf5": False,
         "with_heif": False,
         "with_jpeg": "libjpeg",
+        "with_jxl": False,
         "with_kea": False,
         "with_libarchive": False,
         "with_libdeflate": True,
@@ -183,6 +185,8 @@ class GdalConan(ConanFile):
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
+        if self.options.with_jxl:
+            self.requires("libjxl/0.6.1")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_libarchive:
@@ -312,6 +316,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ICONV"] = self.options.with_libiconv
         tc.cache_variables["GDAL_USE_JSONC"] = True
         tc.cache_variables["GDAL_USE_JPEG"] = self.options.with_jpeg is not None
+        tc.cache_variables["GDAL_USE_JXL"] = self.options.with_jxl
         tc.cache_variables["GDAL_USE_KEA"] = self.options.with_kea
         tc.cache_variables["GDAL_USE_LIBKML"] = self.options.with_libkml
         tc.cache_variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
@@ -364,7 +369,6 @@ class GdalConan(ConanFile):
             # "hdfs": "HDFS",
             # "idb": "IDB",
             "json-c": "JSONC",
-            # "jxl": "JXL",
             # "kdu": "KDU",
             "kealib": "KEA",
             # "lerc": "LERC",
@@ -379,6 +383,7 @@ class GdalConan(ConanFile):
             "libiconv": "Iconv",
             "libjpeg": "JPEG",
             "libjpeg-turbo": "JPEG",
+            "libjxl": "JXL",
             "libkml": "LibKML",
             # "xz_utils": "LibLZMA",
             "libmysqlclient": "MySQL",
@@ -444,6 +449,7 @@ class GdalConan(ConanFile):
             "libdeflate":                 "Deflate::Deflate",
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
+            "libjxl":                     "JXL::JXL",
             "libwebp":                    "WEBP::WebP",
             "lz4":                        "LZ4::LZ4",
             "mongo-cxx-driver::bsoncxx":  "MONGOCXX::BSONCXX",
@@ -540,6 +546,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["hdf5::hdf5_c"])
         if self.options.with_heif:
             self.cpp_info.requires.extend(["libheif::libheif"])
+        if self.options.with_jxl:
+            self.cpp_info.requires.extend(["libjxl::libjxl"])
         if self.options.with_kea:
             self.cpp_info.requires.extend(["kealib::kealib"])
         if self.options.with_libdeflate:
