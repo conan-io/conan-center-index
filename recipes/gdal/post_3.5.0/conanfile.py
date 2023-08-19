@@ -67,6 +67,7 @@ class GdalConan(ConanFile):
         "with_poppler": [True, False],
         "with_proj": [True, False],
         "with_qhull": [True, False],
+        "with_rasterlite2": [True, False],
         "with_sqlite3": [True, False],
         "with_webp": [True, False],
         "with_xerces": [True, False],
@@ -121,6 +122,7 @@ class GdalConan(ConanFile):
         "with_poppler": False,
         "with_proj": True,
         "with_qhull": True,
+        "with_rasterlite2": True,
         "with_sqlite3": True,
         "with_webp": False,
         "with_xerces": False,
@@ -247,6 +249,8 @@ class GdalConan(ConanFile):
             self.requires("proj/9.2.1")
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
+        if self.options.with_rasterlite2:
+            self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.42.0")
         if self.options.with_webp:
@@ -355,6 +359,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
         tc.cache_variables["GDAL_USE_PROJ"] = self.options.with_proj
         tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
+        tc.cache_variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
         tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
         tc.cache_variables["GDAL_USE_TIFF"] = self.options.with_libtiff
         tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
@@ -408,6 +413,7 @@ class GdalConan(ConanFile):
             "libpng": "PNG",
             "libpq": "PostgreSQL",
             # "libqb3": "libQB3",
+            "librasterlite2": "RASTERLITE2",
             "libtiff": "TIFF",
             "libwebp": "WebP",
             "libxml2": "LibXml2",
@@ -436,7 +442,6 @@ class GdalConan(ConanFile):
             "poppler": "Poppler",
             "proj": "PROJ",
             "qhull": "QHULL",
-            # "rasterlite2": "RASTERLITE2",
             # "rdb": "rdb",
             # "sfcgal": "SFCGAL",
             # "shapelib": "Shapelib",
@@ -471,6 +476,7 @@ class GdalConan(ConanFile):
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
             "libjxl":                     "JXL::JXL",
+            "librasterlite2":             "RASTERLITE2::RASTERLITE2",
             "libwebp":                    "WEBP::WebP",
             "lz4":                        "LZ4::LZ4",
             "mongo-cxx-driver::bsoncxx":  "MONGOCXX::BSONCXX",
@@ -623,6 +629,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["poppler::libpoppler"])
         if self.options.with_proj:
             self.cpp_info.requires.extend(["proj::projlib"])
+        if self.options.with_rasterlite2:
+            self.cpp_info.requires.extend(["rasterlite2::rasterlite2"])
         if self.options.with_qhull:
             self.cpp_info.requires.extend(["qhull::libqhull"])
         if self.options.with_sqlite3:
