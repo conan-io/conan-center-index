@@ -76,7 +76,18 @@ class NewmatConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["newmat"]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["Newmat"]
+        elif self.settings.os == "Macos":
+            if self.options.shared:
+                self.cpp_info.libs = ["libNewmat.dylib"]
+            else:
+                self.cpp_info.libs = ["libNewmat.a"]
+        else:
+            if self.options.shared:
+                self.cpp_info.libs = ["libNewmat.so"]
+            else:
+                self.cpp_info.libs = ["libNewmat.a"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
