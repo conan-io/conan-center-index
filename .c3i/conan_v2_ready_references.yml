@@ -78,6 +78,7 @@ required_for_references:
 - bear
 - benchmark
 - bertrand
+- bgfx
 - bigint
 - bimg
 - binutils
@@ -167,6 +168,7 @@ required_for_references:
 - concurrentqueue
 - console_bridge
 - continuable
+- cotila
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -313,6 +315,7 @@ required_for_references:
 - foxglove-schemas-protobuf
 - foxi
 - fp16
+- fpgen
 - fpzip
 - freeglut
 - freeimage
@@ -419,6 +422,7 @@ required_for_references:
 - imath
 - imgui
 - imguizmo
+- immer
 - implot
 - imutils-cpp
 - incbin
@@ -661,6 +665,7 @@ required_for_references:
 - lzma_sdk
 - lzo
 - m4
+- maddy
 - magic_enum
 - mailio
 - make
@@ -743,6 +748,7 @@ required_for_references:
 - nanosvg
 - nas
 - nasm
+- neargye-semver
 - netcdf
 - nettle
 - nextsilicon-cpp-subprocess
@@ -753,6 +759,7 @@ required_for_references:
 - nmslib
 - nng
 - nodejs
+- nodesoup
 - norm
 - nsync
 - ntv2
@@ -803,6 +810,7 @@ required_for_references:
 - opensubdiv
 - opentelemetry-cpp
 - opentelemetry-proto
+- opentracing-cpp
 - openxlsx
 - optional-lite
 - opus
@@ -814,6 +822,7 @@ required_for_references:
 - p-ranav-glob
 - paho-mqtt-c
 - paho-mqtt-cpp
+- panzi-portable-endian
 - parallel-hashmap
 - parg
 - parson
@@ -839,6 +848,7 @@ required_for_references:
 - pixman
 - pkgconf
 - platform.delegates
+- platform.exceptions
 - platform.hashing
 - platform.interfaces
 - plf_colony
@@ -848,6 +858,7 @@ required_for_references:
 - plf_queue
 - plf_stack
 - plog
+- plusaes
 - plutovg
 - pngpp
 - poco
@@ -895,6 +906,8 @@ required_for_references:
 - ragel
 - rang
 - range-v3
+- rangeless
+- rangesnext
 - rapidcheck
 - rapidcsv
 - rapidfuzz
@@ -917,6 +930,7 @@ required_for_references:
 - restbed
 - restinio
 - rg-etc1
+- rgbcx
 - ring-span-lite
 - rmm
 - roaring
@@ -1052,6 +1066,7 @@ required_for_references:
 - trantor
 - tree-sitter
 - troldal-zippy
+- trompeloeil
 - tsl-hopscotch-map
 - turtle
 - type_safe
@@ -1109,6 +1124,7 @@ required_for_references:
 - wt
 - wtl
 - xapian-core
+- xbyak
 - xerces-c
 - xkbcommon
 - xkeyboard-config
@@ -1132,6 +1148,7 @@ required_for_references:
 - xz_utils
 - yajl
 - yaml-cpp
+- yas
 - yasm
 - yyjson
 - z3

@@ -38,7 +38,7 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
-        self.requires("fmt/10.0.0")
+        self.requires("fmt/10.1.0")
         self.requires("expected-lite/0.6.3")
         self.requires("optional-lite/3.5.0")
         self.requires("string-view-lite/1.7.0")
@@ -58,7 +58,7 @@ class RestinioConan(ConanFile):
         if self.options.with_pcre == 1:
             self.requires("pcre/8.45")
         elif self.options.with_pcre == 2:
-            self.requires("pcre2/10.40")
+            self.requires("pcre2/10.42")
 
     def package_id(self):
         self.info.clear()
