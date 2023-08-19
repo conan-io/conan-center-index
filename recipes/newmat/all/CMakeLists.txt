@@ -20,7 +20,7 @@ message("Build with C style element access ${SETUP_C_SUBSCRIPTS}")
 # target
 # -------------
 set(source_subfolder_ "src")
-set(lib_name "Newmat")
+set(lib_name ${PROJECT_NAME})
 add_library(${lib_name})
 
 target_sources(
@@ -60,8 +60,6 @@ target_include_directories(
 target_include_directories(
   ${lib_name} INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-# -fPIC was set in build script, copy this behavior
-set_property(TARGET ${lib_name} PROPERTY POSITION_INDEPENDENT_CODE ON)
 # code has throwing desctructors, thus try to compile with c++98
 set_property(TARGET ${lib_name} PROPERTY CXX_STANDARD 98)
 
@@ -87,10 +85,8 @@ install(
 )
 install(
     TARGETS ${lib_name}
-    EXPORT ${PROJECT_NAME}Config
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-install(EXPORT ${PROJECT_NAME}Config NAMESPACE ${PROJECT_NAME}:: DESTINATION cmake)

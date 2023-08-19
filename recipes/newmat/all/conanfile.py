@@ -39,15 +39,13 @@ class NewmatConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate_build(self):
-        if self.settings.os == "Windows" and self.options.shared == True:
-            raise ConanInvalidConfiguration("Not working yet. Feel free to submit a fix in conan-center")
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support dynamic library with msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -77,26 +75,12 @@ class NewmatConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ["Newmat"]
-        elif self.settings.os == "Macos":
-            if self.options.shared:
-                self.cpp_info.libs = ["libNewmat.dylib"]
-            else:
-                self.cpp_info.libs = ["libNewmat.a"]
-        else:
-            if self.options.shared:
-                self.cpp_info.libs = ["libNewmat.so"]
-            else:
-                self.cpp_info.libs = ["libNewmat.a"]
+        self.cpp_info.libs = ["newmat"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
 
         self.cpp_info.includedirs.append(os.path.join("include", "newmat"))
-
-        self.cpp_info.set_property("cmake_file_name", "newmat")
-        self.cpp_info.set_property("cmake_target_name", "newmat::newmat")
-        self.cpp_info.names["cmake_find_package"] = "newmat"
-        self.cpp_info.names["cmake_find_package_multi"] = "newmat"
+        if self.options.with_c_subscripts:
+            self.cpp_info.defines = ["SETUP_C_SUBSCRIPTS"]
 
