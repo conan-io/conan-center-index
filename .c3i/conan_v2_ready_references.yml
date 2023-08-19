@@ -269,6 +269,7 @@ required_for_references:
 - emio
 - enet
 - enhex-generic_serialization
+- enhex-strong_type
 - entityx
 - entt
 - enum-flags
@@ -464,6 +465,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kdbindings
 - keychain
 - khrplatform
 - kickcat
@@ -872,6 +874,7 @@ required_for_references:
 - pprint
 - pranav-csv2
 - pretty-name
+- procxx-boost-ext-simd
 - proj
 - prometheus-cpp
 - proposal
@@ -1015,6 +1018,7 @@ required_for_references:
 - stduuid
 - stlab
 - strawberryperl
+- streamvbyte
 - string-view-lite
 - stringtoolbox
 - strong_type
@@ -1103,6 +1107,7 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- vvenc
 - wasmer
 - wasmtime
 - wasmtime-cpp
