@@ -65,7 +65,6 @@ class GdalConan(ConanFile):
         "with_webp": [True, False],
         "with_xerces": [True, False],
         "with_xml2": [True, False],
-        "with_zlib": [True, False],
         "with_zstd": [True, False],
     }
 
@@ -114,7 +113,6 @@ class GdalConan(ConanFile):
         "with_webp": False,
         "with_xerces": False,
         "with_xml2": False,
-        "with_zlib": True,
         "with_zstd": False,
     }
 
@@ -142,6 +140,9 @@ class GdalConan(ConanFile):
     def requirements(self):
         self.requires("json-c/0.16")
         self.requires("libgeotiff/1.7.1")
+        # Used in a public header here:
+        # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
+        self.requires("zlib/1.2.13", transitive_headers=True)
         if self.options.with_armadillo:
             self.requires("armadillo/12.2.0")
         if self.options.with_arrow:
@@ -229,8 +230,6 @@ class GdalConan(ConanFile):
             self.requires("xerces-c/3.2.4")
         if self.options.with_xml2:
             self.requires("libxml2/2.11.4")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
@@ -329,7 +328,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_TIFF"] = self.options.with_libtiff
         tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
         tc.cache_variables["GDAL_USE_XERCESC"] = self.options.with_xerces
-        tc.cache_variables["GDAL_USE_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["GDAL_USE_ZLIB"] = True
         tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
         tc.generate()
 
@@ -499,6 +498,7 @@ class GdalConan(ConanFile):
 
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
+        self.cpp_info.requires.extend(["zlib::zlib"])
         if self.options.with_armadillo:
             self.cpp_info.requires.extend(["armadillo::armadillo"])
         if self.options.with_arrow:
@@ -585,8 +585,6 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["xerces-c::xerces-c"])
         if self.options.with_xml2:
             self.cpp_info.requires.extend(["libxml2::libxml2"])
-        if self.options.with_zlib:
-            self.cpp_info.requires.extend(["zlib::zlib"])
         if self.options.with_zstd:
             self.cpp_info.requires.extend(["zstd::zstdlib"])
 
