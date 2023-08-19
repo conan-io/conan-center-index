@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 
 required_conan_version = ">=1.52.0"
 
@@ -20,13 +20,6 @@ class GdalConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
-    # A list of gdal dependencies can be taken from cmake/helpers/CheckDependentLibraries.cmake
-    # within gdal sources with the command:
-    # grep -E '^[ \t]*gdal_check_package\(' cmake/helpers/CheckDependentLibraries.cmake \
-    #   | sed 's/[ \t]*gdal_check_package(\([a-zA-Z_0-9]\+\) "\(.*\)"\(.*\)/{ 'dep': \'\1\', 'descr': \'\2\' },/' \
-    #   | sort | uniq
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -35,8 +28,6 @@ class GdalConan(ConanFile):
         "with_arrow": [True, False],
         "with_blosc": [True, False],
         "with_cfitsio": [True, False],
-        # with_cypto option has been renamed with_openssl in version 3.5.1
-        "with_crypto": [True, False, "deprecated"],
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
@@ -86,7 +77,6 @@ class GdalConan(ConanFile):
         "with_arrow": False,
         "with_blosc": False,
         "with_cfitsio": False,
-        "with_crypto": "deprecated",
         "with_cryptopp": False,
         "with_curl": False,
         "with_dds": False,
@@ -129,17 +119,14 @@ class GdalConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
+        copy(self, "ConanFindPackage.cmake", src=os.path.join(self.recipe_folder, "cmake"), dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.options.with_crypto != "deprecated":
-            self.output.error("with_crypto option is deprecated, use with_openssl instead.")
-
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -251,17 +238,14 @@ class GdalConan(ConanFile):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
         self.tool_requires("cmake/[>=3.18 <4]")
 
-    def package_id(self):
-        del self.info.options.with_crypto
-
     def validate(self):
-        if self.options.get_safe("with_pcre") and self.options.get_safe("with_pcre2"):
+        if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
-        if self.options.get_safe("with_sqlite3") and not self.dependencies["sqlite3"].options.enable_column_metadata:
+        if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("gdql requires sqlite3:enable_column_metadata=True")
 
-        if self.options.get_safe("with_libtiff") and self.dependencies["libtiff"].options.jpeg != self.options.get_safe("with_jpeg"):
+        if self.options.with_libtiff and self.dependencies["libtiff"].options.jpeg != self.options.with_jpeg:
             msg = "libtiff:jpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             # For some reason, the ConanInvalidConfiguration message is not shown, only
             #     ERROR: At least two recipes provides the same functionality:
@@ -270,7 +254,7 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
-        if self.options.get_safe("with_poppler") and self.dependencies["poppler"].options.with_libjpeg != self.options.get_safe("with_jpeg"):
+        if self.options.with_poppler and self.dependencies["poppler"].options.with_libjpeg != self.options.with_jpeg:
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or" " libjpeg-turbo."
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
@@ -280,15 +264,14 @@ class GdalConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        if self.options.get_safe("fPIC", True):
-            tc.cache_variables["GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE"] = True
+        tc.cache_variables["GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
 
         tc.cache_variables["BUILD_JAVA_BINDINGS"] = False
         tc.cache_variables["BUILD_CSHARP_BINDINGS"] = False
         tc.cache_variables["BUILD_PYTHON_BINDINGS"] = False
-
+        tc.cache_variables["BUILD_APPS"] = self.options.tools
         tc.cache_variables["BUILD_TESTING"] = False
+
         tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_JSONC_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_JPEG_INTERNAL"] = False
@@ -297,113 +280,193 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_GEOTIFF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_GIF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
-
         tc.cache_variables["GDAL_USE_LERC_INTERNAL"] = True
         tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = True
 
-        tc.cache_variables["BUILD_APPS"] = self.options.tools
-
         tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
-
         tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
 
-        tc.cache_variables["GDAL_USE_JSONC"] = True
-        tc.cache_variables["GDAL_CONAN_PACKAGE_FOR_JSONC"] = "json-c"
-
+        tc.cache_variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
+        tc.cache_variables["GDAL_USE_ARROW"] = self.options.with_arrow
+        tc.cache_variables["GDAL_USE_BLOSC"] = self.options.with_blosc
+        tc.cache_variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
+        tc.cache_variables["GDAL_USE_CRNLIB"] = self.options.with_dds
+        tc.cache_variables["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
+        tc.cache_variables["GDAL_USE_CURL"] = self.options.with_curl
+        tc.cache_variables["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
+        tc.cache_variables["GDAL_USE_EXPAT"] = self.options.with_expat
+        tc.cache_variables["GDAL_USE_FREEXL"] = self.options.with_freexl
+        tc.cache_variables["GDAL_USE_GEOS"] = self.options.with_geos
         tc.cache_variables["GDAL_USE_GEOTIFF"] = True
-        tc.cache_variables["GDAL_CONAN_PACKAGE_FOR_GEOTIFF"] = "libgeotiff"
-        tc.cache_variables["TARGET_FOR_GEOTIFF"] = "GeoTIFF::GeoTIFF"
-
+        tc.cache_variables["GDAL_USE_GIF"] = self.options.with_gif
+        tc.cache_variables["GDAL_USE_GTA"] = self.options.with_gta
+        tc.cache_variables["GDAL_USE_HDF4"] = self.options.with_hdf4
+        tc.cache_variables["GDAL_USE_HDF5"] = self.options.with_hdf5
+        tc.cache_variables["GDAL_USE_HEIF"] = self.options.with_heif
+        tc.cache_variables["GDAL_USE_ICONV"] = self.options.with_libiconv
+        tc.cache_variables["GDAL_USE_JSONC"] = True
+        tc.cache_variables["GDAL_USE_JPEG"] = self.options.with_jpeg is not None
+        tc.cache_variables["GDAL_USE_KEA"] = self.options.with_kea
+        tc.cache_variables["GDAL_USE_LIBKML"] = self.options.with_libkml
+        tc.cache_variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
+        tc.cache_variables["GDAL_USE_LZ4"] = self.options.with_lz4
+        tc.cache_variables["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
+        tc.cache_variables["GDAL_USE_NETCDF"] = self.options.with_netcdf
+        tc.cache_variables["GDAL_USE_ODBC"] = self.options.with_odbc
+        tc.cache_variables["GDAL_USE_OPENEXR"] = self.options.with_exr
+        tc.cache_variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
+        tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
+        tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
         tc.cache_variables["GDAL_USE_PDFIUM"] = False
-        tc.cache_variables["PDFIUM_FOUND"] = False
-
-        if self.options.with_jpeg == "libjpeg" or self.options.with_jpeg == "libjpeg-turbo":
-            print(f"self.options.with_jpeg: {self.options.with_jpeg}")
-            tc.cache_variables["GDAL_USE_JPEG"] = True
-            tc.cache_variables["GDAL_CONAN_PACKAGE_FOR_JPEG"] = self.options.with_jpeg
-            tc.cache_variables["TARGET_FOR_JPEG"] = (
-                "JPEG::JPEG"
-                if self.options.with_jpeg == "libjpeg"
-                else self.dependencies["libjpeg-turbo"].cpp_info.components["turbojpeg"].get_property("cmake_target_name")
-            )
-        else:
-            tc.cache_variables["JPEG_FOUND"] = False
-
-        if self.options.with_mysql == "libmysqlclient" or self.options.with_mysql == "mariadb-connector-c":
-            tc.cache_variables["GDAL_CONAN_PACKAGE_FOR_MYSQL"] = str(self.options.with_mysql)
-            tc.cache_variables["TARGET_FOR_MYSQL"] = (
-                "mariadb-connector-c::mariadb-connector-c"
-                if self.options.with_mysql == "mariadb-connector-c"
-                else "libmysqlclient::libmysqlclient"
-            )
-        else:
-            tc.cache_variables["MYSQL_FOUND"] = False
-
-        def _configure_dependency(name, pkg_name=None, param_name=None):
-            pkg_name = pkg_name or name.lower()
-            param_name = param_name or name.lower()
-            available = self.options.get_safe(f"with_{param_name}", False)
-            tc.cache_variables[f"GDAL_USE_{name.upper()}"] = available
-            if available:
-                tc.cache_variables[f"GDAL_CONAN_PACKAGE_FOR_{name.upper()}"] = pkg_name
-                tc.cache_variables[f"TARGET_FOR_{name.upper()}"] = self.dependencies[pkg_name].cpp_info.get_property("cmake_target_name")
-            else:
-                tc.cache_variables[f"{name}_FOUND"] = False
-
-        _configure_dependency("Armadillo")
-        _configure_dependency("Arrow")
-        _configure_dependency("Blosc", pkg_name="c-blosc")
-        _configure_dependency("CFITSIO")
-        _configure_dependency("CURL")
-        _configure_dependency("Crnlib", pkg_name="crunch", param_name="dds")
-        _configure_dependency("CryptoPP")
-        _configure_dependency("Deflate", pkg_name="libdeflate", param_name="libdeflate")
-        _configure_dependency("EXPAT")
-        _configure_dependency("FreeXL")
-        _configure_dependency("GEOS")
-        _configure_dependency("GIF", pkg_name="giflib")
-        _configure_dependency("GTA", pkg_name="libgta")
-        _configure_dependency("HDF4")
-        _configure_dependency("HDF5")
-        _configure_dependency("HEIF", pkg_name="libheif")
-        _configure_dependency("Iconv", pkg_name="libiconv", param_name="libiconv")
-        _configure_dependency("KEA", pkg_name="kealib")
-        _configure_dependency("LZ4")
-        _configure_dependency("LibKML")
-        _configure_dependency("LibXml2", pkg_name="libxml2", param_name="xml2")
-        _configure_dependency("MONGOCXX", pkg_name="mongo-cxx-driver")
-        _configure_dependency("NetCDF")
-        _configure_dependency("ODBC")
-        _configure_dependency("OPENJPEG")
-        _configure_dependency("OpenEXR", param_name="exr")
-        _configure_dependency("OpenSSL")
-        _configure_dependency("PCRE")
-        _configure_dependency("PCRE2")
-        _configure_dependency("PNG", pkg_name="libpng")
-        _configure_dependency("PROJ")
-        _configure_dependency("Podofo")
-        _configure_dependency("Poppler")
-        _configure_dependency("PostgreSQL", pkg_name="libpq", param_name="pg")
-        _configure_dependency("QHULL")
-        _configure_dependency("SQLite3")
-        _configure_dependency("TIFF", pkg_name="libtiff", param_name="libtiff")
-        _configure_dependency("WebP", pkg_name="libwebp")
-        _configure_dependency("XercesC", pkg_name="xerces-c", param_name="xerces")
-        _configure_dependency("ZLIB")
-        _configure_dependency("ZSTD")
-
-        # for k, v in tc.cache_variables.items():
-        #     print(k, " = ", v)
-
+        tc.cache_variables["GDAL_USE_PNG"] = self.options.with_png
+        tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
+        tc.cache_variables["GDAL_USE_POPPLER"] = self.options.with_poppler
+        tc.cache_variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
+        tc.cache_variables["GDAL_USE_PROJ"] = self.options.with_proj
+        tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
+        tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
+        tc.cache_variables["GDAL_USE_TIFF"] = self.options.with_libtiff
+        tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
+        tc.cache_variables["GDAL_USE_XERCESC"] = self.options.with_xerces
+        tc.cache_variables["GDAL_USE_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
         tc.generate()
 
+        # TODO?
+        # # gdal includes without "Imath/" folder prefix
+        # target_include_directories(Imath::Imath INTERFACE ${Imath_INCLUDE_DIR})
+        # # and also without "OpenEXR/" prefix
+        # target_include_directories(OpenEXR::OpenEXR INTERFACE ${OpenEXR_INCLUDE_DIR})
+        # set(HDF5_C_LIBRARIES HDF5::C)
+
         deps = CMakeDeps(self)
+        # Based on `grep -h 'grep -hPIR '(gdal_check_package|find_package2)\(' ~/.conan2/p/b/gdal*/b/src/cmake | sort -u`
+        conan_to_cmake_pkg_name = {
+            # "archive": "ARCHIVE",
+            "armadillo": "Armadillo",
+            "arrow": "Arrow",
+            # "brunsli": "BRUNSLI",
+            "c-blosc": "Blosc",
+            "cfitsio": "CFITSIO",
+            "crunch": "Crnlib",
+            "cryptopp": "CryptoPP",
+            # "ecw": "ECW",
+            "expat": "EXPAT",
+            # "filegdb": "FileGDB",
+            "freexl": "FreeXL",
+            # "fyba": "FYBA",
+            "geos": "GEOS",
+            "giflib": "GIF",
+            "hdf4": "HDF4",
+            "hdf5": "HDF5",
+            # "hdfs": "HDFS",
+            # "idb": "IDB",
+            "json-c": "JSONC",
+            # "jxl": "JXL",
+            # "kdu": "KDU",
+            "kealib": "KEA",
+            # "lerc": "LERC",
+            # "libbasisu": "basisu",
+            # "libcsf": "LIBCSF",
+            "libcurl": "CURL",
+            "libdeflate": "Deflate",
+            "libgeotiff": "GeoTIFF",
+            "libgta": "GTA",
+            "libheif": "HEIF",
+            "libiconv": "Iconv",
+            "libjpeg": "JPEG",
+            "libjpeg-turbo": "JPEG",
+            "libkml": "LibKML",
+            # "xz_utils": "LibLZMA",
+            "libmysqlclient": "MySQL",
+            "libpng": "PNG",
+            "libpq": "PostgreSQL",
+            # "libqb3": "libQB3",
+            "libtiff": "TIFF",
+            "libwebp": "WebP",
+            "libxml2": "LibXml2",
+            # "luratech": "LURATECH",
+            "lz4": "LZ4",
+            "mariadb-connector-c": "MySQL",
+            "mongo-cxx-driver": "MONGOCXX",
+            # "mrsid": "MRSID",
+            # "mssql_ncli": "MSSQL_NCLI",
+            # "mssql_odbc": "MSSQL_ODBC",
+            "netcdf": "NetCDF",
+            "odbc": "ODBC",
+            # "odbccpp": "ODBCCPP",
+            # "ogdi": "OGDI",
+            # "opencad": "OpenCAD",
+            # "opencl": "OpenCL",
+            "openexr": "OpenEXR",
+            "openjpeg": "OpenJPEG",
+            "openssl": "OpenSSL",
+            # "oracle": "Oracle",
+            # "parquet": "Parquet",
+            "pcre": "PCRE",
+            "pcre2": "PCRE2",
+            # "pdfium": "PDFIUM",
+            "podofo": "Podofo",
+            "poppler": "Poppler",
+            "proj": "PROJ",
+            "qhull": "QHULL",
+            # "rasterlite2": "RASTERLITE2",
+            # "rdb": "rdb",
+            # "sfcgal": "SFCGAL",
+            # "shapelib": "Shapelib",
+            # "spatialite": "SPATIALITE",
+            "sqlite3": "SQLite3",
+            # "teigha": "TEIGHA",
+            # "tiledb": "TileDB",
+            "xerces-c": "XercesC",
+            "zlib": "ZLIB",
+            "zstd": "ZSTD",
+        }
+        for conan_name, cmake_name in conan_to_cmake_pkg_name.items():
+            deps.set_property(conan_name, "cmake_find_mode", "config")
+            deps.set_property(conan_name, "cmake_file_name", cmake_name)
+
+        renamed_targets = {
+            "arrow":              "arrow_shared",
+            "c-blosc":            "Blosc::Blosc",
+            "cfitsio":            "CFITSIO::CFITSIO",
+            "cryptopp":           "CRYPTOPP::CRYPTOPP",
+            "freexl":             "FREEXL::freexl",
+            "geos":               "GEOS::GEOS",
+            "hdfs":               "HDFS::HDFS",
+            "imath":              "OpenEXR::Half",
+            "libdeflate":         "Deflate::Deflate",
+            "libgeotiff":         "GEOTIFF::GEOTIFF",
+            "lz4":                "LZ4::LZ4",
+            "netcds":             "netCDF::netcdf",
+            "openexr::IlmThread": "OpenEXR::IlmImf",
+            "openexr::OpenEXR":   "OpenEXR::IlmImfUtil",
+            "openjpeg":           "OPENJPEG::OpenJPEG",
+            "pcre2::pcre2-8":     "PCRE2::PCRE2-8",
+            "poppler":            "Poppler::Poppler",
+            "zstd":               "ZSTD::zstd",
+        }
+        for component, new_target_name in renamed_targets.items():
+            deps.set_property(component, "cmake_target_name", new_target_name)
+
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        copy(self, "ConanFindPackage.cmake",
+             src=self.export_sources_folder,
+             dst=os.path.join(self.source_folder, "cmake", "helpers"))
+        # Fix Deflate::Deflate and possibly other linked libs not being propagated internally
+        replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
+                        "gdal_target_link_libraries", "target_link_libraries")
+        replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
+                        "PRIVATE", "PUBLIC")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.export_sources_folder)
+        cmake.configure()
         cmake.build()
 
     def package(self):

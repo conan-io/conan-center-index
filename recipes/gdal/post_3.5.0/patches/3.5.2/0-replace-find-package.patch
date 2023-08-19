@@ -139,55 +139,6 @@ index 0a66b44fec..152ff42ff7 100644
  if (GDAL_USE_LIBKML)
    if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
-diff --git a/cmake/helpers/ConanFindPackage.cmake b/cmake/helpers/ConanFindPackage.cmake
-new file mode 100644
-index 0000000000..9dfa8193a3
---- /dev/null
-+++ b/cmake/helpers/ConanFindPackage.cmake
-@@ -0,0 +1,43 @@
-+
-+function(define_find_package2 pkgname include_file library_name)
-+endfunction()
-+
-+function(find_package2 pkgname)
-+    set(_options QUIET REQUIRED)
-+    set(_oneValueArgs OUT_DEPENDENCY)
-+    set(_multiValueArgs)
-+    cmake_parse_arguments(arg "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-+    if(arg_QUIET)
-+        set(${pkgname}_FIND_QUIETLY TRUE)
-+    endif()
-+    if(arg_REQUIRED)
-+        set(${pkgname}_FIND_REQUIRED TRUE)
-+    endif()
-+
-+    string(TOUPPER ${pkgname} key)
-+
-+    set(docstring "Configured for conan package ${GDAL_CONAN_PACKAGE_FOR_${key}}")
-+    if (DEFINED GDAL_CONAN_PACKAGE_FOR_${key})
-+        message("Using conan package ${GDAL_CONAN_PACKAGE_FOR_${key}} for dependency ${pkgname}")
-+        set(conan_package ${GDAL_CONAN_PACKAGE_FOR_${key}})
-+        string(TOUPPER ${conan_package} conan_package_upper)
-+
-+        set(${key}_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_${conan_package_upper}}" CACHE STRING ${docstring})
-+        if (NOT TARGET_FOR_${key})
-+            set(TARGET_FOR_${key} "${conan_package}::${conan_package}")
-+        endif()
-+        set(${key}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_INCLUDE_DIRS "CONAN_INCLUDE_DIRS_${conan_package_upper}" CACHE STRING ${docstring})
-+        set(${pkgname}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_FOUND TRUE CACHE BOOL ${docstring})
-+
-+    else ()
-+        message("dependency ${pkgname} has no conan package")
-+        set(${key}_FOUND FALSE CACHE BOOL ${docstring})
-+    endif()
-+
-+endfunction()
 diff --git a/frmts/hfa/CMakeLists.txt b/frmts/hfa/CMakeLists.txt
 index e5b7138e91..039cac7361 100644
 --- a/frmts/hfa/CMakeLists.txt

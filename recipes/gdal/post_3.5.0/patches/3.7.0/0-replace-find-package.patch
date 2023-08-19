@@ -161,53 +161,6 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
  if (GDAL_USE_LIBKML)
    if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
-diff -urN ./a/cmake/helpers/ConanFindPackage.cmake ./b/cmake/helpers/ConanFindPackage.cmake
---- ./a/cmake/helpers/ConanFindPackage.cmake	1969-12-31 18:00:00.000000000 -0600
-+++ ./b/cmake/helpers/ConanFindPackage.cmake	2023-06-06 16:26:55.800008000 -0500
-@@ -0,0 +1,43 @@
-+
-+function(define_find_package2 pkgname include_file library_name)
-+endfunction()
-+
-+function(find_package2 pkgname)
-+    set(_options QUIET REQUIRED)
-+    set(_oneValueArgs OUT_DEPENDENCY)
-+    set(_multiValueArgs)
-+    cmake_parse_arguments(arg "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-+    if(arg_QUIET)
-+        set(${pkgname}_FIND_QUIETLY TRUE)
-+    endif()
-+    if(arg_REQUIRED)
-+        set(${pkgname}_FIND_REQUIRED TRUE)
-+    endif()
-+
-+    string(TOUPPER ${pkgname} key)
-+
-+    set(docstring "Configured for conan package ${GDAL_CONAN_PACKAGE_FOR_${key}}")
-+    if (DEFINED GDAL_CONAN_PACKAGE_FOR_${key})
-+        message("Using conan package ${GDAL_CONAN_PACKAGE_FOR_${key}} for dependency ${pkgname}")
-+        set(conan_package ${GDAL_CONAN_PACKAGE_FOR_${key}})
-+        string(TOUPPER ${conan_package} conan_package_upper)
-+
-+        set(${key}_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_${conan_package_upper}}" CACHE STRING ${docstring})
-+        if (NOT TARGET_FOR_${key})
-+            set(TARGET_FOR_${key} "${conan_package}::${conan_package}")
-+        endif()
-+        set(${key}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_INCLUDE_DIRS "CONAN_INCLUDE_DIRS_${conan_package_upper}" CACHE STRING ${docstring})
-+        set(${pkgname}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_FOUND TRUE CACHE BOOL ${docstring})
-+
-+    else ()
-+        message("dependency ${pkgname} has no conan package")
-+        set(${key}_FOUND FALSE CACHE BOOL ${docstring})
-+    endif()
-+
-+endfunction()
 diff -urN ./a/frmts/hfa/CMakeLists.txt ./b/frmts/hfa/CMakeLists.txt
 --- ./a/frmts/hfa/CMakeLists.txt	2023-05-02 08:47:11.000000000 -0500
 +++ ./b/frmts/hfa/CMakeLists.txt	2023-06-06 16:54:31.162043900 -0500

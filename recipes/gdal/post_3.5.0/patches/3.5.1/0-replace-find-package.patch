@@ -28,7 +28,7 @@ diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDe
 index 7fa3b565c7..77a610f223 100644
 --- a/cmake/helpers/CheckDependentLibraries.cmake
 +++ b/cmake/helpers/CheckDependentLibraries.cmake
-@@ -11,7 +11,10 @@ Detect GDAL dependencies and set variable HAVE_*
+@@ -11,7 +11,10 @@
  include(CheckFunctionExists)
  include(CMakeDependentOption)
  include(FeatureSummary)
@@ -40,9 +40,12 @@ index 7fa3b565c7..77a610f223 100644
  include(CheckSymbolExists)
  
  option(
-@@ -111,47 +114,7 @@ macro (gdal_check_package name purpose)
+@@ -109,49 +112,9 @@
+   string(TOUPPER ${name} key)
+   set(_find_dependency "")
    set(_find_dependency_args "")
-   find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
+-  find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
++  find_package2(${name} QUIET)
    if (NOT DEFINED ${key}_FOUND)
 -    set(_find_package_args)
 -    if (_GCP_VERSION)
@@ -89,7 +92,7 @@ index 7fa3b565c7..77a610f223 100644
    endif ()
    if (${key}_FOUND OR ${name}_FOUND)
      set(HAVE_${key} ON)
-@@ -321,14 +284,15 @@ if (GDAL_USE_CRYPTOPP)
+@@ -321,10 +284,7 @@
  endif ()
  
  # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
@@ -97,20 +100,11 @@ index 7fa3b565c7..77a610f223 100644
 -if (NOT PROJ_FOUND)
 -  find_package(PROJ 8 CONFIG QUIET)
 -endif()
-+find_package2(PROJ)
-+target_include_directories(PROJ::proj INTERFACE ${PROJ_INCLUDE_DIRS})
-+#if (NOT PROJ_FOUND)
-+#  find_package(proj 8 CONFIG QUIET)
-+#endif()
++find_package2(PROJ CONFIG QUIET)
  if (PROJ_FOUND)
    string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ ${PROJ_VERSION_MAJOR} CONFIG)\n")
  else()
--  find_package(PROJ 6.0 REQUIRED)
-+  find_package(proj 6.0 REQUIRED)
-   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ 6.0)\n")
- endif ()
- 
-@@ -379,15 +343,10 @@ gdal_check_package(JSONC "json-c library (external)" CAN_DISABLE
+@@ -379,15 +339,10 @@
    TARGETS json-c::json-c JSONC::JSONC
  )
  gdal_internal_library(JSONC REQUIRED)
@@ -130,7 +124,7 @@ index 7fa3b565c7..77a610f223 100644
  
  gdal_check_package(OpenCAD "libopencad (external, used by OpenCAD driver)" CAN_DISABLE)
  gdal_internal_library(OPENCAD)
-@@ -482,7 +441,7 @@ if (GDAL_USE_RASTERLITE2)
+@@ -482,7 +437,7 @@
  endif ()
  cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
  
@@ -139,55 +133,15 @@ index 7fa3b565c7..77a610f223 100644
  if (GDAL_USE_LIBKML)
    if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
-diff --git a/cmake/helpers/ConanFindPackage.cmake b/cmake/helpers/ConanFindPackage.cmake
-new file mode 100644
-index 0000000000..9dfa8193a3
---- /dev/null
-+++ b/cmake/helpers/ConanFindPackage.cmake
-@@ -0,0 +1,43 @@
-+
-+function(define_find_package2 pkgname include_file library_name)
-+endfunction()
-+
-+function(find_package2 pkgname)
-+    set(_options QUIET REQUIRED)
-+    set(_oneValueArgs OUT_DEPENDENCY)
-+    set(_multiValueArgs)
-+    cmake_parse_arguments(arg "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-+    if(arg_QUIET)
-+        set(${pkgname}_FIND_QUIETLY TRUE)
-+    endif()
-+    if(arg_REQUIRED)
-+        set(${pkgname}_FIND_REQUIRED TRUE)
-+    endif()
-+
-+    string(TOUPPER ${pkgname} key)
-+
-+    set(docstring "Configured for conan package ${GDAL_CONAN_PACKAGE_FOR_${key}}")
-+    if (DEFINED GDAL_CONAN_PACKAGE_FOR_${key})
-+        message("Using conan package ${GDAL_CONAN_PACKAGE_FOR_${key}} for dependency ${pkgname}")
-+        set(conan_package ${GDAL_CONAN_PACKAGE_FOR_${key}})
-+        string(TOUPPER ${conan_package} conan_package_upper)
-+
-+        set(${key}_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_${conan_package_upper}}" CACHE STRING ${docstring})
-+        if (NOT TARGET_FOR_${key})
-+            set(TARGET_FOR_${key} "${conan_package}::${conan_package}")
-+        endif()
-+        set(${key}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_INCLUDE_DIRS "CONAN_INCLUDE_DIRS_${conan_package_upper}" CACHE STRING ${docstring})
-+        set(${pkgname}_LIBRARIES "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_LIBRARY "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${pkgname}_TARGET "${TARGET_FOR_${key}}" CACHE STRING ${docstring})
-+        set(${key}_FOUND TRUE CACHE BOOL ${docstring})
-+
-+    else ()
-+        message("dependency ${pkgname} has no conan package")
-+        set(${key}_FOUND FALSE CACHE BOOL ${docstring})
-+    endif()
-+
-+endfunction()
+@@ -611,7 +566,7 @@
+ gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
+ 
+ # OpenJPEG's cmake-CONFIG is broken, so call module explicitly
+-find_package(OpenJPEG MODULE)
++find_package2(OpenJPEG MODULE)
+ if (GDAL_USE_OPENJPEG)
+   if (NOT OPENJPEG_FOUND)
+     message(FATAL_ERROR "Configured to use GDAL_USE_OPENJPEG, but not found")
 diff --git a/frmts/hfa/CMakeLists.txt b/frmts/hfa/CMakeLists.txt
 index e5b7138e91..039cac7361 100644
 --- a/frmts/hfa/CMakeLists.txt
