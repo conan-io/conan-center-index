@@ -61,9 +61,10 @@ class DoxygenConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-        host_deps = [dep for _, dep in self.dependencies.host.items()]
-        if all(dep.package_type in ["static-library", "header-library"] for dep in host_deps):
-            self.info.requires.minor_mode()
+        if not Version(conan_version) < "2":
+            host_deps = [dep for _, dep in self.dependencies.host.items()]
+            if all(dep.package_type in ["static-library", "header-library"] for dep in host_deps):
+                self.info.requires.minor_mode()
 
     def compatibility(self):
         # Models Debug builds as equivalent to Release builds as this is a tool_requires package
