@@ -1,102 +1,47 @@
 diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDependentLibraries.cmake
-index 0a66b44fec..152ff42ff7 100644
 --- a/cmake/helpers/CheckDependentLibraries.cmake
 +++ b/cmake/helpers/CheckDependentLibraries.cmake
-@@ -11,7 +11,10 @@
+@@ -11,7 +11,7 @@
  include(CheckFunctionExists)
  include(CMakeDependentOption)
  include(FeatureSummary)
 -include(DefineFindPackage2)
-+
-+# Conan recipes should rely on config files from generators so let's just disble GDAL's
 +include(ConanFindPackage)
-+
  include(CheckSymbolExists)
  
  option(
-@@ -109,49 +112,9 @@
+@@ -109,8 +109,8 @@
    string(TOUPPER ${name} key)
    set(_find_dependency "")
    set(_find_dependency_args "")
 -  find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
+-  if (NOT DEFINED ${key}_FOUND)
 +  find_package2(${name} QUIET)
-   if (NOT DEFINED ${key}_FOUND)
--    set(_find_package_args)
--    if (_GCP_VERSION)
--      list(APPEND _find_package_args ${_GCP_VERSION})
--    endif ()
--    if (_GCP_CONFIG)
--      list(APPEND _find_package_args CONFIG)
--    endif ()
--    if (_GCP_COMPONENTS)
--      list(APPEND _find_package_args COMPONENTS ${_GCP_COMPONENTS})
--    endif ()
--    if (_GCP_PATHS)
--      list(APPEND _find_package_args PATHS ${_GCP_PATHS})
--    endif ()
--    if (_GCP_NAMES)
--      set(GDAL_CHECK_PACKAGE_${name}_NAMES "${_GCP_NAMES}" CACHE STRING "Config file name for ${name}")
--      mark_as_advanced(GDAL_CHECK_PACKAGE_${name}_NAMES)
--    endif ()
--    if (_GCP_TARGETS)
--      set(GDAL_CHECK_PACKAGE_${name}_TARGETS "${_GCP_TARGETS}" CACHE STRING "Target name candidates for ${name}")
--      mark_as_advanced(GDAL_CHECK_PACKAGE_${name}_TARGETS)
--    endif ()
--    if (GDAL_CHECK_PACKAGE_${name}_NAMES)
--      find_package(${name} NAMES ${GDAL_CHECK_PACKAGE_${name}_NAMES} ${_find_package_args})
--      gdal_check_package_target(${name} ${GDAL_CHECK_PACKAGE_${name}_TARGETS} REQUIRED)
--      if (${name}_FOUND)
--        get_filename_component(_find_dependency_args "${${name}_CONFIG}" NAME)
--        string(REPLACE ";" " " _find_dependency_args "${name} NAMES ${GDAL_CHECK_PACKAGE_${name}_NAMES} CONFIGS ${_find_dependency_args} ${_find_package_args}")
--      endif ()
--    endif ()
--    if (NOT ${name}_FOUND)
--      find_package(${name} ${_find_package_args})
--      if (${name}_FOUND)
--        gdal_check_package_target(${name} ${GDAL_CHECK_PACKAGE_${name}_TARGETS})
--      elseif (${key}_FOUND) # Some find modules do not set <Pkg>_FOUND
--        gdal_check_package_target(${key} ${GDAL_CHECK_PACKAGE_${name}_TARGETS})
--        set(${name}_FOUND "${key}_FOUND")
--      endif ()
--      if (${name}_FOUND)
--        string(REPLACE ";" " " _find_dependency_args "${name} ${_find_package_args}")
--      endif()
--    endif ()
-+      message(FATAL_ERROR "Conan recipes should rely on config files from generators so let's just disble GDAL's")
-   endif ()
-   if (${key}_FOUND OR ${name}_FOUND)
-     set(HAVE_${key} ON)
-@@ -345,10 +308,7 @@
++  if (FALSE)
+     set(_find_package_args)
+     if (_GCP_VERSION)
+       list(APPEND _find_package_args ${_GCP_VERSION})
+@@ -345,7 +345,7 @@
  endif ()
  
  # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
 -find_package(PROJ 9 CONFIG QUIET)
--if (NOT PROJ_FOUND)
--  find_package(PROJ 8 CONFIG QUIET)
--endif()
-+find_package2(PROJ CONFIG REQUIRED)
- if (PROJ_FOUND)
-   string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ ${PROJ_VERSION_MAJOR} CONFIG)\n")
- else()
-@@ -411,16 +371,7 @@
++find_package2(PROJ 9 CONFIG REQUIRED)
+ if (NOT PROJ_FOUND)
+   find_package(PROJ 8 CONFIG QUIET)
+ endif()
+@@ -411,8 +411,8 @@
    NAMES json-c
    TARGETS json-c::json-c JSONC::JSONC
  )
 -gdal_internal_library(JSONC REQUIRED)
 -if(TARGET json-c::json-c)
--  get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
--  find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
--  list(APPEND include_dirs "${GDAL_JSON_INCLUDE_DIR}")
--  list(REMOVE_DUPLICATES include_dirs)
--  set_target_properties(json-c::json-c PROPERTIES
--    INTERFACE_INCLUDE_DIRECTORIES "${GDAL_JSON_INCLUDE_DIR}"
--  )
--endif()
 +find_package2(JSONC REQUIRED)
- 
- gdal_check_package(OpenCAD "libopencad (external, used by OpenCAD driver)" CAN_DISABLE)
- gdal_internal_library(OPENCAD)
-@@ -517,7 +468,7 @@
++if(FALSE)
+   get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
+   find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
+   list(APPEND include_dirs "${GDAL_JSON_INCLUDE_DIR}")
+@@ -517,9 +517,9 @@
  endif ()
  cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
  
@@ -106,7 +51,9 @@ index 0a66b44fec..152ff42ff7 100644
 -  if (NOT LibKML_FOUND)
 +  if (FALSE)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
-@@ -646,7 +597,7 @@
+   endif ()
+ endif ()
+@@ -646,7 +646,7 @@
  gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
  
  # OpenJPEG's cmake-CONFIG is broken, so call module explicitly
@@ -115,33 +62,3 @@ index 0a66b44fec..152ff42ff7 100644
  if (GDAL_USE_OPENJPEG)
    if (NOT OPENJPEG_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_OPENJPEG, but not found")
-diff --git a/gdal.cmake b/gdal.cmake
-index 4bae2e2760..7695df40c8 100644
---- a/gdal.cmake
-+++ b/gdal.cmake
-@@ -787,25 +787,6 @@ if (NOT GDAL_ENABLE_MACOSX_FRAMEWORK)
-                  ${CMAKE_CURRENT_BINARY_DIR}/GDALConfig.cmake @ONLY)
-   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/GDALConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gdal/)
- 
--  # Generate gdal-config utility command and pkg-config module gdal.pc
--  include(GdalGenerateConfig)
--  gdal_generate_config(
--    TARGET
--    "${GDAL_LIB_TARGET_NAME}"
--    GLOBAL_PROPERTY
--    "gdal_private_link_libraries"
--    GDAL_CONFIG
--    "${PROJECT_BINARY_DIR}/apps/gdal-config"
--    PKG_CONFIG
--    "${CMAKE_CURRENT_BINARY_DIR}/gdal.pc")
--  install(
--    PROGRAMS ${PROJECT_BINARY_DIR}/apps/gdal-config
--    DESTINATION ${CMAKE_INSTALL_BINDIR}
--    COMPONENT applications)
--  install(
--    FILES ${CMAKE_CURRENT_BINARY_DIR}/gdal.pc
--    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
--    COMPONENT libraries)
- endif ()
- 
- configure_file(${GDAL_CMAKE_TEMPLATE_PATH}/uninstall.cmake.in ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake @ONLY)

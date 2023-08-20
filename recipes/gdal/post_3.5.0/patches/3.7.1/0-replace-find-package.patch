@@ -71,7 +71,7 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
    endif ()
  endif ()
-@@ -729,7 +738,7 @@
+@@ -733,7 +742,7 @@
  gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
  
  # OpenJPEG's cmake-CONFIG is broken, so call module explicitly
