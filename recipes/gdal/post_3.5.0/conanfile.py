@@ -49,7 +49,7 @@ class GdalConan(ConanFile):
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
         "with_libkml": [True, False],
-        "with_libtiff": [True, False],
+        "with_libtiff": ["deprecated", True, False],
         "with_lzma": [True, False],
         "with_lz4": [True, False],
         "with_mongocxx": [True, False],
@@ -74,6 +74,7 @@ class GdalConan(ConanFile):
         "with_webp": [True, False],
         "with_xerces": [True, False],
         "with_xml2": [True, False],
+        "with_zlib": ["deprecated", True, False],
         "with_zstd": [True, False],
     }
 
@@ -106,7 +107,7 @@ class GdalConan(ConanFile):
         "with_libdeflate": True,
         "with_libiconv": True,
         "with_libkml": False,
-        "with_libtiff": True,
+        "with_libtiff": "deprecated",
         "with_lzma": False,
         "with_lz4": False,
         "with_mongocxx": False,
@@ -131,6 +132,7 @@ class GdalConan(ConanFile):
         "with_webp": False,
         "with_xerces": False,
         "with_xml2": False,
+        "with_zlib": "deprecated",
         "with_zstd": False,
     }
 
@@ -159,6 +161,7 @@ class GdalConan(ConanFile):
     def requirements(self):
         self.requires("json-c/0.16")
         self.requires("libgeotiff/1.7.1")
+        self.requires("libtiff/4.5.1")
         # Used in a public header here:
         # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
         self.requires("zlib/1.2.13", transitive_headers=True)
@@ -215,8 +218,6 @@ class GdalConan(ConanFile):
             self.requires("libiconv/1.17")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
-        if self.options.with_libtiff:
-            self.requires("libtiff/4.5.1")
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.2")
         if self.options.with_lz4:
@@ -281,7 +282,7 @@ class GdalConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("gdql requires sqlite3:enable_column_metadata=True")
 
-        if self.options.with_libtiff and self.dependencies["libtiff"].options.jpeg != self.options.with_jpeg:
+        if self.dependencies["libtiff"].options.jpeg != self.options.with_jpeg:
             msg = "libtiff:jpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             # For some reason, the ConanInvalidConfiguration message is not shown, only
             #     ERROR: At least two recipes provides the same functionality:
@@ -375,7 +376,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_SHAPELIB"] = self.options.with_shapelib
         tc.cache_variables["GDAL_USE_SPATIALITE"] = self.options.with_spatialite
         tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
-        tc.cache_variables["GDAL_USE_TIFF"] = self.options.with_libtiff
+        tc.cache_variables["GDAL_USE_TIFF"] = True
         tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
         tc.cache_variables["GDAL_USE_XERCESC"] = self.options.with_xerces
         tc.cache_variables["GDAL_USE_ZLIB"] = True
@@ -556,6 +557,7 @@ class GdalConan(ConanFile):
 
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
+        self.cpp_info.requires.extend(["libtiff::libtiff"])
         self.cpp_info.requires.extend(["zlib::zlib"])
         if self.options.with_armadillo:
             self.cpp_info.requires.extend(["armadillo::armadillo"])
@@ -609,8 +611,6 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["libjpeg-turbo::turbojpeg"])
         if self.options.with_libkml:
             self.cpp_info.requires.extend(["libkml::kmldom", "libkml::kmlengine"])
-        if self.options.with_libtiff:
-            self.cpp_info.requires.extend(["libtiff::libtiff"])
         if self.options.with_lzma:
             self.cpp_info.requires.extend(["xz_utils::xz_utils"])
         if self.options.with_lz4:
