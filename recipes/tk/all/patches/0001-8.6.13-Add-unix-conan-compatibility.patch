@@ -1,0 +1,77 @@
+Subject: [PATCH] Add unix conan compatibility
+
+---
+ unix/Makefile.in | 11 +++++------
+ unix/configure   |  2 +-
+ 2 files changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/unix/Makefile.in b/unix/Makefile.in
+index c6f8c25d7..7bc4a22ba 100644
+--- a/unix/Makefile.in
++++ b/unix/Makefile.in
+@@ -144,7 +144,6 @@
+ # Flags to pass to the linker
+ LDFLAGS_DEBUG		= @LDFLAGS_DEBUG@
+ LDFLAGS_OPTIMIZE	= @LDFLAGS_OPTIMIZE@
+-LDFLAGS			= @LDFLAGS_DEFAULT@ @LDFLAGS@
+ 
+ # A "-I" switch that can be used when compiling to make all of the
+ # X11 include files accessible (the configure script will try to
+@@ -330,7 +329,7 @@
+ CC			= @CC@
+ 
+ CC_SWITCHES_NO_STUBS = -I${UNIX_DIR} -I${GENERIC_DIR} -I${BMAP_DIR} \
+-${@TK_WINDOWINGSYSTEM@_INCLUDES} ${CFLAGS} ${CFLAGS_WARNING} \
++${@TK_WINDOWINGSYSTEM@_INCLUDES} ${CFLAGS} ${CPPFLAGS} ${CFLAGS_WARNING} \
+ ${SHLIB_CFLAGS} -I${TCL_GENERIC_DIR} -I${TCL_PLATFORM_DIR} ${AC_FLAGS} \
+ ${PROTO_FLAGS} ${SECURITY_FLAGS} ${MEM_DEBUG_FLAGS} ${KEYSYM_FLAGS} \
+ ${NO_DEPRECATED_FLAGS} @EXTRA_CC_SWITCHES@
+@@ -340,7 +339,7 @@
+ APP_CC_SWITCHES = $(CC_SWITCHES_NO_STUBS) @EXTRA_APP_CC_SWITCHES@
+ 
+ DEPEND_SWITCHES = -I${UNIX_DIR} -I${GENERIC_DIR} -I${BMAP_DIR} \
+-${@TK_WINDOWINGSYSTEM@_INCLUDES} ${CFLAGS} -I${TCL_GENERIC_DIR} \
++${@TK_WINDOWINGSYSTEM@_INCLUDES} ${CFLAGS} ${CPPFLAGS} -I${TCL_GENERIC_DIR} \
+ -I${TCL_PLATFORM_DIR} ${AC_FLAGS} ${PROTO_FLAGS} ${SECURITY_FLAGS} \
+ ${MEM_DEBUG_FLAGS} ${KEYSYM_FLAGS} @EXTRA_CC_SWITCHES@
+ 
+@@ -621,7 +620,7 @@
+ 
+ 
+ ${WISH_EXE}: $(TK_STUB_LIB_FILE) $(WISH_OBJS) $(TK_LIB_FILE) @APP_RSRC_FILE@
+-	${CC} ${CFLAGS} ${LDFLAGS} $(WISH_OBJS) @TK_BUILD_LIB_SPEC@ \
++	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} $(WISH_OBJS) @TK_BUILD_LIB_SPEC@ \
+ 		$(WISH_LIBS) $(CC_SEARCH_FLAGS) -o ${WISH_EXE}
+ 
+ # Resetting the LIB_RUNTIME_DIR below is required so that
+@@ -634,7 +633,7 @@
+ 	$(MAKE) tktest-real LIB_RUNTIME_DIR="`pwd`:$(TCL_BIN_DIR)"
+ 
+ tktest-real: ${TK_STUB_LIB_FILE}
+-	${CC} ${CFLAGS} ${LDFLAGS} $(TKTEST_OBJS) @TK_BUILD_LIB_SPEC@ $(WISH_LIBS) \
++	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} $(TKTEST_OBJS) @TK_BUILD_LIB_SPEC@ $(WISH_LIBS) \
+ 		${TK_STUB_LIB_FILE} ${TCL_STUB_LIB_SPEC} $(CC_SEARCH_FLAGS) -o $(TKTEST_EXE)
+ 
+ # # FIXME: This xttest rule seems to be broken in a number of ways.  It should
+@@ -642,7 +641,7 @@
+ # # tktest, and it is not clear where this test.o object file comes from.
+ #
+ # xttest: test.o tkTest.o tkSquare.o $(TK_LIB_FILE) ${TK_STUB_LIB_FILE}
+-# 	${CC} ${CFLAGS} ${LDFLAGS} test.o tkTest.o tkSquare.o \
++# 	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} test.o tkTest.o tkSquare.o \
+ # 		@TK_BUILD_LIB_SPEC@ ${TK_STUB_LIB_FILE}  ${TCL_STUB_LIB_SPEC} \
+ # 		$(WISH_LIBS) $(LD_SEARCH_FLAGS) -lXt -o xttest
+ 
+diff --git a/unix/configure b/unix/configure
+index fb0f5a3d9..77256a740 100755
+--- a/unix/configure
++++ b/unix/configure
+@@ -7374,7 +7374,7 @@
+ main ()
+ {
+ switch (0) {
+-            case 1: case (sizeof(${tcl_type_64bit})==sizeof(long)): ;
++            case 1: case (sizeof(${tcl_type_64bit})!=sizeof(long)): ;
+         }
+   ;
+   return 0;

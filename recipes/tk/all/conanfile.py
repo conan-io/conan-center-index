@@ -67,6 +67,7 @@ class TkConan(ConanFile):
 
     def build_requirements(self):
         if not is_msvc(self):
+            self.tool_requires("automake/1.16.5")
             if (
                 self._settings_build.os == "Windows"
                 and not self.conf.get("tools.microsoft.bash:path")
@@ -256,6 +257,11 @@ class TkConan(ConanFile):
         self.cpp_info.libs = [f"tk{lib_infix}{tk_suffix}", f"tkstub{lib_infix}"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "Cocoa", "Carbon", "IOKit"]
+            if tk_version >= "8.6.13":
+                self.cpp_info.frameworks.extend(["QuartzCore", "UniformTypeIdentifiers"])
+                if not self.options.shared:
+                    self.cpp_info.sharedlinkflags = ["-ObjC"]
+                    self.cpp_info.exelinkflags = ["-ObjC"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = [
                 "netapi32",
