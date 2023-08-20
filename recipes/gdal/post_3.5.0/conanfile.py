@@ -300,15 +300,19 @@ class GdalConan(ConanFile):
         tc.cache_variables["BUILD_APPS"] = self.options.tools
         tc.cache_variables["BUILD_TESTING"] = False
 
-        tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_JSONC_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_JPEG_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_JPEG12_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_TIFF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_GEOTIFF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_GIF_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_JPEG_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_JPEG12_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_JSONC_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_LERC_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_QHULL_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_TIFF_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
+
+        tc.cache_variables["GDAL_USE_LIBCSF_INTERNAL"] = True
+        tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = True
         tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = True
 
         tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
