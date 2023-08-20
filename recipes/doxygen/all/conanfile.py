@@ -59,12 +59,13 @@ class DoxygenConan(ConanFile):
             # INFO: Doxygen uses upper case CMake variables to link/include IConv, so we are using patches for targets.
             self.requires("libiconv/1.17")
 
+    def package_id(self):
+        del self.info.settings.compiler
+        host_deps = [dep for _, dep in self.dependencies.host.items()]
+        if all(dep.package_type in ["static-library", "header-library"] for dep in host_deps):
+            self.info.requires.minor_mode()
+
     def compatibility(self):
-        if (Version(conan_version).major >= 2):
-            # Models libc++ compatibility and identifies Debug builds as equivalent to Release builds
-            compatible_versions = [{"settings": [("compiler.version", v), ("build_type", "Release")]}
-                for v in self.settings.compiler.version.possible_values() if v <= Version(self.settings.compiler.version)]
-            return compatible_versions
         # Models Debug builds as equivalent to Release builds as this is a tool_requires package
         return [{"settings": [("build_type", "Release")]}]
 
@@ -92,6 +93,9 @@ class DoxygenConan(ConanFile):
         tc.variables["build_app"] = self.options.enable_app
         tc.variables["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         tc.variables["win_static"] = is_msvc_static_runtime(self)
+        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
+            # Link C++ library statically on Linux so that it can run on systems with an older C++ runtime
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static-libstdc++ -static-libgcc"
         tc.generate()
 
         deps = CMakeDeps(self)
