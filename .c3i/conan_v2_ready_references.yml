@@ -123,6 +123,7 @@ required_for_references:
 - capnproto
 - capstone
 - cargs
+- cassandra-cpp-driver
 - catch2
 - ccache
 - cccl
@@ -152,6 +153,7 @@ required_for_references:
 - cli11
 - clickhouse-cpp
 - clipper
+- clipper2
 - clove-unit
 - cmake
 - cmocka
@@ -176,6 +178,7 @@ required_for_references:
 - cpp-optparse
 - cpp-peglib
 - cpp-sort
+- cpp_project_framework
 - cppbenchmark
 - cppcheck
 - cppcmd
@@ -231,6 +234,7 @@ required_for_references:
 - dbus
 - debug_assert
 - decimal_for_cpp
+- deco
 - di
 - dice-template-library
 - dirent
@@ -255,6 +259,7 @@ required_for_references:
 - eastl
 - easy_profiler
 - easyhttpcpp
+- easyloggingpp
 - ecos
 - editline
 - edlib
@@ -269,6 +274,7 @@ required_for_references:
 - emio
 - enet
 - enhex-generic_serialization
+- enhex-strong_type
 - entityx
 - entt
 - enum-flags
@@ -464,6 +470,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kdbindings
 - keychain
 - khrplatform
 - kickcat
@@ -752,6 +759,7 @@ required_for_references:
 - netcdf
 - nettle
 - nextsilicon-cpp-subprocess
+- nfrechette-acl
 - ninja
 - nlohmann_json
 - nlopt
@@ -771,6 +779,7 @@ required_for_references:
 - nvtx
 - oatpp
 - objectbox
+- objectbox-generator
 - observer-ptr-lite
 - octomap
 - odbc
@@ -872,6 +881,7 @@ required_for_references:
 - pprint
 - pranav-csv2
 - pretty-name
+- procxx-boost-ext-simd
 - proj
 - prometheus-cpp
 - proposal
@@ -898,6 +908,7 @@ required_for_references:
 - qt
 - quantlib
 - quaternions
+- quickfix
 - quickjs
 - quill
 - quirc
@@ -936,6 +947,7 @@ required_for_references:
 - roaring
 - robin-hood-hashing
 - rply
+- rtklib
 - rtm
 - rtmidi
 - rttr
@@ -949,6 +961,7 @@ required_for_references:
 - sbepp
 - sbp
 - scip
+- scippp
 - scnlib
 - scons
 - scope-lite
@@ -1015,6 +1028,7 @@ required_for_references:
 - stduuid
 - stlab
 - strawberryperl
+- streamvbyte
 - string-view-lite
 - stringtoolbox
 - strong_type
@@ -1079,6 +1093,7 @@ required_for_references:
 - unordered_dense
 - unqlite
 - upx
+- urdfdom
 - uriparser
 - usockets
 - usrsctp
@@ -1103,6 +1118,8 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- vvenc
+- wasm-micro-runtime
 - wasmer
 - wasmtime
 - wasmtime-cpp
@@ -1146,6 +1163,7 @@ required_for_references:
 - xxhash
 - xxsds-sdsl-lite
 - xz_utils
+- yaclib
 - yajl
 - yaml-cpp
 - yas
