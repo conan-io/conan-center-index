@@ -79,6 +79,8 @@ class TkConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "The shared option of tcl and tk must have the same value"
             )
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("The tk conan recipe does not currently support Macos M1 builds. A contribution to add this functionality would be welcome.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
