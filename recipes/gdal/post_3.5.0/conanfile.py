@@ -252,7 +252,8 @@ class GdalConan(ConanFile):
         if self.options.with_pdfium:
             self.requires("pdfium/cci.20210730")
         if self.options.with_pg:
-            self.requires("libpq/15.4")
+            # libpq 15+ is not supported
+            self.requires("libpq/14.7")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_podofo:
