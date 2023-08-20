@@ -52,7 +52,7 @@ class RsyncConan(ConanFile):
     
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1")
+            self.requires("openssl/[>=1.1 <4]")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
@@ -82,7 +82,7 @@ class RsyncConan(ConanFile):
         tc.configure_args.extend([
             f"--enable-acl-support={yes_no(self.options.enable_acl)}",
             f"--with-included-zlib={yes_no(not self.options.with_zlib)}",            
-            f"--disable-openssl={yes_no(not self.options.with_openssl)}",
+            "--disable-openssl" if not self.options.with_openssl else "",
             f"--with-zstd={yes_no(self.options.with_zstd)}",
             f"--with-lz4={yes_no(self.options.with_lz4)}",
             f"--with-xxhash={yes_no(self.options.with_xxhash)}",
