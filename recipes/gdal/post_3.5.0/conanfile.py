@@ -29,6 +29,8 @@ class GdalConan(ConanFile):
         "with_basisu": [True, False],
         "with_blosc": [True, False],
         "with_cfitsio": [True, False],
+        # with_cypto option has been renamed with_openssl in version 3.5.1
+        "with_crypto": ["deprecated", True, False],
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
@@ -89,6 +91,7 @@ class GdalConan(ConanFile):
         "with_basisu": False,
         "with_blosc": False,
         "with_cfitsio": False,
+        "with_crypto": "deprecated",
         "with_cryptopp": False,
         "with_curl": False,
         "with_dds": False,
@@ -280,6 +283,12 @@ class GdalConan(ConanFile):
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
         self.tool_requires("cmake/[>=3.18 <4]")
+
+    def package_id(self):
+        # Ignore deprecated options
+        del self.info.options.with_crypto
+        del self.info.options.with_libtiff
+        del self.info.options.with_zlib
 
     def validate(self):
         if self.options.with_pcre and self.options.with_pcre2:
