@@ -68,7 +68,7 @@ class GdalConan(ConanFile):
         "with_png": [True, False],
         "with_podofo": [True, False],
         "with_poppler": [True, False],
-        "with_proj": [True, False],
+        "with_proj": ["deprecated", True, False],
         "with_publicdecompwt": [True, False],
         "with_qhull": [True, False],
         "with_rasterlite2": [True, False],
@@ -130,7 +130,7 @@ class GdalConan(ConanFile):
         "with_png": True,
         "with_podofo": False,
         "with_poppler": False,
-        "with_proj": True,
+        "with_proj": "deprecated",
         "with_publicdecompwt": False,
         "with_qhull": True,
         "with_rasterlite2": False,
@@ -170,6 +170,7 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         self.requires("libtiff/4.5.1")
+        self.requires("proj/9.2.1")
         # Used in a public header here:
         # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
         self.requires("zlib/1.2.13", transitive_headers=True)
@@ -258,8 +259,6 @@ class GdalConan(ConanFile):
             self.requires("podofo/0.9.7")
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
-        if self.options.with_proj:
-            self.requires("proj/9.2.1")
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
         if self.options.with_rasterlite2:
@@ -289,6 +288,7 @@ class GdalConan(ConanFile):
         # Ignore deprecated options
         del self.info.options.with_crypto
         del self.info.options.with_libtiff
+        del self.info.options.with_proj
         del self.info.options.with_zlib
 
     def validate(self):
@@ -380,7 +380,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
         tc.cache_variables["GDAL_USE_POPPLER"] = self.options.with_poppler
         tc.cache_variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
-        tc.cache_variables["GDAL_USE_PROJ"] = self.options.with_proj
+        tc.cache_variables["GDAL_USE_PROJ"] = True
         tc.cache_variables["GDAL_USE_PUBLICDECOMPWT"] = self.options.with_publicdecompwt
         tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
         tc.cache_variables["GDAL_USE_QHULL_INTERNAL"] = False
@@ -572,6 +572,7 @@ class GdalConan(ConanFile):
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
         self.cpp_info.requires.extend(["libtiff::libtiff"])
+        self.cpp_info.requires.extend(["proj::projlib"])
         self.cpp_info.requires.extend(["zlib::zlib"])
         if self.options.with_armadillo:
             self.cpp_info.requires.extend(["armadillo::armadillo"])
@@ -657,8 +658,6 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["podofo::podofo"])
         if self.options.with_poppler:
             self.cpp_info.requires.extend(["poppler::libpoppler"])
-        if self.options.with_proj:
-            self.cpp_info.requires.extend(["proj::projlib"])
         if self.options.with_rasterlite2:
             self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:

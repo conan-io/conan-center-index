@@ -72,7 +72,7 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
 -if (NOT PROJ_FOUND)
 -  find_package(PROJ 8 CONFIG QUIET)
 -endif()
-+find_package2(PROJ CONFIG QUIET)
++find_package2(PROJ CONFIG REQUIRED)
  if (PROJ_FOUND)
    string(APPEND GDAL_IMPORT_DEPENDENCIES "find_dependency(PROJ ${PROJ_VERSION_MAJOR} CONFIG)\n")
  else()
@@ -138,19 +138,6 @@ diff -urN ./a/cmake/helpers/CheckDependentLibraries.cmake ./b/cmake/helpers/Chec
  if (GDAL_USE_OPENJPEG)
    if (NOT OPENJPEG_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_OPENJPEG, but not found")
-diff -urN ./a/frmts/hfa/CMakeLists.txt ./b/frmts/hfa/CMakeLists.txt
---- ./a/frmts/hfa/CMakeLists.txt	2023-05-02 08:47:11.000000000 -0500
-+++ ./b/frmts/hfa/CMakeLists.txt	2023-06-06 16:54:31.162043900 -0500
-@@ -15,7 +15,8 @@
-           hfa_overviews.cpp
-   BUILTIN)
- gdal_standard_includes(gdal_HFA)
--target_include_directories(gdal_HFA PRIVATE $<TARGET_PROPERTY:PROJ::proj,INTERFACE_INCLUDE_DIRECTORIES>)
-+target_link_libraries(gdal_HFA INTERFACE PROJ::proj)
-+target_include_directories(gdal_HFA PRIVATE ${PROJ_INCLUDE_DIRS})
- target_compile_definitions(gdal_HFA PRIVATE $<TARGET_PROPERTY:PROJ::proj,INTERFACE_COMPILE_DEFINITIONS>)
- 
- if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
 diff -urN ./a/gdal.cmake ./b/gdal.cmake
 --- ./a/gdal.cmake	2023-05-02 08:47:12.000000000 -0500
 +++ ./b/gdal.cmake	2023-06-06 16:55:34.252830900 -0500
@@ -180,15 +167,3 @@ diff -urN ./a/gdal.cmake ./b/gdal.cmake
  endif ()
  
  configure_file(${GDAL_CMAKE_TEMPLATE_PATH}/uninstall.cmake.in ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake @ONLY)
-diff -urN ./a/ogr/ogr_proj_p.h ./b/ogr/ogr_proj_p.h
---- ./a/ogr/ogr_proj_p.h	2023-05-02 08:47:12.000000000 -0500
-+++ ./b/ogr/ogr_proj_p.h	2023-06-06 16:56:30.772908800 -0500
-@@ -29,7 +29,7 @@
- #ifndef OGR_PROJ_P_H_INCLUDED
- #define OGR_PROJ_P_H_INCLUDED
- 
--#include "proj.h"
-+#include <proj.h>
- 
- #include "cpl_mem_cache.h"
- 
