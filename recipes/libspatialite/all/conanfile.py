@@ -88,17 +88,17 @@ class LibspatialiteConan(ConanFile):
         self.requires("sqlite3/3.42.0")
         self.requires("zlib/1.2.13")
         if self.options.with_proj:
-            self.requires("proj/9.1.1")
+            self.requires("proj/9.2.1")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_freexl:
-            self.requires("freexl/1.0.6")
+            self.requires("freexl/2.0.0")
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.11.2")
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.11.4")
         if self.options.with_minizip:
             self.requires("minizip/1.2.13")
 
@@ -106,7 +106,7 @@ class LibspatialiteConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/1.9.5")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
