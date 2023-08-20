@@ -386,7 +386,7 @@ class GdalConan(ConanFile):
         jsonc.cpp_info.includedirs.append(os.path.join(jsonc.package_folder, "include", "json-c"))
 
         deps = CMakeDeps(self)
-        # Based on `grep -h 'grep -hPIR '(gdal_check_package|find_package2)\(' ~/.conan2/p/b/gdal*/b/src/cmake | sort -u`
+        # Based on `grep -hPIR '(gdal_check_package|find_package2)\(' ~/.conan2/p/b/gdal*/b/src/cmake | sort -u`
         conan_to_cmake_pkg_name = {
             "armadillo": "Armadillo",
             "arrow": "Arrow",
