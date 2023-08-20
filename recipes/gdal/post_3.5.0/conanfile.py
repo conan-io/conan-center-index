@@ -69,6 +69,7 @@ class GdalConan(ConanFile):
         "with_podofo": [True, False],
         "with_poppler": [True, False],
         "with_proj": [True, False],
+        "with_publicdecompwt": [True, False],
         "with_qhull": [True, False],
         "with_rasterlite2": [True, False],
         "with_shapelib": [True, False],
@@ -130,6 +131,7 @@ class GdalConan(ConanFile):
         "with_podofo": False,
         "with_poppler": False,
         "with_proj": True,
+        "with_publicdecompwt": False,
         "with_qhull": True,
         "with_rasterlite2": False,
         "with_shapelib": True,
@@ -379,6 +381,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_POPPLER"] = self.options.with_poppler
         tc.cache_variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
         tc.cache_variables["GDAL_USE_PROJ"] = self.options.with_proj
+        tc.cache_variables["GDAL_USE_PUBLICDECOMPWT"] = self.options.with_publicdecompwt
         tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
         tc.cache_variables["GDAL_USE_QHULL_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
