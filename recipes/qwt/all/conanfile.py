@@ -15,7 +15,7 @@ class QwtConan(ConanFile):
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qwt.sourceforge.io/"
-    topics = ("archive", "compression")
+    topics = ("chart", "data-visualization", "graph", "plot", "qt")
     description = (
         "The Qwt library contains GUI Components and utility classes which are primarily useful for programs "
         "with a technical background. Beside a framework for 2D plots it provides scales, sliders, dials, compasses, "
