@@ -79,8 +79,6 @@ class TkConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "The shared option of tcl and tk must have the same value"
             )
-        if self.settings.os == "Macos" and cross_building(self):
-            raise ConanInvalidConfiguration("The tk conan recipe does not currently support Macos cross-builds. A contribution to add this functionality would be welcome.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -121,13 +119,17 @@ class TkConan(ConanFile):
                 f"--enable-64bit={yes_no(self.settings.arch == 'x86_64')}"
             )
             tc.configure_args.append(f"--enable-aqua={yes_no(is_apple_os(self))}")
-            tc.configure_args.append(
-                f"--with-tcl={os.path.join(self.dependencies['tcl'].package_folder, 'lib')}"
-            )
+            tcl_root = self.dependencies['tcl'].package_folder
+            tc.configure_args.append(f"--with-tcl={os.path.join(tcl_root, 'lib')}")
             tc.configure_args.append(f"--with-x={yes_no(self.settings.os == 'Linux')}")
-            tc.make_args.append(
-                f"TCL_GENERIC_DIR={os.path.join(self.dependencies['tcl'].package_folder, 'include')}"
-            )
+            tc.make_args.append(f"TCL_GENERIC_DIR={os.path.join(tcl_root, 'include')}")
+            if cross_building(self):
+                # We need this environment variable exported in cross-builds
+                # in order for the tclConfig.sh (used by --with-tcl) to expose the correct
+                # variables.
+                # for native builds, this is done by the VirtualRunEnv
+                tc.configure_args.append(f"TCL_ROOT={tcl_root}")
+                tc.make_args.append(f"TCL_ROOT={tcl_root}")
             if self.settings.os == "Windows":
                 tc.extra_defines.extend(
                     [
