@@ -64,8 +64,8 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sbeppc:
-            self.requires("fmt/9.1.0")
-            self.requires("pugixml/1.12.1")
+            self.requires("fmt/10.1.0")
+            self.requires("pugixml/1.13")
 
     def validate(self):
         if self.settings.compiler.cppstd:
