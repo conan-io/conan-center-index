@@ -136,8 +136,9 @@ class TkConan(ConanFile):
                 )
             tc.generate()
 
-            deps = AutotoolsDeps(self)
-            deps.generate()
+            if self.settings.os == "Linux":
+                deps = AutotoolsDeps(self)
+                deps.generate()
 
     def _get_default_build_system(self):
         if is_apple_os(self):
