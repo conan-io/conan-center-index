@@ -166,7 +166,7 @@ class GdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("json-c/0.16")
+        self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         self.requires("libtiff/4.5.1")
         # Used in a public header here:
@@ -185,7 +185,7 @@ class GdalConan(ConanFile):
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.7.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.2.0")
+            self.requires("libcurl/8.2.1")
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
         if self.options.with_expat:
@@ -194,7 +194,7 @@ class GdalConan(ConanFile):
             self.requires("openexr/3.1.9")
             self.requires("imath/3.1.9")
         if self.options.with_freexl:
-            self.requires("freexl/1.0.6")
+            self.requires("freexl/2.0.0")
         if self.options.with_geos:
             self.requires("geos/3.11.2")
         if self.options.with_gif:
@@ -230,7 +230,7 @@ class GdalConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.7.2")
+            self.requires("mongo-cxx-driver/3.8.0")
         if self.options.with_mysql == "libmysqlclient":
             self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
@@ -242,7 +242,7 @@ class GdalConan(ConanFile):
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1v")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre:
             self.requires("pcre/8.45")
         if self.options.with_pcre2:
@@ -250,7 +250,7 @@ class GdalConan(ConanFile):
         if self.options.with_pdfium:
             self.requires("pdfium/cci.20210730")
         if self.options.with_pg:
-            self.requires("libpq/15.3")
+            self.requires("libpq/15.4")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_podofo:
