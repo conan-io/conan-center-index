@@ -68,6 +68,7 @@ class GdalConan(ConanFile):
         "with_proj": [True, False],
         "with_qhull": [True, False],
         "with_rasterlite2": [True, False],
+        "with_shapelib": [True, False],
         "with_spatialite": [True, False],
         "with_sqlite3": [True, False],
         "with_webp": [True, False],
@@ -124,6 +125,7 @@ class GdalConan(ConanFile):
         "with_proj": True,
         "with_qhull": True,
         "with_rasterlite2": False,
+        "with_shapelib": False,
         "with_spatialite": False,
         "with_sqlite3": True,
         "with_webp": False,
@@ -253,6 +255,8 @@ class GdalConan(ConanFile):
             self.requires("qhull/8.0.1")
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
+        if self.options.with_shapelib:
+            self.requires("shapelib/1.5.0")
         if self.options.with_spatialite:
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
@@ -317,7 +321,7 @@ class GdalConan(ConanFile):
 
         tc.cache_variables["GDAL_USE_LIBCSF_INTERNAL"] = True
         tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = True
-        tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = True
+        tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = not self.options.with_shapelib
 
         tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
         tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
@@ -368,6 +372,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_PROJ"] = self.options.with_proj
         tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
         tc.cache_variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
+        tc.cache_variables["GDAL_USE_SHAPELIB"] = self.options.with_shapelib
         tc.cache_variables["GDAL_USE_SPATIALITE"] = self.options.with_spatialite
         tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
         tc.cache_variables["GDAL_USE_TIFF"] = self.options.with_libtiff
@@ -454,7 +459,7 @@ class GdalConan(ConanFile):
             "qhull": "QHULL",
             # "rdb": "rdb",
             # "sfcgal": "SFCGAL",
-            # "shapelib": "Shapelib",
+            "shapelib": "Shapelib",
             "sqlite3": "SQLite3",
             # "teigha": "TEIGHA",
             # "tiledb": "TileDB",
@@ -498,6 +503,7 @@ class GdalConan(ConanFile):
             "pdfium":                     "PDFIUM::PDFIUM",
             "podofo":                     "PODOFO::Podofo",
             "poppler":                    "Poppler::Poppler",
+            "shapelib":                   "SHAPELIB::shp",
             "xz_utils":                   "LibLZMA::LibLZMA",
             "zstd":                       "ZSTD::zstd",
         }
@@ -643,6 +649,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:
             self.cpp_info.requires.extend(["qhull::libqhull"])
+        if self.options.with_shapelib:
+            self.cpp_info.requires.extend(["shapelib::shapelib"])
         if self.options.with_spatialite:
             self.cpp_info.requires.extend(["libspatialite::libspatialite"])
         if self.options.with_sqlite3:
