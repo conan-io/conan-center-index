@@ -46,6 +46,7 @@ class GdalConan(ConanFile):
         "with_kea": [True, False],
         "with_lerc": [True, False],
         "with_libarchive": [True, False],
+        "with_libcsf": [True, False],
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
         "with_libkml": [True, False],
@@ -56,6 +57,7 @@ class GdalConan(ConanFile):
         "with_mysql": [None, "libmysqlclient", "mariadb-connector-c"],
         "with_netcdf": [True, False],
         "with_odbc": [True, False],
+        "with_opencad": [True, False],
         "with_openjpeg": [True, False],
         "with_openssl": [True, False],
         "with_pcre": [True, False],
@@ -104,6 +106,7 @@ class GdalConan(ConanFile):
         "with_kea": False,
         "with_lerc": False,
         "with_libarchive": False,
+        "with_libcsf": True,
         "with_libdeflate": True,
         "with_libiconv": True,
         "with_libkml": False,
@@ -114,6 +117,7 @@ class GdalConan(ConanFile):
         "with_mysql": None,
         "with_netcdf": False,
         "with_odbc": False,
+        "with_opencad": True,
         "with_openjpeg": False,
         "with_openssl": False,
         "with_pcre": False,
@@ -126,7 +130,7 @@ class GdalConan(ConanFile):
         "with_proj": True,
         "with_qhull": True,
         "with_rasterlite2": False,
-        "with_shapelib": False,
+        "with_shapelib": True,
         "with_spatialite": False,
         "with_sqlite3": True,
         "with_webp": False,
@@ -256,8 +260,6 @@ class GdalConan(ConanFile):
             self.requires("qhull/8.0.1")
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
-        if self.options.with_shapelib:
-            self.requires("shapelib/1.5.0")
         if self.options.with_spatialite:
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
@@ -270,6 +272,10 @@ class GdalConan(ConanFile):
             self.requires("libxml2/2.11.4")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
+        # Use of external shapelib is not recommended and is currently broken.
+        # https://github.com/OSGeo/gdal/issues/5711
+        # if self.options.with_shapelib:
+        #     self.requires("shapelib/1.5.0")
 
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
@@ -320,9 +326,9 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_TIFF_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
 
-        tc.cache_variables["GDAL_USE_LIBCSF_INTERNAL"] = True
-        tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = True
-        tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = not self.options.with_shapelib
+        tc.cache_variables["GDAL_USE_LIBCSF_INTERNAL"] = self.options.with_libcsf
+        tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = self.options.with_opencad
+        tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = self.options.with_shapelib
 
         tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
         tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
@@ -649,8 +655,6 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:
             self.cpp_info.requires.extend(["qhull::libqhull"])
-        if self.options.with_shapelib:
-            self.cpp_info.requires.extend(["shapelib::shapelib"])
         if self.options.with_spatialite:
             self.cpp_info.requires.extend(["libspatialite::libspatialite"])
         if self.options.with_sqlite3:
