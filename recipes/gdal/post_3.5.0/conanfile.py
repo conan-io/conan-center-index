@@ -2,7 +2,6 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 
@@ -317,6 +316,7 @@ class GdalConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.cache_variables["GDAL_SET_INSTALL_RELATIVE_RPATH"] = True
 
         tc.cache_variables["BUILD_JAVA_BINDINGS"] = False
         tc.cache_variables["BUILD_CSHARP_BINDINGS"] = False
@@ -553,7 +553,6 @@ class GdalConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GDAL")
