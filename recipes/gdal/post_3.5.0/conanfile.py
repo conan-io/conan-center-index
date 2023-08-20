@@ -122,7 +122,7 @@ class GdalConan(ConanFile):
         "with_poppler": False,
         "with_proj": True,
         "with_qhull": True,
-        "with_rasterlite2": True,
+        "with_rasterlite2": False,
         "with_sqlite3": True,
         "with_webp": False,
         "with_xerces": False,
