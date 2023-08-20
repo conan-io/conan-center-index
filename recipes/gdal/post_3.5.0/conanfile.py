@@ -68,6 +68,7 @@ class GdalConan(ConanFile):
         "with_proj": [True, False],
         "with_qhull": [True, False],
         "with_rasterlite2": [True, False],
+        "with_spatialite": [True, False],
         "with_sqlite3": [True, False],
         "with_webp": [True, False],
         "with_xerces": [True, False],
@@ -123,6 +124,7 @@ class GdalConan(ConanFile):
         "with_proj": True,
         "with_qhull": True,
         "with_rasterlite2": False,
+        "with_spatialite": False,
         "with_sqlite3": True,
         "with_webp": False,
         "with_xerces": False,
@@ -251,6 +253,8 @@ class GdalConan(ConanFile):
             self.requires("qhull/8.0.1")
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
+        if self.options.with_spatialite:
+            self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.42.0")
         if self.options.with_webp:
@@ -364,6 +368,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_PROJ"] = self.options.with_proj
         tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
         tc.cache_variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
+        tc.cache_variables["GDAL_USE_SPATIALITE"] = self.options.with_spatialite
         tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
         tc.cache_variables["GDAL_USE_TIFF"] = self.options.with_libtiff
         tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
@@ -418,6 +423,7 @@ class GdalConan(ConanFile):
             "libpq": "PostgreSQL",
             # "libqb3": "libQB3",
             "librasterlite2": "RASTERLITE2",
+            "libspatialite": "SPATIALITE",
             "libtiff": "TIFF",
             "libwebp": "WebP",
             "libxml2": "LibXml2",
@@ -449,7 +455,6 @@ class GdalConan(ConanFile):
             # "rdb": "rdb",
             # "sfcgal": "SFCGAL",
             # "shapelib": "Shapelib",
-            # "spatialite": "SPATIALITE",
             "sqlite3": "SQLite3",
             # "teigha": "TEIGHA",
             # "tiledb": "TileDB",
@@ -481,6 +486,7 @@ class GdalConan(ConanFile):
             "libheif":                    "HEIF::HEIF",
             "libjxl":                     "JXL::JXL",
             "librasterlite2":             "RASTERLITE2::RASTERLITE2",
+            "libspatialite":              "SPATIALITE::SPATIALITE",
             "libwebp":                    "WEBP::WebP",
             "lz4":                        "LZ4::LZ4",
             "mongo-cxx-driver::bsoncxx":  "MONGOCXX::BSONCXX",
@@ -637,6 +643,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:
             self.cpp_info.requires.extend(["qhull::libqhull"])
+        if self.options.with_spatialite:
+            self.cpp_info.requires.extend(["libspatialite::libspatialite"])
         if self.options.with_sqlite3:
             self.cpp_info.requires.extend(["sqlite3::sqlite"])
         if self.options.with_webp:
