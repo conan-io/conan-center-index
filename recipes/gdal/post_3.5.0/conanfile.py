@@ -634,7 +634,7 @@ class GdalConan(ConanFile):
         if self.options.with_proj:
             self.cpp_info.requires.extend(["proj::projlib"])
         if self.options.with_rasterlite2:
-            self.cpp_info.requires.extend(["rasterlite2::rasterlite2"])
+            self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:
             self.cpp_info.requires.extend(["qhull::libqhull"])
         if self.options.with_sqlite3:
