@@ -42,7 +42,7 @@ class GdalConan(ConanFile):
         "with_hdf4": [True, False],
         "with_hdf5": [True, False],
         "with_heif": [True, False],
-        "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_jxl": [True, False],
         "with_kea": [True, False],
         "with_lerc": [True, False],
@@ -55,7 +55,7 @@ class GdalConan(ConanFile):
         "with_lzma": [True, False],
         "with_lz4": [True, False],
         "with_mongocxx": [True, False],
-        "with_mysql": [None, "libmysqlclient", "mariadb-connector-c"],
+        "with_mysql": [False, "libmysqlclient", "mariadb-connector-c"],
         "with_netcdf": [True, False],
         "with_odbc": [True, False],
         "with_opencad": [True, False],
@@ -81,7 +81,6 @@ class GdalConan(ConanFile):
         "with_zlib": ["deprecated", True, False],
         "with_zstd": [True, False],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -117,7 +116,7 @@ class GdalConan(ConanFile):
         "with_lzma": False,
         "with_lz4": False,
         "with_mongocxx": False,
-        "with_mysql": None,
+        "with_mysql": False,
         "with_netcdf": False,
         "with_odbc": False,
         "with_opencad": False,
@@ -336,13 +335,17 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow
         tc.cache_variables["GDAL_USE_BASISU"] = self.options.with_basisu
         tc.cache_variables["GDAL_USE_BLOSC"] = self.options.with_blosc
+        tc.cache_variables["GDAL_USE_BRUNSLI"] = False
         tc.cache_variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
         tc.cache_variables["GDAL_USE_CRNLIB"] = self.options.with_dds
         tc.cache_variables["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
         tc.cache_variables["GDAL_USE_CURL"] = self.options.with_curl
         tc.cache_variables["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
+        tc.cache_variables["GDAL_USE_ECW"] = False
         tc.cache_variables["GDAL_USE_EXPAT"] = self.options.with_expat
+        tc.cache_variables["GDAL_USE_FILEGDB"] = False
         tc.cache_variables["GDAL_USE_FREEXL"] = self.options.with_freexl
+        tc.cache_variables["GDAL_USE_FYBA"] = False
         tc.cache_variables["GDAL_USE_GEOS"] = self.options.with_geos
         tc.cache_variables["GDAL_USE_GEOTIFF"] = True
         tc.cache_variables["GDAL_USE_GEOTIFF_INTERNAL"] = False
@@ -351,28 +354,46 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_GTA"] = self.options.with_gta
         tc.cache_variables["GDAL_USE_HDF4"] = self.options.with_hdf4
         tc.cache_variables["GDAL_USE_HDF5"] = self.options.with_hdf5
+        tc.cache_variables["GDAL_USE_HDFS"] = False
         tc.cache_variables["GDAL_USE_HEIF"] = self.options.with_heif
         tc.cache_variables["GDAL_USE_ICONV"] = self.options.with_libiconv
-        tc.cache_variables["GDAL_USE_JPEG"] = self.options.with_jpeg is not None
+        tc.cache_variables["GDAL_USE_IDB"] = False
+        tc.cache_variables["GDAL_USE_JPEG"] = bool(self.options.with_jpeg)
         tc.cache_variables["GDAL_USE_JPEG_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_JPEG12_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_JSONC"] = True
         tc.cache_variables["GDAL_USE_JSONC_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_JXL"] = self.options.with_jxl
+        tc.cache_variables["GDAL_USE_JXL_THREADS"] = self.options.with_jxl
+        tc.cache_variables["GDAL_USE_KDU"] = False
         tc.cache_variables["GDAL_USE_KEA"] = self.options.with_kea
         tc.cache_variables["GDAL_USE_LERC"] = self.options.with_lerc
         tc.cache_variables["GDAL_USE_LERC_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_LIBCSF"] = False
         tc.cache_variables["GDAL_USE_LIBCSF_INTERNAL"] = self.options.with_libcsf
         tc.cache_variables["GDAL_USE_LIBKML"] = self.options.with_libkml
+        tc.cache_variables["GDAL_USE_LIBLZMA"] = self.options.with_lzma
+        tc.cache_variables["GDAL_USE_LIBQB3"] = False
         tc.cache_variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
+        tc.cache_variables["GDAL_USE_LURATECH"] = False
         tc.cache_variables["GDAL_USE_LZ4"] = self.options.with_lz4
         tc.cache_variables["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
+        tc.cache_variables["GDAL_USE_MRSID"] = False
+        tc.cache_variables["GDAL_USE_MSSQL_NCLI"] = False
+        tc.cache_variables["GDAL_USE_MSSQL_ODBC"] = False
+        tc.cache_variables["GDAL_USE_MYSQL"] = bool(self.options.with_mysql)
         tc.cache_variables["GDAL_USE_NETCDF"] = self.options.with_netcdf
         tc.cache_variables["GDAL_USE_ODBC"] = self.options.with_odbc
+        tc.cache_variables["GDAL_USE_ODBCCPP"] = False
+        tc.cache_variables["GDAL_USE_OGDI"] = False
+        tc.cache_variables["GDAL_USE_OPENCAD"] = False
         tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = self.options.with_opencad
+        tc.cache_variables["GDAL_USE_OPENCL"] = False
         tc.cache_variables["GDAL_USE_OPENEXR"] = self.options.with_exr
         tc.cache_variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
         tc.cache_variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
+        tc.cache_variables["GDAL_USE_ORACLE"] = False
+        tc.cache_variables["GDAL_USE_PARQUET"] = False
         tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
         tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
         tc.cache_variables["GDAL_USE_PDFIUM"] = self.options.with_pdfium
@@ -381,17 +402,18 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
         tc.cache_variables["GDAL_USE_POPPLER"] = self.options.with_poppler
         tc.cache_variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
-        tc.cache_variables["GDAL_USE_PROJ"] = True
         tc.cache_variables["GDAL_USE_PUBLICDECOMPWT"] = self.options.with_publicdecompwt
         tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
         tc.cache_variables["GDAL_USE_QHULL_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
+        tc.cache_variables["GDAL_USE_SFCGAL"] = False
         tc.cache_variables["GDAL_USE_SHAPELIB"] = False
         tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = self.options.with_shapelib
         tc.cache_variables["GDAL_USE_SPATIALITE"] = self.options.with_spatialite
         tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
-        tc.cache_variables["GDAL_USE_TIFF"] = True
+        tc.cache_variables["GDAL_USE_TEIGHA"] = False
         tc.cache_variables["GDAL_USE_TIFF_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_TILEDB"] = False
         tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
         tc.cache_variables["GDAL_USE_XERCESC"] = self.options.with_xerces
         tc.cache_variables["GDAL_USE_ZLIB"] = True
