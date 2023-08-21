@@ -56,4 +56,5 @@ class LyraConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "bfg"
         self.cpp_info.components["_lyra"].names["cmake_find_package"] = "lyra"
         self.cpp_info.components["_lyra"].names["cmake_find_package_multi"] = "lyra"
+        self.cpp_info.components["_lyra"].libdirs = []
         self.cpp_info.libdirs = []
