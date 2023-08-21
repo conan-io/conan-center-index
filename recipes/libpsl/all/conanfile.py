@@ -1,15 +1,24 @@
-from conans import ConanFile, Meson, tools
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.53.0"
+
 
 class LibPslConan(ConanFile):
     name = "libpsl"
     description = "C library for the Public Suffix List"
     homepage = "https://github.com/rockdaboot/libpsl"
-    topics = ("conan", "psl", "suffix", "TLD", "gTLD", ".com", ".net")
+    topics = ("psl", "suffix", "TLD", "gTLD", ".com", ".net")
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -20,19 +29,9 @@ class LibPslConan(ConanFile):
         "fPIC": True,
         "with_idna": "icu",
     }
-    settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/**"
-    generators = "pkg_config"
 
-    _meson = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,17 +39,16 @@ class LibPslConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def build_requirements(self):
-        self.build_requires("meson/0.55.3")
-        self.build_requires("pkgconf/1.7.3")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_idna == "icu":
-            self.requires("icu/68.1")
+            self.requires("icu/72.1")
         elif self.options.with_idna == "libidn":
             self.requires("libidn/1.36")
         elif self.options.with_idna == "libidn2":
@@ -58,9 +56,13 @@ class LibPslConan(ConanFile):
         if self.options.with_idna in ("libidn", "libidn2"):
             self.requires("libunistring/0.9.10")
 
+    def build_requirements(self):
+        self.tool_requires("meson/1.0.0")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.3")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libpsl-{}".format(self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _idna_option(self):
@@ -69,38 +71,52 @@ class LibPslConan(ConanFile):
             "icu": "libicu",
         }.get(str(self.options.with_idna), str(self.options.with_idna))
 
-    def _configure_meson(self):
-        if self._meson:
-            return self._meson
-        self._meson = Meson(self)
-        self._meson.options["runtime"] = self._idna_option
-        self._meson.options["builtin"] = self._idna_option
-        self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder, pkg_config_paths=[self.install_folder])
-        return self._meson
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = MesonToolchain(self)
+        tc.project_options["runtime"] = self._idna_option
+        tc.project_options["builtin"] = self._idna_option
+        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        meson = self._configure_meson()
+        apply_conandata_patches(self)
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        meson = self._configure_meson()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        if not self.options.shared and self.settings.compiler == "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "libpsl.a"),
-                      os.path.join(self.package_folder, "lib", "psl.lib"))
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libpsl")
         self.cpp_info.libs = ["psl"]
-        self.cpp_info.names["pkg_config"] = "libpsl"
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
         if not self.options.shared:
             self.cpp_info.defines = ["PSL_STATIC"]
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    from conan.tools.files import rename
+    import glob
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

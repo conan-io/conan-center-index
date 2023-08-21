@@ -1,5 +1,8 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rmdir
+from conan.tools.scm import Version
+from conans import AutoToolsBuildEnvironment, tools
 import contextlib
 import functools
 import os
@@ -49,7 +52,7 @@ class LibIdnConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libiconv/1.16")
+        self.requires("libiconv/1.17")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -59,10 +62,10 @@ class LibIdnConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
@@ -87,7 +90,7 @@ class LibIdnConan(ConanFile):
         if not self.options.shared:
             autotools.defines.append("LIBIDN_STATIC")
         if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) >= "12":
+            if Version(self.settings.compiler.version) >= "12":
                 autotools.flags.append("-FS")
             autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
         yes_no = lambda v: "yes" if v else "no"
@@ -122,8 +125,8 @@ class LibIdnConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):

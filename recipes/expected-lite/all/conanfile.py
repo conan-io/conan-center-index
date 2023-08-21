@@ -14,6 +14,7 @@ class ExpectedLiteConan(ConanFile):
     description = "expected lite - Expected objects in C++11 and later in a single-file header-only library"
     topics = ("cpp11", "cpp14", "cpp17", "expected", "expected-implementations")
     license = "BSL-1.0"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,8 +29,7 @@ class ExpectedLiteConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -42,9 +42,7 @@ class ExpectedLiteConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "expected-lite")
         self.cpp_info.set_property("cmake_target_name", "nonstd::expected-lite")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "expected-lite"

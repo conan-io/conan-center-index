@@ -7,6 +7,10 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -16,9 +20,6 @@ class TestPackageConan(ConanFile):
         tc.variables["RABBITMQ_SHARED"] = self.dependencies["rabbitmq-c"].options.shared
         tc.variables["WITH_SSL"] = self.dependencies["rabbitmq-c"].options.ssl
         tc.generate()
-
-    def layout(self):
-        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)

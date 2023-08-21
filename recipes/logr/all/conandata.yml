@@ -1,19 +1,19 @@
 sources:
-  "0.2.0":
-    url: "https://github.com/ngrodzitski/logr/archive/v0.2.0.tar.gz"
-    sha256: "4e1707f9450f12b0752d8ef4d72a3f38a2e6be0014ca7edde049f22e9b9119a4"
-  "0.2.1":
-    url: "https://github.com/ngrodzitski/logr/archive/v0.2.1.tar.gz"
-    sha256: "411282bb03d678d7266951b979102392dbf7e5e14b629bccfb2c4e74cfa758c6"
-  "0.3.0":
-    url: "https://github.com/ngrodzitski/logr/archive/v0.3.0.tar.gz"
-    sha256: "21eea6cce32e3ccf3769f66211143b17f8b36891e79ec3ef5209f849d9e79ad7"
-  "0.4.0":
-    url: "https://github.com/ngrodzitski/logr/archive/v0.4.0.tar.gz"
-    sha256: "c355aa455d0a9c6d1d3bc168a2db0cd7f3c9706b382088e96948ec3a4cf1286f"
-  "0.5.1":
-    url: "https://github.com/ngrodzitski/logr/archive/v0.5.1.tar.gz"
-    sha256: "674be6a53d5b3f40273b1b5710ac9e32d870827032b5008c41621db47f4b3b0e"
   "0.6.0":
     url: "https://github.com/ngrodzitski/logr/archive/v0.6.0.tar.gz"
     sha256: "2ecb40396add33f2120a79957633533381f3df13cb3b53278eb9dec3a1230eb2"
+  "0.5.1":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.5.1.tar.gz"
+    sha256: "674be6a53d5b3f40273b1b5710ac9e32d870827032b5008c41621db47f4b3b0e"
+  "0.4.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.4.0.tar.gz"
+    sha256: "c355aa455d0a9c6d1d3bc168a2db0cd7f3c9706b382088e96948ec3a4cf1286f"
+  "0.3.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.3.0.tar.gz"
+    sha256: "21eea6cce32e3ccf3769f66211143b17f8b36891e79ec3ef5209f849d9e79ad7"
+  "0.2.1":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.2.1.tar.gz"
+    sha256: "411282bb03d678d7266951b979102392dbf7e5e14b629bccfb2c4e74cfa758c6"
+  "0.2.0":
+    url: "https://github.com/ngrodzitski/logr/archive/v0.2.0.tar.gz"
+    sha256: "4e1707f9450f12b0752d8ef4d72a3f38a2e6be0014ca7edde049f22e9b9119a4"

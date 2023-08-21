@@ -15,8 +15,8 @@ class FoonathanLexyConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/foonathan/lexy"
     topics = ("parser", "parser-combinators", "grammar")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
     options = {
         "fPIC": [True, False],
     }
@@ -46,7 +46,7 @@ class FoonathanLexyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
@@ -54,20 +54,8 @@ class FoonathanLexyConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if not self._cmake_new_enough("3.18"):
-            self.tool_requires("cmake/3.25.0")
+        self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
@@ -88,8 +76,6 @@ class FoonathanLexyConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))

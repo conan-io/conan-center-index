@@ -16,6 +16,7 @@ class DuckdbConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cwida/duckdb"
     topics = ("sql", "database", "olap", "embedded-database")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -58,7 +59,7 @@ class DuckdbConan(ConanFile):
     short_paths = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -76,15 +77,15 @@ class DuckdbConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace 
+        # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -191,9 +192,7 @@ class DuckdbConan(ConanFile):
                 self.cpp_info.libs.append("sqlsmith_extension")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")

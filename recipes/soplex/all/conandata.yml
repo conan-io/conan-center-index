@@ -1,0 +1,4 @@
+sources:
+  "6.0.3":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-603.tar.gz"
+    sha256: "2bdf9adc9ac6ad48f98056679b7b852e626ac4aaaf277e7d4ce17794ed1097be"

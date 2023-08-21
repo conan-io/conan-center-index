@@ -18,7 +18,7 @@ class OpenALSoftConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openal-soft.org/"
     license = "LGPL-2.0-or-later"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -118,17 +118,15 @@ class OpenALSoftConan(ConanFile):
         )
 
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             set(OPENAL_FOUND TRUE)
             if(DEFINED OpenAL_INCLUDE_DIR)
-                set(OPENAL_INCLUDE_DIR ${OpenAL_INCLUDE_DIR})
+                set(OPENAL_INCLUDE_DIR ${{OpenAL_INCLUDE_DIR}})
             endif()
             if(DEFINED OpenAL_LIBRARIES)
-                set(OPENAL_LIBRARY ${OpenAL_LIBRARIES})
+                set(OPENAL_LIBRARY ${{OpenAL_LIBRARIES}})
             endif()
-            if(DEFINED OpenAL_VERSION)
-                set(OPENAL_VERSION_STRING ${OpenAL_VERSION})
-            endif()
+            set(OPENAL_VERSION_STRING {self.version})
         """)
         save(self, module_file, content)
 

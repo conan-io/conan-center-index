@@ -1,9 +1,11 @@
-from conans import CMake, ConanFile, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, mkdir
 import glob
 import os
 import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class SundialsConan(ConanFile):
@@ -13,11 +15,11 @@ class SundialsConan(ConanFile):
                    " with the goal of providing robust time integrators "
                    "and nonlinear solvers that can easily be incorporated"
                    "into existing simulation codes.")
-    topics = ("sundials", "integrators", "ode", "non-linear solvers")
+    topics = ("integrators", "ode", "non-linear solvers")
     homepage = "https://github.com/LLNL/sundials"
     url = "https://github.com/conan-io/conan-center-index"
-
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -39,14 +41,7 @@ class SundialsConan(ConanFile):
         "build_kinsol": True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
     short_paths = True
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,42 +49,40 @@ class SundialsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-        self._cmake.definitions["BUILD_ARKODE"] = self.options.build_arkode
-        self._cmake.definitions["BUILD_CVODE"] = self.options.build_cvode
-        self._cmake.definitions["BUILD_CVODES"] = self.options.build_cvodes
-        self._cmake.definitions["BUILD_IDA"] = self.options.build_ida
-        self._cmake.definitions["BUILD_IDAS"] = self.options.build_idas
-        self._cmake.definitions["BUILD_KINSOL"] = self.options.build_kinsol
-        self._cmake.definitions["EXAMPLES_ENABLE_C"] = False
-        self._cmake.definitions["EXAMPLES_INSTALL"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["BUILD_ARKODE"] = self.options.build_arkode
+        tc.variables["BUILD_CVODE"] = self.options.build_cvode
+        tc.variables["BUILD_CVODES"] = self.options.build_cvodes
+        tc.variables["BUILD_IDA"] = self.options.build_ida
+        tc.variables["BUILD_IDAS"] = self.options.build_idas
+        tc.variables["BUILD_KINSOL"] = self.options.build_kinsol
+        tc.variables["EXAMPLES_ENABLE_C"] = False
+        tc.variables["EXAMPLES_INSTALL"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
         if self.settings.os == "Windows" and self.options.shared:
-            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            mkdir(self, os.path.join(self.package_folder, "bin"))
             for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                 shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
 
@@ -110,7 +103,7 @@ class SundialsConan(ConanFile):
         self.cpp_info.components["sundials_sunmatrixsparse"].libs = ["sundials_sunmatrixsparse"]
         self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].libs = ["sundials_sunnonlinsolfixedpoint"]
         self.cpp_info.components["sundials_sunnonlinsolnewton"].libs = ["sundials_sunnonlinsolnewton"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["sundials_nvecmanyvector"].system_libs = ["m"]
             self.cpp_info.components["sundials_nvecserial"].system_libs = ["m"]
             self.cpp_info.components["sundials_sunlinsolpcg"].system_libs = ["m"]
@@ -125,25 +118,25 @@ class SundialsConan(ConanFile):
             self.cpp_info.components["sundials_sunnonlinsolnewton"].system_libs = ["m"]
         if self.options.build_arkode:
             self.cpp_info.components["sundials_arkode"].libs = ["sundials_arkode"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sundials_arkode"].system_libs = ["m"]
         if self.options.build_cvode:
             self.cpp_info.components["sundials_cvode"].libs = ["sundials_cvode"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sundials_cvode"].system_libs = ["m"]
         if self.options.build_cvodes:
             self.cpp_info.components["sundials_cvodes"].libs = ["sundials_cvodes"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sundials_cvodes"].system_libs = ["m"]
         if self.options.build_ida:
             self.cpp_info.components["sundials_ida"].libs = ["sundials_ida"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sundials_ida"].system_libs = ["m"]
         if self.options.build_idas:
             self.cpp_info.components["sundials_idas"].libs = ["sundials_idas"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sundials_idas"].system_libs = ["m"]
         if self.options.build_kinsol:
             self.cpp_info.components["sundials_kinsol"].libs = ["sundials_kinsol"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["sundials_kinsol"].system_libs = ["m"]

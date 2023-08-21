@@ -17,6 +17,7 @@ class LibgcryptConan(ConanFile):
     description = "Libgcrypt is a general purpose cryptographic library originally based on code from GnuPG"
     topics = ("gcrypt", "gnupg", "gpg", "crypto", "cryptography")
     license = "LGPL-2.1-or-later"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,16 +38,15 @@ class LibgcryptConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcap/2.65")
-        self.requires("libgpg-error/1.36")
+        self.requires("libcap/2.66")
+        self.requires("libgpg-error/1.36", transitive_headers=True)
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("This recipe only support Linux. You can contribute Windows and/or Macos support.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if not cross_building(self):

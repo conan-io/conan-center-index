@@ -5,12 +5,12 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 import stat
 
-required_conan_version = ">=1.56.0"
+required_conan_version = ">=1.57.0"
+
 
 class GmpConan(ConanFile):
     name = "gmp"
@@ -23,6 +23,7 @@ class GmpConan(ConanFile):
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -82,12 +83,11 @@ class GmpConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0")      # Needed for determining 32-bit word size
+            self.tool_requires("yasm/1.3.0") # Needed for determining 32-bit word size
             self.tool_requires("automake/1.16.5") # Needed for lib-wrapper
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -109,8 +109,7 @@ class GmpConan(ConanFile):
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
             tc.extra_cxxflags.append("-EHsc")
-            if (self.settings.compiler == "msvc" and Version(self.settings.compiler.version) >= "180") or \
-               (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "12"):
+            if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
         env = tc.environment() # Environment must be captured *after* setting extra_cflags, etc. to pick up changes

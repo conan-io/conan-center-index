@@ -15,6 +15,7 @@ class WatcherConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/e-dant/watcher/"
     topics = ("watch", "filesystem", "event", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property

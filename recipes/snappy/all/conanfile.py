@@ -21,10 +21,14 @@ class SnappyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_bmi2": [True, False, "auto"],
+        "with_ssse3": [True, False, "auto"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_bmi2": "auto",
+        "with_ssse3": "auto",
     }
 
     def export_sources(self):
@@ -33,6 +37,9 @@ class SnappyConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.with_bmi2
+            del self.options.with_ssse3
 
     def configure(self):
         if self.options.shared:
@@ -53,11 +60,18 @@ class SnappyConan(ConanFile):
         tc.variables["SNAPPY_BUILD_TESTS"] = False
         if Version(self.version) >= "1.1.8":
             tc.variables["SNAPPY_FUZZING_BUILD"] = False
+            # Don't use these avx options. These are useless.
+            # https://github.com/conan-io/conan-center-index/pull/16495
             tc.variables["SNAPPY_REQUIRE_AVX"] = False
             tc.variables["SNAPPY_REQUIRE_AVX2"] = False
             tc.variables["SNAPPY_INSTALL"] = True
         if Version(self.version) >= "1.1.9":
             tc.variables["SNAPPY_BUILD_BENCHMARKS"] = False
+        if self.settings.arch in ["x86", "x86_64"]:
+            if self.options.with_bmi2 != "auto":
+                tc.variables["SNAPPY_HAVE_BMI2"] = self.options.with_bmi2
+            if self.options.with_ssse3 != "auto":
+                tc.variables["SNAPPY_HAVE_SSSE3"] = self.options.with_ssse3
         tc.generate()
 
     def build(self):

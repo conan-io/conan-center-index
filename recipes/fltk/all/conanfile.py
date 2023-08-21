@@ -1,7 +1,11 @@
-from conans import CMake, ConanFile, tools
 import os
 
-required_conan_version = ">=1.43.0"
+import conan.tools.files as tools
+from conan import ConanFile
+from conans import CMake
+
+required_conan_version = ">=1.50.0"
+
 
 class FltkConan(ConanFile):
     name = "fltk"
@@ -17,13 +21,14 @@ class FltkConan(ConanFile):
         "with_gl": [True, False],
         "with_threads": [True, False],
         "with_gdiplus": [True, False],
+        "abi_version": "ANY"
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_gl": True,
         "with_threads": True,
-        "with_gdiplus": True,
+        "with_gdiplus": True
     }
     generators = "cmake", "cmake_find_package_multi"
 
@@ -41,6 +46,20 @@ class FltkConan(ConanFile):
             del self.options.fPIC
         else:
             del self.options.with_gdiplus
+        if self.options.abi_version == None:
+            _version_token = self.version.split(".")
+            _version_major = int(_version_token[0])
+            if len(_version_token) >= 3:
+                _version_minor = int(_version_token[1])
+                _version_patch = int(_version_token[2])
+            elif len(_version_token) >= 2:
+                _version_minor = int(_version_token[1])
+                _version_patch = 0
+            self.options.abi_version = str(
+                int(_version_major) * 10000 +
+                int(_version_minor) * 100 +
+                int(_version_patch)
+            )
 
     def configure(self):
         if self.options.shared:
@@ -57,7 +76,7 @@ class FltkConan(ConanFile):
             self.requires("xorg/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.get(self, **self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
@@ -69,12 +88,14 @@ class FltkConan(ConanFile):
         cmake.definitions['OPTION_USE_THREADS'] = self.options.with_threads
         cmake.definitions['OPTION_BUILD_HTML_DOCUMENTATION'] = False
         cmake.definitions['OPTION_BUILD_PDF_DOCUMENTATION'] = False
+        if self.options.abi_version:
+            cmake.definitions['OPTION_ABI_VERSION'] = self.options.abi_version
         cmake.configure()
         return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.patch(self, **patch)
 
         cmake = self._configure_cmake()
         cmake.build()
@@ -83,10 +104,10 @@ class FltkConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "FLTK.framework"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "fltk-config*")
+        tools.rmdir(self, os.path.join(self.package_folder, "share"))
+        tools.rmdir(self, os.path.join(self.package_folder, "FLTK.framework"))
+        tools.rmdir(self, os.path.join(self.package_folder, "CMake"))
+        tools.rm(self, "fltk-config*", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fltk")

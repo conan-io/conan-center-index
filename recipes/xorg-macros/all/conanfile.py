@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path_package_info_legacy
@@ -32,8 +33,10 @@ class XorgMacrosConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
         self.tool_requires("automake/1.16.5")
 
     def package_id(self):
@@ -49,6 +52,9 @@ class XorgMacrosConan(ConanFile):
             ["--datarootdir=${prefix}/bin/share"]
         )
         tc.generate()
+
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
     def build(self):
         apply_conandata_patches(self)
