@@ -530,6 +530,8 @@ class GdalConan(ConanFile):
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
             "libjxl":                     "JXL::JXL",
+            "libjpeg":                    "JPEG::JPEG",
+            "libjpeg-turbo::jpeg":        "JPEG::JPEG",
             "librasterlite2":             "RASTERLITE2::RASTERLITE2",
             "libspatialite":              "SPATIALITE::SPATIALITE",
             "libwebp":                    "WEBP::WebP",
