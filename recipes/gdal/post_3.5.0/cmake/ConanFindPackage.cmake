@@ -5,7 +5,12 @@ function(find_package2 pkgname)
     list(REMOVE_ITEM ARGN OUT_DEPENDENCY _find_dependency)
     # Force CONFIG mode
     list(REMOVE_ITEM ARGN MODULE NO_CONFIG NO_MODULE)
-    find_package(${pkgname} ${ARGN} CONFIG)
+    find_package(${pkgname} ${ARGN}
+        CONFIG
+        # Forbid the use of system libs entirely
+        NO_DEFAULT_PATH
+        PATHS ${CMAKE_PREFIX_PATH}
+    )
     # Add variables with upper-case package name in addition to the default ones
     string(TOUPPER ${pkgname} key)
     set(targets "")
