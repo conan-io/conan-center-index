@@ -95,5 +95,5 @@ class CpuinfoConan(ConanFile):
         self.cpp_info.components["cpuinfo"].libs = ["cpuinfo"]
         if self.version < "cci.20230118":
             self.cpp_info.components["cpuinfo"].requires = ["clog"]
-        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cpuinfo"].system_libs.append("pthread")
