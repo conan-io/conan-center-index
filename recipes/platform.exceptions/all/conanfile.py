@@ -6,7 +6,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.52.0"
 
 
 class PlatformExceptionsConan(ConanFile):
