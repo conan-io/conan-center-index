@@ -57,7 +57,7 @@ class FunctionsFrameworkCppConan(ConanFile):
 
     def requirements(self):
         self.requires("abseil/20230125.3")
-        self.requires("boost/1.82.0")
+        self.requires("boost/1.83.0")
         self.requires("nlohmann_json/3.11.2", transitive_headers=True)
 
     @property
