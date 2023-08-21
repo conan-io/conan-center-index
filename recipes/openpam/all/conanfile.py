@@ -12,7 +12,7 @@ required_conan_version = ">=1.54.0"
 class PackageConan(ConanFile):
     name = "openpam"
     description = "OpenPAM library"
-    license = "BSD"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = " https://openpam.org/"
     topics = ("pam")
