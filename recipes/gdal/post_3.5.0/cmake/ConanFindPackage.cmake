@@ -6,6 +6,7 @@ function(find_package2 pkgname)
     # Force CONFIG mode
     list(REMOVE_ITEM ARGN MODULE NO_CONFIG NO_MODULE)
     find_package(${pkgname} ${ARGN}
+        QUIET
         CONFIG
         # Forbid the use of system libs entirely
         NO_DEFAULT_PATH
