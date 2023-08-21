@@ -14,7 +14,7 @@ class PackageConan(ConanFile):
     description = "OpenPAM library"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = " https://openpam.org/"
+    homepage = "https://openpam.org/"
     topics = ("pam")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
