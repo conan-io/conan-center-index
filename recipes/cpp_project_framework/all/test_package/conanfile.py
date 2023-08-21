@@ -1,13 +1,20 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
-from conans import CMake
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
-class CppProjectFrameworkTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
-    requires = "gtest/1.10.0"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+        self.requires("gtest/1.13.0")
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -15,6 +22,6 @@ class CppProjectFrameworkTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")
