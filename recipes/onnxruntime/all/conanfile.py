@@ -72,22 +72,22 @@ class OnnxRuntimeConan(ConanFile):
         }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
-        self.requires("abseil/20230125.2")
+        self.requires("abseil/20230125.3")
         self.requires("protobuf/3.21.9")
         self.requires("date/3.0.1")
         self.requires("re2/20230301")
         self.requires(f"onnx/{self._onnx_version}")
         self.requires("flatbuffers/1.12.0")
-        self.requires("boost/1.81.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
+        self.requires("boost/1.82.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
         self.requires("nlohmann_json/3.11.2")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20220228")
+        self.requires("cpuinfo/cci.20220618")
         if self.settings.os != "Windows":
-            self.requires("nsync/1.25.0")
+            self.requires("nsync/1.26.0")
         else:
-            self.requires("wil/1.0.230202.1")
+            self.requires("wil/1.0.230629.1")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
 
