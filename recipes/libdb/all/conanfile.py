@@ -66,7 +66,7 @@ class LibdbConan(ConanFile):
             self.requires("tcl/8.6.10")
 
     def validate(self):
-        if is_msvc(self) and check_min_vs(self, "191", raise_invalid=False):
+        if is_msvc(self) and check_min_vs(self, "192", raise_invalid=False):
             # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
             # Currently won't work with Visual Studio 2019 or newer
             raise ConanInvalidConfiguration(f"{self.ref} Visual Studio 2019 is currently not supported. Contributions are welcomed!")
