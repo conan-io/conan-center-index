@@ -10,14 +10,14 @@ required_conan_version = ">=1.53.0"
 
 class NewmatConan(ConanFile):
     name = "newmat"
-    package_type = "library"
+    description = "Manipulate a variety of types of matrices using standard matrix operations."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://newmat.net"
-    description = "Manipulate a variety of types of matrices using standard matrix operations."
-    settings = "os", "compiler", "build_type", "arch"
-    topics = ("newmat", "matrix")
+    topics = ("matrix")
     license = "LicenseRef-newmat"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -44,7 +44,7 @@ class NewmatConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate_build(self):
+    def validate(self):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support dynamic library with msvc.")
 
@@ -76,18 +76,7 @@ class NewmatConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ["Newmat"]
-        elif self.settings.os == "Macos":
-            if self.options.shared:
-                self.cpp_info.libs = ["libNewmat.dylib"]
-            else:
-                self.cpp_info.libs = ["libNewmat.a"]
-        else:
-            if self.options.shared:
-                self.cpp_info.libs = ["libNewmat.so"]
-            else:
-                self.cpp_info.libs = ["libNewmat.a"]
+        self.cpp_info.libs = ["newmat"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

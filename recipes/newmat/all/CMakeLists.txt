@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(
-  "Newmat"
+  "newmat"
   DESCRIPTION
     "The package is intended for scientists and engineers who need to \
     manipulate a variety of types of matrices using standard matrix \
