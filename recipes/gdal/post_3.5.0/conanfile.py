@@ -529,7 +529,8 @@ class GdalConan(ConanFile):
             "libdeflate":                 "Deflate::Deflate",
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
-            "libjxl":                     "JXL::JXL",
+            "libjxl::jxl":                "JXL::JXL",
+            "libjxl::jxl_threads":        "JXL_THREADS::JXL_THREADS",
             "libjpeg":                    "JPEG::JPEG",
             "libjpeg-turbo::jpeg":        "JPEG::JPEG",
             "librasterlite2":             "RASTERLITE2::RASTERLITE2",
@@ -568,6 +569,9 @@ class GdalConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
                         "PRIVATE Deflate::Deflate",
                         "PUBLIC Deflate::Deflate")
+        # JXL_THREADS is provided under the JXL package in Conan.
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                        "JXL_THREADS", "JXL", strict=False)
 
     def build(self):
         self._patch_sources()
