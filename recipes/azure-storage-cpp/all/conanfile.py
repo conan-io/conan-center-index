@@ -51,7 +51,7 @@ class AzureStorageCppConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("boost/1.76.0")
             self.requires("libxml2/2.9.10")
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
         if self.settings.os == "Macos":
             self.requires("libgettext/0.20.1")
 
