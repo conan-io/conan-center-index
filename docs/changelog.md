@@ -1,5 +1,11 @@
 # Changelog
 
+### 17-Aug-2023 - 11:42 CEST
+
+- [fix] Fix type error when catching generic exceptions in Jenkins
+- [fix] Bump dependencies no longer allow version range
+- [feature] Show recipe revision on the pull-request summary table
+
 ### 04-Aug-2023 - 10:26 CEST
 
 - [feature] Enable Conan 2.0.8

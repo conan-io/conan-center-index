@@ -1,4 +1,7 @@
 sources:
+  "5.0.0":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v5.0.0.tar.gz"
+    sha256: "a2991cb222c944aee14397965d9f6b050245da849d8c5da7c72d112de2786b5b"
   "4.1.1":
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v4.1.1.tar.gz"
     sha256: "9009d093e48b3189487d67fc3e375a57c7b354c0e43fc554ad31bec74a4bc2dd"
