@@ -1,5 +1,5 @@
 project('test_package', 'cpp')
-package_dep = dependency('package')
+package_dep = dependency('very-simple-smtps')
 executable('test_package',
             sources : ['test_package.cpp'],
             dependencies : [package_dep])

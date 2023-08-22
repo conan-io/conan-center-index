@@ -139,9 +139,10 @@ class VerySimpleSmtpsConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="include/*.hpp", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
         meson = Meson(self)
         meson.install()
-
+        
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -152,9 +153,9 @@ class VerySimpleSmtpsConan(ConanFile):
 
     def package_info(self):
         # avoid collect_libs(), prefer explicit library name instead
-        self.cpp_info.libs = ["package_lib"]
+        self.cpp_info.libs = ["libsmtp_lib.a"]
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "package")
+        self.cpp_info.set_property("pkg_config_name", "very-simple-smtps")
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
