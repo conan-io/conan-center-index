@@ -1,7 +1,7 @@
 sources:
   "5.2.5":
     url: "https://github.com/assimp/assimp/archive/refs/tags/v5.2.5.tar.gz"
-    sha256: "baa89858c7e545390273530ba63c61b94c2e09d38c28b0a0311bfa7bde396181"
+    sha256: "b5219e63ae31d895d60d98001ee5bb809fb2c7b2de1e7f78ceeb600063641e1a"
   "5.2.2":
     url: "https://github.com/assimp/assimp/archive/refs/tags/v5.2.2.tar.gz"
     sha256: "ad76c5d86c380af65a9d9f64e8fc57af692ffd80a90f613dfc6bd945d0b80bb4"
