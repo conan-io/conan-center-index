@@ -65,6 +65,8 @@ class Libfreenect2Conan(ConanFile):
             self.requires("glfw/3.3.8")
         if self.options.get_safe("with_vaapi"):
             self.requires("vaapi/system")
+        if self.options.with_cuda:
+            self.requires("cuda-samples/12.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -88,10 +90,9 @@ class Libfreenect2Conan(ConanFile):
         tc.variables["ENABLE_TEGRAJPEG"] = False  # TODO: TegraJPEG
         tc.variables["ENABLE_PROFILING"] = False
         if self.options.with_cuda:
+            tc.variables["NVCUDASAMPLES_ROOT"] = os.path.join(self.dependencies["cuda-samples"].package_folder, "include")
             # Required for deprecated FindCUDA support
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0146"] = "OLD"
-            # TODO: create a Conan package for https://github.com/NVIDIA/cuda-samples Common headers
-            # The user will have to set NVCUDASAMPLES_ROOT either as a CMake or environment variable for now
         tc.generate()
 
         deps = CMakeDeps(self)
