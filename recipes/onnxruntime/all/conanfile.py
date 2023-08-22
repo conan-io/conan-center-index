@@ -75,10 +75,10 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("abseil/20230125.3")
         self.requires("protobuf/3.21.9")
         self.requires("date/3.0.1")
-        self.requires("re2/20230301")
+        self.requires("re2/20230801")
         self.requires(f"onnx/{self._onnx_version}")
         self.requires("flatbuffers/1.12.0")
-        self.requires("boost/1.82.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
+        self.requires("boost/1.83.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
         self.requires("nlohmann_json/3.11.2")
         self.requires("eigen/3.4.0")
