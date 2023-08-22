@@ -98,23 +98,23 @@ class OpenvinoConan(ConanFile):
 
     @property
     def _gpu_option_available(self):
-        return self.settings.os != "Macos" and self._target_x86_64
+        return self.settings.os != "Macos"
 
     @property
     def _preprocessing_available(self):
         return Version(self.version) <= "2023.1.0"
 
     def source(self):
-        # pass
-        get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
-        get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
-        get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
-        get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
-        get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
+        pass
+        # get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
+        # get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
+        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
+        # get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
+        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
+        # get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
+        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
+        # get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
+        #     destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -171,8 +171,8 @@ class OpenvinoConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        # cmake_layout(self, src_folder="/Users/sandye51/Documents/Programming/git_repo/openvino",
-        #                    build_folder="/Users/sandye51/Documents/Programming/builds/openvino-release-conan")
+        cmake_layout(self, src_folder="/openvino",
+                           build_folder="/openvino-release-conan")
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -183,8 +183,7 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
-            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False
-            # toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
+            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
         # SW plugins
@@ -222,8 +221,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
-        # toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
-        # toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
+        toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+        toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
         toolchain.generate()
 
     def validate(self):
