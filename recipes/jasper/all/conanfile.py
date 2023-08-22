@@ -49,7 +49,7 @@ class JasperConan(ConanFile):
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_libjpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
 
