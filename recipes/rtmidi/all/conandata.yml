@@ -11,7 +11,14 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-add-a-separate-licence-file-0b5d67c.patch"
+      patch_description: "Add a separate LICENCE file"
+      patch_source: "https://github.com/thestk/rtmidi/commit/0b5d67c"
+      patch_type: "conan"
     - patch_file: "patches/4.0.0-0002-rtmidiconfig-install-location-da51f21.patch"
+      patch_description: "Install rtmidiconfig in the correct location"
+      patch_source: "https://github.com/conan-io/conan-center-index/issues/252"
+      patch_type: "conan"
     - patch_file: "patches/4.0.0-0003-relocatable-macos.patch"
       patch_description: "Relocatable shared lib on macOS"
+      patch_source: "https://github.com/thestk/rtmidi/pull/211"
       patch_type: "conan"
