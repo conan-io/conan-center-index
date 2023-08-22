@@ -71,4 +71,10 @@ class AclConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libacl")
+        self.cpp_info.set_property("cmake_file_name", "acl")
+        self.cpp_info.set_property("cmake_target_name", "acl::acl")
+        self.cpp_info.set_property("cmake_target_aliases", ["acl"])
         self.cpp_info.libs = ["acl"]
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "acl"
+        self.cpp_info.names["cmake_find_package_multi"] = "acl"
