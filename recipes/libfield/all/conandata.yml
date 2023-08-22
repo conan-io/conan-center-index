@@ -1,0 +1,5 @@
+sources:
+  "0.9.2":
+    url:
+      - "https://github.com/CD3/libField/archive/refs/tags/0.9.2.tar.gz"
+    sha256: "6bd90b7b1d964d396303a6ca25236400f6b0a08d15c4895f70621de84b7061bc"

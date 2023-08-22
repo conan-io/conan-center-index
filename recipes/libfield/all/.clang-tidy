@@ -1,0 +1,9 @@
+HeaderFilterRegex: '.*'
+Checks: '-*,modernize-*,readability-identifier-naming'
+CheckOptions:
+  - { key: readability-identifier-naming.NamespaceCase,       value: lower_case }
+  - { key: readability-identifier-naming.StructCase,          value: CamelCase  }
+  - { key: readability-identifier-naming.ClassCase,           value: CamelCase  }
+  - { key: readability-identifier-naming.PrivateMemberPrefix, value: m_         }
+  - { key: readability-identifier-naming.FunctionCase,        value: camelCase  }
+  - { key: readability-identifier-naming.GlobalConstantCase,  value: UPPER_CASE }
