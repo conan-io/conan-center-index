@@ -66,7 +66,14 @@ class OpenTDFConan(ConanFile):
             raise ConanInvalidConfiguration(f'{self.name} can not be built with MT or MTd at this time')
 
     def requirements(self):
-        self.requires("openssl/1.1.1q")
+        # Uses openssl 3.x for 1.5.0 and newer
+        if Version(self.version) >= "1.5.0":
+            self.requires("openssl/[>=3.1 <4]")
+        else:
+            self.requires("openssl/1.1.1u")
+        # Uses magic_enum for 1.4.0 and newer
+        if Version(self.version) >= "1.4.0":
+            self.requires("magic_enum/0.8.2")
         self.requires("ms-gsl/2.1.0")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
@@ -121,3 +128,5 @@ class OpenTDFConan(ConanFile):
         self.cpp_info.components["libopentdf"].requires = ["openssl::openssl", "boost::boost", "ms-gsl::ms-gsl", "libxml2::libxml2", "jwt-cpp::jwt-cpp", "nlohmann_json::nlohmann_json"]
         if Version(self.version) < "1.1.0":
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
+        if Version(self.version) >= "1.4.0":
+            self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")

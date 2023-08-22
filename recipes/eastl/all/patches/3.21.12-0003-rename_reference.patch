@@ -1,0 +1,13 @@
+diff --git a/include/EASTL/internal/type_transformations.h b/include/EASTL/internal/type_transformations.h
+index 5454cfa..54a1c14 100644
+--- a/include/EASTL/internal/type_transformations.h
++++ b/include/EASTL/internal/type_transformations.h
+@@ -497,7 +497,7 @@ namespace eastl
+ 	namespace internal
+ 	{
+ 		template <typename T>
+-		auto try_add_pointer(int) -> type_identity<typename std::remove_reference<T>::type*>;
++		auto try_add_pointer(int) -> type_identity<typename eastl::remove_reference<T>::type*>;
+ 		template <typename T>
+ 		auto try_add_pointer(...) -> type_identity<T>;
+ 	}

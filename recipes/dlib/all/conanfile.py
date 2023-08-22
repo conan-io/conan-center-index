@@ -1,6 +1,9 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rmdir
 from conan.tools.microsoft import is_msvc
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conans import CMake, tools
 import functools
 import os
 
@@ -56,7 +59,7 @@ class DlibConan(ConanFile):
 
     @property
     def _has_with_webp_option(self):
-        return tools.Version(self.version) >= "19.24"
+        return Version(self.version) >= "19.24"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,15 +79,15 @@ class DlibConan(ConanFile):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.40")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.2.2")
+            self.requires("libwebp/1.3.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.42.0")
         if self.options.with_openblas:
-            self.requires("openblas/0.3.17")
+            self.requires("openblas/0.3.20")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
@@ -93,7 +96,7 @@ class DlibConan(ConanFile):
             raise ConanInvalidConfiguration("dlib doesn't support macOS M1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
@@ -178,7 +181,7 @@ class DlibConan(ConanFile):
             os.path.join("include", "dlib", "cmake_utils"),
             os.path.join("include", "dlib", "external", "pybind11", "tools")
         ]:
-            tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
+            rmdir(self, os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "dlib")
