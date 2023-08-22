@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm
+from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -153,7 +153,9 @@ class OpenVDBConan(ConanFile):
 
     def _patch_sources(self):
         # Remove FindXXX files from OpenVDB. Let Conan do the job
-        rm(self, "Find*", os.path.join(self.source_folder, "cmake"), recursive=True)
+        rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"), recursive=True)
+        replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
+                        "${MINIMUM_TBB_VERSION}", "")
 
     def build(self):
         self._patch_sources()
