@@ -63,7 +63,7 @@ class IceoryxConan(ConanFile):
             check_min_cppstd(self, 14)
 
         if compiler == "msvc":
-            if version < "16":
+            if version < "192":
                 raise ConanInvalidConfiguration("Iceoryx is just supported for Visual Studio 2019 and higher.")
             if self.options.shared:
                 raise ConanInvalidConfiguration(
@@ -87,6 +87,7 @@ class IceoryxConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
+        copy(self, "CMakeLists.txt", self.export_sources_folder, self.source_folder)
         apply_conandata_patches(self)
         # Honor fPIC option
         iceoryx_utils = "iceoryx_hoofs" if Version(self.version) >= "2.0.0" else "iceoryx_utils"
@@ -109,7 +110,7 @@ class IceoryxConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "iceoryx_meta"))
+        cmake.configure()
         cmake.build()
 
     def package(self):
