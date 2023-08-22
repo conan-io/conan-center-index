@@ -96,6 +96,7 @@ required_for_references:
 - boost
 - boost-ext-ut
 - boost-leaf
+- boostdep
 - box2d
 - breakpad
 - brigand
@@ -637,6 +638,7 @@ required_for_references:
 - libx264
 - libx265
 - libxcrypt
+- libxft
 - libxls
 - libxlsxwriter
 - libxml2
@@ -854,6 +856,7 @@ required_for_references:
 - picobench
 - picojson
 - picosha2
+- pipes
 - pixman
 - pkgconf
 - platform.delegates
