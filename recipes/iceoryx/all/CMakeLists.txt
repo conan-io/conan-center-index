@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
-project(cmake_wrapper)
+cmake_minimum_required(VERSION 3.5)
+project(cmake_wrapper
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   find_package(acl REQUIRED)
