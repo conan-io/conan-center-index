@@ -67,19 +67,16 @@ class OpenVDBConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         # onetbb/2021.x fails with "'tbb::split' has not been declared"
-        self.requires("onetbb/2020.3", transitive_headers=True)
+        self.requires("onetbb/2020.3.3", transitive_headers=True)
+        # required for IlmBase::Half even if with_exr is not enabled
         if Version(self.version) >= "8.2.0":
-            self.requires("openexr/3.1.7", transitive_headers=True)
+            self.requires("openexr/3.1.9", transitive_headers=True)
         else:
             self.requires("openexr/2.5.7", transitive_headers=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_exr:
-            # Not necessary now. Required for IlmBase::IlmImf
-            # self.requires("openexr/2.5.7", transitive_headers=True)
-            pass
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.4")
         if self.options.with_log4cplus:
@@ -108,43 +105,43 @@ class OpenVDBConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # exposed options
-        tc.variables["USE_BLOSC"] = self.options.with_blosc
-        tc.variables["USE_ZLIB"] = self.options.with_zlib
-        tc.variables["USE_LOG4CPLUS"] = self.options.with_log4cplus
-        tc.variables["USE_EXR"] = self.options.with_exr
-        tc.variables["OPENVDB_SIMD"] = self.options.simd
+        tc.cache_variables["USE_BLOSC"] = self.options.with_blosc
+        tc.cache_variables["USE_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["USE_LOG4CPLUS"] = self.options.with_log4cplus
+        tc.cache_variables["USE_EXR"] = self.options.with_exr
+        tc.cache_variables["OPENVDB_SIMD"] = self.options.simd
 
-        tc.variables["OPENVDB_CORE_SHARED"] = self.options.shared
-        tc.variables["OPENVDB_CORE_STATIC"] = not self.options.shared
+        tc.cache_variables["OPENVDB_CORE_SHARED"] = self.options.shared
+        tc.cache_variables["OPENVDB_CORE_STATIC"] = not self.options.shared
 
         # All available options but not exposed yet. Set to default values
-        tc.variables["OPENVDB_BUILD_CORE"] = True
-        tc.variables["OPENVDB_BUILD_BINARIES"] = False
-        tc.variables["OPENVDB_BUILD_PYTHON_MODULE"] = False
-        tc.variables["OPENVDB_BUILD_UNITTESTS"] = False
-        tc.variables["OPENVDB_BUILD_DOCS"] = False
-        tc.variables["OPENVDB_BUILD_HOUDINI_PLUGIN"] = False
-        tc.variables["OPENVDB_BUILD_HOUDINI_ABITESTS"] = False
+        tc.cache_variables["OPENVDB_BUILD_CORE"] = True
+        tc.cache_variables["OPENVDB_BUILD_BINARIES"] = False
+        tc.cache_variables["OPENVDB_BUILD_PYTHON_MODULE"] = False
+        tc.cache_variables["OPENVDB_BUILD_UNITTESTS"] = False
+        tc.cache_variables["OPENVDB_BUILD_DOCS"] = False
+        tc.cache_variables["OPENVDB_BUILD_HOUDINI_PLUGIN"] = False
+        tc.cache_variables["OPENVDB_BUILD_HOUDINI_ABITESTS"] = False
 
-        tc.variables["OPENVDB_BUILD_AX"] = False
-        tc.variables["OPENVDB_BUILD_AX_BINARIES"] = False
-        tc.variables["OPENVDB_BUILD_AX_UNITTESTS"] = False
+        tc.cache_variables["OPENVDB_BUILD_AX"] = False
+        tc.cache_variables["OPENVDB_BUILD_AX_BINARIES"] = False
+        tc.cache_variables["OPENVDB_BUILD_AX_UNITTESTS"] = False
 
-        tc.variables["OPENVDB_BUILD_MAYA_PLUGIN"] = False
-        tc.variables["OPENVDB_ENABLE_RPATH"] = False
-        tc.variables["OPENVDB_CXX_STRICT"] = False
-        tc.variables["USE_HOUDINI"] = False
-        tc.variables["USE_MAYA"] = False
-        tc.variables["USE_STATIC_DEPENDENCIES"] = False
-        tc.variables["USE_PKGCONFIG"] = False
-        tc.variables["OPENVDB_INSTALL_CMAKE_MODULES"] = False
+        tc.cache_variables["OPENVDB_BUILD_MAYA_PLUGIN"] = False
+        tc.cache_variables["OPENVDB_ENABLE_RPATH"] = False
+        tc.cache_variables["OPENVDB_CXX_STRICT"] = False
+        tc.cache_variables["USE_HOUDINI"] = False
+        tc.cache_variables["USE_MAYA"] = False
+        tc.cache_variables["USE_STATIC_DEPENDENCIES"] = False
+        tc.cache_variables["USE_PKGCONFIG"] = False
+        tc.cache_variables["OPENVDB_INSTALL_CMAKE_MODULES"] = False
 
-        tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
-        tc.variables["OPENEXR_USE_STATIC_LIBS"] = not self.dependencies["openexr"].options.shared
+        tc.cache_variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
+        tc.cache_variables["OPENEXR_USE_STATIC_LIBS"] = not self.dependencies["openexr"].options.shared
 
-        tc.variables["OPENVDB_DISABLE_BOOST_IMPLICIT_LINKING"] = True
+        tc.cache_variables["OPENVDB_DISABLE_BOOST_IMPLICIT_LINKING"] = True
 
-        tc.variables["OPENVDB_FUTURE_DEPRECATION"] = False
+        tc.cache_variables["OPENVDB_FUTURE_DEPRECATION"] = False
 
         tc.generate()
 
