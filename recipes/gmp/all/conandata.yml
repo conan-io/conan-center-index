@@ -1,5 +1,5 @@
 sources:
-  "6.2.1":
+  "6.3.0":
     url:
       - "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2"
       - "https://gmplib.org/download/gmp/gmp-6.3.0.tar.bz2"
