@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, collect_libs
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -139,7 +139,7 @@ class VerySimpleSmtpsConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="include/*.hpp", dst=os.path.join(self.package_folder, "include"), src=self.source_folder, keep_path=False)
+        copy(self, pattern="include/*.hpp", dst=os.path.join(self.package_folder, ""), src=self.source_folder)
         meson = Meson(self)
         meson.install()
         
@@ -153,7 +153,9 @@ class VerySimpleSmtpsConan(ConanFile):
 
     def package_info(self):
         # avoid collect_libs(), prefer explicit library name instead
-        self.cpp_info.libs = ["libsmtp_lib.a"]
+        self.cpp_info.libs = ["libsmtp_lib"]
+        self.output.info("[+] DEBUG: ")
+        self.output.info(self.cpp_info.libdirs)
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "very-simple-smtps")
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
