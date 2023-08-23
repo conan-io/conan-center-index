@@ -77,4 +77,5 @@ class PackageConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["brunslidec-c", "brunslienc-c"]
+        self.cpp_info.components["brunslidec-c"].libs = ["brunslidec-c"]
+        self.cpp_info.components["brunslienc-c"].libs = ["brunslienc-c"]
