@@ -1,0 +1,45 @@
+From 751223394e7d58e6b2af8a8495328eea61544538 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Wed, 23 Aug 2023 15:02:01 -0500
+Subject: [PATCH] Insert freertos_config CMake target for the FreeRTOSConfig.h
+ header
+
+---
+ CMakeLists.txt | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a68b652ca..28a6fd797 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,6 +13,27 @@ cmake_minimum_required(VERSION 3.15)
+ # option FREERTOS_HEAP. If the option is not set, the cmake will default to
+ # using heap_4.c.
+ 
++project(freertos_kernel LANGUAGES C)
++
++add_library(freertos_config INTERFACE)
++
++set_property(
++  TARGET freertos_config
++  APPEND
++  PROPERTY PUBLIC_HEADER
++           ${_FREERTOS_CONFIG_DIR}/FreeRTOSConfig.h
++)
++
++target_compile_definitions(freertos_config INTERFACE projCOVERAGE_TEST=0)
++
++target_include_directories(freertos_config INTERFACE ${_FREERTOS_CONFIG_DIR})
++
++include(GNUInstallDirs)
++
++install(TARGETS freertos_config
++        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
++
+ # `freertos_config` target defines the path to FreeRTOSConfig.h and optionally other freertos based config files
+ if(NOT TARGET freertos_config )
+     if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY )
+-- 
+2.41.0
+
