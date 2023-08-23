@@ -69,7 +69,7 @@ class RsyncConan(ConanFile):
             raise ConanInvalidConfiguration(f"Windows is not supported.")        
 
         if is_apple_os(self):
-            raise ConanInvalidConfiguration(f"Apple operating systems is not supported.")        
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on Apple systems.")        
 
     def generate(self):
         ad = AutotoolsDeps(self)
