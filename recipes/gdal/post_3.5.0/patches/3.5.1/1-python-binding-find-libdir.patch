@@ -1,0 +1,13 @@
+diff --git a/swig/python/CMakeLists.txt b/swig/python/CMakeLists.txt
+index a4ca7e7..1f4812b 100644
+--- a/swig/python/CMakeLists.txt
++++ b/swig/python/CMakeLists.txt
+@@ -185,7 +185,7 @@ if (Python_Interpreter_FOUND)
+     # Do not use file(GENERATE) as, for some unknown reason, it would cause cmake to be reinvoked every time make is
+     # involved
+     get_target_property(_gdal_lib_directory ${GDAL_LIB_TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
+-    set(GDAL_LIB_DIR "'${_gdal_lib_directory}'")
++    set(GDAL_LIB_DIR "'${_gdal_lib_directory}/../lib'")
+     set(SETUP_PY_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in ${SETUP_PY_FILENAME} @ONLY)
+   endif ()

@@ -67,6 +67,7 @@ class GdalConan(ConanFile):
         "with_podofo": [True, False],
         "with_poppler": [True, False],
         "with_proj": [True, False],
+        "with_python_bindings": [True, False],
         "with_qhull": [True, False],
         "with_sqlite3": [True, False],
         "with_webp": [True, False],
@@ -117,6 +118,7 @@ class GdalConan(ConanFile):
         "with_podofo": False,
         "with_poppler": False,
         "with_proj": True,
+        "with_python_bindings": False,
         "with_qhull": True,
         "with_sqlite3": True,
         "with_webp": False,
@@ -333,7 +335,7 @@ class GdalConan(ConanFile):
 
         cmake.definitions["BUILD_JAVA_BINDINGS"] = False
         cmake.definitions["BUILD_CSHARP_BINDINGS"] = False
-        cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
+        cmake.definitions["BUILD_PYTHON_BINDINGS"] = self.options.with_python_bindings
 
         cmake.definitions["BUILD_TESTING"] = False
         cmake.definitions["GDAL_USE_ZLIB_INTERNAL"] = False
