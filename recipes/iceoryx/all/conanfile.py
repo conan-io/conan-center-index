@@ -47,9 +47,9 @@ class IceoryxConan(ConanFile):
 
     def requirements(self):
         if self.options.toml_config:
-            self.requires("cpptoml/0.1.1")
+            self.requires("cpptoml/0.1.1", transitive_headers=True)
         if self.settings.os == "Linux":
-            self.requires("acl/2.3.1")
+            self.requires("acl/2.3.1", transitive_headers=True)
 
     def build_requirements(self):
         if Version(self.version) >= "2.0.0":
