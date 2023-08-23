@@ -16,6 +16,7 @@ class BrotliConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,6 +27,7 @@ class BrotliConan(ConanFile):
         "enable_debug": [True, False],
         "enable_log": [True, False],
     }
+
     default_options = {
         "shared": False,
         "fPIC": True,
