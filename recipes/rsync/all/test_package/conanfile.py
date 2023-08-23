@@ -1,9 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.errors import ConanException
 import os
-from io import StringIO
-import re
 
 
 class TestPackageConan(ConanFile):
