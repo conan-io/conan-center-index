@@ -241,6 +241,7 @@ required_for_references:
 - dirent
 - discount
 - djinni-generator
+- dlib
 - dlpack
 - docopt.cpp
 - doctest
@@ -444,6 +445,7 @@ required_for_references:
 - iqa
 - irrxml
 - iso8601lib
+- itk
 - itlib
 - ittapi
 - ixwebsocket
@@ -760,6 +762,7 @@ required_for_references:
 - neargye-semver
 - netcdf
 - nettle
+- newmat
 - nextsilicon-cpp-subprocess
 - nfrechette-acl
 - ninja
@@ -819,6 +822,7 @@ required_for_references:
 - openmvg
 - openssl
 - opensubdiv
+- opentdf-client
 - opentelemetry-cpp
 - opentelemetry-proto
 - opentracing-cpp
