@@ -120,6 +120,11 @@ class OpenVDBConan(ConanFile):
         if is_msvc(self):
             # Supported by GCC and Clang only
             del self.options.use_colored_output
+        if Version(self.version) < "10.0.0":
+            del self.options.use_explicit_instantiation
+            del self.options.use_delayed_loading
+        elif Version(self.version) < "8.1.0":
+            del self.options.use_imath_half
 
     def configure(self):
         if self.options.shared:
@@ -129,9 +134,8 @@ class OpenVDBConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
+        # with_exr is deprecated and has no effect
         del self.info.options.with_exr
-        if Version(self.version) < "8.1.0":
-            self.info.options.use_imath_half = True
 
     def requirements(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L36-L84
@@ -140,7 +144,7 @@ class OpenVDBConan(ConanFile):
             self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("onetbb/2020.3", transitive_headers=True, transitive_libs=True)
-        if self.options.use_imath_half or Version(self.version) < "8.1.0":
+        if Version(self.version) < "8.1.0" or self.options.use_imath_half:
             # OpenVDB does not support the separate imath/3.* package, unfortunately.
             self.requires("openexr/2.5.7", transitive_headers=True)
         if self.options.with_zlib:
@@ -199,14 +203,14 @@ class OpenVDBConan(ConanFile):
         tc.cache_variables["OPENVDB_FUTURE_DEPRECATION"] = True
         tc.cache_variables["OPENVDB_INSTALL_CMAKE_MODULES"] = False
         tc.cache_variables["OPENVDB_SIMD"] = self.options.simd
-        tc.cache_variables["OPENVDB_USE_DELAYED_LOADING"] = self.options.use_delayed_loading
+        tc.cache_variables["OPENVDB_USE_DELAYED_LOADING"] = self.options.get_safe("use_delayed_loading", False)
         tc.cache_variables["USE_AX"] = False # used only by Python bindings and the Houdini plugin
         tc.cache_variables["USE_BLOSC"] = self.options.with_blosc
-        tc.cache_variables["USE_COLORED_OUTPUT"] = self.options.get_safe("use_colored_output")
-        tc.cache_variables["USE_EXPLICIT_INSTANTIATION"] = self.options.use_explicit_instantiation
+        tc.cache_variables["USE_COLORED_OUTPUT"] = self.options.get_safe("use_colored_output", False)
+        tc.cache_variables["USE_EXPLICIT_INSTANTIATION"] = self.options.get_safe("use_explicit_instantiation", False)
         tc.cache_variables["USE_EXR"] = False
         tc.cache_variables["USE_HOUDINI"] = False
-        tc.cache_variables["USE_IMATH_HALF"] = self.options.use_imath_half
+        tc.cache_variables["USE_IMATH_HALF"] = self.options.get_safe("use_imath_half", False)
         tc.cache_variables["USE_LOG4CPLUS"] = self.options.with_log4cplus
         tc.cache_variables["USE_MAYA"] = False
         tc.cache_variables["USE_NANOVDB"] = False
@@ -293,7 +297,7 @@ class OpenVDBConan(ConanFile):
             main_component.requires.append("c-blosc::c-blosc")
         if self.options.with_log4cplus:
             main_component.requires.append("log4cplus::log4cplus")
-        if self.options.use_imath_half or Version(self.version) < "8.1.0":
+        if Version(self.version) < "8.1.0" or self.options.use_imath_half:
             main_component.requires.append("openexr::ilmbase_half")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
