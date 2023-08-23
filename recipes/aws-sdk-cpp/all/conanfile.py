@@ -348,7 +348,7 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-cal/0.5.13")
             self.requires("aws-c-http/0.6.13")
             self.requires("aws-c-io/0.10.20")
-            self.requires("aws-crt-cpp/0.17.23")
+            self.requires("aws-crt-cpp/0.17.23", transitive_headers=True)
         if self.settings.os != "Windows":
             self.requires("openssl/3.1.0")
             self.requires("libcurl/8.0.1")
@@ -486,6 +486,9 @@ class AwsSdkCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "AWSSDK")
 
+        sdk_plugin_conf = os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [sdk_plugin_conf])
+
         # core component
         self.cpp_info.components["core"].set_property("cmake_target_name", "AWS::aws-sdk-cpp-core")
         self.cpp_info.components["core"].set_property("pkg_config_name", "aws-sdk-cpp-core")
@@ -557,9 +560,6 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["plugin_scripts"].builddirs.extend([
             os.path.join(self._res_folder, "cmake"),
             os.path.join(self._res_folder, "toolchains")])
-        sdk_plugin_conf = os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake")
-        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package"] = [sdk_plugin_conf]
-        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package_multi"] = [sdk_plugin_conf]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"
@@ -568,3 +568,5 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "AWS"
         self.cpp_info.components["core"].names["cmake_find_package"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
+        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package"] = [sdk_plugin_conf]
+        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package_multi"] = [sdk_plugin_conf]
