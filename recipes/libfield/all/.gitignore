@@ -1,6 +1,0 @@
-.*.swp
-*.o
-int
-build*
-.clangd/
-CMakeUserPresets.json
