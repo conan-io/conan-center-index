@@ -1,10 +1,10 @@
 sources:
-  # "10.0.1":
-  #   url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v10.0.1.tar.gz"
-  #   sha256: "887a3391fbd96b20c77914f4fb3ab4b33d26e5fc479aa036d395def5523c622f"
-  # "9.1.0":
-  #   url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v9.1.0.tar.gz"
-  #   sha256: "914ee417b4607c75c95b53bc73a0599de4157c7d6a32e849e80f24e40fb64181"
+  "10.0.1":
+    url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v10.0.1.tar.gz"
+    sha256: "887a3391fbd96b20c77914f4fb3ab4b33d26e5fc479aa036d395def5523c622f"
+  "9.1.0":
+    url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v9.1.0.tar.gz"
+    sha256: "914ee417b4607c75c95b53bc73a0599de4157c7d6a32e849e80f24e40fb64181"
   "8.2.0":
     url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v8.2.0.tar.gz"
     sha256: "d2e77a0720db79e9c44830423bdb013c24a1cf50994dd61d570b6e0c3e0be699"
