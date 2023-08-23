@@ -57,15 +57,15 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.41.1", run=can_run(self))
+        self.requires("sqlite3/3.42.0", run=can_run(self))
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.1")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.88.1")
+            self.requires("libcurl/8.2.1")
 
     def build_requirements(self):
         if not can_run(self):
-            self.tool_requires("sqlite3/3.41.1")
+            self.tool_requires("sqlite3/3.42.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

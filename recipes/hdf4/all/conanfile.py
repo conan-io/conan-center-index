@@ -1,4 +1,7 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.files import get, rmdir
+from conans import CMake, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -53,18 +56,18 @@ class Hdf4Conan(ConanFile):
             del self.options.szip_encoding
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.1.2")
+            self.requires("libjpeg-turbo/2.1.5")
         else:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.szip_support == "with_libaec":
             self.requires("libaec/1.0.6")
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        get(self, **self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
@@ -96,7 +99,7 @@ class Hdf4Conan(ConanFile):
         self._cmake.definitions["HDF4_BUILD_TOOLS"] = False
         self._cmake.definitions["HDF4_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF4_BUILD_JAVA"] = False
-        if tools.cross_building(self):
+        if cross_building(self):
             self._cmake.definitions["H4_PRINTF_LL_TEST_RUN"] = "0"
             self._cmake.definitions["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -106,7 +109,7 @@ class Hdf4Conan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.remove(os.path.join(self.package_folder, "lib", "libhdf4.settings"))
 
     def package_info(self):

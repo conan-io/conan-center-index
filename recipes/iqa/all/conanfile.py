@@ -1,16 +1,22 @@
 import os
-import glob
-from conans import ConanFile, CMake, tools
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get, save
+
+required_conan_version = ">=1.53.0"
 
 
 class IqaConan(ConanFile):
     name = "iqa"
     description = "Image Quality Analysis Library"
     license = "BSD-3-Clause"
-    topics = ("conan", "iqa", "image", "quality", "analysis")
-    homepage = "https://github.com/tjdistler/iqa"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
+    homepage = "https://github.com/tjdistler/iqa"
+    topics = ("image", "quality", "analysis")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -19,18 +25,9 @@ class IqaConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,40 +35,38 @@ class IqaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('iqa-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def _extract_license(self):
-        content_lines = open(os.path.join(self._source_subfolder, "include", "iqa.h")).readlines()
+        content_lines = open(os.path.join(self.source_folder, "include", "iqa.h")).readlines()
         license_content = []
         for i in range(1, 31):
             license_content.append(content_lines[i][3:-1])
-        tools.save("LICENSE", "\n".join(license_content))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), "\n".join(license_content))
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
         self._extract_license()
-        self.copy("LICENSE", dst="licenses")
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
