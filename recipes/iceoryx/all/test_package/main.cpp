@@ -14,11 +14,15 @@
 #include <mutex>
 #include <thread>
 
-int main() {
+int main(int argc, char* argv[]) {
 
     iox::log::LogManager::GetLogManager().SetDefaultLogLevel(iox::log::LogLevel::kInfo);
-    //iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
-    //iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
+    iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
+
+    /* Don't call on test run with conan */
+    if(argc >=2) {
+      iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
+    }
 
     return 0;
 }
