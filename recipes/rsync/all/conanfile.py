@@ -85,7 +85,7 @@ class RsyncConan(ConanFile):
             f"--with-lz4={yes_no(self.options.with_lz4)}",
             f"--with-xxhash={yes_no(self.options.with_xxhash)}",
 
-            f"--enable-manpages=no",
+            "--enable-manpages=no",
         ])        
 
         if self.settings.os == "Neutrino":
