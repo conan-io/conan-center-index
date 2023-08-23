@@ -89,9 +89,8 @@ class IceoryxConan(ConanFile):
     def _patch_sources(self):
         copy(self, "CMakeLists.txt", self.export_sources_folder, self.source_folder)
         apply_conandata_patches(self)
-        iceoryx_utils = "iceoryx_hoofs" if Version(self.version) >= "2.0.0" else "iceoryx_utils"
-        replace_in_file(self, os.path.join(self.source_folder, iceoryx_utils, "CMakeLists.txt"), "PRIVATE acl", "PUBLIC acl PRIVATE ")
         # Honor fPIC option
+        iceoryx_utils = "iceoryx_hoofs" if Version(self.version) >= "2.0.0" else "iceoryx_utils"
         for cmake_file in [
                 os.path.join("iceoryx_binding_c", "CMakeLists.txt"),
                 os.path.join("iceoryx_posh", "CMakeLists.txt"),
