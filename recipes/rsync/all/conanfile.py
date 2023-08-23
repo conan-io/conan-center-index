@@ -5,8 +5,6 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.apple import is_apple_os
 import os
-from io import StringIO
-import re
 
 required_conan_version = ">=1.60.0"
 
