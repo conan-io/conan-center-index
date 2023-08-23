@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b6aa73e..547c44d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -136,7 +136,11 @@ install(
+         ${PROJECT_SOURCE_DIR}/include/streamvbyte_zigzag.h
+     DESTINATION include
+ )
+-install(TARGETS streamvbyte DESTINATION lib)
++install(TARGETS streamvbyte 
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
+ 
+ option(STREAMVBYTE_SANITIZE_UNDEFINED "Sanitize undefined behavior" OFF)
+ if(STREAMVBYTE_SANITIZE_UNDEFINED)
