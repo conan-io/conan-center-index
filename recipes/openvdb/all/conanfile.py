@@ -32,6 +32,7 @@ class OpenVDBConan(ConanFile):
         "simd": [None, "SSE42", "AVX"],
         "use_colored_output": [True, False],
         "use_delayed_loading": [True, False],
+        "use_explicit_instantiation": [True, False],
         "use_imath_half": [True, False],
         "with_blosc": [True, False],
         # Deprecated because EXR is only used when building executables, which the recipe does not support
@@ -46,6 +47,7 @@ class OpenVDBConan(ConanFile):
         "simd": None,
         "use_colored_output": False,
         "use_delayed_loading": False,
+        "use_explicit_instantiation": False,
         "use_imath_half": False,
         "with_blosc": True,
         "with_exr": "deprecated",
@@ -54,13 +56,23 @@ class OpenVDBConan(ConanFile):
     }
     options_description = {
         "build_ax": "Build the OpenVDB AX library.",
-        "simd": ("Choose whether to enable SIMD compiler flags or not. "
-                 "Although not required, it is strongly recommended to enable SIMD. AVX implies SSE42."),
+        "simd": (
+            "Choose whether to enable SIMD compiler flags or not. "
+            "Although not required, it is strongly recommended to enable SIMD. AVX implies SSE42."
+        ),
         "use_colored_output": "Always produce ANSI-colored output (GNU/Clang only).",
         "use_delayed_loading": "Build the core OpenVDB library with delayed-loading.",
-        "use_imath_half": ("Use the definition of half-precision floating point types from the Imath library. "
-                           "If False, the embedded definition provided by OpenVDB is used. "
-                           "You may set this to on to force Imath half to be used if you know it to be required."),
+        "use_explicit_instantiation": (
+            "Use explicit instantiation for all supported classes and methods against a pre-defined "
+            "list of OpenVDB trees. This makes the core library larger and slower to compile, but speeds up "
+            "the compilation of all dependent code by bypassing the expensive template instantiation. "
+            "Disabled by default in ConanCenter to avoid excessive memory usage during compilation."
+        ),
+        "use_imath_half": (
+            "Use the definition of half-precision floating point types from the Imath library. "
+            "If False, the embedded definition provided by OpenVDB is used. "
+            "You may set this to on to force Imath half to be used if you know it to be required."
+        ),
         "with_blosc": "Use Blosc for improved disk compression. Recommended.",
         "with_log4cplus": "Use log4cplus for improved OpenVDB Logging.",
         "with_zlib": "Use ZLib for disk serialization compression. ZLib can only be disabled if Blosc is also disabled.",
@@ -191,6 +203,7 @@ class OpenVDBConan(ConanFile):
         tc.cache_variables["USE_AX"] = False # used only by Python bindings and the Houdini plugin
         tc.cache_variables["USE_BLOSC"] = self.options.with_blosc
         tc.cache_variables["USE_COLORED_OUTPUT"] = self.options.get_safe("use_colored_output")
+        tc.cache_variables["USE_EXPLICIT_INSTANTIATION"] = self.options.use_explicit_instantiation
         tc.cache_variables["USE_EXR"] = False
         tc.cache_variables["USE_HOUDINI"] = False
         tc.cache_variables["USE_IMATH_HALF"] = self.options.use_imath_half
