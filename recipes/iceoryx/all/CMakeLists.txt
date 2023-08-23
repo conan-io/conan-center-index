@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(cmake_wrapper)
-
+if(CMAKE_SYSTEM_NAME MATCHES Linux)
+  find_package(acl REQUIRED)
+endif()
 add_subdirectory("iceoryx_meta")
