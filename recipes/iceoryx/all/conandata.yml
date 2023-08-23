@@ -17,9 +17,21 @@ sources:
 patches:
   "1.0.1":
     - patch_file: "patches/1.0.0-0001-fix-find-toml.patch"
+      patch description: "Remove local cpptoml add_subdirectory call"
+      patch_type: "conan"
     - patch_file: "patches/1.0.0-0002-fix-install-bundle.patch"
+      patch description: "Add bundle destination for installation"
+      patch_type: "portability"
     - patch_file: "patches/1.0.0-0003-no-hardcoded-libcxx.patch"
+      patch description: "Remove libcxx link target"
+      patch_type: "portability"
   "1.0.0":
     - patch_file: "patches/1.0.0-0001-fix-find-toml.patch"
+      patch description: "Remove local cpptoml add_subdirectory call"
+      patch_type: "conan"
     - patch_file: "patches/1.0.0-0002-fix-install-bundle.patch"
+      patch description: "Add bundle destination for installation"
+      patch_type: "portability"
     - patch_file: "patches/1.0.0-0003-no-hardcoded-libcxx.patch"
+      patch description: "Remove libcxx link target"
+      patch_type: "portability"

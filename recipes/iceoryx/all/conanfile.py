@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, get, rm, rmdir, mkdir, rename, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, get, rmdir, mkdir, rename, save
 from conan.tools.scm import Version
 import os
 import textwrap
