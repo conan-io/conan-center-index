@@ -1,8 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.layout import basic_layout
+from conan.tools.files import get, copy
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class So5extraConan(ConanFile):
@@ -15,49 +19,67 @@ class So5extraConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _compiler_support_lut(self):
+        if self.version >= Version("1.6.0"):
+            # Since v1.6.0 requirements to compilers were updated:
+            return {
+                "gcc": "10",
+                "clang": "11",
+                "apple-clang": "13",
+                "Visual Studio": "17",
+                "msvc": "192"
+            }
+
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191"
+        }
 
     def requirements(self):
-        self.requires("sobjectizer/5.7.4")
+        if self.version >= Version("1.6.0"):
+            self.requires("sobjectizer/5.8.0")
+        else:
+            self.requires("sobjectizer/5.7.4")
 
     def validate(self):
         minimal_cpp_standard = "17"
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10",
-            "Visual Studio": "15"
-        }
+            check_min_cppstd(self, minimal_cpp_standard)
+        minimal_version = self._compiler_support_lut()
+
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
-            self.output.warn(
+            self.output.warning(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
+            self.output.warning(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("*.hpp", dst="include/so_5_extra", src=os.path.join(self._source_subfolder, "dev", "so_5_extra"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "dev", "so_5_extra"), dst=os.path.join(self.package_folder, "include", "so_5_extra"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "so5extra")
         self.cpp_info.set_property("cmake_target_name", "sobjectizer::so5extra")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "so5extra"
