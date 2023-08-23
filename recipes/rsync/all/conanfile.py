@@ -66,7 +66,7 @@ class RsyncConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"Windows is not supported.")        
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on Windows.")        
 
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on Apple systems.")        
