@@ -16,7 +16,7 @@ class IceoryxConan(ConanFile):
     homepage = "https://iceoryx.io/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Eclipse iceoryx - true zero-copy inter-process-communication"
-    topics = ("Shared Memory", "IPC", "ROS", "Middleware")
+    topics = ("shared-memory", "ipc", "ros2", "middleware")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
