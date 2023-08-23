@@ -62,7 +62,7 @@ class LibuvcConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
 
     def package_id(self):
         # TODO: to remove once deprecated jpeg_turbo option removed
