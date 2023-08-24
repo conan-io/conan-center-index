@@ -172,7 +172,6 @@ class ArrowConan(ConanFile):
         self.options.with_protobuf = self._with_protobuf()
         self.options.with_re2 = self._with_re2()
         self.options.with_utf8proc = self._with_utf8proc()
-        print("OPTIONS: ", self.options)
 
     def configure(self):
         if self.options.shared:
@@ -691,6 +690,3 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package_multi"] = "flight_sql"
         if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-
-    def package_id(self):
-        print("OPTIONS: ", self.info.options)
