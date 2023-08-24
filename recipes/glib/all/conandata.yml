@@ -48,7 +48,7 @@ patches:
       patch_description: fix libintl discovery
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
   "2.75.3":
-    - patch_file: "patches/libintl-discovery.patch"
+    - patch_file: "patches/libintl-discovery-2.75.3.patch"
       patch_type: bugfix
       patch_description: fix libintl discovery
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
