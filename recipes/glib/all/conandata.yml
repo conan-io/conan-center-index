@@ -32,15 +32,6 @@ sources:
   "2.75.0":
     url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.0.tar.xz"
     sha256: "6dde8e55cc4a2c83d96797120b08bcffb5f645b2e212164ae22d63c40e0e6360"
-  "2.74.1":
-    url: "https://download.gnome.org/sources/glib/2.74/glib-2.74.1.tar.xz"
-    sha256: "0ab981618d1db47845e56417b0d7c123f81a3427b2b9c93f5a46ff5bbb964964"
-  "2.73.3":
-    url: "https://download.gnome.org/sources/glib/2.73/glib-2.73.3.tar.xz"
-    sha256: "df1a2b841667d6b48b2ef6969ebda4328243829f6e45866726f806f90f64eead"
-  "2.72.4":
-    url: "https://download.gnome.org/sources/glib/2.72/glib-2.72.4.tar.xz"
-    sha256: "8848aba518ba2f4217d144307a1d6cb9afcc92b54e5c13ac1f8c4d4608e96f0e"
 patches:
   "2.76.3":
     - patch_file: "patches/libintl-discovery.patch"
@@ -52,8 +43,3 @@ patches:
       patch_type: bugfix
       patch_description: fix libintl discovery
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
-  "2.73.3":
-    - patch_file: "patches/0001-2.73.3-clang-static-assert.patch"
-      patch_type: bugfix
-      patch_description: fix for clang compilation
-      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2898
