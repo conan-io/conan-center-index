@@ -221,7 +221,7 @@ class GLibConan(ConanFile):
             if is_apple_os(self):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
-        self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+        self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
