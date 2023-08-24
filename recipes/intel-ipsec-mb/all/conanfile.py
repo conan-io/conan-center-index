@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -41,9 +42,9 @@ class PackageConan(ConanFile):
 
     def validate(self):
         if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration(f"The architecture '{self.settings.arch}' is not supported.")
+            raise ConanInvalidConfiguration(f"{self.ref} only supports architecture x86_64.")
         if self.settings.os not in ("FreeBSD", "Linux", "Windows"):
-            raise ConanInvalidConfiguration(f"The O.S. '{self.settings.os}' is not supported.")
+            raise ConanInvalidConfiguration(f"{self.ref} does not support the O.S. {self.settings.os}.")
         if self.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} only supports msvc on Windows.")
 
@@ -55,6 +56,8 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate(scope="build")
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
@@ -62,7 +65,12 @@ class PackageConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        # TODO: Need to send it to the upstream. nasm needs slash in the path to include files.
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"), "${DIR_CURRENT} ${DIR_INCLUDE} ${DIR_NO_AESNI}", '${DIR_CURRENT}// ${DIR_INCLUDE}// ${DIR_NO_AESNI}//')
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="IPSec_MB")
