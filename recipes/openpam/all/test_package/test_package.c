@@ -11,8 +11,11 @@ int main(void) {
     struct pam_conv pamc;
     const char *user;
 
-    pam_start("yes", user, &pamc, &pamh);
-    pam_end(pamh, PAM_SUCCESS);
+    int rv = pam_start("yes", user, &pamc, &pamh);
+
+    if(rv == PAM_SUCCESS) {
+        pam_end(pamh, PAM_SUCCESS);
+    }
 
     return EXIT_SUCCESS;
 }

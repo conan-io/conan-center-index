@@ -11,6 +11,12 @@ sources:
   "5.5.2":
     sha256: b2b05d5616ecc69facdc24417cce0b04fb4321491d107db45103add520e3d8c3
     url: https://github.com/CGAL/cgal/releases/download/v5.5.2/CGAL-5.5.2.tar.xz
+  "5.5.3":
+    sha256: 0a04f662693256328b05babfabb5e3a5b7db2f5a58d52e3c520df9d0828ddd73
+    url: https://github.com/CGAL/cgal/releases/download/v5.5.3/CGAL-5.5.3.tar.xz
+  "5.6":
+    sha256: dcab9b08a50a06a7cc2cc69a8a12200f8d8f391b9b8013ae476965c10b45161f
+    url: https://github.com/CGAL/cgal/releases/download/v5.6/CGAL-5.6.tar.xz
 patches:
   "5.3.2":
     - patch_file: "patches/0001-fix-for-conan.patch"
@@ -28,6 +34,11 @@ patches:
       patch_source: https://github.com/CGAL/cgal/pull/7502
       patch_description: Fix Eigen3 support in CGAL
   "5.5.2":
+    - patch_file: "patches/0001-fix-for-conan.patch"
+      patch_type: bugfix
+      patch_source: https://github.com/CGAL/cgal/pull/7502
+      patch_description: Fix Eigen3 support in CGAL
+  "5.5.3":
     - patch_file: "patches/0001-fix-for-conan.patch"
       patch_type: bugfix
       patch_source: https://github.com/CGAL/cgal/pull/7502

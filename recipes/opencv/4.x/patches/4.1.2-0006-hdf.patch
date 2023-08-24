@@ -1,0 +1,21 @@
+--- a/contrib/modules/hdf/CMakeLists.txt
++++ b/contrib/modules/hdf/CMakeLists.txt
+@@ -1,6 +1,4 @@
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
+-
+-if(WIN32)
++if(0)
+   # windows cmake internal lookups are broken for now
+   # will lookup for headers and shared libs given HDF_DIR env
+   find_path(HDF5_INCLUDE_DIRS hdf5.h HINTS "$ENV{HDF5_DIR}\\..\\include")
+@@ -16,8 +14,8 @@ if(WIN32)
+      set(HDF5_FOUND "NO")
+   endif()
+ else()
+-  if(NOT CMAKE_CROSSCOMPILING) # iOS build should not reuse OSX package
+-    find_package(HDF5)
++  if(1)
++    find_package(HDF5 CONFIG)
+   endif()
+ endif()
+ 

@@ -1,3 +1,6 @@
+import os
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -15,8 +18,7 @@ from conan.tools.files import (
 )
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
-import os
-import textwrap
+
 
 required_conan_version = ">=1.53.0"
 
@@ -69,7 +71,7 @@ class FastDDSConan(ConanFile):
 
     def requirements(self):
         self.requires("tinyxml2/9.0.0")
-        self.requires("asio/1.28.0")
+        self.requires("asio/1.28.0")  # This is now a package_type = header
         self.requires("fast-cdr/1.0.27", transitive_headers=True, transitive_libs=True)
         self.requires("foonathan-memory/0.7.3")
         if self.options.with_ssl:
