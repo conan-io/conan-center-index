@@ -256,6 +256,7 @@ required_for_references:
 - drwav
 - dtl
 - duckdb
+- duktape
 - eabase
 - earcut
 - eastl
@@ -314,6 +315,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- fltk
 - fmt
 - fmtlog
 - fontconfig
@@ -845,6 +847,7 @@ required_for_references:
 - pbtools
 - pcapplusplus
 - pcg-cpp
+- pcl
 - pcre
 - pcre2
 - pdfgen
@@ -953,6 +956,7 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rpclib
 - rply
 - rtklib
 - rtm
@@ -1003,6 +1007,7 @@ required_for_references:
 - sml
 - snappy
 - snowhouse
+- sobjectizer
 - soci
 - sofa
 - sokol
