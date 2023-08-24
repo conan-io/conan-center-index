@@ -90,6 +90,9 @@ class EthashConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ethash::ethash")
         self.cpp_info.libs = ["ethash"]
 
-        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "ethash"
         self.cpp_info.names["cmake_find_package_multi"] = "ethash"
+
+        self.cpp_info.components["keccak"].set_property("cmake_file_name", "keccak")
+        self.cpp_info.components["keccak"].set_property("cmake_target_name", "keccak::keccak")
+        self.cpp_info.components["keccak"].libs = ["keccak"]
