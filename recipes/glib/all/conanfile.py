@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, load
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -148,7 +148,11 @@ class GLibConan(ConanFile):
     def build(self):
         self._patch_sources()
         meson = Meson(self)
-        meson.configure()
+        try:
+            meson.configure()
+        except:
+            self.output.warning(load(self, "meson-logs/meson-log.txt"))
+            raise
         meson.build()
 
     def package(self):
