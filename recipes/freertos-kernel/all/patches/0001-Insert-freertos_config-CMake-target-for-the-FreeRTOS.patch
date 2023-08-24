@@ -1,4 +1,4 @@
-From 751223394e7d58e6b2af8a8495328eea61544538 Mon Sep 17 00:00:00 2001
+From b50fc578136f32ccf66963c3ecc75e2965ece555 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Wed, 23 Aug 2023 15:02:01 -0500
 Subject: [PATCH] Insert freertos_config CMake target for the FreeRTOSConfig.h
