@@ -45,8 +45,6 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supports architecture x86_64.")
         if self.settings.os not in ("FreeBSD", "Linux", "Windows"):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the O.S. {self.settings.os}.")
-        if self.settings.os == "Windows" and not is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} only supports msvc on Windows.")
 
     def build_requirements(self):
         self.tool_requires("nasm/2.15.05")
@@ -61,16 +59,17 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # INFO: CMake uses system nasm if not specified.
+        tc.variables["CMAKE_ASM_NASM_COMPILER"] = os.path.join(self.dependencies.direct_build["nasm"].package_folder, "bin", "nasm")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def _patch_sources(self):
-        # TODO: Need to send it to the upstream. nasm needs slash in the path to include files.
-        replace_in_file(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"), "${DIR_CURRENT} ${DIR_INCLUDE} ${DIR_NO_AESNI}", '${DIR_CURRENT}// ${DIR_INCLUDE}// ${DIR_NO_AESNI}//')
+        # INFO: Do not enforce -fPIC flag, let's Conan do it.
+        replace_in_file(os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), '-fPIC', '')
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="IPSec_MB")
