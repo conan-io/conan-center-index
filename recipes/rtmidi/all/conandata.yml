@@ -1,4 +1,7 @@
 sources:
+  "6.0.0":
+    url: "https://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz"
+    sha256: "5960ccf64b42c23400720ccc880e2f205677ce9457f747ef758b598acd64db5b"
   "5.0.0":
     url: "https://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-5.0.0.tar.gz"
     sha256: "48db0ed58c8c0e207b5d7327a0210b5bcaeb50e26387935d02829239b0f3c2b9"
@@ -8,7 +11,14 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-add-a-separate-licence-file-0b5d67c.patch"
+      patch_description: "Add a separate LICENCE file"
+      patch_source: "https://github.com/thestk/rtmidi/commit/0b5d67c"
+      patch_type: "conan"
     - patch_file: "patches/4.0.0-0002-rtmidiconfig-install-location-da51f21.patch"
+      patch_description: "Install rtmidiconfig in the correct location"
+      patch_source: "https://github.com/conan-io/conan-center-index/issues/252"
+      patch_type: "conan"
     - patch_file: "patches/4.0.0-0003-relocatable-macos.patch"
       patch_description: "Relocatable shared lib on macOS"
+      patch_source: "https://github.com/thestk/rtmidi/pull/211"
       patch_type: "conan"

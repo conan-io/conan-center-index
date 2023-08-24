@@ -1,4 +1,7 @@
 sources:
+  "v12":
+    url: "https://github.com/rollbear/strong_type/archive/refs/tags/v12.tar.gz"
+    sha256: "8af0400c7ae76c7ec8646e929bacb37fc7fcae33e54eeaa61fa9f9df508a9248"
   "v11":
     url: "https://github.com/rollbear/strong_type/archive/refs/tags/v11.tar.gz"
     sha256: "b9879c8835501c05147603ac86097b263437f72a35299b5f96c90be789932418"
