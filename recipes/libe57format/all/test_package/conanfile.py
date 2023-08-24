@@ -24,6 +24,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             tested_version = self.tested_reference_str.split('/')[1].split('@')[0]
+            print('package version: ' + tested_version)
             if Version(tested_version) >= Version("3.0.0"):
                 print(f'Skipping tests in version {tested_version}')
             else:
