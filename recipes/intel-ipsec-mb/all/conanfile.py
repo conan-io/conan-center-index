@@ -66,7 +66,7 @@ class PackageConan(ConanFile):
 
     def _patch_sources(self):
         # INFO: Do not enforce -fPIC flag, let's Conan do it.
-        replace_in_file(os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), '-fPIC', '')
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), '-fPIC', '')
 
     def build(self):
         self._patch_sources()
