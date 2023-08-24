@@ -69,6 +69,7 @@ class PackageConan(ConanFile):
         replace_in_file(os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), '-fPIC', '')
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="IPSec_MB")
