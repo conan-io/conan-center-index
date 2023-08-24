@@ -42,6 +42,36 @@ sources:
     url: "https://download.gnome.org/sources/glib/2.72/glib-2.72.4.tar.xz"
     sha256: "8848aba518ba2f4217d144307a1d6cb9afcc92b54e5c13ac1f8c4d4608e96f0e"
 patches:
+  "2.76.3":
+    - patch_file: "patches/libintl-discovery.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+  "2.76.2":
+    - patch_file: "patches/libintl-discovery.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+  "2.76.1":
+    - patch_file: "patches/libintl-discovery.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+  "2.76.0":
+    - patch_file: "patches/libintl-discovery.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+  "2.75.3":
+    - patch_file: "patches/libintl-discovery.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+  "2.75.2":
+    - patch_file: "patches/libintl-discovery.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
   "2.73.3":
     - patch_file: "patches/0001-2.73.3-clang-static-assert.patch"
       patch_type: bugfix
