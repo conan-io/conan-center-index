@@ -79,7 +79,7 @@ class GlibmmConan(ConanFile):
         if self._abi_version == "2.68":
             self.requires("libsigcpp/3.0.7")
         else:
-            self.requires("libsigcpp/3.0.7")
+            self.requires("libsigcpp/2.10.8")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
