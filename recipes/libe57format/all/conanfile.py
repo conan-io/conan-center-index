@@ -41,7 +41,7 @@ class LibE57FormatConan(ConanFile):
         minimal_gcc_version = "11.0.0"
 
         if compiler == "gcc" and compiler_version < Version(minimal_gcc_version):
-            raise ConanInvalidConfiguration(f"gcc {compiler_version} is not supported (use >= {minimal_gcc_version})")
+            raise ConanInvalidConfiguration(f"GCC {compiler_version} is not supported (use >= {minimal_gcc_version})")
 
         if self.options.shared:
             try:
