@@ -154,8 +154,6 @@ class VerySimpleSmtpsConan(ConanFile):
     def package_info(self):
         # avoid collect_libs(), prefer explicit library name instead
         self.cpp_info.libs = ["libsmtp_lib"]
-        self.output.info("[+] DEBUG: ")
-        self.output.info(self.cpp_info.libdirs)
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "very-simple-smtps")
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
