@@ -1,10 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
-from conan.errors import ConanException
 from io import StringIO
 from conan.tools.files import load, save
-import re
 import os
 
 
@@ -33,14 +31,14 @@ class TestPackageConan(ConanFile):
         if not can_run(self):
             return
 
+        bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+        png_file = os.path.join(self.source_folder, "logo.png")
+        self.run(f"{bin_path} {png_file}", env="conanrun")
+
         zstd_version = load(self, os.path.join(self.generators_folder, "zstd_version"))
 
         output = StringIO()
         self.run(f"zstd --version", output, env="conanrun")
         output_str = str.strip(output.getvalue())
-
-        s = re.search(f"{zstd_version}", output_str)
-        if s == None:
-            raise ConanException(f"zstd command output '{output_str}' should contain version string '{zstd_version}'")
-        else:
-            self.output.info(f"Version verified: '{zstd_version}'")
+        assert zstd_version in output_str, f"zstd command output '{output_str}' should contain version string '{zstd_version}'"
+        self.output.info(f"Version verified: '{zstd_version}'")
