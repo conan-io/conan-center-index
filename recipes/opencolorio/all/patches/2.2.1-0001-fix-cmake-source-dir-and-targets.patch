@@ -1,0 +1,96 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 17e188d..91af0ec 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -332,7 +332,7 @@ install(
+     FILE ${OCIO_TARGETS_EXPORT_NAME}
+ )
+ 
+-if (NOT BUILD_SHARED_LIBS)
++if (0)
+     # Install custom macros used in the find modules.
+     install(FILES
+         ${CMAKE_CURRENT_LIST_DIR}/share/cmake/macros/VersionUtils.cmake
+diff --git a/share/cmake/modules/FindExtPackages.cmake b/share/cmake/modules/FindExtPackages.cmake
+index 5455a08..eb91a37 100644
+--- a/share/cmake/modules/FindExtPackages.cmake
++++ b/share/cmake/modules/FindExtPackages.cmake
+@@ -138,7 +138,7 @@ endif()
+ 
+ # minizip-ng
+ # https://github.com/zlib-ng/minizip-ng
+-find_package(minizip-ng 3.0.7 REQUIRED)
++find_package(minizip 3.0.7 REQUIRED)
+ 
+ if(OCIO_BUILD_APPS)
+ 
+@@ -149,7 +149,7 @@ if(OCIO_BUILD_APPS)
+ 
+     # lcms2
+     # https://github.com/mm2/Little-CMS
+-    find_package(lcms2 2.2 REQUIRED)
++    find_package(lcms 2.2 REQUIRED)
+ endif()
+ 
+ if(OCIO_BUILD_OPENFX)
+@@ -214,7 +214,7 @@ if(OCIO_BUILD_APPS)
+         # OpenEXR
+         # https://github.com/AcademySoftwareFoundation/openexr
+         set(_OpenEXR_ExternalProject_VERSION "3.1.5")
+-        find_package(OpenEXR 3.0)
++        find_package(OpenEXR CONFIG)
+ 
+         if(OpenEXR_FOUND AND TARGET OpenEXR::OpenEXR)
+             add_library(OpenColorIO::ImageIOBackend ALIAS OpenEXR::OpenEXR)
+diff --git a/share/cmake/utils/CppVersion.cmake b/share/cmake/utils/CppVersion.cmake
+index 175d89c..2d34a65 100644
+--- a/share/cmake/utils/CppVersion.cmake
++++ b/share/cmake/utils/CppVersion.cmake
+@@ -16,8 +16,6 @@ elseif(NOT CMAKE_CXX_STANDARD IN_LIST SUPPORTED_CXX_STANDARDS)
+             "CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} is unsupported. Supported standards are: ${SUPPORTED_CXX_STANDARDS_STR}.")
+ endif()
+ 
+-set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "${SUPPORTED_CXX_STANDARDS}")
+-
+ include(CheckCXXCompilerFlag)
+ 
+ # As CheckCXXCompilerFlag implicitly uses CMAKE_CXX_FLAGS some custom flags could trigger unrelated
+diff --git a/src/OpenColorIO/CMakeLists.txt b/src/OpenColorIO/CMakeLists.txt
+index 1c4d774..da70227 100755
+--- a/src/OpenColorIO/CMakeLists.txt
++++ b/src/OpenColorIO/CMakeLists.txt
+@@ -289,7 +289,7 @@ target_link_libraries(OpenColorIO
+         "$<BUILD_INTERFACE:utils::strings>"
+         "$<BUILD_INTERFACE:xxHash>"
+         yaml-cpp
+-        MINIZIP::minizip-ng
++        MINIZIP::minizip
+ )
+ 
+ if(APPLE)
+diff --git a/src/apps/ocioarchive/CMakeLists.txt b/src/apps/ocioarchive/CMakeLists.txt
+index 6b868d1..820e36c 100644
+--- a/src/apps/ocioarchive/CMakeLists.txt
++++ b/src/apps/ocioarchive/CMakeLists.txt
+@@ -19,7 +19,7 @@ target_link_libraries(ocioarchive
+     PRIVATE
+         apputils
+         OpenColorIO
+-        MINIZIP::minizip-ng
++        MINIZIP::minizip
+ )
+ 
+ install(TARGETS ocioarchive
+diff --git a/src/apps/ociobakelut/CMakeLists.txt b/src/apps/ociobakelut/CMakeLists.txt
+index a50e87e..37174ea 100755
+--- a/src/apps/ociobakelut/CMakeLists.txt
++++ b/src/apps/ociobakelut/CMakeLists.txt
+@@ -28,7 +28,7 @@ set_target_properties(ociobakelut
+ target_link_libraries(ociobakelut 
+     PRIVATE 
+         apputils
+-        lcms2::lcms2
++        lcms::lcms
+         OpenColorIO
+ )
+ 

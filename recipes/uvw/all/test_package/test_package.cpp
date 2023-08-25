@@ -1,8 +1,9 @@
-#include <cassert>
-
 #include <uvw.hpp>
 
 int main() {
-    auto loop = uvw::Loop::getDefault();
-    assert(loop != nullptr);
+#ifdef UVW_API_3_0
+    uvw::loop::get_default();
+#else
+    uvw::Loop::getDefault();
+#endif
 }

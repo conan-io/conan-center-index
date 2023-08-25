@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index be7205c..cad8d50 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -80,6 +80,7 @@ enable_language(C)
+ 
+ # Library version
+ set(VERSION "3.0.9")
++project(minizip${MZ_PROJECT_SUFFIX} VERSION ${VERSION} LANGUAGES C)
+ 
+ # API version
+ set(SOVERSION "3")
+@@ -665,7 +666,6 @@ endif()
+ list(APPEND MINIZIP_INC ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ # Create minizip library
+-project(minizip${MZ_PROJECT_SUFFIX} LANGUAGES C VERSION ${VERSION})
+ 
+ if(NOT ${MZ_PROJECT_SUFFIX} STREQUAL "")
+     message(STATUS "Project configured as ${PROJECT_NAME}")

@@ -4,7 +4,7 @@ from conan.tools.files import copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class DrflacConan(ConanFile):
@@ -14,26 +14,27 @@ class DrflacConan(ConanFile):
     topics = ("audio", "flac", "sound")
     license = ("Unlicense", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
         "buffer_size": ["ANY"],
         "no_crc": [True, False],
         "no_ogg": [True, False],
         "no_simd": [True, False],
         "no_stdio": [True, False],
-        "no_wchar": [True, False]
+        "no_wchar": [True, False],
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True,
         "buffer_size": 0, # zero means the default buffer size is used
         "no_crc": False,
         "no_ogg": False,
         "no_simd": False,
         "no_stdio": False,
-        "no_wchar": False
+        "no_wchar": False,
     }
     exports_sources = ["CMakeLists.txt", "dr_flac.c"]
 
@@ -45,15 +46,15 @@ class DrflacConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -68,7 +69,7 @@ class DrflacConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
@@ -91,4 +92,4 @@ class DrflacConan(ConanFile):
         if self.options.no_stdio:
             self.cpp_info.defines.append("DR_FLAC_NO_STDIO")
         if self.options.get_safe("no_wchar", False):
-            self.cpp_info.defines.append("DR_FLAC_NO_WCHAR")            
+            self.cpp_info.defines.append("DR_FLAC_NO_WCHAR")

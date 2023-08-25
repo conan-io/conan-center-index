@@ -50,20 +50,9 @@ class CryptoPPConan(ConanFile):
         if self.options.shared and Version(self.version) >= "8.7.0":
             raise ConanInvalidConfiguration("cryptopp 8.7.0 and higher do not support shared builds")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "8.7.0" and not self._cmake_new_enough("3.20"):
-            self.tool_requires("cmake/3.25.2")
+        if Version(self.version) >= "8.7.0":
+            self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         # Get cryptopp sources
@@ -177,7 +166,7 @@ class CryptoPPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cryptopp")
         self.cpp_info.set_property("cmake_target_name", "cryptopp::cryptopp")
         legacy_cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
-        self.cpp_info.set_property("cmake_target_name_aliases", [legacy_cmake_target])
+        self.cpp_info.set_property("cmake_target_aliases", [legacy_cmake_target])
         self.cpp_info.set_property("pkg_config_name", "libcryptopp")
 
         # TODO: back to global scope once cmake_find_package* generators removed

@@ -21,6 +21,7 @@ class AbseilConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -143,7 +144,10 @@ class AbseilConan(ConanFile):
         components = {}
 
         abs_target_content = load(self, absl_target_file_path)
-
+        
+        # Replace the line endings to support building with MSys2 on Windows
+        abs_target_content = abs_target_content.replace("\r\n", "\n")
+        
         cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", abs_target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
             cmake_function_args = re.split(r"[\s|\n]+", cmake_function_args, maxsplit=2)

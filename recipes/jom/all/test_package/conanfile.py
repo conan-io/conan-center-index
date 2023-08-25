@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
@@ -14,5 +13,4 @@ class TestPackageConan(ConanFile):
         pass
 
     def test(self):
-        if can_run(self):
-            self.run("jom /VERSION")
+        self.run("jom /VERSION")

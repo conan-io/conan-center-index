@@ -1,0 +1,50 @@
+--- a/Project/CMake/CMakeLists.txt
++++ b/Project/CMake/CMakeLists.txt
+@@ -83,7 +83,7 @@ elseif(APPLE)
+ endif()
+ 
+ # use bundled tinyxml only if no system
+-find_package(TinyXML)
++find_package(tinyxml2 REQUIRED CONFIG)
+ 
+ # use system curl if is present
+ find_package(CURL)
+@@ -352,7 +352,7 @@ if(WIN32)
+   set(MediaInfoLib_SRCS ${MediaInfoLib_SRCS} ${MediaInfoLib_SOURCES_PATH}/ThirdParty/aes-gladman/aes_ni.c)
+ endif()
+ 
+-if(NOT TinyXML_FOUND)
++if(NOT tinyxml2_FOUND)
+   include_directories(${MediaInfoLib_SOURCES_PATH}/ThirdParty/tinyxml2/)
+   list(APPEND MediaInfoLib_SRCS ${MediaInfoLib_SOURCES_PATH}/ThirdParty/tinyxml2/tinyxml2.cpp)
+ endif()
+@@ -370,7 +370,7 @@ if(NOT CURL_FOUND)
+   target_compile_definitions(mediainfo PRIVATE MEDIAINFO_LIBCURL_NO)
+ else()
+   include_directories(${CURL_INCLUDE_DIRS})
+-  target_link_libraries(mediainfo ${CURL_LIBRARIES})
++  target_link_libraries(mediainfo CURL::libcurl)
+   set(CURL_PC " libcurl")
+   set(CURL_LIB " -lcurl")
+ endif()
+@@ -385,17 +385,17 @@ target_include_directories(mediainfo PRIVATE
+   ${MediaInfoLib_SOURCES_PATH}/ThirdParty/sha2-gladman/
+   ${MediaInfoLib_SOURCES_PATH}/ThirdParty/hmac-gladman/)
+ 
+-if(NOT TinyXML_FOUND)
++if(NOT tinyxml2_FOUND)
+   target_include_directories(mediainfo PRIVATE ${MediaInfoLib_SOURCES_PATH}/ThirdParty/tinyxml2/)
+ else()
+-  target_link_libraries(mediainfo "${TinyXML_LIBRARIES}")
++  target_link_libraries(mediainfo tinyxml2::tinyxml2)
+ endif()
+ 
+ if(BUILD_ZENLIB)
+   target_include_directories(mediainfo PRIVATE ${ZLIB_INCLUDE_DIRS})
+ endif()
+ 
+-target_link_libraries(mediainfo ${ZenLib_LIBRARY} ${ZLIB_LIBRARIES})
++target_link_libraries(mediainfo zen ZLIB::ZLIB)
+ 
+ if(MSVC AND BUILD_SHARED_LIBS)
+   install(FILES $<TARGET_PDB_FILE:mediainfo> DESTINATION ${BIN_INSTALL_DIR} OPTIONAL)

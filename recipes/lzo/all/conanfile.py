@@ -12,7 +12,7 @@ class LZOConan(ConanFile):
     license = "GPL-v2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.oberhumer.com/opensource/lzo/"
-    topics = ("lzo", "compression")
+    topics = ("compression")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"

@@ -1,4 +1,5 @@
 #include "PROPOSAL/PROPOSAL.h"
+#include "PROPOSAL/Logging.h"
 #include <iostream>
 #include <memory>
 
@@ -18,4 +19,6 @@ int main()
                   << particle.name << " in " << target.GetName()
                   << " is: " << dEdx << " MeV * cm^2 / g" << std::endl;
     }
+
+    PROPOSAL::Logging::Get("proposal.conan_test_package")->warn("logging test");
 }

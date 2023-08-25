@@ -1,0 +1,10 @@
+--- a/src/include/robin_hood.h
++++ b/src/include/robin_hood.h
+@@ -42,6 +42,7 @@
+ #include <cstdlib>
+ #include <cstring>
+ #include <functional>
++#include <limits>
+ #include <memory> // only to support hash of smart pointers
+ #include <stdexcept>
+ #include <string>

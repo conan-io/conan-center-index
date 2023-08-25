@@ -5,21 +5,20 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
 
 class CityhashConan(ConanFile):
     name = "cityhash"
     description = "CityHash, a family of hash functions for strings."
     license = "MIT"
-    topics = ("cityhash", "hash")
+    topics = ("hash",)
     homepage = "https://github.com/google/cityhash"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,10 +32,6 @@ class CityhashConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,8 +56,7 @@ class CityhashConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -71,13 +65,12 @@ class CityhashConan(ConanFile):
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
-            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
         env = tc.environment()
         if is_msvc(self):
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
             env.define("CC", "cl -nologo")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
@@ -104,3 +97,5 @@ class CityhashConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["cityhash"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

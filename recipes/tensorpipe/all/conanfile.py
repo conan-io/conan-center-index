@@ -17,10 +17,11 @@ class TensorpipeConan(ConanFile):
                   "using the fastest transport for the tensors contained " \
                   "therein (e.g., CUDA device-to-device copy)."
     license = "BSD-3-Clause"
-    topics = ("tensorpipe", "tensor", "cuda")
+    topics = ("tensor", "cuda")
     homepage = "https://github.com/pytorch/tensorpipe"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -58,19 +59,18 @@ class TensorpipeConan(ConanFile):
 
     def requirements(self):
         self.requires("libnop/cci.20200728")
-        self.requires("libuv/1.44.1")
+        self.requires("libuv/1.44.2")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
-        if self.info.settings.os == "Windows":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows")
-        if self.info.options.cuda:
+        if self.options.cuda:
             raise ConanInvalidConfiguration("cuda recipe not yet available in CCI")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

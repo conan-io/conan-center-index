@@ -1,20 +1,21 @@
 cmake_minimum_required(VERSION 3.4)
-project(implot CXX)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(implot LANGUAGES CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+file(GLOB HEADER_FILES ${IMPLOT_SRC_DIR}/*.h)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(${PROJECT_NAME}
+    ${IMPLOT_SRC_DIR}/implot.cpp
+    ${IMPLOT_SRC_DIR}/implot_items.cpp
+)
+target_include_directories(${PROJECT_NAME} PRIVATE ${IMPLOT_SRC_DIR})
 
-set(SOURCE_DIR source_subfolder)
-file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.cpp)
-file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
+find_package(imgui CONFIG REQUIRED)
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 include(GNUInstallDirs)
 
@@ -24,4 +25,4 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${HEADER_FILES}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+)

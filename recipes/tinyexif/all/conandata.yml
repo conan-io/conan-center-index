@@ -1,0 +1,7 @@
+sources:
+  "cci.20210411":
+    url: "https://github.com/cdcseacave/TinyEXIF/archive/6e56015f56ee0f387f1b8c76e50eb35ac60372da.tar.gz"
+    sha256: "54031072382dbe9cc08ca18b40e39a6c2b248e83bd6263b29c70a4a8aa8affe7"
+  "1.0.2":
+    url: "https://github.com/cdcseacave/TinyEXIF/archive/refs/tags/1.0.2.tar.gz"
+    sha256: "427e02c38ee29d87bc82d08545d9f9a68c603af16e0b35f6807a4a8e63c14b86"

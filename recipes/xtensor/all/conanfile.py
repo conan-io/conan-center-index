@@ -12,6 +12,7 @@ required_conan_version = ">=1.52.0"
 
 class XtensorConan(ConanFile):
     name = "xtensor"
+    package_type = "header-library"
     description = "C++ tensors with broadcasting and lazy computing"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"

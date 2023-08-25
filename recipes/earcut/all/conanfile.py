@@ -1,9 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 
 
-class EarcutConan(ConanFile):
+class EarcutPackage(ConanFile):
     name = "earcut"
     description = "A C++ port of earcut.js, a fast, header-only polygon triangulation library."
     homepage = "https://github.com/mapbox/earcut.hpp"
@@ -35,7 +38,7 @@ class EarcutConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -46,25 +49,24 @@ class EarcutConan(ConanFile):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warning(
+                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
             if lazy_lt_semver(str(self.settings.compiler.version), min_version):
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("*", "include",
-                  src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "*", os.path.join(self.source_folder, "include"),
+             os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", self.source_folder,
+             os.path.join(self.package_folder, "licenses"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()

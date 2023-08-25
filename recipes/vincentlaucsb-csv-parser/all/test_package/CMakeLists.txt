@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.9)
-project(test_package)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(vincentlaucsb-csv-parser REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE vincentlaucsb-csv-parser::vincentlaucsb-csv-parser)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)

@@ -51,17 +51,28 @@ class DataFrameConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "20" if Version(self.version) >= "2.1.0" else "17"
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10.0",
-        }
+            "17": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "6",
+                "apple-clang": "10.0",
+            },
+            "20": {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "13",
+            },
+        }.get(self._min_cppstd, {})
+
+        return {}
 
     def export_sources(self):
         export_conandata_patches(self)

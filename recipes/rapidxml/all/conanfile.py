@@ -1,9 +1,9 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.52.0"
 
 
 class RapiXMLConan(ConanFile):
@@ -22,12 +22,15 @@ class RapiXMLConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
