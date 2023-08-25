@@ -14,16 +14,11 @@
 #include <mutex>
 #include <thread>
 
-int main(int argc, char* argv[]) {
+int main() {
 
-    /* Don't call on test run with conan */
-    if(argc >=2) {
-      iox::log::LogManager::GetLogManager().SetDefaultLogLevel(iox::log::LogLevel::kInfo);
-      iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
-      iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
-    }
-
-    std::cout << "Success\n";
+    iox::log::LogManager::GetLogManager().SetDefaultLogLevel(iox::log::LogLevel::kError);
+    iox::RouDiConfig_t defaultRouDiConfig = iox::RouDiConfig_t().setDefaults();
+    iox::roudi::IceOryxRouDiComponents roudiComponents(defaultRouDiConfig);
 
     return 0;
 }
