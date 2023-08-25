@@ -59,8 +59,6 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        # INFO: intel-ipsec-mb project forces C:/Program Files on Windows
-        tc.cache_variables["CMAKE_INSTALL_PREFIX"] = self.package_folder
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -68,6 +66,8 @@ class PackageConan(ConanFile):
     def _patch_sources(self):
         # INFO: Do not enforce -fPIC flag, let's Conan do it.
         replace_in_file(self, os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), '-fPIC', '')
+        # INFO: intel-ipsec-mb project forces to install in C:/Program Files on Windows
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), 'FORCE)', ')')
 
     def build(self):
         self._patch_sources()
