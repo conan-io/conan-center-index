@@ -13,7 +13,7 @@ class KDBindingsConan(ConanFile):
     homepage = "https://github.com/KDAB/KDBindings"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "compiler"
     no_copy_source = True
 
     def package_id(self):
