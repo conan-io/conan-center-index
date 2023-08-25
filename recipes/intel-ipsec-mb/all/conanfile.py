@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
@@ -26,6 +26,13 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _cmake_target(self):
+        return "libIPSec_MB" if is_msvc(self) else "IPSec_MB"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,24 +66,15 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        # INFO:
-        tc.cache_variables["CMAKE_INSTALL_PREFIX"] = self.package_folder
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        # INFO: Do not enforce -fPIC flag, let's Conan do it.
-        replace_in_file(self, os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), '-fPIC', '')
-        # INFO: intel-ipsec-mb project forces to install in C:/Program Files on Windows
-        replace_in_file(self, os.path.join(self.source_folder, "lib", "cmake", "unix.cmake"), 'FORCE)', ')')
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
-        cmake_target = "libIPSec_MB" if is_msvc(self) else "IPSec_MB"
-        cmake.build(target=cmake_target)
+        cmake.build(target=self._cmake_target)
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -84,8 +82,9 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "man"))
+        rmdir(self, os.path.join(self.package_folder, "intel-ipsec-mb"))
 
     def package_info(self):
-        self.cpp_info.libs = ["IPSec_MB"]
+        self.cpp_info.libs = [self._cmake_target]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
