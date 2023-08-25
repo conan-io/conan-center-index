@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -58,8 +59,6 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        # INFO: CMake uses system nasm if not specified.
-        tc.variables["CMAKE_ASM_NASM_COMPILER"] = os.path.join(self.dependencies.direct_build["nasm"].package_folder, "bin", "nasm")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -72,7 +71,8 @@ class PackageConan(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(target="IPSec_MB")
+        cmake_target = "libIPSec_MB" if is_msvc(self) else "IPSec_MB"
+        cmake.build(target=cmake_target)
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
