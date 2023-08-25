@@ -1,0 +1,19 @@
+diff --git a/src/rdkafka_ssl.c b/src/rdkafka_ssl.c
+index 85f745cb..dd03ff67 100644
+--- a/src/rdkafka_ssl.c
++++ b/src/rdkafka_ssl.c
+@@ -39,9 +39,14 @@
+ #ifdef _WIN32
+ #include <wincrypt.h>
+ #pragma comment(lib, "crypt32.lib")
++#ifdef _DEBUG
++#pragma comment(lib, "libcryptod.lib")
++#pragma comment(lib, "libssld.lib")
++#else
+ #pragma comment(lib, "libcrypto.lib")
+ #pragma comment(lib, "libssl.lib")
+ #endif
++#endif
+
+ #include <openssl/x509.h>
+ #include <openssl/x509_vfy.h>
