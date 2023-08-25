@@ -27,5 +27,5 @@ class IceoryxTestConan(ConanFile):
         # a bad idea (checked on 3 different linux devices
         # always ok - but in container get
         # "fatal SIGBUS signal appeared caused by memset")
-        path, dirs, files = next(os.walk("bin"))
-        print("All %d example files are present" % (len(files)))
+        path, dirs, files = next(os.walk(self.cpp.build.bindir))
+        print(f"All {lin(files)} example files are present")
