@@ -11,11 +11,6 @@ class TestPackageConan(ConanFile):
         self.tool_requires("cmake/3.27.1")
         self.tool_requires(self.tested_reference_str)
 
-    def validate(self):
-        if str(self.settings.compiler) != "gcc":
-            raise ConanInvalidConfiguration(
-                "The compiler must be set to gcc to use this toolchain.")
-
     def layout(self):
         cmake_layout(self)
 

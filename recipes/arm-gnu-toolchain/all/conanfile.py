@@ -81,6 +81,18 @@ class ArmGnuToolchain(ConanFile):
                 f"{supported_build_architectures[build_os]}."
             )
 
+        compiler_name = str(self.settings.compiler)
+        if compiler_name != "gcc":
+            raise ConanInvalidConfiguration(
+                "The compiler must be set to gcc to use this toolchain.")
+
+        compiler_version = str(self.settings.compiler.version)
+        supported_compiler_versions = ["11.3", "12.2", "12.3"]
+        if compiler_version not in supported_compiler_versions:
+            raise ConanInvalidConfiguration(
+                "The compiler version must be one of the following: "
+                f"{supported_compiler_versions}.")
+
     def source(self):
         pass
 
