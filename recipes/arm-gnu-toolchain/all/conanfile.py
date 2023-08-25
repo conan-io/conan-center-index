@@ -87,7 +87,7 @@ class ArmGnuToolchain(ConanFile):
                 "The compiler must be set to gcc to use this toolchain.")
 
         compiler_version = str(self.settings.compiler.version)
-        supported_compiler_versions = ["11.3", "12.2", "12.3"]
+        supported_compiler_versions = ["11", "11.3", "12", "12.2", "12.3"]
         if compiler_version not in supported_compiler_versions:
             raise ConanInvalidConfiguration(
                 "The compiler version must be one of the following: "
