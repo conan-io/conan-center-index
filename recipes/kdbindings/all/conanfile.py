@@ -26,9 +26,10 @@ class KDBindingsConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "Visual Studio": "15.7",
             "clang": "7",
             "apple-clang": "11",
+            "Visual Studio": "15.7",
+            "msvc": "191",
         }
 
     def validate(self):
