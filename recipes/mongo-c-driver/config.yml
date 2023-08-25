@@ -1,4 +1,6 @@
 versions:
+  "1.24.3":
+    folder: all
   "1.24.1":
     folder: all
   "1.23.5":

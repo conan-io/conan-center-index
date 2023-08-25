@@ -27,7 +27,7 @@ class MetallConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("boost/1.79.0")
+        self.requires("boost/1.81.0")
 
     def package_id(self):
         self.info.clear()
