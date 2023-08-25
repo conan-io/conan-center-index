@@ -26,10 +26,9 @@ class ArmGnuToolchain(ConanFile):
     @property
     def download_info(self):
         version = self.version
-        os = str(self._settings_build.os)
+        conan_os = str(self._settings_build.os)
         arch = str(self._settings_build.arch)
-        return self.conan_data.get("sources",
-                                   {}).get(version, {}).get(os, {}).get(arch)
+        return self.conan_data.get("sources", {}).get(version, {}).get(conan_os, {}).get(arch)
 
     @property
     def license_url(self):
@@ -94,18 +93,20 @@ class ArmGnuToolchain(ConanFile):
             destination=self.build_folder, strip_root=True)
 
     def package(self):
+        destination = os.path.join(self.package_folder, "bin")
+
         copy(self, pattern="arm-none-eabi/*", src=self.build_folder,
-             dst=self.package_folder, keep_path=True)
+             dst=destination, keep_path=True)
         copy(self, pattern="bin/*", src=self.build_folder,
-             dst=self.package_folder, keep_path=True)
+             dst=destination, keep_path=True)
         copy(self, pattern="include/*", src=self.build_folder,
-             dst=self.package_folder, keep_path=True)
+             dst=destination, keep_path=True)
         copy(self, pattern="lib/*", src=self.build_folder,
-             dst=self.package_folder, keep_path=True)
+             dst=destination, keep_path=True)
         copy(self, pattern="libexec/*", src=self.build_folder,
-             dst=self.package_folder, keep_path=True)
+             dst=destination, keep_path=True)
         copy(self, pattern="share/*", src=self.build_folder,
-             dst=self.package_folder, keep_path=True)
+             dst=destination, keep_path=True)
 
         license_dir = os.path.join(self.package_folder, "licenses/")
         copy(self, pattern="LICENSE*", src=self.build_folder,
@@ -118,7 +119,7 @@ class ArmGnuToolchain(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
 
-        bin_folder = os.path.join(self.package_folder, "bin")
+        bin_folder = os.path.join(self.package_folder, "bin/bin")
         self.cpp_info.bindirs = [bin_folder]
         self.buildenv_info.append_path("PATH", bin_folder)
 
