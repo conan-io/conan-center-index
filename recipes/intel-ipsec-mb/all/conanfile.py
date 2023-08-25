@@ -59,6 +59,8 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # INFO: intel-ipsec-mb project forces C:/Program Files on Windows
+        tc.cache_variables["CMAKE_INSTALL_PREFIX"] = self.package_folder
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
