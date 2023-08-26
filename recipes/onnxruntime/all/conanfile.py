@@ -68,7 +68,7 @@ class OnnxRuntimeConan(ConanFile):
         version = Version(self.version)
         return {
             "1.14": "1.13.1",
-            "1.15": "1.14.0",
+            "1.15": "1.14.1",
         }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
