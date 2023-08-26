@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 
 class Open62541Conan(ConanFile):
     name = "open62541"
-    license = "MPLv2"
+    license = ("MPL-2.0", "CC0-1.0")
     homepage = "https://open62541.org/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "open62541 is an open source and free implementation of OPC UA " \
@@ -24,10 +24,11 @@ class Open62541Conan(ConanFile):
                   "All platform-specific functionality is implemented via exchangeable " \
                   "plugins. Plugin implementations are provided for the major operating systems."
     topics = (
-        "opc ua", "open62541", "sdk", "server/client", "c", "iec-62541",
+        "opc ua", "sdk", "server/client", "c", "iec-62541",
         "industrial automation", "tsn", "time sensitive networks", "publish-subscirbe", "pubsub"
     )
 
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
@@ -181,7 +182,7 @@ class Open62541Conan(ConanFile):
         if self.options.encryption == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.encryption == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.web_socket:
             self.requires("libwebsockets/4.3.2")
         if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
@@ -353,9 +354,6 @@ class Open62541Conan(ConanFile):
 
         tc.variables["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
 
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -363,8 +361,7 @@ class Open62541Conan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         if Version(self.version) >= "1.3.1":
-            os.unlink(os.path.join(self.source_folder,
-                      "tools", "cmake", "FindPython3.cmake"))
+            os.unlink(os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake"))
 
     def build(self):
         self._patch_sources()
