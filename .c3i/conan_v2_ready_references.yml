@@ -36,6 +36,7 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- arrow
 - arsenalgear
 - artery-font-format
 - asio
@@ -61,6 +62,7 @@ required_for_references:
 - aws-c-http
 - aws-c-io
 - aws-c-mqtt
+- aws-c-s3
 - aws-c-sdkutils
 - aws-checksums
 - aws-kvs-pic
@@ -958,6 +960,7 @@ required_for_references:
 - robin-hood-hashing
 - rpclib
 - rply
+- rsync
 - rtklib
 - rtm
 - rtmidi
