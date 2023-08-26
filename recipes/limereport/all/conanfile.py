@@ -52,12 +52,12 @@ class LimereportConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.build_requires("libpng/1.6.39")
+        self.requires("libpng/[>=1.6 <1.7]")
         if self.options.with_zint:
             self.build_requires("zint/2.10.0")
 
     def requirements(self):
-        self.requires("qt/5.15.8")
+        self.requires("qt/5.15.9")
 
 
     def source(self):
