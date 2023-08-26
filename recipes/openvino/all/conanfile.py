@@ -20,6 +20,7 @@ class OpenvinoConan(ConanFile):
               "speech-recognition", "yolo", "performance-boost", "diffusion-models", "recomendation-system", "stable-diffusion",
               "generative-ai", "llm-inference", "optimize-ai", "deploy-ai")
     package_id_non_embed_mode = "patch_mode"
+    package_type = "library"
     short_paths = True
 
     # Binary configuration
@@ -93,8 +94,7 @@ class OpenvinoConan(ConanFile):
 
     @property
     def _gna_option_available(self):
-        return (self.settings.os == "Linux" or self.settings.os == "Windows") and \
-            self._target_x86_64 and Version(self.version) < "2024.0.0"
+        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) < "2024.0.0"
 
     @property
     def _gpu_option_available(self):
@@ -105,16 +105,16 @@ class OpenvinoConan(ConanFile):
         return Version(self.version) <= "2023.1.0"
 
     def source(self):
-        pass
-        # get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
-        # get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
-        # get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
-        # get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
-        # get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
-        #     destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
+        # pass
+        get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
+        get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
+        get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
+        get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
+            destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -127,14 +127,17 @@ class OpenvinoConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self._protobuf_required:
             # static build + TF FE requires full protobuf, otherwise we can use lite version
+            # TODO: how to handle it?
             # self.options['protobuf'].lite = True # self.options.shared or not self.options.enable_tf_frontend
             if self.options.shared:
                 # we need to use static protobuf to overcome potential issues with multiple registrations inside
                 # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
+                # TODO: how to handle it?
                 # self.options['protobuf'].shared = False
                 pass
         if self.options.enable_tf_lite_frontend:
             # only flatc is required for TF Lite FE plus headers
+            # TODO: how to handle it?
             # self.options['flatbuffers'].header_only = True
             pass
 
@@ -165,14 +168,15 @@ class OpenvinoConan(ConanFile):
         if self.options.enable_onnx_frontend:
             self.requires("onnx/1.13.1")
         if self.options.enable_tf_lite_frontend:
+            # TODO: how to have only flatc and headers?
             self.requires("flatbuffers/22.9.24")
         if self._preprocessing_available:
             self.requires("ade/0.1.2a")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        cmake_layout(self, src_folder="/openvino",
-                           build_folder="/openvino-release-conan")
+        # cmake_layout(self, src_folder="/openvino",
+        #                    build_folder="/openvino-release-conan")
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -221,8 +225,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
-        toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
-        toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
+        # toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+        # toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
         toolchain.generate()
 
     def validate(self):
@@ -233,8 +237,12 @@ class OpenvinoConan(ConanFile):
         #         # MLAS requires C++ 17
         #         check_min_cppstd(self, "17")
         if self.options.enable_cpu and self.options.get_safe("enable_gpu") and not self.options.shared:
-            # GPU and CPU are mutually exclusive in static build configuration
-            raise ConanInvalidConfiguration(f"{self.ref} cannot build both CPU and GPU in static build. Please, select the only plugin.")
+            # GPU and CPU are cannot share oneDNN in static build configuration
+            self.output.warning(
+                f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build."
+                "Please, use shared build configuration to enable GPU plugin with oneDNN (dGPU) support"
+                "or disable CPU plugin to have only one oneDNN copy in the final application."
+            )
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
 
