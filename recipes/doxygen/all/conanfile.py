@@ -53,6 +53,7 @@ class DoxygenConan(ConanFile):
         if self.options.enable_search:
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/1.2.13")
+            self.requires("libiconv/1.17")
 
     def package_id(self):
         del self.info.settings.compiler
