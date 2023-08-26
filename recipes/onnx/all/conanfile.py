@@ -43,7 +43,7 @@ class OnnxConan(ConanFile):
     @property
     def _protobuf_version(self):
         # onnx < 1.9.0 doesn't support protobuf >= 3.18
-        return "3.21.9" if Version(self.version) >= "1.9.0" else "3.17.1"
+        return "3.21.12" if Version(self.version) >= "1.9.0" else "3.17.1"
 
     def export_sources(self):
         export_conandata_patches(self)
