@@ -55,7 +55,7 @@ class OnnxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"protobuf/3.21.12", run=not cross_building(self), transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/3.21.12", run=not cross_building(self), transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -65,7 +65,7 @@ class OnnxConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+            self.tool_requires("protobuf/3.21.12")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
