@@ -1,8 +1,8 @@
 sources:
   "2023.1.0":
     "openvino":
-      url: "https://github.com/ilya-lavrenov/openvino/archive/98ca4c25201b3c40499bc40efa4ce54d1d5693f1.tar.gz"
-      sha256: "3f7e4c47d688d14cce8fe5ce16fbabb0b33b076063a716a20352a02964b323a5"
+      url: "https://github.com/ilya-lavrenov/openvino/archive/fd1bb8aed20a8f99a6d53af81270e8386ed65614.tar.gz"
+      sha256: "4b4bc708c4cf0966d4422ebc269438baa1201101e01cf8d8f57aa342d7c81ccb"
     "arm_compute":
       url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v23.02.1.tar.gz"
       sha256: "c3a443e26539f866969242e690cf0651ef629149741ee18732f954c734da6763"

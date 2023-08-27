@@ -102,7 +102,7 @@ class OpenvinoConan(ConanFile):
 
     @property
     def _preprocessing_available(self):
-        return Version(self.version) <= "2023.1.0"
+        return Version(self.version) < "2023.2.0"
 
     def source(self):
         # pass
@@ -153,7 +153,7 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("cmake/[>=3.18]")
 
     def requirements(self):
-        self.requires("onetbb/2021.3.0")
+        self.requires("onetbb/[>=2021.3.0]")
         self.requires("pugixml/[>=1.10]")
         if self._target_x86_64:
             self.requires("xbyak/6.62")
@@ -187,7 +187,7 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
-            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
+            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
         # SW plugins
@@ -204,6 +204,7 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_OV_PYTORCH_FRONTEND"] = self.options.enable_pytorch_frontend
         # Dependencies
         toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
+        # TODO: for some reason options["onetbb"].shared is not working
         # toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = self.options["onetbb"].shared
         toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = self.options.shared
         toolchain.cache_variables["ENABLE_SYSTEM_PUGIXML"] = True
@@ -220,11 +221,13 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["CPACK_GENERATOR"] = "CONAN"
         toolchain.cache_variables["ENABLE_PROFILING_ITT"] = False
         toolchain.cache_variables["ENABLE_PYTHON"] = False
+        toolchain.cache_variables["ENABLE_PROXY"] = False
         toolchain.cache_variables["ENABLE_WHEEL"] = False
         toolchain.cache_variables["ENABLE_CPPLINT"] = False
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
+        toolchain.cache_variables["CMAKE_VERBOSE_MAKEFILE"] = True
         # toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
         # toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
         toolchain.generate()
@@ -236,15 +239,15 @@ class OpenvinoConan(ConanFile):
         #     if self.options.enable_cpu:
         #         # MLAS requires C++ 17
         #         check_min_cppstd(self, "17")
-        if self.options.enable_cpu and self.options.get_safe("enable_gpu") and not self.options.shared:
-            # GPU and CPU are cannot share oneDNN in static build configuration
-            self.output.warning(
-                f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build."
-                "Please, use shared build configuration to enable GPU plugin with oneDNN (dGPU) support"
-                "or disable CPU plugin to have only one oneDNN copy in the final application."
-            )
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
+        if self.options.get_safe("enable_gpu") and not self.options.shared:
+            # GPU does not support oneDNN in static build configuration
+            self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build.")
+
+    def build_validate(self):
+        if self._protobuf_required and self.options.shared and self.options["protobuf"].shared:
+            raise ConanInvalidConfiguration(f"{self.ref}:shared=True requires protobuf:shared=False for correct work.")
 
     def build(self):
         cmake = CMake(self)
@@ -321,32 +324,24 @@ class OpenvinoConan(ConanFile):
             openvino_onnx.set_property("cmake_target_name", "openvino::frontend::onnx")
             openvino_onnx.libs = ["openvino_onnx_frontend"]
             openvino_onnx.requires = ["Runtime", "onnx::onnx", "protobuf::libprotobuf"]
-            if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-                openvino_onnx.system_libs = ["m", "dl", "pthread"]
 
         if self.options.enable_paddle_frontend:
             openvino_paddle = self.cpp_info.components["Paddle"]
             openvino_paddle.set_property("cmake_target_name", "openvino::frontend::paddle")
             openvino_paddle.libs = ["openvino_paddle_frontend"]
             openvino_paddle.requires = ["Runtime", "protobuf::libprotobuf"]
-            if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-                openvino_paddle.system_libs = ["m", "dl", "pthread"]
 
         if self.options.enable_tf_frontend:
             openvino_tensorflow = self.cpp_info.components["TensorFlow"]
             openvino_tensorflow.set_property("cmake_target_name", "openvino::frontend::tensorflow")
             openvino_tensorflow.libs = ["openvino_tensorflow_frontend"]
             openvino_tensorflow.requires = ["Runtime", "protobuf::libprotobuf", "snappy::snappy"]
-            if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-                openvino_onnx.system_libs = ["m", "dl", "pthread"]
 
         if self.options.enable_pytorch_frontend:
             openvino_pytorch = self.cpp_info.components["PyTorch"]
             openvino_pytorch.set_property("cmake_target_name", "openvino::frontend::pytorch")
             openvino_pytorch.libs = ["openvino_pytorch_frontend"]
             openvino_pytorch.requires = ["Runtime"]
-            if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-                openvino_onnx.system_libs = ["m", "dl", "pthread"]
 
         if self.options.enable_tf_lite_frontend:
             openvino_tensorflow_lite = self.cpp_info.components["TensorFlowLite"]
@@ -354,5 +349,3 @@ class OpenvinoConan(ConanFile):
             openvino_tensorflow_lite.libs = ["openvino_tensorflow_lite_frontend"]
             # TODO: try to remove flatbuffers from 'requires', because only headers are used privately
             openvino_tensorflow_lite.requires = ["Runtime", "flatbuffers::flatbuffers"]
-            if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-                openvino_onnx.system_libs = ["m", "dl", "pthread"]
