@@ -103,7 +103,6 @@ class MysqlConnectorCPPRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib","lib64"]
-        self.cpp_info.includedirs = ["include"]
         if not self.options.shared:
             self.cpp_info.libs = ["mysqlcppconn-static", "mysqlcppconn8-static"]
             stdcpplib = stdcpp_library(self)
