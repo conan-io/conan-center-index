@@ -1,8 +1,15 @@
 diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
-index fbea261..ec8471d 100644
+index fbea261..9f9892a 100644
 --- a/a/CMakeLists.txt
 +++ b/b/CMakeLists.txt
-@@ -114,11 +114,6 @@ endif ()
+@@ -108,17 +108,12 @@ endif ()
+ set (WAMR_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ # Set the strip command based on the system (GNU or Clang)
+-if (CMAKE_STRIP)
++if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang" AND CMAKE_STRIP)
+     set (CMAKE_STRIP_FLAGS "--strip-all")
+ endif ()
  
  include (${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
  
@@ -31,7 +38,7 @@ index fbea261..ec8471d 100644
  if (WAMR_BUILD_WASM_CACHE EQUAL 1)
    target_link_libraries(iwasm_static INTERFACE boringssl_crypto)
  endif ()
-@@ -147,19 +146,23 @@ endif ()
+@@ -147,19 +146,22 @@ endif ()
  install (TARGETS iwasm_static ARCHIVE DESTINATION lib)
  
  # If it's a Release build, strip the static library
@@ -51,14 +58,13 @@ index fbea261..ec8471d 100644
  target_include_directories(iwasm_shared INTERFACE ${WAMR_ROOT_DIR}/core/iwasm/include)
 -target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl -lpthread)
 +target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS})
-+target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS})
 +if(NOT MSVC)
 +  target_link_libraries (iwasm_shared INTERFACE -lm -ldl -lpthread)
 +endif()
  if (WAMR_BUILD_WASM_CACHE EQUAL 1)
    target_link_libraries(iwasm_shared INTERFACE boringssl_crypto)
  endif ()
-@@ -169,7 +172,7 @@ if (MINGW)
+@@ -169,7 +171,7 @@ if (MINGW)
  endif ()
  
  install (TARGETS iwasm_shared LIBRARY DESTINATION lib)
@@ -67,7 +73,7 @@ index fbea261..ec8471d 100644
  # HEADERS
  install (FILES
      ${WAMR_ROOT_DIR}/core/iwasm/include/wasm_c_api.h
-@@ -177,6 +180,7 @@ install (FILES
+@@ -177,6 +179,7 @@ install (FILES
      ${WAMR_ROOT_DIR}/core/iwasm/include/lib_export.h
      DESTINATION include)
  
@@ -75,7 +81,7 @@ index fbea261..ec8471d 100644
  # If it's a Release build, strip the shared library
  if (CMAKE_STRIP AND CMAKE_BUILD_TYPE STREQUAL "Release")
    # Strip shared library
-@@ -185,3 +189,4 @@ if (CMAKE_STRIP AND CMAKE_BUILD_TYPE STREQUAL "Release")
+@@ -185,3 +188,4 @@ if (CMAKE_STRIP AND CMAKE_BUILD_TYPE STREQUAL "Release")
        COMMAND ${CMAKE_STRIP} ${CMAKE_STRIP_FLAGS} $<TARGET_FILE:iwasm_shared>
    )
  endif ()
