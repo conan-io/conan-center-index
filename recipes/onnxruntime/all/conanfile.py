@@ -73,7 +73,7 @@ class OnnxRuntimeConan(ConanFile):
 
     def requirements(self):
         self.requires("abseil/20230125.3")
-        self.requires("protobuf/3.21.9")
+        self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20230801")
         self.requires(f"onnx/{self._onnx_version}")
