@@ -1,12 +1,11 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import patch, copy, get, rm, rmdir
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import patch, copy, get, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from os.path import join
-
 
 required_conan_version = ">=1.54.0"
 
@@ -30,30 +29,60 @@ class PackageConan(ConanFile):
         "with_sandbox": "auto"
     }
 
-    def _patch_sources(self):
-        print("patching for {}-{}-{}".format(self.version, str(self.settings.os).lower(), self.settings.get_safe("os.version")))
+    def _custom_apply_conandata_patches(self):
 
-        # general patches
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            print(f"patching general files: {p['patch_file']}")
-            patch(self, **p, base_path=self.source_folder)
+        if self.conan_data is None:
+            raise ConanException("conandata.yml not defined")
+
+        patches = self.conan_data.get('patches')
+        if patches is None:
+            self.output.info("apply_conandata_patches(): No patches defined in conandata")
+            return
+
+        if isinstance(patches, dict):
+            assert self.version, "Can only be applied if self.version is already defined"
+            entries = patches.get(str(self.version), [])
+        elif isinstance(patches, list):
+            entries = patches
+        else:
+            raise ConanException("conandata.yml 'patches' should be a list or a dict {version: list}")
         
-        # os specific patches
-        for p in self.conan_data.get("patches", {}).get("{}-{}".format(self.version, str(self.settings.os).lower()), []):
-            print(f"patching os specific files: {p['patch_file']}")
-            patch(self, **p, base_path=self.source_folder)
+        for it in entries:
+            if "patch_os" in it:
+                patch_os = it.get("patch_os")
+                os = self.settings.os
 
-        # os version specific patches
-        for p in self.conan_data.get("patches", {}).get("{}-{}-{}".format(self.version, str(self.settings.os).lower(), self.settings.get_safe("os.version")), []):
-            print(f"patching os version specific: {p['patch_file']}")
-            patch(self, **p, base_path=self.source_folder)
+                if patch_os != os:
+                    continue
+
+            if "patch_os_version" in it:
+                patch_os_version = it.get("patch_os_version")
+                os_version = self.settings.get_safe("os.version")
+
+                if patch_os_version != self.settings.get_safe("os.version"):
+                    continue
+
+            if "patch_file" in it:
+                # The patch files are located in the root src
+                entry = it.copy()
+                patch_file = entry.pop("patch_file")
+                patch_file_path = join(self.export_sources_folder, patch_file)
+                if not "patch_description" in entry:
+                    entry["patch_description"] = patch_file
+
+                patch(self, patch_file=patch_file_path, **entry)
+            elif "patch_string" in it:
+                patch(self, **it)
+            else:
+                raise ConanException("The 'conandata.yml' file needs a 'patch_file' or 'patch_string'"
+                                    " entry for every patch to be applied")
 
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
 
     def export_sources(self):
-        copy(self, "patches/*.patch", self.recipe_folder, self.export_sources_folder, keep_path=True)
+        export_conandata_patches(self)
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -63,7 +92,7 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/[>=1.2.12]")
+        self.requires("zlib/[>=1.2.13 <2]")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1q")
         if self.options.with_pam:
@@ -99,7 +128,7 @@ class PackageConan(ConanFile):
         tc.generate()
 
     def build(self):
-        self._patch_sources()
+        self._custom_apply_conandata_patches()
 
         autotools = Autotools(self)
         env = VirtualRunEnv(self)
