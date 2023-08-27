@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class OnnxConan(ConanFile):
@@ -65,7 +65,7 @@ class OnnxConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("protobuf/3.21.12")
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
