@@ -77,7 +77,7 @@ index fbea261..9f9892a 100644
      ${WAMR_ROOT_DIR}/core/iwasm/include/lib_export.h
      DESTINATION include)
  
-+if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
++if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang" AND BUILD_SHARED_LIBS)
  # If it's a Release build, strip the shared library
  if (CMAKE_STRIP AND CMAKE_BUILD_TYPE STREQUAL "Release")
    # Strip shared library
