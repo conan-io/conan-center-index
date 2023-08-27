@@ -74,15 +74,17 @@ class LibZipppConan(ConanFile):
         tc.variables["LIBZIPPP_INSTALL_HEADERS"] = True
         tc.variables["LIBZIPPP_BUILD_TESTS"] = False
         tc.variables["LIBZIPPP_ENABLE_ENCRYPTION"] = self.options.with_encryption
+        tc.variables["LIBZIPPP_CMAKE_CONFIG_MODE"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_source(self):
-        replace_in_file(self, os.path.join(self.source_folder, 'CMakeLists.txt'),
-                        'find_package(LIBZIP MODULE REQUIRED)',
-                        'find_package(libzip REQUIRED CONFIG)')
+        if Version(str(self.version).split("-"[0])) < "6.1":
+            replace_in_file(self, os.path.join(self.source_folder, 'CMakeLists.txt'),
+                            'find_package(LIBZIP MODULE REQUIRED)',
+                            'find_package(libzip REQUIRED CONFIG)')
 
     def build(self):
         self._patch_source()
