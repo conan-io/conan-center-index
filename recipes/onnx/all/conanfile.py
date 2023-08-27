@@ -40,19 +40,12 @@ class OnnxConan(ConanFile):
             return 17
         return 11
 
-    @property
-    def _protobuf_version(self):
-        # onnx < 1.9.0 doesn't support protobuf >= 3.18
-        return "3.21.12" if Version(self.version) >= "1.9.0" else "3.17.1"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.9.0":
-            del self.options.disable_static_registration
 
     def configure(self):
         if self.options.shared:
@@ -62,7 +55,7 @@ class OnnxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"protobuf/{self._protobuf_version}", run=not cross_building(self), transitive_headers=True, transitive_libs=True)
+        self.requires(f"protobuf/3.21.12", run=not cross_building(self), transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -99,8 +92,7 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        if Version(self.version) >= "1.9.0":
-            tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
+        tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -177,8 +169,7 @@ class OnnxConan(ConanFile):
                     }
                 }
             )
-        if Version(self.version) >= "1.11.0":
-            components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
+        components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
         return components
 
     def package_info(self):
