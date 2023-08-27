@@ -12,18 +12,18 @@ class QXlsxConan(ConanFile):
     name = "qxlsx"
     description = "Excel file(*.xlsx) reader/writer library using Qt 5 or 6."
     license = "MIT"
-    topics = ("qxlsx", "excel", "xlsx")
+    topics = ("excel", "xlsx")
     homepage = "https://github.com/QtExcel/QXlsx"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
 
     @property
@@ -41,39 +41,27 @@ class QXlsxConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def requirements(self):
-        self.requires("qt/5.15.7")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
+    def requirements(self):
+        self.requires("qt/5.15.9")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.4.4" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.0")
+        if Version(self.version) >= "1.4.4":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
         tc = CMakeToolchain(self)
         tc.variables["QT_VERSION_MAJOR"] = self._qt_version
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)

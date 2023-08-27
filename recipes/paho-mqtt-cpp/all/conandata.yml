@@ -9,10 +9,16 @@ sources:
     sha256: e97386d159b811e534b98d21e3f6881ab2b43678ec026da7525d5c21ebc292ff
     url: https://github.com/eclipse/paho.mqtt.cpp/archive/v1.0.1.tar.gz
 patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-fix-cmake.patch"
+      patch_description: "CMake: Honor fPIC option and properly link paho-mqtt-c to object target"
+      patch_type: "conan"
   "1.1":
-    - patch_file: "patches/1.1/0001-deadlock_and_remlog-for-1-1.patch"
-    - patch_file: "patches/1.1/0002-ios_fix.patch"
+    - patch_file: "patches/1.1-0001-fix-cmake.patch"
+      patch_description: "CMake: Honor fPIC option and properly link paho-mqtt-c to object target"
+      patch_type: "conan"
+    - patch_file: "patches/1.1-0002-deadlock_and_remlog-for-1-1.patch"
   "1.0.1":
-    - patch_file: "patches/1.0.1/0001-fix-cmake-module-path.patch"
-    - patch_file: "patches/1.0.1/0002-fix-cmake-find-paho-mqtt-c-static.patch"
-    - patch_file: "patches/1.0.1/0003-fix-paho-mqtt-cpp-config-cmake.patch"
+    - patch_file: "patches/1.0.1-0001-fix-cmake.patch"
+      patch_description: "CMake: properly link paho-mqtt-c to object target"
+      patch_type: "conan"

@@ -11,7 +11,6 @@ required_conan_version = ">=1.54.0"
 
 class AutoconfConan(ConanFile):
     name = "autoconf"
-    package_type = "application"
     description = (
         "Autoconf is an extensible package of M4 macros that produce shell "
         "scripts to automatically configure software source code packages"
@@ -19,7 +18,9 @@ class AutoconfConan(ConanFile):
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/autoconf/"
-    topics = ("autoconf", "configure", "build")
+    topics = ("configure", "build")
+
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -33,11 +34,11 @@ class AutoconfConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def package_id(self):
-        self.info.clear()
-
     def requirements(self):
         self.requires("m4/1.4.19") # Needed at runtime by downstream clients as well
+
+    def package_id(self):
+        self.info.clear()
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
@@ -47,8 +48,7 @@ class AutoconfConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -100,6 +100,7 @@ class AutoconfConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "res", "man"))
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = ["res"]

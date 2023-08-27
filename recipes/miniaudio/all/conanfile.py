@@ -13,6 +13,7 @@ class MiniaudioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mackron/miniaudio"
     topics = ("audio", "header-only", "sound")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

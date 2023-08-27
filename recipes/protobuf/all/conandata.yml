@@ -1,4 +1,7 @@
 sources:
+  "3.21.12":
+    url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.tar.gz"
+    sha256: "930c2c3b5ecc6c9c12615cf5ad93f1cd6e12d0aba862b572e076259970ac3a53"
   "3.21.9":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.9.tar.gz"
     sha256: "1add10f9bd92775b91f326da259f243881e904dd509367d5031d4c782ba82810"
@@ -21,6 +24,11 @@ sources:
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.17.1.tar.gz"
     sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"
 patches:
+  "3.21.12":
+    - patch_file: "patches/protobuf-3.21.12-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
   "3.21.9":
     - patch_file: "patches/protobuf-3.21.9-upstream-macos-macros.patch"
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"

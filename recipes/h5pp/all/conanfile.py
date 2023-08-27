@@ -1,7 +1,10 @@
 from conan import ConanFile
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.files import get
+from conan.tools.files import copy
+from conan.tools.files import apply_conandata_patches,export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -13,23 +16,26 @@ class H5ppConan(ConanFile):
     description = "A C++17 wrapper for HDF5 with focus on simplicity"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DavidAce/h5pp"
-    topics = ("h5pp", "hdf5", "binary", "storage", "header-only", "cpp17")
+    topics = ("hdf5", "binary", "storage", "header-only", "cpp17")
     license = "MIT"
+    package_type="header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
     options = {
         "with_eigen": [True, False],
         "with_spdlog": [True, False],
+        "with_zlib" : [True, False], 
     }
     default_options = {
         "with_eigen": True,
         "with_spdlog": True,
+        "with_zlib" : True,
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -39,6 +45,9 @@ class H5ppConan(ConanFile):
             "clang": "6",
             "apple-clang": "10",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if Version(self.version) < "1.10.0":
@@ -50,50 +59,64 @@ class H5ppConan(ConanFile):
             #     that including the headers is intentional.
             del self.options.with_eigen
             del self.options.with_spdlog
+            del self.options.with_zlib
+        else:
+            self.options["hdf5"].with_zlib = self.options.with_zlib
 
     def requirements(self):
-        if Version(self.version) < "1.10.0":
-            self.requires("hdf5/1.12.1")
-        else:
-            self.requires("hdf5/1.13.1")
-
+        self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
-            self.requires("eigen/3.4.0")
+            self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
-            self.requires("spdlog/1.11.0")
+            self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "1.10.0" and self.options.with_zlib:
+            self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
+
+    def layout(self):
+        basic_layout(self,src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration("h5pp requires C++17, which your compiler does not support.")
         else:
-            self.output.warn("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            self.output.warning("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def source(self):
         get(self,**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+                  destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if Version(self.version) < "1.9.0":
-            includedir = os.path.join(self._source_subfolder, "h5pp", "include")
+            includedir = os.path.join(self.source_folder, "h5pp", "include")
         else:
-            includedir = os.path.join(self._source_subfolder, "include")
-        self.copy("*", src=includedir, dst="include")
+            includedir = os.path.join(self.source_folder, "include")
+        copy(self, pattern="*", src=includedir, dst=os.path.join(self.package_folder, "include"))
+        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "h5pp")
         self.cpp_info.set_property("cmake_target_name", "h5pp::h5pp")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
         self.cpp_info.components["h5pp_headers"].set_property("cmake_target_name", "h5pp::headers")
+        self.cpp_info.components["h5pp_headers"].bindirs = []
+        self.cpp_info.components["h5pp_headers"].libdirs = []
         self.cpp_info.components["h5pp_deps"].set_property("cmake_target_name", "h5pp::deps")
-        self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_deps"].bindirs = []
+        self.cpp_info.components["h5pp_deps"].libdirs = []
         self.cpp_info.components["h5pp_deps"].requires = ["hdf5::hdf5"]
+        self.cpp_info.components["h5pp_flags"].set_property("cmake_target_name", "h5pp::flags")
+        self.cpp_info.components["h5pp_flags"].bindirs = []
+        self.cpp_info.components["h5pp_flags"].libdirs = []
 
         if Version(self.version) >= "1.10.0":
             if self.options.with_eigen:
@@ -103,6 +126,9 @@ class H5ppConan(ConanFile):
                 self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
+            if self.options.with_zlib:
+                self.cpp_info.components["h5pp_deps"].requires.append("zlib::zlib")
+
         else:
             self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
             self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")

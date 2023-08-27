@@ -72,24 +72,12 @@ class GoogleAPIS(ConanFile):
         if self.options.shared and not self.dependencies["protobuf"].options.shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
         if not can_run(self):
             self.tool_requires(f"protobuf/{self._protobuf_version}")
 
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
-        if not self._cmake_new_enough("3.20"):
-            self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
@@ -165,6 +153,14 @@ class GoogleAPIS(ConanFile):
             deactivate_library("//google/cloud/talent/v4:talent_cc_proto")
             deactivate_library("//google/cloud/asset/v1:asset_proto")
             deactivate_library("//google/cloud/asset/v1:asset_cc_proto")
+        # This fails to build on Windows. It is arguably a missing feature of
+        # Protobuf.
+        #     https://github.com/protocolbuffers/protobuf/issues/12774
+        # Fortunately this library is not used by any downstream packages
+        # (grpc-protos, or google-cloud-cpp), and it is only "beta" at the
+        # moment. Simply disable it for now.
+        deactivate_library("//google/cloud/lifesciences/v2beta:lifesciences_proto")
+        deactivate_library("//google/cloud/lifesciences/v2beta:lifesciences_cc_proto")
 
         return proto_libraries
 

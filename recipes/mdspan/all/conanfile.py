@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -16,22 +15,32 @@ class MDSpanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kokkos/mdspan"
     topics = ("multi-dimensional", "array", "span", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
-        return 14
+    def _min_cppstd(self):
+        return "14" if Version(self.version) < "0.6.0" else "17"
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15" if Version(self.version) < "0.2.0" else "16",
-            "msvc": "191" if Version(self.version) < "0.2.0" else "192",
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "5.1"
-        }
+            "14": {
+                "Visual Studio": "15" if Version(self.version) < "0.2.0" else "16",
+                "msvc": "191" if Version(self.version) < "0.2.0" else "192",
+                "gcc": "5",
+                "clang": "3.4",
+                "apple-clang": "5.1"
+            },
+            "17": {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+            }
+        }.get(self._min_cppstd, {})
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -41,17 +50,17 @@ class MDSpanConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn(f"{self.ref} recipe lacks information about the {self.settings.compiler} "
-                             "compiler support.")
+            self.output.warning(f"{self.ref} recipe lacks information about the {self.settings.compiler} "
+                                "compiler support.")
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
-                    "The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+                    f"{self.ref} requires C++{self._min_cppstd} support. "
+                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
         if str(self.settings.compiler) == "Visual Studio" and "16.6" <= Version(self.settings.compiler.version) < "17.0":
             raise ConanInvalidConfiguration(
