@@ -62,9 +62,7 @@ class LibRawConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
             if Version(self.version) <= "0.19.5":
-                if conan_version.major == 1:
-                    tc.variables["CMAKE_CXX_STANDARD"] = 11
-                else:
+                if conan_version.major >= 2:
                     check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
                     check_max_cppstd(self, 11)
 
@@ -75,6 +73,8 @@ class LibRawConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["RAW_LIB_VERSION_STRING"] = self.version
         tc.variables["LIBRAW_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if conan_version.major == 1:
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.generate()
 
         deps = CMakeDeps(self)
