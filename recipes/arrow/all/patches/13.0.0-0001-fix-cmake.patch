@@ -1,0 +1,13 @@
+diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
+index 27d7097..6e28138 100644
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -15,7 +15,7 @@
+ # specific language governing permissions and limitations
+ # under the License.
+ 
+-cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.15)
+ message(STATUS "Building using CMake version: ${CMAKE_VERSION}")
+ 
+ # Compiler id for Apple Clang is now AppleClang.
