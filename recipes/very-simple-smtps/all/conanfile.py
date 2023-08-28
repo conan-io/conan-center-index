@@ -25,7 +25,7 @@ class VerySimpleSmtpsConan(ConanFile):
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     # In case not listed there, use "LicenseRef-<license-file-name>"
     license = "MIT"
-    url = "https://github.com/matthewT53/Very-Simple-SMTPS"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/matthewT53/Very-Simple-SMTPS/releases"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("email", "smtps", "attachments")
