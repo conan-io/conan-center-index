@@ -40,6 +40,9 @@ class NodejsConan(ConanFile):
         self.run(cmd, buff)
         return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue()).group(1))
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def validate(self):
         if not self.version in self.conan_data["sources"] or \
            not str(self.settings.os) in self.conan_data["sources"][self.version] or \
