@@ -1,17 +1,15 @@
 import os
 import shutil
-from contextlib import contextmanager
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
     exports_sources = "a.cpp", "b.cpp", "main.c", "main.cpp", "wscript"
 
@@ -20,6 +18,23 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        env = Environment()
+        for var in ["DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]:
+            env.append_path(var, os.path.join(self.build_folder, "build"))
+        env.vars(self, scope="run").save_script("conanrun_macos_runtimepath")
+
+        runenv = VirtualRunEnv(self)
+        runenv.generate()
 
     def build(self):
         if not can_run(self):
@@ -33,26 +48,11 @@ class TestPackageConan(ConanFile):
             self.run("waf configure")
             self.run("waf")
 
-    @contextmanager
-    def _add_ld_search_path(self, extra_path):
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            var = "LD_LIBRARY_PATH"
-        elif is_apple_os(self):
-            var = "DYLD_LIBRARY_PATH"
-        else:
-            yield
-            return
-        ld_path = os.environ.get(var, "")
-        os.environ[var] = f"{ld_path}{os.pathsep}{extra_path}"
-        yield
-        os.environ[var] = ld_path
-
     def test(self):
         if not can_run(self):
             return
-        bin_dir = os.path.join(self.cpp.build.bindir, "build")
-        with self._add_ld_search_path(bin_dir):
-            bin_path = os.path.join(bin_dir, "app")
-            self.run(bin_path, env="conanrun")
-            bin_path = os.path.join(bin_dir, "app2")
-            self.run(bin_path, env="conanrun")
+        bin_dir = os.path.join(self.build_folder, "build")
+        bin_path = os.path.join(bin_dir, "app")
+        self.run(bin_path, env="conanrun")
+        bin_path = os.path.join(bin_dir, "app2")
+        self.run(bin_path, env="conanrun")
