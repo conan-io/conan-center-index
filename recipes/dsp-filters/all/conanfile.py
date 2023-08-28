@@ -53,7 +53,8 @@ class DSPFiltersConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "lib*", excludes="*.pdb", src=os.path.join(self.build_folder, "DSPFilters"), dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "lib*", src=os.path.join(self.build_folder, "DSPFilters"), dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "DSPFilters.lib", src=os.path.join(self.build_folder, "DSPFilters", f"{self.settings.build_type}"), dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
         copy(self, "*.h", src=os.path.join(self.source_folder, "shared", "DSPFilters", "include"), dst=os.path.join(self.package_folder, "include"))
         copy(self, "README.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
