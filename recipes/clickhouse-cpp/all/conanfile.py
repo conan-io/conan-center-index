@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain,CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
@@ -47,9 +47,6 @@ class ClickHouseCppConan(ConanFile):
             ((self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] and not self.options.shared) or \
              self.settings.compiler.libcxx == "libc++")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -94,7 +91,6 @@ class ClickHouseCppConan(ConanFile):
         cd.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
