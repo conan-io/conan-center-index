@@ -16,6 +16,7 @@ class NodejsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
+    package_type = "application"
     settings = "os", "arch", "compiler"
     no_copy_source = True
     short_paths = True
