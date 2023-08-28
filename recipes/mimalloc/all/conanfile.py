@@ -40,7 +40,7 @@ class MimallocConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 11
 
     @property
     def _compilers_minimum_version(self):
