@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-remove-explicit-cmake-options.patch"
       patch_description: "Remove explicit STATIC and FPIC options in CMakeLists.txt"
       patch_type: "conan"
+    - patch_file: "patches/0002-remove-msvc-cmake-flags.patch"
+      patch_description: "Remove MY_FLAGS options in CMakeLists.txt"
+      patch_type: "conan"

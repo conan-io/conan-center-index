@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import collect_libs, copy, get, apply_conandata_patches, export_conandata_patches, mkdir, rename
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 import os
 
 required_conan_version = ">=1.60.0"
@@ -23,6 +25,11 @@ class DSPFiltersConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def validate(self):
+        # in case it does not work in another configuration, it should validated here too
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,4 +68,4 @@ class DSPFiltersConan(ConanFile):
         rename(self, src=os.path.join(self.package_folder, "licenses", "README.md"), dst=os.path.join(self.package_folder, "licenses", "license"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["DSPFilters"]
