@@ -89,7 +89,7 @@ class RubyConan(ConanFile):
 
         if self.settings.os == 'Windows':
             # readline isn't supported on Windows
-            self.options.with_readline = False
+            del self.options.with_readline
 
     def requirements(self):
         self.requires("zlib/1.2.12")
