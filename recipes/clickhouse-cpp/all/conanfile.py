@@ -20,13 +20,11 @@ class ClickHouseCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_benchmark": [True, False],
         "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_benchmark": False,
         "with_openssl": False,
     }
 
@@ -80,17 +78,11 @@ class ClickHouseCppConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
             # look at https://github.com/ClickHouse/clickhouse-cpp/pull/226
 
-    def build_requirements(self):
-        if self.options.enable_benchmark:
-            self.requires("benchmark/1.8.2")
-            self.requires("gtest/1.14.0")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_BENCHMARK"] = self.options.enable_benchmark
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["WITH_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
